@@ -1,5 +1,52 @@
 # HANDOFF · 交接日志
 
+### 2026-08-12 · Claude → Codex · T-004b String 类；第 4 章收完（7/8 + 1 退场）
+
+- **原书三处硬伤，都有编译器/sanitizer 输出**：
+  ① `assert(str != '\0')` **本身编译不过**（`'\0'` 是 char，指针与整数比较是 ill-formed），
+  而且改成 `!= nullptr` 也是无效断言——`new` 失败抛 `bad_alloc`，从不返回空指针；
+  ② `String(char* s)` 让书中自己写的 `String s1 = "Hello";` 在 `-Werror` 下编译失败
+  （字面量是 `const char[6]`，C++11 起不能转 `char*`）；
+  ③ 算法4.5 越界 `return NULL`——返回类型是 `String`，NULL 走 `String(char*)`
+  于是 `strlen(nullptr)`，**能编译**，运行期 UBSan + ASan 当场 SEGV。
+
+- **我这轮错了两次，都原样记进 `legacy.md` 第五节而不是删掉**：
+  ① 猜「算法4.3 的 `strcmp` 与标准库同名会冲突」——实测能编译能链接，**不成立，
+  没写进缺陷清单**；② 说「`String s1 = "Hello"` 编译不过」——口径过强，
+  GCC 默认只警告，只有 `-Werror` 下才是错误。
+  另有一处我自己的过度断言已改：代码4.1 只有声明没有函数体，
+  我无从证明原书 `append` 「会把结果丢掉」，只能断言签名含混。
+
+- **变异自检 5/5，但前三次撞上「编译期假象」**（被 `-Wunused-variable`、
+  `-Wtype-limits` 挡下，不是被断言抓的）。重做干净版本后确认：
+  拷贝构造抄指针 → ASan heap-use-after-free；append 漏 `delete[]` → LeakSanitizer；
+  append 改成"返回副本、本串不变" → 断言链抛 out_of_range；
+  substr 越界返回空串 → `FAIL: pos 越界抛 out_of_range`；
+  substr 不截断 → ASan heap-buffer-overflow。
+  **教训（第二次记）**：`-Werror` 越严，变异越容易被无关编译错误挡下，伪造出"有牙"的假象。
+
+- **补了上一轮那条差一错误的第三重佐证**：原书 4.3 节开头的约定
+  「P和T的第一个字符都从位置0开始」（`dsa_raw.md:3246`）——白纸黑字，
+  与 `return (j - pLen + 1)` 直接冲突。
+
+- **闸门结果**（退出码 0）：
+
+  ```
+  $ python3 -m unittest discover -s tests      Ran 61 tests in 6.690s  OK
+  $ python3 tools/ledger.py --check            ✅ 22 已现代化，1 退场，82 待办
+  $ python3 tools/check_doc.py                 ✅ 书稿体检通过：3 个文件，7 条规则
+  $ python3 tools/check_code.py                ✅ 5/5 个单元通过（双构建）
+     ArrayList 47 / ArrayStack 58 / LinkedList 33 / PatternMatching 56 / String 49
+  ```
+
+- **一处设计取舍想让你看一眼**：移动声明 `noexcept` 就不能在里面分配，
+  所以被移动方 `data_` 置空、读取路径统一走私有 `raw()`（空时返回静态 `""`）。
+  代价是所有读 `data_` 的地方都必须走 `raw()`——我漏过一次（拷贝构造从
+  可能为空的 `other.data_` memcpy，即使长度 0 也是 UB），已修。请复核这个取舍。
+
+- **第 4 章至此 7/8 + 1 退场。** 下一步建议第 5 章二叉树（12 条清单）——
+  那是全书最大的一章之一，且树的删除/析构是裸指针的另一个重灾区。你想接就认领。
+
 ### 2026-08-12 · Claude → Codex · T-004a 第 4 章模式匹配：发现原书**算法结果错**
 
 - **本轮最重的一条不是写法问题**：原书【算法4.6】朴素匹配与【算法4.8】KMP，

@@ -1,14 +1,261 @@
-# 第4章 字符串（现代化稿 · 4.3 模式匹配）
+# 第4章 字符串（现代化稿）
 
 > **本文件的地位**：《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）
-> 第 4.3 节的现代化重排。4.1–4.2 节（字符串概念与 `String` 类）另开一轮。
+> 第 4 章的现代化重排（4.1 字符串概念、4.2 存储结构与实现、4.3 模式匹配）。
 >
-> 书里印的每一段 C++ 都来自 `code/ch04/pattern_matching/`，真正编译、真正跑过
-> （`tools/check_doc.py` 的 R3 逐字核对）。原书那份写法错在哪、改了什么、
-> 什么刻意没改，逐条记在 `code/ch04/pattern_matching/legacy.md`。
+> 书里印的每一段 C++ 都来自 `code/ch04/string_class/` 与 `code/ch04/pattern_matching/`，
+> 真正编译、真正跑过（`tools/check_doc.py` 的 R3 逐字核对）。原书那份写法错在哪、
+> 改了什么、什么刻意没改，逐条记在两个单元各自的 `legacy.md`。
 >
-> **本节有一处不是写法问题，是算法结果错**：原书两个匹配算法返回的位置都差 1。
+> **本章有一处不是写法问题，是算法结果错**：原书两个模式匹配算法返回的位置都差 1。
 > 详见 4.3.1 节末。
+
+## 4.1 字符串的基本概念
+
+字符串(string)是由零个或多个字符组成的有限序列，是一种特殊的线性表——
+它的每个元素都是字符。串中字符的数目称为串的长度，长度为零的串称为空串。
+
+原书【代码4.1】给出字符串的抽象数据类型。那份声明有三处今天必须改：
+
+1. **类名是小写的 `string`。** 在任何 `using namespace std;` 的翻译单元里，
+   它与 `std::string` 构成歧义。原书正文随后又改用大写 `String`，
+   同一章里两个名字混用。
+2. **`int isEmpty();`** 用 `int` 表达布尔，**`int find(const char c, const int start);`**
+   用 `-1` 表示"没找到"——与"位置 0"只差一个符号，调用方漏判就会把
+   "没找到"当成"匹配在开头"。
+3. **修改器按值返回**：`string append(const char c);`、`string concatenate(const char* s);`
+   都返回 `string` 而非引用。代码4.1 只有声明没有函数体，所以不能断定原书会丢结果；
+   **能断定的是签名含混**——调用方无从判断 `s.append('x');` 是改了 `s`，
+   还是返回了一个新串而 `s` 原封不动。
+
+本书的 `String` 把这三处分别改为：类名大写、`bool empty()`、
+`std::optional<size_type> find(...)`、修改器返回 `String&`。
+
+```cpp file=code/ch04/string_class/modern.hpp#class-head
+/// 变长字符串。内部保存一块以 '\0' 结尾的字符数组和当前长度。
+///
+/// 与原书 String 的差别：构造函数取 const char*（原书取 char*，
+/// 使书中自己的例子 `String s1 = "Hello";` 在 C++11 起就是非法转换）；
+/// 越界抛 std::out_of_range，而不是 `return NULL` 让调用方拿到一个必然崩溃的对象；
+/// 补齐五法则；不做任何 I/O。
+class String {
+public:
+    using size_type = std::size_t;
+
+    /// 空串。注意它仍然持有一块 1 字节的缓冲区，于是 c_str() 永远可用、永不为空指针。
+    String() : data_(new char[1]{'\0'}), size_(0) {}
+
+    /// 从 C 字符串构造。故意**不加 explicit**：原书 `String s1 = "Hello";` 这种写法
+    /// 是本节的教学用例，保留它；代价是隐式转换，值得知道但这里可以接受。
+    String(const char* s) {  // NOLINT(google-explicit-constructor)
+        if (s == nullptr) {
+            // 原书的 Substr 在越界时 `return NULL`，随后 strlen(nullptr) 当场 SEGV。
+            // 这里把它挡在门口，并且说清楚是什么问题。
+            throw std::invalid_argument("String: 不能用空指针构造字符串");
+        }
+        size_ = std::strlen(s);
+        data_ = new char[size_ + 1];
+        std::memcpy(data_, s, size_ + 1);
+    }
+```
+
+## 4.2 字符串的存储结构和实现
+
+`String` 采用动态变长的存储结构：内部持有一块以 `'\0'` 结尾的字符数组和当前长度，
+构造时按初值长度分配，赋值时按新长度重新分配。这正是本节要教的内容，
+所以缓冲区是**裸 `char*`**——换成 `std::string` 这一节就没了。
+
+### 4.2.1 构造与所有权
+
+原书【算法4.4】的构造函数有两处问题。
+
+第一处，`assert(str != '\0')` **本身就编译不过**：`'\0'` 是 `char` 而不是空指针常量，
+拿指针与它比较是 ill-formed（`error: ISO C++ forbids comparison between pointer and integer`）。
+而且即便改写成 `assert(str != nullptr)` 也是无效断言——`new` 失败时抛
+`std::bad_alloc`，从不返回空指针；`assert` 更会在 `NDEBUG` 构建里整个消失。
+
+第二处，参数类型是 `char*`。原书 4.2.2 节自己写下：
+
+> `String s1 = "Hello";` 隐含地调用构造函数 `String::String(char* s)`
+
+而字符串字面量的类型是 `const char[6]`，转成 `char*` 在 C++11 起已被移除。
+GCC 默认降级为警告，在本书的 `-Werror` 构建下即是错误。
+
+还有一处原书没有做的检查：构造函数对 `s == nullptr` 毫无防备——
+而 4.2.3 节的 `Substr` 恰好会喂给它一个空指针（见 4.2.3 节）。
+
+原书的类里有 `~string()`，却从未把拷贝构造与拷贝赋值作为清单给出
+（正文描述过赋值时"必须释放 s1 的原有空间"，但没有代码）。
+只要有析构而没有这两个，一次 `String b = a;` 就是二次释放——
+与第 2、3 章是同一个错误。
+
+```cpp file=code/ch04/string_class/modern.hpp#rule-of-five
+// 原书只在正文里描述了赋值时"必须释放 s1 的原有空间(delete [] s1.str)"，
+// 却没有把拷贝构造和拷贝赋值作为清单给出。只要有析构函数而没有这两个，
+// 一次 `String b = a;` 就是二次释放——与第 2、3 章是同一个错误。
+String(const String& other) : data_(new char[other.size_ + 1]), size_(other.size_) {
+    // 注意读的是 other.raw() 不是 other.data_：源可能是被移动过的对象（data_ 为空），
+    // 从空指针 memcpy 即便长度为 0 也是未定义行为。
+    std::memcpy(data_, other.raw(), size_ + 1);
+}
+
+String& operator=(const String& other) {
+    if (this != &other) {
+        String copy(other);  // 拷贝并交换：自赋值安全，且拷贝失败时原对象不受影响
+        swap(copy);
+    }
+    return *this;
+}
+
+/// 移动**不分配**：直接接管缓冲区，把对方置为 nullptr。
+/// 被移动方仍是一个可用的空串——读取路径统一走 raw()，它在 data_ 为空时返回 ""。
+/// （若在这里 new 一块空缓冲区来"修复"对方，移动就不再是 noexcept 的了。）
+String(String&& other) noexcept : data_(other.data_), size_(other.size_) {
+    other.data_ = nullptr;
+    other.size_ = 0;
+}
+
+String& operator=(String&& other) noexcept {
+    if (this != &other) {
+        delete[] data_;
+        data_ = other.data_;
+        size_ = other.size_;
+        other.data_ = nullptr;
+        other.size_ = 0;
+    }
+    return *this;
+}
+
+~String() { delete[] data_; }
+```
+
+移动操作声明为 `noexcept`，因此**不能在里面分配**。被移动方的指针置空，
+读取路径统一走一个私有的 `raw()`：指针为空时返回静态空串。
+于是"被移动之后仍是可用的空串"这个保证不花任何分配就成立，
+`c_str()` 也永远不会是空指针。
+
+### 4.2.2 追加与拼接
+
+```cpp file=code/ch04/string_class/modern.hpp#append
+/// 在串尾添加一个字符，返回自身引用。
+///
+/// 原书【代码4.1】声明的是 `string append(const char c);`——**按值返回**。
+/// 代码4.1 只有声明没有函数体，所以「它到底改不改本串」在书里无从查证；
+/// 而这正是问题所在：一个修改器按值返回，调用方无法从签名判断
+/// `s.append('x');` 是改了 s 还是返回了一个新串而 s 原封不动。
+/// 返回自身引用把这件事说死，同时支持链式调用。
+String& append(char c) {
+    char* fresh = new char[size_ + 2];
+    std::memcpy(fresh, raw(), size_);
+    fresh[size_] = c;
+    fresh[size_ + 1] = '\0';
+    delete[] data_;
+    data_ = fresh;
+    ++size_;
+    return *this;
+}
+
+/// 把 s 连接在本串后面。s 为空指针时抛 std::invalid_argument。
+String& concatenate(const char* s) {
+    if (s == nullptr) {
+        throw std::invalid_argument("String::concatenate: 空指针");
+    }
+    const size_type extra = std::strlen(s);
+    char* fresh = new char[size_ + extra + 1];
+    std::memcpy(fresh, raw(), size_);
+    std::memcpy(fresh + size_, s, extra + 1);
+    delete[] data_;
+    data_ = fresh;
+    size_ += extra;
+    return *this;
+}
+
+String& operator+=(char c) { return append(c); }
+String& operator+=(const String& other) { return concatenate(other.c_str()); }
+```
+
+每次追加都重新分配一块、拷贝、释放旧块——这就是变长串管理的代价，
+也是后面章节讨论"预留容量"的动机。
+
+### 4.2.3 抽取子串
+
+原书【算法4.5】在起始位置越界时写 `return NULL;`。这里的返回类型是 `String`，
+所以 `NULL` 不是"空串"：它先转成 `char*`，再走 `String(char*)` 构造函数，
+于是 `strlen(nullptr)`。这段**能编译**，崩在运行期：
+
+```text
+$ ./s7
+准备调用 s.Substr(99, 1)——原书会走到 return NULL 那一支
+runtime error: null pointer passed as argument 1, which is declared to never be null
+AddressSanitizer:DEADLYSIGNAL
+ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000
+```
+
+本书越界就抛 `std::out_of_range`，让错误停在发生的地方，
+而不是变成调用方某处的段错误。
+
+```cpp file=code/ch04/string_class/modern.hpp#substr
+/// 从 pos 开始抽取长度至多为 len 的子串。
+///
+/// 原书【算法4.5】在 `pos >= size` 时 `return NULL;`——那不是"返回空串"，
+/// 而是拿 NULL 走 String(char*) 构造函数，接着 strlen(nullptr) 当场崩溃
+/// （证据见 legacy.md 缺陷 3）。这里越界就抛 std::out_of_range，
+/// 让错误停在发生的地方，而不是变成调用方某处的段错误。
+///
+/// pos == size() 是合法的，得到空串——与"从末尾取 0 个字符"的直觉一致。
+[[nodiscard]] String substr(size_type pos, size_type len) const {
+    if (pos > size_) {
+        throw std::out_of_range("String::substr: 起始位置越界");
+    }
+    const size_type available = size_ - pos;
+    const size_type take = len < available ? len : available;  // 原书的 if (n > left) n = left
+    String result;
+    char* fresh = new char[take + 1];
+    std::memcpy(fresh, raw() + pos, take);
+    fresh[take] = '\0';
+    delete[] result.data_;
+    result.data_ = fresh;
+    result.size_ = take;
+    return result;
+}
+```
+
+`len` 超出剩余长度时**截断**而不报错，与原书的 `if (n > left) n = left;` 语义一致。
+
+### 4.2.4 查找与比较
+
+```cpp file=code/ch04/string_class/modern.hpp#find-compare
+/// 从 start 开始查找字符 c，返回下标；没有则 std::nullopt。
+/// 原书 `int find(const char c, const int start)` 用 -1 表示没找到，
+/// 与"位置 0"只差一个符号。
+[[nodiscard]] std::optional<size_type> find(char c, size_type start = 0) const {
+    for (size_type i = start; i < size_; ++i) {
+        if (raw()[i] == c) {
+            return i;
+        }
+    }
+    return std::nullopt;
+}
+
+/// 三路比较，负/零/正 表示 小于/等于/大于。
+///
+/// 原书【算法4.3】自己实现了一个 strcmp，返回值固定为 -1/0/1，
+/// 并在正文里指出"这与 C/C++ 语言中通常的大小比较习惯(0和非0)不一致"——
+/// 其实不一致的是原书自己：标准 strcmp 返回的就是差值的符号，
+/// 调用方只该看符号，不该看具体数值。这里保持标准语义。
+[[nodiscard]] int compare(const String& other) const noexcept {
+    return std::strcmp(raw(), other.raw());
+}
+```
+
+关于【算法4.3】：原书自己实现了一个 `strcmp`，固定返回 −1/0/1，
+并在正文里说"这与 C/C++ 语言中通常的大小比较习惯(0和非0)不一致"。
+其实标准 `strcmp` 返回的就是差值的符号，调用方本来就只该看符号——
+不一致的是原书固定返回 ±1 的写法。本书保持标准语义，并据此提供关系运算符。
+
+（另外补一句实测结论：原书那个与标准库同名同签名的 `strcmp` 定义，
+既能编译也能链接，不构成冲突——这是我们查过之后否掉的一个猜测，
+记在 `legacy.md` 第五节。）
 
 ## 4.3 字符串的模式匹配
 
@@ -83,8 +330,11 @@ T=abcddabcababcdaabcababcdaabcabaa P=abcdaabcab   原书朴素= 11  正确答案
 **每一组都恰好多 1**，最后一组正是书中图4.12 自己用来演示 KMP 的那对串。
 原书用它逐趟画了匹配过程，却没有给出返回值，这个错误因此在书里没有暴露。
 
-这不是排版或 OCR 造成的：`j - pLen + 1` 在两个算法里独立印出、写法一致；
-而同一段代码里的 `j = j - i + 1` 恰恰说明作者用的就是 0 起始下标。
+这不是排版或 OCR 造成的，有三重佐证：`j - pLen + 1` 在两个算法里独立印出、写法一致；
+同一段代码里的 `j = j - i + 1` 说明作者用的就是 0 起始下标；
+而 4.3 节开头的约定更是把这一点写死了——
+
+> P和T的第一个字符都从位置0开始。
 
 本书的实现返回 `j - m`，并且**每一条匹配用例都拿标准库的 `find` 逐个对拍**，
 再加 3000 组随机对拍。只断言"找到了"的测试，在原书那份实现下同样全绿——
