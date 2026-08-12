@@ -1,0 +1,1 @@
+{"id":"graph","title":"图与图算法","listings":["代码7.1","代码7.2","代码7.3","代码7.4","算法7.5","算法7.6","算法7.7","算法7.8","算法7.9","算法7.10","算法7.11"],"standard":"c++17","owner":"codex","notes":"邻接矩阵图实现 DFS/BFS、拓扑、Dijkstra、Floyd、Prim、Kruskal。","d001_exceptions":{"#include<vector>":"图的邻接矩阵、访问标记和结果序列是算法工作存储，不替代本章的图表示。","#include<queue>":"BFS 和拓扑排序的 FIFO 工作队列；队列实现不是本章教学目标。"}}

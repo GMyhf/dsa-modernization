@@ -1,0 +1,1 @@
+{"id":"external_sort","title":"外部排序与竞赛树","listings":["算法9.1","代码9.2","代码9.3"],"standard":"c++17","owner":"codex","notes":"置换选择与赢家/败者树抽象。","d001_exceptions":{"#include<vector>":"承载初始归并段和竞赛树的叶序列。","#include<algorithm>":"排序归并段的标准基础设施。"}}

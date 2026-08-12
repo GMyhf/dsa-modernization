@@ -1,0 +1,3 @@
+#include "modern.hpp"
+#include <cstdio>
+int main() { int n=0,b=0; auto c=[&](bool x){++n;if(!x)++b;}; dsa::ArrayQueue<int> a(3); c(a.empty()&&!a.dequeue()); c(a.enqueue(1)&&a.enqueue(2)&&a.enqueue(3)&&!a.enqueue(4)); c(a.dequeue()==1&&a.enqueue(4)&&a.dequeue()==2&&a.dequeue()==3&&a.dequeue()==4); dsa::ArrayQueue<int> ac(2); c(ac.enqueue(7)); auto acopy=ac; ac=acopy; c(ac.dequeue()==7); dsa::LinkedQueue<int> l; l.enqueue(1);l.enqueue(2); auto copy=l; l=copy; c(l.dequeue()==1&&l.dequeue()==2&&!l.dequeue()); l.enqueue(3); c(l.front()&&*l.front()==3); std::printf("Queue: %d 项断言，%d 失败\n",n,b); return b; }

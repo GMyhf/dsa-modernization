@@ -1,0 +1,3 @@
+#include "modern.hpp"
+#include <cstdio>
+int main(){int n=0,b=0;auto c=[&](bool x){++n;if(!x)++b;};dsa::Graph g(4);g.add_edge(0,1,1);g.add_edge(0,2,4);g.add_edge(1,2,2);g.add_edge(1,3,5);g.add_edge(2,3,1);c(g.dfs(0).size()==4&&g.bfs(0).size()==4);c(g.topological_sort()->size()==4);c(g.dijkstra(0)[3]==4&&g.floyd()[0][3]==4);dsa::Graph u(4);u.add_edge(0,1,1,false);u.add_edge(1,2,2,false);u.add_edge(2,3,3,false);u.add_edge(0,3,9,false);c(u.prim(0)->size()==3&&u.kruskal()->size()==3);dsa::Graph cycle(2);cycle.add_edge(0,1,1);cycle.add_edge(1,0,1);c(!cycle.topological_sort());std::printf("Graph: %d 项断言，%d 失败\n",n,b);return b;}
