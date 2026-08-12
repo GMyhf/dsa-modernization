@@ -4,6 +4,8 @@
 // 这里必须有一条会红**。写新用例时请照这个标准，别写「顺手测一下」的用例。
 #include "modern.hpp"
 
+#include "support/fault_injection.hpp"
+
 #include <cstdio>
 #include <iostream>
 #include <memory>
@@ -15,6 +17,12 @@
 #include <utility>
 
 namespace {
+
+using dsa::testing::AllocationFailure;
+using dsa::testing::CheapMove;
+using dsa::testing::Counted;
+using dsa::testing::Fragile;
+using dsa::testing::ThrowingMoveAssignment;
 
 int g_checks = 0;
 int g_failed = 0;
@@ -109,32 +117,17 @@ void test_move_only_element() {
     check(item.has_value() && **item == 9, "move-only 元素可以出栈且值正确");
 }
 
-// D-001 补充条款（2026-08-12 人拍板）：peek() 是 top() 的零拷贝补充。
-struct Counted {
-    int v{0};
-    static int copies;
-    Counted() = default;
-    explicit Counted(int x) : v(x) {}
-    Counted(const Counted& other) : v(other.v) { ++copies; }
-    Counted& operator=(const Counted& other) {
-        v = other.v;
-        ++copies;
-        return *this;
-    }
-};
-int Counted::copies = 0;
-
 void test_peek_does_not_copy() {
     dsa::ArrayStack<Counted> s(4);
     s.push(Counted(1));
     s.push(Counted(2));
 
-    Counted::copies = 0;
+    Counted::reset();
     const Counted* p = s.peek();
     check(p != nullptr && p->v == 2, "peek 指向栈顶元素");
     check(Counted::copies == 0, "peek 一次拷贝都不做");
 
-    Counted::copies = 0;
+    Counted::reset();
     auto copy = s.top();
     check(copy.has_value() && copy->v == 2, "top 返回等值的副本");
     check(Counted::copies >= 1, "top 确实拷贝了——这正是 peek 存在的理由");
@@ -195,29 +188,9 @@ void test_growth_preserves_contents() {
 
 // 缺陷 10 的正面验证：扩容中途抛异常，原栈必须原封不动（强异常保证）。
 // 这是**故障注入**，不是推理——第 N 次拷贝赋值必抛。
-struct Fragile {
-    int v{0};
-    static int assignments;
-    static int throw_at;  // 第几次拷贝赋值抛异常；0 表示不抛
-
-    Fragile() = default;
-    explicit Fragile(int x) : v(x) {}
-    Fragile(const Fragile&) = default;
-    Fragile& operator=(const Fragile& other) {
-        if (throw_at != 0 && ++assignments == throw_at) {
-            throw std::runtime_error("Fragile: 注入的拷贝失败");
-        }
-        v = other.v;
-        return *this;
-    }
-};
-int Fragile::assignments = 0;
-int Fragile::throw_at = 0;
-
 void test_strong_exception_guarantee_on_growth() {
     dsa::ArrayStack<Fragile> s(4);
-    Fragile::throw_at = 0;
-    Fragile::assignments = 0;
+    Fragile::reset();
     for (int i = 0; i < 4; ++i) {
         s.push(Fragile(i));  // 填满，下一次 push 必然触发扩容
     }
@@ -225,15 +198,14 @@ void test_strong_exception_guarantee_on_growth() {
     const auto capacity_before = s.capacity();
 
     // 扩容要搬 4 个元素，让第 3 个搬迁失败
-    Fragile::assignments = 0;
-    Fragile::throw_at = 3;
+    Fragile::reset(3);
     bool threw = false;
     try {
         s.push(Fragile(99));
     } catch (const std::runtime_error&) {
         threw = true;
     }
-    Fragile::throw_at = 0;
+    Fragile::reset();
 
     check(threw, "扩容中途的异常如实抛出，没有被吞掉");
     check(s.size() == size_before, "失败后长度不变");
@@ -250,29 +222,12 @@ void test_strong_exception_guarantee_on_growth() {
 }
 
 // 红队 T-002：分配本身抛 bad_alloc 时，fresh 尚未取得，旧栈也必须原样保留。
-struct AllocationFailure {
-    int v{0};
-    static bool fail_next_array_allocation;
-
-    AllocationFailure() = default;
-    explicit AllocationFailure(int x) : v(x) {}
-    static void* operator new[](std::size_t bytes) {
-        if (fail_next_array_allocation) {
-            fail_next_array_allocation = false;
-            throw std::bad_alloc();
-        }
-        return ::operator new[](bytes);
-    }
-    static void operator delete[](void* p) noexcept { ::operator delete[](p); }
-};
-bool AllocationFailure::fail_next_array_allocation = false;
-
 void test_bad_alloc_preserves_stack() {
     dsa::ArrayStack<AllocationFailure> s(2);
     s.push(AllocationFailure(1));
     s.push(AllocationFailure(2));
     const auto capacity_before = s.capacity();
-    AllocationFailure::fail_next_array_allocation = true;
+    AllocationFailure::arm();
     bool threw = false;
     try {
         s.push(AllocationFailure(3));
@@ -285,37 +240,14 @@ void test_bad_alloc_preserves_stack() {
 }
 
 // 红队 T-002：移动构造 noexcept 并不能证明移动赋值不抛；后者若可抛会破坏强保证。
-struct ThrowingMoveAssignment {
-    int v{0};
-    static int moves;
-    static int throw_at;
-
-    ThrowingMoveAssignment() = default;
-    explicit ThrowingMoveAssignment(int x) : v(x) {}
-    ThrowingMoveAssignment(const ThrowingMoveAssignment&) = default;
-    ThrowingMoveAssignment(ThrowingMoveAssignment&& other) noexcept : v(other.v) { other.v = -1; }
-    ThrowingMoveAssignment& operator=(const ThrowingMoveAssignment&) = default;
-    ThrowingMoveAssignment& operator=(ThrowingMoveAssignment&& other) {
-        if (throw_at != 0 && ++moves == throw_at) {
-            throw std::runtime_error("ThrowingMoveAssignment: 注入的移动赋值失败");
-        }
-        v = other.v;
-        other.v = -1;
-        return *this;
-    }
-};
-int ThrowingMoveAssignment::moves = 0;
-int ThrowingMoveAssignment::throw_at = 0;
-
 void test_throwing_move_assignment_preserves_stack() {
     dsa::ArrayStack<ThrowingMoveAssignment> s(4);
     for (int i = 0; i < 4; ++i) {
         s.push(ThrowingMoveAssignment(i));
     }
-    ThrowingMoveAssignment::moves = 0;
-    ThrowingMoveAssignment::throw_at = 3;
+    ThrowingMoveAssignment::reset(3);
     s.push(ThrowingMoveAssignment(99));
-    ThrowingMoveAssignment::throw_at = 0;
+    ThrowingMoveAssignment::reset();
     check(s.size() == 5 && s.capacity() == 8, "可复制元素扩容时不走会抛的移动赋值");
     bool intact = true;
     for (std::size_t i = 0; i < 4; ++i) {
@@ -327,35 +259,11 @@ void test_throwing_move_assignment_preserves_stack() {
 // 红队 T-002 复核补充：修好强异常保证之后，**不能顺手把移动快路径也弄丢**。
 // 判据必须落在「移动赋值抛不抛」上，而不是「可不可复制」——否则 std::string 这类
 // 移动赋值本就 noexcept 的元素，每次扩容都变成深拷贝，摊还 O(1) 的教学点就打了折扣。
-struct CheapMove {
-    int v{0};
-    static int copies;
-    static int moves;
-
-    CheapMove() = default;
-    explicit CheapMove(int x) : v(x) {}
-    CheapMove(const CheapMove&) = default;
-    CheapMove(CheapMove&&) noexcept = default;
-    CheapMove& operator=(const CheapMove& other) {
-        v = other.v;
-        ++copies;
-        return *this;
-    }
-    CheapMove& operator=(CheapMove&& other) noexcept {
-        v = other.v;
-        ++moves;
-        return *this;
-    }
-};
-int CheapMove::copies = 0;
-int CheapMove::moves = 0;
-
 void test_growth_moves_when_move_assignment_is_noexcept() {
     static_assert(std::is_nothrow_move_assignable<std::string>::value,
                   "std::string 的移动赋值本就是 noexcept——这正是不该退化成深拷贝的理由");
     dsa::ArrayStack<CheapMove> s(1);
-    CheapMove::copies = 0;
-    CheapMove::moves = 0;
+    CheapMove::reset();
     for (int i = 0; i < 64; ++i) {
         s.push(CheapMove(i));  // 每次 push 一次移动赋值，扩容再搬 63 次
     }

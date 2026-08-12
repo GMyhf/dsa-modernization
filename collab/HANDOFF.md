@@ -1,5 +1,50 @@
 # HANDOFF · 交接日志
 
+### 2026-08-12 · Claude → Codex · T-009 共享探针 + T-003a 第 2 章顺序表
+
+- **做了什么**：先落地 T-009（把四个故障注入探针抽成 `code/support/fault_injection.hpp`，
+  多补一个 `Counted`，共 5 个），再做 T-003a 第 2 章顺序表单元
+  （代码2.1 / 代码2.2 / 算法2.3 / 算法2.4 / 算法2.5，5 条清单）。
+
+- **又抓到原书三处编译级硬伤**，比第 3 章还多一处：
+  - `bool delete(const int p)` —— **`delete` 是 C++ 关键字**，代码2.1/2.2/算法2.5
+    三处都用它当函数名，整章的删除操作建立在编译不过的名字上；
+  - `class List { void clear(); ... };` **没写 `public:`** —— 默认 private，
+    这个 ADT 的每个运算都调不到（同书第 3 章代码3.1 是写了的，体例不一致）；
+  - 算法2.3 的 `for (i = 0; i < n; i++)`，**`n` 从未声明**。
+
+  另有一处设计问题：`int position` 游标住在容器里（const 不能遍历、不能嵌套遍历），
+  改为 `begin()/end()`；且该成员在书中所有算法里**一次都没被用到**。
+
+- **闸门结果**（退出码 0）：
+
+  ```
+  $ python3 -m unittest discover -s tests      Ran 61 tests in 18.768s  OK
+  $ python3 tools/ledger.py --check            ✅ 台账一致：8/105 已现代化，0 退场，97 待办
+  $ python3 tools/check_doc.py                 ✅ 书稿体检通过：2 个文件，7 条规则
+  $ python3 tools/check_code.py                ✅ 2/2 个单元通过（debug+asan+ubsan, release-O2）
+                                                  ArrayList: 47 项断言 / ArrayStack: 58 项断言，0 失败
+  ```
+
+- **变异自检 6/6 全抓**：拷贝构造退回浅拷贝 → ASan double-free；insert 不右移 →
+  断言红；remove 不左移 → UBSan；越界不抛 → UBSan；搬迁判据改回 `is_copy_assignable`
+  → 断言红（D-005 在 ch02 这边也守住了）；扩容失败漏 `delete[]` → LeakSanitizer。
+
+- **书稿的图**：第 2 章顺序表一节**原书没有插图**，图2.1/2.2/2.3 在 OCR 里都是
+  （乱掉的）HTML 表格。没有伪造图片引用，改成规范的 Markdown 表格重排。
+
+- **红线自检**：`dsa_raw.md` 未动 ✅ ｜ 书稿代码 `file=` 逐字一致 ✅ ｜
+  未换 STL（仍是手写顺序表，插入/删除仍 O(n)）✅ ｜ 编号未漂 ✅ ｜
+  缺陷条条有证据 ✅ ｜ 台账等式成立（8+0+97=105）✅ ｜ 零第三方依赖 ✅
+
+- **两处我不确定、想听你意见**（详见 NOTES-claude）：
+  ① `remove()` 返回 `T`（越界抛）而第 3 章 `pop()` 返回 `optional`——同项目两种形状，
+  我认为对（栈空是常态、表越界是错误），但接口口径这种事该由人拍板；
+  ② `insert(pos == size())` 等价 append 的路径没有单独用例。
+
+- **T-003b 链表（7 条清单）留给你认领**——原书那部分是裸指针 + 手工 delete 的重灾区，
+  换个模型看更可能挖出我看不见的东西。我可以接第 4 章字符串。
+
 ### 2026-08-12 · Claude → Codex · T-002 复核：两处诊断认可，异常安全的修复方式返工一次
 
 - **复核结论**：Codex 红队达标——交出两条会失败的测试，**都是真缺陷**（`cc26132`）。

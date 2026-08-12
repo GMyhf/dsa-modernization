@@ -1,0 +1,278 @@
+# 第2章 线性表（现代化稿 · 2.1–2.2 顺序表）
+
+> **本文件的地位**：《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）
+> 第 2.1–2.2 节的现代化重排。原书正文（`dsa_raw.md:1145` 起）的讲法、编号、图表一概保留；
+> 换掉的只是那套 2008 年的 C++ 写法。2.3 节链表另开一轮。
+>
+> 书里印的每一段 C++ 都来自 `code/ch02/array_list/`，真正编译、真正跑过
+> （`tools/check_doc.py` 的 R3 逐字核对）。原书那份写法错在哪、改了什么、
+> 什么刻意没改，逐条记在 `code/ch02/array_list/legacy.md`。
+>
+> 代码风格遵循 `collab/DECISION_LOG.md` 的 D-001 与 D-005。
+
+## 2.1 线性表的概念
+
+线性表(linear list)是由 n(n ≥ 0) 个类型相同的数据元素组成的有限序列。
+除第一个元素外，每个元素有且仅有一个直接前驱；除最后一个元素外，
+每个元素有且仅有一个直接后继。
+
+线性表的抽象数据类型给出的是**一组运算**：置空、判空、在表尾追加、
+在指定位置插入、删除指定位置的元素、按位置取值与改值、按值查找位置。
+
+原书【代码2.1】用一个类模板 `List<T>` 来写这组运算。那份清单有两处今天必须改：
+
+1. 它声明了 `bool delete(const int p);`——**`delete` 是 C++ 关键字**，不能作函数名。
+   整章的删除操作都建立在这个编译不过的名字上。
+2. 它写的是 `class List { void clear(); ... };`，**通篇没有 `public:`**。
+   `class` 的默认访问权限是 private，于是这个抽象数据类型的每一个运算都调不到。
+   （同一本书第 3 章的代码3.1 是写了 `public:` 的。）
+
+第 2 点尤其值得停一下：抽象数据类型的意义就是**对外**给出一组运算。
+一个所有运算都私有的 ADT，在语法上成立、在语义上是空的。
+
+本书把这组运算直接定义在 `ArrayList<T>` 上，不再另设一个基类——
+理由与第 3 章相同：那样的空基类给不了多态，却会带来非虚析构的未定义行为。
+对元素类型的要求用 `static_assert` 写在类头：
+
+```cpp file=code/ch02/array_list/modern.hpp#class-head
+/// 顺序表（按顺序方式存储的线性表，又称向量）。
+///
+/// 与原书 arrList 的差别：容量不足时自动翻倍，而不是打印 "The list is overflow"
+/// 然后返回 false；位置非法抛 std::out_of_range，而不是打印一行再返回 false；
+/// 查找返回 std::optional<size_type>，而不是「出参 + bool」双通道。
+template <typename T>
+class ArrayList {
+    static_assert(std::is_default_constructible<T>::value,
+                  "ArrayList<T>: T 必须可默认构造（底层 new T[n] 会构造整块槽位）");
+    static_assert(std::is_move_assignable<T>::value,
+                  "ArrayList<T>: T 必须可移动赋值（插入/删除要搬动元素）");
+    static_assert(std::is_copy_assignable<T>::value || std::is_nothrow_move_assignable<T>::value,
+                  "ArrayList<T>: 不可复制的 T 必须可无异常移动赋值（扩容保持强异常保证）");
+    static_assert(!std::is_reference<T>::value, "ArrayList<T>: T 不能是引用类型");
+
+public:
+    using value_type = T;
+    using size_type = std::size_t;
+```
+
+## 2.2 顺序表
+
+按顺序方式存储的线性表称为顺序表(array-based list)，又称向量(vector)，通过数组建立。
+
+假设每个元素占用 L 个存储单元，顺序表的开始结点 k₀ 的存储位置记为
+b = loc(k₀)，称为首地址；则下标为 i 的元素 kᵢ 的存储位置为
+
+$$\mathrm{loc}(k_i) = b + i \times L$$
+
+每个元素的存储位置都与起始位置相差一个与位序成正比的常数。只要确定了基地址，
+表中任一元素的地址都能直接算出——**顺序表因此是一种随机存取的存储结构**，
+按下标取值的时间代价为 O(1)。物理相邻表示了逻辑相邻。
+
+**(a) 线性表的逻辑结构**
+
+| 数据元素 | k₀ | k₁ | … | kᵢ | … | kₙ₋₁ | … | |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 逻辑地址 | 0 | 1 | … | i | … | n−1 | … | maxSize−1 |
+
+**(b) 线性表的顺序存储结构**
+
+| 数据元素 | k₀ | k₁ | … | kᵢ | … | kₙ₋₁ | … |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 存储地址 | b | b+L | … | b+i·L | … | b+(n−1)·L | … |
+
+图 2.1 顺序表的示意图
+
+### 2.2.1 存储与所有权
+
+原书【代码2.2】用四个成员表示顺序表：`T* aList`、`int maxSize`、`int curLen`、
+`int position`。前三个对应缓冲区、容量、当前长度，现代实现一一对应
+（改用 `std::size_t`，因为「负下标」不该在类型层面存在）。
+
+第四个 `position` 是个**当前处理位置游标**，配合正文提到的
+`setPos / setStart / next / prev` 用来「依次处理元素」。这个设计今天不能要：
+遍历状态一旦住进容器，`const` 对象就没法遍历（游标要改），两处代码不能同时遍历，
+嵌套遍历直接互相踩。本书删掉这个成员，改为提供 `begin()/end()`，
+把遍历状态交回调用方——range-for 因此可以直接用在顺序表上。
+（顺带一提：原书那个 `position`，在书中展示的所有算法里一次都没被用到。）
+
+与第 3 章一样，缓冲区是**裸指针**加显式五法则：顺序表的存储管理正是本节的教学内容，
+换成 `std::unique_ptr<T[]>` 会让五法则退化成走过场。原书 `arrList` 有析构函数
+却没有拷贝构造与拷贝赋值，一次 `arrList<int> b = a;` 就二次释放——
+与第 3 章 `arrStack` 是同一个错误，同一份 ASan 报告可以复现。
+
+另外原书的 `clear()` 是这样写的：
+
+```text
+void clear() { delete [] aList; curLen = position = 0; aList = new T[maxSize]; }
+```
+
+释放整块再重新分配。既没必要（把长度归零即可，容量留着复用），也不是异常安全的：
+若 `new` 抛异常，对象就停在「指针已释放、长度已归零」的破碎状态，
+之后析构还会再 `delete[]` 一次。本书的 `clear()` 是 `noexcept` 的，只把长度归零。
+
+### 2.2.2 顺序表的检索
+
+顺序表上的检索分按位置和按内容两类。按位置的检索直接由地址公式算出，O(1)：
+
+```cpp file=code/ch02/array_list/modern.hpp#access
+/// 按下标读取，O(1)。越界抛 std::out_of_range。
+/// 原书 getValue 用「出参 + bool」，越界时打印一行再返回 false。
+[[nodiscard]] const T& at(size_type index) const {
+    check_index(index, "ArrayList::at");
+    return data_[index];
+}
+
+[[nodiscard]] T& at(size_type index) {
+    check_index(index, "ArrayList::at");
+    return data_[index];
+}
+
+/// 修改指定位置的值。越界抛 std::out_of_range。
+void set(size_type index, const T& value) {
+    check_index(index, "ArrayList::set");
+    data_[index] = value;
+}
+```
+
+按内容的检索是把待查值与表中元素依次比较，O(n)。原书【算法2.3】写作
+`bool getPos(int& p, const T value)`——位置由出参带出、成败由返回值带出。
+这个形状的问题是：调用方忘了检查返回值，读到的就是没被写过的 `p`。
+
+（顺带一提，算法2.3 那段按印刷原样是编译不过的：循环写的是 `for (i = 0; i < n; i++)`，
+而 `n` 从未声明，按上下文应为 `curLen`。）
+
+```cpp file=code/ch02/array_list/modern.hpp#find
+/// 按内容查找，返回第一次出现的下标；没有则返回 std::nullopt。O(n)。
+///
+/// 原书【算法2.3】是 `bool getPos(int& p, const T value)`：出参带位置、
+/// 返回值带成败。调用方忘了检查返回值，读到的就是没被写过的 p。
+/// 这里让「找没找到」进入类型系统，忽略返回值还会被 -Wunused-result 拦下。
+[[nodiscard]] std::optional<size_type> find(const T& value) const {
+    for (size_type i = 0; i < size_; ++i) {
+        if (data_[i] == value) {
+            return i;
+        }
+    }
+    return std::nullopt;
+}
+```
+
+检索的时间代价体现在比较次数上。最好情况是第 1 个元素即为所求，比较 1 次；
+最差情况是表中没有该元素，比较 n 次。等概率假设下平均比较次数为
+
+$$\sum_{i=1}^{n} p \times i = \frac{1}{n}(1 + 2 + \cdots + n) = \frac{n+1}{2}$$
+
+即平均需要检查表中一半的元素，时间开销为 O(n)。
+
+### 2.2.3 顺序表的插入
+
+插入要在指定位置腾出一个空位：从表尾起，把 pos 之后的元素逐个右移一位。
+
+```cpp file=code/ch02/array_list/modern.hpp#insert
+/// 在位置 pos 插入元素，pos 可以等于 size()（即追加到表尾）。
+/// 位置非法抛 std::out_of_range；容量不足自动翻倍。
+///
+/// 时间代价仍是 O(n)——pos 之后的元素都要右移一位。这是顺序表的固有代价，
+/// 也是第 2.3 节要拿它和链表对比的地方，没有被"优化"掉。
+void insert(size_type pos, const T& value) {
+    make_gap(pos);
+    data_[pos] = value;
+    ++size_;
+}
+
+void insert(size_type pos, T&& value) {
+    make_gap(pos);
+    data_[pos] = std::move(value);
+    ++size_;
+}
+
+void append(const T& value) { insert(size_, value); }
+void append(T&& value) { insert(size_, std::move(value)); }
+```
+
+两处与原书不同：
+
+- **容量不足时自动翻倍**，而不是打印 `"The list is overflow"` 然后返回 false。
+  扩容策略与第 3 章算法3.3 相同，搬迁判据见 3.1.3 节末（移动赋值是否 `noexcept`）。
+- **位置非法抛 `std::out_of_range`**，而不是打印一行再返回 false。
+  按公约，可预期的空状态用 `optional`，真正的错误抛异常——插到表外是错误。
+
+插入位置 p 处腾空位的过程如下（图 2.2）：p 及其之后的元素整体右移一位，
+空出的 p 位置写入新元素。
+
+| aList | k₀ | k₁ | … | **value** | kₚ | … | kₙ₋₁ | … | |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 下标 | 0 | 1 | … | p | p+1 | … | n | … | maxSize−1 |
+
+图 2.2 顺序表元素插入示意图
+
+时间代价仍然是 O(n)。最好情况是插在表尾，移动 0 次；最差情况是插在表头，
+n 个元素全要移动；等概率假设下平均移动次数为
+
+$$\sum_{i=0}^{n} p \times (n - i) = \frac{1}{n+1}\sum_{i=0}^{n}(n-i) = \frac{n}{2}$$
+
+**扩容没有改变这个结论**：翻倍带来的搬迁摊还到每次插入是 O(1)，
+而元素右移本身仍是 O(n)。这一点是 2.3 节拿顺序表与链表对比的依据，不能被优化掉。
+
+### 2.2.4 顺序表的删除
+
+删除是插入的镜像：把 pos 之后的元素逐个左移一位。
+
+```cpp file=code/ch02/array_list/modern.hpp#remove
+/// 删除位置 pos 上的元素并返回它。位置非法抛 std::out_of_range。
+///
+/// 空表上删除必然越界，所以不需要原书那句单独的空表检查——
+/// 「表空」在这里不是一种可预期状态，而就是下标非法的一个特例。
+T remove(size_type pos) {
+    check_index(pos, "ArrayList::remove");
+    T removed = std::move(data_[pos]);
+    for (size_type i = pos; i + 1 < size_; ++i) {
+        data_[i] = std::move(data_[i + 1]);  // 左移一位，O(n)
+    }
+    --size_;
+    return removed;
+}
+```
+
+删除位置 p 上的元素后，其后的元素整体左移一位（图 2.3）：
+
+删除前：
+
+| aList | k₀ | k₁ | k₂ | … | **kₚ** | … | kₙ₋₁ | … |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 下标 | 0 | 1 | 2 | … | p | … | n−1 | … |
+
+删除后：
+
+| aList | k₀ | k₁ | k₂ | … | kₚ₊₁ | … | kₙ₋₁ | … |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 下标 | 0 | 1 | 2 | … | p | … | n−2 | … |
+
+图 2.3 顺序表元素删除示意图
+
+原书【算法2.5】的函数名是 `delete`——C++ 关键字，编译不过；本书叫 `remove`。
+另外它返回 `bool`，被删掉的值就此丢失；这里把它返回给调用方，
+「删除并取用」不必先 `getValue` 再 `delete` 两步走。
+
+删除的时间代价分析与插入相同，平均为 O(n)。
+
+## 与原书的对照
+
+| 原书 | 现在 | 为什么 |
+| --- | --- | --- |
+| `bool delete(const int p)` | `T remove(size_type pos)` | `delete` 是关键字，原样编译不过；顺带把被删元素还给调用方 |
+| `class List { ... }` 无 `public:` | 不设基类，要求写成 `static_assert` | 所有运算私有的 ADT 在语义上是空的；空基类给不了多态 |
+| `for (i = 0; i < n; i++)` | `i < size_` | 原书 `n` 从未声明，编译不过 |
+| `bool getPos(int& p, T v)` | `std::optional<size_type> find(const T&)` | 「找没找到」交给类型系统，忽略返回值会告警 |
+| `bool getValue(int p, T& v)` | `const T& at(size_type)`，越界抛异常 | 同上；越界是错误，不是可预期状态 |
+| `int maxSize / curLen`，满了拒绝 | `size_t capacity_ / size_`，自动翻倍 | `int` 溢出是未定义行为；「负下标」不该存在；容量不该是使用者的负担 |
+| `int position` 游标 + `next/prev` | `begin()/end()` | 遍历状态住在容器里，const 不能遍历、不能嵌套遍历 |
+| `cout << "The list is overflow"` | 不做任何 I/O | 数据结构不该和标准输出耦合 |
+| `clear()` 释放后重新分配 | `clear() noexcept` 只归零长度 | 原写法没必要，且 `new` 抛异常会留下破碎对象 |
+
+**刻意没改的**：连续存储、按下标 O(1) 随机存取、插入与删除搬动 O(n) 个元素。
+这三条正是 2.3 节拿顺序表和链表做对比的全部依据，一条都不能优化掉。
+
+完整实现见 `code/ch02/array_list/modern.hpp`，测试见同目录 `test.cpp`
+（47 项断言，覆盖上表每一行；用 `python3 tools/check_code.py` 在
+`-Werror` + ASan/UBSan 与 `-O2` 两种构建下各跑一遍）。

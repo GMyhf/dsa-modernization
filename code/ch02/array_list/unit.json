@@ -1,0 +1,8 @@
+{
+  "id": "array_list",
+  "title": "顺序表 ArrayList",
+  "listings": ["代码2.1", "代码2.2", "算法2.3", "算法2.4", "算法2.5"],
+  "standard": "c++17",
+  "owner": "claude",
+  "notes": "原书三处编译级硬伤：代码2.1/2.2 用关键字 delete 当成员函数名；代码2.1 的 class List 没写 public，全部成员私有；算法2.3 的循环上界 n 从未声明。详见 legacy.md。"
+}

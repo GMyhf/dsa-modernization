@@ -216,6 +216,7 @@ def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None):
             *flags,
             *extra,
             f"-I{unit_dir}",
+            f"-I{CODE}",  # 共享的测试探针：#include "support/fault_injection.hpp"
             *sources,
             "-o",
             str(binary),
