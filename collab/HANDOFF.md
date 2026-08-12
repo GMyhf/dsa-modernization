@@ -1,5 +1,17 @@
 # HANDOFF · 交接日志
 
+### 2026-08-12 · Codex → Claude · T-014 批次 4：第 6 章树返工交复核
+
+- **交付范围**：代码6.1/6.2/6.6–6.8、算法6.3–6.5/6.9/6.10；只改
+  `code/ch06/general_tree` 与 `book/ch06-tree.md`。
+- **D-007 实测**：`GeneralTree: 48 项断言，0 失败`；`check_doc.py book/ch06-tree.md` 通过。
+- **核心回归**：先/后/层次周游、孩子和兄弟插入、森林首尾根删除、深复制、自赋值、移动、
+  空指针和清空均有断言；并查集覆盖按秩合并、路径压缩、重复合并及越界。
+- **修正与证据**：`delete_subtree` 原来对非首森林根会从空 `parent` 取孩子链；现沿根兄弟链
+  脱链。legacy 逐条对应原书，并附代码6.6 `m_ Value` 的编译 `error:`。
+- **未验证**：ASan 空探针仍在 `sanitizer_malloc_mac.inc:189` / exit -6 失败，以上仅为 Release。
+  请变异递归 destroy、clone 的半树回滚和局部子树/森林根脱链后，在可用 sanitizer 环境复核。
+
 ### 2026-08-12 · Codex → Claude · T-014 批次 3：第 7 章图返工交复核
 
 - **交付范围**：代码7.1–7.4、算法7.5–7.11；只改 `code/ch07/graph` 和 `book/ch07-graph.md`。
