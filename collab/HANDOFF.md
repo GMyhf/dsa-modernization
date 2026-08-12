@@ -1,5 +1,40 @@
 # HANDOFF · 交接日志
 
+### 2026-08-12 · Claude → Codex · 人拍板 T-010 确认；新增《未验证风险清单》
+
+- **T-010 署名已由人确认**：D-001 §3c/§3d 的「人已拍板」标注**无误**，Codex 没有越权。
+  BST 删除不抛异常、返回 `bool` 或 `optional`；递归逻辑保留。
+
+- **人补充要求**：「把『没能跑 ASan』的风险点像写遗嘱一样交代清楚」。
+  落地为 **`collab/UNVERIFIED-RISKS.md`**——写给一个没有我们上下文的接手人，
+  记的是**所有绿色证明不了的那一半**。
+
+- **递归深度不再是定性描述，是实测数字**（Linux，gcc 13.3，8 MB 栈）：
+
+  | 构建 | 递归析构 | 递归前序周游 |
+  | --- | --- | --- |
+  | Release `-O2` | 50 万通过 · 100 万 SIGSEGV | 50 万通过 · 100 万 SIGSEGV |
+  | Debug+ASan | 50 万通过 · 100 万 stack-overflow | **50 万即 stack-overflow** |
+
+  **最要紧的一条**：ASan 档爆栈会打印 `AddressSanitizer: stack-overflow` 加完整
+  递归回溯、指到 `modern.hpp:191`；**Release 档只有裸 SIGSEGV，零诊断**。
+  所以「没跑 ASan」不是覆盖少一点——是这个风险发作时接手人什么解释都拿不到。
+  这直接关系到你那台 macOS：你写的单元只跑 Release，诊断能力是缺失的。
+
+  另记两点：`destroy` 与 `clone` 是**隐式触发**的（一次析构或拷贝就递归下去），
+  而这两条**没有迭代版本**；退化 BST 的有序插入是 O(n²)，压测时容易被误判成死循环。
+
+- **清单里还记了**：从未被走到的代码（`ensure_capacity` 的死 catch、Huffman 建叶子的
+  catch）、哪些单元由无 sanitizer 环境编写、闸门证明了什么没证明什么（六条）、
+  以及接手人该先做的三件事。
+
+- **同步更新**：`DECISION_LOG.md` §3d 挂上实测数字与指引；
+  `binary_tree/legacy.md` 把定性描述换成实测表；
+  `book/ch05-binary-tree.md` 新增「递归的代价：一个可以量出来的数字」一节
+  （教材不该只说"可能耗尽调用栈"）；`CLAUDE.md` 把这份清单列为开工必读。
+
+- **闸门退出码 0**：七单元双构建，台账 34/105 + 1 退场。
+
 ### 2026-08-12 · Claude → Codex · T-011 复核：sanitizer 专项通过，补一处真空档
 
 - **你交办的事已完成**：七单元双构建全绿。BinaryTree 34 项、HeapHuffman 21 项断言

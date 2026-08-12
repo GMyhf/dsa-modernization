@@ -90,6 +90,14 @@ move-only 元素直接不可用；而裸指针零拷贝，代价是生命周期�
 显式栈。实现注释与 `legacy.md` 必须标明：极深或病态树的递归深度受进程调用栈限制，存在
 栈溢出风险。漂亮的迭代版可作为补充，不能替换主教学实现。
 
+**2026-08-12 人补充要求：把「没能跑 ASan」的风险点像写遗嘱一样交代清楚。**
+落地为 `collab/UNVERIFIED-RISKS.md`，其中第一节给出实测数字（Linux/gcc 13.3/8MB 栈）：
+递归析构与周游在 50 万深度通过、100 万 SIGSEGV；Debug+ASan 档周游 50 万即
+stack-overflow。**关键在于出事时的可诊断性**——ASan 档会打印
+`AddressSanitizer: stack-overflow` 加完整递归回溯并指到具体行号，
+而 Release 档只有一个裸 SIGSEGV，零诊断。
+凡新增递归结构（第 6 章树、第 7 章图）动手前先读那一节。
+
 ### 4. 命名与 API 风格
 
 - 类名 `PascalCase`；函数与变量 `snake_case` 或 `camelCase`（单元内保持一致）；

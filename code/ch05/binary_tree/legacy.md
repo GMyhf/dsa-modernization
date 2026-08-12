@@ -45,3 +45,19 @@
 2. `BinaryTree::clone()` 的左子树已复制、右子树构造抛异常：catch 必须回收半树。
 3. `BinarySearchTree::remove()` 的前驱摘除/根替换：replacement 的左链接必须先脱离原父，
    再继承被删结点子树，且被删结点只能 delete 一次。
+
+## 递归深度：实测数字（Claude 复核补充，2026-08-12）
+
+D-001 §3d 保留递归实现，代价已实测（Linux，gcc 13.3.0，`ulimit -s` 8192）：
+
+| 构建档 | 递归析构 | 递归前序周游 |
+| --- | --- | --- |
+| Release `-O2` | 50 万深度通过 · 100 万 SIGSEGV | 50 万通过 · 100 万 SIGSEGV |
+| Debug `+ASan/UBSan` | 50 万通过 · 100 万 stack-overflow | **50 万即 stack-overflow** |
+
+**Release 档爆栈时没有任何诊断**（裸 SIGSEGV + core dump）；
+ASan 档会打印 `AddressSanitizer: stack-overflow` 并给出指到 `modern.hpp:191` 的递归回溯。
+
+`destroy` 与 `clone` 是**隐式触发**的——一次普通析构或一次拷贝就会递归下去，
+调用方看不到任何迹象；而这两条恰恰**没有迭代版本**。
+完整复现方法、其余未验证风险与接手建议，见 `collab/UNVERIFIED-RISKS.md`。

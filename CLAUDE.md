@@ -17,8 +17,10 @@ reproduces. Assume any listing lifted from the book is broken until a compiler s
 
 **Two AI agents (Claude Code and Codex) work this repo in alternating implement/review
 rounds.** Before doing anything else, read `collab/README.md` (protocol, red lines,
-claim-a-task-first) and `collab/DECISION_LOG.md` (**signed-off decisions — D-001 is the
-mandatory C++ style convention**). `collab/PLAN.md` holds what is in flight and who owns it;
+claim-a-task-first), `collab/DECISION_LOG.md` (**signed-off decisions — D-001 is the
+mandatory C++ style convention**), and `collab/UNVERIFIED-RISKS.md` (**what the green
+gate does NOT prove** — measured recursion-depth limits, never-executed cleanup paths,
+which units were authored without a working sanitizer). `collab/PLAN.md` holds what is in flight and who owns it;
 decisions live only in DECISION_LOG so the two can't drift apart.
 
 ## Commands
