@@ -27,7 +27,32 @@ def make_unit(root: Path, test_src, standard="c++20"):
         json.dumps({"id": "probe", "title": "闸门探针", "listings": ["算法3.3"], "standard": standard}),
         encoding="utf-8",
     )
-    (d / "legacy.md").write_text("probe", encoding="utf-8")
+    # 探针也必须长得像个真单元：D-007 的实质性检查对所有单元一视同仁，
+    # 不给测试夹具开例外——否则「干净单元能通过」这条断言就名不副实了。
+    (d / "legacy.md").write_text(
+        "# 闸门探针的 legacy.md\n\n"
+        "这是 tests/ 造的合成单元，用来验证闸门本身的行为，不对应原书任何清单。\n"
+        "内容按 D-007 的形状写足，是因为实质性检查不接受例外——\n"
+        "一个能通过闸门的『干净单元』，必须真的能通过全部判据。\n\n"
+        "## 证据（形状示例）\n\n"
+        "```console\n"
+        "$ g++ -std=c++17 -c probe.cpp\n"
+        "probe.cpp:1:1: error: 这是探针用的示例输出，不是真实缺陷\n"
+        "```\n\n"
+        "## 为什么要写这么长\n\n"
+        "D-007 要求 legacy.md 至少 20 行实质内容且含可复现证据。\n"
+        "红线的原话是「每条缺陷都要有证据」——两行说明不构成证据。\n"
+        "探针若能靠一行蒙混过关，那条判据对真单元也就形同虚设。\n\n"
+        "## 与真单元的差别\n\n"
+        "真单元的这份文件要逐条摘录原书清单、逐条附编译器或 sanitizer 的真实输出。\n"
+        "参见 code/ch03/array_stack/legacy.md 或 code/ch04/pattern_matching/legacy.md。\n"
+        "本文件只是形状占位，不含任何关于原书的断言。\n\n"
+        "## 这个夹具为什么不走豁免\n\n"
+        "check_substance() 没有 waiver 字段，这是有意的：\n"
+        "一旦开了逃生口，最先用它的就是最该被拦下的那类提交。\n"
+        "夹具自己达标，比给夹具开后门更能说明判据是真的。\n",
+        encoding="utf-8",
+    )
     (d / "modern.hpp").write_text("#pragma once\n", encoding="utf-8")
     (d / "test.cpp").write_text(test_src, encoding="utf-8")
     return d
@@ -107,7 +132,10 @@ class TestGateHasTeeth(unittest.TestCase):
     @unittest.skipUnless(SANITIZER_AVAILABLE, "本条依赖 sanitizer；环境诊断由 TestSanitizerPreflight 覆盖")
     def test_clean_unit_passes_both_profiles(self):
         with tempfile.TemporaryDirectory() as tmp:
-            unit = make_unit(Path(tmp), "int main() { return 0; }\n")
+            unit = make_unit(
+                Path(tmp),
+                '#include <cstdio>\nint main() { std::printf("Probe: 5 项断言，0 失败\\n"); return 0; }\n',
+            )
             code, out = run_gate(unit)
         self.assertEqual(code, 0, out)
         self.assertIn("debug+asan+ubsan", out)
