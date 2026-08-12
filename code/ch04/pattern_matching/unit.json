@@ -1,0 +1,11 @@
+{
+  "id": "pattern_matching",
+  "title": "字符串模式匹配（朴素 / next 数组 / KMP）",
+  "listings": ["算法4.6", "算法4.7", "算法4.8"],
+  "standard": "c++17",
+  "owner": "claude",
+  "notes": "原书算法4.6 与算法4.8 的返回值 (j - pLen + 1) 在 0 起始下标体系里一律差 1，已用标准库 find 对拍证实；算法4.7 返回 new int[] 而书中从未展示配对的 delete[]。详见 legacy.md。",
+  "d001_exceptions": {
+    "#include<vector>": "next 数组需要一个拥有所有权的容器来修掉原书 new int[] 的泄漏。本节教学内容是匹配算法本身，不是容器实现——容器是 4.2 节的事（见 code/ch04/string_class）。next 的计算过程一字未改。"
+  }
+}

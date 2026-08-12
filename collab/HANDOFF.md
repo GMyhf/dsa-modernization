@@ -1,5 +1,53 @@
 # HANDOFF · 交接日志
 
+### 2026-08-12 · Claude → Codex · T-004a 第 4 章模式匹配：发现原书**算法结果错**
+
+- **本轮最重的一条不是写法问题**：原书【算法4.6】朴素匹配与【算法4.8】KMP，
+  匹配成功时都写 `return (j - pLen + 1);`，而 0 起始下标下正确的是 `j - pLen`。
+  拿标准库 `find` 对拍，四组数据**每组恰好多 1**：
+
+  ```
+  T=abc                              P=abc          原书=  1  正确=  0
+  T=xabc                             P=abc          原书=  2  正确=  1
+  T=aaab                             P=ab           原书=  3  正确=  2
+  T=abcddabcababcdaabcababcdaabcabaa P=abcdaabcab   原书= 11  正确= 10
+  ```
+
+  最后一组正是书中图4.12 自己演示 KMP 用的那对串——原书逐趟画了过程却没给返回值，
+  错误因此在书里没有暴露。不是 OCR：两处独立印出、写法一致，而同段的
+  `j = j - i + 1` 恰恰证明作者用的就是 0 起始下标。
+
+- **这条改变了测试写法**：所有匹配用例都拿 `std::string_view::find` 逐个对拍，
+  外加 3000 组随机对拍。只断言「找到了」的测试在原书那份实现下同样全绿——等于没测。
+
+- **第二处：正文的 next 数组比模式还长一位。** 正文写 11 个值，模式只有 10 个字符，
+  图4.11 给的是 10 个。算法实算站在图这一边。**是印刷错误还是 OCR 多插，分辨不出**，
+  legacy.md 如实写明，只断言三者不能同时成立。
+
+- **两个机制首次投入使用**：
+  ① `d001_exceptions`（`<vector>` 承载 next 以修掉原书 `new int[]` 的泄漏，附理由）
+  ——你红队时加的「理由 `strip()` 非空」检查正在守它；
+  ② `exclusions.json`（代码4.2 退场：它是标准库 `basic_string` 的空壳声明，
+  无可现代化内容；顺带记了往 `namespace std` 加 typedef 是 UB）。
+
+- **闸门结果**（退出码 0）：
+
+  ```
+  $ python3 -m unittest discover -s tests      Ran 61 tests in 9.646s  OK
+  $ python3 tools/ledger.py --check            ✅ 18 已现代化，1 退场，86 待办
+  $ python3 tools/check_doc.py                 ✅ 书稿体检通过：3 个文件，7 条规则
+  $ python3 tools/check_code.py                ✅ 4/4 个单元通过（双构建）
+                          ArrayList 47 / ArrayStack 58 / LinkedList 33 / PatternMatching 56
+  ```
+
+- **变异自检 5/5，其中一条返工过**：「去掉 next 优化」第一次是被**未使用变量的编译错误**
+  挡下的，不是被断言抓的——重做了干净的变异才确认 `test_next_matches_the_book_figure`
+  真的会红。变异自检本身也会做假，得看清是被什么抓的。
+
+- **T-004b 留给你认领**（代码4.1 / 算法4.3 / 4.4 / 4.5，String 类）。证据已采好：
+  `String::String(char* s)` 让书中自己的例子 `String s1 = "Hello";` 在 C++11 起编译不过；
+  算法4.5 从返回 `String` 的函数里 `return NULL`；算法4.3 的 `strcmp` 与标准库同名同签名。
+
 ### 2026-08-12 · Claude → Codex · T-003b 复核：ASan 双构建通过；补 O(1) 守门 + 返工 skip 粒度
 
 - **你交给我的那件事已完成**：三单元双构建全绿，LinkedList 在 Debug+ASan/UBSan 档

@@ -1,4 +1,11 @@
 {
   "_comment": "决定【不做】现代化的原书清单。每条必须写 reason / by / date，缺一项 tools/ledger.py --check 会红。退场不是删除：清单仍然计入 105 的总数，只是从『待办』移到『已决』。",
-  "exclusions": []
+  "exclusions": [
+    {
+      "listing": "代码4.2",
+      "reason": "这条清单不是原书自己的实现，而是标准库 std::basic_string 的声明骨架：namespace std { template <class charT, class traits = char_traits<charT>, class Allocator = allocator<charT>> class basic_string { public: }; typedef basic_string<char> String; }——类体是空的，没有任何可现代化的内容。原书用它说明 String 只是 basic_string<char> 的别名。顺带记一处原书问题：往 namespace std 里添加 typedef 是未定义行为（[namespace.std]），标准只允许为用户自定义类型特化其中的模板。4.2 节要教的字符串存储管理由代码4.1/算法4.4/算法4.5 承载，另立单元 code/ch04/string_class。",
+      "by": "claude",
+      "date": "2026-08-12"
+    }
+  ]
 }
