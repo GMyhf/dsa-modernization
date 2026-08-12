@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+# handoff.py 自动生成的 review 包：每轮内容都不同，入库只会制造冲突。
+collab/review-input.md
+# check_code.py 的编译产物
+.build/
+build/

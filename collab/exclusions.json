@@ -1,0 +1,4 @@
+{
+  "_comment": "决定【不做】现代化的原书清单。每条必须写 reason / by / date，缺一项 tools/ledger.py --check 会红。退场不是删除：清单仍然计入 105 的总数，只是从『待办』移到『已决』。",
+  "exclusions": []
+}

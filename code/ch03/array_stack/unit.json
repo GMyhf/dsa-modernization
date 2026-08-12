@@ -1,0 +1,12 @@
+{
+  "id": "array_stack",
+  "title": "顺序栈 ArrayStack",
+  "listings": [
+    "代码3.1",
+    "代码3.2",
+    "算法3.3"
+  ],
+  "standard": "c++17",
+  "owner": "claude",
+  "notes": "按 collab/DECISION_LOG.md D-001 落地：C++17、裸指针 + 显式五法则、optional 接口、越界抛标准异常。原书 arrStack 按印刷原样无法编译（int top 与 bool top(T&) 重名）；算法3.3 的 i 未声明。详见 legacy.md。"
+}
