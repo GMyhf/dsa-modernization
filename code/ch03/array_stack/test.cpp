@@ -7,6 +7,7 @@
 #include <cstdio>
 #include <iostream>
 #include <memory>
+#include <new>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -66,7 +67,8 @@ void test_copy_is_deep() {
     c.push(99);
     c = a;
     check(c.size() == 2 && c.top() == 2, "拷贝赋值得到独立副本");
-    c = c;                            // 自赋值
+    dsa::ArrayStack<int>& copy_alias = c;
+    c = copy_alias;                   // 自赋值（经别名避开 -Wself-assign-overloaded）
     check(c.size() == 2 && c.top() == 2, "自赋值后仍然完好");
     // 三个对象在这里各自析构一次。原书写法在此处 double-free。
 }
@@ -246,6 +248,81 @@ void test_strong_exception_guarantee_on_growth() {
     check(s.size() == size_before + 1, "异常之后栈仍可继续使用");
 }
 
+// 红队 T-002：分配本身抛 bad_alloc 时，fresh 尚未取得，旧栈也必须原样保留。
+struct AllocationFailure {
+    int v{0};
+    static bool fail_next_array_allocation;
+
+    AllocationFailure() = default;
+    explicit AllocationFailure(int x) : v(x) {}
+    static void* operator new[](std::size_t bytes) {
+        if (fail_next_array_allocation) {
+            fail_next_array_allocation = false;
+            throw std::bad_alloc();
+        }
+        return ::operator new[](bytes);
+    }
+    static void operator delete[](void* p) noexcept { ::operator delete[](p); }
+};
+bool AllocationFailure::fail_next_array_allocation = false;
+
+void test_bad_alloc_preserves_stack() {
+    dsa::ArrayStack<AllocationFailure> s(2);
+    s.push(AllocationFailure(1));
+    s.push(AllocationFailure(2));
+    const auto capacity_before = s.capacity();
+    AllocationFailure::fail_next_array_allocation = true;
+    bool threw = false;
+    try {
+        s.push(AllocationFailure(3));
+    } catch (const std::bad_alloc&) {
+        threw = true;
+    }
+    check(threw, "new T[next] 的 bad_alloc 如实抛出");
+    check(s.size() == 2 && s.capacity() == capacity_before, "bad_alloc 后长度与容量不变");
+    check(s.at(0).v == 1 && s.at(1).v == 2, "bad_alloc 后原有元素完好");
+}
+
+// 红队 T-002：移动构造 noexcept 并不能证明移动赋值不抛；后者若可抛会破坏强保证。
+struct ThrowingMoveAssignment {
+    int v{0};
+    static int moves;
+    static int throw_at;
+
+    ThrowingMoveAssignment() = default;
+    explicit ThrowingMoveAssignment(int x) : v(x) {}
+    ThrowingMoveAssignment(const ThrowingMoveAssignment&) = default;
+    ThrowingMoveAssignment(ThrowingMoveAssignment&& other) noexcept : v(other.v) { other.v = -1; }
+    ThrowingMoveAssignment& operator=(const ThrowingMoveAssignment&) = default;
+    ThrowingMoveAssignment& operator=(ThrowingMoveAssignment&& other) {
+        if (throw_at != 0 && ++moves == throw_at) {
+            throw std::runtime_error("ThrowingMoveAssignment: 注入的移动赋值失败");
+        }
+        v = other.v;
+        other.v = -1;
+        return *this;
+    }
+};
+int ThrowingMoveAssignment::moves = 0;
+int ThrowingMoveAssignment::throw_at = 0;
+
+void test_throwing_move_assignment_preserves_stack() {
+    dsa::ArrayStack<ThrowingMoveAssignment> s(4);
+    for (int i = 0; i < 4; ++i) {
+        s.push(ThrowingMoveAssignment(i));
+    }
+    ThrowingMoveAssignment::moves = 0;
+    ThrowingMoveAssignment::throw_at = 3;
+    s.push(ThrowingMoveAssignment(99));
+    ThrowingMoveAssignment::throw_at = 0;
+    check(s.size() == 5 && s.capacity() == 8, "可复制元素扩容时不走会抛的移动赋值");
+    bool intact = true;
+    for (std::size_t i = 0; i < 4; ++i) {
+        intact = intact && s.at(i).v == static_cast<int>(i);
+    }
+    check(intact, "移动赋值可抛时扩容后旧元素仍完整");
+}
+
 // 缺陷 7：容器不该做 I/O。原书 push/pop 失败时直接 cout 打中文提示。
 void test_no_console_output() {
     std::ostringstream captured;
@@ -302,6 +379,8 @@ int main() {
     test_peek_after_growth_is_refetched();
     test_growth_preserves_contents();
     test_strong_exception_guarantee_on_growth();
+    test_bad_alloc_preserves_stack();
+    test_throwing_move_assignment_preserves_stack();
     test_no_console_output();
     test_at_throws_out_of_range();
     test_clear_keeps_capacity();

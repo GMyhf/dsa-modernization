@@ -131,6 +131,26 @@ class TestD001StaticCheck(unittest.TestCase):
             d, meta = self.unit_with(tmp, src)
             self.assertEqual(check_code.check_d001(d, meta), [])
 
+    def test_block_comment_and_string_literals_are_not_violations(self):
+        src = '/* std::cout << 1; */\nconst char* text = "#include <vector>";\n'
+        with tempfile.TemporaryDirectory() as tmp:
+            d, meta = self.unit_with(tmp, src)
+            self.assertEqual(check_code.check_d001(d, meta), [])
+
+    def test_whitespace_obfuscated_forbidden_tokens_are_rejected(self):
+        src = "#  include   <vector>\nvoid f() { std :: cout << 1; }\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            d, meta = self.unit_with(tmp, src)
+            problems = check_code.check_d001(d, meta)
+        self.assertEqual(len(problems), 2, problems)
+
+    def test_blank_exception_reason_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d, meta = self.unit_with(
+                tmp, "#include <vector>\n", {"d001_exceptions": {"#include<vector>": " "}}
+            )
+            self.assertTrue(check_code.check_d001(d, meta))
+
     def test_documented_exception_is_honoured(self):
         with tempfile.TemporaryDirectory() as tmp:
             d, meta = self.unit_with(

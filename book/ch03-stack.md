@@ -48,7 +48,9 @@ class ArrayStack {
     static_assert(std::is_default_constructible<T>::value,
                   "ArrayStack<T>: T 必须可默认构造（底层 new T[n] 会构造整块槽位）");
     static_assert(std::is_move_assignable<T>::value,
-                  "ArrayStack<T>: T 必须可移动赋值（扩容时要把元素搬到新缓冲区）");
+                  "ArrayStack<T>: T 必须可移动赋值（push/pop 需要移动元素）");
+    static_assert(std::is_copy_assignable<T>::value || std::is_nothrow_move_assignable<T>::value,
+                  "ArrayStack<T>: 不可复制的 T 必须可无异常移动赋值（扩容保持强异常保证）");
     static_assert(!std::is_reference<T>::value, "ArrayStack<T>: T 不能是引用类型");
 
 public:
@@ -211,9 +213,14 @@ void ensure_capacity() {
     T* fresh = new T[next];
     try {
         for (size_type i = 0; i < top_index_; ++i) {
-            // move_if_noexcept：T 的移动可能抛异常时退回拷贝，
-            // 这样搬到一半失败也不会把元素毁在半路（原书直接 = 赋值，没这层考虑）。
-            fresh[i] = std::move_if_noexcept(data_[i]);
+            // 这里是赋值而不是构造，不能用 move_if_noexcept：它检查的是
+            // 移动构造是否 noexcept，移动赋值仍可能在搬迁中途抛并污染原栈。
+            // 可复制元素一律复制；不可复制元素由上面的 static_assert 保证移动赋值不抛。
+            if constexpr (std::is_copy_assignable<T>::value) {
+                fresh[i] = data_[i];
+            } else {
+                fresh[i] = std::move(data_[i]);
+            }
         }
     } catch (...) {
         // 裸指针的代价：RAII 版本不用写这一段。搬迁失败要自己收拾新缓冲区，

@@ -1,5 +1,31 @@
 # HANDOFF · 交接日志
 
+### 2026-08-12 · Codex → Claude · T-002 红队：两处真缺陷已复现并修复
+
+- **静态闸门打穿并加固**：旧 `check_d001()` 会漏 `#  include <vector>` 与
+  `std :: cout`，空格理由可绕过豁免；也会将块注释/字符串里的 token 误判。现改为
+  注释/字符串剥离 + 空白规范化匹配，豁免理由 `strip()` 后必须非空；9 条 D-001
+  自测覆盖这些情况。
+- **强异常保证真 bug**：旧版对「移动构造 `noexcept`、移动赋值第 3 次抛」的故障注入
+  输出 `FAIL: redteam strong guarantee after throwing move assignment`（52 项断言，1 失败）。
+  根因是 `move_if_noexcept` 看移动构造而代码实际做移动赋值。现对可拷贝 T 用复制迁移；
+  不可拷贝 T 静态要求移动赋值 `noexcept`。同时补 `new T[next]` 抛 `bad_alloc` 的回归。
+- **peek 复核**：不解引用失效指针是正确取舍（否则 UB）；维持 D-001 §3b 的
+  `top()` 副本 / `peek()` 零拷贝双接口，不加调试世代计数。
+- **闸门结果（真实）**：书稿同步后 `check_doc.py` 通过；Release `check_code.py`
+  输出 `ArrayStack: 55 项断言，0 失败`。完整验证因当前 macOS ASan 运行时失败而未全绿：
+
+  ```
+  test_clean_unit_passes_both_profiles ... FAIL
+  AddressSanitizer: CHECK failed: sanitizer_malloc_mac.inc:189
+  "((!asan_init_is_running)) != (0)"
+  $ python3 tools/check_doc.py                 ✅ 书稿体检通过：1 个文件，7 条规则
+  $ python3 tools/check_code.py                ❌ Debug ASan 初始化失败；Release 55 项断言，0 失败
+  ```
+
+  该 ASan 错误同样发生在 `tests/test_check_code.py` 的空探针单元，不能宣称本轮完整闸门
+  已通过。详见 `NOTES-codex.md` 的攻击记录与环境证据。
+
 ### 2026-08-12 · Claude → Codex · D-001 §3b `peek()` 落地；正式交红队（T-002）
 
 - **做了什么**：人拍板补充 D-001 §3b，新增 `const T* peek() const noexcept`

@@ -61,18 +61,74 @@ D001_FORBIDDEN = [
 ]
 
 
+def strip_comments_and_strings(source: str) -> str:
+    """用空白替换注释与字符串，保留换行与预处理指令的行号。"""
+    out, i, state = [], 0, "code"
+    while i < len(source):
+        ch = source[i]
+        nxt = source[i + 1] if i + 1 < len(source) else ""
+        if state == "code" and ch == "/" and nxt == "/":
+            state = "line-comment"
+            out.extend("  ")
+            i += 2
+        elif state == "code" and ch == "/" and nxt == "*":
+            state = "block-comment"
+            out.extend("  ")
+            i += 2
+        elif state == "code" and ch == '"':
+            state = "string"
+            out.append(" ")
+            i += 1
+        elif state == "code" and ch == "'":
+            state = "char"
+            out.append(" ")
+            i += 1
+        elif state == "line-comment":
+            out.append("\n" if ch == "\n" else " ")
+            state = "code" if ch == "\n" else state
+            i += 1
+        elif state == "block-comment" and ch == "*" and nxt == "/":
+            state = "code"
+            out.extend("  ")
+            i += 2
+        elif state == "block-comment":
+            out.append("\n" if ch == "\n" else " ")
+            i += 1
+        elif state in {"string", "char"} and ch == "\\":
+            out.extend("  " if nxt else " ")
+            i += 2 if nxt else 1
+        elif state in {"string", "char"} and ((state == "string" and ch == '"') or (state == "char" and ch == "'")):
+            state = "code"
+            out.append(" ")
+            i += 1
+        elif state in {"string", "char"}:
+            out.append("\n" if ch == "\n" else " ")
+            i += 1
+        else:
+            out.append(ch)
+            i += 1
+    return "".join(out)
+
+
 def check_d001(unit_dir: Path, meta):
     """返回违反 D-001 的问题列表。unit.json 的 d001_exceptions 可豁免，但必须写理由。"""
-    exceptions = meta.get("d001_exceptions", {})
+    exceptions = {
+        re.sub(r"\s+", "", token): reason.strip()
+        for token, reason in meta.get("d001_exceptions", {}).items()
+        if isinstance(reason, str) and reason.strip()
+    }
     problems = []
     for name in ("modern.hpp", "modern.cpp"):
         path = unit_dir / name
         if not path.is_file():
             continue
-        for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-            code = line.split("//")[0]
+        source = strip_comments_and_strings(path.read_text(encoding="utf-8"))
+        for lineno, code in enumerate(source.splitlines(), 1):
+            # C++ 允许 `std :: cout` 和 `#  include <vector>`；静态闸门不能因为
+            # 空白不同就漏掉同一条违规。去掉空白只用于本轮 D-001 token 匹配。
+            normalized = re.sub(r"\s+", "", code)
             for pattern, desc in D001_FORBIDDEN:
-                m = pattern.search(code)
+                m = pattern.search(normalized)
                 if not m:
                     continue
                 token = m.group(0).strip()
