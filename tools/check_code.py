@@ -110,6 +110,54 @@ def strip_comments_and_strings(source: str) -> str:
     return "".join(out)
 
 
+# 一个单元可以在结构上完全合规——unit.json 在、legacy.md 在、test.cpp 在、
+# 认领的编号也都真实存在——而里面几乎什么都没有。台账会照样报「已现代化」。
+# 这个空档是 2026-08-12 第一轮就写进 NOTES 的预言，同年同日被兑现：
+# 一次提交用 542 行覆盖 61 条清单，第 8 章 17 条排序清单只有 11 项断言，
+# 且 quick() = std::sort、heap() = std::make_heap、radix() 直接调 counting()。
+#
+# 「实现得对不对」没法机械判定，但「有没有东西」可以。下面两条守的是后者。
+MIN_ASSERTIONS_PER_LISTING = 3
+MIN_ASSERTIONS_PER_UNIT = 5
+MIN_LEGACY_LINES = 20
+EVIDENCE_MARKERS = ("error:", "runtime error", "Sanitizer", "$ g++", "$ ./")
+
+
+def check_substance(unit_dir: Path, meta, assertions):
+    """单元里到底有没有东西。返回 problems 列表。
+
+    判据刻意保守：现有的扎实单元是每条清单 8–18 项断言，
+    这里的下限只要求 3，够宽了。真有正当理由低于它，
+    那是该写进 DECISION_LOG 的决定，不是又开一个逃生口。
+    """
+    problems = []
+    listings = len(meta.get("listings", []))
+    if assertions is not None and listings:
+        need = max(MIN_ASSERTIONS_PER_LISTING * listings, MIN_ASSERTIONS_PER_UNIT)
+        if assertions < need:
+            problems.append(
+                f"  ❌ 断言密度不足：{listings} 条清单只有 {assertions} 项断言"
+                f"（下限 {need}）。清单被认领却几乎没有被验证。"
+            )
+
+    legacy = unit_dir / "legacy.md"
+    if legacy.is_file():
+        text = legacy.read_text(encoding="utf-8")
+        lines = len([ln for ln in text.splitlines() if ln.strip()])
+        if lines < MIN_LEGACY_LINES:
+            problems.append(
+                f"  ❌ legacy.md 只有 {lines} 行实质内容（下限 {MIN_LEGACY_LINES}）。"
+                "红线要求「每条缺陷都要有证据」，两行说明不构成证据。"
+            )
+        elif not any(marker in text for marker in EVIDENCE_MARKERS):
+            problems.append(
+                "  ❌ legacy.md 里没有任何可复现的证据"
+                f"（找不到 {', '.join(EVIDENCE_MARKERS)} 之一）。"
+                "「原书这样写不好」不是证据，编译器与 sanitizer 的输出才是。"
+            )
+    return problems
+
+
 def check_d001(unit_dir: Path, meta):
     """返回违反 D-001 的问题列表。unit.json 的 d001_exceptions 可豁免，但必须写理由。"""
     exceptions = {
@@ -207,6 +255,7 @@ def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None):
     if d001:
         ok = False
         logs.extend(d001)
+    assertions = None
     for name, flags in profiles:
         binary = workdir / f"{unit_dir.name}-{name}"
         cmd = [
@@ -236,7 +285,14 @@ def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None):
             )
         else:
             tail = run.stdout.strip().splitlines()[-1:] or ["(无输出)"]
+            hit = re.search(r"(\d+)\s*项断言", run.stdout)
+            if hit:
+                assertions = int(hit.group(1))
             logs.append(f"  ✅ [{name}] {tail[0][:80]}")
+    substance = check_substance(unit_dir, meta, assertions)
+    if substance:
+        ok = False
+        logs.extend(substance)
     if keep:
         logs.append(f"  产物保留在 {workdir}")
     return ok, [f"{rel}  «{meta.get('title', '')}»", *logs]

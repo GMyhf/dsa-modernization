@@ -40,6 +40,15 @@ void test_three_implementations_agree() {
     }
     check(agree_high, "11! 到 20!：三种实现互相一致");
     check(dsa::factorial_iterative(20) == 2432902008176640000ULL, "20! 的值精确正确");
+    // 边界：递归出口本身
+    check(dsa::factorial_recursive(0) == 1 && dsa::factorial_iterative(0) == 1
+          && dsa::factorial_with_explicit_stack(0) == 1, "0! = 1（递归出口）");
+    check(dsa::factorial_recursive(1) == 1 && dsa::factorial_iterative(1) == 1
+          && dsa::factorial_with_explicit_stack(1) == 1, "1! = 1（出口的邻居）");
+    // 上限那一点三者必须完全一致，差一位都不行
+    check(dsa::factorial_recursive(20) == dsa::factorial_iterative(20)
+          && dsa::factorial_recursive(20) == dsa::factorial_with_explicit_stack(20),
+          "在 64 位上限 20! 处三种实现逐位一致");
 }
 
 // 缺陷 1：原书用 long 且不查溢出。实测 factorial(21) = -4249290049419214848，
@@ -83,6 +92,10 @@ void test_explicit_stack_goes_far_beyond_recursion_depth() {
     const std::uint64_t safe = 10000;
     check(dsa::sum_to_recursive(safe) == dsa::sum_to_with_explicit_stack(safe),
           "安全深度（1 万层）下递归与显式栈结果一致");
+    check(dsa::sum_to_with_explicit_stack(safe) == safe * (safe + 1) / 2,
+          "显式栈版与闭式公式 n(n+1)/2 一致");
+    check(dsa::sum_to_recursive(0) == 0 && dsa::sum_to_with_explicit_stack(0) == 0,
+          "n = 0 时两者都返回 0，不越界也不死循环");
 }
 
 // 容器与算法内部不做 I/O。原书栈的实现失败时会 cout 打提示。

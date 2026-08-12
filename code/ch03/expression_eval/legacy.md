@@ -39,10 +39,20 @@ bool Calculator::GetTwoOperands(double& opd1, double& opd2) {
 后果是这个算法**没法写测试、没法在库里复用、没法处理来自别处的表达式**。
 本书改为接受 `std::string_view`、返回 `double`、出错抛异常。
 
-### 缺陷 3：`s.pop(&opd1)` 传指针，与本书自己的栈 ADT 对不上
+### 缺陷 3（致命）：`s.pop(&opd1)` 传指针，与本书自己的栈 ADT 对不上
 
-代码3.1 声明的是 `bool pop(T& item)`（引用）。这是本书第**三**处同类不一致
-（另两处：算法3.9 的 `s.pop(&tmp)`、本处两次）。
+代码3.1 声明的是 `bool pop(T& item)`（引用）。把两处清单放在一起就编译不过：
+
+```console
+$ g++ -std=c++17 -c calc.cpp
+calc.cpp: In member function ‘bool Calculator::GetTwoOperands(double&, double&)’:
+calc.cpp:12:15: error: cannot convert ‘double*’ to ‘double&’
+   12 |         s.pop(&opd1);
+      |               ^~~~~
+```
+
+这是本书第**三**处同类不一致（另两处：算法3.9 的 `s.pop(&tmp)`、本处两次）。
+换句话说，**算法3.5 与代码3.1 从来没有被放在同一个翻译单元里编译过**。
 
 ### 缺陷 4：`Stack<double> s;` 又实例化了那个假抽象基类
 
