@@ -17,6 +17,9 @@ sys.path.insert(0, str(ROOT / "tools"))
 import check_code  # noqa: E402
 
 
+SANITIZER_AVAILABLE, _SANITIZER_DIAGNOSTIC = check_code.sanitizer_preflight()
+
+
 def make_unit(root: Path, test_src, standard="c++20"):
     d = root / "probe"
     d.mkdir(parents=True)
@@ -41,6 +44,7 @@ def run_gate(unit_dir: Path):
 
 
 @unittest.skipIf(check_code.compiler() is None, "机器上没有 C++ 编译器")
+@unittest.skipUnless(SANITIZER_AVAILABLE, "sanitizer 环境不可用；由 TestSanitizerPreflight 覆盖环境诊断")
 class TestGateHasTeeth(unittest.TestCase):
     def test_failing_assertion_is_reported(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -176,7 +180,9 @@ class TestSanitizerPreflight(unittest.TestCase):
 
     def test_preflight_passes_on_a_working_toolchain(self):
         ok, out = check_code.sanitizer_preflight()
-        self.assertTrue(ok, f"本机 sanitizer 环境应当可用：{out}")
+        if not ok:
+            self.skipTest(f"本机 sanitizer 环境不可用：{out}")
+        self.assertTrue(ok)
 
     def test_preflight_reports_a_broken_environment(self):
         ok, out = check_code.sanitizer_preflight(flags=["-fsanitize=definitely-not-a-sanitizer"])

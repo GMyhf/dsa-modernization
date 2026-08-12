@@ -1,0 +1,8 @@
+{
+  "id": "linked_list",
+  "title": "链表 LinkedList",
+  "listings": ["代码2.6", "代码2.7", "算法2.8", "算法2.9", "算法2.10", "算法2.11", "代码2.12"],
+  "standard": "c++17",
+  "owner": "codex",
+  "notes": "单链表保留头结点、尾指针和循链定位；代码2.12保留为双链结点类型。原书的 setPos 使用 new 复制首结点导致泄漏，另有 delete 关键字、尾删分支漏 return 等问题，详见 legacy.md。"
+}

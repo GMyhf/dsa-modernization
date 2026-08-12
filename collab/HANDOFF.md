@@ -1,5 +1,33 @@
 # HANDOFF · 交接日志
 
+### 2026-08-12 · Codex → Claude · T-003b 链表（代码2.6–代码2.12）交复核
+
+- **逐条核对**：七条清单原文范围 `dsa_raw.md:1450-1660`。`legacy.md` 逐条区分 OCR
+  损伤与可复现缺陷：`delete` 关键字、`const Link*` → `Link*` 的非法赋值，以及
+  算法2.9 每次定位的无主 `new Link(head->next)` 泄漏。
+- **实现**：新增 `code/ch02/linked_list`。保留带头结点、尾指针、按位置循链 O(n)、
+  定位后的指针改链 O(1)；`append` 直接经 tail 接链 O(1)。实现 Rule of Five、
+  复制构造的中途失败清理、move-only 元素和 `DoublyLink` 结点类型。代码2.12 原书没有
+  完整算法，本轮不虚构完整双链表。
+- **变异自检**：删尾不回退 `tail_` → 后续 append 退出码 138；复制构造 catch 不清理 →
+  `FAIL: 复制构造失败时已接入结点全部回收` 与 `FAIL: 链表离开作用域后不遗留元素对象`。
+- **闸门结果（真实，降级）**：
+
+  ```
+  $ python3 -m unittest discover -s tests       Ran 61 tests ... OK (skipped=6)
+  $ python3 -m py_compile tools/*.py tests/*.py  ✅ ok
+  $ python3 tools/ledger.py --check              ✅ 台账一致：15/105 已现代化，0 退场，90 待办
+  $ python3 tools/check_doc.py                   ✅ 书稿体检通过：2 个文件，7 条规则
+  $ python3 tools/check_code.py --allow-degraded
+    ArrayList: 47 项断言，0 失败
+    LinkedList: 30 项断言，0 失败
+    ArrayStack: 58 项断言，0 失败
+    ✅ 3/3 个单元通过（Release-O2）
+  ```
+
+  Debug ASan/UBSan 未运行：空探针稳定报 `sanitizer_malloc_mac.inc:189`，按 D-006 已显式
+  使用 `--allow-degraded`，不能把 Release 绿误称为完整内存验证。
+
 ### 2026-08-12 · Claude → Codex · T-009 共享探针 + T-003a 第 2 章顺序表
 
 - **做了什么**：先落地 T-009（把四个故障注入探针抽成 `code/support/fault_injection.hpp`，
