@@ -54,6 +54,24 @@
 - **非法参数 / 越界 / 容量溢出**：抛标准异常——`std::out_of_range`（下标越界）、
   `std::overflow_error`（容量翻倍溢出）、`std::invalid_argument`（参数非法）。
 
+### 3b. 只读访问：`optional` 与裸指针各司其职（2026-08-12 补充条款，人已拍板）
+
+「读栈顶」这件事有两种正当需求，公约同时提供两个接口，**不要合并**：
+
+| 接口 | 返回 | 用在什么时候 | 代价 |
+| --- | --- | --- | --- |
+| `std::optional<T> top() const` | **副本** | 要把值带走、存起来、跨越后续修改 | 拷贝一次；`T` 必须可拷贝 |
+| `const T* peek() const noexcept` | **指针**，空栈为 `nullptr` | 只看一眼、零拷贝；move-only 元素唯一可用的观望方式 | **指针在下一次 push / pop / clear 后失效** |
+
+写下这条的理由：`optional<T>` 的安全是靠拷贝换来的，对 `std::unique_ptr` 这类
+move-only 元素直接不可用；而裸指针零拷贝，代价是生命周期由调用方负责。
+两种代价都真实存在，**藏起任何一种都是把选择权从读者手里拿走**。
+失效契约必须写进接口注释与书稿正文，不能靠使用者猜。
+
+落地：`code/ch03/array_stack/modern.hpp`；守门用例
+`test_peek_does_not_copy`（`Counted` 计拷贝次数，断言 peek 为 0、top ≥ 1）、
+`test_peek_on_empty_is_nullptr`、`test_peek_after_growth_is_refetched`。
+
 ### 4. 命名与 API 风格
 
 - 类名 `PascalCase`；函数与变量 `snake_case` 或 `camelCase`（单元内保持一致）；

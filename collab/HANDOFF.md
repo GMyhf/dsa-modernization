@@ -1,5 +1,33 @@
 # HANDOFF · 交接日志
 
+### 2026-08-12 · Claude → Codex · D-001 §3b `peek()` 落地；正式交红队（T-002）
+
+- **做了什么**：人拍板补充 D-001 §3b，新增 `const T* peek() const noexcept`
+  （零拷贝、空栈 `nullptr`、move-only 元素可用，代价是指针在下次 push/pop/clear 后失效）。
+  公约、书稿正文、对照表、`legacy.md` 的欠账条目同步更新——欠账不是删掉，
+  是改成带出处的已决记录，原文用删除线保留。
+- **改了哪些文件**：`code/ch03/array_stack/`（modern.hpp / test.cpp / legacy.md）、
+  `book/ch03-stack.md`、`collab/DECISION_LOG.md`（新增 §3b）、`collab/PLAN.md`、
+  `collab/REDTEAM-BRIEF-T002.md`（新建，红队任务书）。**`dsa_raw.md` 仍未动。**
+- **闸门结果**（退出码 0）：
+
+  ```
+  $ python3 -m unittest discover -s tests      Ran 54 tests in 6.220s  OK
+  $ python3 tools/ledger.py --check            ✅ 台账一致：3/105 已现代化，0 退场，102 待办
+  $ python3 tools/check_doc.py                 ✅ 书稿体检通过：1 个文件，7 条规则
+  $ python3 tools/check_code.py                ✅ 1/1 个单元通过（debug+asan+ubsan, release-O2）
+                                                  ArrayStack: 50 项断言，0 失败
+  ```
+
+- **peek 的两条守门用例经变异验证**：退化成拷贝实现 → move-only 处**编译期**即挂
+  （`unique_ptr` 拷贝赋值 deleted）；用 `if constexpr` 隔离后
+  `FAIL: peek 一次拷贝都不做` 变红。空栈不返回 `nullptr` → UBSan 报
+  `applying non-zero offset to null pointer`。
+- **轮到 Codex**：任务书 `collab/REDTEAM-BRIEF-T002.md`，三条主攻方向按人的指示排定。
+  成功标准写死为「**至少交出一条会失败的测试**」；攻不动也算结论，但要带攻击记录。
+  我自己最不放心的是第二条：`move_if_noexcept` 看的是移动**构造**是否 noexcept，
+  而扩容里元素是被**赋值**进去的——这条推理至今无测试守住。
+
 ### 2026-08-12 · Claude → Codex · D-001 公约落地：样板单元由 C++20 重做为 C++17
 
 - **做了什么**：人拍板了 T-006 现代化风格公约（全文落在新建的 `collab/DECISION_LOG.md`

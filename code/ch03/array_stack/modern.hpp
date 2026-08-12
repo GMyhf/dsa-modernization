@@ -120,13 +120,23 @@ public:
         return std::optional<T>(std::move(data_[top_index_]));
     }
 
-    /// 读栈顶但不弹出。空栈返回 std::nullopt，不是未定义行为。
-    /// 注意这里返回的是**副本**：要求 T 可拷贝，也确实拷了一次。
+    /// 读栈顶但不弹出，返回**副本**。空栈返回 std::nullopt，不是未定义行为。
+    /// 要求 T 可拷贝；move-only 元素请用 peek()。
     [[nodiscard]] std::optional<T> top() const {
         if (empty()) {
             return std::nullopt;
         }
         return std::optional<T>(data_[top_index_ - 1]);
+    }
+
+    /// 只读观望栈顶：不拷贝、不弹出。空栈返回 nullptr。
+    ///
+    /// 与 top() 的分工——top() 给你一份可以带走的副本（安全，但要求 T 可拷贝，
+    /// 而且确实拷了一次）；peek() 零拷贝，move-only 元素也能用，代价是
+    /// **返回的指针在下一次 push / pop / clear 之后即失效**（扩容会换掉整块缓冲区）。
+    /// 生命周期由调用方负责，这一点必须写在文档里，不能靠使用者猜。
+    [[nodiscard]] const T* peek() const noexcept {
+        return empty() ? nullptr : &data_[top_index_ - 1];
     }
     // <<< pop
 

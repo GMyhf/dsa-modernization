@@ -13,8 +13,8 @@
 | ID | 任务 | 状态 | 负责 | 关联提交 / 备注 |
 | --- | --- | --- | --- | --- |
 | T-000 | 搭建 Claude⇄Codex 协作脚手架（`collab/` + `tools/` + `tests/`） | Review | Claude | 移植自 cs101.openjudge.cn/collab，闸门按本项目重写：台账 + 书稿体检 + 真编译。48 项工具自测通过，待 Codex 复核 — 2026-08-12 人拍板 D-001 后，工具默认标准改为 c++17 |
-| T-001 | 样板单元：第 3.1 节顺序栈（代码3.1 / 代码3.2 / 算法3.3） | Review | Claude | `code/ch03/array_stack` + `book/ch03-stack.md`。**抓到原书两处编译错误**，见 `legacy.md` — 2026-08-12 按 D-001 重做为 C++17 + 裸指针 + 显式五法则，断言 29→38（新增强异常保证的故障注入与 `at()` 越界），变异自检 5/5 全抓 |
-| T-002 | **红队闸门本身**：Codex 找 `tools/` 的漏洞——哪些坏改动能溜过 `--verify`？写会失败的用例 | Backlog | Codex | 建议起点：R2 的注释剥离能否被绕过？R3 的 dedent 比对能否被空白差异欺骗？台账能否被「认领了但 listings 写错编号」骗过？另：D-001 落地后新增的 `try/catch` 与 `Fragile` 故障注入用例也请一并找茬 |
+| T-001 | 样板单元：第 3.1 节顺序栈（代码3.1 / 代码3.2 / 算法3.3） | Review | Claude | `code/ch03/array_stack` + `book/ch03-stack.md`。**抓到原书两处编译错误**，见 `legacy.md` — 2026-08-12 按 D-001 重做为 C++17 + 裸指针 + 显式五法则，断言 29→38（新增强异常保证的故障注入与 `at()` 越界），变异自检 5/5 全抓 — 2026-08-12 按 D-001 §3b 新增 `peek()`，断言 38→50，peek 的两条守门用例经变异验证（退化成拷贝实现→move-only 处编译失败 + `copies==0` 断言红；空栈不返回 nullptr→UBSan） |
+| T-002 | **红队**：Codex 找漏——D-001 静态检查的正则盲区、`bad_alloc`/移动赋值故障注入、`peek()` 接口 | In progress | Codex | 建议起点：R2 的注释剥离能否被绕过？R3 的 dedent 比对能否被空白差异欺骗？台账能否被「认领了但 listings 写错编号」骗过？任务书见 `collab/REDTEAM-BRIEF-T002.md`（三条主攻方向 + 三条我已知未动的弱点）。成功标准：**至少交出一条会失败的测试** |
 | T-003 | 第 2 章线性表：顺序表与链表（代码2.1–算法2.11，共 12 条清单） | Backlog | — | 链表是重灾区：原书裸指针 + 手工 delete。先做顺序表，链表单独一轮 |
 | T-004 | `ArrayStack` 改用未初始化存储 + placement new | Backlog | — | 现在用 `unique_ptr<T[]>`，会把容量内所有槽位默认构造出来——与原书 `new T[mSize]` 同样的限制，**没有恶化也没有解决**。记在这里而不是悄悄带过。见 `legacy.md` 第四节 |
 | T-005 | 全书 292 张插图 vendoring + 逐张写图注 | Backlog | — | `tools/vendor_figures.py` 只搬字节；alt 文本必须有人看图去写，R4 会一直红着 |
@@ -30,6 +30,7 @@
 | 编号 | 日期 | 决策 | 谁拍的 |
 | --- | --- | --- | --- |
 | D-001 | 2026-08-12 | DSA 教材 C++ 现代化风格公约（T-006）：C++17、STL 边界、错误处理与 I/O、命名 | **人** |
+| D-001 §3b | 2026-08-12 | 补充条款：新增 `const T* peek() const noexcept` 作为 `optional<T> top()` 的零拷贝补充 | **人** |
 | D-002 | 2026-08-12 | `dsa_raw.md` 永久只读 | Claude 记录 |
 | D-003 | 2026-08-12 | 书稿代码块与源码一致性靠机器保证（R3 + sync_book） | Claude 记录 |
 | D-004 | 2026-08-12 | 闸门跑 Debug+ASan/UBSan 与 Release-O2 两种构建 | Claude 记录 |

@@ -99,9 +99,66 @@ void test_move_only_element() {
         s.push(std::make_unique<int>(i));
     }
     check(s.size() == 10, "move-only 元素可以入栈");
+    // top() 返回副本，move-only 元素用不了；peek() 零拷贝，可以。
+    const std::unique_ptr<int>* seen = s.peek();
+    check(seen != nullptr && **seen == 9, "peek 可以观望 move-only 的栈顶元素");
     auto item = s.pop();
     check(item.has_value() && **item == 9, "move-only 元素可以出栈且值正确");
-    // 注意：不能对 move-only 元素调用 top()，它按公约返回 optional<T> 副本。
+}
+
+// D-001 补充条款（2026-08-12 人拍板）：peek() 是 top() 的零拷贝补充。
+struct Counted {
+    int v{0};
+    static int copies;
+    Counted() = default;
+    explicit Counted(int x) : v(x) {}
+    Counted(const Counted& other) : v(other.v) { ++copies; }
+    Counted& operator=(const Counted& other) {
+        v = other.v;
+        ++copies;
+        return *this;
+    }
+};
+int Counted::copies = 0;
+
+void test_peek_does_not_copy() {
+    dsa::ArrayStack<Counted> s(4);
+    s.push(Counted(1));
+    s.push(Counted(2));
+
+    Counted::copies = 0;
+    const Counted* p = s.peek();
+    check(p != nullptr && p->v == 2, "peek 指向栈顶元素");
+    check(Counted::copies == 0, "peek 一次拷贝都不做");
+
+    Counted::copies = 0;
+    auto copy = s.top();
+    check(copy.has_value() && copy->v == 2, "top 返回等值的副本");
+    check(Counted::copies >= 1, "top 确实拷贝了——这正是 peek 存在的理由");
+
+    check(s.size() == 2, "peek/top 都不改变栈");
+}
+
+void test_peek_on_empty_is_nullptr() {
+    dsa::ArrayStack<int> s;
+    check(s.peek() == nullptr, "空栈 peek 返回 nullptr，不是未定义行为");
+    s.push(7);
+    check(s.peek() != nullptr && *s.peek() == 7, "非空栈 peek 可用");
+    (void)s.pop();
+    check(s.peek() == nullptr, "弹空后 peek 又回到 nullptr");
+}
+
+// 契约的另一半：扩容会换掉整块缓冲区，之前 peek 到的指针随之失效。
+// 这里不去解引用旧指针（那是未定义行为），只验证「重新 peek 拿到的是对的」。
+void test_peek_after_growth_is_refetched() {
+    dsa::ArrayStack<int> s(1);
+    s.push(1);
+    check(*s.peek() == 1, "扩容前 peek 正确");
+    for (int i = 2; i <= 100; ++i) {
+        s.push(i);  // 中途必然发生多次扩容
+    }
+    check(s.peek() != nullptr && *s.peek() == 100, "扩容后重新 peek 仍然正确");
+    check(s.at(0) == 1, "扩容后栈底元素完好");
 }
 
 // 算法3.3：扩容策略。原书那段按印刷原样根本编译不过（`i` 未声明）。
@@ -240,6 +297,9 @@ int main() {
     test_copy_is_deep();
     test_move_semantics();
     test_move_only_element();
+    test_peek_does_not_copy();
+    test_peek_on_empty_is_nullptr();
+    test_peek_after_growth_is_refetched();
     test_growth_preserves_contents();
     test_strong_exception_guarantee_on_growth();
     test_no_console_output();

@@ -150,13 +150,23 @@ ArrayStack& operator=(ArrayStack&& other) noexcept {
     return std::optional<T>(std::move(data_[top_index_]));
 }
 
-/// 读栈顶但不弹出。空栈返回 std::nullopt，不是未定义行为。
-/// 注意这里返回的是**副本**：要求 T 可拷贝，也确实拷了一次。
+/// 读栈顶但不弹出，返回**副本**。空栈返回 std::nullopt，不是未定义行为。
+/// 要求 T 可拷贝；move-only 元素请用 peek()。
 [[nodiscard]] std::optional<T> top() const {
     if (empty()) {
         return std::nullopt;
     }
     return std::optional<T>(data_[top_index_ - 1]);
+}
+
+/// 只读观望栈顶：不拷贝、不弹出。空栈返回 nullptr。
+///
+/// 与 top() 的分工——top() 给你一份可以带走的副本（安全，但要求 T 可拷贝，
+/// 而且确实拷了一次）；peek() 零拷贝，move-only 元素也能用，代价是
+/// **返回的指针在下一次 push / pop / clear 之后即失效**（扩容会换掉整块缓冲区）。
+/// 生命周期由调用方负责，这一点必须写在文档里，不能靠使用者猜。
+[[nodiscard]] const T* peek() const noexcept {
+    return empty() ? nullptr : &data_[top_index_ - 1];
 }
 ```
 
@@ -165,8 +175,18 @@ ArrayStack& operator=(ArrayStack&& other) noexcept {
 直接打印中文提示，把一个数据结构与标准输出焊死——它没法在库里复用，
 提示无法本地化，失败路径也无从测试。
 
-`top()` 同样返回 `std::optional<T>`。代价要说清楚：它返回的是**副本**，
-因此对 `std::unique_ptr` 这类只能移动的元素类型不可用（`pop()` 可以）。
+「读栈顶」有两种正当需求，因此这里给了两个接口，**不要把它们合并成一个**：
+
+- `top()` 返回 `std::optional<T>`，是一份可以带走的**副本**。安全，
+  但要求 `T` 可拷贝，而且确实拷贝了一次。
+- `peek()` 返回 `const T*`，空栈为 `nullptr`，**零拷贝**。
+  `std::unique_ptr` 这类只能移动的元素只能用它来观望。
+
+代价也是一对：`optional` 的安全靠拷贝换来，`peek()` 的零拷贝则把生命周期交给了
+调用方——**它返回的指针在下一次 `push` / `pop` / `clear` 之后即失效**，
+因为扩容会换掉整块缓冲区。这条失效契约必须写在文档里，不能靠使用者猜。
+
+两种代价都真实存在。把任何一种藏起来，都是替读者做了本该由读者做的选择。
 
 ## 3.1.3 顺序栈的扩容
 
@@ -255,6 +275,7 @@ void push(T&& item) {
 | `int mSize / int top / T* st` | `size_t capacity_ / size_t top_index_ / T* data_` | `int` 溢出是未定义行为；`top_index_` 避开与成员函数 `top()` 重名 |
 | 只有 `~arrStack()` | 五个特殊成员函数补齐 | 否则一次拷贝就二次释放 |
 | `bool pop(T& item)` | `[[nodiscard]] std::optional<T> pop()` | 「有没有值」交给类型系统，忽略返回值会告警 |
+| `bool top(T& item)` | `optional<T> top()` 取副本；`const T* peek()` 零拷贝 | 两种正当需求，两种代价，都摆在明面上 |
 | `cout << "栈满溢出"` | 不做任何 I/O；越界抛 `std::out_of_range` | 数据结构不该和标准输出耦合；可预期的空状态用 `optional`，真错误才抛异常 |
 | `delete[] st; st = newSt;` | 先建后换 + `try/catch` + `move_if_noexcept` | 搬迁中途抛异常不破坏原栈（强异常保证） |
 
@@ -263,5 +284,5 @@ void push(T&& item) {
 把它换成 `std::stack` 的薄封装固然更短，但这一节要教的正是这些实现细节本身。
 
 完整实现见 `code/ch03/array_stack/modern.hpp`，测试见同目录 `test.cpp`
-（38 项断言，覆盖上表每一行；用 `python3 tools/check_code.py` 在
+（50 项断言，覆盖上表每一行；用 `python3 tools/check_code.py` 在
 `-Werror` + ASan/UBSan 与 `-O2` 两种构建下各跑一遍）。

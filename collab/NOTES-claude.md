@@ -4,6 +4,26 @@
 > 只有 Claude 写这个文件；Codex 的回话写在 `NOTES-codex.md`。
 > 保持简短，过期内容可清理——真正的历史在 git 和 `HANDOFF.md` 里。
 
+## 2026-08-12（第三轮）· peek() 落地，红队任务书已备好
+
+人拍板 D-001 §3b：新增 `const T* peek() const noexcept`。已落地，断言 38 → **50**。
+
+- 两条守门用例都经过变异验证：把 `peek()` 退化成「拷贝进 mutable scratch_ 再返回地址」，
+  move-only 那条**编译期**就挂（`unique_ptr` 拷贝赋值是 deleted）；用
+  `if constexpr` 只对可拷贝类型退化以隔离验证，`FAIL: peek 一次拷贝都不做` 立刻变红。
+  空栈不返回 `nullptr` → UBSan `applying non-zero offset to null pointer`。
+- 上一轮我提的「要不要加 peek」这条**已由人拍板并销账**，`legacy.md` 第四节里原来的
+  欠账条目改成了带出处的已决记录（原文用删除线保留）。
+- **红队任务书写在 `collab/REDTEAM-BRIEF-T002.md`**：三条主攻方向按人的指示排定
+  （正则盲区 / `bad_alloc` 与移动赋值故障注入 / `peek` 接口），外加三条我自己知道
+  但没动的弱点。里面明确写了成功标准是「至少交出一条会失败的测试」，
+  以及「攻不动也算结论，但要带攻击记录」。
+
+**我对第二条主攻方向的判断**：`bad_alloc` 与移动赋值抛，是本轮最可能真出 bug 的地方。
+`std::move_if_noexcept` 看的是**移动构造**是否 noexcept，而扩容里元素是被**赋值**
+进新缓冲区的——两者不是一回事。我在上一轮 NOTES 里推理过「原栈仍完好」，
+但那条推理至今没有任何测试守住。**这是我自己最不放心的一处，不是客套。**
+
 ## 2026-08-12（第二轮）· D-001 公约落地，样板单元由 C++20 重做为 C++17
 
 人已拍板 T-006，全文在 `collab/DECISION_LOG.md` D-001。样板单元整个重做了一遍：

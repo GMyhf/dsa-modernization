@@ -185,6 +185,9 @@ Debug 档 UBSan 立刻报 `reference binding to null pointer`，Release 档直�
 真正的容器做法是申请未初始化存储 + placement new，只在槽位真正被使用时构造对象。
 这条记在 `collab/PLAN.md` 的 **T-004**，不在本单元里悄悄带过。
 
-另一条小欠账：按 D-001 第 3 条，`top()` 返回 `std::optional<T>`，也就是**返回副本**。
-对 `std::unique_ptr` 这类 move-only 元素，`top()` 不可用（`pop()` 可以）。
-这是公约选定的接口形状，代价记在这里。
+~~另一条小欠账：`top()` 返回副本，对 move-only 元素不可用。~~
+**2026-08-12 已销账**：人拍板补充 D-001 第 3b 条，新增
+`const T* peek() const noexcept`——零拷贝、空栈返回 `nullptr`、move-only 元素可用，
+代价是返回的指针在下一次 `push`/`pop`/`clear` 之后失效。两个接口各司其职，
+两种代价都写在了接口注释与书稿正文里。守门用例见 `test.cpp::test_peek_does_not_copy`
+（`Counted` 计拷贝次数：peek 必须为 0、top 必须 ≥ 1）。
