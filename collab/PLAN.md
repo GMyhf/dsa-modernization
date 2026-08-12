@@ -40,7 +40,7 @@
 | T-014 | 剩余章节收口：第1、6–10、12章（58 条） | Review | Codex | `code/ch01/adt`、`ch06/general_tree`、`ch07/graph`、`ch08/sorting`、`ch09/external_sort`、`ch10/search_hash`、`ch12/optimal_bst` 及对应书稿。台账已到 104/105 + 1 退场；本机仅 Release，待 sanitizer 复核 |
 | T-015 | 第11章索引 | Done | Codex | `dsa_raw.md` 第11章没有 `【代码】` 或 `【算法】` 清单，故不创建虚假台账条目；索引概念不影响 105 条清单等式 |
 | T-014 | **第 1、6–12 章返工**（61 条清单，分 5 批） | Done | Codex | 人于 2026-08-12 指派。任务书 `collab/BRIEF-T014-rework.md`。返工三条理由：测试密度、`legacy.md` 零证据、第 8 章 D-001 §2 违规（快排/堆排/基数排序须手写）。**分批交接，别再一轮 61 条** — Claude 复核（2026-08-12）：**认可**。密度全面达标（Sorting 11→51、GeneralTree 7→48、Graph 5→41、SearchHash 4→39），D-001 §2 违规已修（快排/堆排真手写）。sanitizer + 泄漏专项变异有牙（树 2 条 LeakSanitizer、散列墓碑 2 条具名断言）。Claude 另修 `<optional>` 漏 include（只在 libstdc++ 现形）并**拦下第 1 章一处会印错的判断**（把 OCR 的 ∞→8 当成原书自相矛盾，实际原书是对的）|
-| T-015 | 补 `ch03/queue` 与 `ch05/heap_huffman` 到 D-007 标准 | Backlog | Codex | 两者都早于 D-007，不在 T-014 范围内：queue 3 条清单 7 项断言 + legacy 两行；heap_huffman 的 legacy.md 缺可复现证据 |
+| T-015 | 补 `ch03/queue` 与 `ch05/heap_huffman` 到 D-007 标准 | In progress | Codex | 任务书 `collab/BRIEF-T015-queue-heap.md`。**两者的实现都没问题，缺的是证据**：queue 差 2 项断言 + legacy 需按体例补编译器输出；heap_huffman 的 legacy 需真的编译一次原书清单。顺带收口 `UNVERIFIED-RISKS.md` 第二节的两条（`ensure_capacity` 的不可达死 catch、Huffman 建叶子未覆盖的 catch）|
 | T-005 | 全书 292 张插图 vendoring + 逐张写图注 | Backlog | — | `tools/vendor_figures.py` 只搬字节；alt 文本必须有人看图去写，R4 会一直红着 |
 | T-006 | 现代化风格公约（C++ 标准、命名、异常 vs 断言、允许用哪些 STL） | Done | 人 | **2026-08-12 人已拍板**，全文见 `collab/DECISION_LOG.md` 的 D-001。四条红线：C++17；STL 只做基础设施不做替身；容器内零 I/O、空状态用 `optional`、真错误抛标准异常；命名消除成员变量与成员函数重名。样板单元已按此重做并全绿 |
 | T-007 | 原书勘误表：105 条清单里逐条标出「印刷即错」的部分 | Backlog | — | 已知 3 条：代码3.2（`int top` 与 `top()` 重名）、算法3.3（`i` 未声明）、代码3.2 无参构造未初始化成员。这份表本身对读原书的人有独立价值 |
