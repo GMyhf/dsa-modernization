@@ -313,6 +313,156 @@ void push(T&& item) {
 顶层 `const` 对调用方没有意义，却强制了一次拷贝，而且 `std::unique_ptr`
 这类只能移动的类型根本传不进去。
 
+## 3.1.5 栈与递归
+
+> **本节开篇先摆一组实测数字。** 原书正文说递归「需要在内存中开辟一个称为
+> 运行栈(runtime stack)的**足够大**的动态区」。多大算足够大？这是可以量的，
+> 而量出来的结果里有一条相当反直觉。
+
+### 运行栈有多大：三个档位，三种结果
+
+同一份递归源码（每层做一次加法后返回），在一台 Linux 机器上
+（gcc 13.3，`ulimit -s` 为默认的 8 MB）逐档加深度：
+
+| 构建档 | 20 万层 | 50 万层 | 100 万层 |
+| --- | --- | --- | --- |
+| `-O0`（不优化） | 通过 | **段错误** | 段错误 |
+| `-O1` + ASan/UBSan | 通过 | **stack-overflow** | stack-overflow |
+| `-O2` | 通过 | 通过 | **通过** |
+
+把同样的计算改成显式栈（数据压进本章的 `ArrayStack`，也就是放到堆上）：
+三个档位在 **1000 万层**都通过。
+
+### 反直觉的那一条：`-O2` 为什么不崩
+
+不是因为它栈更大，而是因为**编译器把递归消掉了**。查汇编可以确认：
+
+```text
+-O0: recursive_sum 函数体内调用自己的次数 = 2
+-O2: recursive_sum 函数体内调用自己的次数 = 0
+```
+
+`-O2` 下这个函数根本没有自调用——它被转成了循环。所以：
+
+> **「这段递归会不会爆栈」不是源码单独决定的，
+> 是源码 × 编译器 × 优化档共同决定的。**
+
+这件事对学习者的实际含义是：在 `-O2` 下跑通的递归程序，
+换成 `-O0` 调试、或者换个编译器、或者递归形状稍微复杂到无法被转换，
+就可能在同样的输入上崩掉。而崩掉时你看到什么，也取决于构建方式——
+开了 sanitizer 的构建会明确告诉你 `stack-overflow` 并给出递归回溯，
+`-O0` 的构建只有一个段错误，**一行解释都没有**。
+
+### 递归吃运行栈，显式栈吃堆
+
+这正是本节的正题。原书用阶乘作例子，给了三个版本：
+
+**【算法3.6】递归**——每一层的返回地址与局部变量都压在运行栈上，深度由进程栈上限决定：
+
+```cpp file=code/ch03/recursion_and_stack/modern.hpp#factorial-recursive
+/// 【算法3.6】递归实现。保留原书的递归形状——那正是本节要教的东西。
+///
+/// 加了原书没有的两道检查：负数是定义域错误，溢出是真错误（D-001 §3）。
+/// 原书 `if (n <= 0) return 1;` 把负数静默当成 0 处理，返回 1。
+[[nodiscard]] inline factorial_type factorial_recursive(long long n) {
+    if (n < 0) {
+        throw std::invalid_argument("factorial: 负数没有阶乘");
+    }
+    if (static_cast<factorial_type>(n) > kMaxFactorialInput) {
+        throw std::overflow_error("factorial: 结果超出 64 位无符号范围（20! 是上限）");
+    }
+    if (n <= 1) {
+        return 1;  // 递归出口
+    }
+    return static_cast<factorial_type>(n) * factorial_recursive(n - 1);
+}
+```
+
+**【算法3.8】迭代**——不用栈，也不占深度：
+
+```cpp file=code/ch03/recursion_and_stack/modern.hpp#factorial-iterative
+/// 【算法3.8】迭代实现。不用栈，也不占运行栈深度。
+[[nodiscard]] inline factorial_type factorial_iterative(long long n) {
+    if (n < 0) {
+        throw std::invalid_argument("factorial: 负数没有阶乘");
+    }
+    if (static_cast<factorial_type>(n) > kMaxFactorialInput) {
+        throw std::overflow_error("factorial: 结果超出 64 位无符号范围（20! 是上限）");
+    }
+    factorial_type m = 1;
+    for (long long i = 2; i <= n; ++i) {
+        m *= static_cast<factorial_type>(i);
+    }
+    return m;
+}
+```
+
+**【算法3.9】显式栈**——把待处理的数据压进一个自己管理的栈，
+用原书的话说是「模拟编译系统处理递归的机制，使用栈等数据结构保存回溯点」：
+
+```cpp file=code/ch03/recursion_and_stack/modern.hpp#factorial-explicit-stack
+/// 【算法3.9】用显式栈模拟递归。
+///
+/// 这一版存在的意义不是"更快"——它比迭代版慢——而是**演示编译系统处理递归的机制**：
+/// 遇到递归规则就压栈，遇到递归出口就出栈返回。原书的话是
+/// 「模拟编译系统处理递归的机制，使用栈等数据结构保存回溯点」。
+///
+/// 关键差别在**数据放在哪**：递归版把每层的返回地址与局部变量放在**运行栈**上，
+/// 大小由进程栈上限决定；这一版把待处理的数据压进 ArrayStack，**在堆上**，
+/// 只受内存限制。实测数字见书稿 3.1.5 节。
+///
+/// 原书写的是 `while (s.pop(&tmp))`——传的是**指针**，而同书代码3.1 的栈 ADT
+/// 声明的是 `bool pop(T& item)`（引用）。两处对不上（legacy.md 缺陷 3）。
+[[nodiscard]] inline factorial_type factorial_with_explicit_stack(long long n) {
+    if (n < 0) {
+        throw std::invalid_argument("factorial: 负数没有阶乘");
+    }
+    if (static_cast<factorial_type>(n) > kMaxFactorialInput) {
+        throw std::overflow_error("factorial: 结果超出 64 位无符号范围（20! 是上限）");
+    }
+    ArrayStack<factorial_type> pending;
+    for (long long i = n; i > 1; --i) {  // 按递归规则压栈
+        pending.push(static_cast<factorial_type>(i));
+    }
+    factorial_type m = 1;  // 递归出口的返回值
+    while (auto top = pending.pop()) {   // 出栈即"递归返回"
+        m *= *top;
+    }
+    return m;
+}
+```
+
+三者的差别不在快慢（显式栈版最慢），而在**数据放在哪**：
+前者在运行栈上，受进程栈上限约束；后者在堆上，只受内存约束。
+上面那张表量的就是这个差别。
+
+### 原书这三个版本共同的问题：不查溢出
+
+三个版本都是 `long factorial(long n)`，既不检查负数也不检查溢出。
+64 位 `long` 装得下的最大阶乘是 20!，从 21 开始：
+
+```text
+factorial(20) = 2432902008176640000
+factorial(21) = -4249290049419214848      ← 负数
+factorial(66) = 0                          ← 零
+factorial(-5) = 1                          ← 负数静默当成 0 处理
+```
+
+而且这不只是"答案错"——有符号整数溢出在 C++ 里是**未定义行为**：
+
+```text
+runtime error: signed integer overflow: 21 * 2432902008176640000
+               cannot be represented in type 'long int'
+```
+
+本书改用 `std::uint64_t` 并在入口显式判界：超过 20 抛 `std::overflow_error`，
+负数抛 `std::invalid_argument`。三个版本在边界上的行为完全一致——
+测试要求它们对同一输入给出相同答案，包括同样地抛出异常。
+
+（另有一处书内不一致：算法3.9 写 `s.pop(&tmp)` 传指针，
+而同章代码3.1 的栈 ADT 声明的是 `bool pop(T& item)` 传引用，两处配不上。
+详见 `code/ch03/recursion_and_stack/legacy.md`。）
+
 ## 与原书的对照
 
 | 原书 | 现在 | 为什么 |

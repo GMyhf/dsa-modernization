@@ -1,0 +1,8 @@
+{
+  "id": "recursion_and_stack",
+  "title": "递归与栈空间（阶乘的三种实现）",
+  "listings": ["算法3.6", "算法3.7", "算法3.8", "算法3.9"],
+  "standard": "c++17",
+  "owner": "claude",
+  "notes": "原书三个版本都用 long 且不查溢出：实测 factorial(21) = -4249290049419214848、factorial(66) = 0，UBSan 判定为 signed integer overflow（未定义行为）；负数静默返回 1；算法3.9 的 s.pop(&tmp) 传指针，与同书代码3.1 的 bool pop(T&) 对不上。详见 legacy.md。"
+}
