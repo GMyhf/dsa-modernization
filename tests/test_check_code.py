@@ -33,9 +33,17 @@ def make_unit(root: Path, test_src, standard="c++20"):
     return d
 
 
-def run_gate(unit_dir: Path):
+def run_gate(unit_dir: Path, allow_degraded=None):
+    """跑闸门。sanitizer 环境不可用时自动加 --allow-degraded。
+
+    否则 check_code 会以退出码 2（环境问题）返回，那些**与 sanitizer 无关**的
+    门牙判据（断言失败要报、-Werror 要生效）就无从验证——而那正是 macOS 上
+    唯一还能验的两条。降级只丢掉 sanitizer 档，不丢掉这两条。
+    """
+    degraded = (not SANITIZER_AVAILABLE) if allow_degraded is None else allow_degraded
     proc = subprocess.run(
-        [sys.executable, str(ROOT / "tools" / "check_code.py"), str(unit_dir)],
+        [sys.executable, str(ROOT / "tools" / "check_code.py"), str(unit_dir)]
+        + (["--allow-degraded"] if degraded else []),
         capture_output=True,
         text=True,
         timeout=180,
@@ -44,8 +52,14 @@ def run_gate(unit_dir: Path):
 
 
 @unittest.skipIf(check_code.compiler() is None, "机器上没有 C++ 编译器")
-@unittest.skipUnless(SANITIZER_AVAILABLE, "sanitizer 环境不可用；由 TestSanitizerPreflight 覆盖环境诊断")
 class TestGateHasTeeth(unittest.TestCase):
+    """注意 skip 的粒度：只有真正依赖 sanitizer 的那几条才 skip。
+
+    前两条（会挂的断言要被报出来、-Werror 要真的生效）与 sanitizer 无关，
+    在任何机器上都必须跑——把整个类一起 skip 掉，等于在没有 sanitizer 的机器上
+    对「闸门有没有牙」变成零覆盖。
+    """
+
     def test_failing_assertion_is_reported(self):
         with tempfile.TemporaryDirectory() as tmp:
             unit = make_unit(Path(tmp), 'int main() { return 1; }  // 测试失败\n')
@@ -62,6 +76,7 @@ class TestGateHasTeeth(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("编译失败", out)
 
+    @unittest.skipUnless(SANITIZER_AVAILABLE, "本条依赖 sanitizer；环境诊断由 TestSanitizerPreflight 覆盖")
     def test_sanitizer_catches_heap_overflow(self):
         """越界必须被拦住——而且要注意：release-O2 那档它是静默通过的。
 
@@ -79,6 +94,7 @@ class TestGateHasTeeth(unittest.TestCase):
         )
         self.assertIn("✅ [release-O2]", out, "这正是只跑 -O2 会漏掉 UB 的证据")
 
+    @unittest.skipUnless(SANITIZER_AVAILABLE, "本条依赖 sanitizer；环境诊断由 TestSanitizerPreflight 覆盖")
     def test_asan_catches_use_after_free(self):
         """这条 UBSan 管不着，只有 ASan 能抓——用来证明 ASan 确实挂上了。"""
         src = "int main() { int* p = new int[3]; delete[] p; return p[0]; }\n"
@@ -88,6 +104,7 @@ class TestGateHasTeeth(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("AddressSanitizer", out)
 
+    @unittest.skipUnless(SANITIZER_AVAILABLE, "本条依赖 sanitizer；环境诊断由 TestSanitizerPreflight 覆盖")
     def test_clean_unit_passes_both_profiles(self):
         with tempfile.TemporaryDirectory() as tmp:
             unit = make_unit(Path(tmp), "int main() { return 0; }\n")

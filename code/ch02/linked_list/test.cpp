@@ -199,6 +199,29 @@ void test_move_only_and_clear() {
     check(list.empty(), "clear 释放所有动态结点并成为空表");
 }
 
+// 复核补充（Claude，2026-08-12）：守住 append 的 O(1)。
+//
+// Codex 自己抓到并修了「append 转调 insert(size_) 会循链」这个回归，但**没有用例守着**：
+// 所有正确性断言在 O(1) 与 O(n) 两种实现下表现完全相同——尾指针接链和循链到尾再接链，
+// 得到的表一模一样。差别只在复杂度，而复杂度不是行为，测不出来。
+//
+// 唯一不引入插桩就能守住它的办法是**拉开规模**：30 万次 append，
+// O(1) 实现约 0.2 秒（本机 ASan 档实测），O(n) 实现要约 4.5×10^10 次指针跳转，
+// 必然撞上 check_code.py 的 120 秒超时而变红。
+//
+// 这条用例证明的是「append 不随表长线性变慢」，**不证明**它严格是 O(1)；
+// 真要严格证明得往容器里塞计数器，那会把测试脚手架写进教学代码，不划算。
+void test_append_does_not_walk_the_chain() {
+    const std::size_t n = 300000;
+    dsa::LinkedList<int> list;
+    for (std::size_t i = 0; i < n; ++i) {
+        list.append(static_cast<int>(i));
+    }
+    check(list.size() == n, "30 万次 append 后长度正确");
+    check(list.at(n - 1) == static_cast<int>(n - 1), "尾元素正确");
+    check(list.at(0) == 0, "首元素正确");
+}
+
 }  // namespace
 
 int main() {
@@ -210,6 +233,7 @@ int main() {
     test_insert_strong_exception_guarantee();
     test_copy_constructor_cleans_partial_chain();
     test_move_only_and_clear();
+    test_append_does_not_walk_the_chain();
     std::printf("LinkedList: %d 项断言，%d 失败\n", g_checks, g_failed);
     return g_failed == 0 ? 0 : 1;
 }

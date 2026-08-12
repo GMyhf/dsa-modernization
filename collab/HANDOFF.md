@@ -1,5 +1,42 @@
 # HANDOFF · 交接日志
 
+### 2026-08-12 · Claude → Codex · T-003b 复核：ASan 双构建通过；补 O(1) 守门 + 返工 skip 粒度
+
+- **你交给我的那件事已完成**：三单元双构建全绿，LinkedList 在 Debug+ASan/UBSan 档
+  33 项断言通过。你的 macOS 环境诊断成立，实现本身没有内存问题。
+
+- **链表专属的变异自检 5/5 全抓**（这组只有 sanitizer 能证，是本轮我能做而你做不了的）：
+  析构不清链 / `remove` 不 delete / `clear` 只断链 / 拷贝构造失败不回收半截链
+  → 四条全部 **LeakSanitizer**；`swap` 不回填哨兵尾指针 → **UBSan 空指针成员访问**。
+  `fix_sentinel_tail` 与 `take_from` 的求值顺序我逐例推演 + 变异验证，都对。
+
+- **补一处：`append` 的 O(1) 没有守门用例。** 你自己抓到并修了「`append` 转调
+  `insert(size_)` 会循链」，但现有 31 条断言在 O(1) 与 O(n) 两种实现下表现完全相同——
+  差别只在复杂度。补 `test_append_does_not_walk_the_chain`（30 万次 append，
+  O(1) 档 0.208 秒）。反向验证：改回循链版本，闸门报 **`❌ 超过 120s 未结束`**。
+  用例注释里写明了局限：它证明「不随表长线性变慢」，不证明严格 O(1)。
+
+- **返工一处：闸门自测的 skip 粒度过宽。** `@unittest.skipUnless(SANITIZER_AVAILABLE)`
+  加在整个 `TestGateHasTeeth` 类上，而其中两条（断言失败要被报出、`-Werror` 要生效）
+  与 sanitizer 无关——整类 skip 使你在 macOS 上对「闸门有没有牙」变成**零覆盖**。
+  改为 skip 下沉到依赖 sanitizer 的三条，`run_gate()` 环境不可用时自动带
+  `--allow-degraded`。打桩模拟验证：3 skip、2 通过。
+
+- **闸门结果**（退出码 0）：
+
+  ```
+  $ python3 -m unittest discover -s tests      Ran 61 tests in 19.524s  OK
+  $ python3 tools/ledger.py --check            ✅ 台账一致：15/105 已现代化，0 退场，90 待办
+  $ python3 tools/check_doc.py                 ✅ 书稿体检通过：2 个文件，7 条规则
+  $ python3 tools/check_code.py                ✅ 3/3 个单元通过（debug+asan+ubsan, release-O2）
+                                     ArrayList 47 / ArrayStack 58 / LinkedList 33 项断言，0 失败
+  ```
+
+- **需要人拍板的一条**：`remove()` 返回 `T`（越界抛）与 `pop()` 返回 `optional`
+  是两种形状，三个容器都按「栈的空是常态、表的越界是错误」这条隐含口径实现，
+  两个 agent 各自独立选到了同一处——但 D-001 里没写。建议补进公约，
+  免得第 5 章树一开工又各选各的。
+
 ### 2026-08-12 · Codex → Claude · T-003b 链表（代码2.6–代码2.12）交复核
 
 - **逐条核对**：七条清单原文范围 `dsa_raw.md:1450-1660`。`legacy.md` 逐条区分 OCR

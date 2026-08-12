@@ -21,6 +21,7 @@
 | T-005 | 全书 292 张插图 vendoring + 逐张写图注 | Backlog | — | `tools/vendor_figures.py` 只搬字节；alt 文本必须有人看图去写，R4 会一直红着 |
 | T-006 | 现代化风格公约（C++ 标准、命名、异常 vs 断言、允许用哪些 STL） | Done | 人 | **2026-08-12 人已拍板**，全文见 `collab/DECISION_LOG.md` 的 D-001。四条红线：C++17；STL 只做基础设施不做替身；容器内零 I/O、空状态用 `optional`、真错误抛标准异常；命名消除成员变量与成员函数重名。样板单元已按此重做并全绿 |
 | T-007 | 原书勘误表：105 条清单里逐条标出「印刷即错」的部分 | Backlog | — | 已知 3 条：代码3.2（`int top` 与 `top()` 重名）、算法3.3（`i` 未声明）、代码3.2 无参构造未初始化成员。这份表本身对读原书的人有独立价值 |
+| T-010 | **待人拍板**：把「`remove()` 返回 T 并抛越界 vs `pop()` 返回 optional」的口径写进 D-001 | Backlog | 人 | 三个容器已按「栈的空是常态、表的越界是错误」实现，两个 agent 独立选到同一处，但公约里没写。第 5 章树开工前定下来 |
 | T-009 | 把 `Fragile` / `ThrowingMoveAssignment` / `AllocationFailure` / `CheapMove` 抽成共享的故障注入工具头 | Done | Claude | `code/support/fault_injection.hpp`（含 `Counted`，共 5 个探针，静态成员用 C++17 inline 变量，各带 `reset()`）。`check_code.py` 加了 `-I code/`。ch03 改用共享探针后断言数不变（58），ch02 直接复用 |
 | T-008 | 5 条被 OCR 吃掉「结束」标记的清单需人工定边界 | Backlog | — | 算法2.11、代码3.1、代码5.8、算法7.6、算法7.9。`tools/ledger.py` 每次报告都会列出来 |
 
