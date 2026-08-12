@@ -1,1 +1,1 @@
-{"id":"adt","title":"抽象数据类型","listings":["算法1.1","代码1.2"],"standard":"c++17","owner":"codex","notes":"以可测试的传言网络展示 ADT 状态与操作，不将交互 I/O 写入模型。","d001_exceptions":{"#include<string>":"人物标识。","#include<unordered_map>":"ADT 的关系状态存储。"}}
+{"id":"adt","title":"抽象数据类型","listings":["算法1.1","代码1.2"],"standard":"c++17","owner":"codex","notes":"以可测试的传言网络展示 ADT 状态与操作，不将交互 I/O 写入模型。","d001_exceptions":{"#include<vector>":"Floyd 的邻接矩阵和距离工作表是算法1.1的顺序存储，不替代本章教授的 ADT。"}}

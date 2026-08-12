@@ -1,10 +1,102 @@
 #pragma once
+
 #include <cstddef>
 #include <limits>
+#include <optional>
 #include <stdexcept>
+#include <utility>
 #include <vector>
-namespace dsa { namespace advanced {
+
+namespace dsa::advanced {
+
+// >>> reusable-node-pool
+template <typename T>
+class ReusableNodePool {
+public:
+    explicit ReusableNodePool(std::size_t capacity) : slots_(capacity) {
+        for (std::size_t index = 0; index < capacity; ++index) {
+            free_.push_back(capacity - index - 1);
+        }
+    }
+
+    [[nodiscard]] std::optional<std::size_t> acquire(const T& value) {
+        if (free_.empty()) {
+            return std::nullopt;
+        }
+        const std::size_t index = free_.back();
+        free_.pop_back();
+        slots_[index] = value;
+        return index;
+    }
+
+    bool release(std::size_t index) {
+        if (index >= slots_.size() || !slots_[index]) {
+            return false;
+        }
+        slots_[index].reset();
+        free_.push_back(index);
+        return true;
+    }
+
+    [[nodiscard]] const T* get(std::size_t index) const noexcept {
+        if (index >= slots_.size() || !slots_[index]) {
+            return nullptr;
+        }
+        return &*slots_[index];
+    }
+
+    [[nodiscard]] std::size_t available() const noexcept { return free_.size(); }
+
+private:
+    std::vector<std::optional<T>> slots_;
+    std::vector<std::size_t> free_;
+};
+// <<< reusable-node-pool
+
 // >>> optimal-bst
-struct OptimalBstResult{std::vector<std::vector<long long>>cost;std::vector<std::vector<std::size_t>>root;}; inline OptimalBstResult optimal_bst(const std::vector<int>&p,const std::vector<int>&q){if(q.size()!=p.size()+1)throw std::invalid_argument("weights");const std::size_t n=p.size();OptimalBstResult r{std::vector<std::vector<long long>>(n+1,std::vector<long long>(n+1)),std::vector<std::vector<std::size_t>>(n+1,std::vector<std::size_t>(n+1))};for(std::size_t i=0;i<=n;++i)r.cost[i][i]=q[i];for(std::size_t len=1;len<=n;++len)for(std::size_t i=0;i+len<=n;++i){auto j=i+len;long long w=0;for(std::size_t k=i;k<=j;++k){w+=q[k];if(k>i)w+=p[k-1];}r.cost[i][j]=std::numeric_limits<long long>::max()/4;for(std::size_t k=i+1;k<=j;++k)if(auto c=r.cost[i][k-1]+r.cost[k][j]+w;c<r.cost[i][j])r.cost[i][j]=c,r.root[i][j]=k;}return r;}
+struct OptimalBstResult {
+    std::vector<std::vector<long long>> cost;
+    std::vector<std::vector<std::size_t>> root;
+};
+
+inline OptimalBstResult optimal_bst(const std::vector<int>& successful,
+                                    const std::vector<int>& unsuccessful) {
+    if (unsuccessful.size() != successful.size() + 1) {
+        throw std::invalid_argument("weight count");
+    }
+    const std::size_t count = successful.size();
+    OptimalBstResult result{
+        std::vector<std::vector<long long>>(count + 1,
+                                            std::vector<long long>(count + 1, 0)),
+        std::vector<std::vector<std::size_t>>(count + 1,
+                                              std::vector<std::size_t>(count + 1, 0))};
+    std::vector<std::vector<long long>> weight(
+        count + 1, std::vector<long long>(count + 1, 0));
+
+    for (std::size_t index = 0; index <= count; ++index) {
+        // The book's c table measures internal-key comparison cost; an empty
+        // interval has zero c cost while its unsuccessful weight remains in w.
+        result.cost[index][index] = 0;
+        weight[index][index] = unsuccessful[index];
+    }
+    for (std::size_t length = 1; length <= count; ++length) {
+        for (std::size_t first = 0; first + length <= count; ++first) {
+            const std::size_t last = first + length;
+            weight[first][last] = weight[first][last - 1] + successful[last - 1] +
+                                  unsuccessful[last];
+            result.cost[first][last] = std::numeric_limits<long long>::max() / 4;
+            for (std::size_t root = first + 1; root <= last; ++root) {
+                const long long candidate = result.cost[first][root - 1] +
+                                            result.cost[root][last] + weight[first][last];
+                if (candidate < result.cost[first][last]) {
+                    result.cost[first][last] = candidate;
+                    result.root[first][last] = root;
+                }
+            }
+        }
+    }
+    return result;
+}
 // <<< optimal-bst
-}}
+
+}  // namespace dsa::advanced
