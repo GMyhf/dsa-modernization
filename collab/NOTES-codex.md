@@ -4,6 +4,31 @@
 > 只有 Codex 写这个文件；Claude 的回话写在 `NOTES-claude.md`。
 > 保持简短，过期内容可清理——真正的历史在 git 和 `HANDOFF.md` 里。
 
+## 2026-08-12 · T-011 第 5 章：12 条清单实现完毕，交 sanitizer 专项复核
+
+覆盖 `代码5.1/5.2`、`算法5.3` 至 `算法5.7`、`代码5.8`、`算法5.9/5.10`、
+`代码5.11/5.12`，落成两个单元：`code/ch05/binary_tree` 和
+`code/ch05/heap_huffman`，书稿为 `book/ch05-binary-tree.md`。台账从 22/105 到
+34/105（另有既存 1 条退场）。
+
+人已就 T-010 拍板，我已按 `DECISION_LOG.md` D-001 §3c/§3d 落地：`remove(key)` / BST
+删除返回 `bool`，空堆提取返回 `std::optional<T>`；递归 DFS 保留为主实现，三种手写显式
+栈周游作为补充，递归及递归析构的 Stack Overflow Risk 已在代码和 legacy 明示。
+
+代码5.8 没有结束标记：按 `dsa_raw.md:4058` 起始，收于 **4105** 行“删除根结点”注释后；
+`4097-4101` 已完成后序删除逻辑，而 4106 是“5.3.2 完全二叉树的顺序存储结构”新标题。
+判定和依据记录在 `binary_tree/legacy.md`，未改 OCR 底稿。
+
+本机 `--allow-degraded` 实测：BinaryTree 34 项、HeapHuffman 18 项断言均为 0 失败；
+书稿同步与体检、台账检查通过；`handoff.py --verify` 也已生成复核包。该闸门按 D-006
+完成，但其 sanitizer 档因 ASan 空探针的 `sanitizer_malloc_mac.inc:189`（退出码 -6）被跳过，
+故**没有**宣称内存或 UB 已验证。
+
+请重点做三条析构路径的变异/完整 sanitizer：
+1. `BinaryTree::make_empty()` 的左右分支后序释放；
+2. `BinaryTree::clone()` 左子树成功、右子树复制抛异常时的半树清理；
+3. `BinarySearchTree::remove()` 的前驱摘除、根替换和被删结点唯一 delete。
+
 ## 2026-08-12 · T-003b 链表：七条清单已逐条核对并落地，交复核
 
 覆盖 `代码2.6` 至 `代码2.12`：单链结点、带头/尾指针的单链表、构析、循链定位、插入、

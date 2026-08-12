@@ -1,0 +1,8 @@
+{
+  "id": "heap_huffman",
+  "title": "最小堆与 Huffman 树",
+  "listings": ["代码5.11", "代码5.12"],
+  "standard": "c++17",
+  "owner": "codex",
+  "notes": "原书代码5.11 是固定容量小根堆，代码5.12 使用其优先队列式合并；现代实现以 RAII 管理数组和 Huffman 结点。"
+}

@@ -1,5 +1,37 @@
 # HANDOFF · 交接日志
 
+### 2026-08-12 · Codex → Claude · T-011 第 5 章 12 条清单交复核
+
+- **交付**：`code/ch05/binary_tree` 覆盖代码5.1/5.2、算法5.3–5.7、代码5.8、算法5.9/5.10；
+  `code/ch05/heap_huffman` 覆盖代码5.11/5.12；书稿 `book/ch05-binary-tree.md` 已由
+  `sync_book.py --write` 灌入源码锚点。台账为 **34/105 已现代化、1 退场、70 待办**。
+- **T-010 已闭环**：D-001 §3c/§3d 写明“提取用 `optional`、按键删除用 `bool`”；BST 删不存在
+  键返回 false。递归周游保留为主教学实现，代码与 legacy 均标出 Stack Overflow Risk；显式栈
+  版只作补充。
+- **代码5.8 OCR 边界**：从 `dsa_raw.md:4058` 到 **4105** 行“删除根结点”注释；4097–4101
+  的后序删除逻辑已经闭合，4106 是下一节标题。证据在 `code/ch05/binary_tree/legacy.md`。
+- **本机验证（真实降级结果）**：
+
+  ```text
+  python3 tools/ledger.py --check
+  ✅ 台账一致：34/105 已现代化，1 退场，70 待办
+
+  python3 tools/check_code.py code/ch05/binary_tree --allow-degraded
+  ✅ [release-O2] BinaryTree: 34 项断言，0 失败
+
+  python3 tools/check_code.py code/ch05/heap_huffman --allow-degraded
+  ✅ [release-O2] HeapHuffman: 18 项断言，0 失败
+
+  python3 tools/check_doc.py book/ch05-binary-tree.md
+  ✅ 书稿体检通过：1 个文件，7 条规则
+  ```
+
+- **交接验证与未验证项**：`python3 tools/handoff.py --from codex --to claude --base main --verify`
+  已成功生成 `collab/review-input.md`。但 macOS ASan 空探针运行前即以
+  `sanitizer_malloc_mac.inc:189` / exit `-6` 失败，故 sanitizer 档被协议跳过；上述绿色不覆盖
+  泄漏或 UB。请在完整双构建下变异 `make_empty()` 的左右后序、`clone()` 的半树异常清理、BST
+  前驱替换/局部子树切除。
+
 ### 2026-08-12 · Claude → Codex · 第 5 章二叉树指派给你（T-011），任务书已备
 
 - **人于 2026-08-12 指派第 5 章由 Codex 认领。** 任务书：`collab/BRIEF-T011-ch05.md`。
