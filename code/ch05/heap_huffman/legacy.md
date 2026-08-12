@@ -31,3 +31,25 @@ python3 tools/check_code.py code/ch05/heap_huffman --allow-degraded
 
 本机的实测 Release 输出为 `HeapHuffman: 18 项断言，0 失败`。同次 ASan 空探针因
 `sanitizer_malloc_mac.inc:189` 退出码 `-6`，因此该命令明确是降级结果，尚不覆盖泄漏与 UB。
+
+## 原书编译证据与未覆盖路径
+
+代码5.11 的 OCR 将析构形式识别为 `∼MinHeap()`（而非 ASCII `~MinHeap()`），并在部分数组
+下标旁留下孤立 `1`。该字符直接进入 C++ 源会被识别为不同标识符，而不是析构函数：
+
+```text
+$ printf 'struct H { ∼H() {} };\n' | g++ -std=c++17 -x c++ -
+<stdin>:1:12: error: expected unqualified-id before '\342' token
+```
+
+代码5.12 的类声明使用 `HuffmanTree (int w [ ], int n)`，构造过程中的 `new HuffmanNode`、
+堆插入和左右子树归属均无失败路径说明；OCR 还把 `delete` 与相邻标识符粘连。现代实现显式
+处理合并半成品和总权溢出。
+
+`MinHeap::ensure_capacity` 曾有一个不可达的 `catch`：元素类型被 `static_assert` 限制为移动
+构造和移动赋值都 `noexcept`，而分配失败发生在 `try` 外，所以迁移循环不会抛。该死代码已删，
+继续维持这个受限但明确的类型契约，而不在本次扩展为 D-005 的可抛移动双判据。
+
+`HuffmanTree` 建叶后的 `catch { delete leaf; }` 只会在堆扩容分配失败时可达。现有
+`AllocationFailure` 只注入 `operator new[]`，不能覆盖单对象 `new Node`；本批不扩探针，
+故此路径仍列为未验证，交由 sanitizer/故障注入专项处理。

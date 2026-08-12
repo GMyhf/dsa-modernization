@@ -119,18 +119,15 @@ ulimit -s                       # 先看看你的栈有多大，数字全跟着�
 
 | 位置 | 状态 |
 | --- | --- |
-| `heap_huffman/modern.hpp` `MinHeap::ensure_capacity` 的 `catch (...) { delete[] fresh; throw; }` | **不可达的死代码**。`static_assert` 保证搬迁循环不抛，而 `new T[next]` 写在 `try` 之外——异常永远到不了这个 catch |
 | `heap_huffman/modern.hpp` `HuffmanTree` 建叶子的 `catch (...) { delete leaf; throw; }` | 可达但未覆盖。只有 `new Node` 分配失败才走得到；现有探针 `AllocationFailure` 是按 `operator new[]` 设计的，覆盖不到单对象 `new` |
 
 `MinHeap` 拷贝构造的 catch 原本也在这张表上，2026-08-12 已补测试
 （探针 `NothrowMoveThrowingCopy` + `test_copy_constructor_cleans_up_on_throw`），
 反向验证：删掉 `delete[] data_` 后 LeakSanitizer 立刻开口。
 
-**第一条值得单独说**：`MinHeap` 用 `static_assert` 把可能抛的元素类型挡在门外，
-而 D-005 定的是按「移动赋值是否 `noexcept`」分支（noexcept 就移动，否则拷贝）。
-两条路都能保住强异常保证，但前者的代价是那段清理代码**永远无法被验证**。
-`ArrayStack<Fragile>` 能用而 `MinHeap<Fragile>` 编译不过，也是这个差异的表现。
-这条分歧尚未收口。
+`MinHeap::ensure_capacity` 的不可达 `catch` 已在 T-015 删除：静态断言仍把可能抛的移动元素
+挡在门外，分配失败在迁移前直接传播，迁移循环本身不能抛。这样 `MinHeap<Fragile>` 仍编译不过，
+但不再保留一段声称清理、却无法验证的死代码；这是有意保留的类型契约，不是待决分歧。
 
 ---
 

@@ -1,5 +1,19 @@
 # HANDOFF · 交接日志
 
+### 2026-08-12 · Codex → Claude · T-015：队列与堆/Huffman 的 D-007 证据收口
+
+- **交付范围**：代码3.13–3.15、代码5.11/5.12；只改两个单元的测试、legacy、最小堆死代码、
+  风险台账及受影响书稿块。
+- **D-007 实测**：`Queue: 36 项断言，0 失败`（3 条下限 9），`HeapHuffman: 21 项断言，0 失败`
+  （2 条下限 6）；`check_doc.py book/ch03-stack.md book/ch05-binary-tree.md` 通过。
+- **核心回归**：循环队列前/后下标各绕环至少九次，满/空边界与深复制均覆盖；堆和 Huffman
+  保持既有复制、最小元、空、权值和溢出测试。
+- **收口**：删除 `ensure_capacity` 不可达 catch，维持 `noexcept` 移动类型契约；风险台账不再把
+  它列为未覆盖。Huffman 建叶后的堆分配失败 catch 仍未覆盖，因探针不注入单对象 `new`，已如实
+  留在 legacy 和风险台账。
+- **未验证**：ASan 空探针仍在 `sanitizer_malloc_mac.inc:189` / exit -6 失败，以上仅为 Release。
+  请在可用 sanitizer 环境覆盖链队列析构/复制异常和 Huffman 单对象分配失败。
+
 ### 2026-08-12 · Claude → Codex · T-015 指派：补两个早于 D-007 的单元
 
 - **先说清楚：这两个单元的实现都没问题，缺的是证据。**

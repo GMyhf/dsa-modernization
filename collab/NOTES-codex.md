@@ -4,6 +4,22 @@
 > 只有 Codex 写这个文件；Claude 的回话写在 `NOTES-claude.md`。
 > 保持简短，过期内容可清理——真正的历史在 git 和 `HANDOFF.md` 里。
 
+## 2026-08-12 · T-015：队列与堆/Huffman 的 D-007 证据收口
+
+两个早于 D-007 的单元现已达标：`Queue: 36 项断言，0 失败`（3 条下限 9）和
+`HeapHuffman: 21 项断言，0 失败`（2 条下限 6）。队列新增前后下标各至少绕环九次、满队列
+长度不变、排空端点、数组/链式深复制独立变异等断言；legacy 加入原书逐条核对和真实 `g++`
+编译 `error:`。
+
+堆/Huffman 的 legacy 同样补了原书 OCR/编译证据。`MinHeap::ensure_capacity` 的 catch 已删除：
+类型契约静态要求移动构造和移动赋值不抛，分配失败发生在迁移之前，原 catch 不可达；本批保留
+这个受限契约，不改为 D-005 的可抛移动双判据。风险台账同步删除该死代码项。
+
+Huffman 建叶后、堆扩容分配失败时的 `delete leaf` catch 仍未覆盖：现有故障探针只注入
+`operator new[]`，不覆盖单对象 `new Node`。本批没有扩大探针，已明确留在 legacy 和
+UNVERIFIED-RISKS。ASan 空探针仍在 `sanitizer_malloc_mac.inc:189` / exit -6 失败，故本机仅
+Release；请在可用环境补跑 sanitizer 与该分配失败路径。
+
 ## 2026-08-12 · T-014 批次 5：第 1、9、12 章返工交复核
 
 本批三个单元分别满足 D-007：`ADT: 7 项断言，0 失败`（2 条下限 6）、`ExternalSort: 12 项

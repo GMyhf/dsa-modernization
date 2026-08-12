@@ -439,8 +439,9 @@ private:
         if (size_ < capacity_) return;
         const std::size_t next = capacity_ == 0 ? 4 : capacity_ * 2;
         T* fresh = new T[next];
-        try { for (std::size_t i = 0; i < size_; ++i) fresh[i] = std::move(data_[i]); }
-        catch (...) { delete[] fresh; throw; }
+        // The class contract requires non-throwing move assignment, so the
+        // migration loop cannot fail. Allocation failure is thrown before fresh exists.
+        for (std::size_t i = 0; i < size_; ++i) fresh[i] = std::move(data_[i]);
         delete[] data_;
         data_ = fresh;
         capacity_ = next;
