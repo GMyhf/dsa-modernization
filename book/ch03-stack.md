@@ -313,6 +313,239 @@ void push(T&& item) {
 顶层 `const` 对调用方没有意义，却强制了一次拷贝，而且 `std::unique_ptr`
 这类只能移动的类型根本传不进去。
 
+## 3.1.3 链式栈
+
+采用链式存储结构的栈称为链式栈。结点分散在堆上，压栈只是接一个新结点，
+**不需要连续空间，也没有"栈满"这回事**——这正是它与顺序栈的核心差别。
+
+```cpp file=code/ch03/linked_stack/modern.hpp#class-head
+/// 链式栈：结点分散在堆上，压栈只是接一个新结点，不需要连续空间、也不需要扩容。
+///
+/// 与原书 lnkStack 的差别：`top` 这个名字只留给成员函数（原书 `Link<T>* top`
+/// 与 `bool top(T&)` 重名，导致整个类编译不过）；补齐五法则；不做任何 I/O；
+/// 出栈返回 `std::optional<T>`。
+template <typename T>
+class LinkedStack {
+    struct Node {
+        T value;
+        Node* next;
+
+        template <typename U>
+        Node(U&& item, Node* successor) : value(std::forward<U>(item)), next(successor) {}
+    };
+
+public:
+    using value_type = T;
+    using size_type = std::size_t;
+```
+
+原书【代码3.4】的 `lnkStack` 有一处与顺序栈**完全相同**的错误：
+成员 `Link<T>* top` 与成员函数 `bool top(T&)` 重名，整个类编译不过。
+同一本书在两个存储结构上犯了同一个命名错误，两处都没有被编译器验证过。
+
+另有两处值得指出：
+
+- **构造函数是 `lnkStack(int defSize)`，而那个参数从未被使用。**
+  链式栈不需要预设容量，这个参数是从 `arrStack(int size)` 照抄来的；
+  更麻烦的是它没有默认构造函数，使用者被迫为一个无意义的参数编个数出来。
+- **有 `~lnkStack(){ clear(); }` 却没有拷贝构造与拷贝赋值。**
+  这是本书第五次遇到同一个错误（顺序栈、顺序表、链表、字符串、链式栈）。
+
+```cpp file=code/ch03/linked_stack/modern.hpp#rule-of-five
+// 原书有 `~lnkStack(){ clear(); }` 却没有拷贝构造与拷贝赋值：
+// 一次 `lnkStack<int> b = a;` 之后两个栈共享同一串结点，各自析构一次 → 二次释放。
+// 与顺序栈、顺序表、链表、字符串是同一个错误，本书第五次遇到它。
+LinkedStack(const LinkedStack& other) {
+    // 先按原序收集，再逆序压回，避免递归拷贝（深链会爆栈，见 UNVERIFIED-RISKS.md）
+    Node* source = other.top_;
+    Node** tail = &top_;
+    try {
+        while (source != nullptr) {
+            *tail = new Node(source->value, nullptr);
+            tail = &(*tail)->next;
+            ++size_;
+            source = source->next;
+        }
+    } catch (...) {
+        clear();  // 半截链必须自己收拾：构造函数抛出时析构函数不会运行
+        throw;
+    }
+}
+
+LinkedStack& operator=(const LinkedStack& other) {
+    if (this != &other) {
+        LinkedStack copy(other);
+        swap(copy);
+    }
+    return *this;
+}
+
+LinkedStack(LinkedStack&& other) noexcept
+    : top_(std::exchange(other.top_, nullptr)), size_(std::exchange(other.size_, 0)) {}
+
+LinkedStack& operator=(LinkedStack&& other) noexcept {
+    if (this != &other) {
+        clear();
+        top_ = std::exchange(other.top_, nullptr);
+        size_ = std::exchange(other.size_, 0);
+    }
+    return *this;
+}
+
+~LinkedStack() { clear(); }
+```
+
+压栈与出栈：
+
+```cpp file=code/ch03/linked_stack/modern.hpp#push-pop
+/// 入栈：接一个新结点。**没有"栈满"这回事**——这正是链式栈相对顺序栈的差别，
+/// 原书顺序栈那边要判 `top == mSize - 1` 并打印"栈满溢出"。
+void push(const T& item) { top_ = new Node(item, top_); ++size_; }
+void push(T&& item) { top_ = new Node(std::move(item), top_); ++size_; }
+
+/// 出栈。空栈返回 std::nullopt（D-001 §3c：空是可预期状态，不抛异常）。
+[[nodiscard]] std::optional<T> pop() {
+    if (top_ == nullptr) {
+        return std::nullopt;
+    }
+    Node* dying = top_;
+    std::optional<T> result(std::move(dying->value));
+    top_ = dying->next;
+    delete dying;
+    --size_;
+    return result;
+}
+
+/// 取栈顶副本；零拷贝的观望用 peek()（D-001 §3b）。
+[[nodiscard]] std::optional<T> top() const {
+    return top_ == nullptr ? std::nullopt : std::optional<T>(top_->value);
+}
+
+[[nodiscard]] const T* peek() const noexcept {
+    return top_ == nullptr ? nullptr : &top_->value;
+}
+```
+
+**一处实现上的取舍**：`clear()` 与析构都写成**迭代**而非递归。
+链式结构最自然的写法是递归释放，但深链会耗尽调用栈——第 5 章有实测数字。
+本书的测试用 20 万个结点压栈再全部弹出，正是为这条兜底。
+
+## 3.1.4 表达式求值
+
+后缀（逆波兰）表达式不需要括号，也不需要优先级规则：求值时**遇操作数压栈，
+遇操作符弹出两个算完再压回**，读到末尾时栈里剩下的唯一元素就是结果。
+这条主线本书一字未改，用的还是本章自己的 `ArrayStack<double>`。
+
+```cpp file=code/ch03/expression_eval/modern.hpp#evaluate
+/// 对后缀（逆波兰）表达式求值。记号之间用空白分隔，例如 "3 4 + 2 *" → 14。
+///
+/// 与原书 `class Calculator` 的差别，逐条对应它的三个问题：
+///
+/// 1. **原书 `Run()` 直接从 `cin` 读、往 `cout` 写**，算法与终端焊死：没法写测试、
+///    没法在库里复用、没法处理来自别处的表达式。这里接受一个 `string_view`、返回结果。
+/// 2. **原书 `GetTwoOperands` 在第二个操作数缺失时已经把第一个弹掉了**，
+///    返回 false 时栈已被破坏（legacy.md 缺陷 1）。
+///    但要说准确：真正让这个 bug 无害的，**不是**下面那句"先查够不够"，
+///    而是**出错即抛出、整次求值随即作废**——栈根本没有机会被下一步用到。
+///    预检查只是让错误信息更早、更准，属于锦上添花。
+///    原书的 bug 之所以要命，是因为它 `cerr` 一行之后**继续跑**。
+/// 3. **原书出错时 `cerr` 打一行然后 `s.clear()` 继续跑**，调用方拿不到任何信号。
+///    这里抛 `std::invalid_argument`（表达式不合法）或 `std::domain_error`（除零）。
+[[nodiscard]] inline double evaluate_postfix(std::string_view expression) {
+    ArrayStack<double> operands;
+    std::size_t i = 0;
+
+    const auto pop_two = [&operands](double& left, double& right) {
+        // 先确认有两个再弹。注意这不是"修复"原书 bug 的关键（见函数注释第 2 条），
+        // 而是让报错更早、更准。
+        if (operands.size() < 2) {
+            throw std::invalid_argument("后缀表达式：操作数不足");
+        }
+        right = *operands.pop();  // 先弹出的是右操作数
+        left = *operands.pop();
+    };
+
+    while (i < expression.size()) {
+        const char c = expression[i];
+        if (c == ' ' || c == '\t' || c == '\n') {
+            ++i;
+            continue;
+        }
+
+        // 操作符：+ - * / 各弹两个。注意 '-' 也可能是负号，靠后面是不是数字来区分。
+        const bool is_sign = (c == '-' || c == '+') && i + 1 < expression.size()
+                             && (std::isdigit(static_cast<unsigned char>(expression[i + 1]))
+                                 || expression[i + 1] == '.');
+        if (!is_sign && (c == '+' || c == '-' || c == '*' || c == '/')) {
+            double left = 0.0;
+            double right = 0.0;
+            pop_two(left, right);
+            switch (c) {
+                case '+': operands.push(left + right); break;
+                case '-': operands.push(left - right); break;
+                case '*': operands.push(left * right); break;
+                default:
+                    // 原书写 `if (operand1 == 0.0)`，正文又说这样比较浮点数不对、
+                    // 该用阈值。两者都值得推敲：除以 1e-300 是**合法**的，
+                    // 结果是个很大的数或 inf，用阈值把它当成错误是另一个决定。
+                    // 这里只拦精确的 0.0（含 -0.0），并把这个取舍写在明面上。
+                    if (right == 0.0) {
+                        throw std::domain_error("后缀表达式：除数为零");
+                    }
+                    operands.push(left / right);
+                    break;
+            }
+            ++i;
+            continue;
+        }
+
+        // 操作数：交给标准库解析，顺便拿到它吃掉了多少字符
+        std::size_t consumed = 0;
+        double value = 0.0;
+        try {
+            value = std::stod(std::string(expression.substr(i)), &consumed);
+        } catch (const std::exception&) {
+            throw std::invalid_argument(std::string("后缀表达式：无法识别的记号 '") + c + "'");
+        }
+        operands.push(value);
+        i += consumed;
+    }
+
+    if (operands.size() != 1) {
+        // 空表达式、操作数多余、操作符不足，都落在这里
+        throw std::invalid_argument("后缀表达式：不是一个完整的表达式");
+    }
+    return *operands.pop();
+}
+```
+
+原书【算法3.5】把它写成一个 `class Calculator`，有三处今天必须改。
+
+**一、算法与终端焊死。** `Run()` 直接 `cin >> c` 读、`cout << res` 写，
+出错时 `cerr` 打一行。后果是这个算法没法写测试、没法在库里复用、
+也没法处理来自别处的表达式。本书改为接受一个字符串、返回结果、出错抛异常。
+
+**二、`GetTwoOperands` 在第二个操作数缺失时，第一个已经被弹掉了。**
+栈就此少一个元素。但要说准确——**真正让这件事变成 bug 的是调用方继续跑**：
+`Compute` 拿到 `false` 之后清空栈然后接着读下一个记号，`Run()` 的循环照转不误。
+
+这一点改变了"怎样才算修好"：本书的实现**出错即抛出、整次求值作废**，
+栈根本没有机会被下一步用到。（写这一节时验证过：把实现改回"先弹一个再查"，
+全部断言依然通过——因为在抛异常即作废的设计里，栈被破坏与否观测不到。
+于是补了一条测试，钉住"上一次失败不给下一次留残留"这条真正可测的性质。）
+
+**三、除零判断。** 原书正文自己写道：
+
+> 在实际编写程序时，浮点数是否为0不能直接与0进行相等比较，
+> 而是要通过某个很小的阈值来判断，例如采用 `if(abs(operand1) < 1E-7)`
+
+**但印出来的代码仍然是 `if (operand1 == 0.0)`。** 书知道更好的写法，却没有印它。
+
+不过原书这条建议本身也值得推敲：**除以 1e-300 是合法的**，
+结果是一个极大的有限值或无穷，把它当作错误是另一个决定，不是"更正确"。
+本书只拦精确的零，并把这个取舍写在代码注释里；测试中有一条断言专门钉住
+"除以 1e-300 得到极大值而非报错"。
+
 ## 3.1.5 栈与递归
 
 > **本节开篇先摆一组实测数字。** 原书正文说递归「需要在内存中开辟一个称为
