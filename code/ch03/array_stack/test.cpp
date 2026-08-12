@@ -11,6 +11,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <utility>
 
 namespace {
@@ -323,6 +324,50 @@ void test_throwing_move_assignment_preserves_stack() {
     check(intact, "移动赋值可抛时扩容后旧元素仍完整");
 }
 
+// 红队 T-002 复核补充：修好强异常保证之后，**不能顺手把移动快路径也弄丢**。
+// 判据必须落在「移动赋值抛不抛」上，而不是「可不可复制」——否则 std::string 这类
+// 移动赋值本就 noexcept 的元素，每次扩容都变成深拷贝，摊还 O(1) 的教学点就打了折扣。
+struct CheapMove {
+    int v{0};
+    static int copies;
+    static int moves;
+
+    CheapMove() = default;
+    explicit CheapMove(int x) : v(x) {}
+    CheapMove(const CheapMove&) = default;
+    CheapMove(CheapMove&&) noexcept = default;
+    CheapMove& operator=(const CheapMove& other) {
+        v = other.v;
+        ++copies;
+        return *this;
+    }
+    CheapMove& operator=(CheapMove&& other) noexcept {
+        v = other.v;
+        ++moves;
+        return *this;
+    }
+};
+int CheapMove::copies = 0;
+int CheapMove::moves = 0;
+
+void test_growth_moves_when_move_assignment_is_noexcept() {
+    static_assert(std::is_nothrow_move_assignable<std::string>::value,
+                  "std::string 的移动赋值本就是 noexcept——这正是不该退化成深拷贝的理由");
+    dsa::ArrayStack<CheapMove> s(1);
+    CheapMove::copies = 0;
+    CheapMove::moves = 0;
+    for (int i = 0; i < 64; ++i) {
+        s.push(CheapMove(i));  // 每次 push 一次移动赋值，扩容再搬 63 次
+    }
+    check(CheapMove::copies == 0, "移动赋值 noexcept 的元素，扩容时一次都不该拷贝");
+    check(CheapMove::moves > 64, "扩容搬迁确实走了移动");
+    bool intact = true;
+    for (std::size_t i = 0; i < s.size(); ++i) {
+        intact = intact && s.at(i).v == static_cast<int>(i);
+    }
+    check(intact, "走移动快路径后元素依然正确");
+}
+
 // 缺陷 7：容器不该做 I/O。原书 push/pop 失败时直接 cout 打中文提示。
 void test_no_console_output() {
     std::ostringstream captured;
@@ -381,6 +426,7 @@ int main() {
     test_strong_exception_guarantee_on_growth();
     test_bad_alloc_preserves_stack();
     test_throwing_move_assignment_preserves_stack();
+    test_growth_moves_when_move_assignment_is_noexcept();
     test_no_console_output();
     test_at_throws_out_of_range();
     test_clear_keeps_capacity();

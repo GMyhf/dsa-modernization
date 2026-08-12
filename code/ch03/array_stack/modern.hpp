@@ -173,13 +173,18 @@ private:
         T* fresh = new T[next];
         try {
             for (size_type i = 0; i < top_index_; ++i) {
-                // 这里是赋值而不是构造，不能用 move_if_noexcept：它检查的是
-                // 移动构造是否 noexcept，移动赋值仍可能在搬迁中途抛并污染原栈。
-                // 可复制元素一律复制；不可复制元素由上面的 static_assert 保证移动赋值不抛。
-                if constexpr (std::is_copy_assignable<T>::value) {
-                    fresh[i] = data_[i];
-                } else {
+                // 这里是**赋值**而不是构造，所以不能用 std::move_if_noexcept：
+                // 它检查的是移动**构造**是否 noexcept，而可抛的移动赋值会在搬迁
+                // 中途把原栈的元素掏空——红队 T-002 实测复现过（见 legacy.md 缺陷 11）。
+                //
+                // 判据必须落在「移动赋值抛不抛」这一个维度上：
+                //   移动赋值 noexcept → 移动。不可能抛，强异常保证不受影响，也不白白深拷贝。
+                //   否则             → 复制。拷贝赋值取 const&，抛了也动不了原栈；
+                //                      上面的 static_assert 保证走到这里的 T 一定可复制赋值。
+                if constexpr (std::is_nothrow_move_assignable<T>::value) {
                     fresh[i] = std::move(data_[i]);
+                } else {
+                    fresh[i] = data_[i];
                 }
             }
         } catch (...) {

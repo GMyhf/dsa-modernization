@@ -139,6 +139,43 @@ def check_d001(unit_dir: Path, meta):
     return problems
 
 
+SANITIZER_PROFILE = "debug+asan+ubsan"
+
+
+def sanitizer_preflight(std="c++17", flags=None, workdir=None):
+    """先拿一个空程序试 sanitizer 能不能用。返回 (ok, 诊断输出)。
+
+    存在的理由：红队那一轮在 macOS 上撞到 `sanitizer_malloc_mac.inc:189
+    (!asan_init_is_running)`——**连空探针都挂**。那种情况下闸门会把每个单元
+    都判红，读日志的人只会以为是自己的代码坏了。工具应当自己说清楚
+    「是环境不可用」，而不是让人一个个单元去排除。
+    """
+    flags = flags or dict(PROFILES)[SANITIZER_PROFILE]
+    tmp = workdir or tempfile.mkdtemp(prefix="dsa-preflight-")
+    Path(tmp).mkdir(parents=True, exist_ok=True)
+    src, binary = Path(tmp) / "preflight.cpp", Path(tmp) / "preflight"
+    src.write_text("int main() { return 0; }\n", encoding="utf-8")
+    try:
+        build = subprocess.run(
+            [compiler(), f"-std={std}", *flags, str(src), "-o", str(binary)],
+            capture_output=True, text=True, timeout=TIMEOUT_SEC,
+        )
+        if build.returncode != 0:
+            return False, "编译空探针即失败：\n" + (build.stdout + build.stderr).strip()
+        run = subprocess.run([str(binary)], capture_output=True, text=True, timeout=TIMEOUT_SEC)
+        if run.returncode != 0:
+            return False, (
+                f"空探针运行失败（退出码 {run.returncode}）：\n"
+                + (run.stdout + run.stderr).strip()
+            )
+        return True, "ok"
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        return False, f"空探针未能完成：{exc}"
+    finally:
+        if workdir is None:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+
 def discover(paths):
     if paths:
         dirs = []
@@ -152,7 +189,7 @@ def discover(paths):
     return sorted(p.parent for p in CODE.rglob("unit.json")) if CODE.is_dir() else []
 
 
-def build_and_run(unit_dir: Path, workdir: Path, keep=False):
+def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None):
     """返回 (ok, 输出片段列表)。"""
     rel = rel_label(unit_dir)
     meta = json.loads((unit_dir / "unit.json").read_text(encoding="utf-8"))
@@ -164,12 +201,13 @@ def build_and_run(unit_dir: Path, workdir: Path, keep=False):
         sources.append(str(unit_dir / "modern.cpp"))
     sources += [str(unit_dir / s) for s in meta.get("extra_sources", [])]
 
+    profiles = PROFILES if profiles is None else profiles
     logs, ok = [], True
     d001 = check_d001(unit_dir, meta)
     if d001:
         ok = False
         logs.extend(d001)
-    for name, flags in PROFILES:
+    for name, flags in profiles:
         binary = workdir / f"{unit_dir.name}-{name}"
         cmd = [
             compiler(),
@@ -220,6 +258,11 @@ def main():
     parser = argparse.ArgumentParser(description="编译并运行 code/ 下的现代化单元")
     parser.add_argument("paths", nargs="*")
     parser.add_argument("--keep", action="store_true", help="保留编译产物")
+    parser.add_argument(
+        "--allow-degraded",
+        action="store_true",
+        help="仅当 sanitizer 环境自检失败时生效：跳过该档、只跑 Release，并把降级大声记在输出里",
+    )
     opts = parser.parse_args()
 
     if not compiler():
@@ -231,12 +274,32 @@ def main():
         print("⚠️  code/ 下还没有单元，跳过（脚手架已就位，等第一个清单现代化）")
         return
 
+    # 先自检 sanitizer 环境。挂了就直说是环境挂了，别让人误以为是单元的代码坏了。
+    profiles, degraded_note = PROFILES, None
+    ok_env, env_out = sanitizer_preflight()
+    if not ok_env:
+        if not opts.allow_degraded:
+            print("❌ sanitizer 环境自检失败——这不是某个单元的问题，是这台机器上跑不起来。")
+            print(indent(env_out))
+            print(
+                "\n本档用的是：" + " ".join(dict(PROFILES)[SANITIZER_PROFILE])
+                + "\n处理办法：换一台能跑 ASan 的机器，或确认无解后用 --allow-degraded"
+                + "（只跑 Release，降级会写进输出与交接包，不会悄悄变绿）。"
+            )
+            sys.exit(2)  # 2 = 环境问题，区别于 1 = 代码问题
+        profiles = [(n, f) for n, f in PROFILES if n != SANITIZER_PROFILE]
+        degraded_note = (
+            "⚠️  降级运行：sanitizer 档已跳过（环境自检失败），本次结果**不覆盖内存与 UB 检查**。\n"
+            + indent(env_out, head=4, tail=6)
+        )
+        print(degraded_note + "\n")
+
     workdir = Path(ROOT / ".build") if opts.keep else Path(tempfile.mkdtemp(prefix="dsa-check-"))
     workdir.mkdir(parents=True, exist_ok=True)
     failed, blocks = [], []
     for unit in units:
         try:
-            ok, log = build_and_run(unit, workdir, opts.keep)
+            ok, log = build_and_run(unit, workdir, opts.keep, profiles)
         except subprocess.TimeoutExpired:
             ok, log = False, [rel_label(unit), f"  ❌ 超过 {TIMEOUT_SEC}s 未结束"]
         blocks.append("\n".join(log))
@@ -248,8 +311,11 @@ def main():
     print("\n".join(blocks))
     print(
         f"\n{'❌' if failed else '✅'} {len(units) - len(failed)}/{len(units)} 个单元通过"
-        f"（每个 {len(PROFILES)} 种构建：{', '.join(n for n, _ in PROFILES)}）"
+        f"（每个 {len(profiles)} 种构建：{', '.join(n for n, _ in profiles)}）"
     )
+    if degraded_note:
+        # 降级必须在结论旁边再喊一次：交接包里只贴尾部几行的人不能被瞒过去。
+        print("⚠️  本次为降级运行，未跑 sanitizer 档——上面的绿不代表内存与 UB 干净。")
     if failed:
         print("失败: " + ", ".join(failed))
         sys.exit(1)

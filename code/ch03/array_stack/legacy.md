@@ -169,6 +169,35 @@ move-only 类型根本传不进去。现代实现提供 `push(const T&)` 与 `pu
 每个元素逐个不变，且栈之后仍可继续使用。把「先建后换」改回「先释放旧的」，
 Debug 档 UBSan 立刻报 `reference binding to null pointer`，Release 档直接段错误。
 
+### 缺陷 11（现代化过程中自己引入的）：`move_if_noexcept` 在赋值语境下是错的
+
+这一条**不是原书的错，是我们第一版现代化实现的错**，记在这里因为它比原书的很多毛病更值得学。
+
+第一版扩容搬迁写的是 `fresh[i] = std::move_if_noexcept(data_[i])`——
+标准库容器扩容的经典写法。但 `move_if_noexcept` 的判据是 `T` 的**移动构造**
+是否 `noexcept`，而这里 `fresh` 已经由 `new T[next]` 默认构造完毕，
+执行的是**移动赋值**。两者是不同的函数，异常规格可以不同。
+
+红队（Codex，2026-08-12）构造了 `ThrowingMoveAssignment`：移动构造 `noexcept`、
+第 3 次移动赋值抛异常。原实现当场破功——扩容失败后旧栈前两个元素已被移动为 `-1`：
+
+```console
+FAIL: redteam strong guarantee after throwing move assignment
+ArrayStack: 52 项断言，1 失败
+```
+
+**第一版修复（Codex）**：可拷贝就一律拷贝，不可拷贝的由新增 `static_assert`
+要求移动赋值 `noexcept`。正确，但判据用错了维度——`std::string` 的移动赋值本就是
+`noexcept`，却也被迫走深拷贝。实测 64 次 push 触发的扩容搬迁 **63 次全是拷贝**。
+
+**第二版修复（Claude 复核）**：判据落在实际执行的那个操作上——
+移动赋值 `noexcept` 就移动，否则拷贝。同一测量降到 **0 次拷贝**，
+Codex 的两条故障注入用例照样通过。
+
+两版都能通过当时的全部断言，**差别只有一条专门数拷贝次数的用例能分辨**
+（`test_growth_moves_when_move_assignment_is_noexcept`）。这条用例是这次复核补上的：
+测试集分辨不出两种策略，等于这个决定没有被守住。
+
 ## 三、刻意保留的东西
 
 现代化**不是**把它换成 `std::stack` 的薄封装：

@@ -166,6 +166,40 @@ class TestD001StaticCheck(unittest.TestCase):
         self.assertEqual(check_code.check_d001(unit, meta), [])
 
 
+@unittest.skipIf(check_code.compiler() is None, "机器上没有 C++ 编译器")
+class TestSanitizerPreflight(unittest.TestCase):
+    """红队那轮在 macOS 上撞到「连空探针都触发 ASan 初始化错误」。
+
+    闸门必须能把「环境跑不起来」和「代码坏了」分开说——否则读日志的人
+    会一个个单元去排除一个根本不在单元里的问题。
+    """
+
+    def test_preflight_passes_on_a_working_toolchain(self):
+        ok, out = check_code.sanitizer_preflight()
+        self.assertTrue(ok, f"本机 sanitizer 环境应当可用：{out}")
+
+    def test_preflight_reports_a_broken_environment(self):
+        ok, out = check_code.sanitizer_preflight(flags=["-fsanitize=definitely-not-a-sanitizer"])
+        self.assertFalse(ok)
+        self.assertIn("空探针", out, "诊断必须点明是探针失败，不是某个单元失败")
+
+    def test_environment_failure_uses_a_distinct_exit_code(self):
+        """环境问题退出码 2，代码问题退出码 1——交接方一眼能分清。"""
+        import inspect
+
+        src = inspect.getsource(check_code.main)
+        self.assertIn("sys.exit(2)", src)
+        self.assertIn("--allow-degraded", check_code.main.__doc__ or src)
+
+    def test_degraded_mode_is_loud(self):
+        """降级不能悄悄变绿：结论旁边必须再喊一次。"""
+        import inspect
+
+        src = inspect.getsource(check_code.main)
+        self.assertIn("降级", src)
+        self.assertIn("不代表内存与 UB 干净", src)
+
+
 class TestOutputTruncation(unittest.TestCase):
     def test_keeps_head_and_tail(self):
         """噪声多的失败输出里，最后那句 FAIL 不能被顶掉。"""
