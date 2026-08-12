@@ -90,6 +90,48 @@ struct AllocationFailure {
     static void arm() { fail_next_array_allocation = true; }
 };
 
+/// 移动是 `noexcept` 的，但**拷贝**会在第 N 次抛异常。
+///
+/// 用途：验证「只在移动路径上要求 noexcept」的容器（如第 5 章 MinHeap，
+/// 其 static_assert 只约束移动）在**拷贝构造**失败时是否清理干净。
+/// `Fragile` 在这类容器上根本实例化不了——它的移动赋值不是 noexcept——
+/// 所以需要这个形状单独覆盖拷贝路径。
+struct NothrowMoveThrowingCopy {
+    int v{0};
+    inline static int copies = 0;
+    inline static int throw_at = 0;  // 0 表示不抛
+
+    NothrowMoveThrowingCopy() = default;
+    explicit NothrowMoveThrowingCopy(int x) : v(x) {}
+    NothrowMoveThrowingCopy(NothrowMoveThrowingCopy&&) noexcept = default;
+    NothrowMoveThrowingCopy& operator=(NothrowMoveThrowingCopy&&) noexcept = default;
+
+    NothrowMoveThrowingCopy(const NothrowMoveThrowingCopy& other) : v(other.v) { bump(); }
+    NothrowMoveThrowingCopy& operator=(const NothrowMoveThrowingCopy& other) {
+        bump();
+        v = other.v;
+        return *this;
+    }
+
+    static void reset(int at = 0) {
+        copies = 0;
+        throw_at = at;
+    }
+
+    /// 堆之类的容器要比较元素；比较不计拷贝、不抛异常。
+    friend bool operator<(const NothrowMoveThrowingCopy& a,
+                          const NothrowMoveThrowingCopy& b) noexcept {
+        return a.v < b.v;
+    }
+
+private:
+    static void bump() {
+        if (throw_at != 0 && ++copies == throw_at) {
+            throw std::runtime_error("NothrowMoveThrowingCopy: 注入的拷贝失败");
+        }
+    }
+};
+
 /// 数拷贝次数。用来证明「该走移动的地方没有偷偷深拷贝」。
 /// 移动赋值是 `noexcept`，形状与 `std::string`、`std::unique_ptr` 一致。
 struct CheapMove {
