@@ -22,6 +22,7 @@ private:
     Key key_;
 };
 
+// >>> sequential-binary
 // 算法10.2：无需修改输入容器的顺序检索。
 inline std::optional<std::size_t> sequential_search(const std::vector<int>& values, int key) {
     for (std::size_t index = 0; index < values.size(); ++index) {
@@ -42,6 +43,7 @@ inline std::optional<std::size_t> binary_search(const std::vector<int>& sorted_v
     }
     return std::nullopt;
 }
+// <<< sequential-binary
 
 // 代码10.4、算法10.5–10.7：不重复整数集合。
 class IntSet {
@@ -84,6 +86,7 @@ inline std::size_t elf_hash(const std::string& text) noexcept {
     return hash;
 }
 
+// >>> hash-table
 // 算法10.9–10.13：线性探测闭散列表，显式区分空、占用和墓碑。
 class HashTable {
 public:
@@ -147,6 +150,7 @@ private:
     std::vector<Slot> slots_;
     std::size_t size_{0};
 };
+// <<< hash-table
 
 // <<< search-hash
 

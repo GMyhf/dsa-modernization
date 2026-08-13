@@ -1,39 +1,74 @@
-# 第12章 高级结构
+# 第12章 高级数据结构
 
-## 本章先读什么
+本章包含两个主题。可利用空间表复用固定数量的槽位：申请取得一个空闲槽，释放把它归还。最优二叉搜索树则把访问频率写成权重，用动态规划比较每个区间可能的根，得到总查找代价最小的树。
 
-本章包含两个主题。可利用空间表复用固定数量的槽位：申请取得一个空闲槽，释放把它归还；现代
-实现用索引句柄避免劫持全局 `new/delete`。最优二叉搜索树则把访问频率写成权重，用动态规划比较
-每个区间可能的根，得到总查找代价最小的树。
+源码：[空闲槽池与最优 BST](../code/ch12/optimal_bst/modern.hpp)、
+[可运行示例](../code/ch12/optimal_bst/demo.cpp)、
+[测试](../code/ch12/optimal_bst/test.cpp)。
 
-源码入口：[空闲槽池与最优 BST](../code/ch12/optimal_bst/modern.hpp)、
-[测试](../code/ch12/optimal_bst/test.cpp)。运行：
-`python3 tools/check_code.py --allow-degraded code/ch12/optimal_bst`。
+## 12.1 先把题目说清楚
 
-### 最优 BST 在优化什么
+原书用重载 `operator new/delete` 和一条全局 `avail` 链实现结点复用。所有对象共享隐式全局状态，生命周期结束时还要 `::delete` 整条链。现代实现改成显式的索引句柄池：`acquire` 从空闲栈弹出一个下标，`release` 把它推回去；耗尽返回 `nullopt`，重复/越界归还返回 `false`。释放后的下标失效，`get` 得到空指针。
 
-普通二叉搜索树只要求中序遍历有序，树形可能很多。若键的查找频率不同，应把常查的键放得更靠近
-根。最优 BST 的输入包括成功查找权 `p[1..n]` 与失败查找权 `q[0..n]`；动态规划对每个区间
-尝试每一个键作根，选择“左子树代价 + 右子树代价 + 本区间总权”最小的方案。
+普通二叉搜索树只要求中序遍历有序，树形可能很多。若键的查找频率不同，应把常查的键放得更靠近根。最优 BST 的输入包括成功查找权 `p[1..n]` 与失败查找权 `q[0..n]`；动态规划对每个区间尝试每一个键作根，选择「左子树代价 + 右子树代价 + 本区间总权」最小的方案。
 
-结果中的 `cost[i][j]` 是区间内键构成最优树的代价，`root[i][j]` 记录取得最小值的根，因而不只
-能得到最小代价，还能按根表重建树形。它的朴素实现为 O(n³)，适合说明动态规划的填表思想。
+教材样例 `p = {1,5,4,3}`、`q = {5,4,3,2,1}` 的总成本是 57，根是第 2 个键。`cost[i][j]` 是区间代价，`root[i][j]` 记录取得最小值的根，因而还能按根表重建树形。朴素实现为 O(n³)。
 
-最佳二叉搜索树以动态规划的成本表与根表求解；权重输入长度不匹配时明确报错。
+## 12.2 如何调用
 
-```cpp file=code/ch12/optimal_bst/modern.hpp
-#pragma once
+```cpp file=code/ch12/optimal_bst/demo.cpp
+#include "modern.hpp"
 
-#include <cstddef>
-#include <limits>
-#include <optional>
-#include <stdexcept>
-#include <utility>
-#include <vector>
+#include <iostream>
 
-namespace dsa::advanced {
+int main() {
+    dsa::advanced::ReusableNodePool<int> pool(2);
+    const auto first = pool.acquire(11);
+    const auto second = pool.acquire(22);
+    std::cout << "申请到槽 " << *first << " 和 " << *second
+              << "，剩余 " << pool.available() << '\n';
+    pool.release(*first);
+    const auto reused = pool.acquire(44);
+    std::cout << "归还后再申请得到槽 " << *reused
+              << "，值为 " << *pool.get(*reused) << '\n';
 
-// >>> reusable-node-pool
+    const auto tree = dsa::advanced::optimal_bst({1, 5, 4, 3}, {5, 4, 3, 2, 1});
+    std::cout << "最优 BST 总成本 " << tree.cost[0][4]
+              << "，根为键 " << tree.root[0][4] << '\n';
+}
+```
+
+```bash
+c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch12/optimal_bst \
+    code/ch12/optimal_bst/demo.cpp -o /tmp/bst-demo
+/tmp/bst-demo
+```
+
+```console
+申请到槽 0 和 1，剩余 0
+归还后再申请得到槽 0，值为 44
+最优 BST 总成本 57，根为键 2
+```
+
+把 `optimal_bst({1,2}, {3,4})` 这种长度对不上的输入送进去，会抛 `std::invalid_argument`。空树对应 `p = {}`、`q = {某个失败权}`，代价为 0。
+
+## 12.3 再读实现
+
+池用 `vector<optional<T>>` 表示槽位占用，`vector<size_t>` 当空闲栈。构造时下标从大到小入栈，所以第一次 `acquire` 拿到 0。`release` 先确认该槽确实被占用，再 `reset` 并归还——因此重复释放返回 `false`，陈旧句柄不会指到新值。
+
+最优 BST 先校验 `q.size() == p.size() + 1`。空区间的 `cost[i][i] = 0`，`weight[i][i] = q[i]`。长度从 1 扩到 n，对每个区间 `[first, last]` 枚举根 `r`，候选代价是
+
+```text
+cost[first][r-1] + cost[r][last] + weight[first][last]
+```
+
+其中 `weight` 是该区间全部成功权与失败权之和。取最小者写入 `cost` 与 `root`。成本用 `long long`，避免大权重相加溢出。
+
+## 12.4 现代实现
+
+可利用空间表：
+
+```cpp file=code/ch12/optimal_bst/modern.hpp#reusable-node-pool
 template <typename T>
 class ReusableNodePool {
 public:
@@ -75,9 +110,11 @@ private:
     std::vector<std::optional<T>> slots_;
     std::vector<std::size_t> free_;
 };
-// <<< reusable-node-pool
+```
 
-// >>> optimal-bst
+最优二叉搜索树：
+
+```cpp file=code/ch12/optimal_bst/modern.hpp#optimal-bst
 struct OptimalBstResult {
     std::vector<std::vector<long long>> cost;
     std::vector<std::vector<std::size_t>> root;
@@ -121,7 +158,4 @@ inline OptimalBstResult optimal_bst(const std::vector<int>& successful,
     }
     return result;
 }
-// <<< optimal-bst
-
-}  // namespace dsa::advanced
 ```

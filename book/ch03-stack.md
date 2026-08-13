@@ -1,14 +1,83 @@
-# 第3章 栈与队列（现代化稿 · 3.1 栈）
+# 第3章 栈与队列
 
-## 本章先读什么
+栈是「最后放入、最先取出」，适合递归调用、括号匹配和表达式计算；队列是「先放入、先取出」，
+适合排队服务和广度优先搜索。空栈、空队列是正常状态，现代接口以 `std::optional` 返回。
 
-栈是“最后放入、最先取出”，适合递归调用、括号匹配和表达式计算；队列是“先放入、先取出”，
-适合排队服务和广度优先搜索。先用纸笔跟踪 `push/pop` 或 `enqueue/dequeue` 的状态，再阅读数组
-和链式表示的所有权代码。空栈、空队列是正常状态，现代接口以 `std::optional` 返回。
+源码：[顺序栈](../code/ch03/array_stack/modern.hpp)、
+[栈示例](../code/ch03/array_stack/demo.cpp)、
+[链式栈](../code/ch03/linked_stack/modern.hpp)、
+[表达式求值](../code/ch03/expression_eval/modern.hpp)、
+[背包](../code/ch03/knapsack/modern.hpp)、
+[队列](../code/ch03/queue/modern.hpp)、
+[队列示例](../code/ch03/queue/demo.cpp)。
 
-源码入口：[顺序栈](../code/ch03/array_stack/modern.hpp)、[链式栈](../code/ch03/linked_stack/modern.hpp)、
-[表达式求值](../code/ch03/expression_eval/modern.hpp)、[背包](../code/ch03/knapsack/modern.hpp)、
-[队列](../code/ch03/queue/modern.hpp)。运行：`python3 tools/check_code.py --allow-degraded code/ch03`。
+## 先跑一遍
+
+```cpp file=code/ch03/array_stack/demo.cpp
+#include "modern.hpp"
+
+#include <iostream>
+
+int main() {
+    dsa::ArrayStack<int> stack;
+    stack.push(1);
+    stack.push(2);
+    stack.push(3);
+    std::cout << "栈顶是 " << *stack.top() << '\n';
+    std::cout << "依次弹出:";
+    while (auto value = stack.pop()) {
+        std::cout << ' ' << *value;
+    }
+    std::cout << "\n空栈再弹? " << (stack.pop() ? "有值" : "空") << '\n';
+}
+```
+
+```bash
+c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch03/array_stack \
+    code/ch03/array_stack/demo.cpp -o /tmp/stack-demo
+/tmp/stack-demo
+```
+
+```console
+栈顶是 3
+依次弹出: 3 2 1
+空栈再弹? 空
+```
+
+后进先出：最后压入的 3 最先出来。空栈上 `pop()` 返回空 optional，不打印、不崩溃。
+
+循环队列牺牲一个槽位区分空与满，所以逻辑容量 3 实际申请 4 个槽：
+
+```cpp file=code/ch03/queue/demo.cpp
+#include "modern.hpp"
+
+#include <iostream>
+
+int main() {
+    dsa::ArrayQueue<int> queue(3);
+    if (!queue.enqueue(1) || !queue.enqueue(2) || !queue.enqueue(3)) {
+        std::cout << "入队失败\n";
+        return 1;
+    }
+    std::cout << "逻辑容量 3 时再入队? " << (queue.enqueue(4) ? "成功" : "已满") << '\n';
+    std::cout << "依次出队:";
+    while (auto value = queue.dequeue()) {
+        std::cout << ' ' << *value;
+    }
+    std::cout << '\n';
+}
+```
+
+```bash
+c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch03/queue \
+    code/ch03/queue/demo.cpp -o /tmp/queue-demo
+/tmp/queue-demo
+```
+
+```console
+逻辑容量 3 时再入队? 已满
+依次出队: 1 2 3
+```
 
 > **本文件的地位**：这是《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）
 > 第 3.1 节的现代化重排，也是整个仓库的**样板**。原书正文（`dsa_raw.md:1785` 起）

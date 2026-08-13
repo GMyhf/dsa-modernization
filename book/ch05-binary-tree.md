@@ -1,24 +1,155 @@
 # 第5章 二叉树
 
-## 本章先读什么
+二叉树的每个结点最多有左、右两个孩子。周游回答「以什么顺序访问全部结点」；二叉搜索树加上左小右大；堆把最小（或最大）值放在根；Huffman 树不断合并两个最小权值。
 
-二叉树的每个结点最多有左、右两个孩子。周游回答“以什么顺序访问全部结点”；二叉搜索树加入
-左小右大的有序约束；堆把最小值或最大值放在根；Huffman 树不断合并两个最小权值。先画结点和
-边，再跟随周游或插入/删除过程，最后阅读指针所有权与递归实现。
+源码：[二叉树与二叉搜索树](../code/ch05/binary_tree/modern.hpp)、
+[最小堆与 Huffman 树](../code/ch05/heap_huffman/modern.hpp)、
+[树的示例](../code/ch05/binary_tree/demo.cpp)、
+[堆与 Huffman 的示例](../code/ch05/heap_huffman/demo.cpp)。
 
-源码入口：[二叉树与二叉搜索树](../code/ch05/binary_tree/modern.hpp)、
-[最小堆与 Huffman 树](../code/ch05/heap_huffman/modern.hpp)。运行：
-`python3 tools/check_code.py --allow-degraded code/ch05/binary_tree code/ch05/heap_huffman`。
+## 5.1 先把题目说清楚
 
-本章保留二叉链表、递归周游、二叉搜索树、完全二叉树上的堆与 Huffman 合并的教学骨架。
-现代化处理的是所有权、空状态和错误接口：树独占结点并显式深拷贝；提取返回 `optional`；
-按键删除返回 `bool`；容器不输出文本。
+下面这棵树：
 
-## 5.2 二叉树的周游与 5.3 链式存储
+```text
+      A
+     / \
+    B   C
+   / \
+  D   E
+```
 
-【代码5.1】二叉树结点的抽象数据类型。
+![图 5.5 二叉树示例](assets/7c6579b015042738.jpg)
 
-【代码5.2】二叉树的抽象数据类型。
+图 5.5 二叉树示例
+
+四种周游访问的是同一组结点，次序不同：
+
+| 周游 | 顺序 | 本例 |
+| --- | --- | --- |
+| 先序 | 根，左，右 | A B D E C |
+| 中序 | 左，根，右 | D B E A C |
+| 后序 | 左，右，根 | D E B C A |
+| 层次 | 按离根的距离 | A B C D E |
+
+递归版最贴合定义，也是本节要教的东西。极深的退化树会耗尽调用栈：Release 档大约在百万层段错误且**没有诊断**，ASan 档会打印 `stack-overflow` 并指到具体行。析构和拷贝走的也是递归，调用方看不见。数字和复现程序见 [`collab/UNVERIFIED-RISKS.md`](../collab/UNVERIFIED-RISKS.md)。
+
+二叉搜索树要求左子树的键都小于根、右子树都大于根。中序周游因此正好是排序。插入重复键、删除不存在的键都是可预期状态，返回 `false`，不抛异常。
+
+最小堆是一棵完全二叉树，父结点不大于孩子；用数组存时，下标 `i` 的孩子是 `2i+1` 和 `2i+2`。Huffman 树反复取出两个最小权，合成它们的和，直到只剩一棵——这就是前缀编码的那棵树。
+
+## 5.2 如何调用
+
+先建树并打印四种周游，再插一棵 BST：
+
+```cpp file=code/ch05/binary_tree/demo.cpp
+#include "modern.hpp"
+
+#include <iostream>
+#include <utility>
+
+int main() {
+    dsa::BinaryTree<char> left_leaf;
+    dsa::BinaryTree<char> right_leaf;
+    dsa::BinaryTree<char> left;
+    dsa::BinaryTree<char> right;
+    dsa::BinaryTree<char> root;
+    left_leaf.create_tree('D');
+    right_leaf.create_tree('E');
+    left.create_tree('B', std::move(left_leaf), std::move(right_leaf));
+    right.create_tree('C');
+    root.create_tree('A', std::move(left), std::move(right));
+
+    std::cout << "先序: ";
+    root.preorder([](char value) { std::cout << value; });
+    std::cout << "\n中序: ";
+    root.inorder([](char value) { std::cout << value; });
+    std::cout << "\n后序: ";
+    root.postorder([](char value) { std::cout << value; });
+    std::cout << "\n层次: ";
+    root.level_order([](char value) { std::cout << value; });
+    std::cout << '\n';
+
+    dsa::BinarySearchTree<int> tree;
+    for (int key : {8, 3, 10, 1, 6, 14, 4, 7}) {
+        (void)tree.insert(key);
+    }
+    std::cout << "BST 中序:";
+    tree.inorder([](int key) { std::cout << ' ' << key; });
+    std::cout << "\n含 6? " << (tree.contains(6) ? "是" : "否")
+              << "  删 3 后含 3? ";
+    (void)tree.remove(3);
+    std::cout << (tree.contains(3) ? "是" : "否") << '\n';
+}
+```
+
+```bash
+c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch05/binary_tree \
+    code/ch05/binary_tree/demo.cpp -o /tmp/tree-demo
+/tmp/tree-demo
+```
+
+```console
+先序: ABDEC
+中序: DBEAC
+后序: DEBCA
+层次: ABCDE
+BST 中序: 1 3 4 6 7 8 10 14
+含 6? 是  删 3 后含 3? 否
+```
+
+`create_tree(value, left, right)` 接管两棵子树。参数是右值，表示所有权被移走；`left_leaf` 在 `std::move` 之后变空，不会和 `left` 抢着析构同一结点。
+
+堆与 Huffman：
+
+```cpp file=code/ch05/heap_huffman/demo.cpp
+#include "modern.hpp"
+
+#include <iostream>
+
+int main() {
+    dsa::MinHeap<int> heap;
+    for (int value : {5, 1, 4, 2}) {
+        heap.insert(value);
+    }
+    std::cout << "依次取出最小元:";
+    while (auto value = heap.remove_min()) {
+        std::cout << ' ' << *value;
+    }
+    std::cout << '\n';
+
+    const int weights[] = {2, 3, 4, 7};
+    const dsa::HuffmanTree tree(weights, 4);
+    std::cout << "权 2,3,4,7 的 Huffman 树根权 = " << tree.total_weight() << '\n';
+}
+```
+
+```bash
+c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch05/heap_huffman \
+    code/ch05/heap_huffman/demo.cpp -o /tmp/heap-demo
+/tmp/heap-demo
+```
+
+```console
+依次取出最小元: 1 2 4 5
+权 2,3,4,7 的 Huffman 树根权 = 16
+```
+
+空堆上 `remove_min()` 返回 `nullopt`，不会打印「堆空」。Huffman 的根权等于全部叶子权之和，因为每次合并都把两个权加到新根上。
+
+## 5.3 再读实现
+
+`create_tree` 先 `new` 出新根，再把两棵子树的根指针挪过来，最后才清空自己原来的树。这样即使 `new` 抛异常，调用方的两棵子树也不动。
+
+先序 / 中序 / 后序的递归版就是三行：访问自己与走进左右孩子的次序不同。迭代版用一棵手写链式栈模拟调用栈，按 D-001 §3d 只作补充，不替换递归主实现。层次周游用手写链式 FIFO，不用 `std::queue` 替代本节要教的队列用法。
+
+BST 删除有左右孩子的结点时，用左子树里最右的前驱替换它：先把前驱从原位置摘下，再让它继承被删结点的两棵子树，最后只 `delete` 被删结点一次。漏掉「先脱离原父」会形成环或二次释放。
+
+`MinHeap` 的 `sift_down` 必须比较左右两个孩子。Huffman 合并时若 `new` 父结点失败，会拆开并销毁已经取出的两棵子树，避免半成品泄漏。建叶子的那条 `catch { delete leaf; }` 目前没有测试走到——现有探针只拦截 `new[]`。
+
+## 5.4 现代实现
+
+二叉树与周游：
 
 ```cpp file=code/ch05/binary_tree/modern.hpp#binary-tree
 template <typename T>
@@ -227,73 +358,7 @@ private:
 };
 ```
 
-【代码5.1结束】
-
-【代码5.2结束】
-
-【算法5.3】深度优先周游二叉树或其子树。
-
-前/中/后序递归实现保持原书的 tLR、LtR、LRt 结构。D-001 §3d 规定它是主教学实现；
-**Stack Overflow Risk**：病态深树的递归深度受进程调用栈限制，生产场景应按限制选择显式栈补充实现。
-
-【算法5.3结束】
-
-【算法5.4】非递归前序周游二叉树或其子树。
-
-【算法5.4结束】
-
-【算法5.5】非递归中序周游二叉树或其子树。
-
-【算法5.5结束】
-
-【算法5.6】非递归后序周游二叉树或其子树。
-
-【算法5.6结束】
-
-【算法5.7】广度周游二叉树及其子树。
-
-层次周游使用源码中的手写链式 FIFO，访问顺序为逐层、从左到右。
-
-【算法5.7结束】
-
-【代码5.8】二叉树部分成员函数的实现。
-
-本清单的 OCR 缺失结束标记。现代书稿按 `dsa_raw.md:4105` 的“删除根结点”注释收尾，
-因为下一行 `4106` 已开始 5.3.2 的顺序存储主题；完整依据见 `legacy.md`。
-
-【代码5.8结束】
-
-### 递归的代价：一个可以量出来的数字
-
-递归周游是本节的教学主线，本书保留了它。但"递归受调用栈限制"这句话，
-作为教材说到这里是不够的——**它到底能撑多深，是可以量出来的**。
-
-在一台 Linux 机器上（gcc 13.3，`ulimit -s` 为 8 MB 的默认栈），
-用一条纯左链（深度等于结点数）实测：
-
-| 构建 | 递归析构 | 递归前序周游 |
-| --- | --- | --- |
-| Release `-O2` | 50 万深度通过，100 万崩 | 50 万通过，100 万崩 |
-| Debug + ASan/UBSan | 50 万通过，100 万崩 | **50 万就崩** |
-
-Debug 档更早崩，因为检测工具让每层栈帧变胖。换一台机器、换一个栈大小，
-这些数字都会变——**重点不是这几个数，而是"它是有限的、而且可以测"**。
-
-更值得记住的是**崩的时候你看到什么**：
-
-- 开了 sanitizer 的构建会明确告诉你
-  `AddressSanitizer: stack-overflow`，并给出一路递归下去的回溯，直指出事的那一行；
-- 而 Release 构建只有一个段错误，**一行解释都没有**。
-
-还有一点容易被忽略：`preorder` 这类周游是你**显式调用**的，而**析构和拷贝
-也在递归**——一个普通的作用域结束、一次拷贝赋值，都会悄悄走同样深的递归，
-调用方看不到任何迹象。本书为三种周游提供了显式栈的迭代版本作为补充，
-但**析构与拷贝没有**：真正先撞墙的恰恰是它们。
-
-（本书未验证的其余风险点，连同复现方法，集中记在仓库的
-`collab/UNVERIFIED-RISKS.md`。）
-
-## 5.4 二叉搜索树
+二叉搜索树：
 
 ```cpp file=code/ch05/binary_tree/modern.hpp#bst
 template <typename T, typename Compare = std::less<T>>
@@ -389,20 +454,7 @@ private:
 };
 ```
 
-【算法5.9】二叉搜索树的结点插入算法。
-
-【算法5.9结束】
-
-【算法5.10】改进的二叉搜索树的结点删除。
-
-删除有左子树的结点时摘取左子树最大结点作为前驱替代者；先从旧位置脱离它，再接管被删结点
-的左右子树，最后释放被删结点。键不存在返回 `false`，不抛异常。
-
-【算法5.10结束】
-
-## 5.5 堆与 5.6 Huffman 树
-
-【代码5.11】堆的类定义和筛选法。
+最小堆：
 
 ```cpp file=code/ch05/heap_huffman/modern.hpp#min-heap
 template <typename T>
@@ -482,9 +534,7 @@ private:
 };
 ```
 
-【代码5.11结束】
-
-【代码5.12】Huffman 树的类定义。
+Huffman 树：
 
 ```cpp file=code/ch05/heap_huffman/modern.hpp#huffman
 class HuffmanTree {
@@ -533,5 +583,3 @@ public:
 private: static void destroy(Node*n)noexcept{if(n){destroy(n->left);destroy(n->right);delete n;}} Node* root_{nullptr};
 };
 ```
-
-【代码5.12结束】

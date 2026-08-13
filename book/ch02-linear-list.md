@@ -1,15 +1,88 @@
-# 第2章 线性表（现代化稿 · 2.1–2.2 顺序表）
-
-## 本章先读什么
+# 第2章 线性表
 
 线性表把一串同类型元素排成唯一的先后次序。顺序表把元素连续放在数组里，能 O(1) 按下标访问；
-链表用链接保存相邻关系，能在已知结点位置 O(1) 插入或删除。关键是区分“按位置找元素”和
-“已知结点后改链接”这两类操作。
+链表用链接保存相邻关系，能在已知结点位置 O(1) 插入或删除。关键是区分「按位置找元素」和
+「已知结点后改链接」这两类操作。
 
-源码入口：[顺序表实现](../code/ch02/array_list/modern.hpp)、
-[顺序表测试](../code/ch02/array_list/test.cpp)、[链表实现](../code/ch02/linked_list/modern.hpp)、
-[链表测试](../code/ch02/linked_list/test.cpp)。运行：
-`python3 tools/check_code.py --allow-degraded code/ch02/array_list code/ch02/linked_list`。
+源码：[顺序表](../code/ch02/array_list/modern.hpp)、
+[顺序表示例](../code/ch02/array_list/demo.cpp)、
+[链表](../code/ch02/linked_list/modern.hpp)、
+[链表示例](../code/ch02/linked_list/demo.cpp)。
+
+## 先跑一遍
+
+```cpp file=code/ch02/array_list/demo.cpp
+#include "modern.hpp"
+
+#include <iostream>
+
+int main() {
+    dsa::ArrayList<int> values;
+    values.append(10);
+    values.append(30);
+    values.insert(1, 20);
+    std::cout << "顺序表:";
+    for (std::size_t index = 0; index < values.size(); ++index) {
+        std::cout << ' ' << values.at(index);
+    }
+    std::cout << "\n查找 20 的下标: " << *values.find(20) << '\n';
+    std::cout << "删除位置 1 得到 " << values.remove(1) << "，剩余:";
+    for (std::size_t index = 0; index < values.size(); ++index) {
+        std::cout << ' ' << values.at(index);
+    }
+    std::cout << '\n';
+}
+```
+
+```bash
+c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch02/array_list \
+    code/ch02/array_list/demo.cpp -o /tmp/list-demo
+/tmp/list-demo
+```
+
+```console
+顺序表: 10 20 30
+查找 20 的下标: 1
+删除位置 1 得到 20，剩余: 10 30
+```
+
+`insert(1, 20)` 要把后面的元素右移一位，这是顺序表的固有代价。链表同一组操作只改两条链接，但按位置找前驱仍是 O(n)：
+
+```cpp file=code/ch02/linked_list/demo.cpp
+#include "modern.hpp"
+
+#include <iostream>
+
+int main() {
+    dsa::LinkedList<int> values;
+    values.append(10);
+    values.append(30);
+    values.insert(1, 20);
+    std::cout << "链表:";
+    for (int value : values) {
+        std::cout << ' ' << value;
+    }
+    std::cout << "\n删除位置 0 得到 " << values.remove(0) << "，剩余:";
+    for (int value : values) {
+        std::cout << ' ' << value;
+    }
+    std::cout << "\nappend 之后尾元素是 " << values.at(values.size() - 1) << '\n';
+}
+```
+
+```bash
+c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch02/linked_list \
+    code/ch02/linked_list/demo.cpp -o /tmp/link-demo
+/tmp/link-demo
+```
+
+```console
+链表: 10 20 30
+删除位置 0 得到 10，剩余: 20 30
+append 之后尾元素是 30
+```
+
+`append` 经尾指针 O(1) 接链，不必再从头走到尾。
 
 > **本文件的地位**：《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）
 > 第 2.1–2.2 节的现代化重排。原书正文（`dsa_raw.md:1145` 起）的讲法、编号、图表一概保留；

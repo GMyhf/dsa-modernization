@@ -14,6 +14,7 @@ namespace dsa::sorting {
 
 // >>> sorting
 
+// >>> insertion
 // 算法8.1：直接插入排序。相等元素不越过彼此，故稳定。
 inline void insertion_sort(std::vector<int>& values) {
     for (std::size_t index = 1; index < values.size(); ++index) {
@@ -26,6 +27,7 @@ inline void insertion_sort(std::vector<int>& values) {
         values[hole] = value;
     }
 }
+// <<< insertion
 
 // 算法8.2：增量每次减半的 Shell 排序。
 inline void shell_sort(std::vector<int>& values) {
@@ -54,6 +56,7 @@ inline void selection_sort(std::vector<int>& values) {
     }
 }
 
+// >>> heap
 // 算法8.4：手写最大堆筛选与堆排序，不委托 std::make_heap/sort_heap。
 inline void sift_down(std::vector<int>& values, std::size_t root, std::size_t count) {
     while (root * 2 + 1 < count) {
@@ -76,6 +79,7 @@ inline void heap_sort(std::vector<int>& values) {
         sift_down(values, 0, end - 1);
     }
 }
+// <<< heap
 
 // 算法8.5：带“本趟无交换即结束”优化的冒泡排序。
 inline void bubble_sort(std::vector<int>& values) {
@@ -92,6 +96,7 @@ inline void bubble_sort(std::vector<int>& values) {
     }
 }
 
+// >>> quick
 inline std::size_t partition(std::vector<int>& values, std::size_t first, std::size_t last) {
     const int pivot = values[last - 1];
     std::size_t boundary = first;
@@ -116,6 +121,7 @@ inline void quick_sort_range(std::vector<int>& values, std::size_t first, std::s
 
 // 算法8.6：手写快排。
 inline void quick_sort(std::vector<int>& values) { quick_sort_range(values, 0, values.size()); }
+// <<< quick
 
 // 算法8.7：小分区转插入排序、优先递归短侧以限制栈深。
 inline void quick_sort_optimized_range(std::vector<int>& values, std::size_t first, std::size_t last) {
@@ -236,6 +242,7 @@ private:
     std::size_t size_{0};
 };
 
+// >>> radix
 // 算法8.11：LSD 基数排序。翻转符号位使二补码有符号 int 按无符号序排序。
 inline void radix_sort(std::vector<int>& values) {
     std::vector<int> buffer(values.size());
@@ -254,6 +261,7 @@ inline void radix_sort(std::vector<int>& values) {
         values.swap(buffer);
     }
 }
+// <<< radix
 
 // 算法8.13：以显式桶队列演示顺序收集的基数排序。
 inline void radix_sort_linked_style(std::vector<int>& values) {

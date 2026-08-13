@@ -24,6 +24,7 @@ public:
         bool operator<(const Edge& other) const noexcept { return weight < other.weight; }
     };
 
+    // >>> graph-build
     explicit Graph(std::size_t count) : adjacency_(count, std::vector<int>(count, infinity)) {
         for (std::size_t vertex = 0; vertex < count; ++vertex) {
             adjacency_[vertex][vertex] = 0;
@@ -43,7 +44,9 @@ public:
             adjacency_[to][from] = weight;
         }
     }
+    // <<< graph-build
 
+    // >>> dfs
     [[nodiscard]] std::vector<std::size_t> dfs(std::size_t source) const {
         check_vertex(source);
         std::vector<bool> seen(vertices());
@@ -51,7 +54,9 @@ public:
         visit_depth_first(source, seen, result);
         return result;
     }
+    // <<< dfs
 
+    // >>> bfs
     [[nodiscard]] std::vector<std::size_t> bfs(std::size_t source) const {
         check_vertex(source);
         std::vector<bool> seen(vertices());
@@ -72,7 +77,9 @@ public:
         }
         return result;
     }
+    // <<< bfs
 
+    // >>> topological
     [[nodiscard]] std::optional<std::vector<std::size_t>> topological_sort() const {
         std::vector<std::size_t> indegree(vertices());
         for (std::size_t from = 0; from < vertices(); ++from) {
@@ -102,7 +109,9 @@ public:
         return result.size() == vertices() ? std::optional<std::vector<std::size_t>>(result)
                                            : std::nullopt;
     }
+    // <<< topological
 
+    // >>> dijkstra
     [[nodiscard]] std::vector<int> dijkstra(std::size_t source) const {
         check_vertex(source);
         std::vector<int> distance(vertices(), infinity);
@@ -123,7 +132,9 @@ public:
         }
         return distance;
     }
+    // <<< dijkstra
 
+    // >>> floyd
     [[nodiscard]] std::vector<std::vector<int>> floyd() const {
         auto distance = adjacency_;
         for (std::size_t via = 0; via < vertices(); ++via) {
@@ -138,7 +149,9 @@ public:
         }
         return distance;
     }
+    // <<< floyd
 
+    // >>> prim
     [[nodiscard]] std::optional<std::vector<Edge>> prim(std::size_t source) const {
         check_vertex(source);
         std::vector<int> distance(vertices(), infinity);
@@ -164,7 +177,9 @@ public:
         }
         return result;
     }
+    // <<< prim
 
+    // >>> kruskal
     [[nodiscard]] std::optional<std::vector<Edge>> kruskal() const {
         std::vector<Edge> edges;
         for (std::size_t from = 0; from < vertices(); ++from) {
@@ -191,6 +206,7 @@ public:
         return result.size() + 1 == vertices() ? std::optional<std::vector<Edge>>(result)
                                                 : std::nullopt;
     }
+    // <<< kruskal
 
 private:
     // Kept recursive to match the textbook DFS; deep graphs have Stack Overflow Risk.

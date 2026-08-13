@@ -1,14 +1,82 @@
-# 第4章 字符串（现代化稿）
+# 第4章 字符串
 
-## 本章先读什么
-
-字符串是字符的有限序列。先区分“保存字符串”的类与“在文本中找模式”的算法：前者处理容量、
+字符串是字符的有限序列。先区分「保存字符串」的类与「在文本中找模式」的算法：前者处理容量、
 复制和下标边界，后者处理比较顺序。朴素匹配在失配后移动模式；KMP 预先计算 `next` 信息，避免
 重复比较已经知道相等的前缀。
 
-源码入口：[字符串类](../code/ch04/string_class/modern.hpp)、
-[模式匹配](../code/ch04/pattern_matching/modern.hpp)。运行：
-`python3 tools/check_code.py --allow-degraded code/ch04/string_class code/ch04/pattern_matching`。
+源码：[字符串类](../code/ch04/string_class/modern.hpp)、
+[字符串示例](../code/ch04/string_class/demo.cpp)、
+[模式匹配](../code/ch04/pattern_matching/modern.hpp)、
+[匹配示例](../code/ch04/pattern_matching/demo.cpp)。
+
+## 先跑一遍
+
+```cpp file=code/ch04/string_class/demo.cpp
+#include "modern.hpp"
+
+#include <iostream>
+
+int main() {
+    dsa::String text = "Hello";
+    text.append(' ').append('C').append('+').append('+');
+    std::cout << "拼接后: " << text.c_str() << '\n';
+    const auto slice = text.substr(6, 3);
+    std::cout << "子串: " << slice.c_str() << '\n';
+    const auto found = text.find('C');
+    std::cout << "首次出现 C 的下标: ";
+    if (found) {
+        std::cout << *found << '\n';
+    } else {
+        std::cout << "无\n";
+    }
+}
+```
+
+```bash
+c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch04/string_class \
+    code/ch04/string_class/demo.cpp -o /tmp/str-demo
+/tmp/str-demo
+```
+
+```console
+拼接后: Hello C++
+子串: C++
+首次出现 C 的下标: 6
+```
+
+缓冲区仍是手写的 `char*`，换成 `std::string` 这一节就没了。`find` 找不到时返回空 optional，不用 `-1` 和位置 0 抢同一个数字。
+
+图4.12 自己的那对串，原书两个匹配算法都返回 11，正确答案是 10：
+
+```cpp file=code/ch04/pattern_matching/demo.cpp
+#include "modern.hpp"
+
+#include <iostream>
+
+int main() {
+    const char* text = "abcddabcababcdaabcababcdaabcabaa";
+    const char* pattern = "abcdaabcab";
+    const auto naive = dsa::naive_search(text, pattern);
+    const auto kmp = dsa::kmp_search(text, pattern);
+    std::cout << "图4.12 的串，正确起始下标是 10\n";
+    std::cout << "朴素: " << (naive ? static_cast<long>(*naive) : -1) << '\n';
+    std::cout << "KMP:  " << (kmp ? static_cast<long>(*kmp) : -1) << '\n';
+    std::cout << "原书返回 11，一律差 1\n";
+}
+```
+
+```bash
+c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch04/pattern_matching \
+    code/ch04/pattern_matching/demo.cpp -o /tmp/kmp-demo
+/tmp/kmp-demo
+```
+
+```console
+图4.12 的串，正确起始下标是 10
+朴素: 10
+KMP:  10
+原书返回 11，一律差 1
+```
 
 > **本文件的地位**：《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）
 > 第 4 章的现代化重排（4.1 字符串概念、4.2 存储结构与实现、4.3 模式匹配）。
