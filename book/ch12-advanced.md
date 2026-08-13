@@ -6,7 +6,9 @@
 [可运行示例](../code/ch12/optimal_bst/demo.cpp)、
 [测试](../code/ch12/optimal_bst/test.cpp)。
 
-## 12.1 先把题目说清楚
+## 12.2 广义表和存储管理
+
+### 12.2.2 可利用空间表
 
 原书用重载 `operator new/delete` 和一条全局 `avail` 链实现结点复用。所有对象共享隐式全局状态，生命周期结束时还要 `::delete` 整条链。现代实现改成显式的索引句柄池：`acquire` 从空闲栈弹出一个下标，`release` 把它推回去；耗尽返回 `nullopt`，重复/越界归还返回 `false`。释放后的下标失效，`get` 得到空指针。
 
@@ -14,7 +16,7 @@
 
 教材样例 `p = {1,5,4,3}`、`q = {5,4,3,2,1}` 的总成本是 57，根是第 2 个键。`cost[i][j]` 是区间代价，`root[i][j]` 记录取得最小值的根，因而还能按根表重建树形。朴素实现为 O(n³)。
 
-## 12.2 如何调用
+先跑一遍：
 
 ```cpp file=code/ch12/optimal_bst/demo.cpp
 #include "modern.hpp"
@@ -52,21 +54,7 @@ c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch12/optimal_bst \
 
 把 `optimal_bst({1,2}, {3,4})` 这种长度对不上的输入送进去，会抛 `std::invalid_argument`。空树对应 `p = {}`、`q = {某个失败权}`，代价为 0。
 
-## 12.3 再读实现
-
-池用 `vector<optional<T>>` 表示槽位占用，`vector<size_t>` 当空闲栈。构造时下标从大到小入栈，所以第一次 `acquire` 拿到 0。`release` 先确认该槽确实被占用，再 `reset` 并归还——因此重复释放返回 `false`，陈旧句柄不会指到新值。
-
-最优 BST 先校验 `q.size() == p.size() + 1`。空区间的 `cost[i][i] = 0`，`weight[i][i] = q[i]`。长度从 1 扩到 n，对每个区间 `[first, last]` 枚举根 `r`，候选代价是
-
-```text
-cost[first][r-1] + cost[r][last] + weight[first][last]
-```
-
-其中 `weight` 是该区间全部成功权与失败权之和。取最小者写入 `cost` 与 `root`。成本用 `long long`，避免大权重相加溢出。
-
-## 12.4 现代实现
-
-可利用空间表：
+池用 `vector<optional<T>>` 表示槽位占用，`vector<size_t>` 当空闲栈。构造时下标从大到小入栈，所以第一次 `acquire` 拿到 0。`release` 先确认该槽确实被占用，再 `reset` 并归还。
 
 ```cpp file=code/ch12/optimal_bst/modern.hpp#reusable-node-pool
 template <typename T>
@@ -112,7 +100,11 @@ private:
 };
 ```
 
-最优二叉搜索树：
+## 12.4 改进的二叉搜索树
+
+### 12.4.1 最佳二叉搜索树
+
+最优 BST 先校验 `q.size() == p.size() + 1`。空区间的 `cost[i][i] = 0`，`weight[i][i] = q[i]`。长度从 1 扩到 n，对每个区间 `[first, last]` 枚举根 `r`，候选代价是 `cost[first][r-1] + cost[r][last] + weight[first][last]`。
 
 ```cpp file=code/ch12/optimal_bst/modern.hpp#optimal-bst
 struct OptimalBstResult {
@@ -159,3 +151,4 @@ inline OptimalBstResult optimal_bst(const std::vector<int>& successful,
     return result;
 }
 ```
+

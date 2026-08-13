@@ -7,7 +7,11 @@
 [树的示例](../code/ch05/binary_tree/demo.cpp)、
 [堆与 Huffman 的示例](../code/ch05/heap_huffman/demo.cpp)。
 
-## 5.1 先把题目说清楚
+## 5.1 二叉树的概念
+
+二叉树由结点的有限集合构成：或者为空，或者由一个根和两棵互不相交的左、右子树组成。左右次序不能颠倒。根没有父结点；其余每个结点恰有一个父结点，至多两个孩子。没有孩子的是叶，其余是内部结点。从根到某结点的边数是该结点的层数，根在第 0 层。
+
+### 5.1.1 定义和基本术语
 
 下面这棵树：
 
@@ -32,13 +36,19 @@
 | 后序 | 左，右，根 | D E B C A |
 | 层次 | 按离根的距离 | A B C D E |
 
-递归版最贴合定义，也是本节要教的东西。极深的退化树会耗尽调用栈：Release 档大约在百万层段错误且**没有诊断**，ASan 档会打印 `stack-overflow` 并指到具体行。析构和拷贝走的也是递归，调用方看不见。数字和复现程序见 [`collab/UNVERIFIED-RISKS.md`](../collab/UNVERIFIED-RISKS.md)。
+递归版最贴合定义，也是 5.2 节要教的东西。极深的退化树会耗尽调用栈：Release 档大约在百万层段错误且**没有诊断**，ASan 档会打印 `stack-overflow` 并指到具体行。析构和拷贝走的也是递归，调用方看不见。数字和复现程序见仓库中的未验证风险说明。
 
-二叉搜索树要求左子树的键都小于根、右子树都大于根。中序周游因此正好是排序。插入重复键、删除不存在的键都是可预期状态，返回 `false`，不抛异常。
+### 5.1.2 满二叉树、完全二叉树、扩充二叉树
 
-最小堆是一棵完全二叉树，父结点不大于孩子；用数组存时，下标 `i` 的孩子是 `2i+1` 和 `2i+2`。Huffman 树反复取出两个最小权，合成它们的和，直到只剩一棵——这就是前缀编码的那棵树。
+任何结点或者是叶，或者左右子树都非空，叫做满二叉树。叶只出现在最下两层、且最下层靠左对齐，叫做完全二叉树。在空子树位置补上空树叶，得到扩充二叉树；外部路径长度 $E$ 与内部路径长度 $I$ 满足 $E = I + 2n$。
 
-## 5.2 如何调用
+### 5.1.3 主要性质
+
+第 $i$ 层至多 $2^i$ 个结点；深度为 $k$ 的二叉树至多 $2^{k+1}-1$ 个结点；叶结点数 $n_0 = n_2 + 1$。$n$ 个结点的完全二叉树高度为 $\lceil\log_2(n+1)\rceil$。按层从 0 编号时，结点 $i$ 的父是 $\lfloor(i-1)/2\rfloor$，左右孩子是 $2i+1$ 与 $2i+2$。这些性质没错，原样保留。
+
+## 5.2 二叉树的周游
+
+### 5.2.1 先跑一遍
 
 先建树并打印四种周游，再插一棵 BST：
 
@@ -100,56 +110,17 @@ BST 中序: 1 3 4 6 7 8 10 14
 
 `create_tree(value, left, right)` 接管两棵子树。参数是右值，表示所有权被移走；`left_leaf` 在 `std::move` 之后变空，不会和 `left` 抢着析构同一结点。
 
-堆与 Huffman：
+### 5.2.2 深度优先周游
 
-```cpp file=code/ch05/heap_huffman/demo.cpp
-#include "modern.hpp"
+先序 / 中序 / 后序的递归版就是三行：访问自己与走进左右孩子的次序不同。迭代版用一棵手写链式栈模拟调用栈，按 D-001 §3d 只作补充，不替换递归主实现。
 
-#include <iostream>
+### 5.2.3 广度优先周游
 
-int main() {
-    dsa::MinHeap<int> heap;
-    for (int value : {5, 1, 4, 2}) {
-        heap.insert(value);
-    }
-    std::cout << "依次取出最小元:";
-    while (auto value = heap.remove_min()) {
-        std::cout << ' ' << *value;
-    }
-    std::cout << '\n';
+层次周游用手写链式 FIFO，不用 `std::queue` 替代本节要教的队列用法。
 
-    const int weights[] = {2, 3, 4, 7};
-    const dsa::HuffmanTree tree(weights, 4);
-    std::cout << "权 2,3,4,7 的 Huffman 树根权 = " << tree.total_weight() << '\n';
-}
-```
+## 5.3 二叉树的存储结构
 
-```bash
-c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch05/heap_huffman \
-    code/ch05/heap_huffman/demo.cpp -o /tmp/heap-demo
-/tmp/heap-demo
-```
-
-```console
-依次取出最小元: 1 2 4 5
-权 2,3,4,7 的 Huffman 树根权 = 16
-```
-
-空堆上 `remove_min()` 返回 `nullopt`，不会打印「堆空」。Huffman 的根权等于全部叶子权之和，因为每次合并都把两个权加到新根上。
-
-## 5.3 再读实现
-
-`create_tree` 先 `new` 出新根，再把两棵子树的根指针挪过来，最后才清空自己原来的树。这样即使 `new` 抛异常，调用方的两棵子树也不动。
-
-先序 / 中序 / 后序的递归版就是三行：访问自己与走进左右孩子的次序不同。迭代版用一棵手写链式栈模拟调用栈，按 D-001 §3d 只作补充，不替换递归主实现。层次周游用手写链式 FIFO，不用 `std::queue` 替代本节要教的队列用法。
-
-BST 删除有左右孩子的结点时，用左子树里最右的前驱替换它：先把前驱从原位置摘下，再让它继承被删结点的两棵子树，最后只 `delete` 被删结点一次。漏掉「先脱离原父」会形成环或二次释放。
-
-`MinHeap` 的 `sift_down` 必须比较左右两个孩子。Huffman 合并时若 `new` 父结点失败，会拆开并销毁已经取出的两棵子树，避免半成品泄漏。建叶子的那条 `catch { delete leaf; }` 目前没有测试走到——现有探针只拦截 `new[]`。
-
-## 5.4 现代实现
-
-二叉树与周游：
+`create_tree` 先 `new` 出新根，再把两棵子树的根指针挪过来，最后才清空自己原来的树。这样即使 `new` 抛异常，调用方的两棵子树也不动。链式存储是本节主实现；完全二叉树还可以按 5.1.3 的编号放进数组，堆就是这种用法。
 
 ```cpp file=code/ch05/binary_tree/modern.hpp#binary-tree
 template <typename T>
@@ -358,7 +329,9 @@ private:
 };
 ```
 
-二叉搜索树：
+## 5.4 二叉搜索树
+
+二叉搜索树要求左子树的键都小于根、右子树都大于根。中序周游因此正好是排序。插入重复键、删除不存在的键都是可预期状态，返回 `false`，不抛异常。删除有左右孩子的结点时，用左子树里最右的前驱替换它：先把前驱从原位置摘下，再让它继承被删结点的两棵子树，最后只 `delete` 被删结点一次。漏掉「先脱离原父」会形成环或二次释放。
 
 ```cpp file=code/ch05/binary_tree/modern.hpp#bst
 template <typename T, typename Compare = std::less<T>>
@@ -454,7 +427,42 @@ private:
 };
 ```
 
-最小堆：
+## 5.5 堆与优先队列
+
+最小堆是一棵完全二叉树，父结点不大于孩子；用数组存时，下标 `i` 的孩子是 `2i+1` 和 `2i+2`。`sift_down` 必须比较左右两个孩子。空堆上 `remove_min()` 返回 `nullopt`。
+
+```cpp file=code/ch05/heap_huffman/demo.cpp
+#include "modern.hpp"
+
+#include <iostream>
+
+int main() {
+    dsa::MinHeap<int> heap;
+    for (int value : {5, 1, 4, 2}) {
+        heap.insert(value);
+    }
+    std::cout << "依次取出最小元:";
+    while (auto value = heap.remove_min()) {
+        std::cout << ' ' << *value;
+    }
+    std::cout << '\n';
+
+    const int weights[] = {2, 3, 4, 7};
+    const dsa::HuffmanTree tree(weights, 4);
+    std::cout << "权 2,3,4,7 的 Huffman 树根权 = " << tree.total_weight() << '\n';
+}
+```
+
+```bash
+c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch05/heap_huffman \
+    code/ch05/heap_huffman/demo.cpp -o /tmp/heap-demo
+/tmp/heap-demo
+```
+
+```console
+依次取出最小元: 1 2 4 5
+权 2,3,4,7 的 Huffman 树根权 = 16
+```
 
 ```cpp file=code/ch05/heap_huffman/modern.hpp#min-heap
 template <typename T>
@@ -534,7 +542,9 @@ private:
 };
 ```
 
-Huffman 树：
+## 5.6 Huffman 树及其应用
+
+Huffman 树反复取出两个最小权，合成它们的和，直到只剩一棵——这就是前缀编码的那棵树。根权等于全部叶子权之和。合并时若 `new` 父结点失败，会拆开并销毁已经取出的两棵子树。
 
 ```cpp file=code/ch05/heap_huffman/modern.hpp#huffman
 class HuffmanTree {
@@ -583,3 +593,4 @@ public:
 private: static void destroy(Node*n)noexcept{if(n){destroy(n->left);destroy(n->right);delete n;}} Node* root_{nullptr};
 };
 ```
+

@@ -6,7 +6,17 @@
 [可运行示例](../code/ch09/external_sort/demo.cpp)、
 [测试](../code/ch09/external_sort/test.cpp)。
 
-## 9.1 先把题目说清楚
+## 9.1 主存储器和外存储器
+
+内存按字节随机访问，外存按页块读写，一次定位往往比一次比较贵几个数量级。所以外排序的目标首先是减少读写次数，而不是减少内存里的比较。
+
+## 9.2 文件的组织和管理
+
+文件是外存上的记录集合。本章不实现页缓存和文件句柄，只抽出「如何生成更长的初始顺串」和「如何在 k 路中选最小」。
+
+## 9.3 外排序
+
+### 9.3.1 置换选择排序
 
 顺串是磁盘上已经有序的一段记录。内存一次只能装 M 条时，朴素做法是每批排成一条长为 M 的顺串。置换选择可以做得更好：输出堆顶之后，若下一条记录**不小于**刚输出的值，它还可以进入当前顺串；否则冻结到下一趟。平均情况下第一趟长度约为 2M。
 
@@ -26,7 +36,7 @@
 
 多路归并时，每次要在 k 路的队首里选出最小者。赢者树的内部结点保存胜者下标；败者树的内部结点保存败者，另用一个冠军槽记录全局最小。替换一名选手后，两者都只需沿叶到根重赛。
 
-## 9.2 如何调用
+先跑一遍：
 
 ```cpp file=code/ch09/external_sort/demo.cpp
 #include "modern.hpp"
@@ -69,19 +79,7 @@ c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch09/external_sort \
 
 把 `M` 改成 11（装得下全部输入），会只得到一个顺串，内容是整表有序——这时置换选择退化为堆排序，正是「内存够用」的边界。
 
-## 9.3 再读实现
-
-`replacement_selection(input, memory)` 先读入至多 `memory` 条建成最小堆。循环中弹出堆顶写入当前顺串；若还有输入，按「`incoming >= emitted` 则入堆，否则冻结」分流。当前堆空了，就把冻结区建成新堆，开始下一趟。`memory == 0` 抛 `invalid_argument`。
-
-赢者树用完全二叉数组：叶存放选手下标，内部结点写 `better(左, 右)`。平局取左边，保证同值时下标较小者获胜。
-
-败者树在每个内部结点写 `worse(左, 右)`，另用 `champion_` 保存整棵树的胜者。`loser_at(1)` 能看见根上记下的败者——这是它和赢者树可见的差别。替换后只沿父指针重赛，不必访问兄弟子树。
-
-文件缓冲、页块读写由上层负责。这里抽的是「如何延长顺串」和「如何在 k 路中选最小」这两步。
-
-## 9.4 现代实现
-
-置换选择：
+`replacement_selection(input, memory)` 先读入至多 `memory` 条建成最小堆。循环中弹出堆顶写入当前顺串；若还有输入，按「`incoming >= emitted` 则入堆，否则冻结」分流。当前堆空了，就把冻结区建成新堆，开始下一趟。
 
 ```cpp file=code/ch09/external_sort/modern.hpp#replacement-selection
 // 算法9.1：置换选择。memory 是内存工作区能容纳的记录数 M。
@@ -145,7 +143,13 @@ inline std::vector<std::vector<int>> replacement_selection(const std::vector<int
 }
 ```
 
-赢者树：
+### 9.3.2 二路外排序
+
+对 m 个顺串两两归并，趟数是 $\lceil\log_2 m\rceil$。置换选择把初始顺串变长，就是为了减小 m。
+
+### 9.3.3 多路归并——选择树
+
+赢者树用完全二叉数组：叶存放选手下标，内部结点写 `better(左, 右)`。败者树在内部结点写败者，另用 `champion_` 记全局胜者。替换后只沿叶到根重赛。
 
 ```cpp file=code/ch09/external_sort/modern.hpp#winner-tree
 // 代码9.2：赢者树。内部结点保存两名选手比较后的胜者下标，根是全局最小。
@@ -198,8 +202,6 @@ private:
     std::size_t leaf_base_{0};
 };
 ```
-
-败者树：
 
 ```cpp file=code/ch09/external_sort/modern.hpp#loser-tree
 // 代码9.3：败者树。内部结点保存败者下标，另用 champion_ 记录全局胜者。
@@ -269,3 +271,4 @@ private:
     std::size_t champion_{detail::TournamentOps::no_player};
 };
 ```
+

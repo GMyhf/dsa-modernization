@@ -91,7 +91,9 @@ c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch03/queue \
 > 代码风格遵循 `collab/DECISION_LOG.md` 的 D-001 公约：**C++17**；不拿 STL 容器
 > 替代手写实现；存储结构属本节教学内容，故用裸指针加显式五法则。
 
-## 3.1.1 栈的抽象数据类型
+## 3.1 栈
+
+### 3.1.1 栈的抽象数据类型
 
 栈(stack)是限定仅在一端进行插入和删除运算的线性表，该端称为**栈顶**(top)，
 另一端称为**栈底**(bottom)。栈的元素按后进先出(LIFO, last in first out)的次序访问：
@@ -149,7 +151,7 @@ public:
 把这些限制写成 `static_assert`，好过让它们以一条晦涩的模板报错、
 或者某次扩容失败后的谜案出现。
 
-## 3.1.2 顺序栈
+### 3.1.2 顺序栈
 
 采用顺序存储结构的栈称为顺序栈(array-based stack)，需要一块连续的区域存储栈中元素。
 
@@ -275,7 +277,7 @@ ArrayStack& operator=(ArrayStack&& other) noexcept {
 
 两种代价都真实存在。把任何一种藏起来，都是替读者做了本该由读者做的选择。
 
-## 3.1.3 顺序栈的扩容
+#### 顺序栈的扩容
 
 栈中元素动态变化，当栈满时继续进栈会产生上溢出(overflow)。原书【算法3.3】给出的
 改进办法是：申请一个扩大一倍的新数组，把原有内容顺序移动过去，再执行进栈。
@@ -392,7 +394,7 @@ void push(T&& item) {
 顶层 `const` 对调用方没有意义，却强制了一次拷贝，而且 `std::unique_ptr`
 这类只能移动的类型根本传不进去。
 
-## 3.1.3 链式栈
+### 3.1.3 链式栈
 
 采用链式存储结构的栈称为链式栈。结点分散在堆上，压栈只是接一个新结点，
 **不需要连续空间，也没有"栈满"这回事**——这正是它与顺序栈的核心差别。
@@ -509,7 +511,7 @@ void push(T&& item) { top_ = new Node(std::move(item), top_); ++size_; }
 链式结构最自然的写法是递归释放，但深链会耗尽调用栈——第 5 章有实测数字。
 本书的测试用 20 万个结点压栈再全部弹出，正是为这条兜底。
 
-## 3.1.4 表达式求值
+### 3.1.4 表达式求值
 
 后缀（逆波兰）表达式不需要括号，也不需要优先级规则：求值时**遇操作数压栈，
 遇操作符弹出两个算完再压回**，读到末尾时栈里剩下的唯一元素就是结果。
@@ -625,7 +627,7 @@ void push(T&& item) { top_ = new Node(std::move(item), top_); ++size_; }
 本书只拦精确的零，并把这个取舍写在代码注释里；测试中有一条断言专门钉住
 "除以 1e-300 得到极大值而非报错"。
 
-## 3.1.5 栈与递归
+### 3.1.5 栈与递归
 
 > **本节开篇先摆一组实测数字。** 原书正文说递归「需要在内存中开辟一个称为
 > 运行栈(runtime stack)的**足够大**的动态区」。多大算足够大？这是可以量的，
@@ -1005,20 +1007,17 @@ runtime error: signed integer overflow: 21 * 2432902008176640000
 
 ## 3.2 队列
 
-原书循环队列以牺牲一个槽位区分空与满：逻辑容量为 n 时实际申请 n+1 个槽位。
-空队列 `dequeue()` 返回 `std::nullopt`；链式队列则以首尾指针维持 FIFO，并具备独立复制所有权。
+队列只允许在一端插入、在另一端删除，元素按先进先出(FIFO)访问。插入端是队尾，删除端是队头。空队列上的提取是可预期状态，返回 `std::nullopt`。
 
-```cpp file=code/ch03/queue/modern.hpp
-// 原书【代码3.13】【代码3.14】【代码3.15】的现代化队列实现。
-#pragma once
+### 3.2.1 队列的抽象数据类型
 
-#include <cstddef>
-#include <optional>
-#include <utility>
+常用运算是入队 `enqueue`、出队 `dequeue`、读队头，以及判空。顺序实现还需要判满。原书【代码3.13】同样把这些运算写成一个假抽象基类；本书直接定义在 `ArrayQueue` 与 `LinkedQueue` 上。
 
-namespace dsa {
+### 3.2.2 顺序队列
 
-// >>> array-queue
+循环队列牺牲一个槽位区分空与满：逻辑容量为 n 时实际申请 n+1 个槽。`front_ == rear_` 为空，`(rear_ + 1) % slots_ == front_` 为满。这正是章首 demo 里「容量 3 时第 4 个入不进去」的原因。
+
+```cpp file=code/ch03/queue/modern.hpp#array-queue
 template <typename T>
 class ArrayQueue {
 public:
@@ -1039,67 +1038,13 @@ public:
     void clear() noexcept { front_ = rear_ = 0; }
 private: std::size_t slots_{0}, front_{0}, rear_{0}; T* data_{nullptr};
 };
-// <<< array-queue
-
-// >>> linked-queue
-template <typename T>
-class LinkedQueue {
-    struct Node { T value; Node* next{nullptr}; template <typename U> explicit Node(U&& value) : value(std::forward<U>(value)) {} };
-public:
-    LinkedQueue() = default;
-    LinkedQueue(const LinkedQueue& other) { for (Node* n = other.front_; n != nullptr; n = n->next) enqueue(n->value); }
-    LinkedQueue& operator=(const LinkedQueue& other) { if (this != &other) { LinkedQueue copy(other); swap(copy); } return *this; }
-    LinkedQueue(LinkedQueue&& other) noexcept { swap(other); }
-    LinkedQueue& operator=(LinkedQueue&& other) noexcept { if (this != &other) { LinkedQueue moved(std::move(other)); swap(moved); } return *this; }
-    ~LinkedQueue() { clear(); }
-    void swap(LinkedQueue& other) noexcept { using std::swap; swap(front_, other.front_); swap(rear_, other.rear_); swap(size_, other.size_); }
-    [[nodiscard]] bool empty() const noexcept { return front_ == nullptr; }
-    [[nodiscard]] std::size_t size() const noexcept { return size_; }
-    void enqueue(const T& value) { append(new Node(value)); }
-    void enqueue(T&& value) { append(new Node(std::move(value))); }
-    [[nodiscard]] std::optional<T> dequeue() { if (front_ == nullptr) return std::nullopt; Node* old = front_; front_ = old->next; if (front_ == nullptr) rear_ = nullptr; --size_; T value = std::move(old->value); delete old; return value; }
-    [[nodiscard]] const T* front() const noexcept { return front_ == nullptr ? nullptr : &front_->value; }
-    void clear() noexcept { while (front_ != nullptr) { Node* old = front_; front_ = old->next; delete old; } rear_ = nullptr; size_ = 0; }
-private: void append(Node* node) noexcept { if (rear_ == nullptr) front_ = rear_ = node; else { rear_->next = node; rear_ = node; } ++size_; } Node* front_{nullptr}; Node* rear_{nullptr}; std::size_t size_{0};
-};
-// <<< linked-queue
-}  // namespace dsa
 ```
 
-```cpp file=code/ch03/queue/modern.hpp
-// 原书【代码3.13】【代码3.14】【代码3.15】的现代化队列实现。
-#pragma once
+### 3.2.3 链式队列
 
-#include <cstddef>
-#include <optional>
-#include <utility>
+链式队列用首尾指针维持 FIFO，入队接在尾、出队摘下头，并具备独立复制所有权。
 
-namespace dsa {
-
-// >>> array-queue
-template <typename T>
-class ArrayQueue {
-public:
-    explicit ArrayQueue(std::size_t capacity) : slots_(capacity + 1), data_(slots_ ? new T[slots_] : nullptr) {}
-    ArrayQueue(const ArrayQueue& other) : slots_(other.slots_), front_(other.front_), rear_(other.rear_), data_(slots_ ? new T[slots_] : nullptr) { for (std::size_t i = front_; i != rear_; i = (i + 1) % slots_) data_[i] = other.data_[i]; }
-    ArrayQueue& operator=(const ArrayQueue& other) { if (this != &other) { ArrayQueue copy(other); swap(copy); } return *this; }
-    ArrayQueue(ArrayQueue&& other) noexcept { swap(other); }
-    ArrayQueue& operator=(ArrayQueue&& other) noexcept { if (this != &other) { ArrayQueue moved(std::move(other)); swap(moved); } return *this; }
-    ~ArrayQueue() { delete[] data_; }
-    void swap(ArrayQueue& other) noexcept { using std::swap; swap(slots_, other.slots_); swap(front_, other.front_); swap(rear_, other.rear_); swap(data_, other.data_); }
-    [[nodiscard]] bool empty() const noexcept { return front_ == rear_; }
-    [[nodiscard]] bool full() const noexcept { return slots_ != 0 && (rear_ + 1) % slots_ == front_; }
-    [[nodiscard]] std::size_t size() const noexcept { return rear_ >= front_ ? rear_ - front_ : slots_ - front_ + rear_; }
-    [[nodiscard]] bool enqueue(const T& value) { if (full()) return false; data_[rear_] = value; rear_ = (rear_ + 1) % slots_; return true; }
-    [[nodiscard]] bool enqueue(T&& value) { if (full()) return false; data_[rear_] = std::move(value); rear_ = (rear_ + 1) % slots_; return true; }
-    [[nodiscard]] std::optional<T> dequeue() { if (empty()) return std::nullopt; T value = std::move(data_[front_]); front_ = (front_ + 1) % slots_; return value; }
-    [[nodiscard]] const T* front() const noexcept { return empty() ? nullptr : &data_[front_]; }
-    void clear() noexcept { front_ = rear_ = 0; }
-private: std::size_t slots_{0}, front_{0}, rear_{0}; T* data_{nullptr};
-};
-// <<< array-queue
-
-// >>> linked-queue
+```cpp file=code/ch03/queue/modern.hpp#linked-queue
 template <typename T>
 class LinkedQueue {
     struct Node { T value; Node* next{nullptr}; template <typename U> explicit Node(U&& value) : value(std::forward<U>(value)) {} };
@@ -1120,11 +1065,18 @@ public:
     void clear() noexcept { while (front_ != nullptr) { Node* old = front_; front_ = old->next; delete old; } rear_ = nullptr; size_ = 0; }
 private: void append(Node* node) noexcept { if (rear_ == nullptr) front_ = rear_ = node; else { rear_->next = node; rear_ = node; } ++size_; } Node* front_{nullptr}; Node* rear_{nullptr}; std::size_t size_{0};
 };
-// <<< linked-queue
-}  // namespace dsa
 ```
 
 ## 3.3 栈与队列的比较
 
-顺序结构有连续存储与预分配的特点；链式结构按需分配但每个结点附带链接开销。
-两种队列的端点操作均为常数时间，选择取决于容量上界、内存局部性和分配成本。
+### 3.3.1 顺序栈与链式栈
+
+顺序栈预分配连续缓冲区，扩容要搬迁；链式栈按需分配，没有「栈满」，但每个结点多一个指针。两者的 `push`/`pop` 都是 O(1)。
+
+### 3.3.2 顺序队列与链式队列
+
+两种队列的端点操作都是常数时间。循环数组适合容量上界已知、希望局部性好的场合；链表适合长度变化大、不愿预留空洞槽位的场合。
+
+### 3.3.3 限制存取点的表
+
+栈和队列都是限制存取点的线性表：栈只开一端，队列开两端但方向相反。双端队列同时开放两端，不在本章实现范围内。

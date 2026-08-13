@@ -6,7 +6,7 @@
 [可运行示例](../code/ch08/sorting/demo.cpp)、
 [对拍测试](../code/ch08/sorting/test.cpp)。
 
-## 8.1 先把题目说清楚
+## 8.1 排序问题的基本概念
 
 | 方法 | 平均时间 | 稳定性 | 主要特点 |
 | --- | --- | --- | --- |
@@ -20,7 +20,9 @@
 
 「稳定」指相等键在排序前后的相对顺序不变。例如记录按成绩排序时，两名同分学生仍按原来的姓名顺序出现。本章所有实现接受有符号整数，测试含重复和负数。没有用 `std::sort` / `std::make_heap` 替代手写算法。
 
-## 8.2 如何调用
+## 8.2 插入排序
+
+### 8.2.1 先跑一遍
 
 ```cpp file=code/ch08/sorting/demo.cpp
 #include "modern.hpp"
@@ -74,19 +76,7 @@ c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch08/sorting \
 
 四种算法交出同一条非递减序列。插入排序保持两个 `-2`、两个 `3` 的相对次序；堆排和快排不保证这一点。
 
-## 8.3 再读实现
-
 直接插入把 `values[index]` 抽出来，向前挪动所有比它大的元素，把空位留给它。相等元素不越过彼此，所以稳定。
-
-堆排序先把数组建成最大堆，再反复把堆顶与堆尾交换并缩小堆。`sift_down` 必须比较左右两个孩子，漏掉右孩子会交出未排序数组——测试里有一条专门守这个。
-
-快排选区间末元素为枢轴，把更小的元素换到左侧，再递归两边。全相等的输入必须也能结束，否则分区不推进就会无限递归。
-
-基数排序把有符号 `int` 的符号位翻转后，按字节做 4 趟计数收集。否则负数会按无符号序排到最大。
-
-## 8.4 现代实现
-
-直接插入：
 
 ```cpp file=code/ch08/sorting/modern.hpp#insertion
 // 算法8.1：直接插入排序。相等元素不越过彼此，故稳定。
@@ -103,7 +93,15 @@ inline void insertion_sort(std::vector<int>& values) {
 }
 ```
 
-堆排序：
+### 8.2.2 Shell 排序
+
+增量每次减半的插入排序。不稳定，平均优于直接插入。实现见同一源文件中的 `shell_sort`。
+
+## 8.3 选择排序
+
+### 8.3.2 堆排序
+
+先把数组建成最大堆，再反复把堆顶与堆尾交换并缩小堆。`sift_down` 必须比较左右两个孩子。
 
 ```cpp file=code/ch08/sorting/modern.hpp#heap
 // 算法8.4：手写最大堆筛选与堆排序，不委托 std::make_heap/sort_heap。
@@ -130,7 +128,11 @@ inline void heap_sort(std::vector<int>& values) {
 }
 ```
 
-快速排序：
+## 8.4 交换排序
+
+### 8.4.2 快速排序
+
+选区间末元素为枢轴，把更小的元素换到左侧，再递归两边。全相等的输入必须也能结束。
 
 ```cpp file=code/ch08/sorting/modern.hpp#quick
 inline std::size_t partition(std::vector<int>& values, std::size_t first, std::size_t last) {
@@ -159,7 +161,15 @@ inline void quick_sort_range(std::vector<int>& values, std::size_t first, std::s
 inline void quick_sort(std::vector<int>& values) { quick_sort_range(values, 0, values.size()); }
 ```
 
-基数排序：
+## 8.5 归并排序
+
+稳定，需要 O(n) 辅助空间。实现见 `merge_sort`。
+
+## 8.6 分配排序和索引排序
+
+### 8.6.2 基数排序
+
+把有符号 `int` 的符号位翻转后，按字节做 4 趟计数收集。否则负数会按无符号序排到最大。
 
 ```cpp file=code/ch08/sorting/modern.hpp#radix
 // 算法8.11：LSD 基数排序。翻转符号位使二补码有符号 int 按无符号序排序。
@@ -182,4 +192,8 @@ inline void radix_sort(std::vector<int>& values) {
 }
 ```
 
-其余算法（Shell、选择、冒泡、归并、计数、索引排序）在同一文件里，接口相同：`void sort(std::vector<int>&)`。
+## 8.7 排序算法的时间代价
+
+比较排序在最坏情况下至少 Ω(n log n) 次比较。插入、选择、冒泡是 O(n²)；堆、归并最坏也是 O(n log n)；快排平均 O(n log n)、最坏 O(n²)。计数和基数不是比较排序，代价取决于值域或位数。
+
+

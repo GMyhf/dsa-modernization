@@ -6,7 +6,36 @@
 [可运行示例](../code/ch10/search_hash/demo.cpp)、
 [墓碑探测测试](../code/ch10/search_hash/test.cpp)。
 
-## 10.1 先把题目说清楚
+## 10.1 基于线性表的检索
+
+顺序检索不要求有序，没找到返回 `nullopt`。二分检索要求有序，用半开区间 `[first, last)`，避免无符号下标上 `mid - 1` 下溢。
+
+```cpp file=code/ch10/search_hash/modern.hpp#sequential-binary
+// 算法10.2：无需修改输入容器的顺序检索。
+inline std::optional<std::size_t> sequential_search(const std::vector<int>& values, int key) {
+    for (std::size_t index = 0; index < values.size(); ++index) {
+        if (values[index] == key) return index;
+    }
+    return std::nullopt;
+}
+
+// 算法10.3：半开区间避免 `mid - 1` 在无符号下标下溢。
+inline std::optional<std::size_t> binary_search(const std::vector<int>& sorted_values, int key) {
+    std::size_t first = 0;
+    std::size_t last = sorted_values.size();
+    while (first < last) {
+        const std::size_t middle = first + (last - first) / 2;
+        if (sorted_values[middle] == key) return middle;
+        if (sorted_values[middle] < key) first = middle + 1;
+        else last = middle;
+    }
+    return std::nullopt;
+}
+```
+
+## 10.3 散列方法
+
+开放定址删除后**不能**立刻把槽位改成空，否则会截断后方元素的探测链。
 
 开放定址删除后**不能**立刻把槽位改成空，否则会截断后方元素的探测链。
 
@@ -25,7 +54,7 @@
 
 散列表追求平均 O(1) 查找，前提是装载因子不过高且散列分布均匀；它不保持键的有序关系，不适合按范围遍历。
 
-## 10.2 如何调用
+### 10.3.4 先跑一遍
 
 ```cpp file=code/ch10/search_hash/demo.cpp
 #include "modern.hpp"
@@ -86,42 +115,7 @@ c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch10/search_hash \
 
 若把删除写成「标空」而不是「标墓碑」，第二行会变成「否」——测试里有两条具名断言守住这件事。
 
-## 10.3 再读实现
-
-顺序检索从头扫到尾，没找到返回 `nullopt`。二分检索用半开区间 `[first, last)`，避免无符号下标上 `mid - 1` 下溢。
-
-`HashTable::home` 先取绝对值再取模，所以负键也能进表。`find_slot` 遇到 `empty` 就停，遇到 `tombstone` 继续；`insertion_slot` 记下沿途第一个墓碑，确认后方没有同键后复用它。表满且全是墓碑时，插入仍可复用墓碑；真正一个空位都没有且键不在表中，才返回失败。
-
-按键删除返回 `bool`：删到返回 `true`，键不存在返回 `false`。这是 D-001 §3c 的口径，不是逻辑错误。
-
-## 10.4 现代实现
-
-顺序与二分检索：
-
-```cpp file=code/ch10/search_hash/modern.hpp#sequential-binary
-// 算法10.2：无需修改输入容器的顺序检索。
-inline std::optional<std::size_t> sequential_search(const std::vector<int>& values, int key) {
-    for (std::size_t index = 0; index < values.size(); ++index) {
-        if (values[index] == key) return index;
-    }
-    return std::nullopt;
-}
-
-// 算法10.3：半开区间避免 `mid - 1` 在无符号下标下溢。
-inline std::optional<std::size_t> binary_search(const std::vector<int>& sorted_values, int key) {
-    std::size_t first = 0;
-    std::size_t last = sorted_values.size();
-    while (first < last) {
-        const std::size_t middle = first + (last - first) / 2;
-        if (sorted_values[middle] == key) return middle;
-        if (sorted_values[middle] < key) first = middle + 1;
-        else last = middle;
-    }
-    return std::nullopt;
-}
-```
-
-开放定址散列表：
+`HashTable::home` 先取绝对值再取模，所以负键也能进表。`find_slot` 遇到 `empty` 就停，遇到 `tombstone` 继续；`insertion_slot` 记下沿途第一个墓碑，确认后方没有同键后复用它。按键删除返回 `bool`。
 
 ```cpp file=code/ch10/search_hash/modern.hpp#hash-table
 // 算法10.9–10.13：线性探测闭散列表，显式区分空、占用和墓碑。
@@ -188,3 +182,4 @@ private:
     std::size_t size_{0};
 };
 ```
+

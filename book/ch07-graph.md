@@ -6,7 +6,7 @@
 [可运行示例](../code/ch07/graph/demo.cpp)、
 [交叉验证测试](../code/ch07/graph/test.cpp)。
 
-## 7.1 先把题目说清楚
+## 7.1 图的定义和基本术语
 
 | 题目 | 前提 | 结果 |
 | --- | --- | --- |
@@ -20,7 +20,19 @@
 
 本单元用邻接矩阵。没有边记为 `infinity`（`int` 最大值的四分之一，给加法留余量）。环、非连通图等正常失败状态用 `optional` 表达。DFS 仍是递归，深图有栈溢出风险。
 
-## 7.2 如何调用
+## 7.2 图的抽象数据类型
+
+图的运算是加边、问顶点数、以及下面各节的周游与最优化。原书【代码7.1】【代码7.2】的 ADT 声明残缺且标识符被空格切断；本书直接定义在 `Graph` 上。
+
+## 7.3 图的存储结构
+
+### 7.3.1 相邻矩阵
+
+邻接矩阵的第 `from` 行、第 `to` 列是边权。构造时对角线为 0，其余为 `infinity`。`add_edge(..., directed=false)` 同时写入对称位置。零权边可以表示——原书把 0 同时当成「无边」是错的。
+
+## 7.4 图的周游
+
+### 7.4.1 先跑一遍
 
 下面这张有向图：`0→1(2)`、`0→2(7)`、`1→2(1)`、`1→3(5)`、`2→3(1)`、`3→4(3)`。从 0 到 4 的最短路是 `0→1→2→3→4`，总权 7，不是那条权为 7 的直达边 `0→2` 再往后走。
 
@@ -77,45 +89,9 @@ Dijkstra(0->4) = 7
 
 若再加上 `4→0` 形成环，`topological_sort()` 返回 `nullopt`。
 
-## 7.3 再读实现
+### 7.4.2 深度优先与广度优先
 
-邻接矩阵的第 `from` 行、第 `to` 列是边权。构造时对角线为 0，其余为 `infinity`。`add_edge(..., directed=false)` 同时写入对称位置。
-
-DFS 进入一个顶点就立刻标记已访问，再沿编号从小到大的出边递归——所以本例从 0 出发的顺序是 0、1、2、3、4。BFS 用队列按层扩展，先到的顶点先出队。
-
-拓扑排序统计每个顶点的入度，把入度为 0 的点入队；每取出一个点，就把它指出的入度减 1。若最终取出的点数少于顶点数，图里有环。
-
-Dijkstra 反复选出尚未确定的、当前距离最小的顶点，用它的出边松弛邻居。Floyd 则枚举中转点 `via`，比较 `from→to` 与 `from→via→to`。测试里五个源点的 Dijkstra 与 Floyd 逐项对拍。
-
-Prim 从指定源点生长，每次把离当前树最近的顶点加进来。Kruskal 把边按权排序，用并查集跳过会形成环的边。两者在连通图上都应得到 `n-1` 条边、相同总权。
-
-## 7.4 现代实现
-
-建图：
-
-```cpp file=code/ch07/graph/modern.hpp#graph-build
-explicit Graph(std::size_t count) : adjacency_(count, std::vector<int>(count, infinity)) {
-    for (std::size_t vertex = 0; vertex < count; ++vertex) {
-        adjacency_[vertex][vertex] = 0;
-    }
-}
-
-[[nodiscard]] std::size_t vertices() const noexcept { return adjacency_.size(); }
-
-void add_edge(std::size_t from, std::size_t to, int weight, bool directed = true) {
-    check_vertex(from);
-    check_vertex(to);
-    if (weight < 0) {
-        throw std::invalid_argument("negative edge");
-    }
-    adjacency_[from][to] = weight;
-    if (!directed) {
-        adjacency_[to][from] = weight;
-    }
-}
-```
-
-深度优先与广度优先：
+DFS 进入一个顶点就立刻标记已访问，再沿编号从小到大的出边递归。BFS 用队列按层扩展，先到的顶点先出队。
 
 ```cpp file=code/ch07/graph/modern.hpp#dfs
 [[nodiscard]] std::vector<std::size_t> dfs(std::size_t source) const {
@@ -150,7 +126,9 @@ void add_edge(std::size_t from, std::size_t to, int weight, bool directed = true
 }
 ```
 
-拓扑排序：
+### 7.4.3 拓扑排序
+
+统计每个顶点的入度，把入度为 0 的点入队；每取出一个点，就把它指出的入度减 1。若最终取出的点数少于顶点数，图里有环。
 
 ```cpp file=code/ch07/graph/modern.hpp#topological
 [[nodiscard]] std::optional<std::vector<std::size_t>> topological_sort() const {
@@ -184,7 +162,11 @@ void add_edge(std::size_t from, std::size_t to, int weight, bool directed = true
 }
 ```
 
-单源与全源最短路：
+## 7.5 最短路径
+
+### 7.5.1 单源最短路径
+
+Dijkstra 反复选出尚未确定的、当前距离最小的顶点，用它的出边松弛邻居。边权必须非负。
 
 ```cpp file=code/ch07/graph/modern.hpp#dijkstra
 [[nodiscard]] std::vector<int> dijkstra(std::size_t source) const {
@@ -209,6 +191,10 @@ void add_edge(std::size_t from, std::size_t to, int weight, bool directed = true
 }
 ```
 
+### 7.5.2 每对顶点之间的最短路径
+
+Floyd 枚举中转点 `via`，比较 `from→to` 与 `from→via→to`。测试里五个源点的 Dijkstra 与 Floyd 逐项对拍。
+
 ```cpp file=code/ch07/graph/modern.hpp#floyd
 [[nodiscard]] std::vector<std::vector<int>> floyd() const {
     auto distance = adjacency_;
@@ -226,7 +212,13 @@ void add_edge(std::size_t from, std::size_t to, int weight, bool directed = true
 }
 ```
 
-最小生成树：
+## 7.6 最小生成树
+
+目标不是任意两点最短，而是连通全部顶点且选中边的总权最小。
+
+### 7.6.1 Prim 算法
+
+从指定源点生长，每次把离当前树最近的顶点加进来。非连通则返回 `nullopt`。
 
 ```cpp file=code/ch07/graph/modern.hpp#prim
 [[nodiscard]] std::optional<std::vector<Edge>> prim(std::size_t source) const {
@@ -256,6 +248,10 @@ void add_edge(std::size_t from, std::size_t to, int weight, bool directed = true
 }
 ```
 
+### 7.6.2 Kruskal 算法
+
+把边按权排序，用并查集跳过会形成环的边。连通图上与 Prim 得到相同总权、`n-1` 条边。
+
 ```cpp file=code/ch07/graph/modern.hpp#kruskal
 [[nodiscard]] std::optional<std::vector<Edge>> kruskal() const {
     std::vector<Edge> edges;
@@ -284,3 +280,4 @@ void add_edge(std::size_t from, std::size_t to, int weight, bool directed = true
                                             : std::nullopt;
 }
 ```
+
