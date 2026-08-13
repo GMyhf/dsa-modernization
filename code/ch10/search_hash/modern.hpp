@@ -45,6 +45,7 @@ inline std::optional<std::size_t> binary_search(const std::vector<int>& sorted_v
 }
 // <<< sequential-binary
 
+// >>> int-set
 // 代码10.4、算法10.5–10.7：不重复整数集合。
 class IntSet {
 public:
@@ -73,7 +74,9 @@ public:
 private:
     std::vector<int> values_;
 };
+// <<< int-set
 
+// >>> elf-hash
 // 算法10.8：ELFhash，逐字节处理，不把 char 的符号性带入散列。
 inline std::size_t elf_hash(const std::string& text) noexcept {
     std::size_t hash = 0;
@@ -85,6 +88,7 @@ inline std::size_t elf_hash(const std::string& text) noexcept {
     }
     return hash;
 }
+// <<< elf-hash
 
 // >>> hash-table
 // 算法10.9–10.13：线性探测闭散列表，显式区分空、占用和墓碑。

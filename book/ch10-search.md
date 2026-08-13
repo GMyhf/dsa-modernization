@@ -6,9 +6,27 @@
 [可运行示例](../code/ch10/search_hash/demo.cpp)、
 [墓碑探测测试](../code/ch10/search_hash/test.cpp)。
 
+检索是在一组记录里定位关键码等于给定值的那一条，或属性满足条件的那些条。成功就是至少找到一条，失败就是没有。精确匹配查单个值，范围查询查一个区间。
+
+平均检索长度 $\mathrm{ASL}=\sum P_i C_i$，其中 $P_i$ 是查到第 i 个元素的概率，$C_i$ 是比较次数。衡量算法还要看额外空间和实现复杂度。
+
+可以把检索分成四类：基于线性表、按关键码直接访问（含散列）、树形索引、基于属性（倒排）。本章做前两类；树形索引见第 5、11、12 章，倒排见第 11 章。
+
 ## 10.1 基于线性表的检索
 
-顺序检索不要求有序，没找到返回 `nullopt`。二分检索要求有序，用半开区间 `[first, last)`，避免无符号下标上 `mid - 1` 下溢。
+数据放在数组或链表里，按给定值 K 比较，直到命中或确定不在表中。
+
+### 10.1.1 顺序检索
+
+从表头逐个比到表尾。元素可以无序。最好 1 次，最坏 n 次，等概率平均 $(n+1)/2$。
+
+### 10.1.2 二分检索
+
+表必须有序。每次取中点，相等则停，否则丢掉一半。半开区间 `[first, last)` 避免无符号下标上 `mid - 1` 下溢。比较次数是 $O(\log n)$，不适合链表。
+
+### 10.1.3 分块检索
+
+把表分成若干块，块间有序、块内可以无序。先在块的索引上定位，再在块内顺序查。是顺序与二分之间的折中。本章不另写未验证的分块实现。
 
 ```cpp file=code/ch10/search_hash/modern.hpp#sequential-binary
 // 算法10.2：无需修改输入容器的顺序检索。
@@ -33,11 +51,79 @@ inline std::optional<std::size_t> binary_search(const std::vector<int>& sorted_v
 }
 ```
 
+## 10.2 集合的检索
+
+集合只关心「在不在」，不保留重复，也不保证顺序。交、并、差都可以建立在检索之上。
+
+### 10.2.1 集合的数学特性
+
+元素互异；属于关系是命题，不是位置。因此插入已存在的键、删除不存在的键都是可预期的失败，返回 `false`。
+
+### 10.2.2 计算机中的集合
+
+可以用线性表、二叉搜索树或散列表实现。本章的 `IntSet` 用线性表加顺序检索，把接口钉死；大规模时应换成后面的散列表。
+
+```cpp file=code/ch10/search_hash/modern.hpp#int-set
+// 代码10.4、算法10.5–10.7：不重复整数集合。
+class IntSet {
+public:
+    [[nodiscard]] bool insert(int value) {
+        if (contains(value)) return false;
+        values_.push_back(value);
+        return true;
+    }
+    [[nodiscard]] bool erase(int value) {
+        const auto found = sequential_search(values_, value);
+        if (!found) return false;
+        values_.erase(values_.begin() + static_cast<std::ptrdiff_t>(*found));
+        return true;
+    }
+    [[nodiscard]] bool contains(int value) const { return sequential_search(values_, value).has_value(); }
+    [[nodiscard]] IntSet intersection(const IntSet& other) const {
+        IntSet result;
+        for (int value : values_) if (other.contains(value)) (void)result.insert(value);
+        return result;
+    }
+    [[nodiscard]] bool includes(const IntSet& other) const {
+        for (int value : other.values_) if (!contains(value)) return false;
+        return true;
+    }
+    [[nodiscard]] std::size_t size() const noexcept { return values_.size(); }
+private:
+    std::vector<int> values_;
+};
+```
+
 ## 10.3 散列方法
 
-开放定址删除后**不能**立刻把槽位改成空，否则会截断后方元素的探测链。
+散列用函数把关键码映射成槽位下标，期望平均 O(1)。它不保持有序，不适合范围查询。装载因子过高或散列不均匀时会退化。
 
-开放定址删除后**不能**立刻把槽位改成空，否则会截断后方元素的探测链。
+### 10.3.1 散列函数
+
+好的散列函数计算要简单，地址要均匀。本章实现了 ELFHash：逐字节移位异或，并用无符号字符，避免 `char` 的符号性进入计算。
+
+```cpp file=code/ch10/search_hash/modern.hpp#elf-hash
+// 算法10.8：ELFhash，逐字节处理，不把 char 的符号性带入散列。
+inline std::size_t elf_hash(const std::string& text) noexcept {
+    std::size_t hash = 0;
+    for (unsigned char character : text) {
+        hash = (hash << 4U) + character;
+        const std::size_t high_bits = hash & 0xF0000000U;
+        if (high_bits != 0) hash ^= high_bits >> 24U;
+        hash &= ~high_bits;
+    }
+    return hash;
+}
+```
+
+### 10.3.2 开散列方法（拉链法）
+
+每个槽挂一条链表，冲突的关键码串在同一条链上。删除简单，不会截断别的链。装载因子可以大于 1。本章主实现是闭散列，开散列不另写一份。
+
+### 10.3.3 闭散列方法（开地址法）
+
+冲突时在表内继续探测。线性探测就是「回家地址 + i」。删除后**不能**立刻把槽位改成空，否则会截断后方元素的探测链。
+
 
 假设表长为 5，键 1、6、11 的散列地址都为 1，于是它们依次放在槽 1、2、3：
 
@@ -54,7 +140,10 @@ inline std::optional<std::size_t> binary_search(const std::vector<int>& sorted_v
 
 散列表追求平均 O(1) 查找，前提是装载因子不过高且散列分布均匀；它不保持键的有序关系，不适合按范围遍历。
 
-### 10.3.4 先跑一遍
+### 10.3.4 闭散列表的算法
+
+先跑一遍：
+
 
 ```cpp file=code/ch10/search_hash/demo.cpp
 #include "modern.hpp"
@@ -182,4 +271,12 @@ private:
     std::size_t size_{0};
 };
 ```
+
+### 10.3.5 散列方法的效率分析
+
+成功检索的期望探测次数随装载因子 α 上升。线性探测大约是 $(1+1/(1-\alpha))/2$；拉链法是 $1+\alpha/2$。α 接近 1 时闭散列急剧变差，应扩表或改开散列。
+
+### 10.3.6 散列方法的应用
+
+编译器符号表、缓存、去重都常用散列。需要范围查询或有序遍历时，应改用树或有序表。
 
