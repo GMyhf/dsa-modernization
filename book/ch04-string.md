@@ -1,5 +1,15 @@
 # 第4章 字符串（现代化稿）
 
+## 本章先读什么
+
+字符串是字符的有限序列。先区分“保存字符串”的类与“在文本中找模式”的算法：前者处理容量、
+复制和下标边界，后者处理比较顺序。朴素匹配在失配后移动模式；KMP 预先计算 `next` 信息，避免
+重复比较已经知道相等的前缀。
+
+源码入口：[字符串类](../code/ch04/string_class/modern.hpp)、
+[模式匹配](../code/ch04/pattern_matching/modern.hpp)。运行：
+`python3 tools/check_code.py --allow-degraded code/ch04/string_class code/ch04/pattern_matching`。
+
 > **本文件的地位**：《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）
 > 第 4 章的现代化重排（4.1 字符串概念、4.2 存储结构与实现、4.3 模式匹配）。
 >

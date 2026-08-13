@@ -1,5 +1,15 @@
 # 第5章 二叉树
 
+## 本章先读什么
+
+二叉树的每个结点最多有左、右两个孩子。周游回答“以什么顺序访问全部结点”；二叉搜索树加入
+左小右大的有序约束；堆把最小值或最大值放在根；Huffman 树不断合并两个最小权值。先画结点和
+边，再跟随周游或插入/删除过程，最后阅读指针所有权与递归实现。
+
+源码入口：[二叉树与二叉搜索树](../code/ch05/binary_tree/modern.hpp)、
+[最小堆与 Huffman 树](../code/ch05/heap_huffman/modern.hpp)。运行：
+`python3 tools/check_code.py --allow-degraded code/ch05/binary_tree code/ch05/heap_huffman`。
+
 本章保留二叉链表、递归周游、二叉搜索树、完全二叉树上的堆与 Huffman 合并的教学骨架。
 现代化处理的是所有权、空状态和错误接口：树独占结点并显式深拷贝；提取返回 `optional`；
 按键删除返回 `bool`；容器不输出文本。

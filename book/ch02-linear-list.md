@@ -1,5 +1,16 @@
 # 第2章 线性表（现代化稿 · 2.1–2.2 顺序表）
 
+## 本章先读什么
+
+线性表把一串同类型元素排成唯一的先后次序。顺序表把元素连续放在数组里，能 O(1) 按下标访问；
+链表用链接保存相邻关系，能在已知结点位置 O(1) 插入或删除。关键是区分“按位置找元素”和
+“已知结点后改链接”这两类操作。
+
+源码入口：[顺序表实现](../code/ch02/array_list/modern.hpp)、
+[顺序表测试](../code/ch02/array_list/test.cpp)、[链表实现](../code/ch02/linked_list/modern.hpp)、
+[链表测试](../code/ch02/linked_list/test.cpp)。运行：
+`python3 tools/check_code.py --allow-degraded code/ch02/array_list code/ch02/linked_list`。
+
 > **本文件的地位**：《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）
 > 第 2.1–2.2 节的现代化重排。原书正文（`dsa_raw.md:1145` 起）的讲法、编号、图表一概保留；
 > 换掉的只是那套 2008 年的 C++ 写法。2.3 节链表另开一轮。

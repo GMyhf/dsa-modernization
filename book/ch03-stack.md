@@ -1,5 +1,15 @@
 # 第3章 栈与队列（现代化稿 · 3.1 栈）
 
+## 本章先读什么
+
+栈是“最后放入、最先取出”，适合递归调用、括号匹配和表达式计算；队列是“先放入、先取出”，
+适合排队服务和广度优先搜索。先用纸笔跟踪 `push/pop` 或 `enqueue/dequeue` 的状态，再阅读数组
+和链式表示的所有权代码。空栈、空队列是正常状态，现代接口以 `std::optional` 返回。
+
+源码入口：[顺序栈](../code/ch03/array_stack/modern.hpp)、[链式栈](../code/ch03/linked_stack/modern.hpp)、
+[表达式求值](../code/ch03/expression_eval/modern.hpp)、[背包](../code/ch03/knapsack/modern.hpp)、
+[队列](../code/ch03/queue/modern.hpp)。运行：`python3 tools/check_code.py --allow-degraded code/ch03`。
+
 > **本文件的地位**：这是《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）
 > 第 3.1 节的现代化重排，也是整个仓库的**样板**。原书正文（`dsa_raw.md:1785` 起）
 > 的讲法、编号、图表一概保留；换掉的只是那套 2008 年的 C++ 写法。
