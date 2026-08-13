@@ -35,6 +35,7 @@ CHAPTERS = [
     BOOK / "ch10-search.md",
     BOOK / "ch11-index.md",
     BOOK / "ch12-advanced.md",
+    BOOK / "插图.md",
     BOOK / "勘误.md",
 ]
 
@@ -232,7 +233,7 @@ def run_pandoc(md_path: Path, pdf_path: Path) -> None:
         "--from",
         "markdown+tex_math_dollars+raw_tex+pipe_tables+grid_tables+fenced_code_attributes",
         "--toc",
-        "--toc-depth=2",
+        "--toc-depth=3",
         "--top-level-division=chapter",
         f"--include-in-header={WORK / 'preamble.tex'}",
         "--resource-path",
