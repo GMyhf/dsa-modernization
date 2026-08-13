@@ -43,23 +43,44 @@
 \DeclareCaptionLabelSeparator{colon}{：}
 \captionsetup{labelsep=colon}
 \graphicspath{{../}{../../}}
-\setkeys{Gin}{width=0.88\linewidth,keepaspectratio}
+% 插图默认约版心三分之二。pandoc 的 \pandocbounded 只在「超出版心」时缩小，
+% 原图更宽时仍会撑满；这里改成硬上限。
+\setkeys{Gin}{width=0.62\linewidth,keepaspectratio}
+\makeatletter
+\renewcommand*\pandocbounded[1]{%
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{0.62\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempa\p@<\p@
+    \scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else
+    \usebox{\pandoc@box}%
+  \fi
+}
+\makeatother
 
 \usepackage{enumitem}
 \setlist{nosep,leftmargin=1.6em}
 
 \pagestyle{plain}
-\setlength{\parskip}{0.35em}
+\setlength{\parskip}{0.25em}
 \setlength{\parindent}{2em}
-\renewcommand{\baselinestretch}{1.18}
+\renewcommand{\baselinestretch}{1.12}
+% book/ctexbook 默认 flushbottom，标题弹性间距会被拉成整页空白。
+\raggedbottom
+% pandoc 模板会装 parskip.sty，把段距拉到 6pt plus 2pt；这里压回去。
+\setlength{\parskip}{0.2em plus 0.05em minus 0.05em}
 
 % 章首页不要再印一遍巨大的 \chapter 装饰标题：正文里已有「第N章」。
 \usepackage{titlesec}
-\titleformat{\chapter}[display]
-  {\normalfont\huge\bfseries}
+\titleformat{\chapter}[hang]
+  {\normalfont\Large\bfseries}
   {}
   {0pt}
-  {\huge}
-\titlespacing*{\chapter}{0pt}{-18pt}{12pt}
+  {}
+\titleformat{\section}{\normalfont\large\bfseries}{}{0pt}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{}{0pt}{}
+\titlespacing*{\chapter}{0pt}{-12pt}{8pt}
+\titlespacing*{\section}{0pt}{1.1em}{0.45em}
+\titlespacing*{\subsection}{0pt}{0.85em}{0.3em}
 
 \newcommand{\covernote}[1]{\begin{center}\large #1\end{center}}
