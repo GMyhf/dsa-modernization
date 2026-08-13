@@ -81,6 +81,22 @@ c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch01/adt code/ch01/adt/demo.cpp -o /
 /tmp/rumor-demo
 ```
 
+第一行是“编译”，第二行是“运行刚刚编译出的程序”。逐项解释如下：
+
+| 片段 | 含义 |
+| --- | --- |
+| `c++` | C++ 编译器命令。在 macOS 上通常指 Clang；Linux 上也可能指 GCC。 |
+| `-std=c++17` | 按 C++17 语言规则编译；本教程的 `std::optional` 需要 C++17。 |
+| `-Wall -Wextra` | 打开常见和额外的编译器警告，例如未使用变量或可疑转换。 |
+| `-Werror` | 把警告当作错误；用于学习时可及早发现问题。初学调试时可暂时去掉它。 |
+| `-Icode/ch01/adt` | 加一个头文件搜索目录，因此 `#include "modern.hpp"` 能找到 `code/ch01/adt/modern.hpp`。 |
+| `code/ch01/adt/demo.cpp` | 要编译的源文件。它包含 `main()`，所以可以成为可执行程序。 |
+| `-o /tmp/rumor-demo` | 指定输出文件名为 `/tmp/rumor-demo`。`/tmp` 是临时目录，重启后文件可能消失。 |
+| `/tmp/rumor-demo` | 运行该可执行文件，打印程序结果。 |
+
+如果系统提示 `c++: command not found`，需要先安装 C++ 编译器；如果想把程序留在当前目录，
+可以把 `-o /tmp/rumor-demo` 改成 `-o rumor-demo`，再运行 `./rumor-demo`。
+
 输出是：
 
 ```console
@@ -96,9 +112,100 @@ c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch01/adt code/ch01/adt/demo.cpp -o /
 ## 1.3 再读实现
 
 先只关注三个公开操作：构造函数建立距离矩阵，`add_route` 填入直接边，`best_source` 计算答案。
-`best_source` 内部复制一份矩阵，因而多次调用不会改变原始网络。三重循环是 Floyd：外层枚举
-中转站 `via`，内层尝试用 `from -> via -> to` 更新 `from -> to`。之后的双重循环正是上节的
-“每行取最大、所有行再取最小”。
+`best_source` 内部复制一份矩阵，因而多次调用不会改变原始网络。下面按代码出现顺序解释。
+
+### 1.3.1 预处理、头文件与命名空间
+
+`#pragma once` 告诉编译器：同一个头文件即使被间接包含多次，也只处理一次，避免类定义重复。
+
+| 头文件 | 本程序用它做什么 |
+| --- | --- |
+| `<cstddef>` | 提供 `std::size_t`，表示非负的大小或下标。 |
+| `<limits>` | 提供 `std::numeric_limits<int>::max()`，取得 `int` 可表示的最大值。 |
+| `<optional>` | 提供 `std::optional`，表达“可能没有答案”。 |
+| `<stdexcept>` | 提供 `std::invalid_argument`，用于报告非法参数。 |
+| `<vector>` | 提供动态数组 `std::vector`，这里用它保存二维距离矩阵。 |
+
+`namespace dsa::adt { ... }` 把名字放入 `dsa::adt` 命名空间。完整类名因此是
+`dsa::adt::RumorNetwork`，可避免项目中另一个人也定义 `RumorNetwork` 时发生重名。
+代码块中的 `// >>> adt` 与 `// <<< adt` 只是本书稿的同步标记，不参与 C++ 逻辑。
+
+### 1.3.2 类、常量和构造函数
+
+`class RumorNetwork` 定义一种新类型。`public:` 以下是调用者可以使用的接口；`private:` 以下是
+实现细节，调用者不能直接改写。
+
+```text
+static constexpr int infinity = std::numeric_limits<int>::max() / 4;
+```
+
+`static` 表示 `infinity` 属于类本身，而不是每个对象各存一份；`constexpr` 表示编译期常量。
+取最大值的四分之一而非最大值，是为了计算 `a + b` 时仍留有余量，避免整数溢出。
+
+```text
+explicit RumorNetwork(std::size_t people)
+    : distance_(people, std::vector<int>(people, infinity)) { ... }
+```
+
+这是构造函数：`RumorNetwork network(5)` 会调用它。冒号后的部分叫**成员初始化列表**，先创建
+`distance_`，再进入花括号。它构造一个 5 行、每行 5 列的整数矩阵，初始全为 `infinity`。随后
+循环把对角线改为 0，因为一个人到自己不需要传播时间。矩阵的第 `from` 行、第 `to` 列总是表示
+从 `from` 到 `to` 的当前已知最短时间。
+
+### 1.3.3 添加一条边
+
+```text
+void add_route(std::size_t from, std::size_t to, int cost)
+```
+
+这三个参数分别是起点编号、终点编号和直接传播时间。第一段 `if` 检查编号是否越界、时间是否为
+负；不满足题目定义时抛出 `std::invalid_argument`，调用者可用 `try/catch` 处理。第二段 `if` 只在
+新边更短时更新矩阵，所以即使重复添加同一方向的边，也保留较小的时间。
+
+### 1.3.4 Floyd 三重循环
+
+`auto shortest = distance_;` 复制输入矩阵。`auto` 让编译器自动推断类型，这里实际是
+`std::vector<std::vector<int>>`。
+
+三层循环的含义不是“随便循环三次”，而是按中转站逐步扩大可用路径：
+
+```text
+for each via:       允许路径经过 via
+  for each from:    固定起点 from
+    for each to:    固定终点 to
+      比较 原来的 from->to 与 from->via->to
+```
+
+条件 `shortest[from][via] != infinity && shortest[via][to] != infinity` 先确认两段都可达。
+若 `from -> via -> to` 的总时间更小，就更新 `shortest[from][to]`。例如 B2 到 B4 没有直接边，
+但 B2→B5 是 8、B5→B1 是 5、B1→B4 是 4，所以 Floyd 最终得到 B2→B4 是 `8 + 5 + 4 = 17`。
+
+### 1.3.5 从最短路矩阵选答案
+
+```text
+std::optional<std::size_t> result;
+int smallest_eccentricity = infinity;
+```
+
+默认构造的 `result` 是空值，表示“还没有找到合格起点”。`smallest_eccentricity` 保存目前见过的
+最小完成时间。这里的 eccentricity（离心率）就是某起点到全部顶点的最短距离中的最大值。
+
+外层循环每次处理一行，即一个候选起点；内层循环扫描该行。三目表达式
+`distance > largest_distance ? distance : largest_distance` 等价于“若新值更大就采用新值，否则保留
+旧值”，最终得到这行的最大值。若它比当前最佳值小，就同时更新最佳时间与 `result`。
+
+任何一行含 `infinity` 时，该行最大值也是 `infinity`，不会优于有限答案；若所有行都是
+`infinity`，`result` 保持为空，函数返回 `std::nullopt`。`[[nodiscard]]` 提醒编译器：调用者不应
+无意丢弃这个可能为空的重要返回值。
+
+### 1.3.6 私有数据成员
+
+```text
+std::vector<std::vector<int>> distance_;
+```
+
+外层 `vector` 是行，内层 `vector<int>` 是一行中的列，合起来是二维矩阵。末尾下划线是本教程的
+约定，表示私有成员；它与函数参数 `distance` 或局部变量 `shortest` 不会混淆。
 
 时间复杂度为 O(V^3)，空间复杂度为 O(V^2)。这适合顶点数较少、需要比较所有起点的示例；大图
 通常应根据图的稀疏度和查询需求选择其他最短路径算法。
