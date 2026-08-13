@@ -49,6 +49,7 @@
 | T-009 | 把 `Fragile` / `ThrowingMoveAssignment` / `AllocationFailure` / `CheapMove` 抽成共享的故障注入工具头 | Done | Claude | `code/support/fault_injection.hpp`（含 `Counted`，共 5 个探针，静态成员用 C++17 inline 变量，各带 `reset()`）。`check_code.py` 加了 `-I code/`。ch03 改用共享探针后断言数不变（58），ch02 直接复用 |
 | T-008 | 5 条被 OCR 吃掉「结束」标记的清单需人工定边界 | Review | Claude | 5/5 已定，均不改 `dsa_raw.md`。代码5.8 → 4105（已有）；算法2.11 → 1617 围栏末；代码3.1 → 1817 围栏末；算法7.6 → 6189（图打断前最后一行代码）；算法7.9 → 6434 残片 `.9结束】`。依据见各单元 `legacy.md`。 |
 | T-016 | 书稿后半改成第 1 章那种自解释、自包含教程 | Review | Claude | 人不改 `dsa_raw.md`（D-002）。第 5–12 章按 ch01 体例重写；第 6 章双份倾倒已删；第 9 章置换选择按图 9.2 重做并拆开赢者/败者树。本机 ASan 空探针仍挂，`check_code.py --allow-degraded` 19/19 Release 绿。请 Codex 复核置换选择冻结与败者树。 |
+| T-017 | 学生用带书签 PDF | Review | Claude | `python3 tools/build_book_pdf.py` → `book/pdf/现代C++数据结构教程.pdf`。B5，126 页，hyperref 书签 80+ 条（章/节），含 12 章正文与勘误附录。不含 292 张图的图集。 |
 
 ## Decision Log
 

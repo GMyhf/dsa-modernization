@@ -60,7 +60,7 @@ python3 tools/check_doc.py            # 只跑 book/：OCR 残留、编号、插
 | 路径 | 是什么 |
 | --- | --- |
 | `dsa_raw.md` | OCR 底稿，**只读**。1MB / 11978 行 / 12 章 / 105 条清单 / 292 张外链插图 |
-| `book/` | 现代化后的书稿：12 章正文 + [总目录](book/现代C++数据结构教程.md) + [原书勘误](book/勘误.md) + [插图](book/插图.md)。292 张图在 `book/assets/` |
+| `book/` | 现代化后的书稿：12 章正文 + [总目录](book/现代C++数据结构教程.md) + [原书勘误](book/勘误.md) + [插图](book/插图.md)。292 张图在 `book/assets/`。发给学生的带书签 PDF：[`book/pdf/现代C++数据结构教程.pdf`](book/pdf/现代C++数据结构教程.pdf)（`python3 tools/build_book_pdf.py` 重编） |
 | `code/<章>/<单元>/` | 一个清单单元：`unit.json`（认领哪几条清单）、`legacy.md`（原书写法→缺陷证据→现代写法）、`modern.hpp`、`test.cpp` |
 | `code/support/` | 各章测试共用的故障注入探针（只放探针，不放任何数据结构实现） |
 | `tools/` | 闸门与脚手架，纯标准库 |

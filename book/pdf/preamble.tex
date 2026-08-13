@@ -1,0 +1,65 @@
+% 发给学生的教材版式：B5、中文、书签、代码可断行。
+\usepackage{geometry}
+\geometry{b5paper,margin=2.1cm,top=2.2cm,bottom=2.3cm}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setmainfont{Times New Roman}
+\setmonofont{Menlo}[Scale=0.82]
+\setCJKmainfont{Songti SC}[
+  BoldFont = Heiti SC,
+]
+\setCJKsansfont{Heiti SC}
+\setCJKmonofont{Heiti SC}[Scale=0.88]
+\xeCJKsetup{CJKspace=true}
+
+\usepackage{xcolor}
+\PassOptionsToPackage{bookmarks=true,bookmarksnumbered=true,bookmarksopen=true,bookmarksopenlevel=1,colorlinks=true,linkcolor=black,urlcolor=blue!50!black}{hyperref}
+
+\usepackage{fvextra}
+\usepackage{fancyvrb}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{
+  breaklines,
+  breakanywhere,
+  commandchars=\\\{\},
+  fontsize=\small,
+  frame=single,
+  framesep=4pt,
+  rulecolor=\color{black!20},
+}
+\DefineVerbatimEnvironment{verbatim}{Verbatim}{
+  breaklines,
+  breakanywhere,
+  fontsize=\small,
+}
+
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{float}
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf,skip=6pt}
+\DeclareCaptionLabelSeparator{colon}{：}
+\captionsetup{labelsep=colon}
+\graphicspath{{../}{../../}}
+\setkeys{Gin}{width=0.88\linewidth,keepaspectratio}
+
+\usepackage{enumitem}
+\setlist{nosep,leftmargin=1.6em}
+
+\pagestyle{plain}
+\setlength{\parskip}{0.35em}
+\setlength{\parindent}{2em}
+\renewcommand{\baselinestretch}{1.18}
+
+% 章首页不要再印一遍巨大的 \chapter 装饰标题：正文里已有「第N章」。
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries}
+  {}
+  {0pt}
+  {\huge}
+\titlespacing*{\chapter}{0pt}{-18pt}{12pt}
+
+\newcommand{\covernote}[1]{\begin{center}\large #1\end{center}}

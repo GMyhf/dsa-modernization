@@ -5,3 +5,4 @@ collab/review-input.md
 # check_code.py 的编译产物
 .build/
 build/
+# PDF 中间产物在 .build/book-pdf/；成品入库发给学生

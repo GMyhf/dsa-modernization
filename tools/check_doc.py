@@ -281,7 +281,11 @@ def main():
     if opts.paths:
         targets = [Path(p) if Path(p).is_absolute() else ROOT / p for p in opts.paths]
     else:
-        targets = sorted(BOOK.rglob("*.md")) if BOOK.is_dir() else []
+        targets = (
+            sorted(p for p in BOOK.rglob("*.md") if "pdf" not in p.relative_to(BOOK).parts)
+            if BOOK.is_dir()
+            else []
+        )
 
     if not targets:
         print("⚠️  book/ 下还没有书稿，跳过（脚手架已就位，等第一章现代化）")
