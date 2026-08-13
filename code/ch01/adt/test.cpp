@@ -22,7 +22,7 @@ void test_rumor_network() {
     dsa::adt::RumorNetwork network(5);
     network.add_route(0, 3, 4);   // B1 → B4
     network.add_route(0, 4, 3);   // B1 → B5
-    // B2 一条出边也没有（该行全为 ∞）
+    network.add_route(1, 4, 8);   // B2 → B5
     network.add_route(2, 0, 6);   // B3 → B1
     network.add_route(2, 1, 7);   // B3 → B2
     network.add_route(2, 3, 10);  // B3 → B4

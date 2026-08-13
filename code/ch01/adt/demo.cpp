@@ -7,6 +7,7 @@ int main() {
     dsa::adt::RumorNetwork network(5);
     network.add_route(0, 3, 4);   // B1 -> B4，耗时 4
     network.add_route(0, 4, 3);   // B1 -> B5，耗时 3
+    network.add_route(1, 4, 8);   // B2 -> B5，耗时 8
     network.add_route(2, 0, 6);   // B3 -> B1，耗时 6
     network.add_route(2, 1, 7);   // B3 -> B2，耗时 7
     network.add_route(2, 3, 10);  // B3 -> B4，耗时 10
