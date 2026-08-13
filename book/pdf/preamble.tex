@@ -46,17 +46,6 @@
 % 插图默认约版心三分之二。pandoc 的 \pandocbounded 只在「超出版心」时缩小，
 % 原图更宽时仍会撑满；这里改成硬上限。
 \setkeys{Gin}{width=0.62\linewidth,keepaspectratio}
-\makeatletter
-\renewcommand*\pandocbounded[1]{%
-  \sbox\pandoc@box{#1}%
-  \Gscale@div\@tempa{0.62\linewidth}{\wd\pandoc@box}%
-  \ifdim\@tempa\p@<\p@
-    \scalebox{\@tempa}{\usebox\pandoc@box}%
-  \else
-    \usebox{\pandoc@box}%
-  \fi
-}
-\makeatother
 
 \usepackage{enumitem}
 \setlist{nosep,leftmargin=1.6em}

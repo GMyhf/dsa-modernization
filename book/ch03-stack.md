@@ -110,9 +110,8 @@ c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch03/queue \
 
 **抽象数据类型描述的是「一组运算」，不是「一个基类」。** 在 C++ 里，
 模板本身已经承担了这层抽象——`ArrayStack<T>` 提供哪些运算，由它的接口决定，
-不需要继承任何东西。真正需要写下来的是对元素类型 `T` 的要求，
-C++17 用 `static_assert` 配合 `<type_traits>` 表达：编译期检查、
-不付虚函数表的运行期代价，而且错误信息就停在实例化处，不会炸出一屏模板内部细节。
+不需要继承任何东西。真正需要写下来的是对元素类型 `T` 的要求：底层 `new T[n]` 会把整块槽位都默认构造出来，
+所以 `T` 必须能默认构造。这句话写在正文里即可，不必把四条工程契约印进类头。
 
 ```cpp file=code/ch03/array_stack/modern.hpp#class-head
 /// 基于数组的栈（后进先出）。
@@ -122,34 +121,14 @@ C++17 用 `static_assert` 配合 `<type_traits>` 表达：编译期检查、
 /// 而不是靠「出参 + bool」双通道返回。
 template <typename T>
 class ArrayStack {
-    // 原书用一个成员函数既非纯虚、析构又非 virtual 的空基类 Stack<T> 来表达「抽象」。
-    // 那样的基类给不了多态，还带来「通过基类指针删除派生对象」的未定义行为。
-    // C++17 里表达「T 要满足什么」的直接工具是 static_assert + 类型特征：
-    // 编译期检查、不付虚表代价，而且错误信息就停在实例化处。
-    static_assert(std::is_default_constructible<T>::value,
-                  "ArrayStack<T>: T 必须可默认构造（底层 new T[n] 会构造整块槽位）");
-    static_assert(std::is_move_assignable<T>::value,
-                  "ArrayStack<T>: T 必须可移动赋值（push/pop 需要移动元素）");
-    static_assert(std::is_copy_assignable<T>::value || std::is_nothrow_move_assignable<T>::value,
-                  "ArrayStack<T>: 不可复制的 T 必须可无异常移动赋值（扩容保持强异常保证）");
-    static_assert(!std::is_reference<T>::value, "ArrayStack<T>: T 不能是引用类型");
-
 public:
     using value_type = T;
     using size_type = std::size_t;
 ```
 
-四条 `static_assert` 把类对 `T` 的要求摆在了明面上。
-
-第一条尤其诚实：底层的 `new T[n]` 会把整块槽位都默认构造出来，所以 `T` 必须可默认构造——
-这是原书 `new T[mSize]` 就有的限制，我们没有恶化它，也**还没有**解决它
-（真正的容器做法是申请未初始化存储再逐个 placement new）。
-
-第三条（不可拷贝的 `T` 必须能无异常移动赋值）是为了守住扩容的强异常保证，
-理由见 3.1.3 节末——那是本节最容易踩空的一处。
-
-把这些限制写成 `static_assert`，好过让它们以一条晦涩的模板报错、
-或者某次扩容失败后的谜案出现。
+底层的 `new T[n]` 会把整块槽位都默认构造出来，所以 `T` 必须可默认构造——
+这是原书 `new T[mSize]` 就有的限制。真正的容器做法是申请未初始化存储再逐个
+placement new，本书还没有走到那一步。扩容时的异常安全见 3.1.2 节末。
 
 ### 3.1.2 顺序栈
 
@@ -160,9 +139,14 @@ public:
 一个位置，时间代价为 O(n)。反之，把最后一个元素的位置作为栈顶，新元素添加在表尾、
 出栈也只删除表尾元素，每次操作的时间代价仅为 O(1)。图3.2 所示为按后一种方案实现的栈。
 
-![顺序栈的存储结构示意：数组低端为栈底，变量 top 指向当前栈顶元素的下标，入栈在表尾追加](assets/68ddbf0cd26a38ce.jpg)
+图3.2 顺序栈：下标 0 是栈底，`top_index_` 是元素个数，也是下一个空位。
 
-图3.2 栈的顺序存储结构示意
+```text
+下标     0     1     2     3     4     …
+内容    [A]   [B]   [C]    ?     ?     …
+               ▲
+          top_index_ = 3   （栈顶是 C，下一个 push 写到 3）
+```
 
 ### 存储与所有权
 
@@ -231,7 +215,7 @@ ArrayStack& operator=(ArrayStack&& other) noexcept {
 ```cpp file=code/ch03/array_stack/modern.hpp#pop
 /// 出栈。空栈返回 std::nullopt——原书是「返回 false + 往 cout 打一行中文」，
 /// 调用方既没法在库里复用，也容易忽略返回值。
-[[nodiscard]] std::optional<T> pop() {
+std::optional<T> pop() {
     if (empty()) {
         return std::nullopt;
     }
@@ -241,7 +225,7 @@ ArrayStack& operator=(ArrayStack&& other) noexcept {
 
 /// 读栈顶但不弹出，返回**副本**。空栈返回 std::nullopt，不是未定义行为。
 /// 要求 T 可拷贝；move-only 元素请用 peek()。
-[[nodiscard]] std::optional<T> top() const {
+std::optional<T> top() const {
     if (empty()) {
         return std::nullopt;
     }
@@ -254,14 +238,13 @@ ArrayStack& operator=(ArrayStack&& other) noexcept {
 /// 而且确实拷了一次）；peek() 零拷贝，move-only 元素也能用，代价是
 /// **返回的指针在下一次 push / pop / clear 之后即失效**（扩容会换掉整块缓冲区）。
 /// 生命周期由调用方负责，这一点必须写在文档里，不能靠使用者猜。
-[[nodiscard]] const T* peek() const noexcept {
+const T* peek() const noexcept {
     return empty() ? nullptr : &data_[top_index_ - 1];
 }
 ```
 
-`[[nodiscard]]` 使「调用了 pop 却扔掉返回值」成为一条编译警告（本书的构建开
-`-Werror`，即编译失败）。同样重要的是这里**没有 `std::cout`**：原书在空栈出栈时
-直接打印中文提示，把一个数据结构与标准输出焊死——它没法在库里复用，
+返回值是 `optional`，空栈是可预期状态，不是错误。同样重要的是这里**没有 `std::cout`**：
+原书在空栈出栈时直接打印中文提示，把一个数据结构与标准输出焊死——它没法在库里复用，
 提示无法本地化，失败路径也无从测试。
 
 「读栈顶」有两种正当需求，因此这里给了两个接口，**不要把它们合并成一个**：

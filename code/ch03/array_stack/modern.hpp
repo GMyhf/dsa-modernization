@@ -25,10 +25,12 @@ namespace dsa {
 /// 而不是靠「出参 + bool」双通道返回。
 template <typename T>
 class ArrayStack {
-    // 原书用一个成员函数既非纯虚、析构又非 virtual 的空基类 Stack<T> 来表达「抽象」。
-    // 那样的基类给不了多态，还带来「通过基类指针删除派生对象」的未定义行为。
-    // C++17 里表达「T 要满足什么」的直接工具是 static_assert + 类型特征：
-    // 编译期检查、不付虚表代价，而且错误信息就停在实例化处。
+public:
+    using value_type = T;
+    using size_type = std::size_t;
+    // <<< class-head
+
+    // 书稿不印：工程契约，不是 3.1 节的课。new T[n] 会默认构造整块槽位。
     static_assert(std::is_default_constructible<T>::value,
                   "ArrayStack<T>: T 必须可默认构造（底层 new T[n] 会构造整块槽位）");
     static_assert(std::is_move_assignable<T>::value,
@@ -36,11 +38,6 @@ class ArrayStack {
     static_assert(std::is_copy_assignable<T>::value || std::is_nothrow_move_assignable<T>::value,
                   "ArrayStack<T>: 不可复制的 T 必须可无异常移动赋值（扩容保持强异常保证）");
     static_assert(!std::is_reference<T>::value, "ArrayStack<T>: T 不能是引用类型");
-
-public:
-    using value_type = T;
-    using size_type = std::size_t;
-    // <<< class-head
 
     /// 默认构造出一个容量为 0 的空栈——**可用、可析构**。
     /// 原书的无参构造只写了 top = -1，mSize 与 st 都没初始化，
@@ -111,10 +108,11 @@ public:
     }
     // <<< push
 
+    [[nodiscard]]
     // >>> pop
     /// 出栈。空栈返回 std::nullopt——原书是「返回 false + 往 cout 打一行中文」，
     /// 调用方既没法在库里复用，也容易忽略返回值。
-    [[nodiscard]] std::optional<T> pop() {
+    std::optional<T> pop() {
         if (empty()) {
             return std::nullopt;
         }
@@ -124,7 +122,7 @@ public:
 
     /// 读栈顶但不弹出，返回**副本**。空栈返回 std::nullopt，不是未定义行为。
     /// 要求 T 可拷贝；move-only 元素请用 peek()。
-    [[nodiscard]] std::optional<T> top() const {
+    std::optional<T> top() const {
         if (empty()) {
             return std::nullopt;
         }
@@ -137,7 +135,7 @@ public:
     /// 而且确实拷了一次）；peek() 零拷贝，move-only 元素也能用，代价是
     /// **返回的指针在下一次 push / pop / clear 之后即失效**（扩容会换掉整块缓冲区）。
     /// 生命周期由调用方负责，这一点必须写在文档里，不能靠使用者猜。
-    [[nodiscard]] const T* peek() const noexcept {
+    const T* peek() const noexcept {
         return empty() ? nullptr : &data_[top_index_ - 1];
     }
     // <<< pop

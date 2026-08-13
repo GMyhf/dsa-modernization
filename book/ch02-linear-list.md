@@ -116,7 +116,7 @@ append 之后尾元素是 30
 
 本书把这组运算直接定义在 `ArrayList<T>` 上，不再另设一个基类——
 理由与第 3 章相同：那样的空基类给不了多态，却会带来非虚析构的未定义行为。
-对元素类型的要求用 `static_assert` 写在类头：
+底层 `new T[n]` 会默认构造整块槽位，所以 `T` 必须能默认构造。这句话写在正文里即可。
 
 ```cpp file=code/ch02/array_list/modern.hpp#class-head
 /// 顺序表（按顺序方式存储的线性表，又称向量）。
@@ -126,14 +126,6 @@ append 之后尾元素是 30
 /// 查找返回 std::optional<size_type>，而不是「出参 + bool」双通道。
 template <typename T>
 class ArrayList {
-    static_assert(std::is_default_constructible<T>::value,
-                  "ArrayList<T>: T 必须可默认构造（底层 new T[n] 会构造整块槽位）");
-    static_assert(std::is_move_assignable<T>::value,
-                  "ArrayList<T>: T 必须可移动赋值（插入/删除要搬动元素）");
-    static_assert(std::is_copy_assignable<T>::value || std::is_nothrow_move_assignable<T>::value,
-                  "ArrayList<T>: 不可复制的 T 必须可无异常移动赋值（扩容保持强异常保证）");
-    static_assert(!std::is_reference<T>::value, "ArrayList<T>: T 不能是引用类型");
-
 public:
     using value_type = T;
     using size_type = std::size_t;
@@ -201,12 +193,12 @@ void clear() { delete [] aList; curLen = position = 0; aList = new T[maxSize]; }
 ```cpp file=code/ch02/array_list/modern.hpp#access
 /// 按下标读取，O(1)。越界抛 std::out_of_range。
 /// 原书 getValue 用「出参 + bool」，越界时打印一行再返回 false。
-[[nodiscard]] const T& at(size_type index) const {
+const T& at(size_type index) const {
     check_index(index, "ArrayList::at");
     return data_[index];
 }
 
-[[nodiscard]] T& at(size_type index) {
+T& at(size_type index) {
     check_index(index, "ArrayList::at");
     return data_[index];
 }
@@ -231,7 +223,7 @@ void set(size_type index, const T& value) {
 /// 原书【算法2.3】是 `bool getPos(int& p, const T value)`：出参带位置、
 /// 返回值带成败。调用方忘了检查返回值，读到的就是没被写过的 p。
 /// 这里让「找没找到」进入类型系统，忽略返回值还会被 -Wunused-result 拦下。
-[[nodiscard]] std::optional<size_type> find(const T& value) const {
+std::optional<size_type> find(const T& value) const {
     for (size_type i = 0; i < size_; ++i) {
         if (data_[i] == value) {
             return i;

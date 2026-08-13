@@ -25,6 +25,11 @@ namespace dsa {
 /// 查找返回 std::optional<size_type>，而不是「出参 + bool」双通道。
 template <typename T>
 class ArrayList {
+public:
+    using value_type = T;
+    using size_type = std::size_t;
+    // <<< class-head
+
     static_assert(std::is_default_constructible<T>::value,
                   "ArrayList<T>: T 必须可默认构造（底层 new T[n] 会构造整块槽位）");
     static_assert(std::is_move_assignable<T>::value,
@@ -32,11 +37,6 @@ class ArrayList {
     static_assert(std::is_copy_assignable<T>::value || std::is_nothrow_move_assignable<T>::value,
                   "ArrayList<T>: 不可复制的 T 必须可无异常移动赋值（扩容保持强异常保证）");
     static_assert(!std::is_reference<T>::value, "ArrayList<T>: T 不能是引用类型");
-
-public:
-    using value_type = T;
-    using size_type = std::size_t;
-    // <<< class-head
 
     ArrayList() noexcept = default;
 
@@ -88,15 +88,16 @@ public:
     /// 而且一旦 new 抛异常，对象就停在「指针已释放、长度已归零」的破碎状态。
     void clear() noexcept { size_ = 0; }
 
+    [[nodiscard]]
     // >>> access
     /// 按下标读取，O(1)。越界抛 std::out_of_range。
     /// 原书 getValue 用「出参 + bool」，越界时打印一行再返回 false。
-    [[nodiscard]] const T& at(size_type index) const {
+    const T& at(size_type index) const {
         check_index(index, "ArrayList::at");
         return data_[index];
     }
 
-    [[nodiscard]] T& at(size_type index) {
+    T& at(size_type index) {
         check_index(index, "ArrayList::at");
         return data_[index];
     }
@@ -108,13 +109,14 @@ public:
     }
     // <<< access
 
+    [[nodiscard]]
     // >>> find
     /// 按内容查找，返回第一次出现的下标；没有则返回 std::nullopt。O(n)。
     ///
     /// 原书【算法2.3】是 `bool getPos(int& p, const T value)`：出参带位置、
     /// 返回值带成败。调用方忘了检查返回值，读到的就是没被写过的 p。
     /// 这里让「找没找到」进入类型系统，忽略返回值还会被 -Wunused-result 拦下。
-    [[nodiscard]] std::optional<size_type> find(const T& value) const {
+    std::optional<size_type> find(const T& value) const {
         for (size_type i = 0; i < size_; ++i) {
             if (data_[i] == value) {
                 return i;
