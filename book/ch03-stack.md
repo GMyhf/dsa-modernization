@@ -215,6 +215,7 @@ ArrayStack& operator=(ArrayStack&& other) noexcept {
 ```cpp file=code/ch03/array_stack/modern.hpp#pop
 /// 出栈。空栈返回 std::nullopt——原书是「返回 false + 往 cout 打一行中文」，
 /// 调用方既没法在库里复用，也容易忽略返回值。
+[[nodiscard]]
 std::optional<T> pop() {
     if (empty()) {
         return std::nullopt;
@@ -265,8 +266,17 @@ const T* peek() const noexcept {
 栈中元素动态变化，当栈满时继续进栈会产生上溢出(overflow)。原书【算法3.3】给出的
 改进办法是：申请一个扩大一倍的新数组，把原有内容顺序移动过去，再执行进栈。
 这个策略本身是对的——每个元素在均摊意义下只被搬运常数次，push 的**摊还时间代价
-仍是 O(1)**——但那段代码有两个问题：循环变量 `i` 从未声明（编译不过），
-以及先 `delete[] st` 再赋新指针，搬运中途若抛出异常，栈就停在半新半旧的状态。
+仍是 O(1)**（摊还的含义见 2.2.3 节）——但那段代码有两个问题：循环变量 `i` 从未声明
+（编译不过），以及先 `delete[] st` 再赋新指针，搬运中途若抛出异常，栈就停在半新半旧的状态。
+
+下面这段实现里会反复出现两个词，先说清楚：
+
+- **强异常保证**：一个操作要么完全成功，要么**像没发生过一样**——绝不留下半成品状态。
+  做法就是「先在新缓冲区上把事情做完，全部成功了再换过去」。原书的写法没有这个保证：
+  旧缓冲区已经 `delete[]` 掉了，搬到一半抛异常，栈既回不到旧状态也到不了新状态。
+- **RAII**：把资源的生命周期绑在对象的生命周期上，析构时自动释放。用了 RAII 的类型
+  （例如 `std::unique_ptr`）不需要手写下面那段 `try/catch` 清理——这里用裸指针，
+  所以清理要自己写。这份多出来的代价是本节要看见的东西之一。
 
 ```cpp file=code/ch03/array_stack/modern.hpp#grow
 static constexpr size_type kInitialCapacity = 4;

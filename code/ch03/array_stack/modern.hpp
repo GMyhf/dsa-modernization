@@ -108,10 +108,10 @@ public:
     }
     // <<< push
 
-    [[nodiscard]]
     // >>> pop
     /// 出栈。空栈返回 std::nullopt——原书是「返回 false + 往 cout 打一行中文」，
     /// 调用方既没法在库里复用，也容易忽略返回值。
+    [[nodiscard]]
     std::optional<T> pop() {
         if (empty()) {
             return std::nullopt;

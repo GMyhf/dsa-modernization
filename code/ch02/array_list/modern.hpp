@@ -88,10 +88,10 @@ public:
     /// 而且一旦 new 抛异常，对象就停在「指针已释放、长度已归零」的破碎状态。
     void clear() noexcept { size_ = 0; }
 
-    [[nodiscard]]
     // >>> access
     /// 按下标读取，O(1)。越界抛 std::out_of_range。
     /// 原书 getValue 用「出参 + bool」，越界时打印一行再返回 false。
+    [[nodiscard]]
     const T& at(size_type index) const {
         check_index(index, "ArrayList::at");
         return data_[index];
@@ -109,13 +109,14 @@ public:
     }
     // <<< access
 
-    [[nodiscard]]
     // >>> find
-    /// 按内容查找，返回第一次出现的下标；没有则返回 std::nullopt。O(n)。
+    /// 按内容查找，O(n)。找到返回下标，没找到返回 std::nullopt。
     ///
-    /// 原书【算法2.3】是 `bool getPos(int& p, const T value)`：出参带位置、
-    /// 返回值带成败。调用方忘了检查返回值，读到的就是没被写过的 p。
-    /// 这里让「找没找到」进入类型系统，忽略返回值还会被 -Wunused-result 拦下。
+    /// 不用原书【算法2.3】的 `bool getPos(int& p, const T value)`：那种写法下
+    /// 「没找到」只是一个可以被忽略的 bool，忽略了就会读到从没被写过的 p。
+    /// 这里「找没找到」是返回值类型的一部分，取值必须先判断；
+    /// 加上 [[nodiscard]]，连丢弃返回值都编译不过。
+    [[nodiscard]]
     std::optional<size_type> find(const T& value) const {
         for (size_type i = 0; i < size_; ++i) {
             if (data_[i] == value) {
