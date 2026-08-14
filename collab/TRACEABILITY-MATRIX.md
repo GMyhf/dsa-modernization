@@ -11,26 +11,27 @@
 
 ## A. 《教材 1–6 章勘误表》
 
-| 来源 | 题目/勘误编号 | 新书位置 | 是否已修正 | 测试或答案依据 |
-| --- | --- | --- | --- | --- |
-| 教材《 1–6 章勘误表》 | 错误 0：1.4.2 连续有序子数组长度条件 | `book/ch01-adt.md`；`book/勘误.md` | 是，已吸收 | 第 1 章改用半开区间并明确长度；属于文字/公式修正，非独立代码单元 |
-| 同上 | 错误 1：“有序子数组”应为连续有序子数组 | `book/ch01-adt.md`；`book/勘误.md` | 是，已吸收 | 第 1 章文字定义；答案附录第 1 章第 3 题 |
-| 同上 | 错误 2：参数条件应为 `a>1`、`b>1` | `book/勘误.md` | 部分适用 | 本书未复刻该原书公式代码；已在勘误摘要保留，不对应现有测试 |
-| 同上 | 错误 3：第 2.3 节标点 | `book/勘误.md` | 不适用 | 新书重写该段，原标点不存在；无代码测试 |
-| 同上 | 错误 4：算法 2.9 模板拼写、`p` 初始化 | `book/ch02-linear-list.md`；`code/ch02/linked_list/modern.hpp` | 是，已吸收 | `code/ch02/linked_list/test.cpp`：链表构造、遍历、插入删除、拷贝移动测试 |
-| 同上 | 错误 5：`abs` 应为 `fabs` | `book/勘误.md` | 不适用 | 新书没有该原始浮点代码；无现行实现可测 |
-| 同上 | 错误 6：习题递推式 `T(n)=2T(floor(n/2))+n` | `book/ch01-adt.md`；`book/习题与参考答案.md` | 是，已吸收 | 答案给出递推树结论 `Theta(n log n)`；属于数学答案，不是运行时测试 |
-| 同上 | 错误 7：算法 3.11 `while` 条件 | `book/ch03-stack.md`；`code/ch03/knapsack/modern.hpp` | 是，已重写 | `code/ch03/knapsack/test.cpp`：递归、显式栈和优化版对拍 |
-| 同上 | 错误 8：嵌套循环赋值次数说明 | `book/勘误.md` | 不适用 | 新书未保留该段原文；无现行测试 |
-| 同上 | 错误 9：算法 2.9 `while` 后多余分号 | `book/ch02-linear-list.md`；`code/ch02/linked_list/modern.hpp` | 是，已吸收 | 现代实现重新编写；链表单元 Release-O2 通过 |
-| 同上 | 错误 10：算法 4.6 返回 `j-pLen` | `book/ch04-string.md`；`code/ch04/pattern_matching/modern.hpp` | 是，已修正 | `code/ch04/pattern_matching/test.cpp` 与 `std::string::find` 对拍 |
-| 同上 | 错误 11：KMP 文字说明 `Pi=Pk` | `book/ch04-string.md` | 是，已吸收 | next 表构造说明与 `build_next` 实现一致；测试覆盖随机模式 |
-| 同上 | 错误 12：算法 4.7 `while(i<m-1)` / 删除多余 break | `book/ch04-string.md`；`modern.hpp#build-next` | 是，已重写 | 空模式、重复字符和随机模式测试 |
-| 同上 | 错误 13：算法 4.8 返回 `j-pLen` | `book/ch04-string.md`；`modern.hpp#kmp` | 是，已修正 | KMP 与朴素算法逐项对拍，56 项断言 |
-| 同上 | 错误 14：字符串长度和图示 size | `book/ch04-string.md` | 已重绘/吸收 | 新书用 `String` 实现和测试，不复刻原图中的旧 size 标注 |
-| 同上 | 错误 15：Parent 函数缺 `return NULL` | `book/ch05-binary-tree.md`；`code/ch05/binary_tree/modern.hpp` | 是，已吸收 | BST/二叉树测试覆盖空树和不存在结点查询 |
-| 同上 | 错误 16：图 6.6 G 子结点编号 | `book/ch06-tree.md` | 已重绘/吸收 | 新书以左孩子/右兄弟图和 `GeneralTree` 测试为准 |
-| 同上 | 错误 17：图 6.6 C 子结点编号 | `book/ch06-tree.md` | 已重绘/吸收 | `code/ch06/general_tree/test.cpp`：树结构和周游断言 |
+**这一节原来是手抄的表格，2026-08-14 起改为派生。** 勘误与证据的对应关系现在是
+`collab/errata.json`，校验器是 `tools/errata.py`，已接进 `handoff.py --verify`：
+
+```bash
+python3 tools/errata.py          # 看完整映射表
+python3 tools/errata.py --check  # 只校验，有问题退出码 1
+```
+
+规矩和 `exclusions.json` 一样——**不写测试就要留下出处**：
+
+| 类别 | 证据要求 |
+| --- | --- |
+| `runtime` / `memory` | 编号必须出现在某个 `code/**/test.cpp` 的断言文字里（写成「勘误R10」）。实现退回原书那种写法，那句断言就会红 |
+| `compile` | 原书按印刷进不了编译器，写不成运行期断言；证据是对应 `legacy.md` 里真实的 `error:` 输出，校验器会核对 |
+| `prose` / `na` | 文字、公式、图示，或本书没有保留原文的段落。必须写 `reason` / `by` / `date` |
+
+本节原先那张 18 行的表格与 `errata.json` 完全重复，而重复的两份迟早会漂。
+《教材 1–6 章勘误表》的错误 0–17 对应编号 `R00`–`R17`，本书自己那几张勘误表对应 `E01`–`E22`。
+
+**当前状态**：40 条，其中 15 条有会红的回归测试，14 条是编译级（证据在 `legacy.md`），
+其余是文字/图示或本书未保留的段落。
 
 ## B. `ref_DSA` 与课程资料中的题型
 

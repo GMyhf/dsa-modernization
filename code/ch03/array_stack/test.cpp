@@ -75,7 +75,7 @@ void test_copy_is_deep() {
     dsa::ArrayStack<int> c(1);
     c.push(99);
     c = a;
-    check(c.size() == 2 && c.top() == 2, "拷贝赋值得到独立副本");
+    check(c.size() == 2 && c.top() == 2, "勘误E22 五法则：拷贝赋值得到独立副本，两个对象各自析构不二次释放");
     dsa::ArrayStack<int>& copy_alias = c;
     c = copy_alias;                   // 自赋值（经别名避开 -Wself-assign-overloaded）
     check(c.size() == 2 && c.top() == 2, "自赋值后仍然完好");

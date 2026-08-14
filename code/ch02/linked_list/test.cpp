@@ -224,7 +224,30 @@ void test_append_does_not_walk_the_chain() {
 
 }  // namespace
 
+/// 算法2.9「寻找链表的第 i 个结点」的两处勘误都落在**循链定位**上：
+/// 错误 4 是 `p` 没有初始化就使用（应直接指向 `head->next`），
+/// 错误 9 是 `while (...)` 后面多了一个分号，把循环体整个吞掉——定位于是原地不动。
+/// 两者的后果一样：按位置读写会落在错误的结点上。这里逐个位置验一遍。
+void test_locate_by_position() {
+    dsa::LinkedList<int> list;
+    for (int i = 0; i < 8; ++i) {
+        list.append(i * 10);
+    }
+    bool all_right = true;
+    for (std::size_t pos = 0; pos < list.size(); ++pos) {
+        all_right = all_right && list.at(pos) == static_cast<int>(pos) * 10;
+    }
+    check(all_right, "勘误R04 勘误R09 算法2.9：每个位置都定位到正确的结点");
+
+    // 定位若原地不动，插入就会全挤在头部：这一条专盯「多余分号吞掉循环体」。
+    list.insert(4, 999);
+    check(list.at(4) == 999 && list.at(3) == 30 && list.at(5) == 40,
+          "勘误R09 算法2.9：按位置插入落在第 4 个结点之前，不是挤在头部");
+    check(list.remove(4) == 999 && list.at(4) == 40, "勘误R04 算法2.9：按位置删除同样要先定位");
+}
+
 int main() {
+    test_locate_by_position();
     test_node_types();
     test_insert_and_tail();
     test_remove_boundaries_and_tail_repair();

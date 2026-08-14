@@ -95,7 +95,7 @@ void test_exhaustive_agreement() {
         if (e && !solution_is_valid(*e, capacity, weights)) ++mismatches;
         if (o && !solution_is_valid(*o, capacity, weights)) ++mismatches;
     }
-    check(mismatches == 0, "承重 0..20 全部穷举：三种实现与暴力枚举四方一致");
+    check(mismatches == 0, "勘误R07 算法3.11：承重 0..20 全部穷举，三种实现与暴力枚举四方一致");
 }
 
 // 原书没有的检查：重量非正会让两个递归出口失去意义。

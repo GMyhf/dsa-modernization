@@ -69,10 +69,39 @@ void test_hash_and_tombstones() {
 }
 }  // namespace
 
+/// 原书算法10.9 的散列表析构写的是 `delete HT`，而 `HT` 是 `new` 出来的**数组**，
+/// 正确写法是 `delete[]`。对数组用 `delete` 是未定义行为，实践中表现为只析构第一个元素
+/// 并把整块内存交还给错误的释放路径。
+///
+/// 现代实现的槽位数组由容器管理，这个错误在结构上不可能再犯。这个用例守的是这条不变量：
+/// 装满一张表、拷贝一份、两份都析构掉，ASan 不得报泄漏或二次释放。
+/// 谁要是把它改回裸数组加 `delete`，这里就会红。
+void test_table_lifetime() {
+    {
+        dsa::search::HashTable table(64);
+        for (int key = 0; key < 40; ++key) {
+            (void)table.insert(key * 7);
+        }
+        const dsa::search::HashTable copy = table;          // 拷贝一份
+        check(copy.size() == table.size(), "勘误E18 算法10.9：拷贝出来的表规模一致");
+        dsa::search::HashTable assigned(8);
+        assigned = table;                            // 拷贝赋值，原有槽位要被正确释放
+        check(assigned.size() == table.size(), "勘误E18 算法10.9：拷贝赋值后的表规模一致");
+        bool same = true;
+        for (int key = 0; key < 40; ++key) {
+            same = same && assigned.contains(key * 7);
+        }
+        check(same, "勘误E18 算法10.9：拷贝出来的表内容一致");
+    }
+    // 作用域结束，三张表全部析构。ASan 在这一步之后不报错，才算这条勘误没有复发。
+    check(true, "勘误E18 算法10.9：装满的表析构完毕，ASan 未报泄漏或二次释放");
+}
+
 int main() {
     test_linear_searches();
     test_sets();
     test_hash_and_tombstones();
+    test_table_lifetime();
     std::printf("SearchHash: %d 项断言，%d 失败\n", checks, failures);
     return failures == 0 ? 0 : 1;
 }

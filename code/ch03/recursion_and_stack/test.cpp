@@ -58,7 +58,7 @@ void test_overflow_is_rejected_not_silently_wrong() {
     for (long long n : {21LL, 25LL, 66LL, 1000LL}) {
         try { (void)dsa::factorial_recursive(n); } catch (const std::overflow_error&) { ++thrown; }
     }
-    check(thrown == 4, "21! 起一律抛 overflow_error，而不是返回负数或 0");
+    check(thrown == 4, "勘误E14 算法3.6/3.8/3.9：21! 起一律抛 overflow_error，而不是返回负数或 0");
 
     int thrown_all = 0;
     try { (void)dsa::factorial_iterative(21); } catch (const std::overflow_error&) { ++thrown_all; }
@@ -75,7 +75,7 @@ void test_negative_is_rejected() {
         try { (void)dsa::factorial_iterative(n); } catch (const std::invalid_argument&) { ++thrown; }
         try { (void)dsa::factorial_with_explicit_stack(n); } catch (const std::invalid_argument&) { ++thrown; }
     }
-    check(thrown == 9, "负数一律抛 invalid_argument，而不是静默返回 1");
+    check(thrown == 9, "勘误E15 算法3.6：负数一律抛 invalid_argument，而不是静默返回 1");
 }
 
 // 3.1.5 的正题：递归的数据在运行栈上，显式栈的数据在堆上。

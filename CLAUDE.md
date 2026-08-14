@@ -29,6 +29,8 @@ decisions live only in DECISION_LOG so the two can't drift apart.
 python3 tools/handoff.py --verify      # the gate: self-tests → ledger → book → compile+run
 python3 tools/ledger.py                # coverage over the book's 105 listings
 python3 tools/ledger.py --pending      # listings nobody has claimed yet
+python3 tools/errata.py                # errata → the assertion that goes red if it regresses
+python3 tools/errata.py --check        # same, verify only (non-zero exit on gaps)
 python3 tools/check_code.py [unit]     # -Werror + ASan/UBSan and -O2, both must run green
 python3 tools/check_doc.py [file]      # book/ hygiene; --list-rules explains R1–R7
 python3 tools/sync_book.py --write     # push code/ sources into the book's code blocks
@@ -60,7 +62,7 @@ Full text in `collab/DECISION_LOG.md`; the four load-bearing rules:
 
 ## How the pieces fit
 
-The gate is the architecture. Three arbiters, each answering a question documents cannot:
+The gate is the architecture. Four arbiters, each answering a question documents cannot:
 
 - **`tools/ledger.py`** — derives coverage instead of tracking it by hand. Inventory comes
   from parsing `【算法X.Y】`/`【代码X.Y】` out of `dsa_raw.md` (105 listings); "covered" is
@@ -73,6 +75,11 @@ The gate is the architecture. Three arbiters, each answering a question document
   slice between `// >>> anchor` and `// <<< anchor`) verbatim. Printed code and compiled
   code are the same bytes, by construction. `sync_book.py --write` is the writer half of
   that contract; R3 is the checker half.
+- **`tools/errata.py`** — the errata ledger, derived the same way. `collab/errata.json`
+  lists every entry in `book/勘误.md`; a `runtime`/`memory` entry is only accepted if its id
+  (`勘误R10`) appears in some `code/**/test.cpp` assertion, so "we fixed that" is a grep
+  result rather than a claim. `compile` entries instead need a `legacy.md` containing real
+  `error:` output; `prose`/`na` entries need reason + owner + date, like `exclusions.json`.
 - **`tools/check_code.py`** — compiles every unit twice (`-Werror` + ASan/UBSan, and
   `-O2`) and runs it. Both profiles matter: a heap overflow that UBSan aborts on in the
   debug build passes *silently* under `-O2`.

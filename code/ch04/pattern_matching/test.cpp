@@ -39,8 +39,8 @@ void expect_same(std::string_view text, std::string_view pattern, const char* la
     const auto kmp = dsa::kmp_search(text, pattern);
     std::ostringstream desc;
     desc << label << "（T=\"" << text.substr(0, 24) << "\" P=\"" << pattern << "\"）";
-    check(naive == want, "朴素匹配的下标与标准库一致 " + desc.str());
-    check(kmp == want, "KMP 的下标与标准库一致 " + desc.str());
+    check(naive == want, "勘误R10 算法4.6：朴素匹配的下标与标准库一致 " + desc.str());
+    check(kmp == want, "勘误R13 算法4.8：KMP 的下标与标准库一致 " + desc.str());
 }
 
 // 缺陷 1：原书【算法4.6】【算法4.8】都写 `return (j - pLen + 1)`，0 起始下标下差 1。
@@ -49,7 +49,7 @@ void test_match_position_is_exact() {
     expect_same("xabc", "abc", "匹配在下标 1");                // 原书返回 2，正确 1
     expect_same("aaab", "ab", "需要回溯");                     // 原书返回 3，正确 2
     // 书中图4.12 自己用的那组数据：匹配始于下标 10，原书两个算法都返回 11
-    expect_same("abcddabcababcdaabcababcdaabcabaa", "abcdaabcab", "书中图4.12 的例子");
+    expect_same("abcddabcababcdaabcababcdaabcabaa", "abcdaabcab", "勘误E17 勘误E21 算法4.6/4.8：书中图4.12 的例子，0 起始下标返回 j-pLen 而不是加 1");
     expect_same("aaaaa", "aa", "重叠匹配取最左");
     expect_same("abcabcabd", "abcabd", "长回溯");
 }
@@ -74,7 +74,7 @@ void test_next_matches_the_book_figure() {
     const auto next = dsa::build_next("abcdaabcab");
     const std::vector<dsa::next_type> from_figure{-1, 0, 0, 0, -1, 1, 0, 0, 3, 0};
     check(next.size() == 10, "next 数组长度等于模式长度");
-    check(next == from_figure, "next 数组与书中图4.11 最后一行逐个一致");
+    check(next == from_figure, "勘误R12 算法4.7：next 数组与书中图4.11 最后一行逐个一致");
     // 注意：书中**正文**写的是 {-1,0,0,0,0,-1,1,0,0,3,0}，11 个值，比模式还长一位。
     // 正文与图4.11 自相矛盾，算法实算的结果站在图这一边。详见 legacy.md 缺陷 4。
     check(from_figure.size() == 10, "模式 \"abcdaabcab\" 只有 10 个字符，正文那 11 个值必有一处错");

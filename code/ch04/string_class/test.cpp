@@ -94,7 +94,7 @@ void test_substr() {
     } catch (const std::out_of_range&) {
         threw = true;
     }
-    check(threw, "pos 越界抛 out_of_range，而不是返回一个必然崩溃的对象");
+    check(threw, "勘误E16 算法4.5：pos 越界抛 out_of_range，而不是返回一个必然崩溃的对象");
 }
 
 // 缺陷 2（接口形状）：原书【代码4.1】把 append 声明成按值返回 `string append(const char c);`。

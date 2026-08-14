@@ -148,6 +148,8 @@ def run_verify():
         ["python3", "-m", "py_compile", *py_files],
         # 2. 台账：105 条清单谁也不许悄悄消失。
         ["python3", "tools/ledger.py", "--check"],
+        # 2b. 勘误台账：每条「跑起来是错的」勘误都要指得出那句会红的断言。
+        ["python3", "tools/errata.py", "--check"],
         # 3. 书稿：OCR 残留、编号、插图、以及「书上代码 == code/ 里的代码」。
         ["python3", "tools/check_doc.py"],
         # 4. 代码：真编译、真跑、Werror + ASan/UBSan。本项目最硬的一条。

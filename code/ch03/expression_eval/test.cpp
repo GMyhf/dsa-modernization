@@ -66,7 +66,7 @@ void test_divide_by_zero() {
     bool thrown = false;
     try { (void)dsa::evaluate_postfix("1 0 /"); }
     catch (const std::domain_error&) { thrown = true; }
-    check(thrown, "除零抛 domain_error（原书是 cerr 一行 + 清栈，调用方拿不到信号）");
+    check(thrown, "勘误E19 算法3.5：除零抛 domain_error（原书是 cerr 一行 + 清栈，调用方拿不到信号）");
 
     // 除以极小值是**合法**的，不该被当成除零——这是本书与原书正文那条
     // "用阈值判断是否为 0" 建议的分歧点，理由写在 modern.hpp 的注释里。

@@ -34,7 +34,7 @@ void test_traversals_and_parent() {
     check(iterative_postorder == postorder, "算法5.6 非递归后序周游与递归版一致");
     check(level == std::vector<int>({1,2,3,4,5,6}), "算法5.7 层次周游");
     check(tree.parent_of(tree.root()->left->right) == tree.root()->left, "代码5.8 能找到父结点");
-    check(tree.parent_of(tree.root()) == nullptr, "根结点没有父结点");
+    check(tree.parent_of(tree.root()) == nullptr, "勘误R15 算法5.x：根结点没有父结点，失败分支返回空而不是掉出函数");
 }
 
 void test_tree_ownership_and_rule_of_five() {
