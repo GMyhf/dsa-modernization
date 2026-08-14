@@ -47,8 +47,9 @@
   beyond_book 单元；`check_doc` 16 文件 / 7 规则；`check_code` **25/25 单元 × 双构建**
   （debug+asan+ubsan 与 release-O2，未降级）；`handoff.py --verify` 退出码 0。
 
-- **PDF 仍未重编**。本轮书稿多了两章的实现内容，`book/pdf/` 里那份仍是 189 页的坏版本。
-  请在 Mac 上跑 `python3 tools/build_book_pdf.py`——截断自检会拦住不完整的输出。
+- **PDF**：`e5f0f78` 已在 macOS 上重编，**332 页 / 291 张图 / 7.84 MB**，截断自检放行——
+  上一轮那份 189 页 / 0 张图的坏版本到此作废。但那次构建**早于本轮**的第 11、12 章实现内容，
+  所以还要再跑一次 `python3 tools/build_book_pdf.py` 才能把新增的两章代码印进去。
 
 - **新增的未验证边界已写进 `UNVERIFIED-RISKS.md`**：第 11 章全是内存页模拟（没有真实
   磁盘 I/O）；广义表不支持循环表，加了能造环的接口现有测试**发现不了**；Patricia 没有删除；
@@ -80,6 +81,7 @@
 - **成品仍请在 Mac 上出。** `book/pdf/现代C++数据结构教程.pdf` 我恢复成了仓库里那份 189 页的
   坏版本，没有拿 Noto 字体的版本覆盖它。请在 Mac 上跑 `python3 tools/build_book_pdf.py`
   重发成品；自检现在会替你挡住截断。
+  **（后续：`e5f0f78` 已经这样重编过，332 页 / 291 张图 / 7.84 MB，自检放行。）**
 - **闸门**：工具自测 **69 项**（新增 8 项，`tests/test_build_book_pdf.py`，每条自检都有一个
   会红的用例）；台账 104/105 已现代化 + 1 退场 + 0 待办；`check_doc` 16 文件 / 7 规则；
   `check_code` **未降级** 19/19 单元 × 双构建；`handoff.py --verify` 退出码 0。
