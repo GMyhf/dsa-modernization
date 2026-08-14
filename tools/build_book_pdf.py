@@ -35,6 +35,7 @@ CHAPTERS = [
     BOOK / "ch10-search.md",
     BOOK / "ch11-index.md",
     BOOK / "ch12-advanced.md",
+    BOOK / "习题与参考答案.md",
     BOOK / "插图.md",
     BOOK / "勘误.md",
 ]
@@ -50,6 +51,7 @@ classoption:
   - UTF8
   - heading=true
   - scheme=plain
+  - fontset=none
 ---
 
 \\frontmatter
@@ -242,6 +244,8 @@ def run_pandoc(md_path: Path, pdf_path: Path) -> None:
         "documentclass=ctexbook",
         "-V",
         "classoption=UTF8",
+        "-V",
+        "classoption=fontset=none",
         "-V",
         "linestretch=1.15",
         "--highlight-style=tango",
