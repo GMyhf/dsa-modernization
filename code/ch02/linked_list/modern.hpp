@@ -47,6 +47,8 @@ struct DoublyLink {
 /// 对外位置统一为 [0, size()]。按值查找返回 optional，位置错误抛 out_of_range。
 template <typename T>
 class LinkedList {
+    // 头结点只保存链接，不保存 T：哨兵不代表元素，因此不要求 T 默认构造。
+    // Node 继承 NodeBase 后，定位和接链逻辑只需操作 next，结点布局也不重复。
     struct NodeBase {
         NodeBase* next{nullptr};
     };
@@ -55,6 +57,7 @@ class LinkedList {
 
         template <typename U>
         explicit Node(U&& item, NodeBase* successor = nullptr)
+            // 完美转发保留左值拷贝、右值移动两条路径，避免无谓的 T 临时对象。
             : NodeBase{successor}, value(std::forward<U>(item)) {}
     };
 
@@ -95,6 +98,7 @@ public:
         return *this;
     }
 
+    // 析构统一走迭代式 clear()；不依赖 unique_ptr 链的递归析构，避免长链耗尽调用栈。
     ~LinkedList() { clear(); }
 
     void swap(LinkedList& other) noexcept {
@@ -211,6 +215,7 @@ public:
     [[nodiscard]] const_iterator end() const noexcept { return const_iterator(nullptr); }
 
 private:
+    // >>> locate
     [[nodiscard]] NodeBase* predecessor_at(size_type pos) {
         if (pos > size_) {
             throw std::out_of_range("LinkedList: 下标越界");
@@ -221,6 +226,7 @@ private:
         }
         return predecessor;
     }
+    // <<< locate
 
     [[nodiscard]] Node* node_at(size_type pos) {
         if (pos >= size_) {
@@ -246,6 +252,7 @@ private:
 
     template <typename U>
     void insert_impl(size_type pos, U&& value) {
+        // 先构造、后接链：分配或 T 构造抛异常时，旧链和 size_ 都保持不变。
         NodeBase* predecessor = predecessor_at(pos);
         // 先建结点再接链。分配或 T 构造抛异常时，任何链接和 size_ 都没有改变。
         Node* inserted = new Node(std::forward<U>(value), predecessor->next);

@@ -479,6 +479,8 @@ struct DoublyLink {
 /// 对外位置统一为 [0, size()]。按值查找返回 optional，位置错误抛 out_of_range。
 template <typename T>
 class LinkedList {
+    // 头结点只保存链接，不保存 T：哨兵不代表元素，因此不要求 T 默认构造。
+    // Node 继承 NodeBase 后，定位和接链逻辑只需操作 next，结点布局也不重复。
     struct NodeBase {
         NodeBase* next{nullptr};
     };
@@ -487,6 +489,7 @@ class LinkedList {
 
         template <typename U>
         explicit Node(U&& item, NodeBase* successor = nullptr)
+            // 完美转发保留左值拷贝、右值移动两条路径，避免无谓的 T 临时对象。
             : NodeBase{successor}, value(std::forward<U>(item)) {}
     };
 
@@ -505,12 +508,48 @@ public:
 析构函数调用它。复制构造采用“先逐个接入新链，失败即清理”的规则，避免半成品对象在
 元素复制抛异常时泄漏。
 
+构造与析构路径的核心代码如下；析构只调用迭代式 `clear()`，不会递归释放整条链：
+
+```text
+LinkedList() noexcept = default;
+~LinkedList() { clear(); }
+```
+
+```cpp file=code/ch02/linked_list/modern.hpp#clear
+void clear() noexcept {
+    NodeBase* current = head_.next;
+    while (current != nullptr) {
+        NodeBase* following = current->next;
+        delete static_cast<Node*>(current);
+        current = following;
+    }
+    head_.next = nullptr;
+    tail_ = &head_;
+    size_ = 0;
+}
+```
+
 【算法2.8结束】
 
 【算法2.9】寻找链表的第 i 个结点。
 
 定位从头结点开始逐步走 `next`，不新建任何结点。原书的 `setPos(-1)` 是处理头结点的
 技巧；现代接口不暴露 -1 这个特殊位置，内部 `predecessor_at(0)` 直接返回头结点。
+
+定位循环的现代实现如下。返回“前驱”使插入、删除都能统一改写一条 `next` 链接：
+
+```cpp file=code/ch02/linked_list/modern.hpp#locate
+[[nodiscard]] NodeBase* predecessor_at(size_type pos) {
+    if (pos > size_) {
+        throw std::out_of_range("LinkedList: 下标越界");
+    }
+    NodeBase* predecessor = &head_;  // 相当于原书 setPos(-1)
+    for (size_type i = 0; i < pos; ++i) {
+        predecessor = predecessor->next;
+    }
+    return predecessor;
+}
+```
 
 【算法2.9结束】
 
