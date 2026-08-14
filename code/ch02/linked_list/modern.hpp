@@ -110,6 +110,7 @@ public:
     [[nodiscard]] size_type size() const noexcept { return size_; }
 
     /// 清除实际结点，保留嵌入对象内的头结点。不会分配，因此 noexcept。
+// >>> clear
     void clear() noexcept {
         NodeBase* current = head_.next;
         while (current != nullptr) {
@@ -121,6 +122,7 @@ public:
         tail_ = &head_;
         size_ = 0;
     }
+// <<< clear
 
     // >>> access
     [[nodiscard]] const T& at(size_type pos) const {

@@ -442,6 +442,92 @@ public:
 
 【算法2.9结束】
 
+### 2.3.2a 所有权工具怎么选
+
+读到这里会有一个很自然的疑问：既然现代 C++ 有 `std::unique_ptr`，为什么 `clear()` 还在手写 `delete`？把 `next` 声明成 `std::unique_ptr<Node>` 不是更省事吗——没有 `delete`，没有析构函数，五法则一条都不用写。
+
+小规模下这么写确实看不出问题。代价藏在编译器替你生成的析构里：
+
+```cpp file=code/ch02/ownership/modern.hpp#recursive-chain
+/// **教学反例。** 用 `std::unique_ptr` 把结点串成链，看起来最干净：没有 `delete`，
+/// 没有析构函数，五法则一条都不用写。
+///
+/// 代价藏在编译器替你生成的析构里：`~RecursiveNode` 要析构 `next`，`next` 的析构又要
+/// 析构它的 `next`……链有多长，栈就压多深。链表通常正是「元素很多」的结构，
+/// 于是一次普通的析构就能把栈压穿——而且崩溃阈值随优化级别变，debug 崩、release 过。
+///
+/// 实测数字与复现命令见本单元的 `legacy.md`。
+struct RecursiveNode {
+    int value = 0;
+    std::unique_ptr<RecursiveNode> next;
+};
+
+class RecursiveChain {
+public:
+    void push_front(int value) {
+        auto node = std::make_unique<RecursiveNode>();
+        node->value = value;
+        node->next = std::move(head_);
+        head_ = std::move(node);
+        ++size_;
+    }
+
+    [[nodiscard]] std::vector<int> to_vector() const {
+        std::vector<int> out;
+        for (const RecursiveNode* cursor = head_.get(); cursor != nullptr;
+             cursor = cursor->next.get()) {
+            out.push_back(cursor->value);
+        }
+        return out;
+    }
+
+    [[nodiscard]] std::size_t size() const noexcept { return size_; }
+
+private:
+    std::unique_ptr<RecursiveNode> head_;
+    std::size_t size_ = 0;
+    // 析构函数是编译器生成的——问题就出在这里：它是递归的，而且看不见。
+};
+```
+
+`~RecursiveNode` 要析构 `next`，`next` 的析构又要析构它的 `next`——**链有多长，栈就压多深**。而链表恰恰是「元素很多」的结构。本机 8 MB 栈上实测：
+
+| 构建档 | 最大安全结点数 | 崩溃于 |
+| --- | --- | --- |
+| `-O0 -g` | 约 57,625 | 58,601 |
+| `-O2` | 约 523,329 | 524,306 |
+
+两档差了九倍。这才是最难受的地方：同一份代码，debug 下五万多个结点就段错误，release 下五十多万才崩。学生在 debug 里调出段错误，切到 release 又复现不了。递归深度不该由优化级别决定。
+
+自己管所有权，多写一个析构和一个 `clear()`，换来的是**栈深度与链长无关**：
+
+```cpp file=code/ch02/linked_list/modern.hpp#clear
+void clear() noexcept {
+    NodeBase* current = head_.next;
+    while (current != nullptr) {
+        NodeBase* following = current->next;
+        delete static_cast<Node*>(current);
+        current = following;
+    }
+    head_.next = nullptr;
+    tail_ = &head_;
+    size_ = 0;
+}
+```
+
+同样 `-O0`，五百万个结点一次段错误都没有。这几行不是仪式，是这个结构能不能处理大数据的分界线。
+
+**但这不等于「本书不用智能指针」。** 判据是结构形态，不是个人偏好：
+
+| 结构形态 | 该用什么 | 理由 |
+| --- | --- | --- |
+| 链（结点串成一条线） | 裸指针 + 迭代释放 | `unique_ptr` 的析构是递归的，深度正比于链长 |
+| 树（孩子唯一所有权） | `unique_ptr` | 释放同样递归，但深度是 $O(\log n)$；第 11 章的 B+ 树、第 12 章的 Trie 用的就是它 |
+| 一整块缓冲区 | 裸 `T*` + 五法则 | 换成 `unique_ptr<T[]>` 只省掉一句 `delete[]`——它只能移动，拷贝构造仍须手写，五法则并没有消失（见 2.2.1）|
+| 共享（一个结点多个父） | 手写引用计数 | `unique_ptr` 语义上不成立；12.2 的广义表要教的正是「谁来回收」 |
+
+`code/ch02/ownership` 把两种写法并排放着，复现命令和完整数字在该目录的 `legacy.md`。写工程代码时默认用智能指针是对的；本书在少数几处不用，是因为**那几处的所有权本身就是要教的内容**，而且换过去有可测的代价。
+
 ### 2.3.3 插入与删除
 
 【算法2.10】插入单链表的第 i 个结点。
