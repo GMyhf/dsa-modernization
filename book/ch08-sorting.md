@@ -171,7 +171,48 @@ inline void quick_sort(std::vector<int>& values) { quick_sort_range(values, 0, v
 
 ## 8.5 归并排序
 
-稳定，需要 O(n) 辅助空间。实现见 `merge_sort`。
+归并排序采用分治法：先把区间二分，递归地排好左右两个子区间，再用一次线性扫描把两个
+有序区间合并。区间长度小于 2 时已经有序，因此递归可以停止。每一层合并总共扫描
+`n` 个元素，递推式为
+
+$$T(n)=2T(n/2)+\Theta(n)=\Theta(n\log n).$$
+
+实现只分配一个与输入等长的缓冲区，并在所有递归层复用它；因此辅助空间为 `O(n)`，递归
+调用栈另占 `O(log n)`。合并时使用“右侧严格更小才取右侧”的判断：相等元素先取左侧，
+从而保持稳定性。
+
+```cpp file=code/ch08/sorting/modern.hpp#merge
+inline void merge_ranges(std::vector<int>& values, std::vector<int>& buffer,
+                         std::size_t first, std::size_t middle, std::size_t last) {
+    std::size_t left = first;
+    std::size_t right = middle;
+    std::size_t output = first;
+    while (left < middle && right < last) {
+        buffer[output++] = values[right] < values[left] ? values[right++] : values[left++];
+    }
+    while (left < middle) buffer[output++] = values[left++];
+    while (right < last) buffer[output++] = values[right++];
+    for (std::size_t index = first; index < last; ++index) values[index] = buffer[index];
+}
+
+inline void merge_sort_range(std::vector<int>& values, std::vector<int>& buffer,
+                             std::size_t first, std::size_t last) {
+    if (last - first < 2) return;
+    const std::size_t middle = first + (last - first) / 2;
+    merge_sort_range(values, buffer, first, middle);
+    merge_sort_range(values, buffer, middle, last);
+    merge_ranges(values, buffer, first, middle, last);
+}
+
+// 算法8.8：两路归并排序。
+inline void merge_sort(std::vector<int>& values) {
+    std::vector<int> buffer(values.size());
+    merge_sort_range(values, buffer, 0, values.size());
+}
+```
+
+空序列和单元素序列都能直接通过；输入已经有序时，基础版本仍会完成全部归并，若需要跳过
+无效归并可使用下一节的 `merge_sort_optimized`。
 
 ## 8.6 分配排序和索引排序
 

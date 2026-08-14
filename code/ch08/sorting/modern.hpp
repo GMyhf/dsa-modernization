@@ -150,6 +150,7 @@ inline void quick_sort_optimized(std::vector<int>& values) {
     quick_sort_optimized_range(values, 0, values.size());
 }
 
+// >>> merge
 inline void merge_ranges(std::vector<int>& values, std::vector<int>& buffer,
                          std::size_t first, std::size_t middle, std::size_t last) {
     std::size_t left = first;
@@ -177,6 +178,7 @@ inline void merge_sort(std::vector<int>& values) {
     std::vector<int> buffer(values.size());
     merge_sort_range(values, buffer, 0, values.size());
 }
+// <<< merge
 
 // 算法8.9：已有序时跳过 merge；小分区改用插入排序。
 inline void merge_sort_optimized_range(std::vector<int>& values, std::vector<int>& buffer,
