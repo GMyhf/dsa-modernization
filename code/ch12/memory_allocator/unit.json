@@ -1,0 +1,1 @@
+{"id":"memory_allocator","title":"首次/最佳/最坏适应与边界标记","listings":[],"beyond_book":"原书 12.2.3 只有动态分配策略和边界标记概念，本单元为书外教学实现。","standard":"c++17","owner":"codex","notes":"固定容量元数据模拟连续堆；分裂和相邻空闲块合并均显式维护边界。"}
