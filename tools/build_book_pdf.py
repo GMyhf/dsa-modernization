@@ -36,6 +36,7 @@ CHAPTERS = [
     BOOK / "ch11-index.md",
     BOOK / "ch12-advanced.md",
     BOOK / "习题与参考答案.md",
+    ROOT / "DSA_MOOC_solution.md",
     BOOK / "插图.md",
     BOOK / "勘误.md",
 ]
