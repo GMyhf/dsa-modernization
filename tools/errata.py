@@ -155,7 +155,8 @@ def format_report(state):
 
 def main():
     parser = argparse.ArgumentParser(description="勘误 → 回归测试的映射")
-    parser.add_argument("--check", action="store_true", help="只校验，有问题退出码 1")
+    parser.add_argument("--check", "--verify", dest="check", action="store_true",
+                        help="只校验，有问题退出码 1（--verify 为同义别名）")
     parser.add_argument("--json", action="store_true", help="机器可读输出")
     opts = parser.parse_args()
 
