@@ -65,13 +65,20 @@ public:
     const_iterator begin() const noexcept { return const_iterator(head_); }
     const_iterator end() const noexcept { return const_iterator(nullptr); }
 
-    void swap(DoublyLinkedList& other) noexcept { using std::swap; swap(head_, other.head_); swap(tail_, other.tail_); swap(size_, other.size_); repair(); other.repair(); }
+    /// 已知结点位置时插入与删除都是 **O(1)**——不必像单链表那样先循链找前驱。
+    /// 这是双链表多存一个 `prev` 指针换来的东西，也是本节唯一值得多花空间的理由。
+    iterator insert(iterator pos, const T& value) { return iterator(insert_before(pos.node_, value)); }
+    iterator insert(iterator pos, T&& value) { return iterator(insert_before(pos.node_, std::move(value))); }
+    T erase(iterator pos) { return erase_node(pos.node_); }
+
+    /// 交换两张表。只换三个成员即可——结点之间的链接一根都不用动，
+    /// 因为每张表内部本来就是良构的：`head_->prev` 与 `tail_->next` 已经是 `nullptr`。
+    void swap(DoublyLinkedList& other) noexcept { using std::swap; swap(head_, other.head_); swap(tail_, other.tail_); swap(size_, other.size_); }
 
 private:
     Node* head_{nullptr}; Node* tail_{nullptr}; std::size_t size_{0};
-    void repair() noexcept { if (head_) head_->prev = nullptr; if (tail_) tail_->next = nullptr; }
     Node* node_at(std::size_t pos) const { if (pos >= size_) throw std::out_of_range("DoublyLinkedList: index"); Node* node = head_; for (std::size_t i=0; i<pos; ++i) node=node->next; return node; }
-    template <typename U> void insert_before(Node* pos, U&& value) { Node* n = new Node(std::forward<U>(value)); n->next=pos; n->prev=pos?pos->prev:tail_; if(n->prev)n->prev->next=n; else head_=n; if(pos)pos->prev=n; else tail_=n; ++size_; }
+    template <typename U> Node* insert_before(Node* pos, U&& value) { Node* n = new Node(std::forward<U>(value)); n->next=pos; n->prev=pos?pos->prev:tail_; if(n->prev)n->prev->next=n; else head_=n; if(pos)pos->prev=n; else tail_=n; ++size_; return n; }
     T erase_node(Node* node) { if (!node) throw std::out_of_range("DoublyLinkedList: empty"); T value=std::move(node->value); if(node->prev)node->prev->next=node->next; else head_=node->next; if(node->next)node->next->prev=node->prev; else tail_=node->prev; delete node; --size_; return value; }
     void take(DoublyLinkedList& other) noexcept { head_=other.head_; tail_=other.tail_; size_=other.size_; other.head_=other.tail_=nullptr; other.size_=0; }
 };

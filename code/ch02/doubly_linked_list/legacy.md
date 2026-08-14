@@ -1,28 +1,62 @@
-# 代码 2.12 证据
+# 2.3.4 双链表（原书代码2.12 之外的补充）
 
-原书代码 2.12 只定义双链结点，没有给出容器级的插入、删除和生命周期管理。
-这不是把缺失内容误报成原书编译错误，而是明确本书新增的现代化范围。
+## 原书给了什么
 
-现代实现补充了：
+原书【代码2.12】**只给出双链结点的定义**（`prev` 与 `next` 两个链接域），没有给出完整的
+双链表算法。那条清单由 `code/ch02/linked_list` 逐字认领——书稿 2.3.4 印的就是它。
+本单元是完整的 `DoublyLinkedList<T>`，属于新增内容，`listings` 为空，靠 `beyond_book`
+说明来历（D-008），105 的等式不变。
 
-- `push_front`、`push_back` 和按位置 `insert`；
-- `pop_front`、`pop_back` 和按位置 `erase`；
-- 前驱/后继链接、空表和单结点边界；
-- 拷贝构造、拷贝赋值、移动构造、移动赋值和 `clear`。
+## 这个结构凭什么多花一个指针
 
-结点由 `DoublyLinkedList` 独占释放。`prev` 和 `next` 是非拥有观察链接，不能各自使用
-`unique_ptr`，否则一个结点会有两个所有者并在析构时重复释放。
+每个结点多存一个 `prev`，换来的**唯一**实质好处是：**已知结点位置时，删除是 O(1)**——
+不必像单链表那样先循链找前驱。所以这个能力必须出现在公开接口里，否则多存的那个指针白花。
 
-可复现验证：
+本单元因此提供 `erase(iterator)` 与 `insert(iterator, value)`。按下标的
+`erase(std::size_t)` 仍然是 O(n)，因为**定位**本身要走链——双链表省掉的是找前驱，不是找位置。
+两者并存，测试里都覆盖到了。
+
+## 实现要点
+
+- **结点由容器拥有**，`prev`/`next` 是非拥有的裸指针。这里不用 `unique_ptr`：
+  链式结构上它的析构是递归的，实测约 5.7 万结点就压穿栈（D-001 §2b 与第 2.3.2a 节）。
+  `clear()` 是循环释放。
+- **五法则齐全**，拷贝是深拷贝，移动后源对象留在可用的空状态。
+- 越界一律抛 `std::out_of_range`；空表出队同样抛——那是调用方用错接口，不是「空结果」。
+
+## 开发中查出的一处死代码
+
+`swap()` 原本在交换三个成员之后调用 `repair()`，把 `head_->prev` 与 `tail_->next` 置空。
+**变异自检发现删掉 `repair()` 之后测试全绿**——因为每张表内部本来就是良构的，
+交换三个成员并不会破坏任何链接，`head_->prev` 本来就是 `nullptr`。这段防御代码
+永远不可能起作用。已删除，并在 `swap()` 上写明理由。
+
+## 可复现的证据
 
 ```text
-$ python3 tools/check_code.py code/ch02/doubly_linked_list --allow-degraded
-DoublyLinkedList: 6 checks, 0 failures
+$ cd code/ch02/doubly_linked_list
+$ g++ -std=c++17 -Wall -Wextra -Wpedantic -Werror -O1 -g \
+      -fsanitize=address,undefined -fno-sanitize-recover=all test.cpp -o /tmp/dll
+$ /tmp/dll
+DoublyLinkedList: 41 项断言，0 失败
 ```
 
-Sanitizer 受当前 macOS `sanitizer_malloc_mac.inc:189` 空探针故障影响，Release-O2 已执行。
+**变异自检**：
 
-边界证据包括空表、首结点、尾结点、单结点和越界位置；拷贝测试确认两个对象不共享结点。
-移动测试确认源对象归零，删除测试确认最后一个结点删除后表恢复为空。
-这些测试不把 `std::list` 当作实现，容器内部不执行 I/O，也不把所有权交给调用方。
-因此本单元的“完整”指接口和生命周期已覆盖，不声称复刻原书不存在的算法编号。
+| 把实现改成哪种错法 | 后果 |
+| --- | --- |
+| 插入时不接 `pos->prev` | 反向遍历与随机对拍变红，退出码 1 |
+| 删尾时不回退 `tail_` | `ERROR: AddressSanitizer: heap-use-after-free` |
+| 删掉 `swap()` 里的 `repair()` | **全绿**——据此判定它是死代码并移除 |
+
+## 验证边界
+
+- 41 项断言，`-Werror` + ASan/UBSan 与 `-O2` 双档通过。
+- **反向遍历是单独测的**。正向遍历只用 `next`，`prev` 全接错也照样通过；
+  所以每组结构性用例都额外从尾往回走一遍，与正向的逆序逐项比。
+- 200 轮随机操作与 `std::list` 对拍（固定种子 999），正反两个方向都比。
+- **不在范围内**：没有 `const_iterator` 的 `--`（只有 `iterator` 能反向走）；
+  没有 splice / merge / sort；迭代器不满足标准库的双向迭代器完整要求
+  （缺 `value_type` 等 traits），不能直接喂给 `<algorithm>`。
+- 迭代器在其所指结点被删除后失效，接口文档里写明了，但**没有运行期检查**——
+  用一个失效迭代器是未定义行为。

@@ -99,7 +99,7 @@ python3 tools/check_doc.py
 | 章节 | 状态 | 验证入口或边界 |
 | --- | --- | --- |
 | 第 1 章 概论 | 实现并测试 | `code/ch01/adt`；Floyd 示例与测试 |
-| 第 2 章 线性表 | 实现并测试 | `code/ch02/array_list`、`linked_list` |
+| 第 2 章 线性表 | 实现并测试 | `code/ch02/array_list`、`linked_list`、`doubly_linked_list`、`ownership` |
 | 第 3 章 栈与队列 | 实现并测试 | `code/ch03` 下 6 个单元 |
 | 第 4 章 字符串 | 实现并测试 | `code/ch04`；朴素匹配与 KMP |
 | 第 5 章 二叉树 | 实现并测试 | `code/ch05`；深退化树有栈风险 |
@@ -109,7 +109,7 @@ python3 tools/check_doc.py
 | 第 9 章 外部排序 | 实现并测试 | `code/ch09/external_sort`；内存模拟外存 |
 | 第 10 章 检索 | 实现并测试 | `code/ch10/search_hash`；散列与墓碑 |
 | 第 11 章 索引技术 | 实现并测试 | `code/ch11` 下 4 个单元；内存里的页模拟，不做真实磁盘 I/O |
-| 第 12 章 高级数据结构 | 混合 | 广义表、Trie/Patricia、句柄池与最优 BST 实现并测试；多维数组、存储回收、AVL 与伸展树为概念导读 |
+| 第 12 章 高级数据结构 | 混合 | 广义表、Trie/Patricia、句柄池、最优 BST、AVL 与伸展树实现并测试；多维数组与存储回收为概念导读 |
 
 ### 每章验证边界
 
