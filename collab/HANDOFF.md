@@ -1,5 +1,40 @@
 # HANDOFF · 交接日志
 
+### 2026-08-14 · Claude → Codex · 已发布的 PDF 是半本书：定位、修源、加自检、字体回退
+
+- **`d799a60`「publish refreshed textbook PDF」发布的是一本被截断的书。** 189 页 / **0 张图** /
+  1.36 MB，对比上一版 276 页 / 292 张图 / 7.64 MB。丢的是 291 张插图的**整个图册**、
+  **原书勘误附录**，以及约 60% 的 MOOC 附录——正文停在 MOOC 第 10 章第 3 题正中间。
+- **根因已复现，不是推断。** `DSA_MOOC_solution.md:2112` 写成 `$ S = \sum_{i=1}^\infty … $`，
+  开头 `$` 后带空格，pandoc 不认作公式，转义成文本模式的 `\infty` → `book.tex:10907`
+  处 `! Missing $ inserted.` → `-halt-on-error` 当场停机。本机用替换字体复现：坏源 195 页
+  停机；只改这一行后 **326 页、291 张图、exit 0**。
+- **改了 4 行**：2112 那行致命的；2096 `\text{ASL}*n = \sum*{i=1}` 下标被写成 `*`；
+  2092/2106 两处会印成字面 `$ i $`。
+- **`tools/build_book_pdf.py` 加了 `verify_not_truncated()`**：book.tex 的 `\chapter{` 数必须
+  等于 book.toc 实际排出的章数；每张 `\includegraphics` 都必须在 book.log 里有嵌入记录；
+  日志必须有 `Output written on … pages`。**三条期望全部从 book.tex 推出来，不写死页数**。
+  自检不过就不覆盖已发布成品，并删掉 `.build/` 里的半成品——上次被当成品拷走的正是它。
+  xelatex 失败路径同样删。
+- **失败路径是真跑过的，不是推理。** 第一版自检读错了流（嵌图记录只写进 book.log，
+  终端输出里没有），当场判定「291/291 张图没进 PDF」并拒绝覆盖，已发布 PDF 原样未动；
+  改读 book.log 后重跑：`PDF 自检通过：334 页、17 章、291 张图`。
+- **`book/pdf/preamble.tex` 加了字体回退**（`\IfFontExistsTF` 逐级）：Times New Roman →
+  Liberation Serif → DejaVu Serif；Menlo → DejaVu Sans Mono；Songti SC → Noto Serif CJK SC →
+  Droid Sans Fallback；Heiti SC → Noto Sans CJK SC → Droid Sans Fallback。
+  **2026-08-13 那条「本机编不了 PDF」到此销掉**：Linux 上已完整编出 334 页 / 291 张图。
+- **成品仍请在 Mac 上出。** `book/pdf/现代C++数据结构教程.pdf` 我恢复成了仓库里那份 189 页的
+  坏版本，没有拿 Noto 字体的版本覆盖它。请在 Mac 上跑 `python3 tools/build_book_pdf.py`
+  重发成品；自检现在会替你挡住截断。
+- **闸门**：工具自测 **69 项**（新增 8 项，`tests/test_build_book_pdf.py`，每条自检都有一个
+  会红的用例）；台账 104/105 已现代化 + 1 退场 + 0 待办；`check_doc` 16 文件 / 7 规则；
+  `check_code` **未降级** 19/19 单元 × 双构建；`handoff.py --verify` 退出码 0。
+- **没动但值得看**：① `参考资料说明.md` 写「预编译产物不纳入版本控制」，实际跟进来 11 个
+  ELF 可执行文件（`bag`/`test`/`hashdict`/`AVLTree`/`splaytree` 等）；② 仓库 115 MB 里
+  106 MB 是两个 ref 目录；③ MOOC 附录有 410 个康熙部首字符（`⼀⽤⼩⼤`，U+2F00 区）和
+  跨行断开的数字（2118 行「元素5\n8」），印得出但搜不到、复制不对；④ 本轮参考资料的引入
+  没有进 PLAN/HANDOFF，README 与 CLAUDE.md 也没提这两个 ref 目录和 `参考资料说明.md`。
+
 ### 2026-08-13 · Claude → Codex · 复核 `7f86f8c`（B+ 树叶分裂）：结论对、理由错，且例子仍以非法树收尾
 
 - **`7f86f8c` 的结果认可，理由不认可。** 章内自述「3 阶叶最多两个 key」，则下限是 1 个 key，

@@ -64,6 +64,12 @@ LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 COLLAB_RE = re.compile(r"\[(`?[^`\]]+`?)\]\(\.\./collab/[^)]+\)")
 CODE_LINK_RE = re.compile(r"\[([^\]]+)\]\(\.\./code/[^)]+\)")
 
+# 截断自检用：tex 里写了多少章、多少张图，排出来的目录和日志里就该有多少。
+CHAPTER_RE = re.compile(r"\\chapter\{")
+TOC_CHAPTER_RE = re.compile(r"\\contentsline \{chapter\}")
+GRAPHIC_RE = re.compile(r"\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}")
+PAGES_RE = re.compile(r"Output written on \S+ \((\d+) pages?")
+
 
 def strip_file_attr(info: str) -> str:
     parts = [p for p in info.split() if not p.startswith("file=")]
@@ -208,18 +214,72 @@ def assemble() -> str:
     return "\n".join(parts)
 
 
+def drop_partial_pdf() -> None:
+    """xelatex 中途停机也会写出一份「半本书」。留着它，早晚有人当成品拷走。
+
+    2026-08-14 发布的那份 189 页 PDF 就是这么来的：MOOC 附录里一处 `$ S = \\sum…$`
+    让 xelatex 停在第 187 页，291 张插图和勘误附录整整两章没排进去。
+    """
+    partial = WORK / "book.pdf"
+    if partial.is_file():
+        partial.unlink()
+        sys.stderr.write(f"已删除半成品 {partial.relative_to(ROOT)}，不要拿它当成品\n")
+
+
 def run_xelatex(tex_path: Path) -> None:
     cmd = [
         "xelatex",
         "-interaction=nonstopmode",
         "-halt-on-error",
+        # 日志按 79 列折行会把长图片路径拆断，自检就数不准图了。
+        "-max-print-line=1000",
         tex_path.name,
     ]
     proc = subprocess.run(cmd, cwd=WORK, capture_output=True, text=True)
     if proc.returncode != 0:
         sys.stderr.write(proc.stdout[-4000:])
         sys.stderr.write(proc.stderr[-2000:])
+        drop_partial_pdf()
         raise SystemExit(proc.returncode)
+
+
+def verify_not_truncated(tex_path: Path, toc_path: Path, log_text: str) -> int:
+    """退出码为 0 还不算数：确认整本书都排完了、图都嵌进去了，返回页数。
+
+    三条都是从 book.tex 推出来的，不写死页数——章数和图数变了，期望值自己跟着变。
+    `log_text` 必须是 book.log 的内容：嵌图记录只写进日志文件，终端输出里没有。
+    """
+    tex = tex_path.read_text(encoding="utf-8", errors="replace")
+    problems = []
+
+    want_chapters = len(CHAPTER_RE.findall(tex))
+    toc = toc_path.read_text(encoding="utf-8", errors="replace") if toc_path.is_file() else ""
+    got_chapters = len(TOC_CHAPTER_RE.findall(toc))
+    if got_chapters != want_chapters:
+        problems.append(
+            f"目录只排到 {got_chapters} 章，book.tex 里有 {want_chapters} 章——书被截断了"
+        )
+
+    want_figures = {Path(src).name for src in GRAPHIC_RE.findall(tex)}
+    got_figures = {name for name in want_figures if name in log_text}
+    if got_figures != want_figures:
+        missing = sorted(want_figures - got_figures)
+        problems.append(
+            f"{len(missing)}/{len(want_figures)} 张图没进 PDF，例如 {missing[:3]}"
+        )
+
+    match = PAGES_RE.search(log_text)
+    if match is None:
+        problems.append("日志里没有 Output written on … pages，xelatex 没正常收尾")
+    pages = int(match.group(1)) if match else 0
+
+    if problems:
+        for line in problems:
+            sys.stderr.write(f"PDF 自检失败：{line}\n")
+        drop_partial_pdf()
+        raise SystemExit(1)
+    print(f"PDF 自检通过：{pages} 页、{want_chapters} 章、{len(want_figures)} 张图")
+    return pages
 
 
 def run_pandoc(md_path: Path, pdf_path: Path) -> None:
@@ -263,6 +323,9 @@ def run_pandoc(md_path: Path, pdf_path: Path) -> None:
     built = WORK / "book.pdf"
     if not built.is_file():
         raise SystemExit("xelatex 没有写出 book.pdf")
+    # 自检不过就不许覆盖已发布的成品：宁可留着旧版，也不发一本缺章少图的书。
+    log_text = (WORK / "book.log").read_text(encoding="utf-8", errors="replace")
+    verify_not_truncated(tex_path, WORK / "book.toc", log_text)
     # macOS 上目标 PDF 可能已存在；显式复制并替换，避免旧文件被保留。
     shutil.copy2(str(built), str(pdf_path))
     built.unlink()

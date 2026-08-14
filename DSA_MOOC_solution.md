@@ -2089,11 +2089,11 @@ A、1.5	B、2	C、3	D、1.99999999
 >
 > **成功检索的平均检索长度（ASL）**
 >
-> 顺序检索中，若目标是第 $ i $ 个元素，则需比较 $ i $ 次（假设成功检索时恰好在第 $ i $ 步找到）。
+> 顺序检索中，若目标是第 $i$ 个元素，则需比较 $i$ 次（假设成功检索时恰好在第 $i$ 步找到）。
 >
 > 因此，平均检索长度为：
 >
-> $$ \text{ASL}*n = \sum*{i=1}^n i \cdot P_i = \sum_{i=1}^n i \cdot \frac{1}{2^i} $$
+> $$ \text{ASL}_n = \sum_{i=1}^n i \cdot P_i = \sum_{i=1}^n i \cdot \frac{1}{2^i} $$
 >
 > 题目要求的是 **当 $n \to \infty$ 时的极限**，即：
 >
@@ -2103,13 +2103,13 @@ A、1.5	B、2	C、3	D、1.99999999
 >
 > $$ \sum_{i=1}^\infty \frac{i}{r^i} = \frac{r}{(r-1)^2},\quad \text{当 } |r| > 1 $$
 >
-> 令 $ r = 2 $，则：
+> 令 $r = 2$，则：
 >
 > $$ \sum_{i=1}^\infty \frac{i}{2^i} = \frac{2}{(2-1)^2} = 2 $$
 >
 > 或者直接推导：
 >
-> 设 $ S = \sum_{i=1}^\infty \frac{i}{2^i} $
+> 设 $S = \sum_{i=1}^\infty \frac{i}{2^i}$
 >
 > 则： $$ S = \frac{1}{2} + \frac{2}{4} + \frac{3}{8} + \frac{4}{16} + \cdots $$ $$ \frac{1}{2}S = \frac{1}{4} + \frac{2}{8} + \frac{3}{16} + \cdots $$ 相减得： $$ S - \frac{1}{2}S = \frac{1}{2} + \frac{1}{4} + \frac{1}{8} + \cdots = 1 \Rightarrow \frac{1}{2}S = 1 \Rightarrow S = 2 $$
 

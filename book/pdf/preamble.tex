@@ -3,13 +3,30 @@
 \geometry{b5paper,margin=2.1cm,top=2.2cm,bottom=2.3cm}
 \usepackage{fontspec}
 \usepackage{xeCJK}
-\setmainfont{Times New Roman}
-\setmonofont{Menlo}[Scale=0.82]
-\setCJKmainfont{Songti SC}[
-  BoldFont = Heiti SC,
-]
-\setCJKsansfont{Heiti SC}
-\setCJKmonofont{Heiti SC}[Scale=0.88]
+% 成品在 macOS 上编（Times/Menlo/宋体-黑体）。其他平台没有这四款字体时，
+% 整本书会在 \setmainfont 处直接停机，所以逐级回退到等价的自由字体：
+% 构建可复现，字形不同——发给学生的成品仍以 macOS 那一档为准。
+\IfFontExistsTF{Times New Roman}
+  {\setmainfont{Times New Roman}}
+  {\IfFontExistsTF{Liberation Serif}
+     {\setmainfont{Liberation Serif}}
+     {\setmainfont{DejaVu Serif}}}
+\IfFontExistsTF{Menlo}
+  {\setmonofont{Menlo}[Scale=0.82]}
+  {\setmonofont{DejaVu Sans Mono}[Scale=0.82]}
+\IfFontExistsTF{Songti SC}
+  {\setCJKmainfont{Songti SC}[BoldFont = Heiti SC]}
+  {\IfFontExistsTF{Noto Serif CJK SC}
+     {\setCJKmainfont{Noto Serif CJK SC}}
+     {\setCJKmainfont{Droid Sans Fallback}}}
+\IfFontExistsTF{Heiti SC}
+  {\setCJKsansfont{Heiti SC}%
+   \setCJKmonofont{Heiti SC}[Scale=0.88]}
+  {\IfFontExistsTF{Noto Sans CJK SC}
+     {\setCJKsansfont{Noto Sans CJK SC}%
+      \setCJKmonofont{Noto Sans CJK SC}[Scale=0.88]}
+     {\setCJKsansfont{Droid Sans Fallback}%
+      \setCJKmonofont{Droid Sans Fallback}[Scale=0.88]}}
 \xeCJKsetup{CJKspace=true}
 
 \usepackage{xcolor}
