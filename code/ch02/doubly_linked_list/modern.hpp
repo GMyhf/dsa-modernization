@@ -78,7 +78,7 @@ public:
 private:
     Node* head_{nullptr}; Node* tail_{nullptr}; std::size_t size_{0};
     Node* node_at(std::size_t pos) const { if (pos >= size_) throw std::out_of_range("DoublyLinkedList: index"); Node* node = head_; for (std::size_t i=0; i<pos; ++i) node=node->next; return node; }
-    // >>> algorithm-2-12-insert
+    // >>> dll-insert-before
     template <typename U>
     Node* insert_before(Node* pos, U&& value) {
         // 先构造结点；构造失败时原链完全未改变。
@@ -98,8 +98,8 @@ private:
         ++size_;
         return inserted;
     }
-    // <<< algorithm-2-12-insert
-    // >>> algorithm-2-12-erase
+    // <<< dll-insert-before
+    // >>> dll-erase-node
     T erase_node(Node* node) {
         if (node == nullptr) throw std::out_of_range("DoublyLinkedList: empty");
         T value = std::move(node->value);
@@ -111,7 +111,7 @@ private:
         --size_;
         return value;
     }
-    // <<< algorithm-2-12-erase
+    // <<< dll-erase-node
     void take(DoublyLinkedList& other) noexcept { head_=other.head_; tail_=other.tail_; size_=other.size_; other.head_=other.tail_=nullptr; other.size_=0; }
 };
 
