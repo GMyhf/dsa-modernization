@@ -1037,7 +1037,7 @@ private: std::size_t slots_{0}, front_{0}, rear_{0}; T* data_{nullptr};
 
 链式队列用首尾指针维持 FIFO，入队接在尾、出队摘下头，并具备独立复制所有权。
 
-```cpp file=code/ch03/queue/modern.hpp#linked-queue
+```text
 template <typename T>
 class LinkedQueue {
     struct Node { T value; Node* next{nullptr}; template <typename U> explicit Node(U&& value) : value(std::forward<U>(value)) {} };

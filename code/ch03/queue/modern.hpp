@@ -46,10 +46,36 @@ public:
     [[nodiscard]] std::size_t size() const noexcept { return size_; }
     void enqueue(const T& value) { append(new Node(value)); }
     void enqueue(T&& value) { append(new Node(std::move(value))); }
-    [[nodiscard]] std::optional<T> dequeue() { if (front_ == nullptr) return std::nullopt; Node* old = front_; front_ = old->next; if (front_ == nullptr) rear_ = nullptr; --size_; T value = std::move(old->value); delete old; return value; }
+    [[nodiscard]] std::optional<T> dequeue() {
+        if (front_ == nullptr) return std::nullopt;
+        Node* old = front_;
+        front_ = old->next;
+        if (front_ == nullptr) rear_ = nullptr;
+        --size_;
+        T value = std::move(old->value);
+        delete old;
+        return value;
+    }
     [[nodiscard]] const T* front() const noexcept { return front_ == nullptr ? nullptr : &front_->value; }
-    void clear() noexcept { while (front_ != nullptr) { Node* old = front_; front_ = old->next; delete old; } rear_ = nullptr; size_ = 0; }
-private: void append(Node* node) noexcept { if (rear_ == nullptr) front_ = rear_ = node; else { rear_->next = node; rear_ = node; } ++size_; } Node* front_{nullptr}; Node* rear_{nullptr}; std::size_t size_{0};
+    /// 循环释放而非递归析构，长队列也不会消耗与长度成正比的调用栈。
+    void clear() noexcept {
+        while (front_ != nullptr) {
+            Node* old = front_;
+            front_ = old->next;
+            delete old;
+        }
+        rear_ = nullptr;
+        size_ = 0;
+    }
+private:
+    void append(Node* node) noexcept {
+        if (rear_ == nullptr) front_ = rear_ = node;
+        else { rear_->next = node; rear_ = node; }
+        ++size_;
+    }
+    Node* front_{nullptr};
+    Node* rear_{nullptr};
+    std::size_t size_{0};
 };
 // <<< linked-queue
 }  // namespace dsa

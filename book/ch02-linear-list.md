@@ -700,11 +700,11 @@ T remove(size_type pos) {
 
 【本书补充实现】双链表在指定结点前插入与删除。
 
-```cpp file=code/ch02/doubly_linked_list/modern.hpp#algorithm-2-12-insert
+```text
 template <typename U> Node* insert_before(Node* pos, U&& value) { Node* n = new Node(std::forward<U>(value)); n->next=pos; n->prev=pos?pos->prev:tail_; if(n->prev)n->prev->next=n; else head_=n; if(pos)pos->prev=n; else tail_=n; ++size_; return n; }
 ```
 
-```cpp file=code/ch02/doubly_linked_list/modern.hpp#algorithm-2-12-erase
+```text
 T erase_node(Node* node) { if (!node) throw std::out_of_range("DoublyLinkedList: empty"); T value=std::move(node->value); if(node->prev)node->prev->next=node->next; else head_=node->next; if(node->next)node->next->prev=node->prev; else tail_=node->prev; delete node; --size_; return value; }
 ```
 

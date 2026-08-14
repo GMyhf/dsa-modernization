@@ -79,10 +79,38 @@ private:
     Node* head_{nullptr}; Node* tail_{nullptr}; std::size_t size_{0};
     Node* node_at(std::size_t pos) const { if (pos >= size_) throw std::out_of_range("DoublyLinkedList: index"); Node* node = head_; for (std::size_t i=0; i<pos; ++i) node=node->next; return node; }
     // >>> algorithm-2-12-insert
-    template <typename U> Node* insert_before(Node* pos, U&& value) { Node* n = new Node(std::forward<U>(value)); n->next=pos; n->prev=pos?pos->prev:tail_; if(n->prev)n->prev->next=n; else head_=n; if(pos)pos->prev=n; else tail_=n; ++size_; return n; }
+    template <typename U>
+    Node* insert_before(Node* pos, U&& value) {
+        // 先构造结点；构造失败时原链完全未改变。
+        Node* inserted = new Node(std::forward<U>(value));
+        inserted->next = pos;
+        inserted->prev = pos != nullptr ? pos->prev : tail_;
+        if (inserted->prev != nullptr) {
+            inserted->prev->next = inserted;
+        } else {
+            head_ = inserted;
+        }
+        if (pos != nullptr) {
+            pos->prev = inserted;
+        } else {
+            tail_ = inserted;
+        }
+        ++size_;
+        return inserted;
+    }
     // <<< algorithm-2-12-insert
     // >>> algorithm-2-12-erase
-    T erase_node(Node* node) { if (!node) throw std::out_of_range("DoublyLinkedList: empty"); T value=std::move(node->value); if(node->prev)node->prev->next=node->next; else head_=node->next; if(node->next)node->next->prev=node->prev; else tail_=node->prev; delete node; --size_; return value; }
+    T erase_node(Node* node) {
+        if (node == nullptr) throw std::out_of_range("DoublyLinkedList: empty");
+        T value = std::move(node->value);
+        if (node->prev != nullptr) node->prev->next = node->next;
+        else head_ = node->next;
+        if (node->next != nullptr) node->next->prev = node->prev;
+        else tail_ = node->prev;
+        delete node;
+        --size_;
+        return value;
+    }
     // <<< algorithm-2-12-erase
     void take(DoublyLinkedList& other) noexcept { head_=other.head_; tail_=other.tail_; size_=other.size_; other.head_=other.tail_=nullptr; other.size_=0; }
 };
