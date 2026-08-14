@@ -1,0 +1,1 @@
+{"id":"doubly_linked_list","title":"双链表 DoublyLinkedList","listings":["代码2.12"],"standard":"c++17","owner":"codex","notes":"unique_ptr 未用于结点是因为双向结构需要双向非拥有链接；容器拥有并负责释放全部结点。"}

@@ -650,11 +650,13 @@ T remove(size_type pos) {
 
 上面的 `DoublyLink<T>` 已保留 `prev` 与 `next` 两个链接域。双链表删除某一结点时，需要
 同时维护前驱的 `next` 和后继的 `prev`；这能高效向前走，但每个结点多一个指针且不变量更多。
-原书在此只给出结点定义，没有给出完整双链表算法，因此本轮不假装已经现代化完整双链表。
+原书在此只给出结点定义，没有给出完整双链表算法；本书补充 `DoublyLinkedList<T>`，用前后端指针
+实现双端插入删除、按位置插入删除、双向链接维护、拷贝和移动。结点由容器拥有，接口不暴露裸所有权。
 
 【代码2.12结束】
 
-完整可运行实现见 `code/ch02/linked_list/modern.hpp`，测试覆盖头/中/尾插入、删尾后的尾指针
+完整可运行实现见 `code/ch02/doubly_linked_list/modern.hpp`；单链实现仍见 `code/ch02/linked_list/modern.hpp`。
+测试覆盖头/中/尾插入、删尾后的尾指针
 修复、深拷贝、移动、元素构造异常和 move-only 元素；变异自检还确认“删尾不回退 tail”会在
 后续尾插崩溃，“复制构造失败不清理”会留下元素对象。原书逐条证据见
 `code/ch02/linked_list/legacy.md`。

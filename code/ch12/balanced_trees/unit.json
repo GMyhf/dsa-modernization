@@ -1,0 +1,1 @@
+{"id":"balanced_trees","title":"AVL 与伸展树","listings":["AVL 四种旋转","伸展树一字形与之字形旋转"],"standard":"c++17","owner":"codex","notes":"子树由 unique_ptr 拥有，伸展树 parent 为非拥有观察指针。"}
