@@ -1,0 +1,1 @@
+{"id":"linear_index","title":"线性索引：稠密、稀疏与多级","listings":[],"beyond_book":"原书第 11 章没有任何【算法】/【代码】清单（105 条里第 11 章为 0），本单元是新增实现，不认领任何原书清单。","standard":"c++17","owner":"claude","notes":"稠密索引每条记录一项、允许主文件无序；稀疏索引每页一项、要求主文件有序。索引项装不下就逐层上建，顶层常驻内存。page_reads() 数访外页数。","d001_exceptions":{"#include<vector>":"索引项数组与主文件记录数组。","#include<algorithm>":"稠密索引建表时对索引项排序。"}}

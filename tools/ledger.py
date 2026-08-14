@@ -88,9 +88,17 @@ def load_units(code_root=CODE):
                 f"{rel}: unit.json 的 id={data.get('id')!r} 与目录名 {manifest.parent.name!r} 不一致"
             )
         listings = data.get("listings")
-        if not isinstance(listings, list) or not listings:
-            problems.append(f"{rel}: unit.json 缺少非空的 listings 字段")
+        beyond = data.get("beyond_book")
+        if not isinstance(listings, list):
+            problems.append(f"{rel}: unit.json 缺少 listings 字段")
             data["listings"] = []
+        elif not listings and not (isinstance(beyond, str) and beyond.strip()):
+            # 有些内容原书根本没给清单（第11章一条都没有，12.3 的 Trie/Patricia 只有
+            # 文字和图）。这类新增实现也要能入库，但必须自报家门：否则「忘了填 listings」
+            # 和「本来就没有清单可认领」在台账里长得一模一样。
+            problems.append(
+                f"{rel}: listings 为空时必须写 beyond_book，说明原书没有对应清单"
+            )
         std = data.get("standard", DEFAULT_STANDARD)
         if std not in KNOWN_STANDARDS:
             problems.append(f"{rel}: standard={std!r} 不在 {KNOWN_STANDARDS}")
@@ -188,12 +196,11 @@ def format_report(state):
         c = sum(1 for i in ids if i in state["claimed"])
         e = sum(1 for i in ids if i in state["exclusions"])
         lines.append(f"| 第{chapter}章 | {len(ids)} | {c} | {e} | {len(ids) - c - e} |")
-    lines += ["", f"code/ 单元 {len(state['units'])} 个:"]
+    beyond = [u for u in state["units"] if not u.get("listings")]
+    lines += ["", f"code/ 单元 {len(state['units'])} 个（其中 {len(beyond)} 个不对应原书清单）:"]
     for unit in state["units"]:
-        lines.append(
-            f"  - {unit['rel']}  ←  {', '.join(unit.get('listings', []))}"
-            f"  [{unit.get('title', '')}]"
-        )
+        claims = ", ".join(unit.get("listings", [])) or "原书无对应清单"
+        lines.append(f"  - {unit['rel']}  ←  {claims}  [{unit.get('title', '')}]")
     broken = [i["id"] for i in inv if not i["has_end"]]
     if broken:
         lines += [

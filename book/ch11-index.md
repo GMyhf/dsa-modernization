@@ -2,7 +2,18 @@
 
 索引不是保存完整记录的主文件，而是一张「关键码到记录位置」的查找表。它的目标是在海量外存记录中避免逐条扫描：先查较小的索引，再按位置读取目标记录。
 
-原书本章没有独立的 `【算法】` / `【代码】` 清单，因此这里不提供未经验证的示意实现，也不伪造台账条目。下面是概念教程；实现练习留给需要持久化存储的上层项目。
+原书本章没有独立的 `【算法】` / `【代码】` 清单——`dsa_raw.md` 里 105 条清单，第 11 章一条都没有。本章的实现因此全部是新写的，不认领任何原书清单，台账等式不受影响。四个小节各有一个通过闸门的实现单元：
+
+| 小节 | 实现状态 | 代码 |
+| --- | --- | --- |
+| 11.1 线性索引 | 实现并测试 | `code/ch11/linear_index` |
+| 11.2 静态多分树 | 实现并测试 | `code/ch11/bplus_tree` 的 `bulk_load` |
+| 11.3 倒排索引 | 实现并测试 | `code/ch11/inverted_index` |
+| 11.4 B 树与 B+ 树 | 实现并测试 | `code/ch11/bplus_tree` |
+| 11.5 位图、签名 | 实现并测试 | `code/ch11/bitmap_index` |
+| 11.5 红黑树 | 概念导读 | 只作对照讨论，不另写实现 |
+
+这些都是**内存里的页模拟**：结点即页，`page_reads()` / `page_writes()` 数的是页访问次数。它们不做真实磁盘 I/O、页缓存和并发控制——本章要教的是访外次数怎么被结构决定，不是写一个存储引擎。
 
 ## 11.1 线性索引
 
@@ -12,11 +23,108 @@
 
 第一层索引太大、内存放不下时，再为它建一层，成为多级索引。一次查询的路径是：内存里的顶层 → 读一个索引页 → 读数据页。这时的关键指标不是 CPU 比较次数，而是磁盘页访问次数。变长记录尤其适合「索引 + 位置」，因为主文件无法按下标直接算出地址。
 
+先跑一遍：
+
+```cpp file=code/ch11/linear_index/demo.cpp
+#include "modern.hpp"
+
+#include <cstdio>
+
+int main() {
+    using dsa::index::IndexKind;
+    using dsa::index::MultiLevelIndex;
+    std::vector<std::pair<int, std::string>> records;
+    for (int i = 0; i < 1000; ++i) {
+        records.emplace_back(i * 10, std::string(static_cast<std::size_t>(i % 7) + 1, 'x'));
+    }
+
+    // 每个数据页 4 条记录，每个索引页 4 项。
+    MultiLevelIndex sparse(IndexKind::Sparse, 4, 4);
+    sparse.load(records);
+    sparse.reset_counters();
+    const bool hit = sparse.find(5000).has_value();
+    std::printf("稀疏 · 每页 4 项 : %zu 个数据页，%zu 个索引项，%zu 层，查一次读 %zu 页（命中 %d）\n",
+                sparse.data_pages(), sparse.entries(), sparse.levels(), sparse.page_reads(),
+                static_cast<int>(hit));
+
+    // 索引页装得多，层数就少，访外次数随之下降——这就是 11.2 要做多分树的理由。
+    MultiLevelIndex flat(IndexKind::Sparse, 4, 64);
+    flat.load(records);
+    flat.reset_counters();
+    (void)flat.find(5000);
+    std::printf("稀疏 · 每页 64 项: %zu 层，查一次读 %zu 页\n", flat.levels(), flat.page_reads());
+
+    MultiLevelIndex dense(IndexKind::Dense, 4, 64);
+    dense.load(records);
+    dense.reset_counters();
+    (void)dense.find(5005);  // 不存在
+    const std::size_t miss_reads = dense.page_reads();
+    dense.reset_counters();
+    (void)dense.find(5000);  // 存在
+    std::printf("稠密 · %zu 层      : 查不到读 %zu 页，命中读 %zu 页——"
+                "多出来的那一页就是数据页，索引里没有就不必去读\n",
+                dense.levels(), miss_reads, dense.page_reads());
+    return 0;
+}
+```
+
+```text
+稀疏 · 每页 4 项 : 250 个数据页，250 个索引项，4 层，查一次读 4 页（命中 1）
+稀疏 · 每页 64 项: 2 层，查一次读 2 页
+稠密 · 2 层      : 查不到读 1 页，命中读 2 页——多出来的那一页就是数据页，索引里没有就不必去读
+```
+
+三行输出对应三个结论。第一行：索引项一页放不下就逐层上建，查一次的代价等于层数。第二行：**索引页装得多，层数就少，访外次数随之下降**——这正是下一节要做多分树的理由。第三行是稠密与稀疏最实用的差别：稠密索引在索引里查不到就是真没有，一个数据页都不用读；稀疏索引只能定位到页，**查不到也得先把那一页读上来**才知道。
+
+查找过程写出来就是「逐层读索引页，最后读一个数据页」：
+
+```cpp file=code/ch11/linear_index/modern.hpp#index-find
+[[nodiscard]] std::optional<std::string> find(int key) const {
+    if (levels_.empty()) {
+        return std::nullopt;
+    }
+    // 顶层常驻内存：定位到它所在的那一页，不计页访问。
+    std::size_t page = locate(levels_.back(), 0, levels_.back().size(), key);
+    for (std::size_t level = levels_.size() - 1; level > 0; --level) {
+        page = levels_[level][page].target;
+        ++reads_;  // 读一个下层索引页
+        const std::size_t first = page * entries_per_page_;
+        const std::size_t last = std::min(first + entries_per_page_, levels_[level - 1].size());
+        if (first >= last) {
+            return std::nullopt;
+        }
+        page = locate(levels_[level - 1], first, last, key);
+    }
+
+    const Entry& entry = levels_[0][page];
+    if (kind_ == IndexKind::Dense) {
+        // 稠密索引：索引里没有就是真没有，数据页一次都不用读。
+        if (entry.key != key) {
+            return std::nullopt;
+        }
+        ++reads_;
+        return records_[entry.target].second;
+    }
+    // 稀疏索引：只能定位到页，页内还要再找一次；不命中也已经付出了这一页。
+    ++reads_;
+    const std::size_t first = entry.target * records_per_page_;
+    const std::size_t last = std::min(first + records_per_page_, records_.size());
+    for (std::size_t i = first; i < last; ++i) {
+        if (records_[i].first == key) {
+            return records_[i].second;
+        }
+    }
+    return std::nullopt;
+}
+```
+
 ## 11.2 静态多分树
 
 磁盘按页读写，一个索引结点通常设计成恰好装满一页。二叉树每个结点只有两个孩子，同样多的 key 会把树撑得很高，查询就要读很多页。多分树每个结点有许多孩子，树高低，页访问少。
 
 静态多分树在批量装入时按页填满，之后结构不再变。查找从根走到叶，每层读一页。插入、删除会破坏「一页正好满」的约定：多出来的记录只能进溢出区，少了的页会变稀，最终往往要重组整棵树。所以它适合「一次建好、很少改」的文件，不适合频繁更新的目录。
+
+批量装入本身就是「按页填满、自底向上建层」，`code/ch11/bplus_tree` 的 `bulk_load` 实现的正是这件事——把下一节那棵 3 阶 B+ 树按这个办法装出来，得到的就是 11.4 图里的形状。区别只在后续：静态多分树靠重组，B+ 树靠分裂与合并就地维护。
 
 ## 11.3 倒排索引
 
@@ -30,6 +138,80 @@
 「计算机系且擅长英语」就是两个有序列表的交集，结果是 `[0310]`。或查询是并集，差查询是差集。全文检索用同一结构：词项映射到「哪些文档、出现在哪些位置」。短语查询还要用位置是否相邻来过滤。
 
 倒排把查询变成集合运算，速度很快；代价是每次插入、删除、修改记录，都要同步维护所有相关列表。倒排表通常只存标识和位置，完整记录仍在主文件里。
+
+先跑一遍：
+
+```cpp file=code/ch11/inverted_index/demo.cpp
+#include "modern.hpp"
+
+#include <cstdio>
+
+int main() {
+    dsa::index::InvertedIndex index;
+    index.add_document(310, {"计算机系", "英语专长"});
+    index.add_document(330, {"计算机系"});
+    index.add_document(341, {"计算机系"});
+    index.add_document(421, {"英语专长"});
+
+    const auto show = [](const char* label, const std::vector<int>& docs) {
+        std::printf("%s:", label);
+        for (const int doc : docs) {
+            std::printf(" %04d", doc);
+        }
+        std::printf("\n");
+    };
+    show("计算机系          ", index.postings("计算机系"));
+    show("英语专长          ", index.postings("英语专长"));
+    show("计算机系且擅长英语", index.and_query({"计算机系", "英语专长"}));
+    show("计算机系或擅长英语", index.or_query({"计算机系", "英语专长"}));
+    show("不擅长英语        ", index.not_query("英语专长"));
+
+    dsa::index::InvertedIndex text;
+    text.add_document(1, {"the", "quick", "brown", "fox"});
+    text.add_document(2, {"the", "brown", "quick", "fox"});
+    show("含 quick 与 brown ", text.and_query({"quick", "brown"}));
+    show("短语 quick brown  ", text.phrase_query({"quick", "brown"}));
+    return 0;
+}
+```
+
+```text
+计算机系          : 0310 0330 0341
+英语专长          : 0310 0421
+计算机系且擅长英语: 0310
+计算机系或擅长英语: 0310 0330 0341 0421
+不擅长英语        : 0330 0341
+含 quick 与 brown : 0001 0002
+短语 quick brown  : 0001
+```
+
+最后两行是短语查询存在的理由：2 号文档两个词都有，但不相邻，只有位置信息能把它排除掉。
+
+倒排表按文档号升序，所以求交就是一次归并，两个指针各走一趟，代价 $O(n+m)$：
+
+```cpp file=code/ch11/inverted_index/modern.hpp#inverted-intersect
+/// 有序表求交。归并一遍，两个指针各走一趟，代价 O(n+m)。
+[[nodiscard]] static std::vector<int> intersect(const std::vector<int>& left,
+                                                const std::vector<int>& right) {
+    std::vector<int> out;
+    std::size_t i = 0;
+    std::size_t j = 0;
+    while (i < left.size() && j < right.size()) {
+        if (left[i] < right[j]) {
+            ++i;
+        } else if (right[j] < left[i]) {
+            ++j;
+        } else {
+            out.push_back(left[i]);
+            ++i;
+            ++j;
+        }
+    }
+    return out;
+}
+```
+
+这段归并是本节的核心，所以要自己写；换成一行库调用，这一节就没有内容了。
 
 ## 11.4 B 树与 B+ 树
 
@@ -64,9 +246,127 @@ B+ 树把记录（或记录位置）全部放在叶上，内部结点只作路�
        ↔          ↔           ↔          ↔
 ```
 
-叶分裂时分界 key 是**复写**（叶上仍留一份），内部结点分裂时分界 key 是**上移**（原结点不再保留）——这是 B+ 树与 B 树最容易混的一处。
+叶分裂时分界 key 是**复写**（叶上仍留一份），内部结点分裂时分界 key 是**上移**（原结点不再保留）——这是 B+ 树与 B 树最容易混的一处。两条规则并排写出来就是：
 
-删除 70：先在叶上删，若叶下溢就向兄弟借或合并，再改内部结点的路标。
+```cpp file=code/ch11/bplus_tree/modern.hpp#bplus-split
+void split_leaf(Node* node, Split& split) {
+    const std::size_t mid = node->keys.size() / 2;
+    auto right = std::make_unique<Node>(true);
+    right->keys.assign(node->keys.begin() + static_cast<std::ptrdiff_t>(mid), node->keys.end());
+    right->values.assign(std::make_move_iterator(node->values.begin() + static_cast<std::ptrdiff_t>(mid)),
+                         std::make_move_iterator(node->values.end()));
+    node->keys.resize(mid);
+    node->values.resize(mid);
+    right->next = node->next;
+    node->next = right.get();
+    // 叶分裂：分界码是右叶最小关键码，复写上推，叶上仍保留。
+    split.happened = true;
+    split.separator = right->keys.front();
+    split.right = std::move(right);
+    writes_ += 2;
+}
+
+void split_internal(Node* node, Split& split) {
+    const std::size_t mid = node->keys.size() / 2;
+    auto right = std::make_unique<Node>(false);
+    // 内部结点分裂：中位数上移，原结点不再保留它。
+    split.separator = node->keys[mid];
+    right->keys.assign(node->keys.begin() + static_cast<std::ptrdiff_t>(mid) + 1, node->keys.end());
+    right->children.assign(
+        std::make_move_iterator(node->children.begin() + static_cast<std::ptrdiff_t>(mid) + 1),
+        std::make_move_iterator(node->children.end()));
+    node->keys.resize(mid);
+    node->children.resize(mid + 1);
+    split.happened = true;
+    split.right = std::move(right);
+    writes_ += 2;
+}
+```
+
+先跑一遍。上面那两张图不是画出来的，是这段程序打印出来的：
+
+```cpp file=code/ch11/bplus_tree/demo.cpp
+#include "modern.hpp"
+
+#include <cstdio>
+
+int main() {
+    using dsa::index::BPlusTree;
+    std::vector<std::pair<int, std::string>> rows;
+    for (const int key : {10, 20, 30, 50, 70, 90}) {
+        rows.emplace_back(key, "记录" + std::to_string(key));
+    }
+    // 11.2：批量装入，按页填满。
+    BPlusTree tree = BPlusTree::bulk_load(3, rows, 2);
+    std::printf("装入后   : %s\n", tree.to_string().c_str());
+
+    // 11.4：插入 60，叶裂 → 根裂 → 树增高一层。
+    tree.insert(60, "记录60");
+    std::printf("插入 60  : %s（树高 %zu）\n", tree.to_string().c_str(), tree.height());
+    tree.insert(65, "记录65");
+    std::printf("插入 65  : %s（父结点没满，没裂到根）\n", tree.to_string().c_str());
+
+    tree.reset_counters();
+    // 先取结果再取计数：printf 的实参求值顺序没有保证。
+    const auto found = tree.find(50);
+    const std::size_t point_reads = tree.page_reads();
+    std::printf("查找 50  : %s，读了 %zu 页\n", found->c_str(), point_reads);
+
+    tree.reset_counters();
+    const auto scan = tree.range(35, 80);
+    const std::size_t scan_reads = tree.page_reads();
+    std::printf("范围 35..80 :");
+    for (const auto& row : scan) {
+        std::printf(" %d", row.first);
+    }
+    std::printf("，读了 %zu 页\n", scan_reads);
+
+    tree.erase(70);
+    std::printf("删除 70  : %s\n", tree.to_string().c_str());
+    return 0;
+}
+```
+
+```text
+装入后   : [30,70] / [10,20] [30,50] [70,90]
+插入 60  : [50] / [30] [70] / [10,20] [30] [50,60] [70,90]（树高 3）
+插入 65  : [50] / [30] [60,70] / [10,20] [30] [50] [60,65] [70,90]（父结点没满，没裂到根）
+查找 50  : 记录50，读了 3 页
+范围 35..80 : 50 60 65 70，读了 6 页
+删除 70  : [50] / [30] [60,90] / [10,20] [30] [50] [60,65] [90]
+```
+
+范围扫描的写法直接对应「找到下限所在的叶，然后沿叶链横着走」：
+
+```cpp file=code/ch11/bplus_tree/modern.hpp#bplus-range
+/// 范围扫描：找到下限所在的叶，然后沿叶链横着走，不再回到内部结点。
+[[nodiscard]] std::vector<std::pair<int, std::string>> range(int low, int high) const {
+    std::vector<std::pair<int, std::string>> out;
+    if (low > high) {
+        return out;
+    }
+    const Node* node = root_.get();
+    while (!node->leaf) {
+        ++reads_;
+        node = node->children[child_slot(*node, low)].get();
+    }
+    while (node != nullptr) {
+        ++reads_;
+        for (std::size_t i = 0; i < node->keys.size(); ++i) {
+            if (node->keys[i] > high) {
+                return out;
+            }
+            if (node->keys[i] >= low) {
+                out.emplace_back(node->keys[i], node->values[i]);
+            }
+        }
+        node = node->next;
+    }
+    return out;
+}
+```
+
+删除 70：先在叶上删，若叶下溢就向兄弟借或合并，再改内部结点的路标。这里有一处容易漏：借位和合并都会把父结点的分界 key 搬进孩子里，而那个 key 可能正是刚被删掉的——搬完必须按「分界 key = 右子树最小 key」重算一遍，否则树里会留下一个指向已删关键码的路标。这个错误不影响点查询，只有结构不变量检查才看得出来（`code/ch11/bplus_tree/legacy.md` 记了实测过程）。
 
 B 树与 B+ 树可以记成三句话：记录在不在内部结点；叶有没有横向链接；范围扫描要不要反复爬树。
 
@@ -76,14 +376,91 @@ B 树与 B+ 树可以记成三句话：记录在不在内部结点；叶有没�
 
 签名文件把一篇文档的特征散列成较短的位串。查询时先用签名快速丢掉不可能匹配的文档，再回到原文确认。签名可能产生假阳性（签名说可能有、原文里没有），不能有假阴性。它适合「先粗筛、再精查」的全文检索，不替代倒排。
 
-红黑树是内存里的近似平衡二叉搜索树：每个结点带一种颜色，通过几条局部规则保证从根到叶的黑结点数相同，最长路径不超过最短路径的两倍。查找、插入、删除都是 $O(\log n)$，旋转次数有常数上限。它适合进程地址空间里的有序映射，不替代按页组织的 B+ 树。
+红黑树是内存里的近似平衡二叉搜索树：每个结点带一种颜色，通过几条局部规则保证从根到叶的黑结点数相同，最长路径不超过最短路径的两倍。查找、插入、删除都是 $O(\log n)$，旋转次数有常数上限。它适合进程地址空间里的有序映射，不替代按页组织的 B+ 树。本书不另写红黑树实现，只作对照讨论。
+
+先跑一遍：
+
+```cpp file=code/ch11/bitmap_index/demo.cpp
+#include "modern.hpp"
+
+#include <cstdio>
+
+int main() {
+    dsa::index::BitmapIndex index;
+    for (int i = 0; i < 200; ++i) {
+        index.add_record((i % 3) == 0 ? "及格" : "不及格");
+    }
+    index.reset_ops();
+    const auto passed = index.select("及格");
+    const auto failed = index.select_not("及格");
+    std::printf("200 条记录，%zu 个取值，位图共 %zu 个机器字\n",
+                index.distinct_values(), index.words());
+    std::printf("及格 %zu 条，不及格 %zu 条；取反只做了 %zu 次字运算\n",
+                passed.size(), failed.size(), index.word_ops());
+
+    // 稀疏位图：大片全 0 的字，游程压缩很有效。
+    dsa::index::BitmapIndex sparse;
+    for (int i = 0; i < 1000; ++i) {
+        sparse.add_record(i < 3 ? "命中" : "其他");
+    }
+    const auto bits = sparse.bitmap("命中");
+    const auto encoded = dsa::index::run_length_encode(bits);
+    std::printf("稀疏位图 %zu 个字 → 游程压缩后 %zu 个字\n", bits.size(), encoded.size());
+
+    dsa::index::SignatureFile signatures(2);
+    signatures.add(1, {"数据", "结构"});
+    signatures.add(2, {"算法", "分析"});
+    std::printf("签名粗筛「数据」的候选文档数：%zu（仍需回原文确认）\n",
+                signatures.candidates({"数据"}).size());
+    return 0;
+}
+```
+
+```text
+200 条记录，2 个取值，位图共 8 个机器字
+及格 67 条，不及格 133 条；取反只做了 4 次字运算
+稀疏位图 16 个字 → 游程压缩后 4 个字
+签名粗筛「数据」的候选文档数：1（仍需回原文确认）
+```
+
+第二行就是位图的全部理由：200 条记录只占 4 个机器字，一次取反做 4 次运算就处理完了全部记录。查询写出来只是逐字的按位运算：
+
+```cpp file=code/ch11/bitmap_index/modern.hpp#bitmap-ops
+/// 「与」：逐字 `&`。`word_ops()` 数的就是这里做了几次字运算。
+[[nodiscard]] std::vector<std::size_t> select_and(const std::string& a,
+                                                  const std::string& b) const {
+    return to_records(combine(bitmap(a), bitmap(b), Op::And));
+}
+
+[[nodiscard]] std::vector<std::size_t> select_or(const std::string& a,
+                                                 const std::string& b) const {
+    return to_records(combine(bitmap(a), bitmap(b), Op::Or));
+}
+
+[[nodiscard]] std::vector<std::size_t> select_not(const std::string& value) const {
+    std::vector<std::uint64_t> bits = bitmap(value);
+    for (auto& word : bits) {
+        word = ~word;
+        ++ops_;
+    }
+    mask_tail(bits);  // 最后一个字里超出记录数的那些位必须清掉
+    return to_records(bits);
+}
+```
+
+注意 `mask_tail`：记录数不是 64 的整数倍时，最后一个字里超出记录数的那些位取反后会变成 1，于是冒出根本不存在的记录号。这是位图实现最常见的一个洞。
+
+压缩不是万能的。上面稀疏位图 16 个字压到 4 个，但对 0 和 1 交替的稠密位图，游程压缩后**反而更大**——`code/ch11/bitmap_index/test.cpp` 直接断言了这一点，不粉饰。
 
 ## 11.6 练习路径
 
-1. 为变长记录实现二级稀疏索引，统计一次查询读取了几个页。
-2. 为若干文档建立倒排表，完成 AND、OR、短语查询。
-3. 用固定大小数组模拟 B+ 树页，测试分裂、借位、合并和范围扫描。
-4. 为低基数列实现压缩位图，对比扫描主表和位图过滤的成本。
+本章四个方向都已有可运行实现，练习因此从「照着写一遍」改成「在已有实现上再往前走一步」：
+
+1. 给 `MultiLevelIndex` 的页内定位换成二分查找，测量比较次数的变化，并确认**页访问次数一次都没变**——本章的关键指标不在这里。
+2. 给 `InvertedIndex` 的倒排表加差值编码（只存与前一个文档号的差），比较压缩前后的表长；注意求交时要能边解码边归并。
+3. 给 `BPlusTree` 加一个「按范围批量删除」的接口，并用 `validate()` 确认每一步之后结构仍然合法。
+4. 给 `BitmapIndex` 换成字对齐混合编码（WAH），和现在的字级游程比压缩率；用交替位图确认它不会像现在这样越压越大。
+5. 为 `SignatureFile` 做一次参数实验：固定语料，改变每词位数，画出假阳性率随位数的变化。
 
 ## 本章小结
 

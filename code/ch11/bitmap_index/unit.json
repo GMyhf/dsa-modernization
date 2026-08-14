@@ -1,0 +1,1 @@
+{"id":"bitmap_index","title":"位图与签名：按位运算的粗筛","listings":[],"beyond_book":"原书第 11 章没有任何【算法】/【代码】清单（105 条里第 11 章为 0），本单元是新增实现，不认领任何原书清单。","standard":"c++17","owner":"claude","notes":"位图每个取值一条位串，查询是机器字上的按位运算；字级游程压缩如实呈现「稠密位图反而变大」；签名可假阳性、绝不假阴性。","d001_exceptions":{"#include<map>":"属性取值到位串的字典。","#include<vector>":"位串本身（uint64 数组）。","#include<cstdint>":"固定宽度的机器字 uint64_t——位运算必须知道字宽。"}}

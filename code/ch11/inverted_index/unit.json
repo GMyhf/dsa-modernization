@@ -1,0 +1,1 @@
+{"id":"inverted_index","title":"倒排索引：从属性值到记录集合","listings":[],"beyond_book":"原书第 11 章没有任何【算法】/【代码】清单（105 条里第 11 章为 0），本单元是新增实现，不认领任何原书清单。","standard":"c++17","owner":"claude","notes":"倒排表按文档号升序，交并差都手写归并（这是本节要教的算法，不调 set_intersection）；带位置信息支持短语查询。","d001_exceptions":{"#include<map>":"词项到倒排表的字典。词典结构本身是第 10 章的内容，本节要教的是倒排表上的集合运算。","#include<vector>":"倒排表与位置表。"}}

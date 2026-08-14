@@ -2,13 +2,18 @@
 
 本章包含两个主题。可利用空间表复用固定数量的槽位：申请取得一个空闲槽，释放把它归还。最优二叉搜索树则把访问频率写成权重，用动态规划比较每个区间可能的根，得到总查找代价最小的树。
 
-本章的可运行实现是 12.2.2 的句柄池和最优 BST（标记为“实现并测试”）；12.1 的特殊矩阵、12.2
-的广义表与 12.3 的 Trie/Patricia 树是“概念导读”，用于保留原书的结构和表示法比较，未提供未经
-验证的完整容器实现。相关实现练习见各节末尾提示。
+本章各节的实现状态：
 
-源码：[空闲槽池与最优 BST](../code/ch12/optimal_bst/modern.hpp)、
-[可运行示例](../code/ch12/optimal_bst/demo.cpp)、
-[测试](../code/ch12/optimal_bst/test.cpp)。
+| 小节 | 实现状态 | 代码 |
+| --- | --- | --- |
+| 12.1 多维数组、特殊矩阵、稀疏矩阵 | 概念导读 | 只给存储与定位公式，不另写十字链表 |
+| 12.2.1 广义表 | 实现并测试 | `code/ch12/gen_list` |
+| 12.2.2 可利用空间表、最优 BST | 实现并测试 | `code/ch12/optimal_bst` |
+| 12.2.3–12.2.4 动态分配与无用单元回收 | 概念导读 | 分配策略与标记-清除只讨论 |
+| 12.3 Trie 与 Patricia | 实现并测试 | `code/ch12/trie` |
+| 12.4 最优 BST / AVL / 伸展树 | 混合 | 最优 BST 有实现，AVL 与伸展树为概念导读 |
+
+其中广义表与 Trie/Patricia 原书没有给清单（第 12 章的清单只有算法12.1、算法12.2），这两个单元是新写的，不认领任何原书清单。
 
 ## 12.1 多维数组
 
@@ -51,6 +56,64 @@ $$
 表头是第一个元素，表尾是去掉表头后剩下的那个表。空表既没有头也没有尾。任何一个非空广义表都可以唯一地拆成「头 + 尾」，所以递归算法写成「先处理头、再处理尾」就和定义对上了。
 
 结点通常有一个标记位，区分原子和子表：原子结点存值，子表结点存指向另一个表的指针。再加表头结点，可以把空表和共享关系表示得更干净。原书图 12.7–12.9 画的就是无头结点、带头结点、以及带循环的几种。
+
+先跑一遍：
+
+```cpp file=code/ch12/gen_list/demo.cpp
+#include "modern.hpp"
+
+#include <cstdio>
+
+int main() {
+    using dsa::advanced::GenList;
+    const GenList list = GenList::parse("(a,(b,c),d)");
+    std::printf("表      : %s\n", list.to_string().c_str());
+    std::printf("表头    : %s\n", list.head()->to_string().c_str());
+    std::printf("表尾    : %s\n", list.tail()->to_string().c_str());
+    std::printf("长度 %zu，深度 %zu，原子 %zu 个\n",
+                list.length(), list.depth(), list.atom_count());
+
+    // 再入表：同一个子表挂到两处，靠引用计数而不是拷贝。
+    const GenList shared = GenList::parse("(b,c)");
+    const GenList host = GenList::cons(shared, GenList::cons(shared, GenList()));
+    std::printf("共享后  : %s，被引用 %zu 次\n", host.to_string().c_str(), shared.use_count());
+    return 0;
+}
+```
+
+```text
+表      : (a,(b,c),d)
+表头    : a
+表尾    : ((b,c),d)
+长度 3，深度 2，原子 4 个
+共享后  : ((b,c),(b,c))，被引用 3 次
+```
+
+最后一行是本节的难点：`(b,c)` 只有一份，挂在两处，引用计数是 3（自己一份，两个宿主各一份）。共享一旦发生，回收就**不能再按树递归 `delete`**——那会把同一个结点删两次。所以结点上带计数，句柄负责加减：
+
+```cpp file=code/ch12/gen_list/modern.hpp#genlist-refcount
+static void retain(GenNode* node) noexcept {
+    if (node != nullptr) {
+        ++node->refs;
+    }
+}
+
+static void release(GenNode* node) noexcept {
+    // 计数归零才真正删除；共享的子表因此只会被删一次。
+    while (node != nullptr && --node->refs == 0) {
+        GenNode* const head = node->head;
+        GenNode* const tail = node->tail;
+        delete node;
+        // 表尾用循环走，长表不会把栈压穿；表头递归，深度由嵌套层数决定。
+        release(head);
+        node = tail;
+    }
+}
+```
+
+`release` 沿表尾迭代、只对表头递归，因此三万个元素的长表析构不会压穿栈，栈深度只跟嵌套层数走。这里不用 `shared_ptr`：12.2 要教的就是「谁来回收共享结点」，交给标准库这一节就没了。
+
+引用计数收不回**环**。构造函数自底向上建表，本书的接口造不出循环表；原书 12.2.4 讲的无用单元回收（标记-清扫）正是为环准备的，本书不实现，也不假装实现。
 
 ### 12.2.2 可利用空间表
 
@@ -176,7 +239,92 @@ private:
 
 带 `*` 的是词尾。查找 `car` 走 c–a–r，三步；查找 `cab` 在 b 处没有分支，失败。最长前缀匹配（路由）则走到不能再走为止，回退到最近的词尾。
 
-纯 Trie 在「只有一个孩子」的内部结点上仍然分支，路径偏长。Patricia 树把这种单孩子结点压缩掉，边上记下「跳过几位再比」。查找时按记下的位位置取关键码的那一位，决定走左还是走右。路径更短，结点更少，仍然保持前缀共享。二者都是原书没错的结构；本仓库没有单独的可运行实现，用这张图就能把前缀共享说清楚。
+先跑一遍。上面那棵图里的结点数不是数出来的，是程序报的：
+
+```cpp file=code/ch12/trie/demo.cpp
+#include "modern.hpp"
+
+#include <cstdio>
+
+int main() {
+    dsa::advanced::Trie trie;
+    dsa::advanced::PatriciaTree patricia;
+    for (const char* word : {"can", "car", "cat", "do"}) {
+        trie.insert(word);
+        patricia.insert(word);
+    }
+    std::printf("Trie     : %zu 个词，%zu 个结点（字符总数 11）\n",
+                trie.size(), trie.node_count());
+    std::printf("Patricia : %zu 个词，%zu 个内部结点\n",
+                patricia.size(), patricia.internal_count());
+    std::printf("前缀 ca 下有 %zu 个词：", trie.count_with_prefix("ca"));
+    for (const auto& word : trie.keys_with_prefix("ca")) {
+        std::printf("%s ", word.c_str());
+    }
+    std::printf("\n最长前缀匹配 dozen -> %s（走不动就回退到最近词尾）\n",
+                trie.longest_prefix_of("dozen").c_str());
+    return 0;
+}
+```
+
+```text
+Trie     : 4 个词，7 个结点（字符总数 11）
+Patricia : 4 个词，3 个内部结点
+前缀 ca 下有 3 个词：can car cat 
+最长前缀匹配 dozen -> do（走不动就回退到最近词尾）
+```
+
+第一行就是前缀共享的全部价值：四个词一共 11 个字符，树里只有 7 个结点，因为 `ca` 只存了一次。最长前缀匹配的写法就是「一路往下走，随手记住最近一次经过的词尾」：
+
+```cpp file=code/ch12/trie/modern.hpp#trie-longest-prefix
+/// 最长前缀匹配：走到走不动为止，回退到最近的词尾。IP 路由查表就是这个动作。
+[[nodiscard]] std::string longest_prefix_of(std::string_view text) const {
+    const Node* node = &root_;
+    std::size_t best = 0;
+    for (std::size_t i = 0; i < text.size(); ++i) {
+        if (!is_letter(text[i])) {
+            break;
+        }
+        const Node* next = node->children[index_of(text[i])].get();
+        if (next == nullptr) {
+            break;
+        }
+        node = next;
+        if (node->terminal) {
+            best = i + 1;
+        }
+    }
+    return std::string(text.substr(0, best));
+}
+```
+
+纯 Trie 在「只有一个孩子」的内部结点上仍然分支，路径偏长。Patricia 树把这种单孩子结点压缩掉，边上记下「跳过几位再比」。查找时按记下的位位置取关键码的那一位，决定走左还是走右。路径更短，结点更少，仍然保持前缀共享——同样四个词，Patricia 只要 3 个内部结点。
+
+按位取值和「两个关键码第一次不同在第几位」是 Patricia 的两块基石：
+
+```cpp file=code/ch12/trie/modern.hpp#patricia-bits
+static bool bit_of(std::string_view key, std::size_t index) noexcept {
+    const std::size_t byte = index / 8;
+    if (byte >= key.size()) {
+        return false;  // 越过关键码长度，一律读 0
+    }
+    const auto value = static_cast<unsigned char>(key[byte]);
+    return ((value >> (7 - index % 8)) & 1U) != 0;
+}
+
+static optional_bit first_differing_bit(std::string_view a, std::string_view b) {
+    const std::size_t longest = a.size() > b.size() ? a.size() : b.size();
+    const std::size_t bits = (longest + 1) * 8;  // +1 让「一个是另一个的前缀」也能分开
+    for (std::size_t i = 0; i < bits; ++i) {
+        if (bit_of(a, i) != bit_of(b, i)) {
+            return {true, i};
+        }
+    }
+    return {};
+}
+```
+
+越过关键码长度的位一律读作 0，这样「一个关键码是另一个的前缀」（`a` 与 `ab`）也能分开，代价是关键码里不能出现 `'\0'`。还有一处不能省：沿位下降到叶之后，**必须和叶上的完整关键码再比一次**——路上只看了少数几位，不比就会把 `ca`、`cars` 这种根本不在表里的串判成命中。
 
 ## 12.4 改进的二叉搜索树
 

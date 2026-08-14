@@ -93,6 +93,29 @@ class TestUnitsAndExclusions(unittest.TestCase):
         self.assertTrue(any("standard" in p for p in problems))
         self.assertTrue(any("listings" in p for p in problems))
 
+    def test_empty_listings_needs_beyond_book(self):
+        """第11章、Trie/Patricia 这类新增实现没有清单可认领，但必须自报家门。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            self.make_unit(Path(tmp), "u", listings=[], beyond_book="第11章原书没有清单")
+            units, problems = ledger.load_units(Path(tmp))
+        self.assertEqual(problems, [])
+        self.assertEqual(units[0]["listings"], [])
+
+    def test_blank_beyond_book_does_not_count(self):
+        """空字符串糊弄不过去——否则「忘了填」和「本来就没有」又混在一起了。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            self.make_unit(Path(tmp), "u", listings=[], beyond_book="   ")
+            _, problems = ledger.load_units(Path(tmp))
+        self.assertTrue(any("beyond_book" in p for p in problems))
+
+    def test_beyond_book_units_do_not_inflate_coverage(self):
+        """新增单元不认领任何清单，105 的等式因此一动不动。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            self.make_unit(Path(tmp), "u", listings=[], beyond_book="原书无对应清单")
+            units, _ = ledger.load_units(Path(tmp))
+        claimed = [listing for unit in units for listing in unit["listings"]]
+        self.assertEqual(claimed, [])
+
     def test_exclusion_without_reason_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "exclusions.json"
