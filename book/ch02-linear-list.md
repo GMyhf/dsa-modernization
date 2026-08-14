@@ -694,6 +694,22 @@ T remove(size_type pos) {
 
 【代码2.12结束】
 
+原书的代码 2.12 只有双链结点定义，并没有完整的双链表操作；下面明确标出本书新增的核心操作，
+以免把原书的结点定义和现代容器实现混为一谈。插入必须同时接好 `prev` 与 `next`，删除则
+必须同时修复两侧链接，并在删除首尾结点时更新 `head_`/`tail_`。
+
+【本书补充实现】双链表在指定结点前插入与删除。
+
+```cpp file=code/ch02/doubly_linked_list/modern.hpp#algorithm-2-12-insert
+template <typename U> Node* insert_before(Node* pos, U&& value) { Node* n = new Node(std::forward<U>(value)); n->next=pos; n->prev=pos?pos->prev:tail_; if(n->prev)n->prev->next=n; else head_=n; if(pos)pos->prev=n; else tail_=n; ++size_; return n; }
+```
+
+```cpp file=code/ch02/doubly_linked_list/modern.hpp#algorithm-2-12-erase
+T erase_node(Node* node) { if (!node) throw std::out_of_range("DoublyLinkedList: empty"); T value=std::move(node->value); if(node->prev)node->prev->next=node->next; else head_=node->next; if(node->next)node->next->prev=node->prev; else tail_=node->prev; delete node; --size_; return value; }
+```
+
+【本书补充实现结束】
+
 完整可运行实现见 `code/ch02/doubly_linked_list/modern.hpp`；单链实现仍见 `code/ch02/linked_list/modern.hpp`。
 测试覆盖头/中/尾插入、删尾后的尾指针
 修复、深拷贝、移动、元素构造异常和 move-only 元素；变异自检还确认“删尾不回退 tail”会在
