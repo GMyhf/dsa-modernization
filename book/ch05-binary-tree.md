@@ -34,7 +34,14 @@
 | 后序 | 左，右，根 | D E B C A |
 | 层次 | 按离根的距离 | A B C D E |
 
-递归版最贴合定义，也是 5.2 节要教的东西。极深的退化树会耗尽调用栈：Release 档大约在百万层段错误且**没有诊断**，ASan 档会打印 `stack-overflow` 并指到具体行。析构和拷贝走的也是递归，调用方看不见。数字和复现程序见仓库中的未验证风险说明。
+递归版最贴合定义，也是 5.2 节要教的东西。极深的退化树会耗尽调用栈：Release 档大约在百万层段错误且**没有诊断**，ASan 档会打印 `stack-overflow` 并指到具体行。数字和复现程序见仓库中的未验证风险说明。
+
+**周游与析构在这件事上待遇不同，要分清楚：**
+
+- **周游**保留递归为主实现——它就是本节要教的东西，抹掉递归等于抹掉课程内容。迭代版按 D-001 §3d 作为补充并列给出，读者可以对照。
+- **析构 `make_empty()` 与深拷贝**改成了迭代。理由是它们**不是教学内容，却会被隐式触发**：一次普通的作用域结束、一句 `auto copy = tree;`，调用方根本看不见自己正在递归。教学价值为零，风险却实打实。
+
+析构用的是「右旋到没有左孩子，再沿右链逐个删」的经典办法：额外空间 O(1)，不分配内存，所以能保持 `noexcept`。深拷贝用堆上的显式栈代替调用栈。改完之后，纯左链 500 万结点的析构与深拷贝都不再崩（原先分别在 100 万、50 万段错误）；测试里有一个百万深链的用例专门守着这条，改回递归它就会报 `stack-overflow`。
 
 ### 5.1.2 满二叉树、完全二叉树、扩充二叉树
 
@@ -123,43 +130,6 @@ BST 中序: 1 3 4 6 7 8 10 14
 ```cpp file=code/ch05/binary_tree/modern.hpp#binary-tree
 template <typename T>
 class BinaryTree {
-private:
-    template <typename U>
-    class LinkedStack {
-        struct Entry {
-            U value;
-            Entry* next;
-        };
-
-    public:
-        LinkedStack() = default;
-        LinkedStack(const LinkedStack&) = delete;
-        LinkedStack& operator=(const LinkedStack&) = delete;
-        ~LinkedStack() { clear(); }
-
-        [[nodiscard]] bool empty() const noexcept { return top_ == nullptr; }
-        void push(const U& value) { top_ = new Entry{value, top_}; }
-        void push(U&& value) { top_ = new Entry{std::move(value), top_}; }
-        [[nodiscard]] std::optional<U> pop() {
-            if (top_ == nullptr) return std::nullopt;
-            Entry* entry = top_;
-            top_ = entry->next;
-            U value = std::move(entry->value);
-            delete entry;
-            return value;
-        }
-
-    private:
-        void clear() noexcept {
-            while (top_ != nullptr) {
-                Entry* entry = top_;
-                top_ = entry->next;
-                delete entry;
-            }
-        }
-        Entry* top_{nullptr};
-    };
-
 public:
     struct Node {
         T value;
@@ -297,15 +267,57 @@ public:
     }
 
 private:
+    /// 释放整棵树。**迭代实现**，栈深度恒定。
+    ///
+    /// 递归版 `destroy(left); destroy(right); delete node;` 在退化成链的树上会压穿栈——
+    /// 实测纯左链 100 万结点即段错误（`collab/UNVERIFIED-RISKS.md` 有复现方法）。
+    /// 这里用「右旋到没有左孩子，再沿右链删」的经典办法：每次旋转把左子树提上来，
+    /// 树被逐步拉直成一条右链，然后一个一个删。总代价仍是 O(n)，额外空间 O(1)，
+    /// 而且不分配内存，所以能保持 noexcept。
     static void destroy(Node* node) noexcept {
-        if (node != nullptr) { destroy(node->left); destroy(node->right); delete node; }
+        while (node != nullptr) {
+            if (node->left != nullptr) {
+                Node* const left = node->left;   // 右旋：左孩子成为新的根
+                node->left = left->right;
+                left->right = node;
+                node = left;
+            } else {
+                Node* const right = node->right;
+                delete node;
+                node = right;
+            }
+        }
     }
+    /// 深拷贝整棵树。**迭代实现**，用显式栈代替调用栈。
+    ///
+    /// 递归版在退化树上同样会压穿栈，而且比 destroy 更早——实测纯左链 50 万结点即段错误。
+    /// 显式栈的结点放在堆上，深度不再受线程栈限制；中途抛异常时回收已建好的部分，保持强异常保证。
     static Node* clone(const Node* node) {
-        if (node == nullptr) return nullptr;
-        Node* copy = new Node(node->value);
-        try { copy->left = clone(node->left); copy->right = clone(node->right); }
-        catch (...) { destroy(copy); throw; }
-        return copy;
+        if (node == nullptr) {
+            return nullptr;
+        }
+        Node* copy_root = new Node(node->value);
+        try {
+            // 用本章自己那把手写链式栈，与迭代周游同一套零件。
+            LinkedStack<std::pair<const Node*, Node*>> pending;
+            pending.push({node, copy_root});
+            while (auto item = pending.pop()) {
+                const Node* const source = item->first;
+                Node* const target = item->second;
+                if (source->left != nullptr) {
+                    target->left = new Node(source->left->value);
+                    pending.push({source->left, target->left});
+                }
+                if (source->right != nullptr) {
+                    target->right = new Node(source->right->value);
+                    pending.push({source->right, target->right});
+                }
+            }
+        } catch (...) {
+            destroy(copy_root);
+            throw;
+        }
+        return copy_root;
     }
     static const Node* parent_of_impl(const Node* node, const Node* wanted) noexcept {
         if (node == nullptr || wanted == nullptr) return nullptr;
@@ -409,13 +421,54 @@ private:
         delete removed;
         return true;
     }
-    static void destroy(Node* node) noexcept { if (node != nullptr) { destroy(node->left); destroy(node->right); delete node; } }
+    /// 释放整棵树（与 BinaryTree 同法）。**迭代实现**，栈深度恒定。
+    ///
+    /// 递归版 `destroy(left); destroy(right); delete node;` 在退化成链的树上会压穿栈——
+    /// 实测纯左链 100 万结点即段错误（`collab/UNVERIFIED-RISKS.md` 有复现方法）。
+    /// 这里用「右旋到没有左孩子，再沿右链删」的经典办法：每次旋转把左子树提上来，
+    /// 树被逐步拉直成一条右链，然后一个一个删。总代价仍是 O(n)，额外空间 O(1)，
+    /// 而且不分配内存，所以能保持 noexcept。
+    static void destroy(Node* node) noexcept {
+        while (node != nullptr) {
+            if (node->left != nullptr) {
+                Node* const left = node->left;   // 右旋：左孩子成为新的根
+                node->left = left->right;
+                left->right = node;
+                node = left;
+            } else {
+                Node* const right = node->right;
+                delete node;
+                node = right;
+            }
+        }
+    }
+    /// 深拷贝（与 BinaryTree 同法：显式栈代替调用栈，退化树上不压穿栈）。
     static Node* clone(const Node* node) {
-        if (node == nullptr) return nullptr;
-        Node* copy = new Node(node->value);
-        try { copy->left = clone(node->left); copy->right = clone(node->right); }
-        catch (...) { destroy(copy); throw; }
-        return copy;
+        if (node == nullptr) {
+            return nullptr;
+        }
+        Node* copy_root = new Node(node->value);
+        try {
+            // 用本章自己那把手写链式栈，与迭代周游同一套零件。
+            LinkedStack<std::pair<const Node*, Node*>> pending;
+            pending.push({node, copy_root});
+            while (auto item = pending.pop()) {
+                const Node* const source = item->first;
+                Node* const target = item->second;
+                if (source->left != nullptr) {
+                    target->left = new Node(source->left->value);
+                    pending.push({source->left, target->left});
+                }
+                if (source->right != nullptr) {
+                    target->right = new Node(source->right->value);
+                    pending.push({source->right, target->right});
+                }
+            }
+        } catch (...) {
+            destroy(copy_root);
+            throw;
+        }
+        return copy_root;
     }
     template <typename Visitor> static void inorder_impl(const Node* node, Visitor& visit) {
         if (node != nullptr) { inorder_impl(node->left, visit); visit(node->value); inorder_impl(node->right, visit); }

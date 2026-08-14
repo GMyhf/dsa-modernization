@@ -80,9 +80,37 @@ void test_bst_insert_remove_contract() {
     check(ordered == std::vector<int>({5,19,20,35,50,53,88,92,100}), "删除后中序序列仍严格有序");
 }
 
+
+/// 退化成链的树：析构与深拷贝都不能靠调用栈递归，否则一定压穿。
+///
+/// 规模 100 万是**量出来的**，不是拍的：本机 8 MB 栈、闸门的 ASan 档下，
+/// 递归版 clone 在 40 万就段错误、递归版 destroy 在 100 万段错误。
+/// 所以只要有人把 destroy/clone 改回递归，这个用例必然崩——它是这条修复的看门人。
+/// 复现方法与完整数字见 collab/UNVERIFIED-RISKS.md。
+void test_degenerate_chain_does_not_blow_the_stack() {
+    constexpr int kDepth = 1000000;
+
+    dsa::BinaryTree<int> chain;                 // 自底向上造纯左链，构造本身不递归
+    for (int i = 0; i < kDepth; ++i) {
+        dsa::BinaryTree<int> parent;
+        parent.create_tree(i, std::move(chain), dsa::BinaryTree<int>{});
+        chain = std::move(parent);
+    }
+    check(!chain.empty(), "百万深左链建成");
+    check(chain.root()->value == kDepth - 1, "链顶是最后放进去的值");
+
+    {
+        const dsa::BinaryTree<int> copy = chain;   // 迭代 clone：显式栈在堆上
+        check(!copy.empty() && copy.root()->value == kDepth - 1, "百万深左链可深拷贝");
+        check(copy.root() != chain.root(), "深拷贝不是共享同一批结点");
+    }                                              // 迭代 destroy：右旋拉直后逐个删
+
+    chain.make_empty();
+    check(chain.empty(), "百万深左链可析构");
+}
 }  // namespace
 
 int main() {
-    test_traversals_and_parent(); test_tree_ownership_and_rule_of_five(); test_partial_clone_is_cleaned(); test_bst_insert_remove_contract();
+    test_traversals_and_parent(); test_tree_ownership_and_rule_of_five(); test_partial_clone_is_cleaned(); test_bst_insert_remove_contract(); test_degenerate_chain_does_not_blow_the_stack();
     std::printf("BinaryTree: %d 项断言，%d 失败\n", checks, failures); return failures == 0 ? 0 : 1;
 }
