@@ -197,5 +197,84 @@ class TestRealBook(unittest.TestCase):
         self.assertEqual(problems, [])
 
 
+class TestR8CopiedTextBlocks(unittest.TestCase):
+    """R8：本书自己的代码不许以 text 块手抄进书稿。
+
+    缘由是一次真实事故：重构把两个 `cpp file=…#anchor` 块改成了 ```text，
+    R3 从此看不到它们，源码改了、书上那份没改，两边当场漂开。
+    """
+
+    FUNC = (
+        "T erase_node(Node* node) {\n"
+        "    if (node == nullptr) throw std::out_of_range(\"empty\");\n"
+        "    T value = std::move(node->value);\n"
+        "    delete node;\n"
+        "    return value;\n"
+        "}\n"
+    )
+
+    def sources(self):
+        return {"code/ch02/probe/modern.hpp": check_doc._normalize_code(
+            "#pragma once\nclass Probe {\n" + self.FUNC + "};\n")}
+
+    def test_copied_function_is_flagged(self):
+        block = "```text\n" + self.FUNC + "```\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "chapter.md"
+            path.write_text(block, encoding="utf-8")
+            problems = check_doc.check_file(path, {"算法3.3"}, sources=self.sources())
+        self.assertTrue(any("R8" in p for p in problems), problems)
+        self.assertTrue(any("modern.hpp" in p for p in problems), problems)
+
+    def test_same_code_as_cpp_file_block_is_not_flagged(self):
+        """写成 cpp file= 就归 R3 管了，R8 不该再插一脚。"""
+        block = "```cpp file=code/ch02/probe/modern.hpp#erase\n" + self.FUNC + "```\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "chapter.md"
+            path.write_text(block, encoding="utf-8")
+            problems = check_doc.check_file(path, {"算法3.3"}, sources=self.sources())
+        self.assertFalse(any("R8" in p for p in problems), problems)
+
+    def test_short_teaching_excerpt_is_allowed(self):
+        """正文大量「摘一行出来讲」的写法必须放行，否则这条规则没法用。"""
+        excerpt = "```text\nstatic constexpr int infinity = 1;\n```\n"
+        srcs = {"code/x/modern.hpp": check_doc._normalize_code(
+            "class X { static constexpr int infinity = 1; };")}
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "chapter.md"
+            path.write_text(excerpt, encoding="utf-8")
+            problems = check_doc.check_file(path, {"算法3.3"}, sources=srcs)
+        self.assertFalse(any("R8" in p for p in problems), problems)
+
+    def test_quoting_the_original_book_is_allowed(self):
+        """引用原书那些编不过的清单，本来就只能用 text——它们不在 code/ 里，不会命中。"""
+        original = (
+            "```text\n"
+            "void clear() { delete [] aList; curLen = position = 0; aList = new T[maxSize]; }\n"
+            "```\n"
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "chapter.md"
+            path.write_text(original, encoding="utf-8")
+            problems = check_doc.check_file(path, {"算法3.3"}, sources=self.sources())
+        self.assertFalse(any("R8" in p for p in problems), problems)
+
+    def test_indentation_does_not_matter(self):
+        """书稿里顶格、源码里在类内缩进四格——同一段代码，仍要判为抄的。"""
+        dedented = "```text\n" + "".join(
+            line[4:] if line.startswith("    ") else line for line in self.FUNC.splitlines(True)
+        ) + "```\n"
+        srcs = {"code/x/modern.hpp": check_doc._normalize_code(
+            "class X {\n" + "".join("    " + l for l in self.FUNC.splitlines(True)) + "};")}
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "chapter.md"
+            path.write_text(dedented, encoding="utf-8")
+            problems = check_doc.check_file(path, {"算法3.3"}, sources=srcs)
+        self.assertTrue(any("R8" in p for p in problems), problems)
+
+    def test_rule_list_mentions_r8(self):
+        self.assertTrue(any(r.startswith("R8") for r in check_doc.RULES))
+
+
 if __name__ == "__main__":
     unittest.main()

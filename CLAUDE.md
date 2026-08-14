@@ -32,7 +32,7 @@ python3 tools/ledger.py --pending      # listings nobody has claimed yet
 python3 tools/errata.py                # errata → the assertion that goes red if it regresses
 python3 tools/errata.py --check        # same, verify only (non-zero exit on gaps)
 python3 tools/check_code.py [unit]     # -Werror + ASan/UBSan and -O2, both must run green
-python3 tools/check_doc.py [file]      # book/ hygiene; --list-rules explains R1–R7
+python3 tools/check_doc.py [file]      # book/ hygiene; --list-rules explains R1–R8
 python3 tools/sync_book.py --write     # push code/ sources into the book's code blocks
 python3 tools/vendor_figures.py <md>   # download remote figures into book/assets/
 python3 -m unittest discover -s tests -p 'test_*.py'          # tool self-tests only
@@ -70,11 +70,15 @@ The gate is the architecture. Four arbiters, each answering a question documents
   `collab/exclusions.json` (which *requires* reason + owner + date). Pending is what's left.
   A hand-maintained progress table rots; a derived one cannot. The invariant
   `covered + excluded + pending == 105` is what stops work from silently disappearing.
-- **`tools/check_doc.py`** — 7 rules over `book/`. The load-bearing one is **R3**: every
+- **`tools/check_doc.py`** — 8 rules over `book/`. The load-bearing one is **R3**: every
   ```cpp block must carry `file=code/.../modern.hpp#anchor` and match that file (or the
   slice between `// >>> anchor` and `// <<< anchor`) verbatim. Printed code and compiled
   code are the same bytes, by construction. `sync_book.py --write` is the writer half of
-  that contract; R3 is the checker half.
+  that contract; R3 is the checker half. **R8 guards the escape hatch**: R3 only looks at
+  ```cpp blocks, so relabelling one as ```text silently removes it from the contract —
+  which is exactly how the book once drifted from its source. R8 rejects a ```text block
+  whose content is verbatim from `code/**`. Quoting the *original book* as ```text stays
+  legal — those listings do not compile, so they are not in `code/` and never match.
 - **`tools/errata.py`** — the errata ledger, derived the same way. `collab/errata.json`
   lists every entry in `book/勘误.md`; a `runtime`/`memory` entry is only accepted if its id
   (`勘误R10`) appears in some `code/**/test.cpp` assertion, so "we fixed that" is a grep

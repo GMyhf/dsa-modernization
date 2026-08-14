@@ -66,7 +66,51 @@ RULES = [
     "R5  【算法X.Y】必须配对【算法X.Y结束】",
     "R6  正文引用的 算法X.Y/代码X.Y 必须在 dsa_raw.md 的清单目录里存在",
     "R7  正文引用的「第N章」不得超过原书的 12 章",
+    "R8  text 块不得逐字复制 code/ 下的源码——本书自己的代码必须走 cpp file= 由 R3 把关",
 ]
+
+
+# R8：本书自己的代码只能经 `cpp file=` 进书稿。
+#
+# 缘由（2026-08-14）：一次重构把两个 `cpp file=…#anchor` 块改成了 ```text，
+# 于是 R3 不再看管它们，源码改了、书上那份没跟着改，两边当场漂开。
+# ```text 是留给**引用原书**用的——那些清单按印刷进不了编译器，只能原样照抄；
+# 本书自己的代码没有这个借口。
+#
+# 判据要能区分「照抄一整个函数」和「摘一行出来讲」：正文里有大量
+# 「`static constexpr int infinity = …`，其中 static 表示……」这样的教学摘录，
+# 它们本来就该是片段。所以要求同时满足：规范化后 ≥ 60 字符、且含成对花括号
+# （也就是至少是一个带函数体的定义）。当前书稿在这个判据下 0 误报。
+MIN_COPIED_CHARS = 60
+
+
+def _normalize_code(text):
+    """按行去掉首尾空白、丢掉空行——缩进无关，和 R3 的 dedent 是同一个思路。"""
+    return "\n".join(line.strip() for line in text.splitlines() if line.strip())
+
+
+def source_texts(code_root=None):
+    """code/ 下全部实现源码的规范化文本，供 R8 比对。"""
+    root = code_root or (ROOT / "code")
+    out = {}
+    if not root.is_dir():
+        return out
+    for path in sorted(list(root.rglob("*.hpp")) + list(root.rglob("*.cpp"))):
+        out[rel_label(path)] = _normalize_code(path.read_text(encoding="utf-8", errors="replace"))
+    return out
+
+
+def copied_from_source(body, sources):
+    """这段 text 块是不是逐字抄自 code/ 下某个源文件？是则返回那个文件名。"""
+    normalized = _normalize_code(body)
+    if len(normalized) < MIN_COPIED_CHARS:
+        return None
+    if "{" not in normalized or "}" not in normalized:
+        return None
+    for name, content in sources.items():
+        if normalized in content:
+            return name
+    return None
 
 
 def iter_blocks(text):
@@ -169,9 +213,11 @@ def known_listings():
     return {item["id"] for item in parse_inventory()}
 
 
-def check_file(path: Path, listings):
+def check_file(path: Path, listings, sources=None):
     """返回 problems 列表，每条形如 'book/x.md:12  说明'。"""
     problems = []
+    if sources is None:
+        sources = source_texts()
     rel = rel_label(path)
     text = path.read_text(encoding="utf-8")
 
@@ -190,6 +236,17 @@ def check_file(path: Path, listings):
             add(block["start"], f"R1 语言标签 `{lang}` 是 OCR 误判的产物，C++ 清单请标 cpp")
         elif lang not in ALLOWED_LANGS:
             add(block["start"], f"R1 未知语言标签 `{lang}`，白名单：{sorted(ALLOWED_LANGS - {''})}")
+
+        # R8 本书自己的代码不许以 text 块手抄进来
+        if lang == "text":
+            origin = copied_from_source(body, sources)
+            if origin is not None:
+                add(
+                    block["start"],
+                    f"R8 这段 text 块逐字抄自 {origin}；本书自己的代码要写成 "
+                    "```cpp file=<路径>#<锚点>，交给 R3 逐字核对。"
+                    "text 块是留给引用原书用的。",
+                )
 
         # R2 OCR 坏味道
         if lang in ("cpp", "c"):
@@ -300,7 +357,7 @@ def main():
         print("\n".join(f"❌ {p}" for p in problems))
         print(f"\n{len(problems)} 个问题。规则说明见 `python3 tools/check_doc.py --list-rules`")
         sys.exit(1)
-    print(f"✅ 书稿体检通过：{len(targets)} 个文件，7 条规则")
+    print(f"✅ 书稿体检通过：{len(targets)} 个文件，{len(RULES)} 条规则")
 
 
 if __name__ == "__main__":
