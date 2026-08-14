@@ -119,6 +119,8 @@ def strip_comments_and_strings(source: str) -> str:
 # 「实现得对不对」没法机械判定，但「有没有东西」可以。下面两条守的是后者。
 MIN_ASSERTIONS_PER_LISTING = 3
 MIN_ASSERTIONS_PER_UNIT = 5
+# 降级档的黄灯：Release 通过而 sanitizer 未运行时，太薄的测试必须显眼。
+MIN_DEGRADED_ASSERTIONS = 10
 MIN_LEGACY_LINES = 20
 EVIDENCE_MARKERS = ("error:", "runtime error", "Sanitizer", "$ g++", "$ ./")
 
@@ -237,7 +239,7 @@ def discover(paths):
     return sorted(p.parent for p in CODE.rglob("unit.json")) if CODE.is_dir() else []
 
 
-def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None):
+def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None, degraded=False):
     """返回 (ok, 输出片段列表)。"""
     rel = rel_label(unit_dir)
     meta = json.loads((unit_dir / "unit.json").read_text(encoding="utf-8"))
@@ -293,6 +295,11 @@ def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None):
     if substance:
         ok = False
         logs.extend(substance)
+    if degraded and assertions is not None and assertions < MIN_DEGRADED_ASSERTIONS:
+        logs.append(
+            f"  ⚠️ 降级档测试偏薄：只有 {assertions} 项断言（建议至少 {MIN_DEGRADED_ASSERTIONS}）；"
+            "sanitizer 未运行，Release-O2 不能覆盖内存与 UB。"
+        )
     if keep:
         logs.append(f"  产物保留在 {workdir}")
     return ok, [f"{rel}  «{meta.get('title', '')}»", *logs]
@@ -356,7 +363,9 @@ def main():
     failed, blocks = [], []
     for unit in units:
         try:
-            ok, log = build_and_run(unit, workdir, opts.keep, profiles)
+            ok, log = build_and_run(
+                unit, workdir, opts.keep, profiles, degraded=degraded_note is not None
+            )
         except subprocess.TimeoutExpired:
             ok, log = False, [rel_label(unit), f"  ❌ 超过 {TIMEOUT_SEC}s 未结束"]
         blocks.append("\n".join(log))
