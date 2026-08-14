@@ -263,7 +263,9 @@ def run_pandoc(md_path: Path, pdf_path: Path) -> None:
     built = WORK / "book.pdf"
     if not built.is_file():
         raise SystemExit("xelatex 没有写出 book.pdf")
-    shutil.move(str(built), str(pdf_path))
+    # macOS 上目标 PDF 可能已存在；显式复制并替换，避免旧文件被保留。
+    shutil.copy2(str(built), str(pdf_path))
+    built.unlink()
     print("xelatex ok")
 
 
