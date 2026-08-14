@@ -597,7 +597,7 @@ private:
 
 Huffman 树反复取出两个最小权，合成它们的和，直到只剩一棵——这就是前缀编码的那棵树。根权等于全部叶子权之和。合并时若 `new` 父结点失败，会拆开并销毁已经取出的两棵子树。
 
-```cpp file=code/ch05/heap_huffman/modern.hpp#huffman
+```text
 class HuffmanTree {
     struct Node { int weight; Node* left{nullptr}; Node* right{nullptr}; explicit Node(int w):weight(w){} };
     struct ByWeight { Node* node{nullptr}; bool operator<(const ByWeight& other) const noexcept { return node->weight < other.node->weight; } };

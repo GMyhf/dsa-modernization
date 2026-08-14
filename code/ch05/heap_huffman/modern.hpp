@@ -88,8 +88,20 @@ private:
 
 // >>> huffman
 class HuffmanTree {
-    struct Node { int weight; Node* left{nullptr}; Node* right{nullptr}; explicit Node(int w):weight(w){} };
-    struct ByWeight { Node* node{nullptr}; bool operator<(const ByWeight& other) const noexcept { return node->weight < other.node->weight; } };
+    /// 树结点不拥有父指针；整棵树的所有权由 root_ 持有，合并期间由最小堆暂管。
+    struct Node {
+        int weight;
+        Node* left{nullptr};
+        Node* right{nullptr};
+        explicit Node(int w) : weight(w) {}
+    };
+    /// 堆只按权重排序，不负责删除 node；异常路径必须显式回收这些裸指针。
+    struct ByWeight {
+        Node* node{nullptr};
+        bool operator<(const ByWeight& other) const noexcept {
+            return node->weight < other.node->weight;
+        }
+    };
 public:
     HuffmanTree()=default;
     explicit HuffmanTree(const int* weights, std::size_t count) {
@@ -128,9 +140,37 @@ public:
             throw;
         }
     }
-    HuffmanTree(const HuffmanTree&)=delete; HuffmanTree& operator=(const HuffmanTree&)=delete;
-    HuffmanTree(HuffmanTree&& other)noexcept:root_(other.root_){other.root_=nullptr;} HuffmanTree& operator=(HuffmanTree&& other)noexcept{if(this!=&other){destroy(root_);root_=other.root_;other.root_=nullptr;}return *this;} ~HuffmanTree(){destroy(root_);} [[nodiscard]] int total_weight()const noexcept{return root_?root_->weight:0;}
-private: static void destroy(Node*n)noexcept{if(n){destroy(n->left);destroy(n->right);delete n;}} Node* root_{nullptr};
+    HuffmanTree(const HuffmanTree&) = delete;
+    HuffmanTree& operator=(const HuffmanTree&) = delete;
+
+    /// 移动只转移根指针，并立即清空源对象，避免两个对象重复释放同一棵树。
+    HuffmanTree(HuffmanTree&& other) noexcept : root_(other.root_) {
+        other.root_ = nullptr;
+    }
+
+    HuffmanTree& operator=(HuffmanTree&& other) noexcept {
+        if (this != &other) {
+            destroy(root_);
+            root_ = other.root_;
+            other.root_ = nullptr;
+        }
+        return *this;
+    }
+
+    ~HuffmanTree() { destroy(root_); }
+    [[nodiscard]] int total_weight() const noexcept {
+        return root_ ? root_->weight : 0;
+    }
+private:
+    /// 后序释放，先删子树再删父结点；Huffman 树高度受权重分布影响，仍需关注深度上界。
+    static void destroy(Node* node) noexcept {
+        if (node == nullptr) return;
+        destroy(node->left);
+        destroy(node->right);
+        delete node;
+    }
+
+    Node* root_{nullptr};
 };
 // <<< huffman
 }
