@@ -46,11 +46,250 @@
 
 ## 7.3 图的存储结构
 
-图常用两种存法。邻接矩阵用 $n\times n$ 的表，$A[i][j]$ 表示 $i$ 到 $j$ 有没有边、权是多少，适合稠密图和需要 $O(1)$ 问「两点之间有没有边」的算法（Floyd、Prim）。邻接表为每个顶点挂一条出边链表，适合稀疏图和只沿出边走的算法（DFS、BFS、Dijkstra、拓扑）。本章主实现是邻接矩阵；邻接表是同一组运算的另一种存储，不在这里另写一份未验证的实现。
+图常用两种存法。邻接矩阵用 $n\times n$ 的表，$A[i][j]$ 表示 $i$ 到 $j$ 有没有边、权是多少，适合稠密图和需要 $O(1)$ 问「两点之间有没有边」的算法（Floyd、Prim）。邻接表为每个顶点挂一条出边表，适合稀疏图和只沿出边走的算法（DFS、BFS、Dijkstra、拓扑）。
+
+两种都有可运行实现：邻接矩阵是 `code/ch07/graph`（代码7.1–7.3），邻接表是 `code/ch07/adjacency_list`（代码7.4）。两者**逐项对拍**——同一张图上 DFS/BFS 序列、拓扑序、Dijkstra 距离向量必须完全相同，外加 30 轮随机图对拍。换存储方式不该换答案，只该换代价。
 
 ### 7.3.1 相邻矩阵
 
 邻接矩阵的第 `from` 行、第 `to` 列是边权。构造时对角线为 0（到自己的距离是 0），其余为 `infinity`。`add_edge(..., directed=false)` 同时写入对称位置，用来表示无向边。零权边可以表示——原书把 0 同时当成「无边」，那样权为 0 的边就存不进去。
+
+### 7.3.2 邻接表
+
+邻接表为每个顶点存一张出边表，**只存实际存在的边**。代价随之全变：
+
+| | 邻接矩阵 | 邻接表 |
+| --- | --- | --- |
+| 存储量 | $V^2$ | $V + E$ |
+| 遍历某点的邻居 | $O(V)$，要扫过整行 | $O(\deg v)$ |
+| 问「$(u,v)$ 之间有没有边」 | $O(1)$ | $O(\deg u)$ |
+| DFS / BFS 全图 | $O(V^2)$ | $O(V + E)$ |
+| Dijkstra | $O(V^2)$ | $O((V+E)\log V)$（配二叉堆）|
+
+注意第三行：**邻接表在这一项上是吃亏的**。没有哪种表示法总是更好，这正是本节要比较的东西。
+
+结构上的差别只有一处——存的是什么：
+
+```cpp file=code/ch07/adjacency_list/modern.hpp#graph-list
+/// 邻接表存图（原书【代码7.4】）：每个顶点挂一条边表，只存**实际存在**的边。
+///
+/// 与同章 `Graph`（邻接矩阵）的区别只有一处——存储方式——但这一处决定了全部代价：
+///
+/// | | 邻接矩阵 | 邻接表 |
+/// | --- | --- | --- |
+/// | 存储量 | $V^2$ | $V + E$ |
+/// | 遍历某点的邻居 | $O(V)$，要扫过整行 | $O(\deg v)$，只走这条边表 |
+/// | 判断 (u,v) 是否有边 | $O(1)$ | $O(\deg u)$ |
+/// | DFS / BFS 全图 | $O(V^2)$ | $O(V + E)$ |
+///
+/// 稀疏图（$E \ll V^2$）上邻接表快得多；稠密图或频繁问「这两点之间有没有边」时，
+/// 矩阵反而合适。**没有哪种表示法总是更好**，这正是本章要比较的东西。
+class GraphList {
+public:
+    static constexpr int infinity = std::numeric_limits<int>::max() / 4;
+
+    struct Edge {
+        std::size_t from;
+        std::size_t to;
+        int weight;
+
+        bool operator<(const Edge& other) const noexcept { return weight < other.weight; }
+    };
+
+    explicit GraphList(std::size_t count) : adjacency_(count) {}
+
+    /// 加边。重复加同一条 `from→to` 时**覆盖权值**而不是并存两条——
+    /// 与邻接矩阵的语义保持一致，两种表示法才可以逐项对拍。代价是每次加边 O(deg from)。
+    void add_edge(std::size_t from, std::size_t to, int weight, bool directed = true) {
+        check_vertex(from);
+        check_vertex(to);
+        if (weight < 0) {
+            throw std::invalid_argument("negative edge");
+        }
+        put(from, to, weight);
+        if (!directed) {
+            put(to, from, weight);
+        }
+    }
+
+    [[nodiscard]] std::size_t vertices() const noexcept { return adjacency_.size(); }
+
+    /// 边表里的条目数。无向图一条边会在两端各存一次，这里如实返回条目数。
+    [[nodiscard]] std::size_t edge_entries() const noexcept {
+        std::size_t total = 0;
+        for (const auto& list : adjacency_) {
+            total += list.size();
+        }
+        return total;
+    }
+
+    [[nodiscard]] std::size_t degree(std::size_t vertex) const {
+        check_vertex(vertex);
+        return adjacency_[vertex].size();
+    }
+
+    /// 某个顶点的边表。邻接表的核心能力：拿到邻居不必扫过不存在的边。
+    [[nodiscard]] const std::vector<Edge>& neighbors(std::size_t vertex) const {
+        check_vertex(vertex);
+        return adjacency_[vertex];
+    }
+
+    [[nodiscard]] std::optional<int> weight(std::size_t from, std::size_t to) const {
+        check_vertex(from);
+        check_vertex(to);
+        for (const Edge& edge : adjacency_[from]) {
+            ++scanned_;
+            if (edge.to == to) {
+                return edge.weight;
+            }
+        }
+        return std::nullopt;  // 没有这条边是预期状态，不是错误
+    }
+
+    /// 存储量（按「一个整数算一格」计）。对照矩阵的 $V^2$，稀疏图上差距一目了然。
+    [[nodiscard]] std::size_t storage_cells() const noexcept {
+        return vertices() + edge_entries() * 2;  // 每条边存 to 和 weight
+    }
+
+    /// 已经检查过多少条边。教学计数器：用它把 $O(V+E)$ 和 $O(V^2)$ 的差别量出来。
+    [[nodiscard]] std::size_t scan_steps() const noexcept { return scanned_; }
+    void reset_scan_steps() const noexcept { scanned_ = 0; }
+```
+
+周游时的差别随之而来。矩阵版每出队一个顶点要扫过整行 $V$ 格，邻接表只走这条边表：
+
+```cpp file=code/ch07/adjacency_list/modern.hpp#graph-list-traversal
+/// 深度优先周游。只走边表，不看不存在的边——这是与矩阵版最直接的差别。
+[[nodiscard]] std::vector<std::size_t> dfs(std::size_t source) const {
+    check_vertex(source);
+    std::vector<bool> seen(vertices());
+    std::vector<std::size_t> result;
+    visit_depth_first(source, seen, result);
+    return result;
+}
+
+[[nodiscard]] std::vector<std::size_t> bfs(std::size_t source) const {
+    check_vertex(source);
+    std::vector<bool> seen(vertices());
+    std::queue<std::size_t> pending;
+    std::vector<std::size_t> result;
+    pending.push(source);
+    seen[source] = true;
+    while (!pending.empty()) {
+        const std::size_t from = pending.front();
+        pending.pop();
+        result.push_back(from);
+        for (const Edge& edge : adjacency_[from]) {  // 矩阵版这里要扫 V 格
+            ++scanned_;
+            if (!seen[edge.to]) {
+                seen[edge.to] = true;
+                pending.push(edge.to);
+            }
+        }
+    }
+    return result;
+}
+```
+
+差距是量出来的，不是推出来的。取一条 1000 个顶点的链（$E = V-1$，典型的稀疏图）：
+
+```cpp file=code/ch07/adjacency_list/demo.cpp
+#include "modern.hpp"
+
+#include <cstdio>
+
+int main() {
+    using dsa::GraphList;
+
+    // 一条 1000 个顶点的链：典型的稀疏图（E = V - 1）。
+    constexpr std::size_t n = 1000;
+    GraphList sparse(n);
+    for (std::size_t v = 0; v + 1 < n; ++v) {
+        sparse.add_edge(v, v + 1, 1);
+    }
+    sparse.reset_scan_steps();
+    const auto order = sparse.bfs(0);
+    const std::size_t steps = sparse.scan_steps();
+    std::printf("稀疏图 V=%zu, E=%zu\n", n, sparse.edge_entries());
+    std::printf("  邻接表存储 %zu 格   ← 随 V+E 走\n", sparse.storage_cells());
+    std::printf("  邻接矩阵存储 %zu 格 ← V*V\n", n * n);
+    std::printf("  BFS 走遍 %zu 个顶点，只检查了 %zu 条边\n", order.size(), steps);
+    std::printf("  邻接矩阵的 BFS 要扫 %zu 格（每出队一个顶点扫一整行）\n", n * n);
+
+    // 教科书例子：最短路与最小生成树。
+    GraphList graph(6);
+    const int edges[][3] = {{0,1,7},{0,2,9},{0,5,14},{1,2,10},{1,3,15},
+                            {2,3,11},{2,5,2},{3,4,6},{5,4,9}};
+    for (const auto& e : edges) {
+        graph.add_edge(static_cast<std::size_t>(e[0]), static_cast<std::size_t>(e[1]), e[2], false);
+    }
+    const auto distance = graph.dijkstra(0);
+    std::printf("\n从 0 出发的最短距离:");
+    for (const int d : distance) {
+        std::printf(" %d", d);
+    }
+    const auto mst = graph.prim(0);
+    int total = 0;
+    for (const auto& edge : *mst) {
+        total += edge.weight;
+    }
+    std::printf("\n最小生成树 %zu 条边，总权 %d\n", mst->size(), total);
+    return 0;
+}
+```
+
+```text
+稀疏图 V=1000, E=999
+  邻接表存储 2998 格   ← 随 V+E 走
+  邻接矩阵存储 1000000 格 ← V*V
+  BFS 走遍 1000 个顶点，只检查了 999 条边
+  邻接矩阵的 BFS 要扫 1000000 格（每出队一个顶点扫一整行）
+
+从 0 出发的最短距离: 0 7 9 20 20 11
+最小生成树 5 条边，总权 33
+```
+
+存储差 300 倍，BFS 的检查次数差 1000 倍。稠密图上这个差距会消失——$E$ 接近 $V^2$ 时，
+$V+E$ 也就是 $V^2$，而矩阵还省掉了存 `to` 的那一半空间。
+
+Dijkstra 是这一章里差别最大的一处。矩阵版每轮要扫一遍全部顶点找最近的那个，是 $O(V^2)$；
+邻接表配一个最小堆之后，「找最近顶点」由堆负责，「松弛」只走实际存在的边：
+
+```cpp file=code/ch07/adjacency_list/modern.hpp#graph-list-dijkstra
+/// Dijkstra，最小堆版。代价 $O((V+E)\log V)$。
+///
+/// 矩阵版每轮要扫一遍全部顶点找最近的那个，是 $O(V^2)$；换成邻接表 + 堆之后，
+/// 「找最近顶点」由堆负责、「松弛」只走实际存在的边。**稀疏图上这才是该用的组合**。
+/// 堆是第 5 章的教学内容，这里作为基础设施使用（见 unit.json 的 d001_exceptions）。
+[[nodiscard]] std::vector<int> dijkstra(std::size_t source) const {
+    check_vertex(source);
+    std::vector<int> distance(vertices(), infinity);
+    distance[source] = 0;
+
+    using Item = std::pair<int, std::size_t>;  // (当前距离, 顶点)
+    std::priority_queue<Item, std::vector<Item>, std::greater<Item>> heap;
+    heap.emplace(0, source);
+    while (!heap.empty()) {
+        const auto [dist, from] = heap.top();
+        heap.pop();
+        if (dist > distance[from]) {
+            continue;  // 堆里的旧条目，已经被更短的路径取代
+        }
+        for (const Edge& edge : adjacency_[from]) {
+            ++scanned_;
+            const int relaxed = dist + edge.weight;
+            if (relaxed < distance[edge.to]) {
+                distance[edge.to] = relaxed;
+                heap.emplace(relaxed, edge.to);
+            }
+        }
+    }
+    return distance;
+}
+```
+
+7.5.1 节给出的 $O(V^2)$ 是**矩阵版**的结论，别把它套到邻接表上；反过来，常见教材里那个
+$O((V+E)\log V)$ 也不能套到矩阵版上。复杂度是「算法 + 存储结构」一起决定的。
 
 ## 7.4 图的周游
 
@@ -308,8 +547,9 @@ Floyd 枚举中转点 `via`，比较 `from→to` 与 `from→via→to`。测试�
 图对前驱和后继的个数都不加限制。边可以无向或有向、可以带权。存储常用邻接矩阵（稠密、问边 $O(1)$）和邻接表（稀疏、沿出边走）。周游有深度优先和广度优先。有向无环图可以拓扑排序；有环则无解。非负权单源最短路用 Dijkstra，任意两点用 Floyd。无向连通图的最小生成树可用 Prim 或 Kruskal，二者总权相同。
 
 本章实现使用邻接矩阵，因此当前 Dijkstra 和 Prim 的直接实现是 $O(V^2)$，Floyd 是 $O(V^3)$，空间是
-$O(V^2)$。若改用邻接表并配合二叉堆，稀疏图上的 Dijkstra 才能达到常见的
-$O((V+E)\log V)$；不能把这个邻接表结论直接套到本章代码上。
+$O(V^2)$。改用邻接表并配合二叉堆之后，稀疏图上的 Dijkstra 达到 $O((V+E)\log V)$——
+这一条现在有实现和实测支撑，见 7.3.2 与 `code/ch07/adjacency_list`。两个结论各自对应
+各自的存储结构，不能互相套用。
 
 ## 习题
 
@@ -332,4 +572,4 @@ $O((V+E)\log V)$；不能把这个邻接表结论直接套到本章代码上。
 1. 读入一个有向图，输出一种拓扑序；有环则报告。
 2. 实现 Dijkstra，输出源点到各点的距离和一条最短路径。
 3. 实现 Prim 与 Kruskal，对同一组随机连通图比较总权。
-4. 用邻接表重做 DFS/BFS，并与邻接矩阵版对拍访问序列。
+4. `code/ch07/adjacency_list` 已经用邻接表重做了 DFS/BFS 并与矩阵版对拍。再往前一步：给它加一个删边接口，并说明为什么删边在邻接表上是 $O(\deg u)$、在矩阵上是 $O(1)$。

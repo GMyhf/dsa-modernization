@@ -104,7 +104,7 @@ python3 tools/check_doc.py
 | 第 4 章 字符串 | 实现并测试 | `code/ch04`；朴素匹配与 KMP |
 | 第 5 章 二叉树 | 实现并测试 | `code/ch05`；深退化树有栈风险 |
 | 第 6 章 树 | 实现并测试 | `code/ch06/general_tree` |
-| 第 7 章 图 | 实现并测试 | `code/ch07/graph`；邻接矩阵实现 |
+| 第 7 章 图 | 实现并测试 | `code/ch07/graph` 邻接矩阵、`code/ch07/adjacency_list` 邻接表，两者逐项对拍 |
 | 第 8 章 内部排序 | 实现并测试 | `code/ch08/sorting`；手写排序 |
 | 第 9 章 外部排序 | 实现并测试 | `code/ch09/external_sort`；内存模拟外存 |
 | 第 10 章 检索 | 实现并测试 | `code/ch10/search_hash`；散列与墓碑 |
