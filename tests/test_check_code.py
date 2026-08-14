@@ -242,6 +242,61 @@ class TestSanitizerPreflight(unittest.TestCase):
         self.assertIn("sys.exit(2)", src)
         self.assertIn("--allow-degraded", check_code.main.__doc__ or src)
 
+    def test_thin_test_warns_in_degraded_mode(self):
+        """降级档下断言太少要亮黄灯——sanitizer 没跑，Release-O2 覆盖不了内存与 UB。
+
+        这条规则是给 macOS 那种 sanitizer 起不来的环境准备的：那边看到「0 failures」
+        最容易收工，而三五条断言撑不住一个单元的说法。
+
+        断言数取 7：在 D-007 的密度下限（5）之上、新下限（10）之下，
+        这样亮的一定是这盏灯，而不是「断言密度不足」那条。
+        直接调 build_and_run 而不走子进程——`--allow-degraded` 只是*允许*降级，
+        本机 sanitizer 跑得起来时根本不会降级，那条路径在 Linux 上测不到。
+        """
+        src = ('#include <cstdio>\n'
+               'int main(){ std::printf("Probe: 7 项断言，0 失败\\n"); return 0; }\n')
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = make_unit(Path(tmp), src)
+            work = Path(tmp) / "work"
+            work.mkdir(parents=True, exist_ok=True)
+            ok, logs = check_code.build_and_run(
+                unit, work, profiles=[check_code.PROFILES[-1]], degraded=True
+            )
+        text = "\n".join(logs)
+        self.assertIn("降级档测试偏薄", text)
+        self.assertIn("只有 7 项断言", text)
+        self.assertTrue(ok, text)   # 黄灯不是红灯：单元本身仍然通过
+
+    def test_thin_test_is_silent_when_sanitizer_runs(self):
+        """sanitizer 正常跑得起来时不该亮这盏灯——那时 Release-O2 不是唯一证据。"""
+        src = ('#include <cstdio>\n'
+               'int main(){ std::printf("Probe: 7 项断言，0 失败\\n"); return 0; }\n')
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = make_unit(Path(tmp), src)
+            work = Path(tmp) / "work"
+            work.mkdir(parents=True, exist_ok=True)
+            ok, logs = check_code.build_and_run(
+                unit, work, profiles=[check_code.PROFILES[-1]], degraded=False
+            )
+        text = "\n".join(logs)
+        self.assertNotIn("降级档测试偏薄", text)
+        self.assertTrue(ok, text)
+
+    def test_thick_test_does_not_warn_even_when_degraded(self):
+        """断言够多就不该被打扰——黄灯只针对『薄』，不是针对『降级』本身。"""
+        src = ('#include <cstdio>\n'
+               'int main(){ std::printf("Probe: 40 项断言，0 失败\\n"); return 0; }\n')
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = make_unit(Path(tmp), src)
+            work = Path(tmp) / "work"
+            work.mkdir(parents=True, exist_ok=True)
+            ok, logs = check_code.build_and_run(
+                unit, work, profiles=[check_code.PROFILES[-1]], degraded=True
+            )
+        text = "\n".join(logs)
+        self.assertNotIn("降级档测试偏薄", text)
+        self.assertTrue(ok, text)
+
     def test_degraded_mode_is_loud(self):
         """降级不能悄悄变绿：结论旁边必须再喊一次。"""
         import inspect
