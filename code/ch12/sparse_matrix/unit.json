@@ -1,0 +1,1 @@
+{"id":"sparse_matrix","title":"稀疏矩阵与十字链表","listings":[],"beyond_book":"原书 12.1 只有三元组和十字链表概念，本单元为书外补充实现。","standard":"c++17","owner":"codex","notes":"行链由 unique_ptr 拥有，列链为非拥有观察链接。"}

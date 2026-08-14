@@ -1,0 +1,3 @@
+#include "modern.hpp"
+#include <cstdio>
+int main(){int n=0,f=0;auto c=[&](bool x,const char*s){++n;if(!x){++f;std::printf("FAIL %s\n",s);}};dsa::advanced::MarkSweepHeap h;auto*a=h.make(1);auto*b=h.make(2);auto*dead=h.make(3);dsa::advanced::MarkSweepHeap::link(a,b);c(h.live()==3,"分配三结点");h.collect(a);c(h.live()==2&&h.value(a)==1&&h.value(b)==2,"可达链保留");(void)dead;auto*cycle1=h.make(4);auto*cycle2=h.make(5);dsa::advanced::MarkSweepHeap::link(cycle1,cycle2);dsa::advanced::MarkSweepHeap::link(cycle2,cycle1);h.collect(a);c(h.live()==2,"无根环被回收");std::printf("StorageRecovery: %d checks, %d failures\n",n,f);return f;}
