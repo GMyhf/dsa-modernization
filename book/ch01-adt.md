@@ -63,8 +63,6 @@ B3 指出四条边，是唯一能到达其余所有人的起点。
 
 ### 1.1.3 数据结构和算法设计
 
-下面是完整可运行的程序。
-
 下面是完整可运行的程序。`RumorNetwork(5)` 创建 B1 至 B5；`add_route(from, to, cost)` 添加一条
 **有向**传播路径，三个参数均从 0 开始编号。`best_source()` 返回 `std::optional<std::size_t>`：
 有解时保存起点下标，无解时是 `std::nullopt`。
