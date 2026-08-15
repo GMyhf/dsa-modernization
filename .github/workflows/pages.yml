@@ -1,0 +1,66 @@
+# 把书稿的网页版发布到 GitHub Pages。
+#
+#     https://gmyhf.github.io/dsa-modernization/
+#
+# **发布的是现场从 Markdown 构建出来的站点，不是仓库里那份 `book/site/`。**
+# 这样即使有人改了书稿忘了重建，线上读到的仍然是书稿本身说的话；仓库里那份是否过期
+# 由下面第一步单独报告（只警告不挡发布），本地闸门 `tools/handoff.py --verify` 会拦住它。
+#
+# 目录为什么要重排：仓库里站点在 `book/site/`、插图在 `book/assets/`，页面按 `../assets/`
+# 引用，为的是**不把 6.6 MB 插图复制第二份进仓库**。发布时页面要摆到站点根上
+# （URL 里不带 `/site/`），于是用 `--assets-href assets/` 重建一遍，再把插图拷到根下的
+# `assets/`。这个取舍记在 `collab/DECISION_LOG.md` 的 D-011。
+#
+# 触发：改了书稿、改了构建器、或手动点 Run workflow。
+name: 发布网页版
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'book/**'
+      - 'tools/build_site.py'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一时刻只发一版；正在发的不打断，后来的排队。
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 仓库里那份 book/site/ 是否已经过期（只报告，不挡发布）
+        run: |
+          python3 tools/build_site.py --check || \
+            echo "::warning::book/site/ 与书稿不一致。本次发布用的是现场构建的版本；请在本地跑 python3 tools/build_site.py 并提交，否则仓库里那份会越漂越远。"
+
+      - name: 从 Markdown 构建发布目录
+        run: |
+          python3 tools/build_site.py --out _site --assets-href assets/
+          cp -r book/assets _site/assets
+          ls _site | head
+          du -sh _site
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

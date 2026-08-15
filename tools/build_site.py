@@ -44,6 +44,11 @@ BOOK = ROOT / "book"
 SITE = BOOK / "site"
 REPO_BLOB = "https://github.com/GMyhf/dsa-modernization/blob/main/"
 
+# 插图在页面里的前缀。默认 `../assets/`：站点住在 book/site/，图片住在 book/assets/，
+# 不复制第二份。发布到 GitHub Pages 时页面被摆到发布目录的根上，改用 `assets/`
+# （见 .github/workflows/pages.yml 与 D-011）。
+ASSETS_HREF = "../assets/"
+
 BOOK_TITLE = "现代 C++ 数据结构教程"
 DESCRIPTION = ("《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编："
                "保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。")
@@ -293,8 +298,8 @@ def rewrite_href(href, ctx):
         return MD_TO_HTML[target] + fragment
     if target.startswith("../"):                   # code/、collab/、仓库根
         return REPO_BLOB + target[3:] + fragment
-    if target.startswith("assets/"):               # 图片：站点在 book/site/ 下
-        return "../" + target + fragment
+    if target.startswith("assets/"):               # 图片：默认站点在 book/assets/ 的隔壁
+        return ASSETS_HREF + target[len("assets/"):] + fragment
     if target.endswith(".md"):                     # book/ 下没进站点的 Markdown
         return REPO_BLOB + "book/" + target + fragment
     return href
@@ -824,7 +829,8 @@ def find_problems(ctx):
     return problems
 
 
-def build(check_only=False):
+def build(check_only=False, out_dir=None):
+    out_dir = out_dir or SITE
     try:
         rendered, ctx = render_site()
     except FileNotFoundError as missing:
@@ -849,13 +855,13 @@ def build(check_only=False):
         print(f"✅ book/site/ 与 book/*.md 一致（{len(rendered)} 个页面）")
         return 0
 
-    SITE.mkdir(parents=True, exist_ok=True)
+    out_dir.mkdir(parents=True, exist_ok=True)
     total = 0
     for name, page in rendered.items():
-        (SITE / name).write_text(page, encoding="utf-8")
+        (out_dir / name).write_text(page, encoding="utf-8")
         total += len(page.encode())
     known = set(rendered)
-    for orphan in sorted(SITE.glob("*.html")):
+    for orphan in sorted(out_dir.glob("*.html")):
         if orphan.name not in known:
             orphan.unlink()
             print(f"删除了不再对应任何 Markdown 的旧页面 {orphan.name}")
@@ -863,17 +869,24 @@ def build(check_only=False):
     if ctx.unknown_tex:
         print(f"⚠️  {len(ctx.unknown_tex)} 个 LaTeX 命令没有转换规则，已原样印出并加虚线："
               f"{' '.join(sorted(ctx.unknown_tex))}", file=sys.stderr)
-    print(f"✅ book/site/  {len(rendered)} 个页面  {total:,} 字节  "
-          f"入口 book/site/index.html")
+    where = out_dir.relative_to(ROOT) if out_dir.is_relative_to(ROOT) else out_dir
+    print(f"✅ {where}/  {len(rendered)} 个页面  {total:,} 字节  入口 {where}/index.html")
     return 0
 
 
 def main():
+    global ASSETS_HREF
     parser = argparse.ArgumentParser(description="把 book/*.md 渲染成静态站点 book/site/")
     parser.add_argument("--check", action="store_true",
-                        help="只校验站点是否与书稿一致，不写文件")
+                        help="只校验 book/site/ 是否与书稿一致，不写文件")
+    parser.add_argument("--out", metavar="目录", default=None,
+                        help="改写到别处（默认 book/site/）。GitHub Pages 的发布目录用它")
+    parser.add_argument("--assets-href", metavar="前缀", default=ASSETS_HREF,
+                        help=f"插图在页面里的前缀，默认 {ASSETS_HREF}；"
+                             "页面被摆到发布目录根上时用 assets/")
     args = parser.parse_args()
-    return build(check_only=args.check)
+    ASSETS_HREF = args.assets_href
+    return build(check_only=args.check, out_dir=Path(args.out).resolve() if args.out else SITE)
 
 
 if __name__ == "__main__":

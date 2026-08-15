@@ -97,6 +97,18 @@ class TestLinks(unittest.TestCase):
         ctx.page = "figures.html"
         self.assertIn('src="../assets/x.jpg"', build_site.image_tag("图", "assets/x.jpg", ctx))
 
+    def test_assets_href_can_be_moved_to_publish_root(self):
+        """发布到 GitHub Pages 时页面摆在根上，图片前缀要跟着改（见 D-011）。"""
+        ctx = build_site.Context()
+        ctx.page = "figures.html"
+        original = build_site.ASSETS_HREF
+        try:
+            build_site.ASSETS_HREF = "assets/"
+            self.assertIn('src="assets/x.jpg"', build_site.image_tag("图", "assets/x.jpg", ctx))
+        finally:
+            build_site.ASSETS_HREF = original
+        self.assertIn('src="../assets/x.jpg"', build_site.image_tag("图", "assets/x.jpg", ctx))
+
     def test_missing_anchor_is_reported(self):
         ctx = build_site.Context()
         ctx.page = "ch01-adt.html"

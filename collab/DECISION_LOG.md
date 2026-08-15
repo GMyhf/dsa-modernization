@@ -306,6 +306,31 @@ text 块当场就与新源码对不上，R8 也不会命中。R8 堵的是**源�
 它确实会在 `b87dc81` 上立刻命中。但全仓库 104 个锚点里有 29 个是孤儿——多数是把整个类
 包起来、书里只印更窄切片的「整类锚点」。从第一天就吵 29 条的告警，等于没有告警。
 
+## D-011 · 2026-08-15 · Claude 记录：网页版的存放位置与发布路径
+
+**背景**：T-020 把书稿渲染成静态站点。GitHub Pages 只认三种源——仓库根、`docs/`、
+或 Actions 工作流。前两种要求站点和插图在同一棵目录里，而插图有 **6.6 MB / 291 张**，
+复制第二份进仓库既臃肿又立刻会有两份不同步的可能。
+
+**决定**：
+
+1. **仓库里**站点住 `book/site/`，插图仍只有 `book/assets/` 一份，页面按 `../assets/` 引用。
+   这样双击 `book/site/index.html` 就能离线读，仓库里不多一个字节的图片。
+2. **发布时**由 `.github/workflows/pages.yml` 现场重建：
+   `python3 tools/build_site.py --out _site --assets-href assets/`，再把 `book/assets`
+   拷进 `_site/assets`。页面因此摆在站点根上，URL 里不带 `/site/`：
+   <https://gmyhf.github.io/dsa-modernization/>。
+3. **线上发布的是现场从 Markdown 构建的版本，不是仓库里那份 HTML。**
+   仓库里那份若过期，CI 打一条 warning，本地闸门 `build_site.py --check` 直接报红。
+
+**为什么不干脆把站点生成到 `docs/`**：那等于把插图复制第二份，且 `docs/` 会变成一个
+「看着像手写、其实全是产物」的目录——本仓库已经有一条相反的规矩（Markdown 是唯一事实源）。
+用 Actions 组装是唯一不需要复制、也不需要在仓库里放产物副本的做法。
+
+**代价，说清楚**：页面前缀因此有两种形态（`../assets/` 与 `assets/`），
+由 `ASSETS_HREF` 一个变量控制，`tests/test_build_site.py` 里有一条断言两种都盯着。
+将来若把站点换到别的托管，改的是这个变量和工作流，不是书稿。
+
 ## D-002 · 2026-08-12 · Claude 记录：`dsa_raw.md` 永久只读
 
 它是「原书到底怎么写的」唯一凭据，修订一律落在 `book/`。

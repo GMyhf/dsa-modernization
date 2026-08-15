@@ -55,9 +55,32 @@ python3 tools/check_doc.py            # 只跑 book/：OCR 残留、编号、插
 python3 tools/build_site.py           # 把书稿渲染成网页版 book/site/，入口 index.html
 ```
 
-网页版直接双击 `book/site/index.html` 就能读；要用 HTTP 访问就
-`python3 -m http.server -d book` 后打开 `http://localhost:8000/site/`。
-它是 `book/*.md` 的产物，闸门里有一条 `build_site.py --check` 盯着两者不许脱节。
+网页版在线可读：**<https://gmyhf.github.io/dsa-modernization/>**。
+本地读就双击 `book/site/index.html`，或 `python3 -m http.server -d book` 后打开
+`http://localhost:8000/site/`。它是 `book/*.md` 的产物，闸门里有一条
+`build_site.py --check` 盯着两者不许脱节。
+
+### 怎么更新这本在线书
+
+改书稿 → 重建 → 提交推送，三步，剩下的由 CI 做：
+
+```bash
+# 1. 改 book/*.md（或改 code/ 后跑 tools/sync_book.py --write 把源码灌回书稿）
+# 2. 重建网页版并自检
+python3 tools/build_site.py
+python3 tools/handoff.py --verify      # 含 build_site.py --check 这一步
+# 3. 提交推送
+git add -A && git commit -m "..." && git push
+```
+
+推送到 `main` 且改动落在 `book/**` 或 `tools/build_site.py` 时，
+`.github/workflows/pages.yml` 会**从 Markdown 现场重建**站点并发布到 GitHub Pages
+（也可以在 Actions 页面手动 Run workflow）。发布的是现场构建的版本，不是仓库里那份
+`book/site/`——所以线上永远是书稿本身说的话；仓库里那份若过期，CI 会打一条 warning，
+本地闸门会直接报红。
+
+发布目录与仓库里的目录形状不同（页面摆在站点根上、插图在 `assets/`），
+理由与代价见 `collab/DECISION_LOG.md` 的 D-011。
 
 需要 Python 3（仅标准库）与 g++/clang++（支持 C++17 与 sanitizer）。无第三方依赖。
 

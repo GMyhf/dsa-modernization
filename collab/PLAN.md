@@ -52,7 +52,7 @@
 | T-017 | 学生用带书签 PDF | Review | Claude | `python3 tools/build_book_pdf.py` → `book/pdf/现代C++数据结构教程.pdf`。B5，126 页，hyperref 书签 80+ 条（章/节），含 12 章正文与勘误附录。不含 292 张图的图集。 |
 | T-018 | 新书目录对齐 2008 原书；保留原书没错的内容 | Review | Claude | 第 3 章两个 3.1.3 已拆开；第 5–12 章改回原书编号并补回概念节。第 1 章仍以传言问题开篇（原书 1.1），ADT/算法分析尚未整节补回。 |
 | T-019 | 整节补回原书没错、新书还空着的内容 | Review | Claude | 已补 1.2–1.4、6.1.2–6.4、10.1.x/10.2/10.3.x、12.1–12.4 全部分节。无独立实现的节只写概念、不印示意代码。PDF 已重编。 |
-| T-020 | 新书的浏览器版（静态站点） | Review | Claude | `python3 tools/build_site.py` → `book/site/`，16 个页面，入口 `index.html`（双击即可读，或 `python3 -m http.server -d book`）。纯标准库、零 CDN：公式手写 LaTeX 子集转换、C++ 高亮在构建期完成。**HTML 是产物，Markdown 仍是唯一事实源**——闸门新增一步 `build_site.py --check`，书稿改了不重建就红。21 项自测，变异自检 5/5 全抓（含「高亮吃掉一个字节」与「站内锚点检查失效」）。全书 180 个代码块逐字比对渲染前后，一个字节都没变 |
+| T-020 | 新书的浏览器版（静态站点） | Review | Claude | `python3 tools/build_site.py` → `book/site/`，16 个页面，入口 `index.html`（双击即可读，或 `python3 -m http.server -d book`）。纯标准库、零 CDN：公式手写 LaTeX 子集转换、C++ 高亮在构建期完成。**HTML 是产物，Markdown 仍是唯一事实源**——闸门新增一步 `build_site.py --check`，书稿改了不重建就红。21 项自测，变异自检 5/5 全抓（含「高亮吃掉一个字节」与「站内锚点检查失效」）。全书 180 个代码块逐字比对渲染前后，一个字节都没变 — 2026-08-15 已上线 GitHub Pages：<https://gmyhf.github.io/dsa-modernization/>，由 `.github/workflows/pages.yml` 现场重建后发布（D-011），更新方式写进 README「怎么更新这本在线书」 |
 
 ## Decision Log
 
@@ -70,6 +70,7 @@
 | D-002 | 2026-08-12 | `dsa_raw.md` 永久只读 | Claude 记录 |
 | D-003 | 2026-08-12 | 书稿代码块与源码一致性靠机器保证（R3 + sync_book） | Claude 记录 |
 | D-004 | 2026-08-12 | 闸门跑 Debug+ASan/UBSan 与 Release-O2 两种构建 | Claude 记录 |
+| D-011 | 2026-08-15 | 网页版存 `book/site/`（插图不复制第二份），由 Actions 现场重建后发到 GitHub Pages | Claude 记录 |
 
 **已被取代**：2026-08-12 早些时候 Claude 提议的「C++20 + concept」被 D-001 取代为
 C++17 + `static_assert`。原提议与取代理由都保留在 D-001 里，没有删除。
