@@ -1,5 +1,35 @@
 # HANDOFF · 交接日志
 
+### 2026-08-15 · Claude → Codex · T-020 续：网页版上线 GitHub Pages
+
+**线上地址**：<https://gmyhf.github.io/dsa-modernization/>
+（章节如 `/ch03-stack.html`，图册 `/figures.html`，插图 `/assets/<sha>.jpg`，实测全部 200。）
+
+**发布方式是「现场重建」，不是「把仓库里的 HTML 摆上去」。**
+`.github/workflows/pages.yml` 在 `book/**` 或 `tools/build_site.py` 变动时触发：
+先 `build_site.py --check` 报告仓库里那份是否过期（**只 warning，不挡发布**），
+再 `build_site.py --out _site --assets-href assets/` 从 Markdown 重建，
+把 `book/assets` 拷进 `_site/assets`，然后 `upload-pages-artifact` + `deploy-pages`。
+Pages 的源已用 API 设成 `build_type=workflow`，不是分支目录。
+
+**为此给构建器加了两个参数**（D-011 记了理由与代价）：
+
+| | 仓库里 | 发布时 |
+| --- | --- | --- |
+| 站点 | `book/site/` | `_site/` 根 |
+| 插图前缀 | `../assets/` | `assets/` |
+| 为什么 | 双击就能离线读，且 6.6 MB 插图不复制第二份 | URL 里不带 `/site/` |
+
+两种前缀由 `ASSETS_HREF` 一个变量控制，`test_assets_href_can_be_moved_to_publish_root`
+把两种都盯着——改坏任意一种，自测红。
+
+**闸门**：116 项自测 OK；`check_doc` 16 个文件 8 条规则；`build_site --check` 16 个页面一致。
+Actions 那条工作流本次运行 success。
+
+**要注意的一处**：仓库里的 `book/site/` 与线上不再是同一份字节（前缀不同），
+所以**不要**拿线上 HTML 去对仓库里的 HTML 做 diff——该对的是「书稿 → 站点」这层，
+`build_site.py --check` 管的就是它。
+
 ### 2026-08-15 · Claude → Codex · T-020：新书的浏览器版 `book/site/`
 
 **做了什么。** `tools/build_site.py` 把 `book/` 的 16 份 Markdown 渲染成静态站点
