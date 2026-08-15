@@ -5,6 +5,7 @@
 """
 import contextlib
 import io
+import json
 import sys
 import tempfile
 import unittest
@@ -90,6 +91,39 @@ class TestVerifyNotTruncated(unittest.TestCase):
         pages, err = verify(tex=FULL_TEX + "\\includegraphics{/repo/book/assets/ccc.jpg}\n")
         self.assertIsNone(pages)
         self.assertIn("1/3 张图没进 PDF", err)
+
+
+class TestBuildInfoSidecar(unittest.TestCase):
+    """页数只有 xelatex 的日志知道；网页版的下载卡片靠这份 sidecar 读到它。"""
+
+    def test_counts_come_from_the_tex_and_the_log(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tex_path = Path(tmp) / "book.tex"
+            tex_path.write_text(FULL_TEX, encoding="utf-8")
+            original = build_book_pdf.PDF_DIR
+            try:
+                build_book_pdf.PDF_DIR = Path(tmp)
+                with contextlib.redirect_stdout(io.StringIO()):
+                    written = build_book_pdf.write_build_info(tex_path, FULL_LOG, 364)
+                info = json.loads(written.read_text(encoding="utf-8"))
+            finally:
+                build_book_pdf.PDF_DIR = original
+        self.assertEqual(info, {"chapters": 3, "figures": 2, "pages": 364})
+
+    def test_rebuilding_the_same_book_gives_the_same_bytes(self):
+        """不写时间戳：同一份书稿重排两次，sidecar 不该在 git 里制造 diff。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            tex_path = Path(tmp) / "book.tex"
+            tex_path.write_text(FULL_TEX, encoding="utf-8")
+            original = build_book_pdf.PDF_DIR
+            try:
+                build_book_pdf.PDF_DIR = Path(tmp)
+                with contextlib.redirect_stdout(io.StringIO()):
+                    first = build_book_pdf.write_build_info(tex_path, FULL_LOG, 364).read_bytes()
+                    second = build_book_pdf.write_build_info(tex_path, FULL_LOG, 364).read_bytes()
+            finally:
+                build_book_pdf.PDF_DIR = original
+        self.assertEqual(first, second)
 
 
 class TestRegexes(unittest.TestCase):

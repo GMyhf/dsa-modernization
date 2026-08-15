@@ -106,6 +106,17 @@ figcaption{margin-top:9px;color:var(--muted);font-size:13.5px;text-align:center}
 .sqrt{border-top:1px solid currentColor}
 .sqrt::before{content:"√";border-top:0}
 .tex-raw{border-bottom:1px dotted var(--danger);font-style:normal}
+.download{display:flex;align-items:center;gap:14px;margin:4px 0 26px;padding:14px 16px;
+  background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:9px;text-decoration:none;color:var(--ink)}
+.download:hover{background:var(--accent-soft);border-color:var(--accent)}
+.dl-badge{flex:none;background:var(--accent-soft);color:var(--accent);border-radius:6px;
+  padding:6px 9px;font:700 12.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.06em}
+.dl-body{display:block;min-width:0}
+.dl-body b{display:block;font-size:15.5px}
+.dl-meta{display:block;color:var(--muted);font-size:13px;line-height:1.5;margin-top:2px}
+.dl-arrow{margin-left:auto;color:var(--accent);font-size:19px}
 .pagenav{display:flex;justify-content:space-between;gap:16px;margin:50px 0 0;
   border-top:1px solid var(--line);padding-top:18px;font-size:14.5px}
 .pagenav a{text-decoration:none;max-width:46%}
@@ -142,6 +153,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <div class="layout">
 <nav class="book"><b>导读</b><a href="index.html">封面与导读</a><b>正文</b><a href="ch01-adt.html" class="here">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a></nav>
 <main>
+
 <p>数据结构刻画信息及其关系，算法描述求解过程。二者互相依赖：结构选错了，算法再巧也补不回来。本章先用股市传言把问题说到能写程序，再补回逻辑结构、存储映射、抽象数据类型和渐进分析——这些原书没错，是后面十一章共用的词汇。</p>
 <h2 id="11-问题求解"><a class="anchor" href="#11-问题求解">#</a>1.1 问题求解</h2>
 <p>程序是指令的组合，算法是求解过程的逻辑抽象，数据结构是数据及其关系在计算机里的反映。Wirth 的「程序 = 数据结构 + 算法」说的就是这件事。求解路径通常是：把现实问题抽象成模型，选定逻辑结构与存储方式，再设计算法并写成可运行的程序。</p>

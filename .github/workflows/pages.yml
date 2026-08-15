@@ -46,8 +46,12 @@ jobs:
 
       - name: 从 Markdown 构建发布目录
         run: |
-          python3 tools/build_site.py --out _site --assets-href assets/
+          # PDF 摆到站点根上，首页的下载卡片指向它（卡片上的页数来自 build-info.json）
+          python3 tools/build_site.py --out _site \
+            --assets-href assets/ \
+            --pdf-href '现代C++数据结构教程.pdf'
           cp -r book/assets _site/assets
+          cp book/pdf/*.pdf _site/
           ls _site | head
           du -sh _site
 

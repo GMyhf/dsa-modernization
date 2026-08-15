@@ -7,11 +7,15 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import shutil
 import subprocess
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from repo import rel_label  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 BOOK = ROOT / "book"
@@ -282,6 +286,25 @@ def verify_not_truncated(tex_path: Path, toc_path: Path, log_text: str) -> int:
     return pages
 
 
+def write_build_info(tex_path: Path, log_text: str, pages: int) -> Path:
+    """把「这本 PDF 有多少页/章/图」写成 sidecar，供网页版的下载卡片显示。
+
+    页数只在 xelatex 的日志里（PDF 自身的页树是压缩的，正则挖不出来），而日志在
+    `.build/` 里不入库。与其让网页去猜或让人手写一个会过期的数字，不如在**唯一知道
+    答案的时刻**把它落到磁盘上。不写时间戳：同一份书稿重排两次，这个文件应当一模一样。
+    """
+    tex = tex_path.read_text(encoding="utf-8", errors="replace")
+    info = {
+        "chapters": len(CHAPTER_RE.findall(tex)),
+        "figures": len({Path(src).name for src in GRAPHIC_RE.findall(tex)}),
+        "pages": pages,
+    }
+    path = PDF_DIR / "build-info.json"
+    path.write_text(json.dumps(info, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"wrote {rel_label(path)} {info}")      # 测试会把 PDF_DIR 指到 /tmp，别用 relative_to
+    return path
+
+
 def run_pandoc(md_path: Path, pdf_path: Path) -> None:
     if not shutil.which("pandoc"):
         raise SystemExit("需要 pandoc")
@@ -325,7 +348,8 @@ def run_pandoc(md_path: Path, pdf_path: Path) -> None:
         raise SystemExit("xelatex 没有写出 book.pdf")
     # 自检不过就不许覆盖已发布的成品：宁可留着旧版，也不发一本缺章少图的书。
     log_text = (WORK / "book.log").read_text(encoding="utf-8", errors="replace")
-    verify_not_truncated(tex_path, WORK / "book.toc", log_text)
+    pages = verify_not_truncated(tex_path, WORK / "book.toc", log_text)
+    write_build_info(tex_path, log_text, pages)
     # macOS 上目标 PDF 可能已存在；显式复制并替换，避免旧文件被保留。
     shutil.copy2(str(built), str(pdf_path))
     built.unlink()

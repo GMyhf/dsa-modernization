@@ -188,6 +188,52 @@ class TestBlocks(unittest.TestCase):
         self.assertNotIn("math", markup)
 
 
+class TestDownloadCard(unittest.TestCase):
+    """首页的 PDF 下载卡片：数字来自文件本身，不手写。"""
+
+    def test_card_reads_size_and_pages_from_disk(self):
+        card = build_site.download_card()
+        self.assertIn("下载完整教程", card)
+        self.assertRegex(card, r"\d+ 页")           # 页数来自 build-info.json
+        self.assertRegex(card, r"\d+\.\d+ MB")      # 体积来自 PDF 文件本身
+
+    def test_card_href_follows_publish_layout(self):
+        original = build_site.PDF_HREF
+        try:
+            build_site.PDF_HREF = "现代C++数据结构教程.pdf"
+            card = build_site.download_card()
+        finally:
+            build_site.PDF_HREF = original
+        # 中文文件名要转义，否则某些服务器上点了就是 404
+        self.assertIn("%E7%8E%B0", card)
+        self.assertNotIn('href="../pdf/', card)
+
+    def test_no_pdf_means_no_card(self):
+        """PDF 没排版时，宁可没有卡片，也不要一个点了 404 的链接。"""
+        original = build_site.PDF_FILE
+        try:
+            build_site.PDF_FILE = build_site.BOOK / "pdf" / "根本没有这本.pdf"
+            self.assertEqual(build_site.download_card(), "")
+        finally:
+            build_site.PDF_FILE = original
+
+    def test_broken_sidecar_does_not_break_the_build(self):
+        original = build_site.PDF_INFO
+        try:
+            build_site.PDF_INFO = Path(__file__)      # 不是 JSON
+            card = build_site.download_card()
+        finally:
+            build_site.PDF_INFO = original
+        self.assertIn("下载完整教程", card)
+        self.assertNotRegex(card, r"\d+ 页")
+
+    def test_card_only_on_the_cover_page(self):
+        cover = (build_site.SITE / "index.html").read_text(encoding="utf-8")
+        chapter = (build_site.SITE / "ch03-stack.html").read_text(encoding="utf-8")
+        self.assertIn('class="download"', cover)
+        self.assertNotIn('class="download"', chapter)
+
+
 class TestGate(unittest.TestCase):
     """--check 必须在书稿改了、站点没重建时变红。"""
 

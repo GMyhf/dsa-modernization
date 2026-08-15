@@ -106,6 +106,17 @@ figcaption{margin-top:9px;color:var(--muted);font-size:13.5px;text-align:center}
 .sqrt{border-top:1px solid currentColor}
 .sqrt::before{content:"√";border-top:0}
 .tex-raw{border-bottom:1px dotted var(--danger);font-style:normal}
+.download{display:flex;align-items:center;gap:14px;margin:4px 0 26px;padding:14px 16px;
+  background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:9px;text-decoration:none;color:var(--ink)}
+.download:hover{background:var(--accent-soft);border-color:var(--accent)}
+.dl-badge{flex:none;background:var(--accent-soft);color:var(--accent);border-radius:6px;
+  padding:6px 9px;font:700 12.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.06em}
+.dl-body{display:block;min-width:0}
+.dl-body b{display:block;font-size:15.5px}
+.dl-meta{display:block;color:var(--muted);font-size:13px;line-height:1.5;margin-top:2px}
+.dl-arrow{margin-left:auto;color:var(--accent);font-size:19px}
 .pagenav{display:flex;justify-content:space-between;gap:16px;margin:50px 0 0;
   border-top:1px solid var(--line);padding-top:18px;font-size:14.5px}
 .pagenav a{text-decoration:none;max-width:46%}
@@ -142,6 +153,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <div class="layout">
 <nav class="book"><b>导读</b><a href="index.html">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html" class="here">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a></nav>
 <main>
+
 <p>字符串是字符的有限序列。先区分「保存字符串」的类与「在文本中找模式」的算法：前者处理容量、 复制和下标边界，后者处理比较顺序。朴素匹配在失配后移动模式；KMP 预先计算 <code>next</code> 信息，避免 重复比较已经知道相等的前缀。</p>
 <p>源码：<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/modern.hpp" class="ext">字符串类</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/demo.cpp" class="ext">字符串示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/pattern_matching/modern.hpp" class="ext">模式匹配</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/pattern_matching/demo.cpp" class="ext">匹配示例</a>。</p>
 <h2 id="先跑一遍"><a class="anchor" href="#先跑一遍">#</a>先跑一遍</h2>

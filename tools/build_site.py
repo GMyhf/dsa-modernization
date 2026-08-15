@@ -35,9 +35,11 @@ from __future__ import annotations
 
 import argparse
 import html
+import json
 import re
 import sys
 from pathlib import Path
+from urllib.parse import quote
 
 ROOT = Path(__file__).resolve().parent.parent
 BOOK = ROOT / "book"
@@ -48,6 +50,14 @@ REPO_BLOB = "https://github.com/GMyhf/dsa-modernization/blob/main/"
 # 不复制第二份。发布到 GitHub Pages 时页面被摆到发布目录的根上，改用 `assets/`
 # （见 .github/workflows/pages.yml 与 D-011）。
 ASSETS_HREF = "../assets/"
+
+# 学生用 PDF：首页给一个下载卡片。页数来自 tools/build_book_pdf.py 落下的 sidecar
+# （PDF 自身的页树是压缩的，挖不出来），体积直接量文件。PDF 不在时卡片自动消失，
+# 构建照常通过——网页版不该因为没排版 PDF 就构建不出来。
+PDF_NAME = "现代C++数据结构教程.pdf"
+PDF_FILE = BOOK / "pdf" / PDF_NAME
+PDF_INFO = BOOK / "pdf" / "build-info.json"
+PDF_HREF = "../pdf/" + PDF_NAME
 
 BOOK_TITLE = "现代 C++ 数据结构教程"
 DESCRIPTION = ("《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编："
@@ -610,6 +620,17 @@ figcaption{margin-top:9px;color:var(--muted);font-size:13.5px;text-align:center}
 .sqrt{border-top:1px solid currentColor}
 .sqrt::before{content:"√";border-top:0}
 .tex-raw{border-bottom:1px dotted var(--danger);font-style:normal}
+.download{display:flex;align-items:center;gap:14px;margin:4px 0 26px;padding:14px 16px;
+  background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:9px;text-decoration:none;color:var(--ink)}
+.download:hover{background:var(--accent-soft);border-color:var(--accent)}
+.dl-badge{flex:none;background:var(--accent-soft);color:var(--accent);border-radius:6px;
+  padding:6px 9px;font:700 12.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.06em}
+.dl-body{display:block;min-width:0}
+.dl-body b{display:block;font-size:15.5px}
+.dl-meta{display:block;color:var(--muted);font-size:13px;line-height:1.5;margin-top:2px}
+.dl-arrow{margin-left:auto;color:var(--accent);font-size:19px}
 .pagenav{display:flex;justify-content:space-between;gap:16px;margin:50px 0 0;
   border-top:1px solid var(--line);padding-top:18px;font-size:14.5px}
 .pagenav a{text-decoration:none;max-width:46%}
@@ -671,6 +692,30 @@ SCRIPT = """
   });
 })();
 """
+
+
+def download_card():
+    """首页的 PDF 下载卡片。PDF 不存在就返回空串——不印一个点了 404 的链接。"""
+    if not PDF_FILE.is_file():
+        return ""
+    megabytes = PDF_FILE.stat().st_size / 1024 / 1024
+    facts = [f"{megabytes:.1f} MB"]
+    if PDF_INFO.is_file():
+        try:
+            info = json.loads(PDF_INFO.read_text(encoding="utf-8"))
+            if info.get("pages"):
+                facts.insert(0, f"{info['pages']} 页")
+            if info.get("figures"):
+                facts.append(f"{info['figures']} 张插图")
+        except (ValueError, OSError):
+            pass                                  # sidecar 坏了就少显示两个数字，不挡构建
+    href = quote(PDF_HREF, safe="/:.-_~")
+    return (f'<a class="download" href="{html.escape(href, quote=True)}" download>'
+            f'<span class="dl-badge">PDF</span>'
+            f'<span class="dl-body"><b>下载完整教程</b>'
+            f'<span class="dl-meta">B5 开本，带书签目录 · {" · ".join(facts)} · '
+            f'含 12 章正文、习题与参考答案、原书插图与勘误</span></span>'
+            f'<span class="dl-arrow">↓</span></a>')
 
 
 def sidebar(pages, current):
@@ -740,6 +785,7 @@ def build_page(page, pages, position, body, headings, subtitle):
 <div class="layout">
 <nav class="book">{sidebar(pages, page)}</nav>
 <main{' class="gallery-page"' if page["out"] == "figures.html" else ""}>
+{download_card() if page["out"] == "index.html" else ""}
 {body}
 {page_nav(pages, position)}
 </main>
@@ -875,7 +921,7 @@ def build(check_only=False, out_dir=None):
 
 
 def main():
-    global ASSETS_HREF
+    global ASSETS_HREF, PDF_HREF
     parser = argparse.ArgumentParser(description="把 book/*.md 渲染成静态站点 book/site/")
     parser.add_argument("--check", action="store_true",
                         help="只校验 book/site/ 是否与书稿一致，不写文件")
@@ -884,8 +930,12 @@ def main():
     parser.add_argument("--assets-href", metavar="前缀", default=ASSETS_HREF,
                         help=f"插图在页面里的前缀，默认 {ASSETS_HREF}；"
                              "页面被摆到发布目录根上时用 assets/")
+    parser.add_argument("--pdf-href", metavar="路径", default=PDF_HREF,
+                        help=f"首页下载卡片指向的 PDF，默认 {PDF_HREF}；"
+                             "发布时 PDF 摆在站点根上，用它的文件名即可")
     args = parser.parse_args()
     ASSETS_HREF = args.assets_href
+    PDF_HREF = args.pdf_href
     return build(check_only=args.check, out_dir=Path(args.out).resolve() if args.out else SITE)
 
 

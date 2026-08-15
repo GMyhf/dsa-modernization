@@ -106,6 +106,17 @@ figcaption{margin-top:9px;color:var(--muted);font-size:13.5px;text-align:center}
 .sqrt{border-top:1px solid currentColor}
 .sqrt::before{content:"√";border-top:0}
 .tex-raw{border-bottom:1px dotted var(--danger);font-style:normal}
+.download{display:flex;align-items:center;gap:14px;margin:4px 0 26px;padding:14px 16px;
+  background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:9px;text-decoration:none;color:var(--ink)}
+.download:hover{background:var(--accent-soft);border-color:var(--accent)}
+.dl-badge{flex:none;background:var(--accent-soft);color:var(--accent);border-radius:6px;
+  padding:6px 9px;font:700 12.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.06em}
+.dl-body{display:block;min-width:0}
+.dl-body b{display:block;font-size:15.5px}
+.dl-meta{display:block;color:var(--muted);font-size:13px;line-height:1.5;margin-top:2px}
+.dl-arrow{margin-left:auto;color:var(--accent);font-size:19px}
 .pagenav{display:flex;justify-content:space-between;gap:16px;margin:50px 0 0;
   border-top:1px solid var(--line);padding-top:18px;font-size:14.5px}
 .pagenav a{text-decoration:none;max-width:46%}
@@ -142,6 +153,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <div class="layout">
 <nav class="book"><b>导读</b><a href="index.html" class="here">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a></nav>
 <main>
+<a class="download" href="../pdf/%E7%8E%B0%E4%BB%A3C%2B%2B%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E6%95%99%E7%A8%8B.pdf" download><span class="dl-badge">PDF</span><span class="dl-body"><b>下载完整教程</b><span class="dl-meta">B5 开本，带书签目录 · 364 页 · 7.6 MB · 291 张插图 · 含 12 章正文、习题与参考答案、原书插图与勘误</span></span><span class="dl-arrow">↓</span></a>
 <h2 id="如何使用本教程"><a class="anchor" href="#如何使用本教程">#</a>如何使用本教程</h2>
 <p>每章正文位于本目录的独立 Markdown 文件。这样做有两个好处：阅读器能快速跳转，且每一段 C++ 都能与 <code>code/</code> 下通过测试的源码逐字同步。代码块中的 <code>file=</code> 标注就是其来源。</p>
 <p>想在浏览器里读，用 <code>python3 tools/build_site.py</code> 生成的网页版：打开 <code>book/site/index.html</code> 即可，左侧是全书目录、右侧是本章小节，代码块可一键复制。网页由这些 Markdown 渲染而来， 不是另一份稿子。离线阅读还有 <code>book/pdf/现代C++数据结构教程.pdf</code>。</p>
