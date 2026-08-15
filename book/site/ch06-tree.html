@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第6章 树 · 现代 C++ 数据结构教程</title>
+<meta name="description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:title" content="第6章 树">
+<meta property="og:description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:type" content="article">
+<style>
+:root{color-scheme:light;
+  --ink:#1a2230;--muted:#68758a;--faint:#93a0b3;--line:#dde3ec;--bg:#f3f5f9;--panel:#fff;
+  --soft:#eef1f7;--accent:#2f5fd0;--accent-soft:#e5ecfb;--warn:#b06a1c;--danger:#c0392b;
+  --kw:#8b2fa0;--ty:#0f6f8c;--st:#177245;--cm:#7d8899;--pp:#a3572a}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;
+  --ink:#e3e8f0;--muted:#98a3b5;--faint:#6f7c90;--line:#2b3342;--bg:#12151b;--panel:#171b22;
+  --soft:#1e232c;--accent:#84a9f5;--accent-soft:#1c2740;--warn:#dcae72;--danger:#e08a80;
+  --kw:#d79ae8;--ty:#7cc7dd;--st:#8fd0a4;--cm:#7b8598;--pp:#e0a97b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.8 system-ui,-apple-system,"Segoe UI","Noto Sans CJK SC","PingFang SC",sans-serif}
+a{color:var(--accent)}
+.masthead{background:var(--panel);border-bottom:1px solid var(--line);padding:30px 26px 24px}
+.masthead .inner{max-width:1440px;margin:0 auto}
+.masthead .eyebrow{font-size:13px;color:var(--muted);letter-spacing:.06em;margin:0 0 6px}
+.masthead .eyebrow a{text-decoration:none}
+.masthead h1{margin:0;font-size:clamp(23px,3.4vw,34px);line-height:1.25;letter-spacing:-.01em}
+.masthead p.sub{margin:10px 0 0;color:var(--muted);font-size:15px;max-width:62ch}
+.masthead .meta{margin:12px 0 0;font-size:13.5px;color:var(--muted)}
+.layout{max-width:1440px;margin:0 auto;padding:0 26px 80px;display:grid;
+  grid-template-columns:228px minmax(0,1fr) 208px;gap:40px;align-items:start}
+nav.book,nav.page{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;
+  padding:22px 0;font-size:14px;line-height:1.55}
+nav b{display:block;color:var(--faint);font-size:11.5px;letter-spacing:.1em;
+  text-transform:uppercase;margin:16px 0 8px}
+nav b:first-child{margin-top:0}
+nav a{display:block;padding:5px 10px;border-left:2px solid transparent;
+  color:var(--ink);text-decoration:none;border-radius:0 5px 5px 0}
+nav a:hover{background:var(--soft);color:var(--accent)}
+nav.book a.here{background:var(--accent-soft);border-left-color:var(--accent);
+  color:var(--accent);font-weight:600}
+nav.page a{color:var(--muted);font-size:13.5px;padding:4px 10px}
+nav.page a.sub{padding-left:22px;font-size:13px;color:var(--faint)}
+nav.page a.active{border-left-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+main{min-width:0;padding-top:24px}
+h1,h2,h3,h4{scroll-margin-top:16px}
+h2{font-size:24px;margin:48px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+h3{font-size:18.5px;margin:30px 0 10px}
+h4{font-size:16px;margin:22px 0 8px;color:var(--muted)}
+.anchor{float:left;margin-left:-1.05em;padding-right:.3em;color:transparent;
+  text-decoration:none;font-weight:400}
+h2:hover .anchor,h3:hover .anchor,h4:hover .anchor{color:var(--faint)}
+p{margin:0 0 15px}
+code{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  background:var(--soft);padding:2px 6px;border-radius:4px;word-break:break-word}
+.codeblock{position:relative;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px;margin:0 0 18px;overflow:hidden}
+.codeblock .srcbar{border-bottom:1px solid var(--line);background:var(--soft);
+  padding:6px 12px;font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+.codeblock .srcbar a{color:var(--muted);text-decoration:none}
+.codeblock .srcbar a:hover{color:var(--accent);text-decoration:underline}
+.codeblock pre{margin:0;padding:14px 16px;overflow:auto}
+.codeblock code{background:none;padding:0;font-size:13px;line-height:1.65;white-space:pre}
+.codeblock[data-lang=console] pre,.codeblock[data-lang=bash] pre{background:var(--soft)}
+.codeblock[data-lang=text]::after{content:"原书印刷";position:absolute;top:8px;right:10px;
+  font-size:11px;color:var(--faint);letter-spacing:.05em}
+.copy{position:absolute;top:6px;right:8px;border:1px solid var(--line);background:var(--panel);
+  color:var(--muted);border-radius:6px;font-size:12px;padding:2px 8px;cursor:pointer;opacity:0}
+.codeblock:hover .copy{opacity:1}
+.copy:hover{color:var(--accent);border-color:var(--accent)}
+.codeblock .srcbar~.copy{top:34px}
+.k{color:var(--kw)}.t{color:var(--ty)}.s{color:var(--st)}.c{color:var(--cm);font-style:italic}
+.n{color:var(--warn)}.p{color:var(--pp)}
+blockquote{margin:0 0 18px;padding:12px 18px;border-left:3px solid var(--accent);
+  background:var(--soft);border-radius:0 7px 7px 0}
+blockquote p:last-child{margin-bottom:0}
+.table-wrap{overflow-x:auto;margin:0 0 18px}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--panel)}
+th,td{border:1px solid var(--line);padding:8px 11px;vertical-align:top}
+th{background:var(--soft);font-weight:650}
+ul,ol{margin:0 0 15px;padding-left:26px}
+li{margin:6px 0}
+hr{border:0;border-top:1px solid var(--line);margin:34px 0}
+figure{margin:0 0 22px;padding:12px;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px}
+figure img{max-width:100%;display:block;margin:0 auto;border-radius:4px;background:#fff}
+figcaption{margin-top:9px;color:var(--muted);font-size:13.5px;text-align:center}
+.gallery-page{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:18px;align-items:start}
+.gallery-page>figure{margin:0}
+.gallery-page>h2,.gallery-page>h3,.gallery-page>p,.gallery-page>blockquote,
+.gallery-page>hr,.gallery-page>.pagenav{grid-column:1/-1}
+.math{font-family:"Latin Modern Math","Cambria Math",Georgia,serif;font-style:italic}
+.math .upr,.math .mono,.math .bold{font-style:normal}
+.math .mono{font-family:ui-monospace,Menlo,monospace}
+.math .bold{font-weight:700}
+.math sup,.math sub{font-size:.72em}
+.math .rel{margin:0 .28em;font-style:normal}
+.math .bin{margin:0 .16em;font-style:normal}
+.math-display{display:block;text-align:center;margin:18px 0;font-size:17px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+  font-size:.85em;line-height:1.15}
+.frac .num{border-bottom:1px solid currentColor;padding:0 .25em}
+.frac .den{padding:0 .25em}
+.sqrt{border-top:1px solid currentColor}
+.sqrt::before{content:"√";border-top:0}
+.tex-raw{border-bottom:1px dotted var(--danger);font-style:normal}
+.pagenav{display:flex;justify-content:space-between;gap:16px;margin:50px 0 0;
+  border-top:1px solid var(--line);padding-top:18px;font-size:14.5px}
+.pagenav a{text-decoration:none;max-width:46%}
+.pagenav .dir{display:block;color:var(--faint);font-size:12px}
+footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
+  font-size:13.5px;border-top:1px solid var(--line)}
+@media(max-width:1180px){
+  .layout{grid-template-columns:212px minmax(0,1fr);gap:32px}
+  nav.page{display:none}
+}
+@media(max-width:820px){
+  .layout{grid-template-columns:1fr;gap:0;padding:0 18px 60px}
+  nav.book{position:static;max-height:none;border-bottom:1px solid var(--line);
+    margin-bottom:14px;padding:14px 0}
+  .masthead{padding:22px 18px 18px}
+}
+@media print{
+  nav,.pagenav,.copy{display:none}
+  .layout{display:block;max-width:none}
+  body{background:#fff}
+  a{color:inherit;text-decoration:none}
+  .codeblock,figure,table{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header class="masthead"><div class="inner">
+<p class="eyebrow"><a href="index.html">现代 C++ 数据结构教程</a></p>  <h1>第6章 树</h1>
+
+  <p class="meta"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/book/ch06-tree.md">Markdown 源文件</a>
+    · <a href="https://github.com/GMyhf/dsa-modernization">GitHub 仓库</a>
+    · <a href="errata.html">原书勘误</a></p>
+</div></header>
+<div class="layout">
+<nav class="book"><b>导读</b><a href="index.html">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html" class="here">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a></nav>
+<main>
+<p>一般树允许一个结点有任意多个孩子。本章用「左孩子、右兄弟」表示它：<code>child</code> 指向第一个孩子，<code>sibling</code> 指向下一个兄弟。并查集则回答另一类问题：若干元素分属哪些互不相交的集合。</p>
+<p>源码：<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp" class="ext">一般树和并查集</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/demo.cpp" class="ext">可运行示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/test.cpp" class="ext">测试</a>。</p>
+<h2 id="61-树的定义和基本术语"><a class="anchor" href="#61-树的定义和基本术语">#</a>6.1 树的定义和基本术语</h2>
+<p>树形结构用分支关系定义层次：一个结点至多一个前驱，但可以有任意多个后继。家谱、机关编制、文件系统目录、编译器的句法树，都是树。和第 5 章的二叉树不同，一般树的结点不限制孩子个数。</p>
+<h3 id="611-树和森林"><a class="anchor" href="#611-树和森林">#</a>6.1.1 树和森林</h3>
+<p>树是 <span class="math">n</span>（<span class="math">n<span class="rel">≥</span><span class="upr">1</span></span>）个结点的有穷集合 <span class="math">T</span>，满足：有且仅有一个称为根的结点；其余结点被分成 <span class="math">m</span>（<span class="math">m<span class="rel">≥</span><span class="upr">0</span></span>）个互不相交的集合，每个集合又是一棵树，叫做根的子树。这个定义是递归的。</p>
+<p>也可以用二元关系来写。结点集 <span class="math">K</span> 上有一个关系 <span class="math">r</span>：恰好一个结点没有前驱，它是根；其余每个结点恰好一个前驱；从根到任意结点都存在一条由关系元组串起来的路径。</p>
+<p>父、子、兄弟、根、叶、度、层、路径这些词，含义与二叉树相同。结点的度是孩子个数，树的度是各结点度的最大值。根在第 0 层，非根结点的层数是父结点层数加 1。</p>
+<p>自然界里孩子的左右次序往往无所谓，这种树叫无序树。计算机存储是有序的，所以实现时通常把孩子从左到右编上号，当作有序树。注意：度为 2 的有序树还不是二叉树——删掉第一个孩子后，第二个会顶上来占第一的位置；二叉树必须能表示「左空、右不空」这种左右不对称。</p>
+<p>森林是零棵或多棵互不相交的树的集合（通常有序）。一棵树里，某个结点的全部子树组成一个森林；给这个森林加上一个公共根，就又变成一棵树。</p>
+<p>树有多种画法。树形表示法是根在上的倒挂树；凹入表示法用长短线表示层次，像书的目录；文氏图用嵌套圆；嵌套括号把根写在左边、子树写在括号里，例如 <code>A(B(D(I,J),E), C(F,G(K,L),H))</code>。表示法多样，说明树在建模里用得广。</p>
+<p>例如 A 的孩子是 B、C、D，B 的孩子是 E、F。用左孩子 / 右兄弟画出来：</p>
+<div class="codeblock" data-lang="text"><pre><code>A
+└─ child → B ── sibling → C ── sibling → D
+            └─ child → E ── sibling → F</code></pre></div>
+<p>任意度的树只需两个指针域。代价是不能 <span class="math">O(<span class="upr">1</span>)</span> 取得「第 <span class="math">k</span> 个孩子」，必须沿兄弟链走过去。图 6.7 就是这张图。</p>
+<h3 id="612-森林与二叉树的等价转换"><a class="anchor" href="#612-森林与二叉树的等价转换">#</a>6.1.2 森林与二叉树的等价转换</h3>
+<p>树和森林都可以一对一地变成二叉树，相关操作也就都能转到二叉树上做。形象的做法是「连线、切线、旋转」三步：</p>
+<ol>
+<li><strong>连线</strong>：把兄弟结点用线连起来。</li>
+<li><strong>切线</strong>：只保留父结点到第一个孩子的连线，砍掉到其余孩子的连线。</li>
+<li><strong>旋转</strong>：以根为轴顺时针转一下，画面才像通常的二叉树。</li>
+</ol>
+<p>转换后，一个结点的左孩子是它在原树（或森林）里的第一个孩子，右孩子是原来的下一个兄弟。左枝上是父子关系，右枝上是兄弟关系。单棵树的根没有兄弟，所以转成二叉树后根的右孩子一定为空。</p>
+<p>形式地说：森林 <span class="math">F<span class="rel">=</span>{T<sub><span class="upr">1</span></sub>,T<sub><span class="upr">2</span></sub>,…,T<sub>n</sub>}</span> 转成二叉树 <span class="math">B(F)</span>——<span class="math">F</span> 空则 <span class="math">B(F)</span> 空；否则 <span class="math">B(F)</span> 的根是 <span class="math">T<sub><span class="upr">1</span></sub></span> 的根，<span class="math">B(F)</span> 的左子树是 <span class="math">T<sub><span class="upr">1</span></sub></span> 的子树森林转成的二叉树，<span class="math">B(F)</span> 的右子树是 <span class="math">{T<sub><span class="upr">2</span></sub>,…,T<sub>n</sub>}</span> 转成的二叉树。</p>
+<p>反过来是三步的逆：逆时针旋转；若 <span class="math">x</span> 是 <span class="math">y</span> 的左孩子，就把 <span class="math">x</span> 以及 <span class="math">x</span> 右侧整条右链上的结点都补连到 <span class="math">y</span>；再删掉所有到右孩子的边。二叉树 <span class="math">B</span> 对应的森林 <span class="math">F(B)</span>：空树对应空森林；否则 <span class="math">F(B)</span> 是一棵以 <span class="math">B</span> 的根为根、以 <span class="math">F(B<sub>L</sub>)</span> 为子树森林的树，再加上 <span class="math">F(B<sub>R</sub>)</span>。这两种转换互逆。</p>
+<h3 id="613-树的抽象数据类型"><a class="anchor" href="#613-树的抽象数据类型">#</a>6.1.3 树的抽象数据类型</h3>
+<p>和二叉树一样，树的 ADT 分结点类和树类。对外运算是：用一个值建根、在某结点下插入第一个孩子、在某结点旁插入下一个兄弟、问父结点、删掉一棵子树、以及先根 / 后根 / 层次三种周游。原书【代码6.1】【代码6.2】只给出声明。本书把这些运算直接写在 <code>GeneralTree</code> 上，不再另设空基类。</p>
+<h3 id="614-树的周游"><a class="anchor" href="#614-树的周游">#</a>6.1.4 树的周游</h3>
+<p>先根：先访问结点，再依次周游各孩子子树。后根：先周游各孩子子树，再访问结点。层次：按离根的距离一层一层走，需要队列。对本节的例子：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">周游</th>
+<th style="text-align:left">顺序</th>
+<th style="text-align:left">本例</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">先根</td>
+<td style="text-align:left">结点，再孩子子树</td>
+<td style="text-align:left">A B E F C D</td>
+</tr>
+<tr>
+<td style="text-align:left">后根</td>
+<td style="text-align:left">孩子子树，再结点</td>
+<td style="text-align:left">E F B C D A</td>
+</tr>
+<tr>
+<td style="text-align:left">层次</td>
+<td style="text-align:left">按离根的距离</td>
+<td style="text-align:left">A B C D E F</td>
+</tr>
+</tbody></table></div>
+<p>递归周游和递归销毁在极深的退化树上会耗尽调用栈，和第 5 章是同一类风险。</p>
+<h2 id="62-树的链式存储结构"><a class="anchor" href="#62-树的链式存储结构">#</a>6.2 树的链式存储结构</h2>
+<p>一般树的存储比二叉树麻烦，因为度不固定。常见有四种想法，本章主实现是第四种。</p>
+<h3 id="621-子结点表表示方法"><a class="anchor" href="#621-子结点表表示方法">#</a>6.2.1 「子结点表」表示方法</h3>
+<p>每个结点保存一块孩子指针数组（或一张表）。取第 <span class="math">k</span> 个孩子是 <span class="math">O(<span class="upr">1</span>)</span>，按编号随机访问方便。度不固定时数组要扩容，在孩子序列中间插入也要搬指针。空间上，度为 <span class="math">d</span> 的结点就要留 <span class="math">d</span> 个指针槽，稀疏时浪费。本章不把它当主实现。</p>
+<h3 id="622-静态左子右兄表示法"><a class="anchor" href="#622-静态左子右兄表示法">#</a>6.2.2 静态「左子/右兄」表示法</h3>
+<p>结点数事先已知时，不必每个结点 <code>new</code> 一次，用数组下标代替指针即可：<code>child</code>、<code>sibling</code> 存的是另一个下标，而不是地址。语义与动态版相同，只是存储从堆变成一块连续数组。适合并查集那种「一开始就知道有 <span class="math">n</span> 个元素」的场合。</p>
+<h3 id="623-动态表示法"><a class="anchor" href="#623-动态表示法">#</a>6.2.3 动态表示法</h3>
+<p>每个结点单独分配，用指针相连。树的大小事先不知道、会频繁长出新结点时，比静态数组合适。后面的 <code>GeneralTree</code> 就是动态分配。</p>
+<h3 id="624-动态左子右兄表示"><a class="anchor" href="#624-动态左子右兄表示">#</a>6.2.4 动态「左子/右兄」表示</h3>
+<p>这是本章的主实现。任意度的树只需两个指针域：<code>child</code> 指向第一个孩子，<code>sibling</code> 指向下一个兄弟。再加一个 <code>parent</code> 便于向上走。代价是取第 <span class="math">k</span> 个孩子必须沿兄弟链走 <span class="math">k</span> 步。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/demo.cpp">code/ch06/general_tree/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
+
+<span class="p">#include &lt;iostream&gt;</span>
+
+<span class="t">int</span> main() {
+    dsa::GeneralTree&lt;<span class="t">char</span>&gt; tree;
+    tree.create_root(<span class="s">&#x27;A&#x27;</span>);
+    <span class="k">auto</span>* b = tree.insert_first(tree.root(), <span class="s">&#x27;B&#x27;</span>);
+    <span class="k">auto</span>* c = tree.insert_next(b, <span class="s">&#x27;C&#x27;</span>);
+    tree.insert_next(c, <span class="s">&#x27;D&#x27;</span>);
+    tree.insert_first(b, <span class="s">&#x27;E&#x27;</span>);
+    tree.insert_next(tree.root()-&gt;child-&gt;child, <span class="s">&#x27;F&#x27;</span>);
+
+    std::cout &lt;&lt; <span class="s">&quot;先根: &quot;</span>;
+    tree.preorder([](<span class="t">char</span> value) { std::cout &lt;&lt; value; });
+    std::cout &lt;&lt; <span class="s">&quot;\n后根: &quot;</span>;
+    tree.postorder([](<span class="t">char</span> value) { std::cout &lt;&lt; value; });
+    std::cout &lt;&lt; <span class="s">&quot;\n层次: &quot;</span>;
+    tree.breadth_first([](<span class="t">char</span> value) { std::cout &lt;&lt; value; });
+    std::cout &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+
+    dsa::DisjointSet sets(<span class="n">5</span>);
+    sets.unite(<span class="n">0</span>, <span class="n">1</span>);
+    sets.unite(<span class="n">1</span>, <span class="n">2</span>);
+    sets.unite(<span class="n">3</span>, <span class="n">4</span>);
+    std::cout &lt;&lt; <span class="s">&quot;0 与 2 同集合: &quot;</span> &lt;&lt; (sets.same(<span class="n">0</span>, <span class="n">2</span>) ? <span class="s">&quot;是&quot;</span> : <span class="s">&quot;否&quot;</span>) &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+    std::cout &lt;&lt; <span class="s">&quot;0 与 3 同集合: &quot;</span> &lt;&lt; (sets.same(<span class="n">0</span>, <span class="n">3</span>) ? <span class="s">&quot;是&quot;</span> : <span class="s">&quot;否&quot;</span>) &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+}</code></pre></div>
+<p>在仓库根目录运行：</p>
+<div class="codeblock" data-lang="bash"><pre><code>c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch06/general_tree \
+    code/ch06/general_tree/demo.cpp -o /tmp/tree-demo
+/tmp/tree-demo</code></pre></div>
+<p>输出是：</p>
+<div class="codeblock" data-lang="console"><pre><code>先根: ABEFCD
+后根: EFBCDA
+层次: ABCDEF
+0 与 2 同集合: 是
+0 与 3 同集合: 否</code></pre></div>
+<p><code>insert_first(parent, value)</code> 把新结点插到孩子链的最前面；<code>insert_next(node, value)</code> 插到该结点的下一个兄弟。先插入 B，再 <code>insert_next(B, C)</code>、<code>insert_next(C, D)</code>，孩子从左到右就是 B、C、D。</p>
+<p><code>create_root</code> 清空旧树并新建根。<code>insert_first</code> 先让新结点的 <code>sibling</code> 指向原来的第一个孩子，再把它接到 <code>parent-&gt;child</code> 上——所以后插入的孩子会出现在兄弟链前端。<code>delete_subtree</code> 沿着父的孩子链或森林的根兄弟链找到指向它的指针，改写成下一个兄弟，再递归销毁。</p>
+<p>孩子-兄弟树：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp">code/ch06/general_tree/modern.hpp#general-tree</a></div><pre><code><span class="k">template</span> &lt;<span class="k">typename</span> T&gt;
+<span class="k">class</span> GeneralTree {
+<span class="k">public</span>:
+    <span class="k">struct</span> Node {
+        T value;
+        Node* child{<span class="k">nullptr</span>};
+        Node* sibling{<span class="k">nullptr</span>};
+        Node* parent{<span class="k">nullptr</span>};
+
+        <span class="k">explicit</span> Node(<span class="k">const</span> T&amp; value) : value(value) {}
+    };
+
+    GeneralTree() = <span class="k">default</span>;
+
+    GeneralTree(<span class="k">const</span> GeneralTree&amp; other) : root_(clone(other.root_, <span class="k">nullptr</span>)) {}
+
+    GeneralTree&amp; <span class="k">operator</span>=(<span class="k">const</span> GeneralTree&amp; other) {
+        <span class="k">if</span> (<span class="k">this</span> != &amp;other) {
+            GeneralTree copy(other);
+            swap(copy);
+        }
+        <span class="k">return</span> *<span class="k">this</span>;
+    }
+
+    GeneralTree(GeneralTree&amp;&amp; other) <span class="k">noexcept</span> : root_(other.release()) {}
+
+    GeneralTree&amp; <span class="k">operator</span>=(GeneralTree&amp;&amp; other) <span class="k">noexcept</span> {
+        <span class="k">if</span> (<span class="k">this</span> != &amp;other) {
+            clear();
+            root_ = other.release();
+        }
+        <span class="k">return</span> *<span class="k">this</span>;
+    }
+
+    ~GeneralTree() { clear(); }
+
+    <span class="t">void</span> swap(GeneralTree&amp; other) <span class="k">noexcept</span> {
+        <span class="k">using</span> std::swap;
+        swap(root_, other.root_);
+    }
+
+    [[nodiscard]] Node* root() <span class="k">noexcept</span> { <span class="k">return</span> root_; }
+    [[nodiscard]] <span class="k">const</span> Node* root() <span class="k">const</span> <span class="k">noexcept</span> { <span class="k">return</span> root_; }
+
+    <span class="t">void</span> create_root(<span class="k">const</span> T&amp; value) {
+        clear();
+        root_ = <span class="k">new</span> Node(value);
+    }
+
+    Node* insert_first(Node* parent, <span class="k">const</span> T&amp; value) {
+        <span class="k">if</span> (parent == <span class="k">nullptr</span>) {
+            <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;parent must not be null&quot;</span>);
+        }
+        Node* node = <span class="k">new</span> Node(value);
+        node-&gt;sibling = parent-&gt;child;
+        node-&gt;parent = parent;
+        parent-&gt;child = node;
+        <span class="k">return</span> node;
+    }
+
+    Node* insert_next(Node* node, <span class="k">const</span> T&amp; value) {
+        <span class="k">if</span> (node == <span class="k">nullptr</span>) {
+            <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;node must not be null&quot;</span>);
+        }
+        Node* next = <span class="k">new</span> Node(value);
+        next-&gt;sibling = node-&gt;sibling;
+        next-&gt;parent = node-&gt;parent;
+        node-&gt;sibling = next;
+        <span class="k">return</span> next;
+    }
+
+    [[nodiscard]] Node* parent_of(Node* node) <span class="k">const</span> <span class="k">noexcept</span> {
+        <span class="k">return</span> node == <span class="k">nullptr</span> ? <span class="k">nullptr</span> : node-&gt;parent;
+    }
+
+    <span class="t">void</span> delete_subtree(Node* node) {
+        <span class="k">if</span> (node == <span class="k">nullptr</span>) {
+            <span class="k">return</span>;
+        }
+
+        Node** link = node-&gt;parent == <span class="k">nullptr</span> ? &amp;root_ : &amp;node-&gt;parent-&gt;child;
+        <span class="k">while</span> (*link != <span class="k">nullptr</span> &amp;&amp; *link != node) {
+            link = &amp;(*link)-&gt;sibling;
+        }
+        <span class="k">if</span> (*link != node) {
+            <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;node is not part of this tree&quot;</span>);
+        }
+
+        *link = node-&gt;sibling;
+        node-&gt;sibling = <span class="k">nullptr</span>;
+        destroy(node);
+    }
+
+    <span class="t">void</span> clear() <span class="k">noexcept</span> {
+        destroy(root_);
+        root_ = <span class="k">nullptr</span>;
+    }
+
+    <span class="k">template</span> &lt;<span class="k">class</span> Visitor&gt;
+    <span class="t">void</span> preorder(Visitor&amp;&amp; visitor) <span class="k">const</span> {
+        pre(root_, visitor);
+    }
+
+    <span class="k">template</span> &lt;<span class="k">class</span> Visitor&gt;
+    <span class="t">void</span> postorder(Visitor&amp;&amp; visitor) <span class="k">const</span> {
+        post(root_, visitor);
+    }
+
+    <span class="k">template</span> &lt;<span class="k">class</span> Visitor&gt;
+    <span class="t">void</span> breadth_first(Visitor&amp;&amp; visitor) <span class="k">const</span> {
+        std::vector&lt;Node*&gt; queue;
+        <span class="k">for</span> (Node* node = root_; node != <span class="k">nullptr</span>; node = node-&gt;sibling) {
+            queue.push_back(node);
+        }
+        <span class="k">for</span> (std::<span class="t">size_t</span> index = <span class="n">0</span>; index &lt; queue.size(); ++index) {
+            visitor(queue[index]-&gt;value);
+            <span class="k">for</span> (Node* child = queue[index]-&gt;child; child != <span class="k">nullptr</span>;
+                 child = child-&gt;sibling) {
+                queue.push_back(child);
+            }
+        }
+    }
+
+<span class="k">private</span>:
+    <span class="c">// Recursive destruction and traversals preserve the textbook presentation.</span>
+    <span class="c">// They have a Stack Overflow Risk for a pathologically deep tree.</span>
+    <span class="k">static</span> <span class="t">void</span> destroy(Node* node) <span class="k">noexcept</span> {
+        <span class="k">if</span> (node == <span class="k">nullptr</span>) {
+            <span class="k">return</span>;
+        }
+        destroy(node-&gt;child);
+        destroy(node-&gt;sibling);
+        <span class="k">delete</span> node;
+    }
+
+    <span class="k">static</span> Node* clone(<span class="k">const</span> Node* node, Node* parent) {
+        <span class="k">if</span> (node == <span class="k">nullptr</span>) {
+            <span class="k">return</span> <span class="k">nullptr</span>;
+        }
+        Node* copy = <span class="k">new</span> Node(node-&gt;value);
+        copy-&gt;parent = parent;
+        <span class="k">try</span> {
+            copy-&gt;child = clone(node-&gt;child, copy);
+            copy-&gt;sibling = clone(node-&gt;sibling, parent);
+        } <span class="k">catch</span> (...) {
+            destroy(copy);
+            <span class="k">throw</span>;
+        }
+        <span class="k">return</span> copy;
+    }
+
+    <span class="k">template</span> &lt;<span class="k">class</span> Visitor&gt;
+    <span class="k">static</span> <span class="t">void</span> pre(Node* node, Visitor&amp; visitor) {
+        <span class="k">for</span> (; node != <span class="k">nullptr</span>; node = node-&gt;sibling) {
+            visitor(node-&gt;value);
+            pre(node-&gt;child, visitor);
+        }
+    }
+
+    <span class="k">template</span> &lt;<span class="k">class</span> Visitor&gt;
+    <span class="k">static</span> <span class="t">void</span> post(Node* node, Visitor&amp; visitor) {
+        <span class="k">for</span> (; node != <span class="k">nullptr</span>; node = node-&gt;sibling) {
+            post(node-&gt;child, visitor);
+            visitor(node-&gt;value);
+        }
+    }
+
+    Node* release() <span class="k">noexcept</span> {
+        Node* result = root_;
+        root_ = <span class="k">nullptr</span>;
+        <span class="k">return</span> result;
+    }
+
+    Node* root_{<span class="k">nullptr</span>};
+};</code></pre></div>
+<h3 id="625-父指针表示法和并查集"><a class="anchor" href="#625-父指针表示法和并查集">#</a>6.2.5 父指针表示法和并查集</h3>
+<p><code>find</code> 在返回根之前把沿途结点的父指针改成根，这就是路径压缩。<code>unite</code> 比较两棵树的秩，把较矮的挂到较高的下面；两棵一样高时，新根的秩加 1。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp">code/ch06/general_tree/modern.hpp#disjoint-set</a></div><pre><code><span class="k">class</span> DisjointSet {
+<span class="k">public</span>:
+    <span class="k">explicit</span> DisjointSet(std::<span class="t">size_t</span> count) : parent_(count), rank_(count, <span class="n">0</span>) {
+        <span class="k">for</span> (std::<span class="t">size_t</span> index = <span class="n">0</span>; index &lt; count; ++index) {
+            parent_[index] = index;
+        }
+    }
+
+    std::<span class="t">size_t</span> find(std::<span class="t">size_t</span> index) {
+        <span class="k">if</span> (index &gt;= parent_.size()) {
+            <span class="k">throw</span> std::out_of_range(<span class="s">&quot;disjoint-set index&quot;</span>);
+        }
+        <span class="k">if</span> (parent_[index] != index) {
+            parent_[index] = find(parent_[index]);
+        }
+        <span class="k">return</span> parent_[index];
+    }
+
+    <span class="t">bool</span> unite(std::<span class="t">size_t</span> left, std::<span class="t">size_t</span> right) {
+        left = find(left);
+        right = find(right);
+        <span class="k">if</span> (left == right) {
+            <span class="k">return</span> <span class="k">false</span>;
+        }
+        <span class="k">if</span> (rank_[left] &lt; rank_[right]) {
+            std::swap(left, right);
+        }
+        parent_[right] = left;
+        <span class="k">if</span> (rank_[left] == rank_[right]) {
+            ++rank_[left];
+        }
+        <span class="k">return</span> <span class="k">true</span>;
+    }
+
+    [[nodiscard]] <span class="t">bool</span> same(std::<span class="t">size_t</span> left, std::<span class="t">size_t</span> right) {
+        <span class="k">return</span> find(left) == find(right);
+    }
+
+<span class="k">private</span>:
+    std::vector&lt;std::<span class="t">size_t</span>&gt; parent_;
+    std::vector&lt;std::<span class="t">size_t</span>&gt; rank_;
+};</code></pre></div>
+<h2 id="63-树的顺序存储结构"><a class="anchor" href="#63-树的顺序存储结构">#</a>6.3 树的顺序存储结构</h2>
+<p>链式存储每个结点单独分配，指针占空间，也不利于整块读写。如果把结点按某一种周游次序排进数组，再用很少的附加信息记下「谁是下一个兄弟」或「有几个孩子」，就能在连续空间里还原整棵树。原书给了四种，思路都对；本章不另写一套未验证的实现，只把还原办法说清楚。</p>
+<h3 id="631-带右链的先根次序表示"><a class="anchor" href="#631-带右链的先根次序表示">#</a>6.3.1 带右链的先根次序表示</h3>
+<p>按先根次序把结点排进数组。每个结点另存一个「右链」下标，指向它的下一个兄弟；没有下一个兄弟就存空。因为先根次序里，一个结点的孩子们正好排在它后面、直到右链所指的位置之前，所以顺着数组往下走、再靠右链跳过整棵子树，就能还原所有父子和兄弟关系。</p>
+<h3 id="632-带双标记的先根次序表示"><a class="anchor" href="#632-带双标记的先根次序表示">#</a>6.3.2 带双标记的先根次序表示</h3>
+<p>右链要用一个整型下标。若改成两个布尔标记——「有没有孩子」「有没有下一个兄弟」——每位只占 1 bit，更省。扫描时用栈：遇到「有孩子」就下降；遇到「没有下一个兄弟」就上升到最近那个还没处理完兄弟的祖先。信息量和带右链相同，只是用栈换空间。</p>
+<h3 id="633-带度数的后根次序表示"><a class="anchor" href="#633-带度数的后根次序表示">#</a>6.3.3 带度数的后根次序表示</h3>
+<p>按后根次序存放，每个结点记下自己的度数（孩子个数）。后根的特点是：一个结点出现时，它的全部孩子已经作为连续的一段排在它前面。扫描时用栈，每读到一个度数为 <span class="math">d</span> 的结点，就从栈顶弹出 <span class="math">d</span> 棵子树做它的孩子，再把这棵新树压回去。扫完数组，栈里剩下的就是整棵树（或森林）。</p>
+<h3 id="634-带双标记的层次次序表示"><a class="anchor" href="#634-带双标记的层次次序表示">#</a>6.3.4 带双标记的层次次序表示</h3>
+<p>按层次周游的次序存放，标记含义与 6.3.2 相同：有没有孩子、有没有下一个兄弟。因为同一层的兄弟本来就排在一起，一层扫完再扫下一层，用队列就能还原。适合需要按层处理的外部存储。</p>
+<h2 id="64-k-叉树"><a class="anchor" href="#64-k-叉树">#</a>6.4 K 叉树</h2>
+<p>有些应用里每个结点的孩子数有固定上限 <span class="math">K</span>，例如三子棋的博弈树、某些 B 树的内存模拟。这时不必走「任意度 + 兄弟链」，可以规定每个结点至多 <span class="math">K</span> 个孩子，叫做 <span class="math">K</span> 叉树。</p>
+<p>满 <span class="math">K</span> 叉树、完全 <span class="math">K</span> 叉树的定义与二叉树平行：满 <span class="math">K</span> 叉树的每个结点要么是叶，要么恰好 <span class="math">K</span> 个孩子；完全 <span class="math">K</span> 叉树只有最下两层的度可以小于 <span class="math">K</span>，且最下层靠左对齐。按层从 0 编号时，结点 <span class="math">i</span> 的孩子们是 <span class="math">Ki<span class="bin">+</span><span class="upr">1</span>,…,Ki<span class="bin">+</span>K</span>，父结点是 <span class="math">⌊(i<span class="bin">−</span><span class="upr">1</span>)/K⌋</span>。<span class="math">K<span class="rel">=</span><span class="upr">2</span></span> 就回到二叉树。</p>
+<p>本章主实现仍是任意度的左子 / 右兄，不单独做一份 <span class="math">K</span> 叉数组。需要固定 <span class="math">K</span>、又想顺序存放时，用上面的编号公式即可。</p>
+<h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
+<p>一般树允许任意多个孩子。森林是若干互不相交的树。树和森林与二叉树可以按「长子—左、兄弟—右」一一转换。链式存储里，左子/右兄用两个指针表示任意度；顺序存储则按某种周游次序排进数组，再靠右链、双标记或度数还原树形。并查集用父指针表示集合，路径压缩和按秩合并让大量操作接近常数。<span class="math">K</span> 叉树是度有上限的特例。</p>
+<h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
+<h3 id="补充证明与算法题参考课程第-6-章"><a class="anchor" href="#补充证明与算法题参考课程第-6-章">#</a>补充证明与算法题（参考课程第 6 章）</h3>
+<ol>
+<li>高度为 <code>h</code> 的满 <code>k</code> 叉树按层编号，推导第 <code>l</code> 层结点数、结点 <code>i</code> 的第 <code>m</code> 个孩子编号及右兄弟条件。</li>
+<li>用并查集判断变量方程组 <code>a==b</code>、<code>a!=b</code> 是否有解，并分别分析无优化、按秩合并和路径压缩的复杂度。</li>
+<li>给定一棵树的左孩子/右兄弟表示，写出其森林的先根序列和带度数后根序列。</li>
+<li>画出三棵树组成的森林转换成的二叉树，再转换回去，验证互逆。</li>
+<li>对图 6.7 那棵树写出先根、后根、层次序列。</li>
+<li>度为 2 的有序树和二叉树差在哪里？举一个「左空右不空」的例子。</li>
+<li>用带度数的后根次序表示一棵小树，并说明扫描时栈如何弹出孩子。</li>
+<li>对元素 <span class="math"><span class="upr">0..6</span></span> 依次 <code>unite(0,1)</code>、<code>unite(1,2)</code>、<code>unite(3,4)</code>，画出父指针，再 <code>find(0)</code> 后画出路径压缩的结果。</li>
+<li>完全 3 叉树按层编号，写出结点 4 的父和孩子们。</li>
+</ol>
+<h2 id="上机题"><a class="anchor" href="#上机题">#</a>上机题</h2>
+<ol>
+<li>实现森林与二叉树的互相转换，并用先根序列对拍。</li>
+<li>用并查集判断无向图是否连通，并统计连通分量个数。</li>
+<li>比较带路径压缩与不带路径压缩的 <code>find</code> 在退化链上的时间。</li>
+</ol>
+<div class="pagenav"><a href="ch05-binary-tree.html"><span class="dir">← 上一篇</span>第5章 二叉树</a><a href="ch07-graph.html" style="text-align:right"><span class="dir">下一篇 →</span>第7章 图</a></div>
+</main>
+<nav class="page"><b>本页</b><a href="#61-树的定义和基本术语">6.1 树的定义和基本术语</a><a href="#611-树和森林" class="sub">6.1.1 树和森林</a><a href="#612-森林与二叉树的等价转换" class="sub">6.1.2 森林与二叉树的等价转换</a><a href="#613-树的抽象数据类型" class="sub">6.1.3 树的抽象数据类型</a><a href="#614-树的周游" class="sub">6.1.4 树的周游</a><a href="#62-树的链式存储结构">6.2 树的链式存储结构</a><a href="#621-子结点表表示方法" class="sub">6.2.1 「子结点表」表示方法</a><a href="#622-静态左子右兄表示法" class="sub">6.2.2 静态「左子/右兄」表示法</a><a href="#623-动态表示法" class="sub">6.2.3 动态表示法</a><a href="#624-动态左子右兄表示" class="sub">6.2.4 动态「左子/右兄」表示</a><a href="#625-父指针表示法和并查集" class="sub">6.2.5 父指针表示法和并查集</a><a href="#63-树的顺序存储结构">6.3 树的顺序存储结构</a><a href="#631-带右链的先根次序表示" class="sub">6.3.1 带右链的先根次序表示</a><a href="#632-带双标记的先根次序表示" class="sub">6.3.2 带双标记的先根次序表示</a><a href="#633-带度数的后根次序表示" class="sub">6.3.3 带度数的后根次序表示</a><a href="#634-带双标记的层次次序表示" class="sub">6.3.4 带双标记的层次次序表示</a><a href="#64-k-叉树">6.4 K 叉树</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充证明与算法题参考课程第-6-章" class="sub">补充证明与算法题（参考课程第 6 章）</a><a href="#上机题">上机题</a></nav>
+</div>
+<footer>
+  本页由 <code>tools/build_site.py</code> 从 <code>book/ch06-tree.md</code> 生成
+  —— Markdown 是唯一事实源，请勿手改此文件。正文中的 C++ 代码块与 <code>code/</code> 下
+  通过测试的源码逐字一致（由 <code>tools/check_doc.py</code> 的 R3 保证）。
+</footer>
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('nav.page a'));
+  if(links.length){
+    var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a});
+    var seen=[];
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        var id=e.target.id;
+        if(e.isIntersecting){if(seen.indexOf(id)<0)seen.push(id)}
+        else{var i=seen.indexOf(id);if(i>=0)seen.splice(i,1)}
+      });
+      links.forEach(function(a){a.classList.remove('active')});
+      if(seen.length&&map[seen[0]])map[seen[0]].classList.add('active');
+    },{rootMargin:'0px 0px -75% 0px'});
+    [].slice.call(document.querySelectorAll('h2[id],h3[id]')).forEach(function(h){io.observe(h)});
+  }
+  [].slice.call(document.querySelectorAll('.codeblock')).forEach(function(block){
+    var button=document.createElement('button');
+    button.className='copy';button.type='button';button.textContent='复制';
+    button.addEventListener('click',function(){
+      var text=block.querySelector('code').textContent;
+      var done=function(){button.textContent='已复制';
+        setTimeout(function(){button.textContent='复制'},1200)};
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done,function(){button.textContent='复制失败'});
+      }else{
+        var area=document.createElement('textarea');area.value=text;document.body.appendChild(area);
+        area.select();try{document.execCommand('copy');done()}catch(e){button.textContent='复制失败'}
+        document.body.removeChild(area);
+      }
+    });
+    block.appendChild(button);
+  });
+})();
+</script>
+</body>
+</html>

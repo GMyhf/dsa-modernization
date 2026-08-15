@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第4章 字符串 · 现代 C++ 数据结构教程</title>
+<meta name="description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:title" content="第4章 字符串">
+<meta property="og:description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:type" content="article">
+<style>
+:root{color-scheme:light;
+  --ink:#1a2230;--muted:#68758a;--faint:#93a0b3;--line:#dde3ec;--bg:#f3f5f9;--panel:#fff;
+  --soft:#eef1f7;--accent:#2f5fd0;--accent-soft:#e5ecfb;--warn:#b06a1c;--danger:#c0392b;
+  --kw:#8b2fa0;--ty:#0f6f8c;--st:#177245;--cm:#7d8899;--pp:#a3572a}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;
+  --ink:#e3e8f0;--muted:#98a3b5;--faint:#6f7c90;--line:#2b3342;--bg:#12151b;--panel:#171b22;
+  --soft:#1e232c;--accent:#84a9f5;--accent-soft:#1c2740;--warn:#dcae72;--danger:#e08a80;
+  --kw:#d79ae8;--ty:#7cc7dd;--st:#8fd0a4;--cm:#7b8598;--pp:#e0a97b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.8 system-ui,-apple-system,"Segoe UI","Noto Sans CJK SC","PingFang SC",sans-serif}
+a{color:var(--accent)}
+.masthead{background:var(--panel);border-bottom:1px solid var(--line);padding:30px 26px 24px}
+.masthead .inner{max-width:1440px;margin:0 auto}
+.masthead .eyebrow{font-size:13px;color:var(--muted);letter-spacing:.06em;margin:0 0 6px}
+.masthead .eyebrow a{text-decoration:none}
+.masthead h1{margin:0;font-size:clamp(23px,3.4vw,34px);line-height:1.25;letter-spacing:-.01em}
+.masthead p.sub{margin:10px 0 0;color:var(--muted);font-size:15px;max-width:62ch}
+.masthead .meta{margin:12px 0 0;font-size:13.5px;color:var(--muted)}
+.layout{max-width:1440px;margin:0 auto;padding:0 26px 80px;display:grid;
+  grid-template-columns:228px minmax(0,1fr) 208px;gap:40px;align-items:start}
+nav.book,nav.page{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;
+  padding:22px 0;font-size:14px;line-height:1.55}
+nav b{display:block;color:var(--faint);font-size:11.5px;letter-spacing:.1em;
+  text-transform:uppercase;margin:16px 0 8px}
+nav b:first-child{margin-top:0}
+nav a{display:block;padding:5px 10px;border-left:2px solid transparent;
+  color:var(--ink);text-decoration:none;border-radius:0 5px 5px 0}
+nav a:hover{background:var(--soft);color:var(--accent)}
+nav.book a.here{background:var(--accent-soft);border-left-color:var(--accent);
+  color:var(--accent);font-weight:600}
+nav.page a{color:var(--muted);font-size:13.5px;padding:4px 10px}
+nav.page a.sub{padding-left:22px;font-size:13px;color:var(--faint)}
+nav.page a.active{border-left-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+main{min-width:0;padding-top:24px}
+h1,h2,h3,h4{scroll-margin-top:16px}
+h2{font-size:24px;margin:48px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+h3{font-size:18.5px;margin:30px 0 10px}
+h4{font-size:16px;margin:22px 0 8px;color:var(--muted)}
+.anchor{float:left;margin-left:-1.05em;padding-right:.3em;color:transparent;
+  text-decoration:none;font-weight:400}
+h2:hover .anchor,h3:hover .anchor,h4:hover .anchor{color:var(--faint)}
+p{margin:0 0 15px}
+code{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  background:var(--soft);padding:2px 6px;border-radius:4px;word-break:break-word}
+.codeblock{position:relative;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px;margin:0 0 18px;overflow:hidden}
+.codeblock .srcbar{border-bottom:1px solid var(--line);background:var(--soft);
+  padding:6px 12px;font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+.codeblock .srcbar a{color:var(--muted);text-decoration:none}
+.codeblock .srcbar a:hover{color:var(--accent);text-decoration:underline}
+.codeblock pre{margin:0;padding:14px 16px;overflow:auto}
+.codeblock code{background:none;padding:0;font-size:13px;line-height:1.65;white-space:pre}
+.codeblock[data-lang=console] pre,.codeblock[data-lang=bash] pre{background:var(--soft)}
+.codeblock[data-lang=text]::after{content:"原书印刷";position:absolute;top:8px;right:10px;
+  font-size:11px;color:var(--faint);letter-spacing:.05em}
+.copy{position:absolute;top:6px;right:8px;border:1px solid var(--line);background:var(--panel);
+  color:var(--muted);border-radius:6px;font-size:12px;padding:2px 8px;cursor:pointer;opacity:0}
+.codeblock:hover .copy{opacity:1}
+.copy:hover{color:var(--accent);border-color:var(--accent)}
+.codeblock .srcbar~.copy{top:34px}
+.k{color:var(--kw)}.t{color:var(--ty)}.s{color:var(--st)}.c{color:var(--cm);font-style:italic}
+.n{color:var(--warn)}.p{color:var(--pp)}
+blockquote{margin:0 0 18px;padding:12px 18px;border-left:3px solid var(--accent);
+  background:var(--soft);border-radius:0 7px 7px 0}
+blockquote p:last-child{margin-bottom:0}
+.table-wrap{overflow-x:auto;margin:0 0 18px}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--panel)}
+th,td{border:1px solid var(--line);padding:8px 11px;vertical-align:top}
+th{background:var(--soft);font-weight:650}
+ul,ol{margin:0 0 15px;padding-left:26px}
+li{margin:6px 0}
+hr{border:0;border-top:1px solid var(--line);margin:34px 0}
+figure{margin:0 0 22px;padding:12px;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px}
+figure img{max-width:100%;display:block;margin:0 auto;border-radius:4px;background:#fff}
+figcaption{margin-top:9px;color:var(--muted);font-size:13.5px;text-align:center}
+.gallery-page{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:18px;align-items:start}
+.gallery-page>figure{margin:0}
+.gallery-page>h2,.gallery-page>h3,.gallery-page>p,.gallery-page>blockquote,
+.gallery-page>hr,.gallery-page>.pagenav{grid-column:1/-1}
+.math{font-family:"Latin Modern Math","Cambria Math",Georgia,serif;font-style:italic}
+.math .upr,.math .mono,.math .bold{font-style:normal}
+.math .mono{font-family:ui-monospace,Menlo,monospace}
+.math .bold{font-weight:700}
+.math sup,.math sub{font-size:.72em}
+.math .rel{margin:0 .28em;font-style:normal}
+.math .bin{margin:0 .16em;font-style:normal}
+.math-display{display:block;text-align:center;margin:18px 0;font-size:17px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+  font-size:.85em;line-height:1.15}
+.frac .num{border-bottom:1px solid currentColor;padding:0 .25em}
+.frac .den{padding:0 .25em}
+.sqrt{border-top:1px solid currentColor}
+.sqrt::before{content:"√";border-top:0}
+.tex-raw{border-bottom:1px dotted var(--danger);font-style:normal}
+.pagenav{display:flex;justify-content:space-between;gap:16px;margin:50px 0 0;
+  border-top:1px solid var(--line);padding-top:18px;font-size:14.5px}
+.pagenav a{text-decoration:none;max-width:46%}
+.pagenav .dir{display:block;color:var(--faint);font-size:12px}
+footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
+  font-size:13.5px;border-top:1px solid var(--line)}
+@media(max-width:1180px){
+  .layout{grid-template-columns:212px minmax(0,1fr);gap:32px}
+  nav.page{display:none}
+}
+@media(max-width:820px){
+  .layout{grid-template-columns:1fr;gap:0;padding:0 18px 60px}
+  nav.book{position:static;max-height:none;border-bottom:1px solid var(--line);
+    margin-bottom:14px;padding:14px 0}
+  .masthead{padding:22px 18px 18px}
+}
+@media print{
+  nav,.pagenav,.copy{display:none}
+  .layout{display:block;max-width:none}
+  body{background:#fff}
+  a{color:inherit;text-decoration:none}
+  .codeblock,figure,table{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header class="masthead"><div class="inner">
+<p class="eyebrow"><a href="index.html">现代 C++ 数据结构教程</a></p>  <h1>第4章 字符串</h1>
+
+  <p class="meta"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/book/ch04-string.md">Markdown 源文件</a>
+    · <a href="https://github.com/GMyhf/dsa-modernization">GitHub 仓库</a>
+    · <a href="errata.html">原书勘误</a></p>
+</div></header>
+<div class="layout">
+<nav class="book"><b>导读</b><a href="index.html">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html" class="here">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a></nav>
+<main>
+<p>字符串是字符的有限序列。先区分「保存字符串」的类与「在文本中找模式」的算法：前者处理容量、 复制和下标边界，后者处理比较顺序。朴素匹配在失配后移动模式；KMP 预先计算 <code>next</code> 信息，避免 重复比较已经知道相等的前缀。</p>
+<p>源码：<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/modern.hpp" class="ext">字符串类</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/demo.cpp" class="ext">字符串示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/pattern_matching/modern.hpp" class="ext">模式匹配</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/pattern_matching/demo.cpp" class="ext">匹配示例</a>。</p>
+<h2 id="先跑一遍"><a class="anchor" href="#先跑一遍">#</a>先跑一遍</h2>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/demo.cpp">code/ch04/string_class/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
+
+<span class="p">#include &lt;iostream&gt;</span>
+
+<span class="t">int</span> main() {
+    dsa::String text = <span class="s">&quot;Hello&quot;</span>;
+    text.append(<span class="s">&#x27; &#x27;</span>).append(<span class="s">&#x27;C&#x27;</span>).append(<span class="s">&#x27;+&#x27;</span>).append(<span class="s">&#x27;+&#x27;</span>);
+    std::cout &lt;&lt; <span class="s">&quot;拼接后: &quot;</span> &lt;&lt; text.c_str() &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+    <span class="k">const</span> <span class="k">auto</span> slice = text.substr(<span class="n">6</span>, <span class="n">3</span>);
+    std::cout &lt;&lt; <span class="s">&quot;子串: &quot;</span> &lt;&lt; slice.c_str() &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+    <span class="k">const</span> <span class="k">auto</span> found = text.find(<span class="s">&#x27;C&#x27;</span>);
+    std::cout &lt;&lt; <span class="s">&quot;首次出现 C 的下标: &quot;</span>;
+    <span class="k">if</span> (found) {
+        std::cout &lt;&lt; *found &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+    } <span class="k">else</span> {
+        std::cout &lt;&lt; <span class="s">&quot;无\n&quot;</span>;
+    }
+}</code></pre></div>
+<div class="codeblock" data-lang="bash"><pre><code>c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch04/string_class \
+    code/ch04/string_class/demo.cpp -o /tmp/str-demo
+/tmp/str-demo</code></pre></div>
+<div class="codeblock" data-lang="console"><pre><code>拼接后: Hello C++
+子串: C++
+首次出现 C 的下标: 6</code></pre></div>
+<p>缓冲区仍是手写的 <code>char*</code>，换成 <code>std::string</code> 这一节就没了。<code>find</code> 找不到时返回空 optional，不用 <code>-1</code> 和位置 0 抢同一个数字。</p>
+<p>图4.12 自己的那对串，原书两个匹配算法都返回 11，正确答案是 10：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/pattern_matching/demo.cpp">code/ch04/pattern_matching/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
+
+<span class="p">#include &lt;iostream&gt;</span>
+
+<span class="t">int</span> main() {
+    <span class="k">const</span> <span class="t">char</span>* text = <span class="s">&quot;abcddabcababcdaabcababcdaabcabaa&quot;</span>;
+    <span class="k">const</span> <span class="t">char</span>* pattern = <span class="s">&quot;abcdaabcab&quot;</span>;
+    <span class="k">const</span> <span class="k">auto</span> naive = dsa::naive_search(text, pattern);
+    <span class="k">const</span> <span class="k">auto</span> kmp = dsa::kmp_search(text, pattern);
+    std::cout &lt;&lt; <span class="s">&quot;图4.12 的串，正确起始下标是 10\n&quot;</span>;
+    std::cout &lt;&lt; <span class="s">&quot;朴素: &quot;</span> &lt;&lt; (naive ? <span class="k">static_cast</span>&lt;<span class="t">long</span>&gt;(*naive) : -<span class="n">1</span>) &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+    std::cout &lt;&lt; <span class="s">&quot;KMP:  &quot;</span> &lt;&lt; (kmp ? <span class="k">static_cast</span>&lt;<span class="t">long</span>&gt;(*kmp) : -<span class="n">1</span>) &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+    std::cout &lt;&lt; <span class="s">&quot;原书返回 11，一律差 1\n&quot;</span>;
+}</code></pre></div>
+<div class="codeblock" data-lang="bash"><pre><code>c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch04/pattern_matching \
+    code/ch04/pattern_matching/demo.cpp -o /tmp/kmp-demo
+/tmp/kmp-demo</code></pre></div>
+<div class="codeblock" data-lang="console"><pre><code>图4.12 的串，正确起始下标是 10
+朴素: 10
+KMP:  10
+原书返回 11，一律差 1</code></pre></div>
+<blockquote><p><strong>本文件的地位</strong>：《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008） 第 4 章的现代化重排（4.1 字符串概念、4.2 存储结构与实现、4.3 模式匹配）。</p><p>书里印的每一段 C++ 都来自 <code>code/ch04/string_class/</code> 与 <code>code/ch04/pattern_matching/</code>， 真正编译、真正跑过（<code>tools/check_doc.py</code> 的 R3 逐字核对）。原书那份写法错在哪、 改了什么、什么刻意没改，逐条记在两个单元各自的 <code>legacy.md</code>。</p><p><strong>本章有一处不是写法问题，是算法结果错</strong>：原书两个模式匹配算法返回的位置都差 1。 详见 4.3.1 节末。</p></blockquote>
+<h2 id="41-字符串的基本概念"><a class="anchor" href="#41-字符串的基本概念">#</a>4.1 字符串的基本概念</h2>
+<p>字符串(string)是由零个或多个字符组成的有限序列，是一种特殊的线性表—— 它的每个元素都是字符。串中字符的数目称为串的长度，长度为零的串称为空串。</p>
+<p>原书【代码4.1】给出字符串的抽象数据类型。那份声明有三处今天必须改：</p>
+<ol>
+<li><strong>类名是小写的 <code>string</code>。</strong> 在任何 <code>using namespace std;</code> 的翻译单元里， 它与 <code>std::string</code> 构成歧义。原书正文随后又改用大写 <code>String</code>， 同一章里两个名字混用。</li>
+<li><strong><code>int isEmpty();</code></strong> 用 <code>int</code> 表达布尔，<strong><code>int find(const char c, const int start);</code></strong> 用 <code>-1</code> 表示&quot;没找到&quot;——与&quot;位置 0&quot;只差一个符号，调用方漏判就会把 &quot;没找到&quot;当成&quot;匹配在开头&quot;。</li>
+<li><strong>修改器按值返回</strong>：<code>string append(const char c);</code>、<code>string concatenate(const char* s);</code> 都返回 <code>string</code> 而非引用。代码4.1 只有声明没有函数体，所以不能断定原书会丢结果； <strong>能断定的是签名含混</strong>——调用方无从判断 <code>s.append(&#x27;x&#x27;);</code> 是改了 <code>s</code>， 还是返回了一个新串而 <code>s</code> 原封不动。</li>
+</ol>
+<p>本书的 <code>String</code> 把这三处分别改为：类名大写、<code>bool empty()</code>、 <code>std::optional&lt;size_type&gt; find(...)</code>、修改器返回 <code>String&amp;</code>。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/modern.hpp">code/ch04/string_class/modern.hpp#class-head</a></div><pre><code><span class="c">/// 变长字符串。内部保存一块以 &#x27;\0&#x27; 结尾的字符数组和当前长度。</span>
+<span class="c">///</span>
+<span class="c">/// 与原书 String 的差别：构造函数取 const char*（原书取 char*，</span>
+<span class="c">/// 使书中自己的例子 `String s1 = &quot;Hello&quot;;` 在 C++11 起就是非法转换）；</span>
+<span class="c">/// 越界抛 std::out_of_range，而不是 `return NULL` 让调用方拿到一个必然崩溃的对象；</span>
+<span class="c">/// 补齐五法则；不做任何 I/O。</span>
+<span class="k">class</span> String {
+<span class="k">public</span>:
+    <span class="k">using</span> size_type = std::<span class="t">size_t</span>;
+
+    <span class="c">/// 空串。注意它仍然持有一块 1 字节的缓冲区，于是 c_str() 永远可用、永不为空指针。</span>
+    String() : data_(<span class="k">new</span> <span class="t">char</span>[<span class="n">1</span>]{<span class="s">&#x27;\0&#x27;</span>}), size_(<span class="n">0</span>) {}
+
+    <span class="c">/// 从 C 字符串构造。故意**不加 explicit**：原书 `String s1 = &quot;Hello&quot;;` 这种写法</span>
+    <span class="c">/// 是本节的教学用例，保留它；代价是隐式转换，值得知道但这里可以接受。</span>
+    String(<span class="k">const</span> <span class="t">char</span>* s) {  <span class="c">// NOLINT(google-explicit-constructor)</span>
+        <span class="k">if</span> (s == <span class="k">nullptr</span>) {
+            <span class="c">// 原书的 Substr 在越界时 `return NULL`，随后 strlen(nullptr) 当场 SEGV。</span>
+            <span class="c">// 这里把它挡在门口，并且说清楚是什么问题。</span>
+            <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;String: 不能用空指针构造字符串&quot;</span>);
+        }
+        size_ = std::strlen(s);
+        data_ = <span class="k">new</span> <span class="t">char</span>[size_ + <span class="n">1</span>];
+        std::memcpy(data_, s, size_ + <span class="n">1</span>);
+    }</code></pre></div>
+<h2 id="42-字符串的存储结构和实现"><a class="anchor" href="#42-字符串的存储结构和实现">#</a>4.2 字符串的存储结构和实现</h2>
+<p><code>String</code> 采用动态变长的存储结构：内部持有一块以 <code>&#x27;\0&#x27;</code> 结尾的字符数组和当前长度， 构造时按初值长度分配，赋值时按新长度重新分配。这正是本节要教的内容， 所以缓冲区是<strong>裸 <code>char*</code></strong>——换成 <code>std::string</code> 这一节就没了。</p>
+<h3 id="421-构造与所有权"><a class="anchor" href="#421-构造与所有权">#</a>4.2.1 构造与所有权</h3>
+<p>原书【算法4.4】的构造函数有两处问题。</p>
+<p>第一处，<code>assert(str != &#x27;\0&#x27;)</code> <strong>本身就编译不过</strong>：<code>&#x27;\0&#x27;</code> 是 <code>char</code> 而不是空指针常量， 拿指针与它比较是 ill-formed（<code>error: ISO C++ forbids comparison between pointer and integer</code>）。 而且即便改写成 <code>assert(str != nullptr)</code> 也是无效断言——<code>new</code> 失败时抛 <code>std::bad_alloc</code>，从不返回空指针；<code>assert</code> 更会在 <code>NDEBUG</code> 构建里整个消失。</p>
+<p>第二处，参数类型是 <code>char*</code>。原书 4.2.2 节自己写下：</p>
+<blockquote><p><code>String s1 = &quot;Hello&quot;;</code> 隐含地调用构造函数 <code>String::String(char* s)</code></p></blockquote>
+<p>而字符串字面量的类型是 <code>const char[6]</code>，转成 <code>char*</code> 在 C++11 起已被移除。 GCC 默认降级为警告，在本书的 <code>-Werror</code> 构建下即是错误。</p>
+<p>还有一处原书没有做的检查：构造函数对 <code>s == nullptr</code> 毫无防备—— 而 4.2.3 节的 <code>Substr</code> 恰好会喂给它一个空指针（见 4.2.3 节）。</p>
+<p>原书的类里有 <code>~string()</code>，却从未把拷贝构造与拷贝赋值作为清单给出 （正文描述过赋值时&quot;必须释放 s1 的原有空间&quot;，但没有代码）。 只要有析构而没有这两个，一次 <code>String b = a;</code> 就是二次释放—— 与第 2、3 章是同一个错误。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/modern.hpp">code/ch04/string_class/modern.hpp#rule-of-five</a></div><pre><code><span class="c">// 原书只在正文里描述了赋值时&quot;必须释放 s1 的原有空间(delete [] s1.str)&quot;，</span>
+<span class="c">// 却没有把拷贝构造和拷贝赋值作为清单给出。只要有析构函数而没有这两个，</span>
+<span class="c">// 一次 `String b = a;` 就是二次释放——与第 2、3 章是同一个错误。</span>
+String(<span class="k">const</span> String&amp; other) : data_(<span class="k">new</span> <span class="t">char</span>[other.size_ + <span class="n">1</span>]), size_(other.size_) {
+    <span class="c">// 注意读的是 other.raw() 不是 other.data_：源可能是被移动过的对象（data_ 为空），</span>
+    <span class="c">// 从空指针 memcpy 即便长度为 0 也是未定义行为。</span>
+    std::memcpy(data_, other.raw(), size_ + <span class="n">1</span>);
+}
+
+String&amp; <span class="k">operator</span>=(<span class="k">const</span> String&amp; other) {
+    <span class="k">if</span> (<span class="k">this</span> != &amp;other) {
+        String copy(other);  <span class="c">// 拷贝并交换：自赋值安全，且拷贝失败时原对象不受影响</span>
+        swap(copy);
+    }
+    <span class="k">return</span> *<span class="k">this</span>;
+}
+
+<span class="c">/// 移动**不分配**：直接接管缓冲区，把对方置为 nullptr。</span>
+<span class="c">/// 被移动方仍是一个可用的空串——读取路径统一走 raw()，它在 data_ 为空时返回 &quot;&quot;。</span>
+<span class="c">/// （若在这里 new 一块空缓冲区来&quot;修复&quot;对方，移动就不再是 noexcept 的了。）</span>
+String(String&amp;&amp; other) <span class="k">noexcept</span> : data_(other.data_), size_(other.size_) {
+    other.data_ = <span class="k">nullptr</span>;
+    other.size_ = <span class="n">0</span>;
+}
+
+String&amp; <span class="k">operator</span>=(String&amp;&amp; other) <span class="k">noexcept</span> {
+    <span class="k">if</span> (<span class="k">this</span> != &amp;other) {
+        <span class="k">delete</span>[] data_;
+        data_ = other.data_;
+        size_ = other.size_;
+        other.data_ = <span class="k">nullptr</span>;
+        other.size_ = <span class="n">0</span>;
+    }
+    <span class="k">return</span> *<span class="k">this</span>;
+}
+
+~String() { <span class="k">delete</span>[] data_; }</code></pre></div>
+<p>移动操作声明为 <code>noexcept</code>，因此<strong>不能在里面分配</strong>。被移动方的指针置空， 读取路径统一走一个私有的 <code>raw()</code>：指针为空时返回静态空串。 于是&quot;被移动之后仍是可用的空串&quot;这个保证不花任何分配就成立， <code>c_str()</code> 也永远不会是空指针。</p>
+<h3 id="422-追加与拼接"><a class="anchor" href="#422-追加与拼接">#</a>4.2.2 追加与拼接</h3>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/modern.hpp">code/ch04/string_class/modern.hpp#append</a></div><pre><code><span class="c">/// 在串尾添加一个字符，返回自身引用。</span>
+<span class="c">///</span>
+<span class="c">/// 原书【代码4.1】声明的是 `string append(const char c);`——**按值返回**。</span>
+<span class="c">/// 代码4.1 只有声明没有函数体，所以「它到底改不改本串」在书里无从查证；</span>
+<span class="c">/// 而这正是问题所在：一个修改器按值返回，调用方无法从签名判断</span>
+<span class="c">/// `s.append(&#x27;x&#x27;);` 是改了 s 还是返回了一个新串而 s 原封不动。</span>
+<span class="c">/// 返回自身引用把这件事说死，同时支持链式调用。</span>
+String&amp; append(<span class="t">char</span> c) {
+    <span class="t">char</span>* fresh = <span class="k">new</span> <span class="t">char</span>[size_ + <span class="n">2</span>];
+    std::memcpy(fresh, raw(), size_);
+    fresh[size_] = c;
+    fresh[size_ + <span class="n">1</span>] = <span class="s">&#x27;\0&#x27;</span>;
+    <span class="k">delete</span>[] data_;
+    data_ = fresh;
+    ++size_;
+    <span class="k">return</span> *<span class="k">this</span>;
+}
+
+<span class="c">/// 把 s 连接在本串后面。s 为空指针时抛 std::invalid_argument。</span>
+String&amp; concatenate(<span class="k">const</span> <span class="t">char</span>* s) {
+    <span class="k">if</span> (s == <span class="k">nullptr</span>) {
+        <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;String::concatenate: 空指针&quot;</span>);
+    }
+    <span class="k">const</span> size_type extra = std::strlen(s);
+    <span class="t">char</span>* fresh = <span class="k">new</span> <span class="t">char</span>[size_ + extra + <span class="n">1</span>];
+    std::memcpy(fresh, raw(), size_);
+    std::memcpy(fresh + size_, s, extra + <span class="n">1</span>);
+    <span class="k">delete</span>[] data_;
+    data_ = fresh;
+    size_ += extra;
+    <span class="k">return</span> *<span class="k">this</span>;
+}
+
+String&amp; <span class="k">operator</span>+=(<span class="t">char</span> c) { <span class="k">return</span> append(c); }
+String&amp; <span class="k">operator</span>+=(<span class="k">const</span> String&amp; other) { <span class="k">return</span> concatenate(other.c_str()); }</code></pre></div>
+<p>每次追加都重新分配一块、拷贝、释放旧块——这就是变长串管理的代价， 也是后面章节讨论&quot;预留容量&quot;的动机。</p>
+<h3 id="423-抽取子串"><a class="anchor" href="#423-抽取子串">#</a>4.2.3 抽取子串</h3>
+<p>原书【算法4.5】在起始位置越界时写 <code>return NULL;</code>。这里的返回类型是 <code>String</code>， 所以 <code>NULL</code> 不是&quot;空串&quot;：它先转成 <code>char*</code>，再走 <code>String(char*)</code> 构造函数， 于是 <code>strlen(nullptr)</code>。这段<strong>能编译</strong>，崩在运行期：</p>
+<div class="codeblock" data-lang="text"><pre><code>$ ./s7
+准备调用 s.Substr(99, 1)——原书会走到 return NULL 那一支
+runtime error: null pointer passed as argument 1, which is declared to never be null
+AddressSanitizer:DEADLYSIGNAL
+ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000</code></pre></div>
+<p>本书越界就抛 <code>std::out_of_range</code>，让错误停在发生的地方， 而不是变成调用方某处的段错误。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/modern.hpp">code/ch04/string_class/modern.hpp#substr</a></div><pre><code><span class="c">/// 从 pos 开始抽取长度至多为 len 的子串。</span>
+<span class="c">///</span>
+<span class="c">/// 原书【算法4.5】在 `pos &gt;= size` 时 `return NULL;`——那不是&quot;返回空串&quot;，</span>
+<span class="c">/// 而是拿 NULL 走 String(char*) 构造函数，接着 strlen(nullptr) 当场崩溃</span>
+<span class="c">/// （证据见 legacy.md 缺陷 3）。这里越界就抛 std::out_of_range，</span>
+<span class="c">/// 让错误停在发生的地方，而不是变成调用方某处的段错误。</span>
+<span class="c">///</span>
+<span class="c">/// pos == size() 是合法的，得到空串——与&quot;从末尾取 0 个字符&quot;的直觉一致。</span>
+[[nodiscard]] String substr(size_type pos, size_type len) <span class="k">const</span> {
+    <span class="k">if</span> (pos &gt; size_) {
+        <span class="k">throw</span> std::out_of_range(<span class="s">&quot;String::substr: 起始位置越界&quot;</span>);
+    }
+    <span class="k">const</span> size_type available = size_ - pos;
+    <span class="k">const</span> size_type take = len &lt; available ? len : available;  <span class="c">// 原书的 if (n &gt; left) n = left</span>
+    String result;
+    <span class="t">char</span>* fresh = <span class="k">new</span> <span class="t">char</span>[take + <span class="n">1</span>];
+    std::memcpy(fresh, raw() + pos, take);
+    fresh[take] = <span class="s">&#x27;\0&#x27;</span>;
+    <span class="k">delete</span>[] result.data_;
+    result.data_ = fresh;
+    result.size_ = take;
+    <span class="k">return</span> result;
+}</code></pre></div>
+<p><code>len</code> 超出剩余长度时<strong>截断</strong>而不报错，与原书的 <code>if (n &gt; left) n = left;</code> 语义一致。</p>
+<h3 id="424-查找与比较"><a class="anchor" href="#424-查找与比较">#</a>4.2.4 查找与比较</h3>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/modern.hpp">code/ch04/string_class/modern.hpp#find-compare</a></div><pre><code><span class="c">/// 从 start 开始查找字符 c，返回下标；没有则 std::nullopt。</span>
+<span class="c">/// 原书 `int find(const char c, const int start)` 用 -1 表示没找到，</span>
+<span class="c">/// 与&quot;位置 0&quot;只差一个符号。</span>
+[[nodiscard]] std::optional&lt;size_type&gt; find(<span class="t">char</span> c, size_type start = <span class="n">0</span>) <span class="k">const</span> {
+    <span class="k">for</span> (size_type i = start; i &lt; size_; ++i) {
+        <span class="k">if</span> (raw()[i] == c) {
+            <span class="k">return</span> i;
+        }
+    }
+    <span class="k">return</span> std::nullopt;
+}
+
+<span class="c">/// 三路比较，负/零/正 表示 小于/等于/大于。</span>
+<span class="c">///</span>
+<span class="c">/// 原书【算法4.3】自己实现了一个 strcmp，返回值固定为 -1/0/1，</span>
+<span class="c">/// 并在正文里指出&quot;这与 C/C++ 语言中通常的大小比较习惯(0和非0)不一致&quot;——</span>
+<span class="c">/// 其实不一致的是原书自己：标准 strcmp 返回的就是差值的符号，</span>
+<span class="c">/// 调用方只该看符号，不该看具体数值。这里保持标准语义。</span>
+[[nodiscard]] <span class="t">int</span> compare(<span class="k">const</span> String&amp; other) <span class="k">const</span> <span class="k">noexcept</span> {
+    <span class="k">return</span> std::strcmp(raw(), other.raw());
+}</code></pre></div>
+<p>关于【算法4.3】：原书自己实现了一个 <code>strcmp</code>，固定返回 −1/0/1， 并在正文里说&quot;这与 C/C++ 语言中通常的大小比较习惯(0和非0)不一致&quot;。 其实标准 <code>strcmp</code> 返回的就是差值的符号，调用方本来就只该看符号—— 不一致的是原书固定返回 ±1 的写法。本书保持标准语义，并据此提供关系运算符。</p>
+<p>（另外补一句实测结论：原书那个与标准库同名同签名的 <code>strcmp</code> 定义， 既能编译也能链接，不构成冲突——这是我们查过之后否掉的一个猜测， 记在 <code>legacy.md</code> 第五节。）</p>
+<h2 id="43-字符串的模式匹配"><a class="anchor" href="#43-字符串的模式匹配">#</a>4.3 字符串的模式匹配</h2>
+<p>给定目标串 T 和模式串 P，模式匹配要回答：P 是否作为 T 的连续子串出现， 若出现，首次出现在哪个位置。</p>
+<p>本节的教学内容是<strong>算法本身</strong>，因此下面的实现用 <code>std::string_view</code> 接收输入： 不拷贝、不拥有，把注意力留在匹配过程上。字符串容器的实现是 4.2 节的事。</p>
+<h3 id="431-朴素的模式匹配算法"><a class="anchor" href="#431-朴素的模式匹配算法">#</a>4.3.1 朴素的模式匹配算法</h3>
+<p>朴素算法的思路直白：把模式的首字符对齐目标的每一个位置，逐字符比较； 一旦失配，就把模式整体右移一位，从头再来。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/pattern_matching/modern.hpp">code/ch04/pattern_matching/modern.hpp#naive</a></div><pre><code><span class="c">/// 朴素模式匹配：返回 pattern 在 text 中首次出现的**起始下标**；没有则 std::nullopt。</span>
+<span class="c">///</span>
+<span class="c">/// 与原书【算法4.6】的关键差别是返回值：原书写的是 `return (j - pLen + 1);`，</span>
+<span class="c">/// 而在 0 起始的下标体系里正确的是 `j - pLen`——**原书这里差了 1**。</span>
+<span class="c">/// 用书中自己的例子可以当场看出来：T=&quot;abcddabcab...&quot;、P=&quot;abcdaabcab&quot; 匹配始于下标 10，</span>
+<span class="c">/// 原书返回 11（证据见 legacy.md 缺陷 1）。</span>
+<span class="c">///</span>
+<span class="c">/// 空模式约定返回 0（与 std::string::find(&quot;&quot;) 一致）；原书用 assert(m&gt;0) 把它挡在门外，</span>
+<span class="c">/// 而 assert 在 NDEBUG 下会被整个编译掉。</span>
+[[nodiscard]] <span class="k">inline</span> std::optional&lt;std::<span class="t">size_t</span>&gt; naive_search(std::string_view text,
+                                                             std::string_view pattern) {
+    <span class="k">const</span> std::<span class="t">size_t</span> n = text.size();
+    <span class="k">const</span> std::<span class="t">size_t</span> m = pattern.size();
+    <span class="k">if</span> (m == <span class="n">0</span>) {
+        <span class="k">return</span> std::<span class="t">size_t</span>{<span class="n">0</span>};
+    }
+    <span class="k">if</span> (n &lt; m) {
+        <span class="k">return</span> std::nullopt;
+    }
+    std::<span class="t">size_t</span> i = <span class="n">0</span>;  <span class="c">// 模式下标</span>
+    std::<span class="t">size_t</span> j = <span class="n">0</span>;  <span class="c">// 目标下标</span>
+    <span class="k">while</span> (i &lt; m &amp;&amp; j &lt; n) {
+        <span class="k">if</span> (text[j] == pattern[i]) {
+            ++i;
+            ++j;
+        } <span class="k">else</span> {
+            j = j - i + <span class="n">1</span>;  <span class="c">// 回退到本趟起点的下一个位置</span>
+            i = <span class="n">0</span>;
+        }
+    }
+    <span class="k">return</span> i &gt;= m ? std::optional&lt;std::<span class="t">size_t</span>&gt;(j - m) : std::nullopt;
+}</code></pre></div>
+<p>失配时 <code>j = j - i + 1</code> 把目标下标退回本趟起点的<strong>下一个</strong>位置——这一步的&quot;+1&quot;是对的， 它表示&quot;换一个起点重来&quot;。最坏情况下，每个起点都要比较到模式末尾才失配 （例如 T = &quot;aaa…a&quot;、P = &quot;aa…ab&quot;），总比较次数为 O(|T|·|P|)。</p>
+<h4 id="一处必须指出的错误原书的返回值差-1"><a class="anchor" href="#一处必须指出的错误原书的返回值差-1">#</a>一处必须指出的错误：原书的返回值差 1</h4>
+<p>原书【算法4.6】与【算法4.8】在匹配成功时都写：</p>
+<div class="codeblock" data-lang="text"><pre><code>if (i &gt;= pLen) return (j - pLen + 1);</code></pre></div>
+<p>匹配成功时 <code>j</code> 已经走到匹配段的<strong>末尾之后</strong>，所以起始位置是 <code>j - pLen</code>。 那个 <code>+1</code> 是多余的。把原书两段代码照抄进程序，拿标准库的 <code>find</code> 做参照：</p>
+<div class="codeblock" data-lang="text"><pre><code>T=abc                              P=abc          原书朴素=  1  正确答案=  0
+T=xabc                             P=abc          原书朴素=  2  正确答案=  1
+T=aaab                             P=ab           原书朴素=  3  正确答案=  2
+T=abcddabcababcdaabcababcdaabcabaa P=abcdaabcab   原书朴素= 11  正确答案= 10</code></pre></div>
+<p><strong>每一组都恰好多 1</strong>，最后一组正是书中图4.12 自己用来演示 KMP 的那对串。 原书用它逐趟画了匹配过程，却没有给出返回值，这个错误因此在书里没有暴露。</p>
+<p>这不是排版或 OCR 造成的，有三重佐证：<code>j - pLen + 1</code> 在两个算法里独立印出、写法一致； 同一段代码里的 <code>j = j - i + 1</code> 说明作者用的就是 0 起始下标； 而 4.3 节开头的约定更是把这一点写死了——</p>
+<blockquote><p>P和T的第一个字符都从位置0开始。</p></blockquote>
+<p>本书的实现返回 <code>j - m</code>，并且<strong>每一条匹配用例都拿标准库的 <code>find</code> 逐个对拍</strong>， 再加 3000 组随机对拍。只断言&quot;找到了&quot;的测试，在原书那份实现下同样全绿—— 那样的测试等于没写。</p>
+<h3 id="432-字符串的特征向量"><a class="anchor" href="#432-字符串的特征向量">#</a>4.3.2 字符串的特征向量</h3>
+<p>KMP 的想法是：失配时不必把模式退回从头开始，因为<strong>已经匹配上的那一段本身携带了信息</strong>。 这句话抽象，用一个例子就清楚了。</p>
+<p>设目标串 T = <code>ababab d</code>，模式 P = <code>ababd</code>，从 T 的位置 0 开始比：</p>
+<div class="codeblock" data-lang="text"><pre><code>位置:  0 1 2 3 4 5 6
+T   :  a b a b a b d
+P   :  a b a b d
+                ↑ 这里失配（T[4]=&#x27;a&#x27;，P[4]=&#x27;d&#x27;）</code></pre></div>
+<p>失配前已经匹配上了 <code>abab</code> 这四个字符。<strong>朴素算法</strong>到这里会把模式整体右移一位、从 T[1] 重新 逐字符比起——但这其实浪费了信息：我们已经知道 T[0..3] 就是 <code>abab</code>。</p>
+<p>KMP 的做法是问：<code>abab</code> 的<strong>前缀</strong>和<strong>后缀</strong>里，最长的相同的一段是多少？</p>
+<div class="codeblock" data-lang="text"><pre><code>abab 的前缀: a, ab, aba
+abab 的后缀: b, ab, bab
+最长相同的一段: &quot;ab&quot;，长度 2</code></pre></div>
+<p>这个 2 的意义是：<code>abab</code> 的末尾两个字符 <code>ab</code>，恰好也是 <code>abab</code> 的开头两个字符。而模式的开头 也是 <code>ab</code>。所以模式可以<strong>一次右移 4 − 2 = 2 位</strong>直接对上去，并且移过去之后<strong>前两个字符 不必再比</strong>——它们必然相同：</p>
+<div class="codeblock" data-lang="text"><pre><code>位置:  0 1 2 3 4 5 6
+T   :  a b a b a b d
+P   :      a b a b d
+             ↑ 这两个已知相同，从这里继续比</code></pre></div>
+<p>接着从 P[2] 与 T[4] 往下比，一路比到底，在位置 2 匹配成功。整个过程中 <strong>T 的下标从来没有 往回退过</strong>，这正是 KMP 优于朴素算法的地方：朴素算法最坏要把 T 的每个位置都当一次起点重来。</p>
+<p>把「每个位置失配时该退到哪里」对模式的每个位置预先算出来，就是特征向量（next 数组）。 上面这个例子用本章的实现跑出来是：</p>
+<div class="codeblock" data-lang="text"><pre><code>next(ababd) = -1 0 -1 0 2
+kmp_search(&quot;abababd&quot;, &quot;ababd&quot;) = 2
+std::string::find 对照         = 2</code></pre></div>
+<p><code>next[4] = 2</code> 正是「在 P[4] 处失配时，模式的比较位置退到 2」——和上面手推的一致。 （这里印的是原书【算法4.7】的<strong>优化版</strong> next，所以中间会出现 −1；未优化版本的取值不同， 但失配后的落点等价。）</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/pattern_matching/modern.hpp">code/ch04/pattern_matching/modern.hpp#build-next</a></div><pre><code><span class="c">/// 计算模式的特征向量（next 数组），原书【算法4.7】的&quot;优化版&quot;。</span>
+<span class="c">///</span>
+<span class="c">/// 与原书的差别只有所有权：原书 `int* findNext(String P)` 用 `new int[m]` 返回裸数组，</span>
+<span class="c">/// 而书中**从未展示过与之配对的 delete[]**——每调用一次泄漏一个数组。</span>
+<span class="c">/// 计算过程一字未改，包括 `next[i] = next[k]` 这一步优化。</span>
+<span class="c">///</span>
+<span class="c">/// 空模式返回空向量；原书是 `assert(m &gt; 0)`，而 assert 在 NDEBUG 下会被编译掉，</span>
+<span class="c">/// 于是 release 构建里 `new int[0]` 加 `next[0] = -1` 就是一次越界写。</span>
+[[nodiscard]] <span class="k">inline</span> std::vector&lt;next_type&gt; build_next(std::string_view pattern) {
+    <span class="k">const</span> std::<span class="t">size_t</span> m = pattern.size();
+    std::vector&lt;next_type&gt; next(m);
+    <span class="k">if</span> (m == <span class="n">0</span>) {
+        <span class="k">return</span> next;
+    }
+    next_type i = <span class="n">0</span>;
+    next_type k = -<span class="n">1</span>;
+    next[<span class="n">0</span>] = -<span class="n">1</span>;
+    <span class="k">while</span> (i &lt; <span class="k">static_cast</span>&lt;next_type&gt;(m)) {
+        <span class="k">while</span> (k &gt;= <span class="n">0</span> &amp;&amp; pattern[<span class="k">static_cast</span>&lt;std::<span class="t">size_t</span>&gt;(i)] != pattern[<span class="k">static_cast</span>&lt;std::<span class="t">size_t</span>&gt;(k)]) {
+            k = next[<span class="k">static_cast</span>&lt;std::<span class="t">size_t</span>&gt;(k)];  <span class="c">// 沿已算好的特征值回退</span>
+        }
+        ++i;
+        ++k;
+        <span class="k">if</span> (i == <span class="k">static_cast</span>&lt;next_type&gt;(m)) {
+            <span class="k">break</span>;
+        }
+        <span class="k">const</span> <span class="k">auto</span> ui = <span class="k">static_cast</span>&lt;std::<span class="t">size_t</span>&gt;(i);
+        <span class="k">const</span> <span class="k">auto</span> uk = <span class="k">static_cast</span>&lt;std::<span class="t">size_t</span>&gt;(k);
+        <span class="c">// P[i] 与 P[k] 相等时可以直接借用 next[k]，省掉一次注定失败的比较——这就是&quot;优化版&quot;。</span>
+        next[ui] = (pattern[ui] == pattern[uk]) ? next[uk] : k;
+    }
+    <span class="k">return</span> next;
+}</code></pre></div>
+<p><code>next[i] = next[k]</code> 那一步是原书所说的&quot;优化&quot;：如果 <code>P[i]</code> 与 <code>P[k]</code> 相同， 那么用 <code>k</code> 作为回退目标必然会再失配一次，不如直接借用 <code>next[k]</code> 一步到位。</p>
+<p>对模式 <code>&quot;abcdaabcab&quot;</code>，算法产生：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">i</th>
+<th style="text-align:left">0</th>
+<th style="text-align:left">1</th>
+<th style="text-align:left">2</th>
+<th style="text-align:left">3</th>
+<th style="text-align:left">4</th>
+<th style="text-align:left">5</th>
+<th style="text-align:left">6</th>
+<th style="text-align:left">7</th>
+<th style="text-align:left">8</th>
+<th style="text-align:left">9</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">P[i]</td>
+<td style="text-align:left">a</td>
+<td style="text-align:left">b</td>
+<td style="text-align:left">c</td>
+<td style="text-align:left">d</td>
+<td style="text-align:left">a</td>
+<td style="text-align:left">a</td>
+<td style="text-align:left">b</td>
+<td style="text-align:left">c</td>
+<td style="text-align:left">a</td>
+<td style="text-align:left">b</td>
+</tr>
+<tr>
+<td style="text-align:left">next[i]</td>
+<td style="text-align:left">−1</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">−1</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">3</td>
+<td style="text-align:left">0</td>
+</tr>
+</tbody></table></div>
+<p>这与原书图4.11 最后一行完全一致。</p>
+<blockquote><p><strong>注意原书正文与图 4.11 不一致。</strong> 正文写的是 <code>next = {-1,0,0,0,0,-1,1,0,0,3,0}</code>，数一下是 <strong>11 个值</strong>， 而模式只有 <strong>10 个字符</strong>。图 4.11 给的是 10 个值，与算法实算的结果相符。 正文里多出来的那个 0 是错的。本书的测试逐个比对图 4.11 的十个值， 并单独断言&quot;模式只有 10 个字符&quot;，把这处矛盾钉住。</p></blockquote>
+<p>关于所有权：原书 <code>findNext</code> 用 <code>new int[m]</code> 返回裸数组，而书中调用它的地方 ——算法4.8 的 <code>N</code> 参数、正文的示例——<strong>一次都没有出现配对的 <code>delete[]</code></strong>。 每匹配一个模式就漏一个数组。本书返回一个拥有所有权的容器，计算过程一字未改。</p>
+<h3 id="433-kmp-模式匹配算法"><a class="anchor" href="#433-kmp-模式匹配算法">#</a>4.3.3 KMP 模式匹配算法</h3>
+<p>有了特征向量，匹配过程与朴素算法几乎一样，只有失配那一步不同： 不再把模式退回开头，而是退到 <code>next[i]</code>。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/pattern_matching/modern.hpp">code/ch04/pattern_matching/modern.hpp#kmp</a></div><pre><code><span class="c">/// KMP 模式匹配。失配时不再把模式右移一位，而是按特征值决定右移多少。</span>
+<span class="c">///</span>
+<span class="c">/// 返回值与 naive_search 一致，也修正了原书【算法4.8】同样的差一错误。</span>
+<span class="c">/// next 由调用方传入：同一个模式可以只算一次、多次匹配复用——</span>
+<span class="c">/// 这正是原书强调的性质，接口把它显式表达出来。</span>
+[[nodiscard]] <span class="k">inline</span> std::optional&lt;std::<span class="t">size_t</span>&gt; kmp_search(std::string_view text,
+                                                           std::string_view pattern,
+                                                           <span class="k">const</span> std::vector&lt;next_type&gt;&amp; next) {
+    <span class="k">const</span> std::<span class="t">size_t</span> n = text.size();
+    <span class="k">const</span> std::<span class="t">size_t</span> m = pattern.size();
+    <span class="k">if</span> (m == <span class="n">0</span>) {
+        <span class="k">return</span> std::<span class="t">size_t</span>{<span class="n">0</span>};
+    }
+    <span class="k">if</span> (next.size() != m) {
+        <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;kmp_search: next 数组长度与模式不符&quot;</span>);
+    }
+    <span class="k">if</span> (n &lt; m) {
+        <span class="k">return</span> std::nullopt;
+    }
+    next_type i = <span class="n">0</span>;    <span class="c">// 模式下标，可以退到 -1</span>
+    std::<span class="t">size_t</span> j = <span class="n">0</span>;  <span class="c">// 目标下标，只增不减</span>
+    <span class="k">while</span> (i &lt; <span class="k">static_cast</span>&lt;next_type&gt;(m) &amp;&amp; j &lt; n) {
+        <span class="k">if</span> (i == -<span class="n">1</span> || text[j] == pattern[<span class="k">static_cast</span>&lt;std::<span class="t">size_t</span>&gt;(i)]) {
+            ++i;
+            ++j;
+        } <span class="k">else</span> {
+            i = next[<span class="k">static_cast</span>&lt;std::<span class="t">size_t</span>&gt;(i)];
+        }
+    }
+    <span class="k">return</span> i &gt;= <span class="k">static_cast</span>&lt;next_type&gt;(m) ? std::optional&lt;std::<span class="t">size_t</span>&gt;(j - m) : std::nullopt;
+}
+
+<span class="c">/// 便利重载：模式只用一次时，自己把 next 算掉。</span>
+[[nodiscard]] <span class="k">inline</span> std::optional&lt;std::<span class="t">size_t</span>&gt; kmp_search(std::string_view text,
+                                                           std::string_view pattern) {
+    <span class="k">return</span> kmp_search(text, pattern, build_next(pattern));
+}</code></pre></div>
+<p><strong>时间代价的关键在于目标下标 <code>j</code> 只增不减。</strong> 循环体里 <code>++j</code> 至多执行 |T| 次， 与它同处一条语句的 <code>++i</code> 也不超过 |T| 次；能让 <code>i</code> 减少的只有 <code>i = next[i]</code>， 而 <code>next[i] &lt; i</code>，所以每执行一次 <code>i</code> 至少减 1；一旦减到 −1，下一步必然进入 <code>++i, ++j</code> 分支。因此 <code>i = next[i]</code> 的执行次数不超过 <code>++i, ++j</code> 的次数加 1， 整个循环体至多执行 2|T| + 1 次——<strong>与目标串长度成线性关系</strong>。</p>
+<p>加上计算 next 的 O(|P|)，KMP 整体为 O(|P| + |T|)。而同一个模式的特征向量 只需算一次即可跨多个目标复用，这一点接口里用「next 由调用方传入」显式表达。</p>
+<p>本书的测试用朴素算法的最坏情况（T = 20 万个 &#x27;a&#x27;，P = 1999 个 &#x27;a&#x27; 加一个 &#x27;b&#x27;） 验证这条线性性质：KMP 在其上瞬间完成，而失配后不按特征值回退的实现会退化成 O(|T|·|P|)，直接撞上构建闸门的超时。</p>
+<h2 id="与原书的对照"><a class="anchor" href="#与原书的对照">#</a>与原书的对照</h2>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">原书</th>
+<th style="text-align:left">现在</th>
+<th style="text-align:left">为什么</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><code>return (j - pLen + 1)</code></td>
+<td style="text-align:left"><code>return j - m</code></td>
+<td style="text-align:left"><strong>原书差 1</strong>，四组数据逐个对拍证实</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>int</code> 返回值，−1 表示没找到</td>
+<td style="text-align:left"><code>std::optional&lt;std::size_t&gt;</code></td>
+<td style="text-align:left">−1 与&quot;位置 0&quot;只差一个符号，漏判就把未匹配当成匹配在开头</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>int* findNext()</code> 返回 <code>new int[]</code></td>
+<td style="text-align:left">返回拥有所有权的容器</td>
+<td style="text-align:left">书中从未展示配对的 <code>delete[]</code>，每次调用漏一个数组</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>assert(m &gt; 0)</code></td>
+<td style="text-align:left">空模式返回 0</td>
+<td style="text-align:left"><code>assert</code> 在 NDEBUG 下整个消失，release 构建里是越界写</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>assert(next != 0)</code></td>
+<td style="text-align:left">删除</td>
+<td style="text-align:left"><code>new</code> 失败抛 <code>bad_alloc</code>，从不返回空指针，该断言永远为真</td>
+</tr>
+</tbody></table></div>
+<p><strong>刻意没改的</strong>：朴素匹配仍是回溯式的；next 仍是原书的优化版（图4.11 对的是这一版）； KMP 的 next 仍由调用方传入并可跨目标复用。这三条是本节全部的教学内容。</p>
+<p>完整实现见 <code>code/ch04/pattern_matching/modern.hpp</code>，测试见同目录 <code>test.cpp</code> （56 项断言，含 3000 组随机对拍；用 <code>python3 tools/check_code.py</code> 在 <code>-Werror</code> + ASan/UBSan 与 <code>-O2</code> 两种构建下各跑一遍）。</p>
+<h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
+<p>字符串是元素为字符的线性表。存储要考虑变长：定长数组访问方便，插入删除要搬字符；动态缓冲按长度分配。常用运算是复制、求长、比较、拼接、抽子串、查找字符。模式匹配是子串在主串中的定位：朴素算法直观但会回溯，时间与 <span class="math">|P| |T|</span> 成正比；KMP 用模式自身的特征向量避免回溯，时间为 <span class="math">O(|P|<span class="bin">+</span>|T|)</span>。本书还修正了原书返回值一律差 1 的错误。</p>
+<h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
+<ol>
+<li>已知 <span class="math">s<span class="rel">=</span><span class="mono">(xyz)<span class="bin">+</span>*</span></span>，<span class="math">t<span class="rel">=</span><span class="mono">(x<span class="bin">+</span>z)*y</span></span>。用连接、抽子串和置换把 <span class="math">s</span> 变成 <span class="math">t</span>。</li>
+<li>给出使 <span class="math">s<sub><span class="upr">1</span></sub><span class="bin">+</span>s<sub><span class="upr">2</span></sub><span class="rel">=</span>s<sub><span class="upr">2</span></sub><span class="bin">+</span>s<sub><span class="upr">1</span></sub></span> 成立的所有可能条件（<span class="math"><span class="bin">+</span></span> 为连接）。</li>
+<li>统计输入串中各合法字符（A–Z、0–9）的频度。</li>
+<li>把长为 <span class="math">n</span> 的串 <span class="math">S</span> 改造成：偶数位字符按原下标从大到小放后半，奇数位从小到大放前半。例如 <code>ABCDEFGHIJKL</code> 变成 <code>ACEGIKLJHFDB</code>。</li>
+<li>判断串是否对称，对称返回 1 否则 0。</li>
+<li>求包含在 <span class="math">s</span> 中但不在 <span class="math">t</span> 中的字符构成的新串，以及每个字符在 <span class="math">s</span> 中第一次出现的位置。</li>
+<li>线性时间判断 <span class="math">T</span> 是否是 <span class="math">T&#x27;</span> 的循环反转（如 <code>arc</code> 与 <code>car</code>）。</li>
+<li>从 <span class="math">s</span> 中删除所有与 <span class="math">t</span> 相同的子串。</li>
+<li>求 <code>BAAABBBAA</code> 的特征向量，并与目标 <code>BAAABBBCDDDCCHHHHBBBAAABBBAADD</code> 匹配，画出过程。</li>
+</ol>
+<h2 id="上机题"><a class="anchor" href="#上机题">#</a>上机题</h2>
+<ol>
+<li>实现 <code>atoi(x)</code>：把由数字和可选负号组成的串转成整数。</li>
+<li>统计输入串中的整数个数并输出它们（连续数字看成一个整数）。</li>
+<li>返回串中最长重复子串及其下标。例如 <code>abcdacdac</code> 的最长重复子串是 <code>cdac</code>，下标 2。</li>
+<li>实现一个简单行编辑器：行插入/删除、当前行指针、分页显示，以及用 KMP（不得调用环境自带查找）做查找替换。</li>
+</ol>
+<div class="pagenav"><a href="ch03-stack.html"><span class="dir">← 上一篇</span>第3章 栈与队列</a><a href="ch05-binary-tree.html" style="text-align:right"><span class="dir">下一篇 →</span>第5章 二叉树</a></div>
+</main>
+<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#41-字符串的基本概念">4.1 字符串的基本概念</a><a href="#42-字符串的存储结构和实现">4.2 字符串的存储结构和实现</a><a href="#421-构造与所有权" class="sub">4.2.1 构造与所有权</a><a href="#422-追加与拼接" class="sub">4.2.2 追加与拼接</a><a href="#423-抽取子串" class="sub">4.2.3 抽取子串</a><a href="#424-查找与比较" class="sub">4.2.4 查找与比较</a><a href="#43-字符串的模式匹配">4.3 字符串的模式匹配</a><a href="#431-朴素的模式匹配算法" class="sub">4.3.1 朴素的模式匹配算法</a><a href="#432-字符串的特征向量" class="sub">4.3.2 字符串的特征向量</a><a href="#433-kmp-模式匹配算法" class="sub">4.3.3 KMP 模式匹配算法</a><a href="#与原书的对照">与原书的对照</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#上机题">上机题</a></nav>
+</div>
+<footer>
+  本页由 <code>tools/build_site.py</code> 从 <code>book/ch04-string.md</code> 生成
+  —— Markdown 是唯一事实源，请勿手改此文件。正文中的 C++ 代码块与 <code>code/</code> 下
+  通过测试的源码逐字一致（由 <code>tools/check_doc.py</code> 的 R3 保证）。
+</footer>
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('nav.page a'));
+  if(links.length){
+    var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a});
+    var seen=[];
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        var id=e.target.id;
+        if(e.isIntersecting){if(seen.indexOf(id)<0)seen.push(id)}
+        else{var i=seen.indexOf(id);if(i>=0)seen.splice(i,1)}
+      });
+      links.forEach(function(a){a.classList.remove('active')});
+      if(seen.length&&map[seen[0]])map[seen[0]].classList.add('active');
+    },{rootMargin:'0px 0px -75% 0px'});
+    [].slice.call(document.querySelectorAll('h2[id],h3[id]')).forEach(function(h){io.observe(h)});
+  }
+  [].slice.call(document.querySelectorAll('.codeblock')).forEach(function(block){
+    var button=document.createElement('button');
+    button.className='copy';button.type='button';button.textContent='复制';
+    button.addEventListener('click',function(){
+      var text=block.querySelector('code').textContent;
+      var done=function(){button.textContent='已复制';
+        setTimeout(function(){button.textContent='复制'},1200)};
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done,function(){button.textContent='复制失败'});
+      }else{
+        var area=document.createElement('textarea');area.value=text;document.body.appendChild(area);
+        area.select();try{document.execCommand('copy');done()}catch(e){button.textContent='复制失败'}
+        document.body.removeChild(area);
+      }
+    });
+    block.appendChild(button);
+  });
+})();
+</script>
+</body>
+</html>

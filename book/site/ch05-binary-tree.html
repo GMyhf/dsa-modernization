@@ -1,0 +1,812 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第5章 二叉树 · 现代 C++ 数据结构教程</title>
+<meta name="description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:title" content="第5章 二叉树">
+<meta property="og:description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:type" content="article">
+<style>
+:root{color-scheme:light;
+  --ink:#1a2230;--muted:#68758a;--faint:#93a0b3;--line:#dde3ec;--bg:#f3f5f9;--panel:#fff;
+  --soft:#eef1f7;--accent:#2f5fd0;--accent-soft:#e5ecfb;--warn:#b06a1c;--danger:#c0392b;
+  --kw:#8b2fa0;--ty:#0f6f8c;--st:#177245;--cm:#7d8899;--pp:#a3572a}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;
+  --ink:#e3e8f0;--muted:#98a3b5;--faint:#6f7c90;--line:#2b3342;--bg:#12151b;--panel:#171b22;
+  --soft:#1e232c;--accent:#84a9f5;--accent-soft:#1c2740;--warn:#dcae72;--danger:#e08a80;
+  --kw:#d79ae8;--ty:#7cc7dd;--st:#8fd0a4;--cm:#7b8598;--pp:#e0a97b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.8 system-ui,-apple-system,"Segoe UI","Noto Sans CJK SC","PingFang SC",sans-serif}
+a{color:var(--accent)}
+.masthead{background:var(--panel);border-bottom:1px solid var(--line);padding:30px 26px 24px}
+.masthead .inner{max-width:1440px;margin:0 auto}
+.masthead .eyebrow{font-size:13px;color:var(--muted);letter-spacing:.06em;margin:0 0 6px}
+.masthead .eyebrow a{text-decoration:none}
+.masthead h1{margin:0;font-size:clamp(23px,3.4vw,34px);line-height:1.25;letter-spacing:-.01em}
+.masthead p.sub{margin:10px 0 0;color:var(--muted);font-size:15px;max-width:62ch}
+.masthead .meta{margin:12px 0 0;font-size:13.5px;color:var(--muted)}
+.layout{max-width:1440px;margin:0 auto;padding:0 26px 80px;display:grid;
+  grid-template-columns:228px minmax(0,1fr) 208px;gap:40px;align-items:start}
+nav.book,nav.page{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;
+  padding:22px 0;font-size:14px;line-height:1.55}
+nav b{display:block;color:var(--faint);font-size:11.5px;letter-spacing:.1em;
+  text-transform:uppercase;margin:16px 0 8px}
+nav b:first-child{margin-top:0}
+nav a{display:block;padding:5px 10px;border-left:2px solid transparent;
+  color:var(--ink);text-decoration:none;border-radius:0 5px 5px 0}
+nav a:hover{background:var(--soft);color:var(--accent)}
+nav.book a.here{background:var(--accent-soft);border-left-color:var(--accent);
+  color:var(--accent);font-weight:600}
+nav.page a{color:var(--muted);font-size:13.5px;padding:4px 10px}
+nav.page a.sub{padding-left:22px;font-size:13px;color:var(--faint)}
+nav.page a.active{border-left-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+main{min-width:0;padding-top:24px}
+h1,h2,h3,h4{scroll-margin-top:16px}
+h2{font-size:24px;margin:48px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+h3{font-size:18.5px;margin:30px 0 10px}
+h4{font-size:16px;margin:22px 0 8px;color:var(--muted)}
+.anchor{float:left;margin-left:-1.05em;padding-right:.3em;color:transparent;
+  text-decoration:none;font-weight:400}
+h2:hover .anchor,h3:hover .anchor,h4:hover .anchor{color:var(--faint)}
+p{margin:0 0 15px}
+code{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  background:var(--soft);padding:2px 6px;border-radius:4px;word-break:break-word}
+.codeblock{position:relative;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px;margin:0 0 18px;overflow:hidden}
+.codeblock .srcbar{border-bottom:1px solid var(--line);background:var(--soft);
+  padding:6px 12px;font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+.codeblock .srcbar a{color:var(--muted);text-decoration:none}
+.codeblock .srcbar a:hover{color:var(--accent);text-decoration:underline}
+.codeblock pre{margin:0;padding:14px 16px;overflow:auto}
+.codeblock code{background:none;padding:0;font-size:13px;line-height:1.65;white-space:pre}
+.codeblock[data-lang=console] pre,.codeblock[data-lang=bash] pre{background:var(--soft)}
+.codeblock[data-lang=text]::after{content:"原书印刷";position:absolute;top:8px;right:10px;
+  font-size:11px;color:var(--faint);letter-spacing:.05em}
+.copy{position:absolute;top:6px;right:8px;border:1px solid var(--line);background:var(--panel);
+  color:var(--muted);border-radius:6px;font-size:12px;padding:2px 8px;cursor:pointer;opacity:0}
+.codeblock:hover .copy{opacity:1}
+.copy:hover{color:var(--accent);border-color:var(--accent)}
+.codeblock .srcbar~.copy{top:34px}
+.k{color:var(--kw)}.t{color:var(--ty)}.s{color:var(--st)}.c{color:var(--cm);font-style:italic}
+.n{color:var(--warn)}.p{color:var(--pp)}
+blockquote{margin:0 0 18px;padding:12px 18px;border-left:3px solid var(--accent);
+  background:var(--soft);border-radius:0 7px 7px 0}
+blockquote p:last-child{margin-bottom:0}
+.table-wrap{overflow-x:auto;margin:0 0 18px}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--panel)}
+th,td{border:1px solid var(--line);padding:8px 11px;vertical-align:top}
+th{background:var(--soft);font-weight:650}
+ul,ol{margin:0 0 15px;padding-left:26px}
+li{margin:6px 0}
+hr{border:0;border-top:1px solid var(--line);margin:34px 0}
+figure{margin:0 0 22px;padding:12px;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px}
+figure img{max-width:100%;display:block;margin:0 auto;border-radius:4px;background:#fff}
+figcaption{margin-top:9px;color:var(--muted);font-size:13.5px;text-align:center}
+.gallery-page{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:18px;align-items:start}
+.gallery-page>figure{margin:0}
+.gallery-page>h2,.gallery-page>h3,.gallery-page>p,.gallery-page>blockquote,
+.gallery-page>hr,.gallery-page>.pagenav{grid-column:1/-1}
+.math{font-family:"Latin Modern Math","Cambria Math",Georgia,serif;font-style:italic}
+.math .upr,.math .mono,.math .bold{font-style:normal}
+.math .mono{font-family:ui-monospace,Menlo,monospace}
+.math .bold{font-weight:700}
+.math sup,.math sub{font-size:.72em}
+.math .rel{margin:0 .28em;font-style:normal}
+.math .bin{margin:0 .16em;font-style:normal}
+.math-display{display:block;text-align:center;margin:18px 0;font-size:17px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+  font-size:.85em;line-height:1.15}
+.frac .num{border-bottom:1px solid currentColor;padding:0 .25em}
+.frac .den{padding:0 .25em}
+.sqrt{border-top:1px solid currentColor}
+.sqrt::before{content:"√";border-top:0}
+.tex-raw{border-bottom:1px dotted var(--danger);font-style:normal}
+.pagenav{display:flex;justify-content:space-between;gap:16px;margin:50px 0 0;
+  border-top:1px solid var(--line);padding-top:18px;font-size:14.5px}
+.pagenav a{text-decoration:none;max-width:46%}
+.pagenav .dir{display:block;color:var(--faint);font-size:12px}
+footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
+  font-size:13.5px;border-top:1px solid var(--line)}
+@media(max-width:1180px){
+  .layout{grid-template-columns:212px minmax(0,1fr);gap:32px}
+  nav.page{display:none}
+}
+@media(max-width:820px){
+  .layout{grid-template-columns:1fr;gap:0;padding:0 18px 60px}
+  nav.book{position:static;max-height:none;border-bottom:1px solid var(--line);
+    margin-bottom:14px;padding:14px 0}
+  .masthead{padding:22px 18px 18px}
+}
+@media print{
+  nav,.pagenav,.copy{display:none}
+  .layout{display:block;max-width:none}
+  body{background:#fff}
+  a{color:inherit;text-decoration:none}
+  .codeblock,figure,table{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header class="masthead"><div class="inner">
+<p class="eyebrow"><a href="index.html">现代 C++ 数据结构教程</a></p>  <h1>第5章 二叉树</h1>
+
+  <p class="meta"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/book/ch05-binary-tree.md">Markdown 源文件</a>
+    · <a href="https://github.com/GMyhf/dsa-modernization">GitHub 仓库</a>
+    · <a href="errata.html">原书勘误</a></p>
+</div></header>
+<div class="layout">
+<nav class="book"><b>导读</b><a href="index.html">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html">第4章 字符串</a><a href="ch05-binary-tree.html" class="here">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a></nav>
+<main>
+<p>二叉树的每个结点最多有左、右两个孩子。周游回答「以什么顺序访问全部结点」；二叉搜索树加上左小右大；堆把最小（或最大）值放在根；Huffman 树不断合并两个最小权值。</p>
+<p>源码：<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/modern.hpp" class="ext">二叉树与二叉搜索树</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/heap_huffman/modern.hpp" class="ext">最小堆与 Huffman 树</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/demo.cpp" class="ext">树的示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/heap_huffman/demo.cpp" class="ext">堆与 Huffman 的示例</a>。</p>
+<h2 id="51-二叉树的概念"><a class="anchor" href="#51-二叉树的概念">#</a>5.1 二叉树的概念</h2>
+<p>二叉树由结点的有限集合构成：或者为空，或者由一个根和两棵互不相交的左、右子树组成。左右次序不能颠倒。根没有父结点；其余每个结点恰有一个父结点，至多两个孩子。没有孩子的是叶，其余是内部结点。从根到某结点的边数是该结点的层数，根在第 0 层。</p>
+<h3 id="511-定义和基本术语"><a class="anchor" href="#511-定义和基本术语">#</a>5.1.1 定义和基本术语</h3>
+<p>下面这棵树：</p>
+<div class="codeblock" data-lang="text"><pre><code>      A
+     / \
+    B   C
+   / \
+  D   E</code></pre></div>
+<p>图 5.5 就是上面这棵树。</p>
+<p>四种周游访问的是同一组结点，次序不同：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">周游</th>
+<th style="text-align:left">顺序</th>
+<th style="text-align:left">本例</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">先序</td>
+<td style="text-align:left">根，左，右</td>
+<td style="text-align:left">A B D E C</td>
+</tr>
+<tr>
+<td style="text-align:left">中序</td>
+<td style="text-align:left">左，根，右</td>
+<td style="text-align:left">D B E A C</td>
+</tr>
+<tr>
+<td style="text-align:left">后序</td>
+<td style="text-align:left">左，右，根</td>
+<td style="text-align:left">D E B C A</td>
+</tr>
+<tr>
+<td style="text-align:left">层次</td>
+<td style="text-align:left">按离根的距离</td>
+<td style="text-align:left">A B C D E</td>
+</tr>
+</tbody></table></div>
+<p>递归版最贴合定义，也是 5.2 节要教的东西。极深的退化树会耗尽调用栈：Release 档大约在百万层段错误且<strong>没有诊断</strong>，ASan 档会打印 <code>stack-overflow</code> 并指到具体行。数字和复现程序见仓库中的未验证风险说明。</p>
+<p><strong>周游与析构在这件事上待遇不同，要分清楚：</strong></p>
+<ul>
+<li><strong>周游</strong>保留递归为主实现——它就是本节要教的东西，抹掉递归等于抹掉课程内容。迭代版按 D-001 §3d 作为补充并列给出，读者可以对照。</li>
+<li><strong>析构 <code>make_empty()</code> 与深拷贝</strong>改成了迭代。理由是它们<strong>不是教学内容，却会被隐式触发</strong>：一次普通的作用域结束、一句 <code>auto copy = tree;</code>，调用方根本看不见自己正在递归。教学价值为零，风险却实打实。</li>
+</ul>
+<p>析构用的是「右旋到没有左孩子，再沿右链逐个删」的经典办法：额外空间 O(1)，不分配内存，所以能保持 <code>noexcept</code>。深拷贝用堆上的显式栈代替调用栈。改完之后，纯左链 500 万结点的析构与深拷贝都不再崩（原先分别在 100 万、50 万段错误）；测试里有一个百万深链的用例专门守着这条，改回递归它就会报 <code>stack-overflow</code>。</p>
+<h3 id="512-满二叉树完全二叉树扩充二叉树"><a class="anchor" href="#512-满二叉树完全二叉树扩充二叉树">#</a>5.1.2 满二叉树、完全二叉树、扩充二叉树</h3>
+<p>任何结点或者是叶，或者左右子树都非空，叫做满二叉树。叶只出现在最下两层、且最下层靠左对齐，叫做完全二叉树。在空子树位置补上空树叶，得到扩充二叉树；外部路径长度 <span class="math">E</span> 与内部路径长度 <span class="math">I</span> 满足 <span class="math">E<span class="rel">=</span>I<span class="bin">+</span><span class="upr">2</span>n</span>。</p>
+<h3 id="513-主要性质"><a class="anchor" href="#513-主要性质">#</a>5.1.3 主要性质</h3>
+<p>第 <span class="math">i</span> 层至多 <span class="math"><span class="upr">2</span><sup>i</sup></span> 个结点；深度为 <span class="math">k</span> 的二叉树至多 <span class="math"><span class="upr">2</span><sup>k<span class="bin">+</span><span class="upr">1</span></sup><span class="bin">−</span><span class="upr">1</span></span> 个结点；叶结点数 <span class="math">n<sub><span class="upr">0</span></sub><span class="rel">=</span>n<sub><span class="upr">2</span></sub><span class="bin">+</span><span class="upr">1</span></span>。<span class="math">n</span> 个结点的完全二叉树高度为 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>(n<span class="bin">+</span><span class="upr">1</span>)⌉</span>。按层从 0 编号时，结点 <span class="math">i</span> 的父是 <span class="math">⌊(i<span class="bin">−</span><span class="upr">1</span>)/<span class="upr">2</span>⌋</span>，左右孩子是 <span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">1</span></span> 与 <span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">2</span></span>。这些性质没错，原样保留。</p>
+<h2 id="52-二叉树的周游"><a class="anchor" href="#52-二叉树的周游">#</a>5.2 二叉树的周游</h2>
+<h3 id="521-先跑一遍"><a class="anchor" href="#521-先跑一遍">#</a>5.2.1 先跑一遍</h3>
+<p>先建树并打印四种周游，再插一棵 BST：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/demo.cpp">code/ch05/binary_tree/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
+
+<span class="p">#include &lt;iostream&gt;</span>
+<span class="p">#include &lt;utility&gt;</span>
+
+<span class="t">int</span> main() {
+    dsa::BinaryTree&lt;<span class="t">char</span>&gt; left_leaf;
+    dsa::BinaryTree&lt;<span class="t">char</span>&gt; right_leaf;
+    dsa::BinaryTree&lt;<span class="t">char</span>&gt; left;
+    dsa::BinaryTree&lt;<span class="t">char</span>&gt; right;
+    dsa::BinaryTree&lt;<span class="t">char</span>&gt; root;
+    left_leaf.create_tree(<span class="s">&#x27;D&#x27;</span>);
+    right_leaf.create_tree(<span class="s">&#x27;E&#x27;</span>);
+    left.create_tree(<span class="s">&#x27;B&#x27;</span>, std::move(left_leaf), std::move(right_leaf));
+    right.create_tree(<span class="s">&#x27;C&#x27;</span>);
+    root.create_tree(<span class="s">&#x27;A&#x27;</span>, std::move(left), std::move(right));
+
+    std::cout &lt;&lt; <span class="s">&quot;先序: &quot;</span>;
+    root.preorder([](<span class="t">char</span> value) { std::cout &lt;&lt; value; });
+    std::cout &lt;&lt; <span class="s">&quot;\n中序: &quot;</span>;
+    root.inorder([](<span class="t">char</span> value) { std::cout &lt;&lt; value; });
+    std::cout &lt;&lt; <span class="s">&quot;\n后序: &quot;</span>;
+    root.postorder([](<span class="t">char</span> value) { std::cout &lt;&lt; value; });
+    std::cout &lt;&lt; <span class="s">&quot;\n层次: &quot;</span>;
+    root.level_order([](<span class="t">char</span> value) { std::cout &lt;&lt; value; });
+    std::cout &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+
+    dsa::BinarySearchTree&lt;<span class="t">int</span>&gt; tree;
+    <span class="k">for</span> (<span class="t">int</span> key : {<span class="n">8</span>, <span class="n">3</span>, <span class="n">10</span>, <span class="n">1</span>, <span class="n">6</span>, <span class="n">14</span>, <span class="n">4</span>, <span class="n">7</span>}) {
+        (<span class="t">void</span>)tree.insert(key);
+    }
+    std::cout &lt;&lt; <span class="s">&quot;BST 中序:&quot;</span>;
+    tree.inorder([](<span class="t">int</span> key) { std::cout &lt;&lt; <span class="s">&#x27; &#x27;</span> &lt;&lt; key; });
+    std::cout &lt;&lt; <span class="s">&quot;\n含 6? &quot;</span> &lt;&lt; (tree.contains(<span class="n">6</span>) ? <span class="s">&quot;是&quot;</span> : <span class="s">&quot;否&quot;</span>)
+              &lt;&lt; <span class="s">&quot;  删 3 后含 3? &quot;</span>;
+    (<span class="t">void</span>)tree.remove(<span class="n">3</span>);
+    std::cout &lt;&lt; (tree.contains(<span class="n">3</span>) ? <span class="s">&quot;是&quot;</span> : <span class="s">&quot;否&quot;</span>) &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+}</code></pre></div>
+<div class="codeblock" data-lang="bash"><pre><code>c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch05/binary_tree \
+    code/ch05/binary_tree/demo.cpp -o /tmp/tree-demo
+/tmp/tree-demo</code></pre></div>
+<div class="codeblock" data-lang="console"><pre><code>先序: ABDEC
+中序: DBEAC
+后序: DEBCA
+层次: ABCDE
+BST 中序: 1 3 4 6 7 8 10 14
+含 6? 是  删 3 后含 3? 否</code></pre></div>
+<p><code>create_tree(value, left, right)</code> 接管两棵子树。参数是右值，表示所有权被移走；<code>left_leaf</code> 在 <code>std::move</code> 之后变空，不会和 <code>left</code> 抢着析构同一结点。</p>
+<h3 id="522-深度优先周游"><a class="anchor" href="#522-深度优先周游">#</a>5.2.2 深度优先周游</h3>
+<p>先序 / 中序 / 后序的递归版就是三行：访问自己与走进左右孩子的次序不同。迭代版用一棵手写链式栈模拟调用栈，按 D-001 §3d 只作补充，不替换递归主实现。</p>
+<h3 id="523-广度优先周游"><a class="anchor" href="#523-广度优先周游">#</a>5.2.3 广度优先周游</h3>
+<p>层次周游用手写链式 FIFO，不用 <code>std::queue</code> 替代本节要教的队列用法。</p>
+<h2 id="53-二叉树的存储结构"><a class="anchor" href="#53-二叉树的存储结构">#</a>5.3 二叉树的存储结构</h2>
+<p><code>create_tree</code> 先 <code>new</code> 出新根，再把两棵子树的根指针挪过来，最后才清空自己原来的树。这样即使 <code>new</code> 抛异常，调用方的两棵子树也不动。链式存储是本节主实现；完全二叉树还可以按 5.1.3 的编号放进数组，堆就是这种用法。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/modern.hpp">code/ch05/binary_tree/modern.hpp#binary-tree</a></div><pre><code><span class="k">template</span> &lt;<span class="k">typename</span> T&gt;
+<span class="k">class</span> BinaryTree {
+<span class="k">public</span>:
+    <span class="k">struct</span> Node {
+        T value;
+        Node* left{<span class="k">nullptr</span>};
+        Node* right{<span class="k">nullptr</span>};
+
+        <span class="k">template</span> &lt;<span class="k">typename</span> U&gt;
+        <span class="k">explicit</span> Node(U&amp;&amp; item) : value(std::forward&lt;U&gt;(item)) {}
+    };
+
+    BinaryTree() <span class="k">noexcept</span> = <span class="k">default</span>;
+    BinaryTree(<span class="k">const</span> BinaryTree&amp; other) : root_(clone(other.root_)) {}
+    BinaryTree&amp; <span class="k">operator</span>=(<span class="k">const</span> BinaryTree&amp; other) {
+        <span class="k">if</span> (<span class="k">this</span> != &amp;other) {
+            BinaryTree copy(other);
+            swap(copy);
+        }
+        <span class="k">return</span> *<span class="k">this</span>;
+    }
+    BinaryTree(BinaryTree&amp;&amp; other) <span class="k">noexcept</span> : root_(other.release_root()) {}
+    BinaryTree&amp; <span class="k">operator</span>=(BinaryTree&amp;&amp; other) <span class="k">noexcept</span> {
+        <span class="k">if</span> (<span class="k">this</span> != &amp;other) {
+            make_empty();
+            root_ = other.release_root();
+        }
+        <span class="k">return</span> *<span class="k">this</span>;
+    }
+    ~BinaryTree() { make_empty(); }
+
+    <span class="t">void</span> swap(BinaryTree&amp; other) <span class="k">noexcept</span> {
+        <span class="k">using</span> std::swap;
+        swap(root_, other.root_);
+    }
+
+    [[nodiscard]] <span class="t">bool</span> empty() <span class="k">const</span> <span class="k">noexcept</span> { <span class="k">return</span> root_ == <span class="k">nullptr</span>; }
+    [[nodiscard]] <span class="k">const</span> Node* root() <span class="k">const</span> <span class="k">noexcept</span> { <span class="k">return</span> root_; }
+    [[nodiscard]] Node* root() <span class="k">noexcept</span> { <span class="k">return</span> root_; }
+
+    <span class="c">/// 构造一棵新树并接管两个子树，强异常保证：根结点创建失败时两棵子树不动。</span>
+    <span class="k">template</span> &lt;<span class="k">typename</span> U&gt;
+    <span class="t">void</span> create_tree(U&amp;&amp; value, BinaryTree&amp;&amp; left = {}, BinaryTree&amp;&amp; right = {}) {
+        Node* fresh = <span class="k">new</span> Node(std::forward&lt;U&gt;(value));
+        fresh-&gt;left = left.release_root();
+        fresh-&gt;right = right.release_root();
+        make_empty();
+        root_ = fresh;
+    }
+
+    <span class="c">/// 后序释放整个树。递归删除与递归周游同样受树高限制。</span>
+    <span class="t">void</span> make_empty() <span class="k">noexcept</span> {
+        destroy(root_);
+        root_ = <span class="k">nullptr</span>;
+    }
+
+    <span class="c">// Stack Overflow Risk: 以下递归周游忠实保留原书算法5.3；病态深树可能耗尽调用栈。</span>
+    <span class="k">template</span> &lt;<span class="k">typename</span> Visitor&gt;
+    <span class="t">void</span> preorder(Visitor&amp;&amp; visit) <span class="k">const</span> { preorder_impl(root_, visit); }
+    <span class="k">template</span> &lt;<span class="k">typename</span> Visitor&gt;
+    <span class="t">void</span> inorder(Visitor&amp;&amp; visit) <span class="k">const</span> { inorder_impl(root_, visit); }
+    <span class="k">template</span> &lt;<span class="k">typename</span> Visitor&gt;
+    <span class="t">void</span> postorder(Visitor&amp;&amp; visit) <span class="k">const</span> { postorder_impl(root_, visit); }
+
+    <span class="c">// 算法5.4 至 5.6：作为补充保留原书的手写栈式非递归周游。</span>
+    <span class="k">template</span> &lt;<span class="k">typename</span> Visitor&gt;
+    <span class="t">void</span> preorder_iterative(Visitor&amp;&amp; visit) <span class="k">const</span> {
+        LinkedStack&lt;<span class="k">const</span> Node*&gt; pending;
+        <span class="k">if</span> (root_ != <span class="k">nullptr</span>) pending.push(root_);
+        <span class="k">while</span> (<span class="k">auto</span> node = pending.pop()) {
+            visit((*node)-&gt;value);
+            <span class="k">if</span> ((*node)-&gt;right != <span class="k">nullptr</span>) pending.push((*node)-&gt;right);
+            <span class="k">if</span> ((*node)-&gt;left != <span class="k">nullptr</span>) pending.push((*node)-&gt;left);
+        }
+    }
+    <span class="k">template</span> &lt;<span class="k">typename</span> Visitor&gt;
+    <span class="t">void</span> inorder_iterative(Visitor&amp;&amp; visit) <span class="k">const</span> {
+        LinkedStack&lt;<span class="k">const</span> Node*&gt; pending;
+        <span class="k">const</span> Node* current = root_;
+        <span class="k">while</span> (current != <span class="k">nullptr</span> || !pending.empty()) {
+            <span class="k">while</span> (current != <span class="k">nullptr</span>) {
+                pending.push(current);
+                current = current-&gt;left;
+            }
+            current = *pending.pop();
+            visit(current-&gt;value);
+            current = current-&gt;right;
+        }
+    }
+    <span class="k">template</span> &lt;<span class="k">typename</span> Visitor&gt;
+    <span class="t">void</span> postorder_iterative(Visitor&amp;&amp; visit) <span class="k">const</span> {
+        <span class="k">struct</span> Frame { <span class="k">const</span> Node* node; <span class="t">bool</span> expanded; };
+        LinkedStack&lt;Frame&gt; pending;
+        <span class="k">if</span> (root_ != <span class="k">nullptr</span>) pending.push(Frame{root_, <span class="k">false</span>});
+        <span class="k">while</span> (<span class="k">auto</span> frame = pending.pop()) {
+            <span class="k">if</span> (frame-&gt;expanded) {
+                visit(frame-&gt;node-&gt;value);
+            } <span class="k">else</span> {
+                pending.push(Frame{frame-&gt;node, <span class="k">true</span>});
+                <span class="k">if</span> (frame-&gt;node-&gt;right != <span class="k">nullptr</span>) pending.push(Frame{frame-&gt;node-&gt;right, <span class="k">false</span>});
+                <span class="k">if</span> (frame-&gt;node-&gt;left != <span class="k">nullptr</span>) pending.push(Frame{frame-&gt;node-&gt;left, <span class="k">false</span>});
+            }
+        }
+    }
+
+    <span class="c">/// 算法5.7 的层次周游。内部手写链式 FIFO，不以 STL queue 替代本章内容。</span>
+    <span class="k">template</span> &lt;<span class="k">typename</span> Visitor&gt;
+    <span class="t">void</span> level_order(Visitor&amp;&amp; visit) <span class="k">const</span> {
+        <span class="k">struct</span> Pending { <span class="k">const</span> Node* node; Pending* next; };
+        Pending* front = <span class="k">nullptr</span>;
+        Pending* back = <span class="k">nullptr</span>;
+        <span class="k">auto</span> enqueue = [&amp;](<span class="k">const</span> Node* node) {
+            Pending* item = <span class="k">new</span> Pending{node, <span class="k">nullptr</span>};
+            <span class="k">if</span> (back == <span class="k">nullptr</span>) front = item; <span class="k">else</span> back-&gt;next = item;
+            back = item;
+        };
+        <span class="k">try</span> {
+            <span class="k">if</span> (root_ != <span class="k">nullptr</span>) enqueue(root_);
+            <span class="k">while</span> (front != <span class="k">nullptr</span>) {
+                Pending* item = front;
+                front = front-&gt;next;
+                <span class="k">if</span> (front == <span class="k">nullptr</span>) back = <span class="k">nullptr</span>;
+                <span class="k">const</span> Node* node = item-&gt;node;
+                <span class="k">delete</span> item;
+                visit(node-&gt;value);
+                <span class="k">if</span> (node-&gt;left != <span class="k">nullptr</span>) enqueue(node-&gt;left);
+                <span class="k">if</span> (node-&gt;right != <span class="k">nullptr</span>) enqueue(node-&gt;right);
+            }
+        } <span class="k">catch</span> (...) {
+            <span class="k">while</span> (front != <span class="k">nullptr</span>) { Pending* item = front; front = front-&gt;next; <span class="k">delete</span> item; }
+            <span class="k">throw</span>;
+        }
+    }
+
+    [[nodiscard]] <span class="k">const</span> Node* parent_of(<span class="k">const</span> Node* wanted) <span class="k">const</span> <span class="k">noexcept</span> {
+        <span class="k">return</span> parent_of_impl(root_, wanted);
+    }
+
+<span class="k">private</span>:
+    <span class="c">/// 释放整棵树。**迭代实现**，栈深度恒定。</span>
+    <span class="c">///</span>
+    <span class="c">/// 递归版 `destroy(left); destroy(right); delete node;` 在退化成链的树上会压穿栈——</span>
+    <span class="c">/// 实测纯左链 100 万结点即段错误（`collab/UNVERIFIED-RISKS.md` 有复现方法）。</span>
+    <span class="c">/// 这里用「右旋到没有左孩子，再沿右链删」的经典办法：每次旋转把左子树提上来，</span>
+    <span class="c">/// 树被逐步拉直成一条右链，然后一个一个删。总代价仍是 O(n)，额外空间 O(1)，</span>
+    <span class="c">/// 而且不分配内存，所以能保持 noexcept。</span>
+    <span class="k">static</span> <span class="t">void</span> destroy(Node* node) <span class="k">noexcept</span> {
+        <span class="k">while</span> (node != <span class="k">nullptr</span>) {
+            <span class="k">if</span> (node-&gt;left != <span class="k">nullptr</span>) {
+                Node* <span class="k">const</span> left = node-&gt;left;   <span class="c">// 右旋：左孩子成为新的根</span>
+                node-&gt;left = left-&gt;right;
+                left-&gt;right = node;
+                node = left;
+            } <span class="k">else</span> {
+                Node* <span class="k">const</span> right = node-&gt;right;
+                <span class="k">delete</span> node;
+                node = right;
+            }
+        }
+    }
+    <span class="c">/// 深拷贝整棵树。**迭代实现**，用显式栈代替调用栈。</span>
+    <span class="c">///</span>
+    <span class="c">/// 递归版在退化树上同样会压穿栈，而且比 destroy 更早——实测纯左链 50 万结点即段错误。</span>
+    <span class="c">/// 显式栈的结点放在堆上，深度不再受线程栈限制；中途抛异常时回收已建好的部分，保持强异常保证。</span>
+    <span class="k">static</span> Node* clone(<span class="k">const</span> Node* node) {
+        <span class="k">if</span> (node == <span class="k">nullptr</span>) {
+            <span class="k">return</span> <span class="k">nullptr</span>;
+        }
+        Node* copy_root = <span class="k">new</span> Node(node-&gt;value);
+        <span class="k">try</span> {
+            <span class="c">// 用本章自己那把手写链式栈，与迭代周游同一套零件。</span>
+            LinkedStack&lt;std::pair&lt;<span class="k">const</span> Node*, Node*&gt;&gt; pending;
+            pending.push({node, copy_root});
+            <span class="k">while</span> (<span class="k">auto</span> item = pending.pop()) {
+                <span class="k">const</span> Node* <span class="k">const</span> source = item-&gt;first;
+                Node* <span class="k">const</span> target = item-&gt;second;
+                <span class="k">if</span> (source-&gt;left != <span class="k">nullptr</span>) {
+                    target-&gt;left = <span class="k">new</span> Node(source-&gt;left-&gt;value);
+                    pending.push({source-&gt;left, target-&gt;left});
+                }
+                <span class="k">if</span> (source-&gt;right != <span class="k">nullptr</span>) {
+                    target-&gt;right = <span class="k">new</span> Node(source-&gt;right-&gt;value);
+                    pending.push({source-&gt;right, target-&gt;right});
+                }
+            }
+        } <span class="k">catch</span> (...) {
+            destroy(copy_root);
+            <span class="k">throw</span>;
+        }
+        <span class="k">return</span> copy_root;
+    }
+    <span class="k">static</span> <span class="k">const</span> Node* parent_of_impl(<span class="k">const</span> Node* node, <span class="k">const</span> Node* wanted) <span class="k">noexcept</span> {
+        <span class="k">if</span> (node == <span class="k">nullptr</span> || wanted == <span class="k">nullptr</span>) <span class="k">return</span> <span class="k">nullptr</span>;
+        <span class="k">if</span> (node-&gt;left == wanted || node-&gt;right == wanted) <span class="k">return</span> node;
+        <span class="k">if</span> (<span class="k">const</span> Node* left = parent_of_impl(node-&gt;left, wanted)) <span class="k">return</span> left;
+        <span class="k">return</span> parent_of_impl(node-&gt;right, wanted);
+    }
+    <span class="k">template</span> &lt;<span class="k">typename</span> Visitor&gt; <span class="k">static</span> <span class="t">void</span> preorder_impl(<span class="k">const</span> Node* node, Visitor&amp; visit) {
+        <span class="k">if</span> (node != <span class="k">nullptr</span>) { visit(node-&gt;value); preorder_impl(node-&gt;left, visit); preorder_impl(node-&gt;right, visit); }
+    }
+    <span class="k">template</span> &lt;<span class="k">typename</span> Visitor&gt; <span class="k">static</span> <span class="t">void</span> inorder_impl(<span class="k">const</span> Node* node, Visitor&amp; visit) {
+        <span class="k">if</span> (node != <span class="k">nullptr</span>) { inorder_impl(node-&gt;left, visit); visit(node-&gt;value); inorder_impl(node-&gt;right, visit); }
+    }
+    <span class="k">template</span> &lt;<span class="k">typename</span> Visitor&gt; <span class="k">static</span> <span class="t">void</span> postorder_impl(<span class="k">const</span> Node* node, Visitor&amp; visit) {
+        <span class="k">if</span> (node != <span class="k">nullptr</span>) { postorder_impl(node-&gt;left, visit); postorder_impl(node-&gt;right, visit); visit(node-&gt;value); }
+    }
+    Node* release_root() <span class="k">noexcept</span> { Node* result = root_; root_ = <span class="k">nullptr</span>; <span class="k">return</span> result; }
+    Node* root_{<span class="k">nullptr</span>};
+};</code></pre></div>
+<h2 id="54-二叉搜索树"><a class="anchor" href="#54-二叉搜索树">#</a>5.4 二叉搜索树</h2>
+<p>二叉搜索树要求左子树的键都小于根、右子树都大于根。中序周游因此正好是排序。插入重复键、删除不存在的键都是可预期状态，返回 <code>false</code>，不抛异常。删除有左右孩子的结点时，用左子树里最右的前驱替换它：先把前驱从原位置摘下，再让它继承被删结点的两棵子树，最后只 <code>delete</code> 被删结点一次。漏掉「先脱离原父」会形成环或二次释放。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/modern.hpp">code/ch05/binary_tree/modern.hpp#bst</a></div><pre><code><span class="k">template</span> &lt;<span class="k">typename</span> T, <span class="k">typename</span> Compare = std::less&lt;T&gt;&gt;
+<span class="k">class</span> BinarySearchTree {
+    <span class="k">struct</span> Node {
+        T value;
+        Node* left{<span class="k">nullptr</span>};
+        Node* right{<span class="k">nullptr</span>};
+        <span class="k">template</span> &lt;<span class="k">typename</span> U&gt; <span class="k">explicit</span> Node(U&amp;&amp; item) : value(std::forward&lt;U&gt;(item)) {}
+    };
+
+<span class="k">public</span>:
+    BinarySearchTree() = <span class="k">default</span>;
+    BinarySearchTree(<span class="k">const</span> BinarySearchTree&amp; other) : root_(clone(other.root_)), compare_(other.compare_) {}
+    BinarySearchTree&amp; <span class="k">operator</span>=(<span class="k">const</span> BinarySearchTree&amp; other) {
+        <span class="k">if</span> (<span class="k">this</span> != &amp;other) { BinarySearchTree copy(other); swap(copy); }
+        <span class="k">return</span> *<span class="k">this</span>;
+    }
+    BinarySearchTree(BinarySearchTree&amp;&amp; other) : root_(other.root_), compare_(std::move(other.compare_)) { other.root_ = <span class="k">nullptr</span>; }
+    BinarySearchTree&amp; <span class="k">operator</span>=(BinarySearchTree&amp;&amp; other) {
+        <span class="k">if</span> (<span class="k">this</span> != &amp;other) { clear(); root_ = other.root_; other.root_ = <span class="k">nullptr</span>; compare_ = std::move(other.compare_); }
+        <span class="k">return</span> *<span class="k">this</span>;
+    }
+    ~BinarySearchTree() { clear(); }
+
+    <span class="t">void</span> swap(BinarySearchTree&amp; other) {
+        <span class="k">using</span> std::swap; swap(root_, other.root_); swap(compare_, other.compare_);
+    }
+    [[nodiscard]] <span class="t">bool</span> empty() <span class="k">const</span> <span class="k">noexcept</span> { <span class="k">return</span> root_ == <span class="k">nullptr</span>; }
+
+    <span class="c">/// 算法5.9：插入唯一键。重复键是可预期状态，返回 false。</span>
+    <span class="t">bool</span> insert(<span class="k">const</span> T&amp; value) { <span class="k">return</span> insert_impl(value); }
+    <span class="t">bool</span> insert(T&amp;&amp; value) { <span class="k">return</span> insert_impl(std::move(value)); }
+
+    [[nodiscard]] <span class="t">bool</span> contains(<span class="k">const</span> T&amp; value) <span class="k">const</span> {
+        <span class="k">const</span> Node* current = root_;
+        <span class="k">while</span> (current != <span class="k">nullptr</span>) {
+            <span class="k">if</span> (equivalent(value, current-&gt;value)) <span class="k">return</span> <span class="k">true</span>;
+            current = compare_(value, current-&gt;value) ? current-&gt;left : current-&gt;right;
+        }
+        <span class="k">return</span> <span class="k">false</span>;
+    }
+
+    <span class="c">/// 算法5.10：删除不存在的键是幂等的可预期状态，返回 false（D-001 §3c）。</span>
+    <span class="t">bool</span> remove(<span class="k">const</span> T&amp; value) { <span class="k">return</span> remove_impl(root_, value); }
+    <span class="t">void</span> clear() <span class="k">noexcept</span> { destroy(root_); root_ = <span class="k">nullptr</span>; }
+
+    <span class="k">template</span> &lt;<span class="k">typename</span> Visitor&gt;
+    <span class="t">void</span> inorder(Visitor&amp;&amp; visit) <span class="k">const</span> { inorder_impl(root_, visit); }
+
+<span class="k">private</span>:
+    [[nodiscard]] <span class="t">bool</span> equivalent(<span class="k">const</span> T&amp; left, <span class="k">const</span> T&amp; right) <span class="k">const</span> {
+        <span class="k">return</span> !compare_(left, right) &amp;&amp; !compare_(right, left);
+    }
+    <span class="k">template</span> &lt;<span class="k">typename</span> U&gt; <span class="t">bool</span> insert_impl(U&amp;&amp; value) {
+        Node** link = &amp;root_;
+        <span class="k">while</span> (*link != <span class="k">nullptr</span>) {
+            <span class="k">if</span> (equivalent(value, (*link)-&gt;value)) <span class="k">return</span> <span class="k">false</span>;
+            link = compare_(value, (*link)-&gt;value) ? &amp;(*link)-&gt;left : &amp;(*link)-&gt;right;
+        }
+        *link = <span class="k">new</span> Node(std::forward&lt;U&gt;(value));
+        <span class="k">return</span> <span class="k">true</span>;
+    }
+    <span class="t">bool</span> remove_impl(Node*&amp; link, <span class="k">const</span> T&amp; value) {
+        <span class="k">if</span> (link == <span class="k">nullptr</span>) <span class="k">return</span> <span class="k">false</span>;
+        <span class="k">if</span> (compare_(value, link-&gt;value)) <span class="k">return</span> remove_impl(link-&gt;left, value);
+        <span class="k">if</span> (compare_(link-&gt;value, value)) <span class="k">return</span> remove_impl(link-&gt;right, value);
+        Node* removed = link;
+        <span class="k">if</span> (removed-&gt;left == <span class="k">nullptr</span>) { link = removed-&gt;right; <span class="k">delete</span> removed; <span class="k">return</span> <span class="k">true</span>; }
+        Node** predecessor_link = &amp;removed-&gt;left;
+        <span class="k">while</span> ((*predecessor_link)-&gt;right != <span class="k">nullptr</span>) predecessor_link = &amp;(*predecessor_link)-&gt;right;
+        Node* replacement = *predecessor_link;
+        *predecessor_link = replacement-&gt;left;
+        replacement-&gt;left = removed-&gt;left;
+        replacement-&gt;right = removed-&gt;right;
+        link = replacement;
+        <span class="k">delete</span> removed;
+        <span class="k">return</span> <span class="k">true</span>;
+    }
+    <span class="c">/// 释放整棵树（与 BinaryTree 同法）。**迭代实现**，栈深度恒定。</span>
+    <span class="c">///</span>
+    <span class="c">/// 递归版 `destroy(left); destroy(right); delete node;` 在退化成链的树上会压穿栈——</span>
+    <span class="c">/// 实测纯左链 100 万结点即段错误（`collab/UNVERIFIED-RISKS.md` 有复现方法）。</span>
+    <span class="c">/// 这里用「右旋到没有左孩子，再沿右链删」的经典办法：每次旋转把左子树提上来，</span>
+    <span class="c">/// 树被逐步拉直成一条右链，然后一个一个删。总代价仍是 O(n)，额外空间 O(1)，</span>
+    <span class="c">/// 而且不分配内存，所以能保持 noexcept。</span>
+    <span class="k">static</span> <span class="t">void</span> destroy(Node* node) <span class="k">noexcept</span> {
+        <span class="k">while</span> (node != <span class="k">nullptr</span>) {
+            <span class="k">if</span> (node-&gt;left != <span class="k">nullptr</span>) {
+                Node* <span class="k">const</span> left = node-&gt;left;   <span class="c">// 右旋：左孩子成为新的根</span>
+                node-&gt;left = left-&gt;right;
+                left-&gt;right = node;
+                node = left;
+            } <span class="k">else</span> {
+                Node* <span class="k">const</span> right = node-&gt;right;
+                <span class="k">delete</span> node;
+                node = right;
+            }
+        }
+    }
+    <span class="c">/// 深拷贝（与 BinaryTree 同法：显式栈代替调用栈，退化树上不压穿栈）。</span>
+    <span class="k">static</span> Node* clone(<span class="k">const</span> Node* node) {
+        <span class="k">if</span> (node == <span class="k">nullptr</span>) {
+            <span class="k">return</span> <span class="k">nullptr</span>;
+        }
+        Node* copy_root = <span class="k">new</span> Node(node-&gt;value);
+        <span class="k">try</span> {
+            <span class="c">// 用本章自己那把手写链式栈，与迭代周游同一套零件。</span>
+            LinkedStack&lt;std::pair&lt;<span class="k">const</span> Node*, Node*&gt;&gt; pending;
+            pending.push({node, copy_root});
+            <span class="k">while</span> (<span class="k">auto</span> item = pending.pop()) {
+                <span class="k">const</span> Node* <span class="k">const</span> source = item-&gt;first;
+                Node* <span class="k">const</span> target = item-&gt;second;
+                <span class="k">if</span> (source-&gt;left != <span class="k">nullptr</span>) {
+                    target-&gt;left = <span class="k">new</span> Node(source-&gt;left-&gt;value);
+                    pending.push({source-&gt;left, target-&gt;left});
+                }
+                <span class="k">if</span> (source-&gt;right != <span class="k">nullptr</span>) {
+                    target-&gt;right = <span class="k">new</span> Node(source-&gt;right-&gt;value);
+                    pending.push({source-&gt;right, target-&gt;right});
+                }
+            }
+        } <span class="k">catch</span> (...) {
+            destroy(copy_root);
+            <span class="k">throw</span>;
+        }
+        <span class="k">return</span> copy_root;
+    }
+    <span class="k">template</span> &lt;<span class="k">typename</span> Visitor&gt; <span class="k">static</span> <span class="t">void</span> inorder_impl(<span class="k">const</span> Node* node, Visitor&amp; visit) {
+        <span class="k">if</span> (node != <span class="k">nullptr</span>) { inorder_impl(node-&gt;left, visit); visit(node-&gt;value); inorder_impl(node-&gt;right, visit); }
+    }
+    Node* root_{<span class="k">nullptr</span>};
+    Compare compare_{};
+};</code></pre></div>
+<h2 id="55-堆与优先队列"><a class="anchor" href="#55-堆与优先队列">#</a>5.5 堆与优先队列</h2>
+<p>最小堆是一棵完全二叉树，父结点不大于孩子；用数组存时，下标 <code>i</code> 的孩子是 <code>2i+1</code> 和 <code>2i+2</code>。<code>sift_down</code> 必须比较左右两个孩子。空堆上 <code>remove_min()</code> 返回 <code>nullopt</code>。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/heap_huffman/demo.cpp">code/ch05/heap_huffman/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
+
+<span class="p">#include &lt;iostream&gt;</span>
+
+<span class="t">int</span> main() {
+    dsa::MinHeap&lt;<span class="t">int</span>&gt; heap;
+    <span class="k">for</span> (<span class="t">int</span> value : {<span class="n">5</span>, <span class="n">1</span>, <span class="n">4</span>, <span class="n">2</span>}) {
+        heap.insert(value);
+    }
+    std::cout &lt;&lt; <span class="s">&quot;依次取出最小元:&quot;</span>;
+    <span class="k">while</span> (<span class="k">auto</span> value = heap.remove_min()) {
+        std::cout &lt;&lt; <span class="s">&#x27; &#x27;</span> &lt;&lt; *value;
+    }
+    std::cout &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+
+    <span class="k">const</span> <span class="t">int</span> weights[] = {<span class="n">2</span>, <span class="n">3</span>, <span class="n">4</span>, <span class="n">7</span>};
+    <span class="k">const</span> dsa::HuffmanTree tree(weights, <span class="n">4</span>);
+    std::cout &lt;&lt; <span class="s">&quot;权 2,3,4,7 的 Huffman 树根权 = &quot;</span> &lt;&lt; tree.total_weight() &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+}</code></pre></div>
+<div class="codeblock" data-lang="bash"><pre><code>c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch05/heap_huffman \
+    code/ch05/heap_huffman/demo.cpp -o /tmp/heap-demo
+/tmp/heap-demo</code></pre></div>
+<div class="codeblock" data-lang="console"><pre><code>依次取出最小元: 1 2 4 5
+权 2,3,4,7 的 Huffman 树根权 = 16</code></pre></div>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/heap_huffman/modern.hpp">code/ch05/heap_huffman/modern.hpp#min-heap</a></div><pre><code><span class="k">template</span> &lt;<span class="k">typename</span> T&gt;
+<span class="k">class</span> MinHeap {
+<span class="k">public</span>:
+    <span class="k">static_assert</span>(std::is_nothrow_move_constructible&lt;T&gt;::value &amp;&amp; std::is_nothrow_move_assignable&lt;T&gt;::value,
+                  <span class="s">&quot;MinHeap growth relies on non-throwing moves; use a noexcept-movable element type.&quot;</span>);
+
+    MinHeap() = <span class="k">default</span>;
+    MinHeap(<span class="k">const</span> MinHeap&amp; other) : data_(other.capacity_ ? <span class="k">new</span> T[other.capacity_] : <span class="k">nullptr</span>), size_(other.size_), capacity_(other.capacity_) {
+        <span class="k">try</span> { <span class="k">for</span> (std::<span class="t">size_t</span> i = <span class="n">0</span>; i &lt; size_; ++i) data_[i] = other.data_[i]; }
+        <span class="k">catch</span> (...) { <span class="k">delete</span>[] data_; <span class="k">throw</span>; }
+    }
+    MinHeap&amp; <span class="k">operator</span>=(<span class="k">const</span> MinHeap&amp; other) { <span class="k">if</span> (<span class="k">this</span> != &amp;other) { MinHeap copy(other); swap(copy); } <span class="k">return</span> *<span class="k">this</span>; }
+    MinHeap(MinHeap&amp;&amp; other) <span class="k">noexcept</span> { swap(other); }
+    MinHeap&amp; <span class="k">operator</span>=(MinHeap&amp;&amp; other) <span class="k">noexcept</span> {
+        <span class="k">if</span> (<span class="k">this</span> != &amp;other) {
+            <span class="k">delete</span>[] data_;
+            data_ = other.data_;
+            size_ = other.size_;
+            capacity_ = other.capacity_;
+            other.data_ = <span class="k">nullptr</span>;
+            other.size_ = other.capacity_ = <span class="n">0</span>;
+        }
+        <span class="k">return</span> *<span class="k">this</span>;
+    }
+    ~MinHeap() { <span class="k">delete</span>[] data_; }
+    <span class="t">void</span> swap(MinHeap&amp; other) <span class="k">noexcept</span> { <span class="k">using</span> std::swap; swap(data_, other.data_); swap(size_, other.size_); swap(capacity_, other.capacity_); }
+    [[nodiscard]] <span class="t">bool</span> empty() <span class="k">const</span> <span class="k">noexcept</span> { <span class="k">return</span> size_ == <span class="n">0</span>; }
+    [[nodiscard]] std::<span class="t">size_t</span> size() <span class="k">const</span> <span class="k">noexcept</span> { <span class="k">return</span> size_; }
+    <span class="t">void</span> insert(<span class="k">const</span> T&amp; value) { ensure_capacity(); data_[size_] = value; sift_up(size_++); }
+    <span class="t">void</span> insert(T&amp;&amp; value) { ensure_capacity(); data_[size_] = std::move(value); sift_up(size_++); }
+    [[nodiscard]] std::optional&lt;T&gt; remove_min() {
+        <span class="k">if</span> (empty()) <span class="k">return</span> std::nullopt;
+        T value = std::move(data_[<span class="n">0</span>]);
+        --size_;
+        <span class="k">if</span> (size_ == <span class="n">0</span>) <span class="k">return</span> value;
+        data_[<span class="n">0</span>] = std::move(data_[size_]);
+        sift_down(<span class="n">0</span>);
+        <span class="k">return</span> value;
+    }
+<span class="k">private</span>:
+    <span class="t">void</span> ensure_capacity() {
+        <span class="k">if</span> (size_ &lt; capacity_) <span class="k">return</span>;
+        <span class="k">const</span> std::<span class="t">size_t</span> next = capacity_ == <span class="n">0</span> ? <span class="n">4</span> : capacity_ * <span class="n">2</span>;
+        T* fresh = <span class="k">new</span> T[next];
+        <span class="c">// The class contract requires non-throwing move assignment, so the</span>
+        <span class="c">// migration loop cannot fail. Allocation failure is thrown before fresh exists.</span>
+        <span class="k">for</span> (std::<span class="t">size_t</span> i = <span class="n">0</span>; i &lt; size_; ++i) fresh[i] = std::move(data_[i]);
+        <span class="k">delete</span>[] data_;
+        data_ = fresh;
+        capacity_ = next;
+    }
+    <span class="t">void</span> sift_up(std::<span class="t">size_t</span> index) {
+        <span class="k">while</span> (index != <span class="n">0</span> &amp;&amp; data_[index] &lt; data_[(index - <span class="n">1</span>) / <span class="n">2</span>]) {
+            <span class="k">using</span> std::swap;
+            swap(data_[index], data_[(index - <span class="n">1</span>) / <span class="n">2</span>]);
+            index = (index - <span class="n">1</span>) / <span class="n">2</span>;
+        }
+    }
+    <span class="t">void</span> sift_down(std::<span class="t">size_t</span> index) {
+        <span class="k">for</span> (;;) {
+            <span class="k">const</span> std::<span class="t">size_t</span> left = index * <span class="n">2</span> + <span class="n">1</span>;
+            <span class="k">const</span> std::<span class="t">size_t</span> right = left + <span class="n">1</span>;
+            std::<span class="t">size_t</span> smallest = index;
+            <span class="k">if</span> (left &lt; size_ &amp;&amp; data_[left] &lt; data_[smallest]) smallest = left;
+            <span class="k">if</span> (right &lt; size_ &amp;&amp; data_[right] &lt; data_[smallest]) smallest = right;
+            <span class="k">if</span> (smallest == index) <span class="k">return</span>;
+            <span class="k">using</span> std::swap;
+            swap(data_[index], data_[smallest]);
+            index = smallest;
+        }
+    }
+    T* data_{<span class="k">nullptr</span>};
+    std::<span class="t">size_t</span> size_{<span class="n">0</span>};
+    std::<span class="t">size_t</span> capacity_{<span class="n">0</span>};
+};</code></pre></div>
+<h2 id="56-huffman-树及其应用"><a class="anchor" href="#56-huffman-树及其应用">#</a>5.6 Huffman 树及其应用</h2>
+<p>Huffman 树反复取出两个最小权，合成它们的和，直到只剩一棵——这就是前缀编码的那棵树。根权等于全部叶子权之和。合并时若 <code>new</code> 父结点失败，会拆开并销毁已经取出的两棵子树。</p>
+<div class="codeblock" data-lang="text"><pre><code>class HuffmanTree {
+    struct Node { int weight; Node* left{nullptr}; Node* right{nullptr}; explicit Node(int w):weight(w){} };
+    struct ByWeight { Node* node{nullptr}; bool operator&lt;(const ByWeight&amp; other) const noexcept { return node-&gt;weight &lt; other.node-&gt;weight; } };
+public:
+    HuffmanTree()=default;
+    explicit HuffmanTree(const int* weights, std::size_t count) {
+        if (count == 0) return;
+        if (weights == nullptr) throw std::invalid_argument(&quot;non-empty Huffman input requires weights&quot;);
+        MinHeap&lt;ByWeight&gt; heap;
+        try {
+            for (std::size_t i = 0; i &lt; count; ++i) {
+                if (weights[i] &lt; 0) throw std::invalid_argument(&quot;Huffman weights must be non-negative&quot;);
+                Node* leaf = new Node(weights[i]);
+                try { heap.insert(ByWeight{leaf}); }
+                catch (...) { delete leaf; throw; }
+            }
+            while (heap.size() &gt; 1) {
+                Node* left = heap.remove_min()-&gt;node;
+                Node* right = heap.remove_min()-&gt;node;
+                Node* parent = nullptr;
+                try {
+                    if (left-&gt;weight &gt; std::numeric_limits&lt;int&gt;::max() - right-&gt;weight) {
+                        throw std::overflow_error(&quot;Huffman weight sum overflows int&quot;);
+                    }
+                    parent = new Node(left-&gt;weight + right-&gt;weight);
+                    parent-&gt;left = left;
+                    parent-&gt;right = right;
+                    heap.insert(ByWeight{parent});
+                } catch (...) {
+                    if (parent != nullptr) { parent-&gt;left = parent-&gt;right = nullptr; delete parent; }
+                    destroy(left);
+                    destroy(right);
+                    throw;
+                }
+            }
+            root_ = heap.remove_min()-&gt;node;
+        } catch (...) {
+            while (auto item = heap.remove_min()) destroy(item-&gt;node);
+            throw;
+        }
+    }
+    HuffmanTree(const HuffmanTree&amp;)=delete; HuffmanTree&amp; operator=(const HuffmanTree&amp;)=delete;
+    HuffmanTree(HuffmanTree&amp;&amp; other)noexcept:root_(other.root_){other.root_=nullptr;} HuffmanTree&amp; operator=(HuffmanTree&amp;&amp; other)noexcept{if(this!=&amp;other){destroy(root_);root_=other.root_;other.root_=nullptr;}return *this;} ~HuffmanTree(){destroy(root_);} [[nodiscard]] int total_weight()const noexcept{return root_?root_-&gt;weight:0;}
+private: static void destroy(Node*n)noexcept{if(n){destroy(n-&gt;left);destroy(n-&gt;right);delete n;}} Node* root_{nullptr};
+};</code></pre></div>
+<h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
+<p>二叉树每个结点至多两个有左右之分的孩子。满二叉树、完全二叉树和扩充二叉树是三种常用特殊形态；第 <span class="math">i</span> 层至多 <span class="math"><span class="upr">2</span><sup>i</sup></span> 个结点，<span class="math">n<sub><span class="upr">0</span></sub><span class="rel">=</span>n<sub><span class="upr">2</span></sub><span class="bin">+</span><span class="upr">1</span></span>。周游有先序、中序、后序和层次。链式存储用左右指针；完全二叉树还可以按层编号放进数组，堆就是这种用法。二叉搜索树加上左小右大，中序即排序。堆把最值放在根；Huffman 树反复合并两个最小权，得到带权路径长度最小的树。</p>
+<h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
+<h3 id="补充证明题参考课程第-5-章"><a class="anchor" href="#补充证明题参考课程第-5-章">#</a>补充证明题（参考课程第 5 章）</h3>
+<ol>
+<li>判断“先序和后序遍历序列总能唯一确定二叉树”是否成立；若不成立给出最小反例。</li>
+<li>设计 <code>O(n)</code> 算法检查数组是否为大顶堆，并说明为什么只需检查每个非根结点与父结点的关系。</li>
+<li>证明含 <code>n</code> 个结点的满二叉 Huffman 树叶子数为 <code>(n+1)/2</code>。</li>
+<li>分别画出含 3 个结点的二叉树的所有不同形态。</li>
+<li>一棵二叉树的先序是 ABCDEFG、中序是 CBDAFEG，画出这棵树并写出后序。</li>
+<li>证明：有 <span class="math">n</span> 个结点的二叉树，空指针域的个数是 <span class="math">n<span class="bin">+</span><span class="upr">1</span></span>。</li>
+<li>完全二叉树按层编号，写出结点 <span class="math">i</span> 的父、左孩子、右孩子公式，并证明。</li>
+<li>写出层次周游的算法，并说明为什么需要队列。</li>
+<li>在二叉搜索树中插入序列 50, 30, 70, 20, 40, 60, 80，画出结果；再删除 50，画出删除后的树。</li>
+<li>对权 2, 3, 4, 7, 8 构造一棵 Huffman 树，计算带权路径长度，并给出一组前缀编码。</li>
+</ol>
+<h2 id="上机题"><a class="anchor" href="#上机题">#</a>上机题</h2>
+<ol>
+<li>由先序和中序序列重建二叉树，再输出后序。</li>
+<li>实现二叉搜索树的插入、按键删除和中序输出，并用有序插入验证会退化成链。</li>
+<li>用最小堆对 <span class="math">n</span> 个整数排序，并与直接插入比较运行时间。</li>
+<li>根据一组权值建 Huffman 树，输出每个权的编码。</li>
+</ol>
+<div class="pagenav"><a href="ch04-string.html"><span class="dir">← 上一篇</span>第4章 字符串</a><a href="ch06-tree.html" style="text-align:right"><span class="dir">下一篇 →</span>第6章 树</a></div>
+</main>
+<nav class="page"><b>本页</b><a href="#51-二叉树的概念">5.1 二叉树的概念</a><a href="#511-定义和基本术语" class="sub">5.1.1 定义和基本术语</a><a href="#512-满二叉树完全二叉树扩充二叉树" class="sub">5.1.2 满二叉树、完全二叉树、扩充二叉树</a><a href="#513-主要性质" class="sub">5.1.3 主要性质</a><a href="#52-二叉树的周游">5.2 二叉树的周游</a><a href="#521-先跑一遍" class="sub">5.2.1 先跑一遍</a><a href="#522-深度优先周游" class="sub">5.2.2 深度优先周游</a><a href="#523-广度优先周游" class="sub">5.2.3 广度优先周游</a><a href="#53-二叉树的存储结构">5.3 二叉树的存储结构</a><a href="#54-二叉搜索树">5.4 二叉搜索树</a><a href="#55-堆与优先队列">5.5 堆与优先队列</a><a href="#56-huffman-树及其应用">5.6 Huffman 树及其应用</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充证明题参考课程第-5-章" class="sub">补充证明题（参考课程第 5 章）</a><a href="#上机题">上机题</a></nav>
+</div>
+<footer>
+  本页由 <code>tools/build_site.py</code> 从 <code>book/ch05-binary-tree.md</code> 生成
+  —— Markdown 是唯一事实源，请勿手改此文件。正文中的 C++ 代码块与 <code>code/</code> 下
+  通过测试的源码逐字一致（由 <code>tools/check_doc.py</code> 的 R3 保证）。
+</footer>
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('nav.page a'));
+  if(links.length){
+    var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a});
+    var seen=[];
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        var id=e.target.id;
+        if(e.isIntersecting){if(seen.indexOf(id)<0)seen.push(id)}
+        else{var i=seen.indexOf(id);if(i>=0)seen.splice(i,1)}
+      });
+      links.forEach(function(a){a.classList.remove('active')});
+      if(seen.length&&map[seen[0]])map[seen[0]].classList.add('active');
+    },{rootMargin:'0px 0px -75% 0px'});
+    [].slice.call(document.querySelectorAll('h2[id],h3[id]')).forEach(function(h){io.observe(h)});
+  }
+  [].slice.call(document.querySelectorAll('.codeblock')).forEach(function(block){
+    var button=document.createElement('button');
+    button.className='copy';button.type='button';button.textContent='复制';
+    button.addEventListener('click',function(){
+      var text=block.querySelector('code').textContent;
+      var done=function(){button.textContent='已复制';
+        setTimeout(function(){button.textContent='复制'},1200)};
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done,function(){button.textContent='复制失败'});
+      }else{
+        var area=document.createElement('textarea');area.value=text;document.body.appendChild(area);
+        area.select();try{document.execCommand('copy');done()}catch(e){button.textContent='复制失败'}
+        document.body.removeChild(area);
+      }
+    });
+    block.appendChild(button);
+  });
+})();
+</script>
+</body>
+</html>

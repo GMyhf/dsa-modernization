@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第9章 文件管理与外部排序 · 现代 C++ 数据结构教程</title>
+<meta name="description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:title" content="第9章 文件管理与外部排序">
+<meta property="og:description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:type" content="article">
+<style>
+:root{color-scheme:light;
+  --ink:#1a2230;--muted:#68758a;--faint:#93a0b3;--line:#dde3ec;--bg:#f3f5f9;--panel:#fff;
+  --soft:#eef1f7;--accent:#2f5fd0;--accent-soft:#e5ecfb;--warn:#b06a1c;--danger:#c0392b;
+  --kw:#8b2fa0;--ty:#0f6f8c;--st:#177245;--cm:#7d8899;--pp:#a3572a}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;
+  --ink:#e3e8f0;--muted:#98a3b5;--faint:#6f7c90;--line:#2b3342;--bg:#12151b;--panel:#171b22;
+  --soft:#1e232c;--accent:#84a9f5;--accent-soft:#1c2740;--warn:#dcae72;--danger:#e08a80;
+  --kw:#d79ae8;--ty:#7cc7dd;--st:#8fd0a4;--cm:#7b8598;--pp:#e0a97b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.8 system-ui,-apple-system,"Segoe UI","Noto Sans CJK SC","PingFang SC",sans-serif}
+a{color:var(--accent)}
+.masthead{background:var(--panel);border-bottom:1px solid var(--line);padding:30px 26px 24px}
+.masthead .inner{max-width:1440px;margin:0 auto}
+.masthead .eyebrow{font-size:13px;color:var(--muted);letter-spacing:.06em;margin:0 0 6px}
+.masthead .eyebrow a{text-decoration:none}
+.masthead h1{margin:0;font-size:clamp(23px,3.4vw,34px);line-height:1.25;letter-spacing:-.01em}
+.masthead p.sub{margin:10px 0 0;color:var(--muted);font-size:15px;max-width:62ch}
+.masthead .meta{margin:12px 0 0;font-size:13.5px;color:var(--muted)}
+.layout{max-width:1440px;margin:0 auto;padding:0 26px 80px;display:grid;
+  grid-template-columns:228px minmax(0,1fr) 208px;gap:40px;align-items:start}
+nav.book,nav.page{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;
+  padding:22px 0;font-size:14px;line-height:1.55}
+nav b{display:block;color:var(--faint);font-size:11.5px;letter-spacing:.1em;
+  text-transform:uppercase;margin:16px 0 8px}
+nav b:first-child{margin-top:0}
+nav a{display:block;padding:5px 10px;border-left:2px solid transparent;
+  color:var(--ink);text-decoration:none;border-radius:0 5px 5px 0}
+nav a:hover{background:var(--soft);color:var(--accent)}
+nav.book a.here{background:var(--accent-soft);border-left-color:var(--accent);
+  color:var(--accent);font-weight:600}
+nav.page a{color:var(--muted);font-size:13.5px;padding:4px 10px}
+nav.page a.sub{padding-left:22px;font-size:13px;color:var(--faint)}
+nav.page a.active{border-left-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+main{min-width:0;padding-top:24px}
+h1,h2,h3,h4{scroll-margin-top:16px}
+h2{font-size:24px;margin:48px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+h3{font-size:18.5px;margin:30px 0 10px}
+h4{font-size:16px;margin:22px 0 8px;color:var(--muted)}
+.anchor{float:left;margin-left:-1.05em;padding-right:.3em;color:transparent;
+  text-decoration:none;font-weight:400}
+h2:hover .anchor,h3:hover .anchor,h4:hover .anchor{color:var(--faint)}
+p{margin:0 0 15px}
+code{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  background:var(--soft);padding:2px 6px;border-radius:4px;word-break:break-word}
+.codeblock{position:relative;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px;margin:0 0 18px;overflow:hidden}
+.codeblock .srcbar{border-bottom:1px solid var(--line);background:var(--soft);
+  padding:6px 12px;font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+.codeblock .srcbar a{color:var(--muted);text-decoration:none}
+.codeblock .srcbar a:hover{color:var(--accent);text-decoration:underline}
+.codeblock pre{margin:0;padding:14px 16px;overflow:auto}
+.codeblock code{background:none;padding:0;font-size:13px;line-height:1.65;white-space:pre}
+.codeblock[data-lang=console] pre,.codeblock[data-lang=bash] pre{background:var(--soft)}
+.codeblock[data-lang=text]::after{content:"原书印刷";position:absolute;top:8px;right:10px;
+  font-size:11px;color:var(--faint);letter-spacing:.05em}
+.copy{position:absolute;top:6px;right:8px;border:1px solid var(--line);background:var(--panel);
+  color:var(--muted);border-radius:6px;font-size:12px;padding:2px 8px;cursor:pointer;opacity:0}
+.codeblock:hover .copy{opacity:1}
+.copy:hover{color:var(--accent);border-color:var(--accent)}
+.codeblock .srcbar~.copy{top:34px}
+.k{color:var(--kw)}.t{color:var(--ty)}.s{color:var(--st)}.c{color:var(--cm);font-style:italic}
+.n{color:var(--warn)}.p{color:var(--pp)}
+blockquote{margin:0 0 18px;padding:12px 18px;border-left:3px solid var(--accent);
+  background:var(--soft);border-radius:0 7px 7px 0}
+blockquote p:last-child{margin-bottom:0}
+.table-wrap{overflow-x:auto;margin:0 0 18px}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--panel)}
+th,td{border:1px solid var(--line);padding:8px 11px;vertical-align:top}
+th{background:var(--soft);font-weight:650}
+ul,ol{margin:0 0 15px;padding-left:26px}
+li{margin:6px 0}
+hr{border:0;border-top:1px solid var(--line);margin:34px 0}
+figure{margin:0 0 22px;padding:12px;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px}
+figure img{max-width:100%;display:block;margin:0 auto;border-radius:4px;background:#fff}
+figcaption{margin-top:9px;color:var(--muted);font-size:13.5px;text-align:center}
+.gallery-page{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:18px;align-items:start}
+.gallery-page>figure{margin:0}
+.gallery-page>h2,.gallery-page>h3,.gallery-page>p,.gallery-page>blockquote,
+.gallery-page>hr,.gallery-page>.pagenav{grid-column:1/-1}
+.math{font-family:"Latin Modern Math","Cambria Math",Georgia,serif;font-style:italic}
+.math .upr,.math .mono,.math .bold{font-style:normal}
+.math .mono{font-family:ui-monospace,Menlo,monospace}
+.math .bold{font-weight:700}
+.math sup,.math sub{font-size:.72em}
+.math .rel{margin:0 .28em;font-style:normal}
+.math .bin{margin:0 .16em;font-style:normal}
+.math-display{display:block;text-align:center;margin:18px 0;font-size:17px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+  font-size:.85em;line-height:1.15}
+.frac .num{border-bottom:1px solid currentColor;padding:0 .25em}
+.frac .den{padding:0 .25em}
+.sqrt{border-top:1px solid currentColor}
+.sqrt::before{content:"√";border-top:0}
+.tex-raw{border-bottom:1px dotted var(--danger);font-style:normal}
+.pagenav{display:flex;justify-content:space-between;gap:16px;margin:50px 0 0;
+  border-top:1px solid var(--line);padding-top:18px;font-size:14.5px}
+.pagenav a{text-decoration:none;max-width:46%}
+.pagenav .dir{display:block;color:var(--faint);font-size:12px}
+footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
+  font-size:13.5px;border-top:1px solid var(--line)}
+@media(max-width:1180px){
+  .layout{grid-template-columns:212px minmax(0,1fr);gap:32px}
+  nav.page{display:none}
+}
+@media(max-width:820px){
+  .layout{grid-template-columns:1fr;gap:0;padding:0 18px 60px}
+  nav.book{position:static;max-height:none;border-bottom:1px solid var(--line);
+    margin-bottom:14px;padding:14px 0}
+  .masthead{padding:22px 18px 18px}
+}
+@media print{
+  nav,.pagenav,.copy{display:none}
+  .layout{display:block;max-width:none}
+  body{background:#fff}
+  a{color:inherit;text-decoration:none}
+  .codeblock,figure,table{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header class="masthead"><div class="inner">
+<p class="eyebrow"><a href="index.html">现代 C++ 数据结构教程</a></p>  <h1>第9章 文件管理与外部排序</h1>
+
+  <p class="meta"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/book/ch09-external-sort.md">Markdown 源文件</a>
+    · <a href="https://github.com/GMyhf/dsa-modernization">GitHub 仓库</a>
+    · <a href="errata.html">原书勘误</a></p>
+</div></header>
+<div class="layout">
+<nav class="book"><b>导读</b><a href="index.html">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html" class="here">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a></nav>
+<main>
+<p>当数据大到内存装不下时，排序的瓶颈变成磁盘读写。外部排序先生成有序顺串，再进行多路归并。置换选择用最小堆尽可能延长当前顺串；竞赛树维护多路输入中当前最小的选手。</p>
+<p>源码：<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch09/external_sort/modern.hpp" class="ext">置换选择与竞赛树</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch09/external_sort/demo.cpp" class="ext">可运行示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch09/external_sort/test.cpp" class="ext">测试</a>。</p>
+<h2 id="91-主存储器和外存储器"><a class="anchor" href="#91-主存储器和外存储器">#</a>9.1 主存储器和外存储器</h2>
+<p>前面各章的结构基本上都在内存里，也叫内部数据结构。内存容量有限，程序一结束数据也就没了。大规模数据必须放到外存上，排序过程也就变成多次内存与外存之间的交换。</p>
+<p>主存（RAM、cache、显存）在主板上，按单元连续编址，CPU 直接访问，一次存取时间可以看成很小的常数，单位是纳秒。它快、贵、容量相对小，断电就丢。外存（硬盘、磁带、U 盘）便宜、容量大，信息断电不丢，有的还能随身带走。但一次存取以毫秒甚至秒计，比内存慢几个数量级。</p>
+<p>外存慢，一个原因是每次访问都要先定位再读写。磁盘要把磁头移到目标磁道，再等扇区转到磁头下，定位往往就要几毫秒到几十毫秒，远慢于真正把数据读出来。所以外存按固定大小的页块存取：一次定位读写一整页，减少定位次数。顺序扫描时再配合缓冲：一次读入一页或几页到内存，后面的访问尽量打在缓冲区里。</p>
+<p>对外排序来说，目标首先是减少读写次数，而不是减少内存里的比较。一次磁盘 I/O 往往比一次比较贵几个数量级。</p>
+<h2 id="92-文件的组织和管理"><a class="anchor" href="#92-文件的组织和管理">#</a>9.2 文件的组织和管理</h2>
+<p>文件是外存上的数据结构，由大量性质相同的记录组成。记录是有独立逻辑意义的一块数据，简单可以是一串字符，复杂则由若干字段组成。操作系统文件常常是连续字符流，结构不明显；数据库文件是有结构的记录集合，每条记录由若干不可再分的数据项组成。学生登记表——姓名、学号、性别、出生年月——就是后一种。</p>
+<p>按记录长度，文件分定长和不定长：定长更好处理。按关键码个数，分单关键码和多关键码：多关键码文件除了主码还可以有若干次码。操作通常以记录为单位：顺序读、追加、按条件修改或删除。处理方式有实时（要求很快应答）和批量（允许较长反馈）。</p>
+<p>用户看见的是逻辑文件：顺序定长、顺序变长、或按关键码存取。系统实现的是物理文件，常见几种：</p>
+<ol>
+<li><strong>顺序文件</strong>：记录按逻辑次序放进连续物理块，物理顺序与逻辑顺序一致。顺序扫描很快，按关键码插入、删除要搬很多块。</li>
+<li><strong>索引文件</strong>：主文件之外另造索引，先查索引再读记录。第 11 章专门讨论。</li>
+<li><strong>散列文件</strong>：用散列函数把关键码映射到桶或块。第 10 章的闭散列思想可以搬到外存，但冲突处理要按块设计。</li>
+</ol>
+<p>本章不实现页缓存和文件句柄，只抽出外排序里两件与文件组织无关、却决定 I/O 次数的事：如何生成更长的初始顺串，以及如何在 <span class="math">k</span> 路归并里选出当前最小。</p>
+<h2 id="93-外排序"><a class="anchor" href="#93-外排序">#</a>9.3 外排序</h2>
+<h3 id="931-置换选择排序"><a class="anchor" href="#931-置换选择排序">#</a>9.3.1 置换选择排序</h3>
+<p>顺串是磁盘上已经有序的一段记录。内存一次只能装 M 条时，朴素做法是每批排成一条长为 M 的顺串。置换选择可以做得更好：输出堆顶之后，若下一条记录<strong>不小于</strong>刚输出的值，它还可以进入当前顺串；否则冻结到下一趟。平均情况下第一趟长度约为 2M。</p>
+<p>原书图 9.2 的输入是 <code>50 49 35 45 30 25 15 60 16 27 1</code>，工作区 <code>M = 7</code>。前 7 个建成最小堆后，堆顶是 15。接着读到 60——它比 15 大，可以进当前堆；再读到 16、27、1，它们都比当时的输出值小，被冻结。第一顺串因此是</p>
+<div class="codeblock" data-lang="text"><pre><code>15 25 30 35 45 49 50 60</code></pre></div>
+<p>长度 8，已经超过 M。剩下的 <code>1 16 27</code> 构成第二顺串。</p>
+<p>图9.1 置换选择：工作区是最小堆。弹出堆顶后，下一条记录若不小于刚输出的值就入堆，否则冻结到下一趟。</p>
+<p>若把整份输入推进一个堆再依次弹出，得到的是一条完全有序序列——那是堆排序，不是置换选择。旧实现曾经这样做，测试只断言 <code>{3,1,2} → {1,2,3}</code>，堆排序也能过。现在的接口返回<strong>若干顺串</strong>，并用原书这组数据守门。</p>
+<p>多路归并时，每次要在 k 路的队首里选出最小者。赢者树的内部结点保存胜者下标；败者树的内部结点保存败者，另用一个冠军槽记录全局最小。替换一名选手后，两者都只需沿叶到根重赛。</p>
+<p>先跑一遍：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch09/external_sort/demo.cpp">code/ch09/external_sort/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
+
+<span class="p">#include &lt;iostream&gt;</span>
+
+<span class="t">int</span> main() {
+    <span class="k">const</span> std::vector&lt;<span class="t">int</span>&gt; input{<span class="n">50</span>, <span class="n">49</span>, <span class="n">35</span>, <span class="n">45</span>, <span class="n">30</span>, <span class="n">25</span>, <span class="n">15</span>, <span class="n">60</span>, <span class="n">16</span>, <span class="n">27</span>, <span class="n">1</span>};
+    <span class="k">const</span> <span class="k">auto</span> runs = dsa::external_sort::replacement_selection(input, <span class="n">7</span>);
+
+    std::cout &lt;&lt; <span class="s">&quot;工作区 M=7，得到 &quot;</span> &lt;&lt; runs.size() &lt;&lt; <span class="s">&quot; 个顺串\n&quot;</span>;
+    <span class="k">for</span> (std::<span class="t">size_t</span> index = <span class="n">0</span>; index &lt; runs.size(); ++index) {
+        std::cout &lt;&lt; <span class="s">&quot;顺串 &quot;</span> &lt;&lt; index + <span class="n">1</span> &lt;&lt; <span class="s">&quot;（长度 &quot;</span> &lt;&lt; runs[index].size() &lt;&lt; <span class="s">&quot;）:&quot;</span>;
+        <span class="k">for</span> (<span class="t">int</span> value : runs[index]) {
+            std::cout &lt;&lt; <span class="s">&#x27; &#x27;</span> &lt;&lt; value;
+        }
+        std::cout &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+    }
+
+    dsa::external_sort::LoserTree tree({<span class="n">20</span>, <span class="n">6</span>, <span class="n">8</span>, <span class="n">9</span>, <span class="n">11</span>});
+    std::cout &lt;&lt; <span class="s">&quot;败者树当前冠军: &quot;</span> &lt;&lt; *tree.winner() &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+    tree.replace(<span class="n">1</span>, <span class="n">15</span>);
+    std::cout &lt;&lt; <span class="s">&quot;替换后冠军: &quot;</span> &lt;&lt; *tree.winner() &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+}</code></pre></div>
+<div class="codeblock" data-lang="bash"><pre><code>c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch09/external_sort \
+    code/ch09/external_sort/demo.cpp -o /tmp/extsort-demo
+/tmp/extsort-demo</code></pre></div>
+<div class="codeblock" data-lang="console"><pre><code>工作区 M=7，得到 2 个顺串
+顺串 1（长度 8）: 15 25 30 35 45 49 50 60
+顺串 2（长度 3）: 1 16 27
+败者树当前冠军: 6
+替换后冠军: 8</code></pre></div>
+<p>把 <code>M</code> 改成 11（装得下全部输入），会只得到一个顺串，内容是整表有序——这时置换选择退化为堆排序，正是「内存够用」的边界。</p>
+<p><code>replacement_selection(input, memory)</code> 先读入至多 <code>memory</code> 条建成最小堆。循环中弹出堆顶写入当前顺串；若还有输入，按「<code>incoming &gt;= emitted</code> 则入堆，否则冻结」分流。当前堆空了，就把冻结区建成新堆，开始下一趟。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch09/external_sort/modern.hpp">code/ch09/external_sort/modern.hpp#replacement-selection</a></div><pre><code><span class="c">// 算法9.1：置换选择。memory 是内存工作区能容纳的记录数 M。</span>
+<span class="c">// 返回若干顺串：每个顺串内部有序，第一趟的平均长度约为 2M，而不是 M。</span>
+<span class="c">// 不属于当前顺串的新记录被冻结，等当前堆耗尽后再建下一趟。</span>
+<span class="k">inline</span> std::vector&lt;std::vector&lt;<span class="t">int</span>&gt;&gt; replacement_selection(<span class="k">const</span> std::vector&lt;<span class="t">int</span>&gt;&amp; input,
+                                                           std::<span class="t">size_t</span> memory) {
+    <span class="k">if</span> (memory == <span class="n">0</span>) {
+        <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;replacement selection memory must be positive&quot;</span>);
+    }
+    <span class="k">if</span> (input.empty()) {
+        <span class="k">return</span> {};
+    }
+
+    std::<span class="t">size_t</span> next = <span class="n">0</span>;
+    std::vector&lt;<span class="t">int</span>&gt; heap;
+    heap.reserve(memory);
+    <span class="k">while</span> (next &lt; input.size() &amp;&amp; heap.size() &lt; memory) {
+        heap.push_back(input[next++]);
+    }
+    detail::heap_from(heap);
+
+    std::vector&lt;std::vector&lt;<span class="t">int</span>&gt;&gt; runs;
+    std::vector&lt;<span class="t">int</span>&gt; current_run;
+    std::vector&lt;<span class="t">int</span>&gt; frozen;
+
+    <span class="k">while</span> (!heap.empty() || next &lt; input.size() || !frozen.empty()) {
+        <span class="k">if</span> (heap.empty()) {
+            <span class="k">if</span> (!current_run.empty()) {
+                runs.push_back(std::move(current_run));
+                current_run = {};
+            }
+            heap = std::move(frozen);
+            frozen = {};
+            <span class="k">while</span> (next &lt; input.size() &amp;&amp; heap.size() &lt; memory) {
+                heap.push_back(input[next++]);
+            }
+            detail::heap_from(heap);
+            <span class="k">if</span> (heap.empty()) {
+                <span class="k">break</span>;
+            }
+        }
+
+        <span class="k">const</span> <span class="t">int</span> emitted = detail::heap_pop(heap);
+        current_run.push_back(emitted);
+
+        <span class="k">if</span> (next == input.size()) {
+            <span class="k">continue</span>;
+        }
+        <span class="k">const</span> <span class="t">int</span> incoming = input[next++];
+        <span class="k">if</span> (incoming &gt;= emitted) {
+            detail::heap_push(heap, incoming);
+        } <span class="k">else</span> {
+            frozen.push_back(incoming);
+        }
+    }
+    <span class="k">if</span> (!current_run.empty()) {
+        runs.push_back(std::move(current_run));
+    }
+    <span class="k">return</span> runs;
+}</code></pre></div>
+<h3 id="932-二路外排序"><a class="anchor" href="#932-二路外排序">#</a>9.3.2 二路外排序</h3>
+<p>对 m 个顺串两两归并，趟数是 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>m⌉</span>。置换选择把初始顺串变长，就是为了减小 m。</p>
+<h3 id="933-多路归并选择树"><a class="anchor" href="#933-多路归并选择树">#</a>9.3.3 多路归并——选择树</h3>
+<p>赢者树用完全二叉数组：叶存放选手下标，内部结点写 <code>better(左, 右)</code>。败者树在内部结点写败者，另用 <code>champion_</code> 记全局胜者。替换后只沿叶到根重赛。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch09/external_sort/modern.hpp">code/ch09/external_sort/modern.hpp#winner-tree</a></div><pre><code><span class="c">// 代码9.2：赢者树。内部结点保存两名选手比较后的胜者下标，根是全局最小。</span>
+<span class="k">class</span> WinnerTree {
+<span class="k">public</span>:
+    <span class="k">explicit</span> WinnerTree(std::vector&lt;<span class="t">int</span>&gt; players) : players_(std::move(players)) {
+        <span class="k">if</span> (players_.empty()) {
+            <span class="k">return</span>;
+        }
+        leaf_base_ = detail::TournamentOps::next_power_of_two(players_.size());
+        tree_.assign(leaf_base_ * <span class="n">2</span>, detail::TournamentOps::no_player);
+        <span class="k">for</span> (std::<span class="t">size_t</span> index = <span class="n">0</span>; index &lt; players_.size(); ++index) {
+            tree_[leaf_base_ + index] = index;
+        }
+        <span class="k">for</span> (std::<span class="t">size_t</span> node = leaf_base_ - <span class="n">1</span>; node &gt; <span class="n">0</span>; --node) {
+            tree_[node] = detail::TournamentOps::better(players_, tree_[node * <span class="n">2</span>],
+                                                        tree_[node * <span class="n">2</span> + <span class="n">1</span>]);
+        }
+    }
+
+    [[nodiscard]] std::optional&lt;std::<span class="t">size_t</span>&gt; winner_index() <span class="k">const</span> {
+        <span class="k">if</span> (players_.empty() || tree_[<span class="n">1</span>] == detail::TournamentOps::no_player) {
+            <span class="k">return</span> std::nullopt;
+        }
+        <span class="k">return</span> tree_[<span class="n">1</span>];
+    }
+
+    [[nodiscard]] std::optional&lt;<span class="t">int</span>&gt; winner() <span class="k">const</span> {
+        <span class="k">const</span> <span class="k">auto</span> index = winner_index();
+        <span class="k">return</span> index ? std::optional&lt;<span class="t">int</span>&gt;(players_[*index]) : std::nullopt;
+    }
+
+    <span class="t">void</span> replace(std::<span class="t">size_t</span> player, <span class="t">int</span> value) {
+        <span class="k">if</span> (player &gt;= players_.size()) {
+            <span class="k">throw</span> std::out_of_range(<span class="s">&quot;tournament player&quot;</span>);
+        }
+        players_[player] = value;
+        std::<span class="t">size_t</span> node = leaf_base_ + player;
+        tree_[node] = player;
+        <span class="k">while</span> (node &gt; <span class="n">1</span>) {
+            node /= <span class="n">2</span>;
+            tree_[node] = detail::TournamentOps::better(players_, tree_[node * <span class="n">2</span>],
+                                                        tree_[node * <span class="n">2</span> + <span class="n">1</span>]);
+        }
+    }
+
+<span class="k">private</span>:
+    std::vector&lt;<span class="t">int</span>&gt; players_;
+    std::vector&lt;std::<span class="t">size_t</span>&gt; tree_;
+    std::<span class="t">size_t</span> leaf_base_{<span class="n">0</span>};
+};</code></pre></div>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch09/external_sort/modern.hpp">code/ch09/external_sort/modern.hpp#loser-tree</a></div><pre><code><span class="c">// 代码9.3：败者树。内部结点保存败者下标，另用 champion_ 记录全局胜者。</span>
+<span class="c">// 替换一名选手时只需沿叶到根重赛，不必访问兄弟子树的内部结构。</span>
+<span class="k">class</span> LoserTree {
+<span class="k">public</span>:
+    <span class="k">explicit</span> LoserTree(std::vector&lt;<span class="t">int</span>&gt; players) : players_(std::move(players)) {
+        <span class="k">if</span> (players_.empty()) {
+            <span class="k">return</span>;
+        }
+        leaf_base_ = detail::TournamentOps::next_power_of_two(players_.size());
+        loser_.assign(leaf_base_, detail::TournamentOps::no_player);
+        subtree_winner_.assign(leaf_base_ * <span class="n">2</span>, detail::TournamentOps::no_player);
+        <span class="k">for</span> (std::<span class="t">size_t</span> index = <span class="n">0</span>; index &lt; players_.size(); ++index) {
+            subtree_winner_[leaf_base_ + index] = index;
+        }
+        <span class="k">for</span> (std::<span class="t">size_t</span> node = leaf_base_ - <span class="n">1</span>; node &gt; <span class="n">0</span>; --node) {
+            replay_node(node);
+        }
+        champion_ = subtree_winner_[<span class="n">1</span>];
+    }
+
+    [[nodiscard]] std::optional&lt;std::<span class="t">size_t</span>&gt; winner_index() <span class="k">const</span> {
+        <span class="k">if</span> (players_.empty() || champion_ == detail::TournamentOps::no_player) {
+            <span class="k">return</span> std::nullopt;
+        }
+        <span class="k">return</span> champion_;
+    }
+
+    [[nodiscard]] std::optional&lt;<span class="t">int</span>&gt; winner() <span class="k">const</span> {
+        <span class="k">const</span> <span class="k">auto</span> index = winner_index();
+        <span class="k">return</span> index ? std::optional&lt;<span class="t">int</span>&gt;(players_[*index]) : std::nullopt;
+    }
+
+    [[nodiscard]] std::optional&lt;std::<span class="t">size_t</span>&gt; loser_at(std::<span class="t">size_t</span> node) <span class="k">const</span> {
+        <span class="k">if</span> (node == <span class="n">0</span> || node &gt;= loser_.size() ||
+            loser_[node] == detail::TournamentOps::no_player) {
+            <span class="k">return</span> std::nullopt;
+        }
+        <span class="k">return</span> loser_[node];
+    }
+
+    <span class="t">void</span> replace(std::<span class="t">size_t</span> player, <span class="t">int</span> value) {
+        <span class="k">if</span> (player &gt;= players_.size()) {
+            <span class="k">throw</span> std::out_of_range(<span class="s">&quot;tournament player&quot;</span>);
+        }
+        players_[player] = value;
+        subtree_winner_[leaf_base_ + player] = player;
+        <span class="k">for</span> (std::<span class="t">size_t</span> node = (leaf_base_ + player) / <span class="n">2</span>; node &gt; <span class="n">0</span>; node /= <span class="n">2</span>) {
+            replay_node(node);
+        }
+        champion_ = subtree_winner_[<span class="n">1</span>];
+    }
+
+<span class="k">private</span>:
+    <span class="t">void</span> replay_node(std::<span class="t">size_t</span> node) {
+        <span class="k">const</span> std::<span class="t">size_t</span> left = subtree_winner_[node * <span class="n">2</span>];
+        <span class="k">const</span> std::<span class="t">size_t</span> right = subtree_winner_[node * <span class="n">2</span> + <span class="n">1</span>];
+        loser_[node] = detail::TournamentOps::worse(players_, left, right);
+        subtree_winner_[node] = detail::TournamentOps::better(players_, left, right);
+    }
+
+    std::vector&lt;<span class="t">int</span>&gt; players_;
+    std::vector&lt;std::<span class="t">size_t</span>&gt; loser_;
+    std::vector&lt;std::<span class="t">size_t</span>&gt; subtree_winner_;
+    std::<span class="t">size_t</span> leaf_base_{<span class="n">0</span>};
+    std::<span class="t">size_t</span> champion_{detail::TournamentOps::no_player};
+};</code></pre></div>
+<h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
+<p>外存按页存取，一次定位比一次比较贵几个数量级，所以外排序首先要减少读写次数。文件是外存上的记录集合，逻辑组织与物理组织（顺序、索引、散列）要分开看。外排序先生成初始顺串再多路归并。置换选择用堆把不属于当前顺串的记录冻结，第一趟平均长度约 <span class="math"><span class="upr">2</span>M</span>，而不是 <span class="math">M</span>。<span class="math">k</span> 路归并用赢者树或败者树在 <span class="math">O(<span class="upr">log</span>&thinsp;k)</span> 时间内选出当前最小。</p>
+<h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
+<h3 id="补充外排序题参考课程第-9-章"><a class="anchor" href="#补充外排序题参考课程第-9-章">#</a>补充外排序题（参考课程第 9 章）</h3>
+<ol>
+<li>给定内存容量 <code>M</code> 的最小堆，模拟置换选择生成全部顺串，并标出每次冻结的记录。</li>
+<li>给定页大小、记录大小和内存缓冲页数，计算一次归并的最大路数、顺串长度和访外次数。</li>
+<li>比较 winner tree、loser tree 与最小堆在多路归并中的更新代价。</li>
+<li>说明为什么外存要按页读写，以及缓冲如何减少定位次数。</li>
+<li>对输入 <code>50 49 35 45 30 25 15 60 16 27 1</code>、<span class="math">M<span class="rel">=</span><span class="upr">7</span></span>，写出置换选择的两个顺串，并指出哪些键被冻结。</li>
+<li>若 <span class="math">M</span> 大到能装下全部输入，置换选择退化成什么。</li>
+<li>赢者树和败者树的内部结点各记什么？替换一名选手后为什么只需沿叶到根重赛。</li>
+<li><span class="math">m</span> 个顺串做二路归并要多少趟？置换选择怎样减少 <span class="math">m</span>。</li>
+</ol>
+<h2 id="上机题"><a class="anchor" href="#上机题">#</a>上机题</h2>
+<ol>
+<li>实现置换选择，用原书图 9.2 的输入做守门测试。</li>
+<li>实现赢者树，随机替换选手并与每次扫描 <span class="math">k</span> 路的朴素选最小对拍。</li>
+<li>模拟 <span class="math">k</span> 路归并：输入是若干已排序向量，用败者树输出完整有序序列。</li>
+<li>比较 <span class="math">M<span class="rel">=</span><span class="upr">4</span>,<span class="upr">8</span>,<span class="upr">16</span></span> 时置换选择产生的顺串个数。</li>
+</ol>
+<div class="pagenav"><a href="ch08-sorting.html"><span class="dir">← 上一篇</span>第8章 内部排序</a><a href="ch10-search.html" style="text-align:right"><span class="dir">下一篇 →</span>第10章 检索</a></div>
+</main>
+<nav class="page"><b>本页</b><a href="#91-主存储器和外存储器">9.1 主存储器和外存储器</a><a href="#92-文件的组织和管理">9.2 文件的组织和管理</a><a href="#93-外排序">9.3 外排序</a><a href="#931-置换选择排序" class="sub">9.3.1 置换选择排序</a><a href="#932-二路外排序" class="sub">9.3.2 二路外排序</a><a href="#933-多路归并选择树" class="sub">9.3.3 多路归并——选择树</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充外排序题参考课程第-9-章" class="sub">补充外排序题（参考课程第 9 章）</a><a href="#上机题">上机题</a></nav>
+</div>
+<footer>
+  本页由 <code>tools/build_site.py</code> 从 <code>book/ch09-external-sort.md</code> 生成
+  —— Markdown 是唯一事实源，请勿手改此文件。正文中的 C++ 代码块与 <code>code/</code> 下
+  通过测试的源码逐字一致（由 <code>tools/check_doc.py</code> 的 R3 保证）。
+</footer>
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('nav.page a'));
+  if(links.length){
+    var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a});
+    var seen=[];
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        var id=e.target.id;
+        if(e.isIntersecting){if(seen.indexOf(id)<0)seen.push(id)}
+        else{var i=seen.indexOf(id);if(i>=0)seen.splice(i,1)}
+      });
+      links.forEach(function(a){a.classList.remove('active')});
+      if(seen.length&&map[seen[0]])map[seen[0]].classList.add('active');
+    },{rootMargin:'0px 0px -75% 0px'});
+    [].slice.call(document.querySelectorAll('h2[id],h3[id]')).forEach(function(h){io.observe(h)});
+  }
+  [].slice.call(document.querySelectorAll('.codeblock')).forEach(function(block){
+    var button=document.createElement('button');
+    button.className='copy';button.type='button';button.textContent='复制';
+    button.addEventListener('click',function(){
+      var text=block.querySelector('code').textContent;
+      var done=function(){button.textContent='已复制';
+        setTimeout(function(){button.textContent='复制'},1200)};
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done,function(){button.textContent='复制失败'});
+      }else{
+        var area=document.createElement('textarea');area.value=text;document.body.appendChild(area);
+        area.select();try{document.execCommand('copy');done()}catch(e){button.textContent='复制失败'}
+        document.body.removeChild(area);
+      }
+    });
+    block.appendChild(button);
+  });
+})();
+</script>
+</body>
+</html>

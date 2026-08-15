@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第7章 图 · 现代 C++ 数据结构教程</title>
+<meta name="description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:title" content="第7章 图">
+<meta property="og:description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:type" content="article">
+<style>
+:root{color-scheme:light;
+  --ink:#1a2230;--muted:#68758a;--faint:#93a0b3;--line:#dde3ec;--bg:#f3f5f9;--panel:#fff;
+  --soft:#eef1f7;--accent:#2f5fd0;--accent-soft:#e5ecfb;--warn:#b06a1c;--danger:#c0392b;
+  --kw:#8b2fa0;--ty:#0f6f8c;--st:#177245;--cm:#7d8899;--pp:#a3572a}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;
+  --ink:#e3e8f0;--muted:#98a3b5;--faint:#6f7c90;--line:#2b3342;--bg:#12151b;--panel:#171b22;
+  --soft:#1e232c;--accent:#84a9f5;--accent-soft:#1c2740;--warn:#dcae72;--danger:#e08a80;
+  --kw:#d79ae8;--ty:#7cc7dd;--st:#8fd0a4;--cm:#7b8598;--pp:#e0a97b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.8 system-ui,-apple-system,"Segoe UI","Noto Sans CJK SC","PingFang SC",sans-serif}
+a{color:var(--accent)}
+.masthead{background:var(--panel);border-bottom:1px solid var(--line);padding:30px 26px 24px}
+.masthead .inner{max-width:1440px;margin:0 auto}
+.masthead .eyebrow{font-size:13px;color:var(--muted);letter-spacing:.06em;margin:0 0 6px}
+.masthead .eyebrow a{text-decoration:none}
+.masthead h1{margin:0;font-size:clamp(23px,3.4vw,34px);line-height:1.25;letter-spacing:-.01em}
+.masthead p.sub{margin:10px 0 0;color:var(--muted);font-size:15px;max-width:62ch}
+.masthead .meta{margin:12px 0 0;font-size:13.5px;color:var(--muted)}
+.layout{max-width:1440px;margin:0 auto;padding:0 26px 80px;display:grid;
+  grid-template-columns:228px minmax(0,1fr) 208px;gap:40px;align-items:start}
+nav.book,nav.page{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;
+  padding:22px 0;font-size:14px;line-height:1.55}
+nav b{display:block;color:var(--faint);font-size:11.5px;letter-spacing:.1em;
+  text-transform:uppercase;margin:16px 0 8px}
+nav b:first-child{margin-top:0}
+nav a{display:block;padding:5px 10px;border-left:2px solid transparent;
+  color:var(--ink);text-decoration:none;border-radius:0 5px 5px 0}
+nav a:hover{background:var(--soft);color:var(--accent)}
+nav.book a.here{background:var(--accent-soft);border-left-color:var(--accent);
+  color:var(--accent);font-weight:600}
+nav.page a{color:var(--muted);font-size:13.5px;padding:4px 10px}
+nav.page a.sub{padding-left:22px;font-size:13px;color:var(--faint)}
+nav.page a.active{border-left-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+main{min-width:0;padding-top:24px}
+h1,h2,h3,h4{scroll-margin-top:16px}
+h2{font-size:24px;margin:48px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+h3{font-size:18.5px;margin:30px 0 10px}
+h4{font-size:16px;margin:22px 0 8px;color:var(--muted)}
+.anchor{float:left;margin-left:-1.05em;padding-right:.3em;color:transparent;
+  text-decoration:none;font-weight:400}
+h2:hover .anchor,h3:hover .anchor,h4:hover .anchor{color:var(--faint)}
+p{margin:0 0 15px}
+code{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  background:var(--soft);padding:2px 6px;border-radius:4px;word-break:break-word}
+.codeblock{position:relative;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px;margin:0 0 18px;overflow:hidden}
+.codeblock .srcbar{border-bottom:1px solid var(--line);background:var(--soft);
+  padding:6px 12px;font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+.codeblock .srcbar a{color:var(--muted);text-decoration:none}
+.codeblock .srcbar a:hover{color:var(--accent);text-decoration:underline}
+.codeblock pre{margin:0;padding:14px 16px;overflow:auto}
+.codeblock code{background:none;padding:0;font-size:13px;line-height:1.65;white-space:pre}
+.codeblock[data-lang=console] pre,.codeblock[data-lang=bash] pre{background:var(--soft)}
+.codeblock[data-lang=text]::after{content:"原书印刷";position:absolute;top:8px;right:10px;
+  font-size:11px;color:var(--faint);letter-spacing:.05em}
+.copy{position:absolute;top:6px;right:8px;border:1px solid var(--line);background:var(--panel);
+  color:var(--muted);border-radius:6px;font-size:12px;padding:2px 8px;cursor:pointer;opacity:0}
+.codeblock:hover .copy{opacity:1}
+.copy:hover{color:var(--accent);border-color:var(--accent)}
+.codeblock .srcbar~.copy{top:34px}
+.k{color:var(--kw)}.t{color:var(--ty)}.s{color:var(--st)}.c{color:var(--cm);font-style:italic}
+.n{color:var(--warn)}.p{color:var(--pp)}
+blockquote{margin:0 0 18px;padding:12px 18px;border-left:3px solid var(--accent);
+  background:var(--soft);border-radius:0 7px 7px 0}
+blockquote p:last-child{margin-bottom:0}
+.table-wrap{overflow-x:auto;margin:0 0 18px}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--panel)}
+th,td{border:1px solid var(--line);padding:8px 11px;vertical-align:top}
+th{background:var(--soft);font-weight:650}
+ul,ol{margin:0 0 15px;padding-left:26px}
+li{margin:6px 0}
+hr{border:0;border-top:1px solid var(--line);margin:34px 0}
+figure{margin:0 0 22px;padding:12px;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px}
+figure img{max-width:100%;display:block;margin:0 auto;border-radius:4px;background:#fff}
+figcaption{margin-top:9px;color:var(--muted);font-size:13.5px;text-align:center}
+.gallery-page{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:18px;align-items:start}
+.gallery-page>figure{margin:0}
+.gallery-page>h2,.gallery-page>h3,.gallery-page>p,.gallery-page>blockquote,
+.gallery-page>hr,.gallery-page>.pagenav{grid-column:1/-1}
+.math{font-family:"Latin Modern Math","Cambria Math",Georgia,serif;font-style:italic}
+.math .upr,.math .mono,.math .bold{font-style:normal}
+.math .mono{font-family:ui-monospace,Menlo,monospace}
+.math .bold{font-weight:700}
+.math sup,.math sub{font-size:.72em}
+.math .rel{margin:0 .28em;font-style:normal}
+.math .bin{margin:0 .16em;font-style:normal}
+.math-display{display:block;text-align:center;margin:18px 0;font-size:17px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+  font-size:.85em;line-height:1.15}
+.frac .num{border-bottom:1px solid currentColor;padding:0 .25em}
+.frac .den{padding:0 .25em}
+.sqrt{border-top:1px solid currentColor}
+.sqrt::before{content:"√";border-top:0}
+.tex-raw{border-bottom:1px dotted var(--danger);font-style:normal}
+.pagenav{display:flex;justify-content:space-between;gap:16px;margin:50px 0 0;
+  border-top:1px solid var(--line);padding-top:18px;font-size:14.5px}
+.pagenav a{text-decoration:none;max-width:46%}
+.pagenav .dir{display:block;color:var(--faint);font-size:12px}
+footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
+  font-size:13.5px;border-top:1px solid var(--line)}
+@media(max-width:1180px){
+  .layout{grid-template-columns:212px minmax(0,1fr);gap:32px}
+  nav.page{display:none}
+}
+@media(max-width:820px){
+  .layout{grid-template-columns:1fr;gap:0;padding:0 18px 60px}
+  nav.book{position:static;max-height:none;border-bottom:1px solid var(--line);
+    margin-bottom:14px;padding:14px 0}
+  .masthead{padding:22px 18px 18px}
+}
+@media print{
+  nav,.pagenav,.copy{display:none}
+  .layout{display:block;max-width:none}
+  body{background:#fff}
+  a{color:inherit;text-decoration:none}
+  .codeblock,figure,table{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header class="masthead"><div class="inner">
+<p class="eyebrow"><a href="index.html">现代 C++ 数据结构教程</a></p>  <h1>第7章 图</h1>
+
+  <p class="meta"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/book/ch07-graph.md">Markdown 源文件</a>
+    · <a href="https://github.com/GMyhf/dsa-modernization">GitHub 仓库</a>
+    · <a href="errata.html">原书勘误</a></p>
+</div></header>
+<div class="layout">
+<nav class="book"><b>导读</b><a href="index.html">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html" class="here">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a></nav>
+<main>
+<p>图由顶点和边组成。有向边表示单向关系，无向边表示双向关系，带权边表示代价。先弄清题目属于哪一种，再选算法。</p>
+<p>源码：<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp" class="ext">图与七个算法</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/demo.cpp" class="ext">可运行示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/test.cpp" class="ext">交叉验证测试</a>。</p>
+<h2 id="71-图的定义和基本术语"><a class="anchor" href="#71-图的定义和基本术语">#</a>7.1 图的定义和基本术语</h2>
+<p>图比线性结构和树更一般：结点之间的关系可以是任意的。按第 1 章的分类——线性结构唯一前驱、唯一后继；树唯一前驱、多个后继；图对前驱和后继的个数都不加限制。线性和树都可以看成受限的图。</p>
+<p>一个典型问题：要在几个城市之间建通信网，使每两个城市都能直接或间接通话，并且总造价尽量低。用顶点代表城市，边代表线路，边旁的数代表造价，问题就变成：在带权图里找一棵连通全部顶点、边权之和最小的树。这就是后面的最小生成树。</p>
+<p>图记作 <span class="math">G<span class="rel">=</span>⟨V,E⟩</span>。<span class="math">V</span> 是顶点的有穷非空集合；<span class="math">E</span> 是边的集合，每条边是一对顶点。边没有方向时叫无向图，无序对写成 <span class="math">(v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">2</span></sub>)</span>，<span class="math">(v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">2</span></sub>)</span> 与 <span class="math">(v<sub><span class="upr">2</span></sub>,v<sub><span class="upr">1</span></sub>)</span> 是同一条边。边有方向时叫有向图，有序对写成 <span class="math">⟨v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">2</span></sub>⟩</span>，也叫弧：<span class="math">v<sub><span class="upr">1</span></sub></span> 是弧尾（起点），<span class="math">v<sub><span class="upr">2</span></sub></span> 是弧头（终点）；<span class="math">⟨v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">2</span></sub>⟩</span> 与 <span class="math">⟨v<sub><span class="upr">2</span></sub>,v<sub><span class="upr">1</span></sub>⟩</span> 是两条不同的弧。</p>
+<p>边或弧上可以附带权，表示距离、时间或代价。每条边都带权的图叫带权图。本书不考虑多重边（同一对顶点之间多于一条边）和自环（顶点到自己的边）。</p>
+<p>用 <span class="math">n</span> 表示顶点数，<span class="math">e</span> 表示边数。无向图 <span class="math">e</span> 的范围是 <span class="math"><span class="upr">0</span><span class="rel">∼</span>n(n<span class="bin">−</span><span class="upr">1</span>)/<span class="upr">2</span></span>，有向图是 <span class="math"><span class="upr">0</span><span class="rel">∼</span>n(n<span class="bin">−</span><span class="upr">1</span>)</span>。边相对少的叫稀疏图，相对多的叫稠密图。任意两个顶点之间都有边的图叫完全图，它取到边数的上限。</p>
+<p>若 <span class="math">V&#x27;</span> 是 <span class="math">V</span> 的子集，<span class="math">E&#x27;</span> 是 <span class="math">E</span> 的子集，且 <span class="math">E&#x27;</span> 里的边只连 <span class="math">V&#x27;</span> 里的顶点，则 <span class="math">G&#x27;<span class="rel">=</span>⟨V&#x27;,E&#x27;⟩</span> 是 <span class="math">G</span> 的子图。一条边所连的两个顶点互为邻接点；这条边与这两个顶点相关联。有向图里还要分清「邻接到」和「邻接自」。</p>
+<p>顶点的度是与它相关联的边数。有向图再分成入度（指进来的弧）和出度（指出去的弧）。度为 0 的顶点是孤立点。</p>
+<p>从 <span class="math">u</span> 出发、沿边走到 <span class="math">v</span> 的顶点序列叫路径；边数是路径长度。有向图必须顺着弧走。起点和终点相同、且至少含一条边的路径叫回路（环）。除端点外没有重复顶点的路径叫简单路径。</p>
+<p>无向图中，若任意两点之间都有路径，称图连通；极大的连通子图叫连通分量。有向图中，若任意两点 <span class="math">u</span>、<span class="math">v</span> 都存在 <span class="math">u</span> 到 <span class="math">v</span> 和 <span class="math">v</span> 到 <span class="math">u</span> 的有向路径，称强连通；只要求把有向边看成无向边后连通，叫弱连通。</p>
+<p>无向连通图的生成树，是包含全部顶点、有 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 条边、因而没有环的连通子图。带权连通图里边权之和最小的生成树，就是最小生成树。最短路的「短」是边权总和最小，不一定是经过的边数最少。</p>
+<p>选算法之前，先分清题目：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">题目</th>
+<th style="text-align:left">前提</th>
+<th style="text-align:left">结果</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">从一个点能走到哪些点</td>
+<td style="text-align:left">任意图</td>
+<td style="text-align:left">DFS 或 BFS 的访问序列</td>
+</tr>
+<tr>
+<td style="text-align:left">课程或任务的可行顺序</td>
+<td style="text-align:left">有向无环图</td>
+<td style="text-align:left">拓扑序；有环则无解</td>
+</tr>
+<tr>
+<td style="text-align:left">一个源点到各点的最短路</td>
+<td style="text-align:left">边权非负</td>
+<td style="text-align:left">Dijkstra 的距离数组</td>
+</tr>
+<tr>
+<td style="text-align:left">任意两点最短路</td>
+<td style="text-align:left">顶点数较小</td>
+<td style="text-align:left">Floyd 的距离矩阵</td>
+</tr>
+<tr>
+<td style="text-align:left">连通所有点且总权最小</td>
+<td style="text-align:left">无向连通图</td>
+<td style="text-align:left">Prim 或 Kruskal 的边集</td>
+</tr>
+</tbody></table></div>
+<p>本单元用邻接矩阵。没有边记为 <code>infinity</code>（<code>int</code> 最大值的四分之一，给加法留余量）。环、非连通等正常失败用 <code>optional</code> 表达。DFS 仍是递归，深图有栈溢出风险。</p>
+<h2 id="72-图的抽象数据类型"><a class="anchor" href="#72-图的抽象数据类型">#</a>7.2 图的抽象数据类型</h2>
+<p>图的对外运算是：指定顶点数构造、加一条边、问有多少个顶点，以及后面各节的周游、拓扑、最短路和最小生成树。原书【代码7.1】【代码7.2】的 ADT 声明残缺，标识符还被 OCR 空格切断。本书直接定义在 <code>Graph</code> 上。</p>
+<h2 id="73-图的存储结构"><a class="anchor" href="#73-图的存储结构">#</a>7.3 图的存储结构</h2>
+<p>图常用两种存法。邻接矩阵用 <span class="math">n<span class="bin">×</span>n</span> 的表，<span class="math">A[i][j]</span> 表示 <span class="math">i</span> 到 <span class="math">j</span> 有没有边、权是多少，适合稠密图和需要 <span class="math">O(<span class="upr">1</span>)</span> 问「两点之间有没有边」的算法（Floyd、Prim）。邻接表为每个顶点挂一条出边表，适合稀疏图和只沿出边走的算法（DFS、BFS、Dijkstra、拓扑）。</p>
+<p>两种都有可运行实现：邻接矩阵是 <code>code/ch07/graph</code>（代码7.1–7.3），邻接表是 <code>code/ch07/adjacency_list</code>（代码7.4）。两者<strong>逐项对拍</strong>——同一张图上 DFS/BFS 序列、拓扑序、Dijkstra 距离向量必须完全相同，外加 30 轮随机图对拍。换存储方式不该换答案，只该换代价。</p>
+<h3 id="731-相邻矩阵"><a class="anchor" href="#731-相邻矩阵">#</a>7.3.1 相邻矩阵</h3>
+<p>邻接矩阵的第 <code>from</code> 行、第 <code>to</code> 列是边权。构造时对角线为 0（到自己的距离是 0），其余为 <code>infinity</code>。<code>add_edge(..., directed=false)</code> 同时写入对称位置，用来表示无向边。零权边可以表示——原书把 0 同时当成「无边」，那样权为 0 的边就存不进去。</p>
+<h3 id="732-邻接表"><a class="anchor" href="#732-邻接表">#</a>7.3.2 邻接表</h3>
+<p>邻接表为每个顶点存一张出边表，<strong>只存实际存在的边</strong>。代价随之全变：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left"></th>
+<th style="text-align:left">邻接矩阵</th>
+<th style="text-align:left">邻接表</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">存储量</td>
+<td style="text-align:left"><span class="math">V<sup><span class="upr">2</span></sup></span></td>
+<td style="text-align:left"><span class="math">V<span class="bin">+</span>E</span></td>
+</tr>
+<tr>
+<td style="text-align:left">遍历某点的邻居</td>
+<td style="text-align:left"><span class="math">O(V)</span>，要扫过整行</td>
+<td style="text-align:left"><span class="math">O(<span class="upr">deg</span>&thinsp;v)</span></td>
+</tr>
+<tr>
+<td style="text-align:left">问「<span class="math">(u,v)</span> 之间有没有边」</td>
+<td style="text-align:left"><span class="math">O(<span class="upr">1</span>)</span></td>
+<td style="text-align:left"><span class="math">O(<span class="upr">deg</span>&thinsp;u)</span></td>
+</tr>
+<tr>
+<td style="text-align:left">DFS / BFS 全图</td>
+<td style="text-align:left"><span class="math">O(V<sup><span class="upr">2</span></sup>)</span></td>
+<td style="text-align:left"><span class="math">O(V<span class="bin">+</span>E)</span></td>
+</tr>
+<tr>
+<td style="text-align:left">Dijkstra</td>
+<td style="text-align:left"><span class="math">O(V<sup><span class="upr">2</span></sup>)</span></td>
+<td style="text-align:left"><span class="math">O((V<span class="bin">+</span>E)&thinsp;<span class="upr">log</span>&thinsp;V)</span>（配二叉堆）</td>
+</tr>
+</tbody></table></div>
+<p>注意第三行：<strong>邻接表在这一项上是吃亏的</strong>。没有哪种表示法总是更好，这正是本节要比较的东西。</p>
+<p>结构上的差别只有一处——存的是什么：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/adjacency_list/modern.hpp">code/ch07/adjacency_list/modern.hpp#graph-list</a></div><pre><code><span class="c">/// 邻接表存图（原书【代码7.4】）：每个顶点挂一条边表，只存**实际存在**的边。</span>
+<span class="c">///</span>
+<span class="c">/// 与同章 `Graph`（邻接矩阵）的区别只有一处——存储方式——但这一处决定了全部代价：</span>
+<span class="c">///</span>
+<span class="c">/// | | 邻接矩阵 | 邻接表 |</span>
+<span class="c">/// | --- | --- | --- |</span>
+<span class="c">/// | 存储量 | $V^2$ | $V + E$ |</span>
+<span class="c">/// | 遍历某点的邻居 | $O(V)$，要扫过整行 | $O(\deg v)$，只走这条边表 |</span>
+<span class="c">/// | 判断 (u,v) 是否有边 | $O(1)$ | $O(\deg u)$ |</span>
+<span class="c">/// | DFS / BFS 全图 | $O(V^2)$ | $O(V + E)$ |</span>
+<span class="c">///</span>
+<span class="c">/// 稀疏图（$E \ll V^2$）上邻接表快得多；稠密图或频繁问「这两点之间有没有边」时，</span>
+<span class="c">/// 矩阵反而合适。**没有哪种表示法总是更好**，这正是本章要比较的东西。</span>
+<span class="k">class</span> GraphList {
+<span class="k">public</span>:
+    <span class="k">static</span> <span class="k">constexpr</span> <span class="t">int</span> infinity = std::numeric_limits&lt;<span class="t">int</span>&gt;::max() / <span class="n">4</span>;
+
+    <span class="k">struct</span> Edge {
+        std::<span class="t">size_t</span> from;
+        std::<span class="t">size_t</span> to;
+        <span class="t">int</span> weight;
+
+        <span class="t">bool</span> <span class="k">operator</span>&lt;(<span class="k">const</span> Edge&amp; other) <span class="k">const</span> <span class="k">noexcept</span> { <span class="k">return</span> weight &lt; other.weight; }
+    };
+
+    <span class="k">explicit</span> GraphList(std::<span class="t">size_t</span> count) : adjacency_(count) {}
+
+    <span class="c">/// 加边。重复加同一条 `from→to` 时**覆盖权值**而不是并存两条——</span>
+    <span class="c">/// 与邻接矩阵的语义保持一致，两种表示法才可以逐项对拍。代价是每次加边 O(deg from)。</span>
+    <span class="t">void</span> add_edge(std::<span class="t">size_t</span> from, std::<span class="t">size_t</span> to, <span class="t">int</span> weight, <span class="t">bool</span> directed = <span class="k">true</span>) {
+        check_vertex(from);
+        check_vertex(to);
+        <span class="k">if</span> (weight &lt; <span class="n">0</span>) {
+            <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;negative edge&quot;</span>);
+        }
+        put(from, to, weight);
+        <span class="k">if</span> (!directed) {
+            put(to, from, weight);
+        }
+    }
+
+    [[nodiscard]] std::<span class="t">size_t</span> vertices() <span class="k">const</span> <span class="k">noexcept</span> { <span class="k">return</span> adjacency_.size(); }
+
+    <span class="c">/// 边表里的条目数。无向图一条边会在两端各存一次，这里如实返回条目数。</span>
+    [[nodiscard]] std::<span class="t">size_t</span> edge_entries() <span class="k">const</span> <span class="k">noexcept</span> {
+        std::<span class="t">size_t</span> total = <span class="n">0</span>;
+        <span class="k">for</span> (<span class="k">const</span> <span class="k">auto</span>&amp; list : adjacency_) {
+            total += list.size();
+        }
+        <span class="k">return</span> total;
+    }
+
+    [[nodiscard]] std::<span class="t">size_t</span> degree(std::<span class="t">size_t</span> vertex) <span class="k">const</span> {
+        check_vertex(vertex);
+        <span class="k">return</span> adjacency_[vertex].size();
+    }
+
+    <span class="c">/// 某个顶点的边表。邻接表的核心能力：拿到邻居不必扫过不存在的边。</span>
+    [[nodiscard]] <span class="k">const</span> std::vector&lt;Edge&gt;&amp; neighbors(std::<span class="t">size_t</span> vertex) <span class="k">const</span> {
+        check_vertex(vertex);
+        <span class="k">return</span> adjacency_[vertex];
+    }
+
+    [[nodiscard]] std::optional&lt;<span class="t">int</span>&gt; weight(std::<span class="t">size_t</span> from, std::<span class="t">size_t</span> to) <span class="k">const</span> {
+        check_vertex(from);
+        check_vertex(to);
+        <span class="k">for</span> (<span class="k">const</span> Edge&amp; edge : adjacency_[from]) {
+            ++scanned_;
+            <span class="k">if</span> (edge.to == to) {
+                <span class="k">return</span> edge.weight;
+            }
+        }
+        <span class="k">return</span> std::nullopt;  <span class="c">// 没有这条边是预期状态，不是错误</span>
+    }
+
+    <span class="c">/// 存储量（按「一个整数算一格」计）。对照矩阵的 $V^2$，稀疏图上差距一目了然。</span>
+    [[nodiscard]] std::<span class="t">size_t</span> storage_cells() <span class="k">const</span> <span class="k">noexcept</span> {
+        <span class="k">return</span> vertices() + edge_entries() * <span class="n">2</span>;  <span class="c">// 每条边存 to 和 weight</span>
+    }
+
+    <span class="c">/// 已经检查过多少条边。教学计数器：用它把 $O(V+E)$ 和 $O(V^2)$ 的差别量出来。</span>
+    [[nodiscard]] std::<span class="t">size_t</span> scan_steps() <span class="k">const</span> <span class="k">noexcept</span> { <span class="k">return</span> scanned_; }
+    <span class="t">void</span> reset_scan_steps() <span class="k">const</span> <span class="k">noexcept</span> { scanned_ = <span class="n">0</span>; }</code></pre></div>
+<p>周游时的差别随之而来。矩阵版每出队一个顶点要扫过整行 <span class="math">V</span> 格，邻接表只走这条边表：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/adjacency_list/modern.hpp">code/ch07/adjacency_list/modern.hpp#graph-list-traversal</a></div><pre><code><span class="c">/// 深度优先周游。只走边表，不看不存在的边——这是与矩阵版最直接的差别。</span>
+[[nodiscard]] std::vector&lt;std::<span class="t">size_t</span>&gt; dfs(std::<span class="t">size_t</span> source) <span class="k">const</span> {
+    check_vertex(source);
+    std::vector&lt;<span class="t">bool</span>&gt; seen(vertices());
+    std::vector&lt;std::<span class="t">size_t</span>&gt; result;
+    visit_depth_first(source, seen, result);
+    <span class="k">return</span> result;
+}
+
+[[nodiscard]] std::vector&lt;std::<span class="t">size_t</span>&gt; bfs(std::<span class="t">size_t</span> source) <span class="k">const</span> {
+    check_vertex(source);
+    std::vector&lt;<span class="t">bool</span>&gt; seen(vertices());
+    std::queue&lt;std::<span class="t">size_t</span>&gt; pending;
+    std::vector&lt;std::<span class="t">size_t</span>&gt; result;
+    pending.push(source);
+    seen[source] = <span class="k">true</span>;
+    <span class="k">while</span> (!pending.empty()) {
+        <span class="k">const</span> std::<span class="t">size_t</span> from = pending.front();
+        pending.pop();
+        result.push_back(from);
+        <span class="k">for</span> (<span class="k">const</span> Edge&amp; edge : adjacency_[from]) {  <span class="c">// 矩阵版这里要扫 V 格</span>
+            ++scanned_;
+            <span class="k">if</span> (!seen[edge.to]) {
+                seen[edge.to] = <span class="k">true</span>;
+                pending.push(edge.to);
+            }
+        }
+    }
+    <span class="k">return</span> result;
+}</code></pre></div>
+<p>差距是量出来的，不是推出来的。取一条 1000 个顶点的链（<span class="math">E<span class="rel">=</span>V<span class="bin">−</span><span class="upr">1</span></span>，典型的稀疏图）：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/adjacency_list/demo.cpp">code/ch07/adjacency_list/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
+
+<span class="p">#include &lt;cstdio&gt;</span>
+
+<span class="t">int</span> main() {
+    <span class="k">using</span> dsa::GraphList;
+
+    <span class="c">// 一条 1000 个顶点的链：典型的稀疏图（E = V - 1）。</span>
+    <span class="k">constexpr</span> std::<span class="t">size_t</span> n = <span class="n">1000</span>;
+    GraphList sparse(n);
+    <span class="k">for</span> (std::<span class="t">size_t</span> v = <span class="n">0</span>; v + <span class="n">1</span> &lt; n; ++v) {
+        sparse.add_edge(v, v + <span class="n">1</span>, <span class="n">1</span>);
+    }
+    sparse.reset_scan_steps();
+    <span class="k">const</span> <span class="k">auto</span> order = sparse.bfs(<span class="n">0</span>);
+    <span class="k">const</span> std::<span class="t">size_t</span> steps = sparse.scan_steps();
+    std::printf(<span class="s">&quot;稀疏图 V=%zu, E=%zu\n&quot;</span>, n, sparse.edge_entries());
+    std::printf(<span class="s">&quot;  邻接表存储 %zu 格   ← 随 V+E 走\n&quot;</span>, sparse.storage_cells());
+    std::printf(<span class="s">&quot;  邻接矩阵存储 %zu 格 ← V*V\n&quot;</span>, n * n);
+    std::printf(<span class="s">&quot;  BFS 走遍 %zu 个顶点，只检查了 %zu 条边\n&quot;</span>, order.size(), steps);
+    std::printf(<span class="s">&quot;  邻接矩阵的 BFS 要扫 %zu 格（每出队一个顶点扫一整行）\n&quot;</span>, n * n);
+
+    <span class="c">// 教科书例子：最短路与最小生成树。</span>
+    GraphList graph(<span class="n">6</span>);
+    <span class="k">const</span> <span class="t">int</span> edges[][<span class="n">3</span>] = {{<span class="n">0</span>,<span class="n">1</span>,<span class="n">7</span>},{<span class="n">0</span>,<span class="n">2</span>,<span class="n">9</span>},{<span class="n">0</span>,<span class="n">5</span>,<span class="n">14</span>},{<span class="n">1</span>,<span class="n">2</span>,<span class="n">10</span>},{<span class="n">1</span>,<span class="n">3</span>,<span class="n">15</span>},
+                            {<span class="n">2</span>,<span class="n">3</span>,<span class="n">11</span>},{<span class="n">2</span>,<span class="n">5</span>,<span class="n">2</span>},{<span class="n">3</span>,<span class="n">4</span>,<span class="n">6</span>},{<span class="n">5</span>,<span class="n">4</span>,<span class="n">9</span>}};
+    <span class="k">for</span> (<span class="k">const</span> <span class="k">auto</span>&amp; e : edges) {
+        graph.add_edge(<span class="k">static_cast</span>&lt;std::<span class="t">size_t</span>&gt;(e[<span class="n">0</span>]), <span class="k">static_cast</span>&lt;std::<span class="t">size_t</span>&gt;(e[<span class="n">1</span>]), e[<span class="n">2</span>], <span class="k">false</span>);
+    }
+    <span class="k">const</span> <span class="k">auto</span> distance = graph.dijkstra(<span class="n">0</span>);
+    std::printf(<span class="s">&quot;\n从 0 出发的最短距离:&quot;</span>);
+    <span class="k">for</span> (<span class="k">const</span> <span class="t">int</span> d : distance) {
+        std::printf(<span class="s">&quot; %d&quot;</span>, d);
+    }
+    <span class="k">const</span> <span class="k">auto</span> mst = graph.prim(<span class="n">0</span>);
+    <span class="t">int</span> total = <span class="n">0</span>;
+    <span class="k">for</span> (<span class="k">const</span> <span class="k">auto</span>&amp; edge : *mst) {
+        total += edge.weight;
+    }
+    std::printf(<span class="s">&quot;\n最小生成树 %zu 条边，总权 %d\n&quot;</span>, mst-&gt;size(), total);
+    <span class="k">return</span> <span class="n">0</span>;
+}</code></pre></div>
+<div class="codeblock" data-lang="text"><pre><code>稀疏图 V=1000, E=999
+  邻接表存储 2998 格   ← 随 V+E 走
+  邻接矩阵存储 1000000 格 ← V*V
+  BFS 走遍 1000 个顶点，只检查了 999 条边
+  邻接矩阵的 BFS 要扫 1000000 格（每出队一个顶点扫一整行）
+
+从 0 出发的最短距离: 0 7 9 20 20 11
+最小生成树 5 条边，总权 33</code></pre></div>
+<p>存储差 300 倍，BFS 的检查次数差 1000 倍。稠密图上这个差距会消失——<span class="math">E</span> 接近 <span class="math">V<sup><span class="upr">2</span></sup></span> 时， <span class="math">V<span class="bin">+</span>E</span> 也就是 <span class="math">V<sup><span class="upr">2</span></sup></span>，而矩阵还省掉了存 <code>to</code> 的那一半空间。</p>
+<p>Dijkstra 是这一章里差别最大的一处。矩阵版每轮要扫一遍全部顶点找最近的那个，是 <span class="math">O(V<sup><span class="upr">2</span></sup>)</span>； 邻接表配一个最小堆之后，「找最近顶点」由堆负责，「松弛」只走实际存在的边：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/adjacency_list/modern.hpp">code/ch07/adjacency_list/modern.hpp#graph-list-dijkstra</a></div><pre><code><span class="c">/// Dijkstra，最小堆版。代价 $O((V+E)\log V)$。</span>
+<span class="c">///</span>
+<span class="c">/// 矩阵版每轮要扫一遍全部顶点找最近的那个，是 $O(V^2)$；换成邻接表 + 堆之后，</span>
+<span class="c">/// 「找最近顶点」由堆负责、「松弛」只走实际存在的边。**稀疏图上这才是该用的组合**。</span>
+<span class="c">/// 堆是第 5 章的教学内容，这里作为基础设施使用（见 unit.json 的 d001_exceptions）。</span>
+[[nodiscard]] std::vector&lt;<span class="t">int</span>&gt; dijkstra(std::<span class="t">size_t</span> source) <span class="k">const</span> {
+    check_vertex(source);
+    std::vector&lt;<span class="t">int</span>&gt; distance(vertices(), infinity);
+    distance[source] = <span class="n">0</span>;
+
+    <span class="k">using</span> Item = std::pair&lt;<span class="t">int</span>, std::<span class="t">size_t</span>&gt;;  <span class="c">// (当前距离, 顶点)</span>
+    std::priority_queue&lt;Item, std::vector&lt;Item&gt;, std::greater&lt;Item&gt;&gt; heap;
+    heap.emplace(<span class="n">0</span>, source);
+    <span class="k">while</span> (!heap.empty()) {
+        <span class="k">const</span> <span class="k">auto</span> [dist, from] = heap.top();
+        heap.pop();
+        <span class="k">if</span> (dist &gt; distance[from]) {
+            <span class="k">continue</span>;  <span class="c">// 堆里的旧条目，已经被更短的路径取代</span>
+        }
+        <span class="k">for</span> (<span class="k">const</span> Edge&amp; edge : adjacency_[from]) {
+            ++scanned_;
+            <span class="k">const</span> <span class="t">int</span> relaxed = dist + edge.weight;
+            <span class="k">if</span> (relaxed &lt; distance[edge.to]) {
+                distance[edge.to] = relaxed;
+                heap.emplace(relaxed, edge.to);
+            }
+        }
+    }
+    <span class="k">return</span> distance;
+}</code></pre></div>
+<p>7.5.1 节给出的 <span class="math">O(V<sup><span class="upr">2</span></sup>)</span> 是<strong>矩阵版</strong>的结论，别把它套到邻接表上；反过来，常见教材里那个 <span class="math">O((V<span class="bin">+</span>E)&thinsp;<span class="upr">log</span>&thinsp;V)</span> 也不能套到矩阵版上。复杂度是「算法 + 存储结构」一起决定的。</p>
+<h2 id="74-图的周游"><a class="anchor" href="#74-图的周游">#</a>7.4 图的周游</h2>
+<h3 id="741-先跑一遍"><a class="anchor" href="#741-先跑一遍">#</a>7.4.1 先跑一遍</h3>
+<p>下面这张有向图：<code>0→1(2)</code>、<code>0→2(7)</code>、<code>1→2(1)</code>、<code>1→3(5)</code>、<code>2→3(1)</code>、<code>3→4(3)</code>。从 0 到 4 的最短路是 <code>0→1→2→3→4</code>，总权 7，不是那条权为 7 的直达边 <code>0→2</code> 再往后走。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/demo.cpp">code/ch07/graph/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
+
+<span class="p">#include &lt;iostream&gt;</span>
+
+<span class="t">int</span> main() {
+    dsa::Graph graph(<span class="n">5</span>);
+    graph.add_edge(<span class="n">0</span>, <span class="n">1</span>, <span class="n">2</span>);
+    graph.add_edge(<span class="n">0</span>, <span class="n">2</span>, <span class="n">7</span>);
+    graph.add_edge(<span class="n">1</span>, <span class="n">2</span>, <span class="n">1</span>);
+    graph.add_edge(<span class="n">1</span>, <span class="n">3</span>, <span class="n">5</span>);
+    graph.add_edge(<span class="n">2</span>, <span class="n">3</span>, <span class="n">1</span>);
+    graph.add_edge(<span class="n">3</span>, <span class="n">4</span>, <span class="n">3</span>);
+
+    std::cout &lt;&lt; <span class="s">&quot;DFS(0):&quot;</span>;
+    <span class="k">for</span> (std::<span class="t">size_t</span> vertex : graph.dfs(<span class="n">0</span>)) {
+        std::cout &lt;&lt; <span class="s">&#x27; &#x27;</span> &lt;&lt; vertex;
+    }
+    std::cout &lt;&lt; <span class="s">&quot;\nBFS(0):&quot;</span>;
+    <span class="k">for</span> (std::<span class="t">size_t</span> vertex : graph.bfs(<span class="n">0</span>)) {
+        std::cout &lt;&lt; <span class="s">&#x27; &#x27;</span> &lt;&lt; vertex;
+    }
+
+    <span class="k">const</span> <span class="k">auto</span> topo = graph.topological_sort();
+    std::cout &lt;&lt; <span class="s">&quot;\n拓扑序:&quot;</span>;
+    <span class="k">if</span> (topo) {
+        <span class="k">for</span> (std::<span class="t">size_t</span> vertex : *topo) {
+            std::cout &lt;&lt; <span class="s">&#x27; &#x27;</span> &lt;&lt; vertex;
+        }
+    } <span class="k">else</span> {
+        std::cout &lt;&lt; <span class="s">&quot; 无（有环）&quot;</span>;
+    }
+
+    <span class="k">const</span> <span class="k">auto</span> distance = graph.dijkstra(<span class="n">0</span>);
+    std::cout &lt;&lt; <span class="s">&quot;\nDijkstra(0-&gt;4) = &quot;</span> &lt;&lt; distance[<span class="n">4</span>] &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+}</code></pre></div>
+<div class="codeblock" data-lang="bash"><pre><code>c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch07/graph \
+    code/ch07/graph/demo.cpp -o /tmp/graph-demo
+/tmp/graph-demo</code></pre></div>
+<div class="codeblock" data-lang="console"><pre><code>DFS(0): 0 1 2 3 4
+BFS(0): 0 1 2 3 4
+拓扑序: 0 1 2 3 4
+Dijkstra(0-&gt;4) = 7</code></pre></div>
+<p>若再加上 <code>4→0</code> 形成环，<code>topological_sort()</code> 返回 <code>nullopt</code>。</p>
+<h3 id="742-深度优先与广度优先"><a class="anchor" href="#742-深度优先与广度优先">#</a>7.4.2 深度优先与广度优先</h3>
+<p>DFS 进入一个顶点就立刻标记已访问，再沿编号从小到大的出边递归。BFS 用队列按层扩展，先到的顶点先出队。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#dfs</a></div><pre><code>[[nodiscard]] std::vector&lt;std::<span class="t">size_t</span>&gt; dfs(std::<span class="t">size_t</span> source) <span class="k">const</span> {
+    check_vertex(source);
+    std::vector&lt;<span class="t">bool</span>&gt; seen(vertices());
+    std::vector&lt;std::<span class="t">size_t</span>&gt; result;
+    visit_depth_first(source, seen, result);
+    <span class="k">return</span> result;
+}</code></pre></div>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#bfs</a></div><pre><code>[[nodiscard]] std::vector&lt;std::<span class="t">size_t</span>&gt; bfs(std::<span class="t">size_t</span> source) <span class="k">const</span> {
+    check_vertex(source);
+    std::vector&lt;<span class="t">bool</span>&gt; seen(vertices());
+    std::queue&lt;std::<span class="t">size_t</span>&gt; queue;
+    std::vector&lt;std::<span class="t">size_t</span>&gt; result;
+    queue.push(source);
+    seen[source] = <span class="k">true</span>;
+    <span class="k">while</span> (!queue.empty()) {
+        <span class="k">const</span> std::<span class="t">size_t</span> from = queue.front();
+        queue.pop();
+        result.push_back(from);
+        <span class="k">for</span> (std::<span class="t">size_t</span> to = <span class="n">0</span>; to &lt; vertices(); ++to) {
+            <span class="k">if</span> (adjacency_[from][to] &lt; infinity &amp;&amp; !seen[to]) {
+                seen[to] = <span class="k">true</span>;
+                queue.push(to);
+            }
+        }
+    }
+    <span class="k">return</span> result;
+}</code></pre></div>
+<h3 id="743-拓扑排序"><a class="anchor" href="#743-拓扑排序">#</a>7.4.3 拓扑排序</h3>
+<p>统计每个顶点的入度，把入度为 0 的点入队；每取出一个点，就把它指出的入度减 1。若最终取出的点数少于顶点数，图里有环。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#topological</a></div><pre><code>[[nodiscard]] std::optional&lt;std::vector&lt;std::<span class="t">size_t</span>&gt;&gt; topological_sort() <span class="k">const</span> {
+    std::vector&lt;std::<span class="t">size_t</span>&gt; indegree(vertices());
+    <span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; vertices(); ++from) {
+        <span class="k">for</span> (std::<span class="t">size_t</span> to = <span class="n">0</span>; to &lt; vertices(); ++to) {
+            <span class="k">if</span> (from != to &amp;&amp; adjacency_[from][to] &lt; infinity) {
+                ++indegree[to];
+            }
+        }
+    }
+    std::queue&lt;std::<span class="t">size_t</span>&gt; queue;
+    <span class="k">for</span> (std::<span class="t">size_t</span> vertex = <span class="n">0</span>; vertex &lt; vertices(); ++vertex) {
+        <span class="k">if</span> (indegree[vertex] == <span class="n">0</span>) {
+            queue.push(vertex);
+        }
+    }
+    std::vector&lt;std::<span class="t">size_t</span>&gt; result;
+    <span class="k">while</span> (!queue.empty()) {
+        <span class="k">const</span> std::<span class="t">size_t</span> from = queue.front();
+        queue.pop();
+        result.push_back(from);
+        <span class="k">for</span> (std::<span class="t">size_t</span> to = <span class="n">0</span>; to &lt; vertices(); ++to) {
+            <span class="k">if</span> (from != to &amp;&amp; adjacency_[from][to] &lt; infinity &amp;&amp; --indegree[to] == <span class="n">0</span>) {
+                queue.push(to);
+            }
+        }
+    }
+    <span class="k">return</span> result.size() == vertices() ? std::optional&lt;std::vector&lt;std::<span class="t">size_t</span>&gt;&gt;(result)
+                                       : std::nullopt;
+}</code></pre></div>
+<h2 id="75-最短路径"><a class="anchor" href="#75-最短路径">#</a>7.5 最短路径</h2>
+<h3 id="751-单源最短路径"><a class="anchor" href="#751-单源最短路径">#</a>7.5.1 单源最短路径</h3>
+<p>Dijkstra 反复选出尚未确定的、当前距离最小的顶点，用它的出边松弛邻居。边权必须非负。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#dijkstra</a></div><pre><code>[[nodiscard]] std::vector&lt;<span class="t">int</span>&gt; dijkstra(std::<span class="t">size_t</span> source) <span class="k">const</span> {
+    check_vertex(source);
+    std::vector&lt;<span class="t">int</span>&gt; distance(vertices(), infinity);
+    std::vector&lt;<span class="t">bool</span>&gt; used(vertices());
+    distance[source] = <span class="n">0</span>;
+    <span class="k">for</span> (std::<span class="t">size_t</span> count = <span class="n">0</span>; count &lt; vertices(); ++count) {
+        <span class="k">const</span> std::<span class="t">size_t</span> from = nearest_unvisited(distance, used);
+        <span class="k">if</span> (from == vertices() || distance[from] == infinity) {
+            <span class="k">break</span>;
+        }
+        used[from] = <span class="k">true</span>;
+        <span class="k">for</span> (std::<span class="t">size_t</span> to = <span class="n">0</span>; to &lt; vertices(); ++to) {
+            <span class="k">if</span> (adjacency_[from][to] &lt; infinity &amp;&amp;
+                distance[to] &gt; distance[from] + adjacency_[from][to]) {
+                distance[to] = distance[from] + adjacency_[from][to];
+            }
+        }
+    }
+    <span class="k">return</span> distance;
+}</code></pre></div>
+<h3 id="752-每对顶点之间的最短路径"><a class="anchor" href="#752-每对顶点之间的最短路径">#</a>7.5.2 每对顶点之间的最短路径</h3>
+<p>Floyd 枚举中转点 <code>via</code>，比较 <code>from→to</code> 与 <code>from→via→to</code>。测试里五个源点的 Dijkstra 与 Floyd 逐项对拍。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#floyd</a></div><pre><code>[[nodiscard]] std::vector&lt;std::vector&lt;<span class="t">int</span>&gt;&gt; floyd() <span class="k">const</span> {
+    <span class="k">auto</span> distance = adjacency_;
+    <span class="k">for</span> (std::<span class="t">size_t</span> via = <span class="n">0</span>; via &lt; vertices(); ++via) {
+        <span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; vertices(); ++from) {
+            <span class="k">for</span> (std::<span class="t">size_t</span> to = <span class="n">0</span>; to &lt; vertices(); ++to) {
+                <span class="k">if</span> (distance[from][via] &lt; infinity &amp;&amp; distance[via][to] &lt; infinity) {
+                    distance[from][to] = std::min(
+                        distance[from][to], distance[from][via] + distance[via][to]);
+                }
+            }
+        }
+    }
+    <span class="k">return</span> distance;
+}</code></pre></div>
+<h2 id="76-最小生成树"><a class="anchor" href="#76-最小生成树">#</a>7.6 最小生成树</h2>
+<p>目标不是任意两点最短，而是连通全部顶点且选中边的总权最小。</p>
+<h3 id="761-prim-算法"><a class="anchor" href="#761-prim-算法">#</a>7.6.1 Prim 算法</h3>
+<p>从指定源点生长，每次把离当前树最近的顶点加进来。非连通则返回 <code>nullopt</code>。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#prim</a></div><pre><code>[[nodiscard]] std::optional&lt;std::vector&lt;Edge&gt;&gt; prim(std::<span class="t">size_t</span> source) <span class="k">const</span> {
+    check_vertex(source);
+    std::vector&lt;<span class="t">int</span>&gt; distance(vertices(), infinity);
+    std::vector&lt;std::<span class="t">size_t</span>&gt; predecessor(vertices());
+    std::vector&lt;<span class="t">bool</span>&gt; used(vertices());
+    std::vector&lt;Edge&gt; result;
+    distance[source] = <span class="n">0</span>;
+    <span class="k">for</span> (std::<span class="t">size_t</span> count = <span class="n">0</span>; count &lt; vertices(); ++count) {
+        <span class="k">const</span> std::<span class="t">size_t</span> from = nearest_unvisited(distance, used);
+        <span class="k">if</span> (from == vertices() || distance[from] == infinity) {
+            <span class="k">return</span> std::nullopt;
+        }
+        used[from] = <span class="k">true</span>;
+        <span class="k">if</span> (from != source) {
+            result.push_back({predecessor[from], from, distance[from]});
+        }
+        <span class="k">for</span> (std::<span class="t">size_t</span> to = <span class="n">0</span>; to &lt; vertices(); ++to) {
+            <span class="k">if</span> (!used[to] &amp;&amp; adjacency_[from][to] &lt; distance[to]) {
+                distance[to] = adjacency_[from][to];
+                predecessor[to] = from;
+            }
+        }
+    }
+    <span class="k">return</span> result;
+}</code></pre></div>
+<h3 id="762-kruskal-算法"><a class="anchor" href="#762-kruskal-算法">#</a>7.6.2 Kruskal 算法</h3>
+<p>把边按权排序，用并查集跳过会形成环的边。连通图上与 Prim 得到相同总权、<code>n-1</code> 条边。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#kruskal</a></div><pre><code>[[nodiscard]] std::optional&lt;std::vector&lt;Edge&gt;&gt; kruskal() <span class="k">const</span> {
+    std::vector&lt;Edge&gt; edges;
+    <span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; vertices(); ++from) {
+        <span class="k">for</span> (std::<span class="t">size_t</span> to = from + <span class="n">1</span>; to &lt; vertices(); ++to) {
+            <span class="k">if</span> (adjacency_[from][to] &lt; infinity) {
+                edges.push_back({from, to, adjacency_[from][to]});
+            }
+        }
+    }
+    std::sort(edges.begin(), edges.end());
+    std::vector&lt;std::<span class="t">size_t</span>&gt; parent(vertices());
+    <span class="k">for</span> (std::<span class="t">size_t</span> vertex = <span class="n">0</span>; vertex &lt; vertices(); ++vertex) {
+        parent[vertex] = vertex;
+    }
+    std::vector&lt;Edge&gt; result;
+    <span class="k">for</span> (<span class="k">const</span> Edge&amp; edge : edges) {
+        <span class="k">const</span> std::<span class="t">size_t</span> from_root = find_root(parent, edge.from);
+        <span class="k">const</span> std::<span class="t">size_t</span> to_root = find_root(parent, edge.to);
+        <span class="k">if</span> (from_root != to_root) {
+            parent[from_root] = to_root;
+            result.push_back(edge);
+        }
+    }
+    <span class="k">return</span> result.size() + <span class="n">1</span> == vertices() ? std::optional&lt;std::vector&lt;Edge&gt;&gt;(result)
+                                            : std::nullopt;
+}</code></pre></div>
+<h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
+<p>图对前驱和后继的个数都不加限制。边可以无向或有向、可以带权。存储常用邻接矩阵（稠密、问边 <span class="math">O(<span class="upr">1</span>)</span>）和邻接表（稀疏、沿出边走）。周游有深度优先和广度优先。有向无环图可以拓扑排序；有环则无解。非负权单源最短路用 Dijkstra，任意两点用 Floyd。无向连通图的最小生成树可用 Prim 或 Kruskal，二者总权相同。</p>
+<p>本章实现使用邻接矩阵，因此当前 Dijkstra 和 Prim 的直接实现是 <span class="math">O(V<sup><span class="upr">2</span></sup>)</span>，Floyd 是 <span class="math">O(V<sup><span class="upr">3</span></sup>)</span>，空间是 <span class="math">O(V<sup><span class="upr">2</span></sup>)</span>。改用邻接表并配合二叉堆之后，稀疏图上的 Dijkstra 达到 <span class="math">O((V<span class="bin">+</span>E)&thinsp;<span class="upr">log</span>&thinsp;V)</span>—— 这一条现在有实现和实测支撑，见 7.3.2 与 <code>code/ch07/adjacency_list</code>。两个结论各自对应 各自的存储结构，不能互相套用。</p>
+<h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
+<h3 id="补充算法设计题参考课程第-7-章"><a class="anchor" href="#补充算法设计题参考课程第-7-章">#</a>补充算法设计题（参考课程第 7 章）</h3>
+<ol>
+<li>在 DAG 中设计关键路径算法，计算每个顶点的最早发生时间和工程总工期。</li>
+<li>说明为什么不能给所有边统一加常数后继续使用 Dijkstra；给出负权边反例。</li>
+<li>证明 Dijkstra 得到的是最短路树而不一定是最小生成树。</li>
+<li>分别画出 4 个顶点的无向完全图和有向完全图，并写出边数公式。</li>
+<li>对本章 demo 那张有向图，写出从 0 出发的一种 DFS 序列和一种 BFS 序列。</li>
+<li>给一个有环的有向图，说明拓扑排序如何发现环。</li>
+<li>在边权非负的图上用手算 Dijkstra，列出每一步选出的顶点和距离数组。</li>
+<li>说明为什么负权边不能直接用 Dijkstra。</li>
+<li>对同一张无向带权连通图分别做 Prim 和 Kruskal，验证边集可以不同、总权必须相同。</li>
+<li>邻接矩阵和邻接表各适合什么图、什么运算？给出空间代价。</li>
+</ol>
+<h2 id="上机题"><a class="anchor" href="#上机题">#</a>上机题</h2>
+<ol>
+<li>读入一个有向图，输出一种拓扑序；有环则报告。</li>
+<li>实现 Dijkstra，输出源点到各点的距离和一条最短路径。</li>
+<li>实现 Prim 与 Kruskal，对同一组随机连通图比较总权。</li>
+<li><code>code/ch07/adjacency_list</code> 已经用邻接表重做了 DFS/BFS 并与矩阵版对拍。再往前一步：给它加一个删边接口，并说明为什么删边在邻接表上是 <span class="math">O(<span class="upr">deg</span>&thinsp;u)</span>、在矩阵上是 <span class="math">O(<span class="upr">1</span>)</span>。</li>
+</ol>
+<div class="pagenav"><a href="ch06-tree.html"><span class="dir">← 上一篇</span>第6章 树</a><a href="ch08-sorting.html" style="text-align:right"><span class="dir">下一篇 →</span>第8章 内部排序</a></div>
+</main>
+<nav class="page"><b>本页</b><a href="#71-图的定义和基本术语">7.1 图的定义和基本术语</a><a href="#72-图的抽象数据类型">7.2 图的抽象数据类型</a><a href="#73-图的存储结构">7.3 图的存储结构</a><a href="#731-相邻矩阵" class="sub">7.3.1 相邻矩阵</a><a href="#732-邻接表" class="sub">7.3.2 邻接表</a><a href="#74-图的周游">7.4 图的周游</a><a href="#741-先跑一遍" class="sub">7.4.1 先跑一遍</a><a href="#742-深度优先与广度优先" class="sub">7.4.2 深度优先与广度优先</a><a href="#743-拓扑排序" class="sub">7.4.3 拓扑排序</a><a href="#75-最短路径">7.5 最短路径</a><a href="#751-单源最短路径" class="sub">7.5.1 单源最短路径</a><a href="#752-每对顶点之间的最短路径" class="sub">7.5.2 每对顶点之间的最短路径</a><a href="#76-最小生成树">7.6 最小生成树</a><a href="#761-prim-算法" class="sub">7.6.1 Prim 算法</a><a href="#762-kruskal-算法" class="sub">7.6.2 Kruskal 算法</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充算法设计题参考课程第-7-章" class="sub">补充算法设计题（参考课程第 7 章）</a><a href="#上机题">上机题</a></nav>
+</div>
+<footer>
+  本页由 <code>tools/build_site.py</code> 从 <code>book/ch07-graph.md</code> 生成
+  —— Markdown 是唯一事实源，请勿手改此文件。正文中的 C++ 代码块与 <code>code/</code> 下
+  通过测试的源码逐字一致（由 <code>tools/check_doc.py</code> 的 R3 保证）。
+</footer>
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('nav.page a'));
+  if(links.length){
+    var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a});
+    var seen=[];
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        var id=e.target.id;
+        if(e.isIntersecting){if(seen.indexOf(id)<0)seen.push(id)}
+        else{var i=seen.indexOf(id);if(i>=0)seen.splice(i,1)}
+      });
+      links.forEach(function(a){a.classList.remove('active')});
+      if(seen.length&&map[seen[0]])map[seen[0]].classList.add('active');
+    },{rootMargin:'0px 0px -75% 0px'});
+    [].slice.call(document.querySelectorAll('h2[id],h3[id]')).forEach(function(h){io.observe(h)});
+  }
+  [].slice.call(document.querySelectorAll('.codeblock')).forEach(function(block){
+    var button=document.createElement('button');
+    button.className='copy';button.type='button';button.textContent='复制';
+    button.addEventListener('click',function(){
+      var text=block.querySelector('code').textContent;
+      var done=function(){button.textContent='已复制';
+        setTimeout(function(){button.textContent='复制'},1200)};
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done,function(){button.textContent='复制失败'});
+      }else{
+        var area=document.createElement('textarea');area.value=text;document.body.appendChild(area);
+        area.select();try{document.execCommand('copy');done()}catch(e){button.textContent='复制失败'}
+        document.body.removeChild(area);
+      }
+    });
+    block.appendChild(button);
+  });
+})();
+</script>
+</body>
+</html>

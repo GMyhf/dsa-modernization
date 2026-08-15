@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>现代 C++ 数据结构教程</title>
+<meta name="description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:title" content="现代 C++ 数据结构教程">
+<meta property="og:description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:type" content="article">
+<style>
+:root{color-scheme:light;
+  --ink:#1a2230;--muted:#68758a;--faint:#93a0b3;--line:#dde3ec;--bg:#f3f5f9;--panel:#fff;
+  --soft:#eef1f7;--accent:#2f5fd0;--accent-soft:#e5ecfb;--warn:#b06a1c;--danger:#c0392b;
+  --kw:#8b2fa0;--ty:#0f6f8c;--st:#177245;--cm:#7d8899;--pp:#a3572a}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;
+  --ink:#e3e8f0;--muted:#98a3b5;--faint:#6f7c90;--line:#2b3342;--bg:#12151b;--panel:#171b22;
+  --soft:#1e232c;--accent:#84a9f5;--accent-soft:#1c2740;--warn:#dcae72;--danger:#e08a80;
+  --kw:#d79ae8;--ty:#7cc7dd;--st:#8fd0a4;--cm:#7b8598;--pp:#e0a97b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.8 system-ui,-apple-system,"Segoe UI","Noto Sans CJK SC","PingFang SC",sans-serif}
+a{color:var(--accent)}
+.masthead{background:var(--panel);border-bottom:1px solid var(--line);padding:30px 26px 24px}
+.masthead .inner{max-width:1440px;margin:0 auto}
+.masthead .eyebrow{font-size:13px;color:var(--muted);letter-spacing:.06em;margin:0 0 6px}
+.masthead .eyebrow a{text-decoration:none}
+.masthead h1{margin:0;font-size:clamp(23px,3.4vw,34px);line-height:1.25;letter-spacing:-.01em}
+.masthead p.sub{margin:10px 0 0;color:var(--muted);font-size:15px;max-width:62ch}
+.masthead .meta{margin:12px 0 0;font-size:13.5px;color:var(--muted)}
+.layout{max-width:1440px;margin:0 auto;padding:0 26px 80px;display:grid;
+  grid-template-columns:228px minmax(0,1fr) 208px;gap:40px;align-items:start}
+nav.book,nav.page{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;
+  padding:22px 0;font-size:14px;line-height:1.55}
+nav b{display:block;color:var(--faint);font-size:11.5px;letter-spacing:.1em;
+  text-transform:uppercase;margin:16px 0 8px}
+nav b:first-child{margin-top:0}
+nav a{display:block;padding:5px 10px;border-left:2px solid transparent;
+  color:var(--ink);text-decoration:none;border-radius:0 5px 5px 0}
+nav a:hover{background:var(--soft);color:var(--accent)}
+nav.book a.here{background:var(--accent-soft);border-left-color:var(--accent);
+  color:var(--accent);font-weight:600}
+nav.page a{color:var(--muted);font-size:13.5px;padding:4px 10px}
+nav.page a.sub{padding-left:22px;font-size:13px;color:var(--faint)}
+nav.page a.active{border-left-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+main{min-width:0;padding-top:24px}
+h1,h2,h3,h4{scroll-margin-top:16px}
+h2{font-size:24px;margin:48px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+h3{font-size:18.5px;margin:30px 0 10px}
+h4{font-size:16px;margin:22px 0 8px;color:var(--muted)}
+.anchor{float:left;margin-left:-1.05em;padding-right:.3em;color:transparent;
+  text-decoration:none;font-weight:400}
+h2:hover .anchor,h3:hover .anchor,h4:hover .anchor{color:var(--faint)}
+p{margin:0 0 15px}
+code{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  background:var(--soft);padding:2px 6px;border-radius:4px;word-break:break-word}
+.codeblock{position:relative;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px;margin:0 0 18px;overflow:hidden}
+.codeblock .srcbar{border-bottom:1px solid var(--line);background:var(--soft);
+  padding:6px 12px;font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+.codeblock .srcbar a{color:var(--muted);text-decoration:none}
+.codeblock .srcbar a:hover{color:var(--accent);text-decoration:underline}
+.codeblock pre{margin:0;padding:14px 16px;overflow:auto}
+.codeblock code{background:none;padding:0;font-size:13px;line-height:1.65;white-space:pre}
+.codeblock[data-lang=console] pre,.codeblock[data-lang=bash] pre{background:var(--soft)}
+.codeblock[data-lang=text]::after{content:"原书印刷";position:absolute;top:8px;right:10px;
+  font-size:11px;color:var(--faint);letter-spacing:.05em}
+.copy{position:absolute;top:6px;right:8px;border:1px solid var(--line);background:var(--panel);
+  color:var(--muted);border-radius:6px;font-size:12px;padding:2px 8px;cursor:pointer;opacity:0}
+.codeblock:hover .copy{opacity:1}
+.copy:hover{color:var(--accent);border-color:var(--accent)}
+.codeblock .srcbar~.copy{top:34px}
+.k{color:var(--kw)}.t{color:var(--ty)}.s{color:var(--st)}.c{color:var(--cm);font-style:italic}
+.n{color:var(--warn)}.p{color:var(--pp)}
+blockquote{margin:0 0 18px;padding:12px 18px;border-left:3px solid var(--accent);
+  background:var(--soft);border-radius:0 7px 7px 0}
+blockquote p:last-child{margin-bottom:0}
+.table-wrap{overflow-x:auto;margin:0 0 18px}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--panel)}
+th,td{border:1px solid var(--line);padding:8px 11px;vertical-align:top}
+th{background:var(--soft);font-weight:650}
+ul,ol{margin:0 0 15px;padding-left:26px}
+li{margin:6px 0}
+hr{border:0;border-top:1px solid var(--line);margin:34px 0}
+figure{margin:0 0 22px;padding:12px;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px}
+figure img{max-width:100%;display:block;margin:0 auto;border-radius:4px;background:#fff}
+figcaption{margin-top:9px;color:var(--muted);font-size:13.5px;text-align:center}
+.gallery-page{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:18px;align-items:start}
+.gallery-page>figure{margin:0}
+.gallery-page>h2,.gallery-page>h3,.gallery-page>p,.gallery-page>blockquote,
+.gallery-page>hr,.gallery-page>.pagenav{grid-column:1/-1}
+.math{font-family:"Latin Modern Math","Cambria Math",Georgia,serif;font-style:italic}
+.math .upr,.math .mono,.math .bold{font-style:normal}
+.math .mono{font-family:ui-monospace,Menlo,monospace}
+.math .bold{font-weight:700}
+.math sup,.math sub{font-size:.72em}
+.math .rel{margin:0 .28em;font-style:normal}
+.math .bin{margin:0 .16em;font-style:normal}
+.math-display{display:block;text-align:center;margin:18px 0;font-size:17px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+  font-size:.85em;line-height:1.15}
+.frac .num{border-bottom:1px solid currentColor;padding:0 .25em}
+.frac .den{padding:0 .25em}
+.sqrt{border-top:1px solid currentColor}
+.sqrt::before{content:"√";border-top:0}
+.tex-raw{border-bottom:1px dotted var(--danger);font-style:normal}
+.pagenav{display:flex;justify-content:space-between;gap:16px;margin:50px 0 0;
+  border-top:1px solid var(--line);padding-top:18px;font-size:14.5px}
+.pagenav a{text-decoration:none;max-width:46%}
+.pagenav .dir{display:block;color:var(--faint);font-size:12px}
+footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
+  font-size:13.5px;border-top:1px solid var(--line)}
+@media(max-width:1180px){
+  .layout{grid-template-columns:212px minmax(0,1fr);gap:32px}
+  nav.page{display:none}
+}
+@media(max-width:820px){
+  .layout{grid-template-columns:1fr;gap:0;padding:0 18px 60px}
+  nav.book{position:static;max-height:none;border-bottom:1px solid var(--line);
+    margin-bottom:14px;padding:14px 0}
+  .masthead{padding:22px 18px 18px}
+}
+@media print{
+  nav,.pagenav,.copy{display:none}
+  .layout{display:block;max-width:none}
+  body{background:#fff}
+  a{color:inherit;text-decoration:none}
+  .codeblock,figure,table{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header class="masthead"><div class="inner">
+  <h1>现代 C++ 数据结构教程</h1>
+<p class="sub">基于《数据结构与算法》（张铭、王腾蛟、赵海燕编著，高等教育出版社，2008）重编</p>
+  <p class="meta"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/book/现代C++数据结构教程.md">Markdown 源文件</a>
+    · <a href="https://github.com/GMyhf/dsa-modernization">GitHub 仓库</a>
+    · <a href="errata.html">原书勘误</a></p>
+</div></header>
+<div class="layout">
+<nav class="book"><b>导读</b><a href="index.html" class="here">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a></nav>
+<main>
+<h2 id="如何使用本教程"><a class="anchor" href="#如何使用本教程">#</a>如何使用本教程</h2>
+<p>每章正文位于本目录的独立 Markdown 文件。这样做有两个好处：阅读器能快速跳转，且每一段 C++ 都能与 <code>code/</code> 下通过测试的源码逐字同步。代码块中的 <code>file=</code> 标注就是其来源。</p>
+<p>想在浏览器里读，用 <code>python3 tools/build_site.py</code> 生成的网页版：打开 <code>book/site/index.html</code> 即可，左侧是全书目录、右侧是本章小节，代码块可一键复制。网页由这些 Markdown 渲染而来， 不是另一份稿子。离线阅读还有 <code>book/pdf/现代C++数据结构教程.pdf</code>。</p>
+<p>建议的学习顺序是第 1 至第 10 章；第 11 章把索引技术做成可运行的页模拟（线性索引、倒排、B+ 树、位图）；第 12 章收束广义表的共享回收、前缀树与动态规划。 每章先理解抽象模型，再阅读实现，最后运行对应单元的测试。所有提取操作（例如 <code>pop</code>、 <code>dequeue</code>）都用 <code>std::optional</code> 表达正常的空状态；参数、容量或权重不合法则抛标准异常。</p>
+<div class="codeblock" data-lang="bash"><pre><code># 编译并运行全书的现代实现与测试
+python3 tools/check_code.py --allow-degraded
+
+# 检查书稿中的代码与源码是否仍逐字一致
+python3 tools/check_doc.py</code></pre></div>
+<p>单章可以先跑那个单元的 <code>demo.cpp</code>。第 1 章的编译命令在 <a href="ch01-adt.html">ch01-adt.md</a> 里逐项解释过； 后面各章的命令形状相同，只改 <code>-I</code> 路径和源文件。</p>
+<h3 id="语言版本与实现状态"><a class="anchor" href="#语言版本与实现状态">#</a>语言版本与实现状态</h3>
+<p>正文代码固定使用 C++17，以保证 GCC、Clang 和 MSVC 的可用性。C++20/23 的 concepts、ranges 和 views 不作为正文前置条件，只在需要时作为延伸阅读。每章内容按实现状态区分：</p>
+<ul>
+<li><strong>实现并测试</strong>：有 <code>code/</code> 源码、<code>demo.cpp</code> 和测试，并由闸门编译运行。</li>
+<li><strong>概念导读</strong>：解释结构、表示法或算法取舍，但没有把未经验证的代码印进正文。</li>
+<li><strong>练习实现</strong>：给出接口、公式或题目，由读者实现并自行验证。</li>
+</ul>
+<h3 id="现代-c-能力地图"><a class="anchor" href="#现代-c-能力地图">#</a>现代 C++ 能力地图</h3>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">能力</th>
+<th style="text-align:left">首次出现</th>
+<th style="text-align:left">本书内的学习入口</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">RAII、析构与五法则</td>
+<td style="text-align:left">第 2 章顺序表</td>
+<td style="text-align:left">第 2 章“存储与所有权”</td>
+</tr>
+<tr>
+<td style="text-align:left">移动语义与完美转发</td>
+<td style="text-align:left">第 2、5 章</td>
+<td style="text-align:left">第 2 章链表、第 5 章树</td>
+</tr>
+<tr>
+<td style="text-align:left">异常与异常安全</td>
+<td style="text-align:left">第 2、5、10 章</td>
+<td style="text-align:left">各章“失败处理”小节</td>
+</tr>
+<tr>
+<td style="text-align:left">迭代器与 STL 算法</td>
+<td style="text-align:left">第 8、10 章</td>
+<td style="text-align:left">第 8 章排序、第 10 章检索</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>[[nodiscard]]</code></td>
+<td style="text-align:left">第 1 章起</td>
+<td style="text-align:left">下面的“属性和接口约定”</td>
+</tr>
+<tr>
+<td style="text-align:left">concepts、ranges、views</td>
+<td style="text-align:left">延伸阅读</td>
+<td style="text-align:left">不作为正文前置条件</td>
+</tr>
+</tbody></table></div>
+<h3 id="术语速查"><a class="anchor" href="#术语速查">#</a>术语速查</h3>
+<p>正文里反复出现的几个词，第一次撞上时可以回来查。每条只讲两件事：<strong>是什么</strong>，以及 <strong>不这样做会出什么事</strong>——后者才是它们存在的理由。</p>
+<p><strong><code>std::optional&lt;T&gt;</code></strong>：一个「可能装着 T 的盒子」。表示「可能没有结果」的返回值， 取值前必须先判断盒子空不空。它替代的是老写法「返回 <code>bool</code> 表示成败 + 用引用参数带出结果」—— 那种写法下调用方忘了看 <code>bool</code>，就会读到一个从没被写过的变量，程序不崩，只是默默按错误数据继续跑。 第 2.2.2 节有完整对照。</p>
+<p><strong>五法则（Rule of Five）</strong>：一个类只要自己管着资源（这里是 <code>new</code> 出来的缓冲区或结点）， 就得同时写全<strong>析构函数、拷贝构造、拷贝赋值、移动构造、移动赋值</strong>这五个函数。 少写任何一个，编译器都会替你生成一个「逐成员照抄」的版本——照抄指针的结果是两个对象 指向同一块内存，各自析构一次，<strong>同一块内存被释放两次</strong>。原书的 <code>arrStack</code> 和 <code>arrList</code> 都缺了这几个，第 3 章用 ASan 报告复现了这个二次释放。</p>
+<p><strong>RAII</strong>：把「资源的生命周期」绑在「对象的生命周期」上——构造时拿到，析构时自动还回去。 好处是无论函数怎么退出（正常返回、提前 <code>return</code>、抛异常），析构都一定会跑， 所以不会漏掉释放。<code>std::unique_ptr</code> 就是 RAII 的典型；本书在少数几处刻意不用它， 理由和代价见第 2.3.2a 节。</p>
+<p><strong><code>noexcept</code></strong>：写在函数后面，承诺这个函数不会抛异常。它不只是文档——标准库和本书的容器 都会<strong>查询</strong>这个承诺来决定策略（例如扩容时是「移动元素」还是「拷贝元素」）。 承诺了却真的抛，程序直接 <code>std::terminate</code>，没有补救余地。</p>
+<p><strong>强异常保证</strong>：一个操作要么完全成功，要么<strong>像没发生过一样</strong>，绝不留下半成品状态。 典型做法是「先在新地方做好，全部成功了再换过去」。反例是原书扩容：先 <code>delete[]</code> 旧缓冲区 再搬元素，中途抛异常就停在一个既不是旧状态、也不是新状态的地方，对象从此不可用。 第 3.1.3 节有可运行的对照测试。</p>
+<p><strong>摊还代价（amortized cost）</strong>：单次操作偶尔很贵，但把总代价分摊到所有操作上后每次很便宜。 顺序表扩容是标准例子：绝大多数插入是 O(1)，偶尔一次翻倍要搬走全部 n 个元素； 但两次扩容之间至少发生了 n 次插入，把这次搬迁分摊下去，每次插入仍是 O(1)。 注意它说的是<strong>平均</strong>，不是保证——对延迟敏感的场合，那一次搬迁仍然会实打实地卡住。</p>
+<h3 id="属性和接口约定"><a class="anchor" href="#属性和接口约定">#</a>属性和接口约定</h3>
+<p>代码中的 <code>[[nodiscard]]</code> 是 C++17 的标准属性，意思是“调用者不应无意丢弃这个返回值”。它特别 适合查找结果、<code>std::optional</code>、是否成功以及新建对象等接口：</p>
+<div class="codeblock" data-lang="text"><pre><code>[[nodiscard]] std::optional&lt;std::size_t&gt; find(int key) const;</code></pre></div>
+<p>如果调用者只写 <code>table.find(42);</code>，编译器可能给出警告，提醒程序员检查返回值。它不是运行时检查、 不是异常，也不会改变函数的返回类型；确实要忽略时可以显式写 <code>(void)table.find(42);</code>。本教程的 编译命令使用 <code>-Wall -Wextra -Werror</code>，因此把这类疏忽尽早变成编译错误。</p>
+<h3 id="各章实现状态"><a class="anchor" href="#各章实现状态">#</a>各章实现状态</h3>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">章节</th>
+<th style="text-align:left">状态</th>
+<th style="text-align:left">验证入口或边界</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">第 1 章 概论</td>
+<td style="text-align:left">实现并测试</td>
+<td style="text-align:left"><code>code/ch01/adt</code>；Floyd 示例与测试</td>
+</tr>
+<tr>
+<td style="text-align:left">第 2 章 线性表</td>
+<td style="text-align:left">实现并测试</td>
+<td style="text-align:left"><code>code/ch02/array_list</code>、<code>linked_list</code>、<code>doubly_linked_list</code>、<code>ownership</code></td>
+</tr>
+<tr>
+<td style="text-align:left">第 3 章 栈与队列</td>
+<td style="text-align:left">实现并测试</td>
+<td style="text-align:left"><code>code/ch03</code> 下 6 个单元</td>
+</tr>
+<tr>
+<td style="text-align:left">第 4 章 字符串</td>
+<td style="text-align:left">实现并测试</td>
+<td style="text-align:left"><code>code/ch04</code>；朴素匹配与 KMP</td>
+</tr>
+<tr>
+<td style="text-align:left">第 5 章 二叉树</td>
+<td style="text-align:left">实现并测试</td>
+<td style="text-align:left"><code>code/ch05</code>；深退化树有栈风险</td>
+</tr>
+<tr>
+<td style="text-align:left">第 6 章 树</td>
+<td style="text-align:left">实现并测试</td>
+<td style="text-align:left"><code>code/ch06/general_tree</code></td>
+</tr>
+<tr>
+<td style="text-align:left">第 7 章 图</td>
+<td style="text-align:left">实现并测试</td>
+<td style="text-align:left"><code>code/ch07/graph</code> 邻接矩阵、<code>code/ch07/adjacency_list</code> 邻接表，两者逐项对拍</td>
+</tr>
+<tr>
+<td style="text-align:left">第 8 章 内部排序</td>
+<td style="text-align:left">实现并测试</td>
+<td style="text-align:left"><code>code/ch08/sorting</code>；手写排序</td>
+</tr>
+<tr>
+<td style="text-align:left">第 9 章 外部排序</td>
+<td style="text-align:left">实现并测试</td>
+<td style="text-align:left"><code>code/ch09/external_sort</code>；内存模拟外存</td>
+</tr>
+<tr>
+<td style="text-align:left">第 10 章 检索</td>
+<td style="text-align:left">实现并测试</td>
+<td style="text-align:left"><code>code/ch10/search_hash</code>；散列与墓碑</td>
+</tr>
+<tr>
+<td style="text-align:left">第 11 章 索引技术</td>
+<td style="text-align:left">实现并测试</td>
+<td style="text-align:left"><code>code/ch11</code> 下 4 个单元；内存里的页模拟，不做真实磁盘 I/O</td>
+</tr>
+<tr>
+<td style="text-align:left">第 12 章 高级数据结构</td>
+<td style="text-align:left">混合</td>
+<td style="text-align:left">广义表、Trie/Patricia、稀疏矩阵、动态分配、标记–清除、AVL/伸展树与最优 BST 均实现并测试；只有多维数组的定位公式仍为概念导读</td>
+</tr>
+</tbody></table></div>
+<h3 id="每章验证边界"><a class="anchor" href="#每章验证边界">#</a>每章验证边界</h3>
+<p>“实现并测试”表示对应 <code>code/</code> 单元在 Release-O2 运行通过，并不表示所有平台、线程场景或极端 输入都已证明。macOS 环境若无法启动 ASan/UBSan，检查脚本会明确报告降级；递归结构的栈深度也 随编译器、优化级别和进程栈大小变化。概念导读章节不伪造未验证的实现，练习代码需要读者自行 编译和测试。</p>
+<h2 id="目录"><a class="anchor" href="#目录">#</a>目录</h2>
+<ol>
+<li><a href="ch01-adt.html">概论</a>：1.1 问题求解，1.2 数据结构，1.3 算法，1.4 算法分析。</li>
+<li><a href="ch02-linear-list.html">线性表</a>：2.1 概念，2.2 顺序表，2.3 链表，2.4 比较。</li>
+<li><a href="ch03-stack.html">栈与队列</a>：3.1 栈，3.2 队列，3.3 比较。</li>
+<li><a href="ch04-string.html">字符串</a>：4.1 概念，4.2 存储与实现，4.3 模式匹配。</li>
+<li><a href="ch05-binary-tree.html">二叉树</a>：5.1 概念，5.2 周游，5.3 存储，5.4 BST，5.5 堆，5.6 Huffman。</li>
+<li><a href="ch06-tree.html">树</a>：6.1 定义，6.2 链式存储，6.3 顺序存储，6.4 K 叉树。</li>
+<li><a href="ch07-graph.html">图</a>：7.1–7.3 概念与存储，7.4 周游，7.5 最短路，7.6 最小生成树。</li>
+<li><a href="ch08-sorting.html">内部排序</a>：8.1 概念，8.2–8.6 各类排序，8.7 时间代价。</li>
+<li><a href="ch09-external-sort.html">文件管理与外部排序</a>：9.1–9.2 外存与文件，9.3 置换选择与选择树。</li>
+<li><a href="ch10-search.html">检索</a>：10.1 线性表检索，10.2 集合，10.3 散列。</li>
+<li><a href="ch11-index.html">索引技术</a>：11.1–11.6 线性/倒排/B 树/位图/红黑树。</li>
+<li><a href="ch12-advanced.html">高级数据结构</a>：12.1 多维数组，12.2 广义表与存储，12.3 Trie，12.4 改进 BST。</li>
+</ol>
+<p>对照纸书时，编译级硬伤与算法错见 <a href="errata.html">原书勘误</a>；其余原书插图见 <a href="figures.html">插图</a>。 各章习题、上机题及参考答案见 <a href="exercises.html">习题与参考答案</a>；题目来源和验证状态见 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/collab/TRACEABILITY-MATRIX.md" class="ext">参考资料逐项追踪矩阵</a>。 MOOC 题目的逐题解析作为来源参考附录收录，见 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/DSA_MOOC_solution.md" class="ext">MOOC 题解附录</a>；其中答案 需以本书正文、代码测试和追踪矩阵为准，不替代本书的自拟习题答案。</p>
+<h2 id="阅读约定"><a class="anchor" href="#阅读约定">#</a>阅读约定</h2>
+<ul>
+<li><strong>算法思想优先。</strong> 没有用标准库容器或排序算法替代本章要教的核心结构或算法。</li>
+<li><strong>资源所有权显式。</strong> 手写数组和结点链使用 RAII、析构、深复制和移动语义管理寿命。</li>
+<li><strong>测试是正文的一部分。</strong> 每个实现目录的 <code>test.cpp</code> 都覆盖其声明的原书清单；运行测试比 阅读一段未经执行的伪代码更可靠。</li>
+<li><strong>风险如实保留。</strong> 递归树周游与析构仍适合教学，但极深退化结构存在栈溢出风险；详见 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/collab/UNVERIFIED-RISKS.md" class="ext"> 0 </a>。</li>
+</ul>
+<h2 id="验证与边界"><a class="anchor" href="#验证与边界">#</a>验证与边界</h2>
+<p>本教程覆盖原书 105 条算法/代码清单。<code>code/</code> 下的每个单元都有对应的 <code>unit.json</code>、现代实现、 原书问题证据和可执行测试；书稿的 C++ 代码由工具逐字同步。完整的边界条件、未覆盖故障路径与 递归深度风险见 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/collab/UNVERIFIED-RISKS.md" class="ext"> 2 </a>。</p>
+<p>本教程采用 C++17，侧重数据结构的实现与算法语义。它不提供文件系统、数据库页缓存、并发控制 或跨平台性能承诺；这些属于使用数据结构的系统层设计。</p>
+<div class="pagenav"><span></span><a href="ch01-adt.html" style="text-align:right"><span class="dir">下一篇 →</span>第1章 概论</a></div>
+</main>
+<nav class="page"><b>本页</b><a href="#如何使用本教程">如何使用本教程</a><a href="#语言版本与实现状态" class="sub">语言版本与实现状态</a><a href="#现代-c-能力地图" class="sub">现代 C++ 能力地图</a><a href="#术语速查" class="sub">术语速查</a><a href="#属性和接口约定" class="sub">属性和接口约定</a><a href="#各章实现状态" class="sub">各章实现状态</a><a href="#每章验证边界" class="sub">每章验证边界</a><a href="#目录">目录</a><a href="#阅读约定">阅读约定</a><a href="#验证与边界">验证与边界</a></nav>
+</div>
+<footer>
+  本页由 <code>tools/build_site.py</code> 从 <code>book/现代C++数据结构教程.md</code> 生成
+  —— Markdown 是唯一事实源，请勿手改此文件。正文中的 C++ 代码块与 <code>code/</code> 下
+  通过测试的源码逐字一致（由 <code>tools/check_doc.py</code> 的 R3 保证）。
+</footer>
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('nav.page a'));
+  if(links.length){
+    var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a});
+    var seen=[];
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        var id=e.target.id;
+        if(e.isIntersecting){if(seen.indexOf(id)<0)seen.push(id)}
+        else{var i=seen.indexOf(id);if(i>=0)seen.splice(i,1)}
+      });
+      links.forEach(function(a){a.classList.remove('active')});
+      if(seen.length&&map[seen[0]])map[seen[0]].classList.add('active');
+    },{rootMargin:'0px 0px -75% 0px'});
+    [].slice.call(document.querySelectorAll('h2[id],h3[id]')).forEach(function(h){io.observe(h)});
+  }
+  [].slice.call(document.querySelectorAll('.codeblock')).forEach(function(block){
+    var button=document.createElement('button');
+    button.className='copy';button.type='button';button.textContent='复制';
+    button.addEventListener('click',function(){
+      var text=block.querySelector('code').textContent;
+      var done=function(){button.textContent='已复制';
+        setTimeout(function(){button.textContent='复制'},1200)};
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done,function(){button.textContent='复制失败'});
+      }else{
+        var area=document.createElement('textarea');area.value=text;document.body.appendChild(area);
+        area.select();try{document.execCommand('copy');done()}catch(e){button.textContent='复制失败'}
+        document.body.removeChild(area);
+      }
+    });
+    block.appendChild(button);
+  });
+})();
+</script>
+</body>
+</html>

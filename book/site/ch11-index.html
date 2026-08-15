@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第11章 索引技术 · 现代 C++ 数据结构教程</title>
+<meta name="description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:title" content="第11章 索引技术">
+<meta property="og:description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:type" content="article">
+<style>
+:root{color-scheme:light;
+  --ink:#1a2230;--muted:#68758a;--faint:#93a0b3;--line:#dde3ec;--bg:#f3f5f9;--panel:#fff;
+  --soft:#eef1f7;--accent:#2f5fd0;--accent-soft:#e5ecfb;--warn:#b06a1c;--danger:#c0392b;
+  --kw:#8b2fa0;--ty:#0f6f8c;--st:#177245;--cm:#7d8899;--pp:#a3572a}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;
+  --ink:#e3e8f0;--muted:#98a3b5;--faint:#6f7c90;--line:#2b3342;--bg:#12151b;--panel:#171b22;
+  --soft:#1e232c;--accent:#84a9f5;--accent-soft:#1c2740;--warn:#dcae72;--danger:#e08a80;
+  --kw:#d79ae8;--ty:#7cc7dd;--st:#8fd0a4;--cm:#7b8598;--pp:#e0a97b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.8 system-ui,-apple-system,"Segoe UI","Noto Sans CJK SC","PingFang SC",sans-serif}
+a{color:var(--accent)}
+.masthead{background:var(--panel);border-bottom:1px solid var(--line);padding:30px 26px 24px}
+.masthead .inner{max-width:1440px;margin:0 auto}
+.masthead .eyebrow{font-size:13px;color:var(--muted);letter-spacing:.06em;margin:0 0 6px}
+.masthead .eyebrow a{text-decoration:none}
+.masthead h1{margin:0;font-size:clamp(23px,3.4vw,34px);line-height:1.25;letter-spacing:-.01em}
+.masthead p.sub{margin:10px 0 0;color:var(--muted);font-size:15px;max-width:62ch}
+.masthead .meta{margin:12px 0 0;font-size:13.5px;color:var(--muted)}
+.layout{max-width:1440px;margin:0 auto;padding:0 26px 80px;display:grid;
+  grid-template-columns:228px minmax(0,1fr) 208px;gap:40px;align-items:start}
+nav.book,nav.page{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;
+  padding:22px 0;font-size:14px;line-height:1.55}
+nav b{display:block;color:var(--faint);font-size:11.5px;letter-spacing:.1em;
+  text-transform:uppercase;margin:16px 0 8px}
+nav b:first-child{margin-top:0}
+nav a{display:block;padding:5px 10px;border-left:2px solid transparent;
+  color:var(--ink);text-decoration:none;border-radius:0 5px 5px 0}
+nav a:hover{background:var(--soft);color:var(--accent)}
+nav.book a.here{background:var(--accent-soft);border-left-color:var(--accent);
+  color:var(--accent);font-weight:600}
+nav.page a{color:var(--muted);font-size:13.5px;padding:4px 10px}
+nav.page a.sub{padding-left:22px;font-size:13px;color:var(--faint)}
+nav.page a.active{border-left-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+main{min-width:0;padding-top:24px}
+h1,h2,h3,h4{scroll-margin-top:16px}
+h2{font-size:24px;margin:48px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+h3{font-size:18.5px;margin:30px 0 10px}
+h4{font-size:16px;margin:22px 0 8px;color:var(--muted)}
+.anchor{float:left;margin-left:-1.05em;padding-right:.3em;color:transparent;
+  text-decoration:none;font-weight:400}
+h2:hover .anchor,h3:hover .anchor,h4:hover .anchor{color:var(--faint)}
+p{margin:0 0 15px}
+code{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  background:var(--soft);padding:2px 6px;border-radius:4px;word-break:break-word}
+.codeblock{position:relative;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px;margin:0 0 18px;overflow:hidden}
+.codeblock .srcbar{border-bottom:1px solid var(--line);background:var(--soft);
+  padding:6px 12px;font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+.codeblock .srcbar a{color:var(--muted);text-decoration:none}
+.codeblock .srcbar a:hover{color:var(--accent);text-decoration:underline}
+.codeblock pre{margin:0;padding:14px 16px;overflow:auto}
+.codeblock code{background:none;padding:0;font-size:13px;line-height:1.65;white-space:pre}
+.codeblock[data-lang=console] pre,.codeblock[data-lang=bash] pre{background:var(--soft)}
+.codeblock[data-lang=text]::after{content:"原书印刷";position:absolute;top:8px;right:10px;
+  font-size:11px;color:var(--faint);letter-spacing:.05em}
+.copy{position:absolute;top:6px;right:8px;border:1px solid var(--line);background:var(--panel);
+  color:var(--muted);border-radius:6px;font-size:12px;padding:2px 8px;cursor:pointer;opacity:0}
+.codeblock:hover .copy{opacity:1}
+.copy:hover{color:var(--accent);border-color:var(--accent)}
+.codeblock .srcbar~.copy{top:34px}
+.k{color:var(--kw)}.t{color:var(--ty)}.s{color:var(--st)}.c{color:var(--cm);font-style:italic}
+.n{color:var(--warn)}.p{color:var(--pp)}
+blockquote{margin:0 0 18px;padding:12px 18px;border-left:3px solid var(--accent);
+  background:var(--soft);border-radius:0 7px 7px 0}
+blockquote p:last-child{margin-bottom:0}
+.table-wrap{overflow-x:auto;margin:0 0 18px}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--panel)}
+th,td{border:1px solid var(--line);padding:8px 11px;vertical-align:top}
+th{background:var(--soft);font-weight:650}
+ul,ol{margin:0 0 15px;padding-left:26px}
+li{margin:6px 0}
+hr{border:0;border-top:1px solid var(--line);margin:34px 0}
+figure{margin:0 0 22px;padding:12px;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px}
+figure img{max-width:100%;display:block;margin:0 auto;border-radius:4px;background:#fff}
+figcaption{margin-top:9px;color:var(--muted);font-size:13.5px;text-align:center}
+.gallery-page{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:18px;align-items:start}
+.gallery-page>figure{margin:0}
+.gallery-page>h2,.gallery-page>h3,.gallery-page>p,.gallery-page>blockquote,
+.gallery-page>hr,.gallery-page>.pagenav{grid-column:1/-1}
+.math{font-family:"Latin Modern Math","Cambria Math",Georgia,serif;font-style:italic}
+.math .upr,.math .mono,.math .bold{font-style:normal}
+.math .mono{font-family:ui-monospace,Menlo,monospace}
+.math .bold{font-weight:700}
+.math sup,.math sub{font-size:.72em}
+.math .rel{margin:0 .28em;font-style:normal}
+.math .bin{margin:0 .16em;font-style:normal}
+.math-display{display:block;text-align:center;margin:18px 0;font-size:17px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+  font-size:.85em;line-height:1.15}
+.frac .num{border-bottom:1px solid currentColor;padding:0 .25em}
+.frac .den{padding:0 .25em}
+.sqrt{border-top:1px solid currentColor}
+.sqrt::before{content:"√";border-top:0}
+.tex-raw{border-bottom:1px dotted var(--danger);font-style:normal}
+.pagenav{display:flex;justify-content:space-between;gap:16px;margin:50px 0 0;
+  border-top:1px solid var(--line);padding-top:18px;font-size:14.5px}
+.pagenav a{text-decoration:none;max-width:46%}
+.pagenav .dir{display:block;color:var(--faint);font-size:12px}
+footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
+  font-size:13.5px;border-top:1px solid var(--line)}
+@media(max-width:1180px){
+  .layout{grid-template-columns:212px minmax(0,1fr);gap:32px}
+  nav.page{display:none}
+}
+@media(max-width:820px){
+  .layout{grid-template-columns:1fr;gap:0;padding:0 18px 60px}
+  nav.book{position:static;max-height:none;border-bottom:1px solid var(--line);
+    margin-bottom:14px;padding:14px 0}
+  .masthead{padding:22px 18px 18px}
+}
+@media print{
+  nav,.pagenav,.copy{display:none}
+  .layout{display:block;max-width:none}
+  body{background:#fff}
+  a{color:inherit;text-decoration:none}
+  .codeblock,figure,table{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header class="masthead"><div class="inner">
+<p class="eyebrow"><a href="index.html">现代 C++ 数据结构教程</a></p>  <h1>第11章 索引技术</h1>
+
+  <p class="meta"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/book/ch11-index.md">Markdown 源文件</a>
+    · <a href="https://github.com/GMyhf/dsa-modernization">GitHub 仓库</a>
+    · <a href="errata.html">原书勘误</a></p>
+</div></header>
+<div class="layout">
+<nav class="book"><b>导读</b><a href="index.html">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html" class="here">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a></nav>
+<main>
+<p>索引不是保存完整记录的主文件，而是一张「关键码到记录位置」的查找表。它的目标是在海量外存记录中避免逐条扫描：先查较小的索引，再按位置读取目标记录。</p>
+<p>原书本章没有独立的 <code>【算法】</code> / <code>【代码】</code> 清单——<code>dsa_raw.md</code> 里 105 条清单，第 11 章一条都没有。本章的实现因此全部是新写的，不认领任何原书清单，台账等式不受影响。四个小节各有一个通过闸门的实现单元：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">小节</th>
+<th style="text-align:left">实现状态</th>
+<th style="text-align:left">代码</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">11.1 线性索引</td>
+<td style="text-align:left">实现并测试</td>
+<td style="text-align:left"><code>code/ch11/linear_index</code></td>
+</tr>
+<tr>
+<td style="text-align:left">11.2 静态多分树</td>
+<td style="text-align:left">实现并测试</td>
+<td style="text-align:left"><code>code/ch11/bplus_tree</code> 的 <code>bulk_load</code></td>
+</tr>
+<tr>
+<td style="text-align:left">11.3 倒排索引</td>
+<td style="text-align:left">实现并测试</td>
+<td style="text-align:left"><code>code/ch11/inverted_index</code></td>
+</tr>
+<tr>
+<td style="text-align:left">11.4 B 树与 B+ 树</td>
+<td style="text-align:left">实现并测试</td>
+<td style="text-align:left"><code>code/ch11/bplus_tree</code></td>
+</tr>
+<tr>
+<td style="text-align:left">11.5 位图、签名</td>
+<td style="text-align:left">实现并测试</td>
+<td style="text-align:left"><code>code/ch11/bitmap_index</code></td>
+</tr>
+<tr>
+<td style="text-align:left">11.5 红黑树</td>
+<td style="text-align:left">概念导读</td>
+<td style="text-align:left">只作对照讨论，不另写实现</td>
+</tr>
+</tbody></table></div>
+<p>这些都是<strong>内存里的页模拟</strong>：结点即页，<code>page_reads()</code> / <code>page_writes()</code> 数的是页访问次数。它们不做真实磁盘 I/O、页缓存和并发控制——本章要教的是访外次数怎么被结构决定，不是写一个存储引擎。</p>
+<h2 id="111-线性索引"><a class="anchor" href="#111-线性索引">#</a>11.1 线性索引</h2>
+<p>第 1 章和第 9 章已经说过：外存上逐条扫描主文件太贵，应该先查一张较小的表，再按位置读记录。线性索引就是这张表：项是 <code>(key, location)</code>，按 key 排序，可以在内存里二分。</p>
+<p>稠密索引为每条记录建一项，主文件可以无序，查到索引项就直接得到记录位置。稀疏索引只为每个有序数据块建一项，通常记下该块的最小 key；查到块之后还要在块内再找一次。稀疏索引更省空间，但要求主文件按 key 分块有序。</p>
+<p>第一层索引太大、内存放不下时，再为它建一层，成为多级索引。一次查询的路径是：内存里的顶层 → 读一个索引页 → 读数据页。这时的关键指标不是 CPU 比较次数，而是磁盘页访问次数。变长记录尤其适合「索引 + 位置」，因为主文件无法按下标直接算出地址。</p>
+<p>先跑一遍：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/linear_index/demo.cpp">code/ch11/linear_index/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
+
+<span class="p">#include &lt;cstdio&gt;</span>
+
+<span class="t">int</span> main() {
+    <span class="k">using</span> dsa::index::IndexKind;
+    <span class="k">using</span> dsa::index::MultiLevelIndex;
+    std::vector&lt;std::pair&lt;<span class="t">int</span>, std::string&gt;&gt; records;
+    <span class="k">for</span> (<span class="t">int</span> i = <span class="n">0</span>; i &lt; <span class="n">1000</span>; ++i) {
+        records.emplace_back(i * <span class="n">10</span>, std::string(<span class="k">static_cast</span>&lt;std::<span class="t">size_t</span>&gt;(i % <span class="n">7</span>) + <span class="n">1</span>, <span class="s">&#x27;x&#x27;</span>));
+    }
+
+    <span class="c">// 每个数据页 4 条记录，每个索引页 4 项。</span>
+    MultiLevelIndex sparse(IndexKind::Sparse, <span class="n">4</span>, <span class="n">4</span>);
+    sparse.load(records);
+    sparse.reset_counters();
+    <span class="k">const</span> <span class="t">bool</span> hit = sparse.find(<span class="n">5000</span>).has_value();
+    std::printf(<span class="s">&quot;稀疏 · 每页 4 项 : %zu 个数据页，%zu 个索引项，%zu 层，查一次读 %zu 页（命中 %d）\n&quot;</span>,
+                sparse.data_pages(), sparse.entries(), sparse.levels(), sparse.page_reads(),
+                <span class="k">static_cast</span>&lt;<span class="t">int</span>&gt;(hit));
+
+    <span class="c">// 索引页装得多，层数就少，访外次数随之下降——这就是 11.2 要做多分树的理由。</span>
+    MultiLevelIndex flat(IndexKind::Sparse, <span class="n">4</span>, <span class="n">64</span>);
+    flat.load(records);
+    flat.reset_counters();
+    (<span class="t">void</span>)flat.find(<span class="n">5000</span>);
+    std::printf(<span class="s">&quot;稀疏 · 每页 64 项: %zu 层，查一次读 %zu 页\n&quot;</span>, flat.levels(), flat.page_reads());
+
+    MultiLevelIndex dense(IndexKind::Dense, <span class="n">4</span>, <span class="n">64</span>);
+    dense.load(records);
+    dense.reset_counters();
+    (<span class="t">void</span>)dense.find(<span class="n">5005</span>);  <span class="c">// 不存在</span>
+    <span class="k">const</span> std::<span class="t">size_t</span> miss_reads = dense.page_reads();
+    dense.reset_counters();
+    (<span class="t">void</span>)dense.find(<span class="n">5000</span>);  <span class="c">// 存在</span>
+    std::printf(<span class="s">&quot;稠密 · %zu 层      : 查不到读 %zu 页，命中读 %zu 页——&quot;</span>
+                <span class="s">&quot;多出来的那一页就是数据页，索引里没有就不必去读\n&quot;</span>,
+                dense.levels(), miss_reads, dense.page_reads());
+    <span class="k">return</span> <span class="n">0</span>;
+}</code></pre></div>
+<div class="codeblock" data-lang="text"><pre><code>稀疏 · 每页 4 项 : 250 个数据页，250 个索引项，4 层，查一次读 4 页（命中 1）
+稀疏 · 每页 64 项: 2 层，查一次读 2 页
+稠密 · 2 层      : 查不到读 1 页，命中读 2 页——多出来的那一页就是数据页，索引里没有就不必去读</code></pre></div>
+<p>三行输出对应三个结论。第一行：索引项一页放不下就逐层上建，查一次的代价等于层数。第二行：<strong>索引页装得多，层数就少，访外次数随之下降</strong>——这正是下一节要做多分树的理由。第三行是稠密与稀疏最实用的差别：稠密索引在索引里查不到就是真没有，一个数据页都不用读；稀疏索引只能定位到页，<strong>查不到也得先把那一页读上来</strong>才知道。</p>
+<p>查找过程写出来就是「逐层读索引页，最后读一个数据页」：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/linear_index/modern.hpp">code/ch11/linear_index/modern.hpp#index-find</a></div><pre><code>[[nodiscard]] std::optional&lt;std::string&gt; find(<span class="t">int</span> key) <span class="k">const</span> {
+    <span class="k">if</span> (levels_.empty()) {
+        <span class="k">return</span> std::nullopt;
+    }
+    <span class="c">// 顶层常驻内存：定位到它所在的那一页，不计页访问。</span>
+    std::<span class="t">size_t</span> page = locate(levels_.back(), <span class="n">0</span>, levels_.back().size(), key);
+    <span class="k">for</span> (std::<span class="t">size_t</span> level = levels_.size() - <span class="n">1</span>; level &gt; <span class="n">0</span>; --level) {
+        page = levels_[level][page].target;
+        ++reads_;  <span class="c">// 读一个下层索引页</span>
+        <span class="k">const</span> std::<span class="t">size_t</span> first = page * entries_per_page_;
+        <span class="k">const</span> std::<span class="t">size_t</span> last = std::min(first + entries_per_page_, levels_[level - <span class="n">1</span>].size());
+        <span class="k">if</span> (first &gt;= last) {
+            <span class="k">return</span> std::nullopt;
+        }
+        page = locate(levels_[level - <span class="n">1</span>], first, last, key);
+    }
+
+    <span class="k">const</span> Entry&amp; entry = levels_[<span class="n">0</span>][page];
+    <span class="k">if</span> (kind_ == IndexKind::Dense) {
+        <span class="c">// 稠密索引：索引里没有就是真没有，数据页一次都不用读。</span>
+        <span class="k">if</span> (entry.key != key) {
+            <span class="k">return</span> std::nullopt;
+        }
+        ++reads_;
+        <span class="k">return</span> records_[entry.target].second;
+    }
+    <span class="c">// 稀疏索引：只能定位到页，页内还要再找一次；不命中也已经付出了这一页。</span>
+    ++reads_;
+    <span class="k">const</span> std::<span class="t">size_t</span> first = entry.target * records_per_page_;
+    <span class="k">const</span> std::<span class="t">size_t</span> last = std::min(first + records_per_page_, records_.size());
+    <span class="k">for</span> (std::<span class="t">size_t</span> i = first; i &lt; last; ++i) {
+        <span class="k">if</span> (records_[i].first == key) {
+            <span class="k">return</span> records_[i].second;
+        }
+    }
+    <span class="k">return</span> std::nullopt;
+}</code></pre></div>
+<h2 id="112-静态多分树"><a class="anchor" href="#112-静态多分树">#</a>11.2 静态多分树</h2>
+<p>磁盘按页读写，一个索引结点通常设计成恰好装满一页。二叉树每个结点只有两个孩子，同样多的 key 会把树撑得很高，查询就要读很多页。多分树每个结点有许多孩子，树高低，页访问少。</p>
+<p>静态多分树在批量装入时按页填满，之后结构不再变。查找从根走到叶，每层读一页。插入、删除会破坏「一页正好满」的约定：多出来的记录只能进溢出区，少了的页会变稀，最终往往要重组整棵树。所以它适合「一次建好、很少改」的文件，不适合频繁更新的目录。</p>
+<p>批量装入本身就是「按页填满、自底向上建层」，<code>code/ch11/bplus_tree</code> 的 <code>bulk_load</code> 实现的正是这件事——把下一节那棵 3 阶 B+ 树按这个办法装出来，得到的就是 11.4 图里的形状。区别只在后续：静态多分树靠重组，B+ 树靠分裂与合并就地维护。</p>
+<h2 id="113-倒排索引"><a class="anchor" href="#113-倒排索引">#</a>11.3 倒排索引</h2>
+<p>前面的索引都是从记录走到属性：先找到学号 0310，再看他是不是计算机系。倒排反过来：从属性值走到记录集合。例如</p>
+<div class="codeblock" data-lang="text"><pre><code>计算机系 -&gt; [0310, 0330, 0341]
+英语专长 -&gt; [0310, 0421]</code></pre></div>
+<p>「计算机系且擅长英语」就是两个有序列表的交集，结果是 <code>[0310]</code>。或查询是并集，差查询是差集。全文检索用同一结构：词项映射到「哪些文档、出现在哪些位置」。短语查询还要用位置是否相邻来过滤。</p>
+<p>倒排把查询变成集合运算，速度很快；代价是每次插入、删除、修改记录，都要同步维护所有相关列表。倒排表通常只存标识和位置，完整记录仍在主文件里。</p>
+<p>先跑一遍：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/inverted_index/demo.cpp">code/ch11/inverted_index/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
+
+<span class="p">#include &lt;cstdio&gt;</span>
+
+<span class="t">int</span> main() {
+    dsa::index::InvertedIndex index;
+    index.add_document(<span class="n">310</span>, {<span class="s">&quot;计算机系&quot;</span>, <span class="s">&quot;英语专长&quot;</span>});
+    index.add_document(<span class="n">330</span>, {<span class="s">&quot;计算机系&quot;</span>});
+    index.add_document(<span class="n">341</span>, {<span class="s">&quot;计算机系&quot;</span>});
+    index.add_document(<span class="n">421</span>, {<span class="s">&quot;英语专长&quot;</span>});
+
+    <span class="k">const</span> <span class="k">auto</span> show = [](<span class="k">const</span> <span class="t">char</span>* label, <span class="k">const</span> std::vector&lt;<span class="t">int</span>&gt;&amp; docs) {
+        std::printf(<span class="s">&quot;%s:&quot;</span>, label);
+        <span class="k">for</span> (<span class="k">const</span> <span class="t">int</span> doc : docs) {
+            std::printf(<span class="s">&quot; %04d&quot;</span>, doc);
+        }
+        std::printf(<span class="s">&quot;\n&quot;</span>);
+    };
+    show(<span class="s">&quot;计算机系          &quot;</span>, index.postings(<span class="s">&quot;计算机系&quot;</span>));
+    show(<span class="s">&quot;英语专长          &quot;</span>, index.postings(<span class="s">&quot;英语专长&quot;</span>));
+    show(<span class="s">&quot;计算机系且擅长英语&quot;</span>, index.and_query({<span class="s">&quot;计算机系&quot;</span>, <span class="s">&quot;英语专长&quot;</span>}));
+    show(<span class="s">&quot;计算机系或擅长英语&quot;</span>, index.or_query({<span class="s">&quot;计算机系&quot;</span>, <span class="s">&quot;英语专长&quot;</span>}));
+    show(<span class="s">&quot;不擅长英语        &quot;</span>, index.not_query(<span class="s">&quot;英语专长&quot;</span>));
+
+    dsa::index::InvertedIndex text;
+    text.add_document(<span class="n">1</span>, {<span class="s">&quot;the&quot;</span>, <span class="s">&quot;quick&quot;</span>, <span class="s">&quot;brown&quot;</span>, <span class="s">&quot;fox&quot;</span>});
+    text.add_document(<span class="n">2</span>, {<span class="s">&quot;the&quot;</span>, <span class="s">&quot;brown&quot;</span>, <span class="s">&quot;quick&quot;</span>, <span class="s">&quot;fox&quot;</span>});
+    show(<span class="s">&quot;含 quick 与 brown &quot;</span>, text.and_query({<span class="s">&quot;quick&quot;</span>, <span class="s">&quot;brown&quot;</span>}));
+    show(<span class="s">&quot;短语 quick brown  &quot;</span>, text.phrase_query({<span class="s">&quot;quick&quot;</span>, <span class="s">&quot;brown&quot;</span>}));
+    <span class="k">return</span> <span class="n">0</span>;
+}</code></pre></div>
+<div class="codeblock" data-lang="text"><pre><code>计算机系          : 0310 0330 0341
+英语专长          : 0310 0421
+计算机系且擅长英语: 0310
+计算机系或擅长英语: 0310 0330 0341 0421
+不擅长英语        : 0330 0341
+含 quick 与 brown : 0001 0002
+短语 quick brown  : 0001</code></pre></div>
+<p>最后两行是短语查询存在的理由：2 号文档两个词都有，但不相邻，只有位置信息能把它排除掉。</p>
+<p>倒排表按文档号升序，所以求交就是一次归并，两个指针各走一趟，代价 <span class="math">O(n<span class="bin">+</span>m)</span>：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/inverted_index/modern.hpp">code/ch11/inverted_index/modern.hpp#inverted-intersect</a></div><pre><code><span class="c">/// 有序表求交。归并一遍，两个指针各走一趟，代价 O(n+m)。</span>
+[[nodiscard]] <span class="k">static</span> std::vector&lt;<span class="t">int</span>&gt; intersect(<span class="k">const</span> std::vector&lt;<span class="t">int</span>&gt;&amp; left,
+                                                <span class="k">const</span> std::vector&lt;<span class="t">int</span>&gt;&amp; right) {
+    std::vector&lt;<span class="t">int</span>&gt; out;
+    std::<span class="t">size_t</span> i = <span class="n">0</span>;
+    std::<span class="t">size_t</span> j = <span class="n">0</span>;
+    <span class="k">while</span> (i &lt; left.size() &amp;&amp; j &lt; right.size()) {
+        <span class="k">if</span> (left[i] &lt; right[j]) {
+            ++i;
+        } <span class="k">else</span> <span class="k">if</span> (right[j] &lt; left[i]) {
+            ++j;
+        } <span class="k">else</span> {
+            out.push_back(left[i]);
+            ++i;
+            ++j;
+        }
+    }
+    <span class="k">return</span> out;
+}</code></pre></div>
+<p>这段归并是本节的核心，所以要自己写；换成一行库调用，这一节就没有内容了。</p>
+<h2 id="114-b-树与-b-树"><a class="anchor" href="#114-b-树与-b-树">#</a>11.4 B 树与 B+ 树</h2>
+<p>B 树是保持平衡的多路搜索树，专门为磁盘页设计。一个结点里有多个有序 key，key 之间是指向孩子的指针。查找从根开始，在页内确定下一条分支，再读孩子页。树高随阶数增大而降低，一次查找的页数大约是 <span class="math"><span class="upr">log</span><sub>m</sub>n</span>。</p>
+<p>插入使结点超过上限（溢出）时，把它分裂成两个，并把分界 key 上推到父结点；父结点也可能接着分裂，最坏会一直裂到根，树增高一层。删除使结点低于下限（下溢）时，先向左右兄弟借 key；借不到就把两个结点合并，分界 key 从父结点拿下来。借和合并都可能向上传播。这些局部调整保证所有叶在同一层，所以 B 树始终平衡。</p>
+<p>B+ 树把记录（或记录位置）全部放在叶上，内部结点只作路标，不存完整记录。叶按 key 从小到大串成一条链。点查询仍然从根走到叶；范围查询找到下限所在的叶之后，沿叶链顺序扫到上限即可，不必再回到内部结点。关系数据库的磁盘索引多用 B+ 树，正是因为范围扫描是常见操作。</p>
+<p>一棵 3 阶 B+ 树可以这样看（内部结点只导航，数据全在最下一层，叶之间有横链）：</p>
+<div class="codeblock" data-lang="text"><pre><code>                [  30  |  70  ]
+               /       |       \
+        [10|20]     [30|50]    [70|90]
+           ↔           ↔           ↔
+         记录…       记录…       记录…</code></pre></div>
+<p>本章的约定：3 阶指一个结点最多 3 个孩子，因此叶和内部结点都最多 2 个 key；内部结点的分界 key 取右子树最小 key 的复写。原书 11.4.2 用的是另一套约定——最大关键码复写，并把 m 阶 B+ 叶的容量定为 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 到 <span class="math">m</span> 个 key（3 阶叶因此存 2 到 3 个 key）。两套约定都成立，对照原书读时注意这处差别。</p>
+<p>查找 50：根上 <span class="math"><span class="upr">30</span>&lt;<span class="upr">50</span>&lt;<span class="upr">70</span></span>，走中间孩子；叶上直接取到 50。查找 35 到 80：先落到含 35 的叶，再沿 <code>↔</code> 扫过 50、70，直到超过 80。</p>
+<p>插入 60：中间叶暂成 <code>[30|50|60]</code>，超过 2 个 key 的上限。按原书 11.4.1 的分裂规则取中位数 50 作分界，叶裂成 <code>[30]</code> 和 <code>[50|60]</code>，50 复写一份上推（B+ 的分界 key 在叶上仍保留）。上推之后根成了 <code>[30|50|70]</code>、要挂 4 个孩子，同样超限，于是根也分裂：中位数 50 上移，成为新根，树增高一层。</p>
+<div class="codeblock" data-lang="text"><pre><code>                    [  50  ]
+                 /            \
+          [  30  ]            [  70  ]
+         /       \          /        \
+    [10|20]     [30]      [50|60]    [70|90]
+       ↔          ↔           ↔          ↔</code></pre></div>
+<p>叶分裂时分界 key 是<strong>复写</strong>（叶上仍留一份），内部结点分裂时分界 key 是<strong>上移</strong>（原结点不再保留）——这是 B+ 树与 B 树最容易混的一处。两条规则并排写出来就是：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/bplus_tree/modern.hpp">code/ch11/bplus_tree/modern.hpp#bplus-split</a></div><pre><code><span class="t">void</span> split_leaf(Node* node, Split&amp; split) {
+    <span class="k">const</span> std::<span class="t">size_t</span> mid = node-&gt;keys.size() / <span class="n">2</span>;
+    <span class="k">auto</span> right = std::make_unique&lt;Node&gt;(<span class="k">true</span>);
+    right-&gt;keys.assign(node-&gt;keys.begin() + <span class="k">static_cast</span>&lt;std::<span class="t">ptrdiff_t</span>&gt;(mid), node-&gt;keys.end());
+    right-&gt;values.assign(std::make_move_iterator(node-&gt;values.begin() + <span class="k">static_cast</span>&lt;std::<span class="t">ptrdiff_t</span>&gt;(mid)),
+                         std::make_move_iterator(node-&gt;values.end()));
+    node-&gt;keys.resize(mid);
+    node-&gt;values.resize(mid);
+    right-&gt;next = node-&gt;next;
+    node-&gt;next = right.get();
+    <span class="c">// 叶分裂：分界码是右叶最小关键码，复写上推，叶上仍保留。</span>
+    split.happened = <span class="k">true</span>;
+    split.separator = right-&gt;keys.front();
+    split.right = std::move(right);
+    writes_ += <span class="n">2</span>;
+}
+
+<span class="t">void</span> split_internal(Node* node, Split&amp; split) {
+    <span class="k">const</span> std::<span class="t">size_t</span> mid = node-&gt;keys.size() / <span class="n">2</span>;
+    <span class="k">auto</span> right = std::make_unique&lt;Node&gt;(<span class="k">false</span>);
+    <span class="c">// 内部结点分裂：中位数上移，原结点不再保留它。</span>
+    split.separator = node-&gt;keys[mid];
+    right-&gt;keys.assign(node-&gt;keys.begin() + <span class="k">static_cast</span>&lt;std::<span class="t">ptrdiff_t</span>&gt;(mid) + <span class="n">1</span>, node-&gt;keys.end());
+    right-&gt;children.assign(
+        std::make_move_iterator(node-&gt;children.begin() + <span class="k">static_cast</span>&lt;std::<span class="t">ptrdiff_t</span>&gt;(mid) + <span class="n">1</span>),
+        std::make_move_iterator(node-&gt;children.end()));
+    node-&gt;keys.resize(mid);
+    node-&gt;children.resize(mid + <span class="n">1</span>);
+    split.happened = <span class="k">true</span>;
+    split.right = std::move(right);
+    writes_ += <span class="n">2</span>;
+}</code></pre></div>
+<p>先跑一遍。上面那两张图不是画出来的，是这段程序打印出来的：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/bplus_tree/demo.cpp">code/ch11/bplus_tree/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
+
+<span class="p">#include &lt;cstdio&gt;</span>
+
+<span class="t">int</span> main() {
+    <span class="k">using</span> dsa::index::BPlusTree;
+    std::vector&lt;std::pair&lt;<span class="t">int</span>, std::string&gt;&gt; rows;
+    <span class="k">for</span> (<span class="k">const</span> <span class="t">int</span> key : {<span class="n">10</span>, <span class="n">20</span>, <span class="n">30</span>, <span class="n">50</span>, <span class="n">70</span>, <span class="n">90</span>}) {
+        rows.emplace_back(key, <span class="s">&quot;记录&quot;</span> + std::to_string(key));
+    }
+    <span class="c">// 11.2：批量装入，按页填满。</span>
+    BPlusTree tree = BPlusTree::bulk_load(<span class="n">3</span>, rows, <span class="n">2</span>);
+    std::printf(<span class="s">&quot;装入后   : %s\n&quot;</span>, tree.to_string().c_str());
+
+    <span class="c">// 11.4：插入 60，叶裂 → 根裂 → 树增高一层。</span>
+    tree.insert(<span class="n">60</span>, <span class="s">&quot;记录60&quot;</span>);
+    std::printf(<span class="s">&quot;插入 60  : %s（树高 %zu）\n&quot;</span>, tree.to_string().c_str(), tree.height());
+    tree.insert(<span class="n">65</span>, <span class="s">&quot;记录65&quot;</span>);
+    std::printf(<span class="s">&quot;插入 65  : %s（父结点没满，没裂到根）\n&quot;</span>, tree.to_string().c_str());
+
+    tree.reset_counters();
+    <span class="c">// 先取结果再取计数：printf 的实参求值顺序没有保证。</span>
+    <span class="k">const</span> <span class="k">auto</span> found = tree.find(<span class="n">50</span>);
+    <span class="k">const</span> std::<span class="t">size_t</span> point_reads = tree.page_reads();
+    std::printf(<span class="s">&quot;查找 50  : %s，读了 %zu 页\n&quot;</span>, found-&gt;c_str(), point_reads);
+
+    tree.reset_counters();
+    <span class="k">const</span> <span class="k">auto</span> scan = tree.range(<span class="n">35</span>, <span class="n">80</span>);
+    <span class="k">const</span> std::<span class="t">size_t</span> scan_reads = tree.page_reads();
+    std::printf(<span class="s">&quot;范围 35..80 :&quot;</span>);
+    <span class="k">for</span> (<span class="k">const</span> <span class="k">auto</span>&amp; row : scan) {
+        std::printf(<span class="s">&quot; %d&quot;</span>, row.first);
+    }
+    std::printf(<span class="s">&quot;，读了 %zu 页\n&quot;</span>, scan_reads);
+
+    tree.erase(<span class="n">70</span>);
+    std::printf(<span class="s">&quot;删除 70  : %s\n&quot;</span>, tree.to_string().c_str());
+    <span class="k">return</span> <span class="n">0</span>;
+}</code></pre></div>
+<div class="codeblock" data-lang="text"><pre><code>装入后   : [30,70] / [10,20] [30,50] [70,90]
+插入 60  : [50] / [30] [70] / [10,20] [30] [50,60] [70,90]（树高 3）
+插入 65  : [50] / [30] [60,70] / [10,20] [30] [50] [60,65] [70,90]（父结点没满，没裂到根）
+查找 50  : 记录50，读了 3 页
+范围 35..80 : 50 60 65 70，读了 6 页
+删除 70  : [50] / [30] [60,90] / [10,20] [30] [50] [60,65] [90]</code></pre></div>
+<p>范围扫描的写法直接对应「找到下限所在的叶，然后沿叶链横着走」：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/bplus_tree/modern.hpp">code/ch11/bplus_tree/modern.hpp#bplus-range</a></div><pre><code><span class="c">/// 范围扫描：找到下限所在的叶，然后沿叶链横着走，不再回到内部结点。</span>
+[[nodiscard]] std::vector&lt;std::pair&lt;<span class="t">int</span>, std::string&gt;&gt; range(<span class="t">int</span> low, <span class="t">int</span> high) <span class="k">const</span> {
+    std::vector&lt;std::pair&lt;<span class="t">int</span>, std::string&gt;&gt; out;
+    <span class="k">if</span> (low &gt; high) {
+        <span class="k">return</span> out;
+    }
+    <span class="k">const</span> Node* node = root_.get();
+    <span class="k">while</span> (!node-&gt;leaf) {
+        ++reads_;
+        node = node-&gt;children[child_slot(*node, low)].get();
+    }
+    <span class="k">while</span> (node != <span class="k">nullptr</span>) {
+        ++reads_;
+        <span class="k">for</span> (std::<span class="t">size_t</span> i = <span class="n">0</span>; i &lt; node-&gt;keys.size(); ++i) {
+            <span class="k">if</span> (node-&gt;keys[i] &gt; high) {
+                <span class="k">return</span> out;
+            }
+            <span class="k">if</span> (node-&gt;keys[i] &gt;= low) {
+                out.emplace_back(node-&gt;keys[i], node-&gt;values[i]);
+            }
+        }
+        node = node-&gt;next;
+    }
+    <span class="k">return</span> out;
+}</code></pre></div>
+<p>删除 70：先在叶上删，若叶下溢就向兄弟借或合并，再改内部结点的路标。这里有一处容易漏：借位和合并都会把父结点的分界 key 搬进孩子里，而那个 key 可能正是刚被删掉的——搬完必须按「分界 key = 右子树最小 key」重算一遍，否则树里会留下一个指向已删关键码的路标。这个错误不影响点查询，只有结构不变量检查才看得出来（<code>code/ch11/bplus_tree/legacy.md</code> 记了实测过程）。</p>
+<p>B 树与 B+ 树可以记成三句话：记录在不在内部结点；叶有没有横向链接；范围扫描要不要反复爬树。</p>
+<h2 id="115-位图签名和红黑树"><a class="anchor" href="#115-位图签名和红黑树">#</a>11.5 位图、签名和红黑树</h2>
+<p>位图索引适合取值很少的属性，例如性别、省份、是否及格。每个属性值对应一个位串，第 <span class="math">i</span> 位表示第 <span class="math">i</span> 条记录有没有这个值。AND、OR、NOT 查询变成机器字上的按位运算，一次可以处理几十上百条记录。属性取值一多，位图会变得很宽，需要压缩（游程、字对齐混合等）。</p>
+<p>签名文件把一篇文档的特征散列成较短的位串。查询时先用签名快速丢掉不可能匹配的文档，再回到原文确认。签名可能产生假阳性（签名说可能有、原文里没有），不能有假阴性。它适合「先粗筛、再精查」的全文检索，不替代倒排。</p>
+<p>红黑树是内存里的近似平衡二叉搜索树：每个结点带一种颜色，通过几条局部规则保证从根到叶的黑结点数相同，最长路径不超过最短路径的两倍。查找、插入、删除都是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>，旋转次数有常数上限。它适合进程地址空间里的有序映射，不替代按页组织的 B+ 树。本书不另写红黑树实现，只作对照讨论。</p>
+<p>先跑一遍：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/bitmap_index/demo.cpp">code/ch11/bitmap_index/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
+
+<span class="p">#include &lt;cstdio&gt;</span>
+
+<span class="t">int</span> main() {
+    dsa::index::BitmapIndex index;
+    <span class="k">for</span> (<span class="t">int</span> i = <span class="n">0</span>; i &lt; <span class="n">200</span>; ++i) {
+        index.add_record((i % <span class="n">3</span>) == <span class="n">0</span> ? <span class="s">&quot;及格&quot;</span> : <span class="s">&quot;不及格&quot;</span>);
+    }
+    index.reset_ops();
+    <span class="k">const</span> <span class="k">auto</span> passed = index.select(<span class="s">&quot;及格&quot;</span>);
+    <span class="k">const</span> <span class="k">auto</span> failed = index.select_not(<span class="s">&quot;及格&quot;</span>);
+    std::printf(<span class="s">&quot;200 条记录，%zu 个取值，位图共 %zu 个机器字\n&quot;</span>,
+                index.distinct_values(), index.words());
+    std::printf(<span class="s">&quot;及格 %zu 条，不及格 %zu 条；取反只做了 %zu 次字运算\n&quot;</span>,
+                passed.size(), failed.size(), index.word_ops());
+
+    <span class="c">// 稀疏位图：大片全 0 的字，游程压缩很有效。</span>
+    dsa::index::BitmapIndex sparse;
+    <span class="k">for</span> (<span class="t">int</span> i = <span class="n">0</span>; i &lt; <span class="n">1000</span>; ++i) {
+        sparse.add_record(i &lt; <span class="n">3</span> ? <span class="s">&quot;命中&quot;</span> : <span class="s">&quot;其他&quot;</span>);
+    }
+    <span class="k">const</span> <span class="k">auto</span> bits = sparse.bitmap(<span class="s">&quot;命中&quot;</span>);
+    <span class="k">const</span> <span class="k">auto</span> encoded = dsa::index::run_length_encode(bits);
+    std::printf(<span class="s">&quot;稀疏位图 %zu 个字 → 游程压缩后 %zu 个字\n&quot;</span>, bits.size(), encoded.size());
+
+    dsa::index::SignatureFile signatures(<span class="n">2</span>);
+    signatures.add(<span class="n">1</span>, {<span class="s">&quot;数据&quot;</span>, <span class="s">&quot;结构&quot;</span>});
+    signatures.add(<span class="n">2</span>, {<span class="s">&quot;算法&quot;</span>, <span class="s">&quot;分析&quot;</span>});
+    std::printf(<span class="s">&quot;签名粗筛「数据」的候选文档数：%zu（仍需回原文确认）\n&quot;</span>,
+                signatures.candidates({<span class="s">&quot;数据&quot;</span>}).size());
+    <span class="k">return</span> <span class="n">0</span>;
+}</code></pre></div>
+<div class="codeblock" data-lang="text"><pre><code>200 条记录，2 个取值，位图共 8 个机器字
+及格 67 条，不及格 133 条；取反只做了 4 次字运算
+稀疏位图 16 个字 → 游程压缩后 4 个字
+签名粗筛「数据」的候选文档数：1（仍需回原文确认）</code></pre></div>
+<p>第二行就是位图的全部理由：200 条记录只占 4 个机器字，一次取反做 4 次运算就处理完了全部记录。查询写出来只是逐字的按位运算：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/bitmap_index/modern.hpp">code/ch11/bitmap_index/modern.hpp#bitmap-ops</a></div><pre><code><span class="c">/// 「与」：逐字 `&amp;`。`word_ops()` 数的就是这里做了几次字运算。</span>
+[[nodiscard]] std::vector&lt;std::<span class="t">size_t</span>&gt; select_and(<span class="k">const</span> std::string&amp; a,
+                                                  <span class="k">const</span> std::string&amp; b) <span class="k">const</span> {
+    <span class="k">return</span> to_records(combine(bitmap(a), bitmap(b), Op::And));
+}
+
+[[nodiscard]] std::vector&lt;std::<span class="t">size_t</span>&gt; select_or(<span class="k">const</span> std::string&amp; a,
+                                                 <span class="k">const</span> std::string&amp; b) <span class="k">const</span> {
+    <span class="k">return</span> to_records(combine(bitmap(a), bitmap(b), Op::Or));
+}
+
+[[nodiscard]] std::vector&lt;std::<span class="t">size_t</span>&gt; select_not(<span class="k">const</span> std::string&amp; value) <span class="k">const</span> {
+    std::vector&lt;std::uint64_t&gt; bits = bitmap(value);
+    <span class="k">for</span> (<span class="k">auto</span>&amp; word : bits) {
+        word = ~word;
+        ++ops_;
+    }
+    mask_tail(bits);  <span class="c">// 最后一个字里超出记录数的那些位必须清掉</span>
+    <span class="k">return</span> to_records(bits);
+}</code></pre></div>
+<p>注意 <code>mask_tail</code>：记录数不是 64 的整数倍时，最后一个字里超出记录数的那些位取反后会变成 1，于是冒出根本不存在的记录号。这是位图实现最常见的一个洞。</p>
+<p>压缩不是万能的。上面稀疏位图 16 个字压到 4 个，但对 0 和 1 交替的稠密位图，游程压缩后<strong>反而更大</strong>——<code>code/ch11/bitmap_index/test.cpp</code> 直接断言了这一点，不粉饰。</p>
+<h2 id="116-练习路径"><a class="anchor" href="#116-练习路径">#</a>11.6 练习路径</h2>
+<p>本章四个方向都已有可运行实现，练习因此从「照着写一遍」改成「在已有实现上再往前走一步」：</p>
+<ol>
+<li>给 <code>MultiLevelIndex</code> 的页内定位换成二分查找，测量比较次数的变化，并确认<strong>页访问次数一次都没变</strong>——本章的关键指标不在这里。</li>
+<li>给 <code>InvertedIndex</code> 的倒排表加差值编码（只存与前一个文档号的差），比较压缩前后的表长；注意求交时要能边解码边归并。</li>
+<li>给 <code>BPlusTree</code> 加一个「按范围批量删除」的接口，并用 <code>validate()</code> 确认每一步之后结构仍然合法。</li>
+<li>给 <code>BitmapIndex</code> 换成字对齐混合编码（WAH），和现在的字级游程比压缩率；用交替位图确认它不会像现在这样越压越大。</li>
+<li>为 <code>SignatureFile</code> 做一次参数实验：固定语料，改变每词位数，画出假阳性率随位数的变化。</li>
+</ol>
+<h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
+<p>索引是「关键码到记录位置」的表，用来少读磁盘。线性索引分稠密和稀疏，过大就做成多级。静态多分树把一个结点做成一页，树高低、页访问少，但不适合频繁更新。倒排从属性走到记录集合，查询变成交并差。B 树在页内分裂合并以保持平衡；B+ 树把记录放在叶上并用叶链做范围扫描。位图适合低基数属性，签名做粗筛，红黑树是内存有序映射。</p>
+<h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
+<h3 id="补充索引题参考课程第-11-章"><a class="anchor" href="#补充索引题参考课程第-11-章">#</a>补充索引题（参考课程第 11 章）</h3>
+<ol>
+<li>给定页大小、记录大小和索引项大小，计算稠密索引最多支持的记录数及二级索引的访外次数。</li>
+<li>对给定的院系表和宿舍表建立倒排索引，并求“院系且宿舍”查询的交集。</li>
+<li>模拟 B+ 树查找、插入分裂和删除后继替换，分别统计读页和写页次数。</li>
+<li>稠密索引和稀疏索引各要求主文件怎样组织。</li>
+<li>多级索引一次查询大约读几页？关键指标为什么不是比较次数。</li>
+<li>静态多分树插入一条溢出记录会发生什么。</li>
+<li>用倒排表求「计算机系且擅长英语」的交集。</li>
+<li>在 11.4 插入 60 之后的那棵 3 阶 B+ 树上继续插入 65，写出叶和根，并说明这次为什么没有一直裂到根。</li>
+<li>位图、签名、红黑树、B+ 树各适合内存还是外存、点查询还是范围查询。</li>
+</ol>
+<h2 id="上机题"><a class="anchor" href="#上机题">#</a>上机题</h2>
+<p>见 11.6 的四条练习路径。</p>
+<div class="pagenav"><a href="ch10-search.html"><span class="dir">← 上一篇</span>第10章 检索</a><a href="ch12-advanced.html" style="text-align:right"><span class="dir">下一篇 →</span>第12章 高级数据结构</a></div>
+</main>
+<nav class="page"><b>本页</b><a href="#111-线性索引">11.1 线性索引</a><a href="#112-静态多分树">11.2 静态多分树</a><a href="#113-倒排索引">11.3 倒排索引</a><a href="#114-b-树与-b-树">11.4 B 树与 B+ 树</a><a href="#115-位图签名和红黑树">11.5 位图、签名和红黑树</a><a href="#116-练习路径">11.6 练习路径</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充索引题参考课程第-11-章" class="sub">补充索引题（参考课程第 11 章）</a><a href="#上机题">上机题</a></nav>
+</div>
+<footer>
+  本页由 <code>tools/build_site.py</code> 从 <code>book/ch11-index.md</code> 生成
+  —— Markdown 是唯一事实源，请勿手改此文件。正文中的 C++ 代码块与 <code>code/</code> 下
+  通过测试的源码逐字一致（由 <code>tools/check_doc.py</code> 的 R3 保证）。
+</footer>
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('nav.page a'));
+  if(links.length){
+    var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a});
+    var seen=[];
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        var id=e.target.id;
+        if(e.isIntersecting){if(seen.indexOf(id)<0)seen.push(id)}
+        else{var i=seen.indexOf(id);if(i>=0)seen.splice(i,1)}
+      });
+      links.forEach(function(a){a.classList.remove('active')});
+      if(seen.length&&map[seen[0]])map[seen[0]].classList.add('active');
+    },{rootMargin:'0px 0px -75% 0px'});
+    [].slice.call(document.querySelectorAll('h2[id],h3[id]')).forEach(function(h){io.observe(h)});
+  }
+  [].slice.call(document.querySelectorAll('.codeblock')).forEach(function(block){
+    var button=document.createElement('button');
+    button.className='copy';button.type='button';button.textContent='复制';
+    button.addEventListener('click',function(){
+      var text=block.querySelector('code').textContent;
+      var done=function(){button.textContent='已复制';
+        setTimeout(function(){button.textContent='复制'},1200)};
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done,function(){button.textContent='复制失败'});
+      }else{
+        var area=document.createElement('textarea');area.value=text;document.body.appendChild(area);
+        area.select();try{document.execCommand('copy');done()}catch(e){button.textContent='复制失败'}
+        document.body.removeChild(area);
+      }
+    });
+    block.appendChild(button);
+  });
+})();
+</script>
+</body>
+</html>

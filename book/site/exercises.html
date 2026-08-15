@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>习题、上机题与参考答案 · 现代 C++ 数据结构教程</title>
+<meta name="description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:title" content="习题、上机题与参考答案">
+<meta property="og:description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:type" content="article">
+<style>
+:root{color-scheme:light;
+  --ink:#1a2230;--muted:#68758a;--faint:#93a0b3;--line:#dde3ec;--bg:#f3f5f9;--panel:#fff;
+  --soft:#eef1f7;--accent:#2f5fd0;--accent-soft:#e5ecfb;--warn:#b06a1c;--danger:#c0392b;
+  --kw:#8b2fa0;--ty:#0f6f8c;--st:#177245;--cm:#7d8899;--pp:#a3572a}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;
+  --ink:#e3e8f0;--muted:#98a3b5;--faint:#6f7c90;--line:#2b3342;--bg:#12151b;--panel:#171b22;
+  --soft:#1e232c;--accent:#84a9f5;--accent-soft:#1c2740;--warn:#dcae72;--danger:#e08a80;
+  --kw:#d79ae8;--ty:#7cc7dd;--st:#8fd0a4;--cm:#7b8598;--pp:#e0a97b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.8 system-ui,-apple-system,"Segoe UI","Noto Sans CJK SC","PingFang SC",sans-serif}
+a{color:var(--accent)}
+.masthead{background:var(--panel);border-bottom:1px solid var(--line);padding:30px 26px 24px}
+.masthead .inner{max-width:1440px;margin:0 auto}
+.masthead .eyebrow{font-size:13px;color:var(--muted);letter-spacing:.06em;margin:0 0 6px}
+.masthead .eyebrow a{text-decoration:none}
+.masthead h1{margin:0;font-size:clamp(23px,3.4vw,34px);line-height:1.25;letter-spacing:-.01em}
+.masthead p.sub{margin:10px 0 0;color:var(--muted);font-size:15px;max-width:62ch}
+.masthead .meta{margin:12px 0 0;font-size:13.5px;color:var(--muted)}
+.layout{max-width:1440px;margin:0 auto;padding:0 26px 80px;display:grid;
+  grid-template-columns:228px minmax(0,1fr) 208px;gap:40px;align-items:start}
+nav.book,nav.page{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;
+  padding:22px 0;font-size:14px;line-height:1.55}
+nav b{display:block;color:var(--faint);font-size:11.5px;letter-spacing:.1em;
+  text-transform:uppercase;margin:16px 0 8px}
+nav b:first-child{margin-top:0}
+nav a{display:block;padding:5px 10px;border-left:2px solid transparent;
+  color:var(--ink);text-decoration:none;border-radius:0 5px 5px 0}
+nav a:hover{background:var(--soft);color:var(--accent)}
+nav.book a.here{background:var(--accent-soft);border-left-color:var(--accent);
+  color:var(--accent);font-weight:600}
+nav.page a{color:var(--muted);font-size:13.5px;padding:4px 10px}
+nav.page a.sub{padding-left:22px;font-size:13px;color:var(--faint)}
+nav.page a.active{border-left-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+main{min-width:0;padding-top:24px}
+h1,h2,h3,h4{scroll-margin-top:16px}
+h2{font-size:24px;margin:48px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+h3{font-size:18.5px;margin:30px 0 10px}
+h4{font-size:16px;margin:22px 0 8px;color:var(--muted)}
+.anchor{float:left;margin-left:-1.05em;padding-right:.3em;color:transparent;
+  text-decoration:none;font-weight:400}
+h2:hover .anchor,h3:hover .anchor,h4:hover .anchor{color:var(--faint)}
+p{margin:0 0 15px}
+code{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  background:var(--soft);padding:2px 6px;border-radius:4px;word-break:break-word}
+.codeblock{position:relative;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px;margin:0 0 18px;overflow:hidden}
+.codeblock .srcbar{border-bottom:1px solid var(--line);background:var(--soft);
+  padding:6px 12px;font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+.codeblock .srcbar a{color:var(--muted);text-decoration:none}
+.codeblock .srcbar a:hover{color:var(--accent);text-decoration:underline}
+.codeblock pre{margin:0;padding:14px 16px;overflow:auto}
+.codeblock code{background:none;padding:0;font-size:13px;line-height:1.65;white-space:pre}
+.codeblock[data-lang=console] pre,.codeblock[data-lang=bash] pre{background:var(--soft)}
+.codeblock[data-lang=text]::after{content:"原书印刷";position:absolute;top:8px;right:10px;
+  font-size:11px;color:var(--faint);letter-spacing:.05em}
+.copy{position:absolute;top:6px;right:8px;border:1px solid var(--line);background:var(--panel);
+  color:var(--muted);border-radius:6px;font-size:12px;padding:2px 8px;cursor:pointer;opacity:0}
+.codeblock:hover .copy{opacity:1}
+.copy:hover{color:var(--accent);border-color:var(--accent)}
+.codeblock .srcbar~.copy{top:34px}
+.k{color:var(--kw)}.t{color:var(--ty)}.s{color:var(--st)}.c{color:var(--cm);font-style:italic}
+.n{color:var(--warn)}.p{color:var(--pp)}
+blockquote{margin:0 0 18px;padding:12px 18px;border-left:3px solid var(--accent);
+  background:var(--soft);border-radius:0 7px 7px 0}
+blockquote p:last-child{margin-bottom:0}
+.table-wrap{overflow-x:auto;margin:0 0 18px}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--panel)}
+th,td{border:1px solid var(--line);padding:8px 11px;vertical-align:top}
+th{background:var(--soft);font-weight:650}
+ul,ol{margin:0 0 15px;padding-left:26px}
+li{margin:6px 0}
+hr{border:0;border-top:1px solid var(--line);margin:34px 0}
+figure{margin:0 0 22px;padding:12px;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px}
+figure img{max-width:100%;display:block;margin:0 auto;border-radius:4px;background:#fff}
+figcaption{margin-top:9px;color:var(--muted);font-size:13.5px;text-align:center}
+.gallery-page{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:18px;align-items:start}
+.gallery-page>figure{margin:0}
+.gallery-page>h2,.gallery-page>h3,.gallery-page>p,.gallery-page>blockquote,
+.gallery-page>hr,.gallery-page>.pagenav{grid-column:1/-1}
+.math{font-family:"Latin Modern Math","Cambria Math",Georgia,serif;font-style:italic}
+.math .upr,.math .mono,.math .bold{font-style:normal}
+.math .mono{font-family:ui-monospace,Menlo,monospace}
+.math .bold{font-weight:700}
+.math sup,.math sub{font-size:.72em}
+.math .rel{margin:0 .28em;font-style:normal}
+.math .bin{margin:0 .16em;font-style:normal}
+.math-display{display:block;text-align:center;margin:18px 0;font-size:17px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+  font-size:.85em;line-height:1.15}
+.frac .num{border-bottom:1px solid currentColor;padding:0 .25em}
+.frac .den{padding:0 .25em}
+.sqrt{border-top:1px solid currentColor}
+.sqrt::before{content:"√";border-top:0}
+.tex-raw{border-bottom:1px dotted var(--danger);font-style:normal}
+.pagenav{display:flex;justify-content:space-between;gap:16px;margin:50px 0 0;
+  border-top:1px solid var(--line);padding-top:18px;font-size:14.5px}
+.pagenav a{text-decoration:none;max-width:46%}
+.pagenav .dir{display:block;color:var(--faint);font-size:12px}
+footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
+  font-size:13.5px;border-top:1px solid var(--line)}
+@media(max-width:1180px){
+  .layout{grid-template-columns:212px minmax(0,1fr);gap:32px}
+  nav.page{display:none}
+}
+@media(max-width:820px){
+  .layout{grid-template-columns:1fr;gap:0;padding:0 18px 60px}
+  nav.book{position:static;max-height:none;border-bottom:1px solid var(--line);
+    margin-bottom:14px;padding:14px 0}
+  .masthead{padding:22px 18px 18px}
+}
+@media print{
+  nav,.pagenav,.copy{display:none}
+  .layout{display:block;max-width:none}
+  body{background:#fff}
+  a{color:inherit;text-decoration:none}
+  .codeblock,figure,table{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header class="masthead"><div class="inner">
+<p class="eyebrow"><a href="index.html">现代 C++ 数据结构教程</a></p>  <h1>习题、上机题与参考答案</h1>
+
+  <p class="meta"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/book/习题与参考答案.md">Markdown 源文件</a>
+    · <a href="https://github.com/GMyhf/dsa-modernization">GitHub 仓库</a>
+    · <a href="errata.html">原书勘误</a></p>
+</div></header>
+<div class="layout">
+<nav class="book"><b>导读</b><a href="index.html">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html" class="here">习题、上机题与参考答案</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a></nav>
+<main>
+<p>本附录把各章正文后的题目整理成可核对的参考答案。答案给出关键结论、算法不变量和复杂度；编程题 的完整实现应优先调用本书 <code>code/</code> 中已经通过测试的接口。除非题目另有说明，下标从 0 开始。</p>
+<p>每题前的来源分三类：<code>课程答案</code> 指 <code>ref_数据结构与算法A 2021秋/2021书面作业答案1-12章/</code> 中的原题答案；<code>ref_DSA</code> 指仓库中 相应 Markdown/PDF；<code>本书自拟</code> 指为现代化教材重新设计。来源答案若有错误，本书保留来源标记并在 答案中校正，不照抄错误结论。</p>
+<h2 id="第-1-章-概论"><a class="anchor" href="#第-1-章-概论">#</a>第 1 章 概论</h2>
+<h3 id="补充题参考答案"><a class="anchor" href="#补充题参考答案">#</a>补充题参考答案</h3>
+<ol>
+<li>外层 <code>i=1..n-1</code>，内层执行 <code>n-i+1</code> 次，因此赋值次数为 <code>sum(n-i+1, i=1..n-1)=n(n+1)/2-1</code>，为 <code>Theta(n^2)</code>。</li>
+<li>由 <code>max(f,g) &lt;= f+g &lt;= 2 max(f,g)</code>，取常数即可得 <code>Theta</code> 关系。</li>
+<li>递推树每层总成本 <code>n</code>，深度 <code>Theta(log n)</code>，故为 <code>Theta(n log n)</code>；归纳证明可用代入上下界完成。</li>
+</ol>
+<h3 id="习题答案"><a class="anchor" href="#习题答案">#</a>习题答案</h3>
+<ol>
+<li><strong>[本书自拟]</strong> 数据结构的四个层次可分别写成逻辑结构、存储结构、数据运算和抽象数据类型；算法分析至少报告时间代价与空间代价。</li>
+<li><strong>[本书自拟]</strong> “程序 = 数据结构 + 算法”强调数据表示和求解步骤相互制约；同一问题换存储结构后，算法复杂度可能改变。</li>
+<li><strong>[教材勘误错误 0、1]</strong> 连续有序子数组必须在原数组中相邻。若端点为 <code>j1..j2</code>，长度是 <code>j2-j1+1</code>，不是 <code>j2-j1-1</code>。</li>
+<li><strong>[教材勘误错误 6；课程第一章答案第 2 题]</strong> <code>T(n)=2T(floor(n/2))+n</code> 的递推树每层总成本为 <code>n</code>，层数为 <code>Theta(log n)</code>，所以 <code>T(n)=Theta(n log n)</code>。</li>
+<li><strong>[张铭教材；本书代码验证]</strong> 股市传言例中 B3 的最慢最短传播时间为 10；B1、B2、B4、B5 至少有一个不可达顶点，因此答案是 B3。</li>
+</ol>
+<h3 id="上机参考"><a class="anchor" href="#上机参考">#</a>上机参考</h3>
+<p>用邻接矩阵实现 Floyd：初始化对角线为 0、不可达为 <code>infinity</code>，再按 <code>via/from/to</code> 顺序松弛；最后逐行取最大有限距离并选择最小者。复杂度 <code>O(V^3)</code>、空间 <code>O(V^2)</code>。</p>
+<h2 id="第-2-章-线性表"><a class="anchor" href="#第-2-章-线性表">#</a>第 2 章 线性表</h2>
+<h3 id="习题答案-1"><a class="anchor" href="#习题答案-1">#</a>习题答案</h3>
+<ol>
+<li><strong>[本书自拟]</strong> 顺序表随机访问为 <code>O(1)</code>；任意位置插入或删除平均需移动 <code>O(n)</code> 个元素；尾部追加在有容量时为 <code>O(1)</code>，扩容实现通常为摊还 <code>O(1)</code>。</li>
+<li><strong>[课程第二章答案第 1 题；<code>ref_DSA/homework/2.md</code> 第 2 题]</strong> 有序表原地去重用双指针：<code>read</code> 扫描输入，<code>write</code> 指向下一个不同值；每次发现新值写入 <code>write++</code>。时间 <code>O(n)</code>，额外空间 <code>O(1)</code>。</li>
+<li><strong>[课程第二章答案第 3 题；<code>ref_DSA/homework/2.md</code> 第 3 题]</strong> 单链表判环用 Floyd 快慢指针。相遇后令一个指针回到头结点，两指针每次走一步，再次相遇处就是环入口；时间 <code>O(n)</code>，空间 <code>O(1)</code>。课程答案只要求判环，<code>ref_DSA</code> 题目进一步要求入口，本书补全第二阶段。</li>
+<li><strong>[<code>ref_DSA/homework/2.md</code> 第 1 题]</strong> 双向循环链表删除 <code>p</code>：令 <code>p-&gt;prev-&gt;next=p-&gt;next</code>、<code>p-&gt;next-&gt;prev=p-&gt;prev</code>，再释放 <code>p</code>；空表和删除唯一结点时要更新头指针。</li>
+</ol>
+<h3 id="上机参考-1"><a class="anchor" href="#上机参考-1">#</a>上机参考</h3>
+<p>实现去重、判环和双向链表删除后，至少测试空表、单结点、重复全表、环入口为头结点和环入口在中间五组边界。参考 <code>code/ch02/linked_list/test.cpp</code> 的异常和移动语义测试方式。</p>
+<h2 id="第-3-章-栈与队列"><a class="anchor" href="#第-3-章-栈与队列">#</a>第 3 章 栈与队列</h2>
+<h3 id="补充题参考答案-1"><a class="anchor" href="#补充题参考答案-1">#</a>补充题参考答案</h3>
+<ol>
+<li><strong>[课程第三章答案第 1 题]</strong> 入队压入 <code>S1</code>；出队时若 <code>S2</code> 空则把 <code>S1</code> 全部转入 <code>S2</code>，再弹出 <code>S2</code>。每个元素至多转移一次，摊还 <code>O(1)</code>。</li>
+<li><strong>[课程第三章答案第 2 题]</strong> 设最后出栈元素为 <code>k</code>，左右两侧独立产生 <code>C_{k-1}</code> 与 <code>C_{n-k}</code>，所以 <code>C_n=sum(C_{k-1}C_{n-k})</code>，解为 <code>1/(n+1) binom(2n,n)</code>。</li>
+<li><strong>[<code>ref_DSA/homework/3.md</code> 第 3 题]</strong> 新操作入撤销栈并清空恢复栈；撤销执行逆操作并把原操作放入恢复栈；恢复执行原操作并放回撤销栈。</li>
+</ol>
+<h3 id="习题答案-2"><a class="anchor" href="#习题答案-2">#</a>习题答案</h3>
+<ol>
+<li><strong>[课程第三章答案第 1 题；<code>ref_DSA/homework/3.md</code> 第 4 题]</strong> 两个栈实现队列：入队只压入 <code>in</code>；出队时若 <code>out</code> 为空，把 <code>in</code> 全部弹出压入 <code>out</code>，再从 <code>out</code> 弹出。单次最坏 <code>O(n)</code>，摊还 <code>O(1)</code>。课程答案文字中“<code>S1</code> 满时搬运”不是必要条件，代码实际采用的也是只在出队栈为空时搬运，本书按代码校正。</li>
+<li><strong>[课程第三章答案第 2 题；<code>ref_DSA/homework/3.md</code> 第 2 题]</strong> n 辆车进出栈的合法出站序列数为 Catalan 数 <code>C_n = 1/(n+1) * binom(2n,n)</code>。</li>
+<li><strong>[<code>ref_DSA/homework/3.md</code> 第 3 题]</strong> 撤销/恢复使用两个栈：新操作压入撤销栈并清空恢复栈；撤销弹出撤销栈、执行逆操作并压入恢复栈；恢复反向操作。</li>
+<li><strong>[张铭教材；本书自拟]</strong> 后缀表达式求值遇到操作数入栈，遇到运算符弹出右操作数和左操作数再压回结果；除法前检查右操作数非零。时间 <code>O(n)</code>。</li>
+</ol>
+<h3 id="上机参考-2"><a class="anchor" href="#上机参考-2">#</a>上机参考</h3>
+<p>分别运行递归、显式栈和优化版背包实现，用穷举结果对拍；再测空物品、容量 0、无解、负容量和非正重量。队列应测试满、空、环回和重复入队出队。</p>
+<h2 id="第-4-章-字符串"><a class="anchor" href="#第-4-章-字符串">#</a>第 4 章 字符串</h2>
+<h3 id="习题答案-3"><a class="anchor" href="#习题答案-3">#</a>习题答案</h3>
+<ol>
+<li><strong>[课程第四章答案第 1 题；<code>ref_DSA/homework/4字符串.md</code> 第 1 题]</strong> KMP 的 <code>next[i]</code> 表示模式前缀与当前位置前缀的最长相等真前后缀长度（本书实现采用 <code>-1</code> 优化风格，具体数值按第 4 章定义计算）。</li>
+<li><strong>[<code>ref_DSA/homework/4字符串.md</code> 第 2 题]</strong> 消除 <code>b</code> 和 <code>ac</code> 可用读写栈：读入字符后压入，若栈顶是 <code>b</code> 就弹出；若末尾形成 <code>ac</code> 就弹出两字符。每个字符最多入栈/出栈一次，时间 <code>O(n)</code>、空间 <code>O(n)</code>。</li>
+<li><strong>[<code>ref_DSA/homework/4字符串.md</code> 第 3 题]</strong> 循环移动字符串 <code>S[0..i]</code> 与 <code>S[i+1..n-1]</code> 可用三次逆置：逆置前段、逆置后段、逆置整体；时间 <code>O(n)</code>、额外空间 <code>O(1)</code>。</li>
+<li><strong>[教材勘误错误 10、13；本书代码验证]</strong> 匹配成功返回首字符 0 起始下标 <code>j-pLen</code>；找不到返回空值。不能使用 <code>j-pLen+1</code>。</li>
+</ol>
+<h3 id="上机参考-3"><a class="anchor" href="#上机参考-3">#</a>上机参考</h3>
+<p>为同一组文本和模式同时调用朴素匹配与 KMP，并逐项对拍；增加空模式、模式长于文本、重复字符和匹配发生在末尾的测试。</p>
+<h2 id="第-5-章-二叉树"><a class="anchor" href="#第-5-章-二叉树">#</a>第 5 章 二叉树</h2>
+<h3 id="补充题参考答案-2"><a class="anchor" href="#补充题参考答案-2">#</a>补充题参考答案</h3>
+<ol>
+<li><strong>[课程第五章答案第 1 题]</strong> 不成立。先序 <code>ABC</code>、后序 <code>CBA</code> 可由四种不同的单支二叉树产生；若改为先序+中序，则按根切分可唯一重建。</li>
+<li><strong>[课程第五章答案第 3 题]</strong> 对每个下标 <code>i=1..n-1</code> 检查 <code>a[parent(i)] &gt;= a[i]</code>，其中 <code>parent(i)=(i-1)/2</code>；一次扫描 <code>O(n)</code>。</li>
+<li><strong>[<code>ref_DSA/homework/5二叉树.md</code> 第 3 题]</strong> 满二叉树有 <code>L</code> 个叶和 <code>L-1</code> 个内部结点，总数 <code>n=2L-1</code>，所以 <code>L=(n+1)/2</code>。</li>
+</ol>
+<h3 id="习题答案-4"><a class="anchor" href="#习题答案-4">#</a>习题答案</h3>
+<ol>
+<li><strong>[课程第五章答案第 1 题；本书补充]</strong> 课程原题“先序+后序能否唯一确定二叉树”的答案是否定的，例如先序 <code>ABC</code>、后序 <code>CBA</code> 可以对应不同的单支树。若已知先序和中序，则先序首元素确定根，再按根在中序中的位置切分左右子树，可以唯一递归重建；后序加中序同理取后序末元素为根。</li>
+<li><strong>[<code>ref_DSA/homework/5二叉树.md</code> 第 3 题]</strong> 含 199 个结点的 Huffman 树若每个内部结点都有两个孩子，则叶子数为 <code>(199+1)/2=100</code>，因为满二叉结构满足 <code>n=2L-1</code>。</li>
+<li><strong>[<code>ref_DSA/homework/5二叉树.md</code> 第 4(2) 题；课程第五章答案第 3 题为大顶堆判定]</strong> 最小堆的最大值只能出现在叶子层；内部结点都不大于其子结点。判定大顶堆时逐个检查每个非根结点不大于其父结点，时间 <code>O(n)</code>。</li>
+<li><strong>[<code>ref_DSA/homework/5二叉树.md</code> 第 3(2)(3) 题；本书代码验证]</strong> Huffman 算法反复取两个最小权值合并，再把和放回最小堆；总带权路径长度最小。权值相同的编码可能不唯一，但总代价相同。</li>
+</ol>
+<h3 id="上机参考-4"><a class="anchor" href="#上机参考-4">#</a>上机参考</h3>
+<p>测试二叉树先/中/后序、BST 插入删除、全相等键、退化链和堆扩容；Huffman 测试空输入、单叶、负权拒绝和权重和溢出。</p>
+<h2 id="第-6-章-树"><a class="anchor" href="#第-6-章-树">#</a>第 6 章 树</h2>
+<h3 id="补充题参考答案-3"><a class="anchor" href="#补充题参考答案-3">#</a>补充题参考答案</h3>
+<ol>
+<li><strong>[课程第六章答案第 1 题]</strong> 第 <code>l</code> 层有 <code>k^l</code> 个结点；按根编号从 1 开始时，结点 <code>i</code> 的第 <code>m</code> 个孩子为 <code>(i-1)k+1+m</code>（按题目约定调整 <code>m</code> 的起点）；非最后一个孩子的右兄弟为 <code>i+1</code>。</li>
+<li><strong>[课程第六章答案第 3 题]</strong> 相等方程合并集合，不等式检查两端代表元是否相同；无优化单次 <code>find</code> 最坏 <code>O(n)</code>，按秩合并为 <code>O(log n)</code>，路径压缩的 m 次操作为 <code>O(m alpha(n))</code>。</li>
+<li><strong>[课程第六章答案第 2 题]</strong> 左孩子/右兄弟结构中先根序列沿第一个孩子递归并沿兄弟链前进；带度数后根序列在访问父结点时记录该结点孩子数。</li>
+</ol>
+<h3 id="习题答案-5"><a class="anchor" href="#习题答案-5">#</a>习题答案</h3>
+<ol>
+<li><strong>[张铭教材；本书自拟]</strong> 左孩子/右兄弟表示中，<code>child</code> 指向第一个孩子，<code>sibling</code> 指向下一个兄弟；先根遍历沿 child 递归、沿 sibling 迭代。</li>
+<li><strong>[课程第六章答案第 2 题]</strong> 森林转二叉树：每棵树根的第一个孩子成为左孩子，其余兄弟链成为右孩子；逆变换反向执行。课程原题进一步要求带右链先根和带度数后根的顺序存储，本书保留转换原理，具体表格取决于题图。</li>
+<li><strong>[课程第六章答案第 3 题；<code>ref_DSA/homework/6树.md</code>]</strong> 并查集不优化时单次 find 最坏 <code>O(n)</code>；按重量/秩合并可把树高限制为 <code>O(log n)</code>；再配合路径压缩，m 次操作的摊还复杂度为 <code>O(m alpha(n))</code>。</li>
+</ol>
+<h3 id="上机参考-5"><a class="anchor" href="#上机参考-5">#</a>上机参考</h3>
+<p>实现一般树三种周游和并查集合并/查找，测试空森林、单根、多兄弟、重复合并和路径压缩前后父指针变化。</p>
+<h2 id="第-7-章-图"><a class="anchor" href="#第-7-章-图">#</a>第 7 章 图</h2>
+<h3 id="补充题参考答案-4"><a class="anchor" href="#补充题参考答案-4">#</a>补充题参考答案</h3>
+<ol>
+<li><strong>[课程第七章答案第 1 题]</strong> 先拓扑排序；按拓扑序计算 <code>earliest[v]=max(earliest[u]+w(u,v))</code>，终点最大值为工期。邻接表下为 <code>O(V+E)</code>。</li>
+<li><strong>[课程第七章答案第 2 题]</strong> 统一加常数会按路径边数增加不同总量，因此可能改变最短路径次序；存在负权边时应使用 Bellman-Ford 等算法。</li>
+<li><strong>[<code>ref_DSA/DSA-HW/Chapter7Graph.md</code> 第 2 题；本书校正]</strong> Dijkstra 的树按源点距离选边，MST 按割上的最小边选边；<code>AB=2,BC=2,AC=3</code> 时两者总权分别为 5 和 4。</li>
+</ol>
+<h3 id="习题答案-6"><a class="anchor" href="#习题答案-6">#</a>习题答案</h3>
+<ol>
+<li><strong>[张铭教材；本书自拟]</strong> 无向完全图边数为 <code>V(V-1)/2</code>，有向完全图（无自环）边数为 <code>V(V-1)</code>。</li>
+<li><strong>[<code>ref_DSA/DSA-HW/Chapter7Graph.md</code> 第 2 题；本书校正]</strong> Dijkstra 生成的是“从源点出发的最短路树”，不一定是最小生成树。例：无向边 AB=2、BC=2、AC=3，从 A 出发时到 C 的最短路是直达边 AC，所以最短路树选 AB、AC，总权 5；MST 选 AB、BC，总权 4。<code>ref_DSA</code> 原答案把三边权 1、2、3 的 MST 总权写成 4，实际应为 3，而且存在等长最短路歧义，因此本书换用无平局反例。</li>
+<li><strong>[<code>ref_DSA/Final/07graph.md</code>“拓扑排序”；本书代码验证]</strong> Kahn 拓扑排序不断删除入度 0 顶点；若输出顶点数少于 <code>V</code>，图中有环。</li>
+<li><strong>[<code>ref_DSA/Final/07graph.md</code>“图的周游/最短路径”；本书代码验证]</strong> 邻接矩阵版 DFS/BFS 为 <code>O(V^2)</code>；邻接表版为 <code>O(V+E)</code>。本书当前 Graph 实现使用矩阵，因此 Dijkstra/Prim 为 <code>O(V^2)</code>，Floyd 为 <code>O(V^3)</code>。</li>
+<li><strong>[课程第七章答案第 2 题；<code>ref_DSA/Final/07graph.md</code>]</strong> Dijkstra 要求所有边权非负；存在负边时不能靠给所有边统一加常数修复，因为路径边数不同会改变路径总代价的相对次序。一般应改用 Bellman-Ford 等算法。</li>
+</ol>
+<h3 id="上机参考-6"><a class="anchor" href="#上机参考-6">#</a>上机参考</h3>
+<p>使用同一无向连通图比较 Prim 和 Kruskal：边集可能不同，但总权和应相同且均有 <code>V-1</code> 条边。再用邻接表重做 DFS/BFS，与矩阵版比较访问序列和复杂度。</p>
+<h2 id="第-8-章-内部排序"><a class="anchor" href="#第-8-章-内部排序">#</a>第 8 章 内部排序</h2>
+<h3 id="补充题参考答案-5"><a class="anchor" href="#补充题参考答案-5">#</a>补充题参考答案</h3>
+<ol>
+<li><strong>[课程第八章答案第 2 题]</strong> Randomized-Select 每次随机划分，只递归一侧；期望时间 <code>O(n)</code>，最坏 <code>O(n^2)</code>。</li>
+<li><strong>[课程第八章答案第 1 题]</strong> 先按长度稳定分桶，再从最高位到最低位对仍有该位的字符串做稳定桶排序；每个字符参与常数次处理，总时间 <code>O(sum |s_i|)</code>。</li>
+<li><strong>[课程第八章答案第 3 题]</strong> 索引排序只移动下标，最后按下标访问原数组；索引键比较相等时保留原下标次序即可稳定。</li>
+</ol>
+<h3 id="习题答案-7"><a class="anchor" href="#习题答案-7">#</a>习题答案</h3>
+<ol>
+<li><strong>[<code>ref_DSA/homework/08内排序.md</code> 复习；本书自拟]</strong> 插入排序稳定，堆排序通常不稳定；稳定性取决于相等键的相对次序是否保持。</li>
+<li><strong>[<code>ref_DSA/homework/08内排序.md</code> 第 1 题；课程第八章答案第 2 题]</strong> 快排末元素作枢轴时，已排序或逆序输入会产生 <code>O(n^2)</code> 最坏递归；随机选择枢轴可降低退化概率。课程答案还用 Randomized-Select 在期望线性时间找第 k 小元素。</li>
+<li><strong>[张铭教材；本书自拟]</strong> 归并排序需要 <code>O(n)</code> 辅助空间；原地归并可以降低空间但实现复杂且常数更大。</li>
+<li><strong>[<code>ref_DSA/DSA-HW/Chapter8.md</code> 第 2 题；本书代码验证]</strong> 基数排序处理有符号整数时，需先建立保持数值顺序的键；本书把值转为 <code>uint32_t</code> 并翻转符号位，使无符号字典序对应有符号数值序。</li>
+</ol>
+<h3 id="上机参考-7"><a class="anchor" href="#上机参考-7">#</a>上机参考</h3>
+<p>生成随机、已排序、逆序、全相等和含负数五类数据，对拍插入、堆、快排、归并、基数排序与标准排序结果，并记录时间和递归深度。</p>
+<h2 id="第-9-章-外部排序"><a class="anchor" href="#第-9-章-外部排序">#</a>第 9 章 外部排序</h2>
+<h3 id="补充题参考答案-6"><a class="anchor" href="#补充题参考答案-6">#</a>补充题参考答案</h3>
+<ol>
+<li><strong>[课程第九章答案第 1 题]</strong> 堆顶输出后读入新记录；不小于当前顺串末值则留在本堆，否则冻结到下一顺串，直到堆空。</li>
+<li><strong>[课程第九章答案第 3 题]</strong> 每页可放 <code>floor(page_size/record_size)</code> 条记录；内存页数决定最大归并路数，顺串平均长度由扫雪机效应约为 <code>2M</code> 条记录；访外次数按读写页分别累计。</li>
+<li><strong>[课程第九章答案第 2 题]</strong> loser tree 和 winner tree 每次更新为 <code>O(log k)</code>，最小堆也为 <code>O(log k)</code>；树结构通常能减少比较常数。</li>
+</ol>
+<h3 id="习题答案-8"><a class="anchor" href="#习题答案-8">#</a>习题答案</h3>
+<ol>
+<li><strong>[课程第九章答案第 1 题；<code>ref_DSA/DSA-HW/Chapter9.md</code> 第 1 题]</strong> 置换选择使用大小为 M 的最小堆产生有序顺串；输出堆顶后读入新值，若新值不小于当前顺串末值则继续本顺串，否则冻结到下一顺串。</li>
+<li><strong>[课程第九章答案第 2 题；<code>ref_DSA/DSA-HW/Chapter9.md</code> 第 2 题]</strong> M 路归并每次从各路当前头元素中取最小值；用 loser tree 时每次取出和更新为 <code>O(log M)</code>。</li>
+<li><strong>[课程第九章答案第 2、3 题]</strong> 外部排序主要代价是磁盘读写次数，不应只比较 CPU 比较次数；缓冲块数决定归并路数，顺串长度决定归并趟数。</li>
+</ol>
+<h3 id="上机参考-8"><a class="anchor" href="#上机参考-8">#</a>上机参考</h3>
+<p>给定固定内存缓冲区，输出顺串并验证每个顺串内部有序、全部记录无丢失；再用多路归并验证最终文件全局有序。</p>
+<h2 id="第-10-章-检索"><a class="anchor" href="#第-10-章-检索">#</a>第 10 章 检索</h2>
+<h3 id="补充题参考答案-7"><a class="anchor" href="#补充题参考答案-7">#</a>补充题参考答案</h3>
+<ol>
+<li><strong>[课程第十章答案第 1 题]</strong> 从当前指针出发按关键码方向前后移动；若返回首个匹配，遇到相等立即停，若返回最后匹配则继续沿相同关键码方向扫描。平均长度取起点和目标位置的双重平均。</li>
+<li><strong>[ref_DSA/DSA-HW/Chapter10.md 第 2 题]</strong> 总复杂度是一次堆排序 <code>O(M log M)</code> 加上 <code>|S1|</code> 次二分检索 <code>O(log M)</code>，即 <code>O(M log M + |S1| log M)</code>。</li>
+<li><strong>[张铭教材；本书代码验证]</strong> 拉链法装填因子可大于 1，成功查找期望约 <code>1+alpha/2</code>；线性探测要求 <code>alpha&lt;1</code>，接近 1 时代价急剧上升。</li>
+</ol>
+<h3 id="习题答案-9"><a class="anchor" href="#习题答案-9">#</a>习题答案</h3>
+<ol>
+<li><strong>[张铭教材；<code>ref_DSA/DSA-HW/Chapter10.md</code>]</strong> 顺序检索无序表为 <code>O(n)</code>；二分检索要求有序且为 <code>O(log n)</code>。若先排序再做多次查询，应把一次排序成本和查询次数一起计算。</li>
+<li><strong>[张铭教材；本书代码验证]</strong> 开散列把冲突元素挂在桶链表中；闭散列在表内探测，删除必须使用墓碑，否则会截断后续探测链。</li>
+<li><strong>[张铭教材；本书代码验证]</strong> 装填因子越高，冲突越多；开放寻址必须小于 1，实践中通常在达到阈值时扩表。</li>
+</ol>
+<h3 id="上机参考-9"><a class="anchor" href="#上机参考-9">#</a>上机参考</h3>
+<p>比较线性检索、二分检索、拉链法和线性探测，测试重复键、删除后再查找、全表墓碑、容量为 0 和负键。</p>
+<h2 id="第-11-章-索引技术"><a class="anchor" href="#第-11-章-索引技术">#</a>第 11 章 索引技术</h2>
+<h3 id="2021-书面作业补充题"><a class="anchor" href="#2021-书面作业补充题">#</a>2021 书面作业补充题</h3>
+<ol>
+<li><strong>[2021 书面作业答案；PKU DSA 笔记第 11 章]</strong> 磁盘块为 1024 字节、每个索引项为 8 字节、数据文件有 25000 条记录时，二级索引的一级和二级索引共需 <code>198</code> 块：<code>ceil(25000 / 128) + ceil(25000 / 128^2) = 196 + 2</code>。</li>
+<li><strong>[2021 书面作业答案；PKU DSA 笔记第 11 章]</strong> 10000 个关键码的 16 阶 B 树，根到叶的索引块访问次数不会小于 <code>3</code>，因为 <code>16^3-1 &lt; 10000 &lt;= 16^4-1</code>。</li>
+<li><strong>[PKU DSA 笔记第 11 章；本书概念校正]</strong> B+ 树的内部关键码是子树边界的副本，叶结点保存完整索引并按链连接；分裂后必须维护父结点的边界关键码。</li>
+</ol>
+<h3 id="补充题参考答案-8"><a class="anchor" href="#补充题参考答案-8">#</a>补充题参考答案</h3>
+<ol>
+<li><strong>[课程第十一章答案第 1 题]</strong> 先算每页能放的记录/索引项，再算内存能驻留的索引项；二级索引要把读根、读索引页和读数据页分别计数。</li>
+<li><strong>[课程第十一章答案第 2 题]</strong> 院系和宿舍分别建 <code>属性 -&gt; ID 列表</code>，查询“且”时求两个有序列表交集；复杂度为两列表长度之和的数量级。</li>
+<li><strong>[课程第十一章答案第 3 题]</strong> B+ 树查找逐层读页；插入溢出时分裂并写原页、新页和父页；删除用后继替换并按是否下溢统计读写页。</li>
+</ol>
+<h3 id="习题答案-10"><a class="anchor" href="#习题答案-10">#</a>习题答案</h3>
+<ol>
+<li><strong>[课程第十一章答案第 1 题]</strong> 稠密索引为每条记录建索引项；稀疏索引按数据块建项，空间小但块内还需二次查找。容量题应先算每页记录数、每页索引项数，再乘可驻留页数。</li>
+<li><strong>[课程第十一章答案第 3 题；张铭教材]</strong> B+ 树的内部结点只存分隔键，叶结点存记录位置并按链相连，范围查询比普通 B 树更方便；插入删除的访外次数应分别计读页和写页。</li>
+<li><strong>[课程第十一章答案第 2 题]</strong> 倒排索引把属性值映射到记录 ID 列表；与查询是有序 posting list 的交集，或查询是并集，短语查询还需比较词项位置。</li>
+</ol>
+<h3 id="上机参考-10"><a class="anchor" href="#上机参考-10">#</a>上机参考</h3>
+<p>用有序数组实现静态稀疏索引和倒排表交集；明确模拟页访问次数，而不是只报告内存比较次数。</p>
+<p>本章四题都有可对照的实现：<code>code/ch11/linear_index</code> 的 <code>page_reads()</code> 直接给出第 1 题要数的访外次数；<code>code/ch11/inverted_index</code> 给出第 3 题的交并差与短语查询；<code>code/ch11/bplus_tree</code> 的 <code>page_reads()</code>/<code>page_writes()</code> 分开计读页与写页，正好对应第 2 题和补充题第 3 题；<code>code/ch11/bitmap_index</code> 覆盖位图与签名。先自己算一遍再跑一遍对答案，比只看结论有用。</p>
+<h2 id="第-12-章-高级数据结构"><a class="anchor" href="#第-12-章-高级数据结构">#</a>第 12 章 高级数据结构</h2>
+<h3 id="2021-书面作业补充题-1"><a class="anchor" href="#2021-书面作业补充题-1">#</a>2021 书面作业补充题</h3>
+<ol>
+<li><strong>[2021 书面作业答案；PKU DSA 笔记第 12 章]</strong> 广义表的纯表对应树，再入表可能共享结点并形成 DAG，循环表含环且递归深度为无穷；释放共享结构不能简单地对每条边递归 <code>delete</code>。</li>
+<li><strong>[PKU DSA 笔记第 12 章；本书代码验证]</strong> CSR 用 <code>row_ptr</code>、<code>col_idx</code>、<code>values</code> 三个数组表示稀疏矩阵；计算 <code>y=A*x</code> 只遍历非零元，时间为 <code>O(nnz)</code>。</li>
+<li><strong>[2021 书面作业答案；本书代码验证]</strong> AVL 插入失衡分为 LL、RR、LR、RL；旋转保持中序序列不变，操作复杂度为 <code>O(log n)</code>。</li>
+</ol>
+<h3 id="补充题参考答案-9"><a class="anchor" href="#补充题参考答案-9">#</a>补充题参考答案</h3>
+<ol>
+<li><strong>[<code>ref_DSA/homework/12高级数据结构.md</code> 第 2 题]</strong> CSR 用 <code>row_ptr</code>、<code>col_idx</code>、<code>values</code> 三数组；<code>y=A x</code> 逐行遍历非零元，时间 <code>O(nnz)</code>，空间 <code>O(nnz+V)</code>。</li>
+<li><strong>[课程第十二章答案第 1 题；本书代码验证]</strong> 共享表释放时可能从多个父表到达同一结点，循环表还会无限递归；可用引用计数，或用访问标记集合保证每个结点只释放一次。<code>code/ch12/gen_list</code> 实现的正是引用计数那条路；把它退化成「不看计数直接 delete」，测试会立刻报 heap-use-after-free。引用计数收不回环，这也是原书 12.2.4 要讲标记-清除的原因。</li>
+<li><strong>[课程第十二章答案第 2 题；<code>ref_DSA/homework/12高级数据结构.md</code> 第 4 题；本书代码验证]</strong> 每个后缀插入 Trie 后，其所有前缀对应主串子串；因此每个不同子串对应一个结点。朴素插入所有后缀最坏 <code>O(N^2)</code>，结点数也为 <code>O(N^2)</code>。可以用 <code>code/ch12/trie</code> 的 <code>node_count()</code> 直接数出来验证。</li>
+<li><strong>[课程第十二章答案第 3 题]</strong> LL/RR 单旋、LR/RL 双旋；旋转只改局部链接，中序遍历序列保持不变。</li>
+</ol>
+<h3 id="习题答案-11"><a class="anchor" href="#习题答案-11">#</a>习题答案</h3>
+<ol>
+<li><strong>[<code>ref_DSA/homework/12高级数据结构.md</code> 第 2 题；本书自拟]</strong> 下三角矩阵按行压缩时，<code>a[i][j]</code>（<code>i&gt;=j</code>）下标为 <code>i(i+1)/2+j</code>；对称矩阵取较大下标在前。<code>ref_DSA</code> 进一步给出 CSR 稀疏矩阵乘向量，时间与非零元数成正比。</li>
+<li><strong>[课程第十二章答案第 1 题；<code>ref_DSA/homework/12高级数据结构.md</code> 第 1 题]</strong> 纯表对应树，再入表对应可能共享的 DAG，循环表对应有环图；共享或有环结构不能简单递归释放。课程答案特别指出无括号的重复原子不应误判为子表。</li>
+<li><strong>[张铭教材；本书代码验证]</strong> 最优 BST 的区间动态规划代价为 <code>O(n^3)</code>，<code>root</code> 表可重建树形。</li>
+<li><strong>[课程第十二章答案第 3 题]</strong> AVL 四种失衡是 LL、RR、LR、RL；旋转只改变局部指针，不改变中序序列。</li>
+<li><strong>[课程第十二章答案第 2 题；<code>ref_DSA/homework/12高级数据结构.md</code> 第 4 题]</strong> Trie 的查找复杂度与关键码长度成正比；把字符串全部后缀插入 Trie 后，结点可对应不同子串。Patricia 压缩单孩子路径以减少结点。</li>
+</ol>
+<h3 id="上机参考-11"><a class="anchor" href="#上机参考-11">#</a>上机参考</h3>
+<p>实现下三角矩阵、句柄池和 Trie；句柄池必须测试耗尽、释放、复用、越界释放和重复释放。Trie 应与 <code>std::set</code> 对拍插入和查找结果。</p>
+<h2 id="参考答案的使用边界与-oj-迁移"><a class="anchor" href="#参考答案的使用边界与-oj-迁移">#</a>参考答案的使用边界与 OJ 迁移</h2>
+<h3 id="oj-题型迁移与校正"><a class="anchor" href="#oj-题型迁移与校正">#</a>OJ 题型迁移与校正</h3>
+<p>参考资料目录 <code>ref_DSA/OJ</code> 中适合纳入本书上机训练的题型，统一由本书现代代码承接；参考目录本身保持只读。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">章节</th>
+<th style="text-align:left">纳入本书的 OJ 题型</th>
+<th style="text-align:left">现代参考实现</th>
+<th style="text-align:left">迁移时的校正</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">第 2 章</td>
+<td style="text-align:left">有序表去重、链表判环、链表删除</td>
+<td style="text-align:left"><code>code/ch02/array_list</code>、<code>linked_list</code>、<code>doubly_linked_list</code></td>
+<td style="text-align:left">明确空表、单结点和环入口边界</td>
+</tr>
+<tr>
+<td style="text-align:left">第 3 章</td>
+<td style="text-align:left">滑动窗口、双栈队列、中缀/后缀表达式</td>
+<td style="text-align:left"><code>code/ch03/queue</code>、<code>expression_eval</code></td>
+<td style="text-align:left">除法先检查右操作数；队列只在输出栈为空时搬运</td>
+</tr>
+<tr>
+<td style="text-align:left">第 4 章</td>
+<td style="text-align:left">KMP、字符串消除、循环移动</td>
+<td style="text-align:left"><code>code/ch04/pattern_matching</code>、<code>string_class</code></td>
+<td style="text-align:left">匹配成功返回 0 起始下标，不能使用 <code>j-pLen+1</code></td>
+</tr>
+<tr>
+<td style="text-align:left">第 5 章</td>
+<td style="text-align:left">中序+后序重建、堆与 Huffman</td>
+<td style="text-align:left"><code>code/ch05/binary_tree</code>、<code>heap_huffman</code></td>
+<td style="text-align:left">重复键需定义约束；单叶 Huffman 单独处理</td>
+</tr>
+<tr>
+<td style="text-align:left">第 6 章</td>
+<td style="text-align:left">森林转换、并查集</td>
+<td style="text-align:left"><code>code/ch06/general_tree</code></td>
+<td style="text-align:left">路径压缩与重复合并都要测试</td>
+</tr>
+<tr>
+<td style="text-align:left">第 7 章</td>
+<td style="text-align:left">Dijkstra、Floyd、Prim、Kruskal、拓扑排序</td>
+<td style="text-align:left"><code>code/ch07/graph</code>、<code>adjacency_list</code></td>
+<td style="text-align:left">Dijkstra 生成最短路树，不等同于 MST；负边不能统一加常数修复</td>
+</tr>
+<tr>
+<td style="text-align:left">第 8 章</td>
+<td style="text-align:left">逆序对、距离排序、电话号码、基数排序</td>
+<td style="text-align:left"><code>code/ch08/sorting</code></td>
+<td style="text-align:left">对拍随机/顺序/逆序/全相等/负数输入，并保留稳定性要求</td>
+</tr>
+</tbody></table></div>
+<p>这些题型的完整实现以 <code>code/</code> 下通过编译和测试的文件为准；OJ 原始代码只作为题意和易错点参考，不直接作为书中代码。</p>
+<p>这些答案用于核对思路和复杂度，不是唯一写法。需要提交代码的题目仍应经过编译器、边界测试和必要的 sanitizer 检查；本书正文中已经提供实现的题目，应以对应 <code>code/*/test.cpp</code> 的可执行行为为最终依据。</p>
+<h2 id="来源文件登记"><a class="anchor" href="#来源文件登记">#</a>来源文件登记</h2>
+<p>本附录引用的课程答案来自：</p>
+<ul>
+<li><code>ref_数据结构与算法A 2021秋/2021书面作业答案1-12章/</code> 内各章书面作业答案；</li>
+<li><a href="https://github.com/ICUlizhi/Data-Structure-and-Algorithm-A-of-pku" class="ext"> 0 </a> 的 <code>notes-理论-期中后/</code> 中第 7--12 章复习笔记（仅吸收可独立核验的题型和结论）；</li>
+<li>同目录下的《教材1-6章勘误表.pdf》。</li>
+</ul>
+<p><code>ref_DSA</code> 引用均在题目标记中写出相对路径。追踪状态汇总见 <code>collab/TRACEABILITY-MATRIX.md</code>。课程 PDF/Word 中依赖图片才能确定具体数值的题目，本附录只引用 可由文本独立核验的结论；没有看清题图时不猜最终序列或树形。</p>
+<div class="pagenav"><a href="ch12-advanced.html"><span class="dir">← 上一篇</span>第12章 高级数据结构</a><a href="figures.html" style="text-align:right"><span class="dir">下一篇 →</span>原书插图</a></div>
+</main>
+<nav class="page"><b>本页</b><a href="#第-1-章-概论">第 1 章 概论</a><a href="#补充题参考答案" class="sub">补充题参考答案</a><a href="#习题答案" class="sub">习题答案</a><a href="#上机参考" class="sub">上机参考</a><a href="#第-2-章-线性表">第 2 章 线性表</a><a href="#习题答案-1" class="sub">习题答案</a><a href="#上机参考-1" class="sub">上机参考</a><a href="#第-3-章-栈与队列">第 3 章 栈与队列</a><a href="#补充题参考答案-1" class="sub">补充题参考答案</a><a href="#习题答案-2" class="sub">习题答案</a><a href="#上机参考-2" class="sub">上机参考</a><a href="#第-4-章-字符串">第 4 章 字符串</a><a href="#习题答案-3" class="sub">习题答案</a><a href="#上机参考-3" class="sub">上机参考</a><a href="#第-5-章-二叉树">第 5 章 二叉树</a><a href="#补充题参考答案-2" class="sub">补充题参考答案</a><a href="#习题答案-4" class="sub">习题答案</a><a href="#上机参考-4" class="sub">上机参考</a><a href="#第-6-章-树">第 6 章 树</a><a href="#补充题参考答案-3" class="sub">补充题参考答案</a><a href="#习题答案-5" class="sub">习题答案</a><a href="#上机参考-5" class="sub">上机参考</a><a href="#第-7-章-图">第 7 章 图</a><a href="#补充题参考答案-4" class="sub">补充题参考答案</a><a href="#习题答案-6" class="sub">习题答案</a><a href="#上机参考-6" class="sub">上机参考</a><a href="#第-8-章-内部排序">第 8 章 内部排序</a><a href="#补充题参考答案-5" class="sub">补充题参考答案</a><a href="#习题答案-7" class="sub">习题答案</a><a href="#上机参考-7" class="sub">上机参考</a><a href="#第-9-章-外部排序">第 9 章 外部排序</a><a href="#补充题参考答案-6" class="sub">补充题参考答案</a><a href="#习题答案-8" class="sub">习题答案</a><a href="#上机参考-8" class="sub">上机参考</a><a href="#第-10-章-检索">第 10 章 检索</a><a href="#补充题参考答案-7" class="sub">补充题参考答案</a><a href="#习题答案-9" class="sub">习题答案</a><a href="#上机参考-9" class="sub">上机参考</a><a href="#第-11-章-索引技术">第 11 章 索引技术</a><a href="#2021-书面作业补充题" class="sub">2021 书面作业补充题</a><a href="#补充题参考答案-8" class="sub">补充题参考答案</a><a href="#习题答案-10" class="sub">习题答案</a><a href="#上机参考-10" class="sub">上机参考</a><a href="#第-12-章-高级数据结构">第 12 章 高级数据结构</a><a href="#2021-书面作业补充题-1" class="sub">2021 书面作业补充题</a><a href="#补充题参考答案-9" class="sub">补充题参考答案</a><a href="#习题答案-11" class="sub">习题答案</a><a href="#上机参考-11" class="sub">上机参考</a><a href="#参考答案的使用边界与-oj-迁移">参考答案的使用边界与 OJ 迁移</a><a href="#oj-题型迁移与校正" class="sub">OJ 题型迁移与校正</a><a href="#来源文件登记">来源文件登记</a></nav>
+</div>
+<footer>
+  本页由 <code>tools/build_site.py</code> 从 <code>book/习题与参考答案.md</code> 生成
+  —— Markdown 是唯一事实源，请勿手改此文件。正文中的 C++ 代码块与 <code>code/</code> 下
+  通过测试的源码逐字一致（由 <code>tools/check_doc.py</code> 的 R3 保证）。
+</footer>
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('nav.page a'));
+  if(links.length){
+    var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a});
+    var seen=[];
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        var id=e.target.id;
+        if(e.isIntersecting){if(seen.indexOf(id)<0)seen.push(id)}
+        else{var i=seen.indexOf(id);if(i>=0)seen.splice(i,1)}
+      });
+      links.forEach(function(a){a.classList.remove('active')});
+      if(seen.length&&map[seen[0]])map[seen[0]].classList.add('active');
+    },{rootMargin:'0px 0px -75% 0px'});
+    [].slice.call(document.querySelectorAll('h2[id],h3[id]')).forEach(function(h){io.observe(h)});
+  }
+  [].slice.call(document.querySelectorAll('.codeblock')).forEach(function(block){
+    var button=document.createElement('button');
+    button.className='copy';button.type='button';button.textContent='复制';
+    button.addEventListener('click',function(){
+      var text=block.querySelector('code').textContent;
+      var done=function(){button.textContent='已复制';
+        setTimeout(function(){button.textContent='复制'},1200)};
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done,function(){button.textContent='复制失败'});
+      }else{
+        var area=document.createElement('textarea');area.value=text;document.body.appendChild(area);
+        area.select();try{document.execCommand('copy');done()}catch(e){button.textContent='复制失败'}
+        document.body.removeChild(area);
+      }
+    });
+    block.appendChild(button);
+  });
+})();
+</script>
+</body>
+</html>

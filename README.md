@@ -15,9 +15,10 @@
 
 ```
 台账   104 已现代化 / 1 退场 / 0 待办  = 105 条清单
-书稿   15 个文件（12 章正文 + 总目录 + 勘误 + 插图），7 条规则通过
-代码   19 个单元 × 2 种构建（Debug+ASan/UBSan、Release-O2）
-自测   61 项（闸门自己的单元测试）
+书稿   16 个文件（12 章正文 + 总目录 + 习题 + 勘误 + 插图），8 条规则通过
+成品   PDF（book/pdf/）与网页版（book/site/，双击 index.html 即可读）
+代码   32 个单元 × 2 种构建（Debug+ASan/UBSan、Release-O2）
+自测   115 项（闸门自己的单元测试）
 ```
 
 `python3 tools/handoff.py --verify` 退出码 0。
@@ -51,7 +52,12 @@ python3 tools/handoff.py --verify     # 完整闸门：工具自测 → 台账 �
 python3 tools/ledger.py               # 105 条清单现在做到哪了
 python3 tools/check_code.py           # 只跑 code/：-Werror + ASan/UBSan + O2 双构建
 python3 tools/check_doc.py            # 只跑 book/：OCR 残留、编号、插图、代码块一致性
+python3 tools/build_site.py           # 把书稿渲染成网页版 book/site/，入口 index.html
 ```
+
+网页版直接双击 `book/site/index.html` 就能读；要用 HTTP 访问就
+`python3 -m http.server -d book` 后打开 `http://localhost:8000/site/`。
+它是 `book/*.md` 的产物，闸门里有一条 `build_site.py --check` 盯着两者不许脱节。
 
 需要 Python 3（仅标准库）与 g++/clang++（支持 C++17 与 sanitizer）。无第三方依赖。
 
@@ -60,11 +66,11 @@ python3 tools/check_doc.py            # 只跑 book/：OCR 残留、编号、插
 | 路径 | 是什么 |
 | --- | --- |
 | `dsa_raw.md` | OCR 底稿，**只读**。1MB / 11978 行 / 12 章 / 105 条清单 / 292 张外链插图 |
-| `book/` | 现代化后的书稿：12 章正文 + [总目录](book/现代C++数据结构教程.md) + [原书勘误](book/勘误.md) + [插图](book/插图.md)。292 张图在 `book/assets/`。发给学生的带书签 PDF：[`book/pdf/现代C++数据结构教程.pdf`](book/pdf/现代C++数据结构教程.pdf)（`python3 tools/build_book_pdf.py` 重编） |
+| `book/` | 现代化后的书稿：12 章正文 + [总目录](book/现代C++数据结构教程.md) + [原书勘误](book/勘误.md) + [插图](book/插图.md)。292 张图在 `book/assets/`。发给学生的带书签 PDF：[`book/pdf/现代C++数据结构教程.pdf`](book/pdf/现代C++数据结构教程.pdf)（`python3 tools/build_book_pdf.py` 重编）；浏览器版：[`book/site/index.html`](book/site/index.html)（`python3 tools/build_site.py` 重编） |
 | `code/<章>/<单元>/` | 一个清单单元：`unit.json`（认领哪几条清单）、`legacy.md`（原书写法→缺陷证据→现代写法）、`modern.hpp`、`test.cpp` |
 | `code/support/` | 各章测试共用的故障注入探针（只放探针，不放任何数据结构实现） |
 | `tools/` | 闸门与脚手架，纯标准库 |
-| `tests/` | 闸门自身的单元测试，61 项 |
+| `tests/` | 闸门自身的单元测试，115 项 |
 | `collab/` | 协作事实源：PLAN / DECISION_LOG / HANDOFF / 双向 NOTES / 退场记录 |
 
 ## 四条闸门

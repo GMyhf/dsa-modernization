@@ -1,0 +1,765 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第1章 概论 · 现代 C++ 数据结构教程</title>
+<meta name="description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:title" content="第1章 概论">
+<meta property="og:description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:type" content="article">
+<style>
+:root{color-scheme:light;
+  --ink:#1a2230;--muted:#68758a;--faint:#93a0b3;--line:#dde3ec;--bg:#f3f5f9;--panel:#fff;
+  --soft:#eef1f7;--accent:#2f5fd0;--accent-soft:#e5ecfb;--warn:#b06a1c;--danger:#c0392b;
+  --kw:#8b2fa0;--ty:#0f6f8c;--st:#177245;--cm:#7d8899;--pp:#a3572a}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;
+  --ink:#e3e8f0;--muted:#98a3b5;--faint:#6f7c90;--line:#2b3342;--bg:#12151b;--panel:#171b22;
+  --soft:#1e232c;--accent:#84a9f5;--accent-soft:#1c2740;--warn:#dcae72;--danger:#e08a80;
+  --kw:#d79ae8;--ty:#7cc7dd;--st:#8fd0a4;--cm:#7b8598;--pp:#e0a97b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.8 system-ui,-apple-system,"Segoe UI","Noto Sans CJK SC","PingFang SC",sans-serif}
+a{color:var(--accent)}
+.masthead{background:var(--panel);border-bottom:1px solid var(--line);padding:30px 26px 24px}
+.masthead .inner{max-width:1440px;margin:0 auto}
+.masthead .eyebrow{font-size:13px;color:var(--muted);letter-spacing:.06em;margin:0 0 6px}
+.masthead .eyebrow a{text-decoration:none}
+.masthead h1{margin:0;font-size:clamp(23px,3.4vw,34px);line-height:1.25;letter-spacing:-.01em}
+.masthead p.sub{margin:10px 0 0;color:var(--muted);font-size:15px;max-width:62ch}
+.masthead .meta{margin:12px 0 0;font-size:13.5px;color:var(--muted)}
+.layout{max-width:1440px;margin:0 auto;padding:0 26px 80px;display:grid;
+  grid-template-columns:228px minmax(0,1fr) 208px;gap:40px;align-items:start}
+nav.book,nav.page{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;
+  padding:22px 0;font-size:14px;line-height:1.55}
+nav b{display:block;color:var(--faint);font-size:11.5px;letter-spacing:.1em;
+  text-transform:uppercase;margin:16px 0 8px}
+nav b:first-child{margin-top:0}
+nav a{display:block;padding:5px 10px;border-left:2px solid transparent;
+  color:var(--ink);text-decoration:none;border-radius:0 5px 5px 0}
+nav a:hover{background:var(--soft);color:var(--accent)}
+nav.book a.here{background:var(--accent-soft);border-left-color:var(--accent);
+  color:var(--accent);font-weight:600}
+nav.page a{color:var(--muted);font-size:13.5px;padding:4px 10px}
+nav.page a.sub{padding-left:22px;font-size:13px;color:var(--faint)}
+nav.page a.active{border-left-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+main{min-width:0;padding-top:24px}
+h1,h2,h3,h4{scroll-margin-top:16px}
+h2{font-size:24px;margin:48px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+h3{font-size:18.5px;margin:30px 0 10px}
+h4{font-size:16px;margin:22px 0 8px;color:var(--muted)}
+.anchor{float:left;margin-left:-1.05em;padding-right:.3em;color:transparent;
+  text-decoration:none;font-weight:400}
+h2:hover .anchor,h3:hover .anchor,h4:hover .anchor{color:var(--faint)}
+p{margin:0 0 15px}
+code{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  background:var(--soft);padding:2px 6px;border-radius:4px;word-break:break-word}
+.codeblock{position:relative;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px;margin:0 0 18px;overflow:hidden}
+.codeblock .srcbar{border-bottom:1px solid var(--line);background:var(--soft);
+  padding:6px 12px;font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+.codeblock .srcbar a{color:var(--muted);text-decoration:none}
+.codeblock .srcbar a:hover{color:var(--accent);text-decoration:underline}
+.codeblock pre{margin:0;padding:14px 16px;overflow:auto}
+.codeblock code{background:none;padding:0;font-size:13px;line-height:1.65;white-space:pre}
+.codeblock[data-lang=console] pre,.codeblock[data-lang=bash] pre{background:var(--soft)}
+.codeblock[data-lang=text]::after{content:"原书印刷";position:absolute;top:8px;right:10px;
+  font-size:11px;color:var(--faint);letter-spacing:.05em}
+.copy{position:absolute;top:6px;right:8px;border:1px solid var(--line);background:var(--panel);
+  color:var(--muted);border-radius:6px;font-size:12px;padding:2px 8px;cursor:pointer;opacity:0}
+.codeblock:hover .copy{opacity:1}
+.copy:hover{color:var(--accent);border-color:var(--accent)}
+.codeblock .srcbar~.copy{top:34px}
+.k{color:var(--kw)}.t{color:var(--ty)}.s{color:var(--st)}.c{color:var(--cm);font-style:italic}
+.n{color:var(--warn)}.p{color:var(--pp)}
+blockquote{margin:0 0 18px;padding:12px 18px;border-left:3px solid var(--accent);
+  background:var(--soft);border-radius:0 7px 7px 0}
+blockquote p:last-child{margin-bottom:0}
+.table-wrap{overflow-x:auto;margin:0 0 18px}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--panel)}
+th,td{border:1px solid var(--line);padding:8px 11px;vertical-align:top}
+th{background:var(--soft);font-weight:650}
+ul,ol{margin:0 0 15px;padding-left:26px}
+li{margin:6px 0}
+hr{border:0;border-top:1px solid var(--line);margin:34px 0}
+figure{margin:0 0 22px;padding:12px;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px}
+figure img{max-width:100%;display:block;margin:0 auto;border-radius:4px;background:#fff}
+figcaption{margin-top:9px;color:var(--muted);font-size:13.5px;text-align:center}
+.gallery-page{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:18px;align-items:start}
+.gallery-page>figure{margin:0}
+.gallery-page>h2,.gallery-page>h3,.gallery-page>p,.gallery-page>blockquote,
+.gallery-page>hr,.gallery-page>.pagenav{grid-column:1/-1}
+.math{font-family:"Latin Modern Math","Cambria Math",Georgia,serif;font-style:italic}
+.math .upr,.math .mono,.math .bold{font-style:normal}
+.math .mono{font-family:ui-monospace,Menlo,monospace}
+.math .bold{font-weight:700}
+.math sup,.math sub{font-size:.72em}
+.math .rel{margin:0 .28em;font-style:normal}
+.math .bin{margin:0 .16em;font-style:normal}
+.math-display{display:block;text-align:center;margin:18px 0;font-size:17px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+  font-size:.85em;line-height:1.15}
+.frac .num{border-bottom:1px solid currentColor;padding:0 .25em}
+.frac .den{padding:0 .25em}
+.sqrt{border-top:1px solid currentColor}
+.sqrt::before{content:"√";border-top:0}
+.tex-raw{border-bottom:1px dotted var(--danger);font-style:normal}
+.pagenav{display:flex;justify-content:space-between;gap:16px;margin:50px 0 0;
+  border-top:1px solid var(--line);padding-top:18px;font-size:14.5px}
+.pagenav a{text-decoration:none;max-width:46%}
+.pagenav .dir{display:block;color:var(--faint);font-size:12px}
+footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
+  font-size:13.5px;border-top:1px solid var(--line)}
+@media(max-width:1180px){
+  .layout{grid-template-columns:212px minmax(0,1fr);gap:32px}
+  nav.page{display:none}
+}
+@media(max-width:820px){
+  .layout{grid-template-columns:1fr;gap:0;padding:0 18px 60px}
+  nav.book{position:static;max-height:none;border-bottom:1px solid var(--line);
+    margin-bottom:14px;padding:14px 0}
+  .masthead{padding:22px 18px 18px}
+}
+@media print{
+  nav,.pagenav,.copy{display:none}
+  .layout{display:block;max-width:none}
+  body{background:#fff}
+  a{color:inherit;text-decoration:none}
+  .codeblock,figure,table{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header class="masthead"><div class="inner">
+<p class="eyebrow"><a href="index.html">现代 C++ 数据结构教程</a></p>  <h1>第1章 概论</h1>
+
+  <p class="meta"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/book/ch01-adt.md">Markdown 源文件</a>
+    · <a href="https://github.com/GMyhf/dsa-modernization">GitHub 仓库</a>
+    · <a href="errata.html">原书勘误</a></p>
+</div></header>
+<div class="layout">
+<nav class="book"><b>导读</b><a href="index.html">封面与导读</a><b>正文</b><a href="ch01-adt.html" class="here">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a></nav>
+<main>
+<p>数据结构刻画信息及其关系，算法描述求解过程。二者互相依赖：结构选错了，算法再巧也补不回来。本章先用股市传言把问题说到能写程序，再补回逻辑结构、存储映射、抽象数据类型和渐进分析——这些原书没错，是后面十一章共用的词汇。</p>
+<h2 id="11-问题求解"><a class="anchor" href="#11-问题求解">#</a>1.1 问题求解</h2>
+<p>程序是指令的组合，算法是求解过程的逻辑抽象，数据结构是数据及其关系在计算机里的反映。Wirth 的「程序 = 数据结构 + 算法」说的就是这件事。求解路径通常是：把现实问题抽象成模型，选定逻辑结构与存储方式，再设计算法并写成可运行的程序。</p>
+<h3 id="111-问题描述股市的传言"><a class="anchor" href="#111-问题描述股市的传言">#</a>1.1.1 问题描述：股市的传言</h3>
+<p>本章把原书 1.1 的“股市传言”问题写成一个可直接调用的程序。它不是在找“边最多”的经纪人， 而是在找一个起点：从这个人出发能把消息传给<strong>所有</strong>人，并且最慢的那条最短传播路径尽可能短。</p>
+<h3 id="112-问题分析和抽象"><a class="anchor" href="#112-问题分析和抽象">#</a>1.1.2 问题分析和抽象</h3>
+<p>把 B1 到 B5 看成五个顶点。一条 <code>Bi -&gt; Bj</code> 边表示消息能从 <code>Bi</code> 直接传给 <code>Bj</code>；边权是传播 时间。没有路径就记为 <code>∞</code>，表示消息永远传不到那里。B3 是唯一可以到达全部经纪人的起点。</p>
+<p>图1.1 经纪人间的消息传递（有向边，时间为权）：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">起点</th>
+<th style="text-align:left">终点</th>
+<th style="text-align:right">时间</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">B1</td>
+<td style="text-align:left">B4</td>
+<td style="text-align:right">4</td>
+</tr>
+<tr>
+<td style="text-align:left">B1</td>
+<td style="text-align:left">B5</td>
+<td style="text-align:right">3</td>
+</tr>
+<tr>
+<td style="text-align:left">B2</td>
+<td style="text-align:left">B5</td>
+<td style="text-align:right">8</td>
+</tr>
+<tr>
+<td style="text-align:left">B3</td>
+<td style="text-align:left">B1</td>
+<td style="text-align:right">6</td>
+</tr>
+<tr>
+<td style="text-align:left">B3</td>
+<td style="text-align:left">B2</td>
+<td style="text-align:right">7</td>
+</tr>
+<tr>
+<td style="text-align:left">B3</td>
+<td style="text-align:left">B4</td>
+<td style="text-align:right">10</td>
+</tr>
+<tr>
+<td style="text-align:left">B3</td>
+<td style="text-align:left">B5</td>
+<td style="text-align:right">2</td>
+</tr>
+<tr>
+<td style="text-align:left">B5</td>
+<td style="text-align:left">B1</td>
+<td style="text-align:right">5</td>
+</tr>
+<tr>
+<td style="text-align:left">B5</td>
+<td style="text-align:left">B2</td>
+<td style="text-align:right">5</td>
+</tr>
+</tbody></table></div>
+<p>B3 指出四条边，是唯一能到达其余所有人的起点。</p>
+<p>原书算法 1.1 的工作可以拆成三步：</p>
+<ol>
+<li>Floyd 算法算出任意两人间的最短传播时间。</li>
+<li>对每一个候选起点，找出“从它出发到每个人的最短时间”中最慢的一项。</li>
+<li>从这些最大值中选最小的一个；如果某行仍有不可达的 <code>∞</code>，该起点不能胜任。</li>
+</ol>
+<p>原书中的 <code>D</code> 对应现代代码里的 <code>shortest</code> 矩阵，<code>max[i]</code> 对应每一行的 <code>largest_distance</code>，<code>pos</code> 对应 <code>best_source()</code> 的返回值。下标从 0 开始，因此 B3 的返回值是 2。</p>
+<h3 id="为什么要取最慢的一项"><a class="anchor" href="#为什么要取最慢的一项">#</a>为什么要取“最慢的一项”</h3>
+<p>假设从 B3 开始，Floyd 算出的最短传播时间为：到 B1 是 6，到 B2 是 7，到自身是 0，到 B4 是 10，到 B5 是 2。消息要“传遍所有人”，必须等最慢的 B4 收到消息，因此 B3 的完成时间是 这五个数里的最大值 10，而不是它们的和，也不是最小值。</p>
+<p>把每个人都当一次起点，结果如下。<code>∞</code> 表示至少有一人永远收不到消息，所以这一行没有可用的 完成时间。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">起点</th>
+<th style="text-align:right">到 B1</th>
+<th style="text-align:right">到 B2</th>
+<th style="text-align:right">到 B3</th>
+<th style="text-align:right">到 B4</th>
+<th style="text-align:right">到 B5</th>
+<th style="text-align:right">最慢的最短时间</th>
+<th style="text-align:left">是否可选</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">B1</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">∞</td>
+<td style="text-align:right">∞</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">3</td>
+<td style="text-align:right">∞</td>
+<td style="text-align:left">否</td>
+</tr>
+<tr>
+<td style="text-align:left">B2</td>
+<td style="text-align:right">13</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">∞</td>
+<td style="text-align:right">17</td>
+<td style="text-align:right">8</td>
+<td style="text-align:right">∞</td>
+<td style="text-align:left">否</td>
+</tr>
+<tr>
+<td style="text-align:left">B3</td>
+<td style="text-align:right">6</td>
+<td style="text-align:right">7</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">10</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right"><strong>10</strong></td>
+<td style="text-align:left">是</td>
+</tr>
+<tr>
+<td style="text-align:left">B4</td>
+<td style="text-align:right">∞</td>
+<td style="text-align:right">∞</td>
+<td style="text-align:right">∞</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">∞</td>
+<td style="text-align:right">∞</td>
+<td style="text-align:left">否</td>
+</tr>
+<tr>
+<td style="text-align:left">B5</td>
+<td style="text-align:right">5</td>
+<td style="text-align:right">5</td>
+<td style="text-align:right">∞</td>
+<td style="text-align:right">9</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">∞</td>
+<td style="text-align:left">否</td>
+</tr>
+</tbody></table></div>
+<p>因此答案是 B3。这个目标常称为“最小化最大距离”：不是选离某一个人最近的起点，而是选让 <strong>最后一个</strong>收到消息的人也尽可能早收到消息的起点。</p>
+<h3 id="113-数据结构和算法设计"><a class="anchor" href="#113-数据结构和算法设计">#</a>1.1.3 数据结构和算法设计</h3>
+<p>下面是完整可运行的程序。<code>RumorNetwork(5)</code> 创建 B1 至 B5；<code>add_route(from, to, cost)</code> 添加一条 <strong>有向</strong>传播路径，三个参数均从 0 开始编号。<code>best_source()</code> 返回 <code>std::optional&lt;std::size_t&gt;</code>—— 可以先理解成一个「可能装着下标的盒子」：有解时盒子里是起点下标，无解时盒子是空的 （<code>std::nullopt</code>）。取值前必须先判断盒子空不空，所以「无解」这种情况不可能被漏掉。 为什么不用「返回 <code>bool</code> + 引用参数带出下标」的老写法，第 2.2.2 节有完整对照。</p>
+<p>源码文件在这里：<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch01/adt/demo.cpp" class="ext">可运行示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch01/adt/modern.hpp" class="ext">数据结构实现</a>、<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch01/adt/test.cpp" class="ext">测试用例</a>。 <code>demo.cpp</code> 负责输入/输出；<code>modern.hpp</code> 只负责数据和计算，这就是把“怎么展示”与“怎么算”分开。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch01/adt/demo.cpp">code/ch01/adt/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
+
+<span class="p">#include &lt;iostream&gt;</span>
+
+<span class="t">int</span> main() {
+    <span class="c">// B1 ... B5 对应下标 0 ... 4。</span>
+    dsa::adt::RumorNetwork network(<span class="n">5</span>);
+    network.add_route(<span class="n">0</span>, <span class="n">3</span>, <span class="n">4</span>);   <span class="c">// B1 -&gt; B4，耗时 4</span>
+    network.add_route(<span class="n">0</span>, <span class="n">4</span>, <span class="n">3</span>);   <span class="c">// B1 -&gt; B5，耗时 3</span>
+    network.add_route(<span class="n">1</span>, <span class="n">4</span>, <span class="n">8</span>);   <span class="c">// B2 -&gt; B5，耗时 8</span>
+    network.add_route(<span class="n">2</span>, <span class="n">0</span>, <span class="n">6</span>);   <span class="c">// B3 -&gt; B1，耗时 6</span>
+    network.add_route(<span class="n">2</span>, <span class="n">1</span>, <span class="n">7</span>);   <span class="c">// B3 -&gt; B2，耗时 7</span>
+    network.add_route(<span class="n">2</span>, <span class="n">3</span>, <span class="n">10</span>);  <span class="c">// B3 -&gt; B4，耗时 10</span>
+    network.add_route(<span class="n">2</span>, <span class="n">4</span>, <span class="n">2</span>);   <span class="c">// B3 -&gt; B5，耗时 2</span>
+    network.add_route(<span class="n">4</span>, <span class="n">0</span>, <span class="n">5</span>);   <span class="c">// B5 -&gt; B1，耗时 5</span>
+    network.add_route(<span class="n">4</span>, <span class="n">1</span>, <span class="n">5</span>);   <span class="c">// B5 -&gt; B2，耗时 5</span>
+
+    <span class="k">const</span> <span class="k">auto</span> source = network.best_source();
+    <span class="k">if</span> (source) {
+        std::cout &lt;&lt; <span class="s">&quot;最佳传播起点是 B&quot;</span> &lt;&lt; *source + <span class="n">1</span> &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+    } <span class="k">else</span> {
+        std::cout &lt;&lt; <span class="s">&quot;不存在能到达全部经纪人的起点\n&quot;</span>;
+    }
+}</code></pre></div>
+<p>在仓库根目录运行：</p>
+<div class="codeblock" data-lang="bash"><pre><code>c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch01/adt code/ch01/adt/demo.cpp -o /tmp/rumor-demo
+/tmp/rumor-demo</code></pre></div>
+<p>第一行是“编译”，第二行是“运行刚刚编译出的程序”。逐项解释如下：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">片段</th>
+<th style="text-align:left">含义</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><code>c++</code></td>
+<td style="text-align:left">C++ 编译器命令。在 macOS 上通常指 Clang；Linux 上也可能指 GCC。</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>-std=c++17</code></td>
+<td style="text-align:left">按 C++17 语言规则编译；本教程的 <code>std::optional</code> 需要 C++17。</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>-Wall -Wextra</code></td>
+<td style="text-align:left">打开常见和额外的编译器警告，例如未使用变量或可疑转换。</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>-Werror</code></td>
+<td style="text-align:left">把警告当作错误；用于学习时可及早发现问题。初学调试时可暂时去掉它。</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>-Icode/ch01/adt</code></td>
+<td style="text-align:left">加一个头文件搜索目录，因此 <code>#include &quot;modern.hpp&quot;</code> 能找到 <code>code/ch01/adt/modern.hpp</code>。</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>code/ch01/adt/demo.cpp</code></td>
+<td style="text-align:left">要编译的源文件。它包含 <code>main()</code>，所以可以成为可执行程序。</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>-o /tmp/rumor-demo</code></td>
+<td style="text-align:left">指定输出文件名为 <code>/tmp/rumor-demo</code>。<code>/tmp</code> 是临时目录，重启后文件可能消失。</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>/tmp/rumor-demo</code></td>
+<td style="text-align:left">运行该可执行文件，打印程序结果。</td>
+</tr>
+</tbody></table></div>
+<p>如果系统提示 <code>c++: command not found</code>，需要先安装 C++ 编译器；如果想把程序留在当前目录， 可以把 <code>-o /tmp/rumor-demo</code> 改成 <code>-o rumor-demo</code>，再运行 <code>./rumor-demo</code>。</p>
+<p>输出是：</p>
+<div class="codeblock" data-lang="console"><pre><code>最佳传播起点是 B3</code></pre></div>
+<p>如果删除 B3 的某条出边，例如 <code>network.add_route(2, 1, 7)</code>，B3 将无法到达 B2；当不存在任何 能覆盖全部顶点的起点时，<code>best_source()</code> 返回空值，程序会输出“不存在能到达全部经纪人的起点”。</p>
+<p>可以先只改边和权值，再运行同一条命令观察结果。例如把 <code>B3 -&gt; B4</code> 的时间从 10 改为 1，答案 仍是 B3，只是它的最慢传播时间从 10 缩短为 7。</p>
+<h3 id="实现导读"><a class="anchor" href="#实现导读">#</a>实现导读</h3>
+<p>先只关注三个公开操作：构造函数建立距离矩阵，<code>add_route</code> 填入直接边，<code>best_source</code> 计算答案。 <code>best_source</code> 内部复制一份矩阵，因而多次调用不会改变原始网络。下面按代码出现顺序解释。</p>
+<h4 id="预处理头文件与命名空间"><a class="anchor" href="#预处理头文件与命名空间">#</a>预处理、头文件与命名空间</h4>
+<p><code>#pragma once</code> 告诉编译器：同一个头文件即使被间接包含多次，也只处理一次，避免类定义重复。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">头文件</th>
+<th style="text-align:left">本程序用它做什么</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><code>&lt;cstddef&gt;</code></td>
+<td style="text-align:left">提供 <code>std::size_t</code>，表示非负的大小或下标。</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>&lt;limits&gt;</code></td>
+<td style="text-align:left">提供 <code>std::numeric_limits&lt;int&gt;::max()</code>，取得 <code>int</code> 可表示的最大值。</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>&lt;optional&gt;</code></td>
+<td style="text-align:left">提供 <code>std::optional</code>，表达“可能没有答案”。</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>&lt;stdexcept&gt;</code></td>
+<td style="text-align:left">提供 <code>std::invalid_argument</code>，用于报告非法参数。</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>&lt;vector&gt;</code></td>
+<td style="text-align:left">提供动态数组 <code>std::vector</code>，这里用它保存二维距离矩阵。</td>
+</tr>
+</tbody></table></div>
+<p><code>namespace dsa::adt { ... }</code> 把名字放入 <code>dsa::adt</code> 命名空间。完整类名因此是 <code>dsa::adt::RumorNetwork</code>，可避免项目中另一个人也定义 <code>RumorNetwork</code> 时发生重名。 代码块中的 <code>// &gt;&gt;&gt; adt</code> 与 <code>// &lt;&lt;&lt; adt</code> 只是本书稿的同步标记，不参与 C++ 逻辑。</p>
+<h4 id="类常量和构造函数"><a class="anchor" href="#类常量和构造函数">#</a>类、常量和构造函数</h4>
+<p><code>class RumorNetwork</code> 定义一种新类型。<code>public:</code> 以下是调用者可以使用的接口；<code>private:</code> 以下是 实现细节，调用者不能直接改写。</p>
+<div class="codeblock" data-lang="text"><pre><code>static constexpr int infinity = std::numeric_limits&lt;int&gt;::max() / 4;</code></pre></div>
+<p><code>static</code> 表示 <code>infinity</code> 属于类本身，而不是每个对象各存一份；<code>constexpr</code> 表示编译期常量。 取最大值的四分之一而非最大值，是为了计算 <code>a + b</code> 时仍留有余量，避免整数溢出。</p>
+<div class="codeblock" data-lang="text"><pre><code>explicit RumorNetwork(std::size_t people)
+    : distance_(people, std::vector&lt;int&gt;(people, infinity)) { ... }</code></pre></div>
+<p>这是构造函数：<code>RumorNetwork network(5)</code> 会调用它。冒号后的部分叫<strong>成员初始化列表</strong>，先创建 <code>distance_</code>，再进入花括号。它构造一个 5 行、每行 5 列的整数矩阵，初始全为 <code>infinity</code>。随后 循环把对角线改为 0，因为一个人到自己不需要传播时间。矩阵的第 <code>from</code> 行、第 <code>to</code> 列总是表示 从 <code>from</code> 到 <code>to</code> 的当前已知最短时间。</p>
+<h4 id="添加一条边"><a class="anchor" href="#添加一条边">#</a>添加一条边</h4>
+<div class="codeblock" data-lang="text"><pre><code>void add_route(std::size_t from, std::size_t to, int cost)</code></pre></div>
+<p>这三个参数分别是起点编号、终点编号和直接传播时间。第一段 <code>if</code> 检查编号是否越界、时间是否为 负；不满足题目定义时抛出 <code>std::invalid_argument</code>，调用者可用 <code>try/catch</code> 处理。第二段 <code>if</code> 只在 新边更短时更新矩阵，所以即使重复添加同一方向的边，也保留较小的时间。</p>
+<h4 id="floyd-三重循环"><a class="anchor" href="#floyd-三重循环">#</a>Floyd 三重循环</h4>
+<p><code>auto shortest = distance_;</code> 复制输入矩阵。<code>auto</code> 让编译器自动推断类型，这里实际是 <code>std::vector&lt;std::vector&lt;int&gt;&gt;</code>。</p>
+<p>三层循环的含义不是“随便循环三次”，而是按中转站逐步扩大可用路径：</p>
+<div class="codeblock" data-lang="text"><pre><code>for each via:       允许路径经过 via
+  for each from:    固定起点 from
+    for each to:    固定终点 to
+      比较 原来的 from-&gt;to 与 from-&gt;via-&gt;to</code></pre></div>
+<p>条件 <code>shortest[from][via] != infinity &amp;&amp; shortest[via][to] != infinity</code> 先确认两段都可达。 若 <code>from -&gt; via -&gt; to</code> 的总时间更小，就更新 <code>shortest[from][to]</code>。例如 B2 到 B4 没有直接边， 但 B2→B5 是 8、B5→B1 是 5、B1→B4 是 4，所以 Floyd 最终得到 B2→B4 是 <code>8 + 5 + 4 = 17</code>。</p>
+<h4 id="从最短路矩阵选答案"><a class="anchor" href="#从最短路矩阵选答案">#</a>从最短路矩阵选答案</h4>
+<div class="codeblock" data-lang="text"><pre><code>std::optional&lt;std::size_t&gt; result;
+int smallest_eccentricity = infinity;</code></pre></div>
+<p>默认构造的 <code>result</code> 是空值，表示“还没有找到合格起点”。<code>smallest_eccentricity</code> 保存目前见过的 最小完成时间。这里的 eccentricity（离心率）就是某起点到全部顶点的最短距离中的最大值。</p>
+<p>外层循环每次处理一行，即一个候选起点；内层循环扫描该行。三目表达式 <code>distance &gt; largest_distance ? distance : largest_distance</code> 等价于“若新值更大就采用新值，否则保留 旧值”，最终得到这行的最大值。若它比当前最佳值小，就同时更新最佳时间与 <code>result</code>。</p>
+<p>任何一行含 <code>infinity</code> 时，该行最大值也是 <code>infinity</code>，不会优于有限答案；若所有行都是 <code>infinity</code>，<code>result</code> 保持为空，函数返回 <code>std::nullopt</code>。<code>[[nodiscard]]</code> 提醒编译器：调用者不应 无意丢弃这个可能为空的重要返回值。</p>
+<h4 id="私有数据成员"><a class="anchor" href="#私有数据成员">#</a>私有数据成员</h4>
+<div class="codeblock" data-lang="text"><pre><code>std::vector&lt;std::vector&lt;int&gt;&gt; distance_;</code></pre></div>
+<p>外层 <code>vector</code> 是行，内层 <code>vector&lt;int&gt;</code> 是一行中的列，合起来是二维矩阵。末尾下划线是本教程的 约定，表示私有成员；它与函数参数 <code>distance</code> 或局部变量 <code>shortest</code> 不会混淆。</p>
+<p>时间复杂度为 O(V^3)，空间复杂度为 O(V^2)。这适合顶点数较少、需要比较所有起点的示例；大图 通常应根据图的稀疏度和查询需求选择其他最短路径算法。</p>
+<h3 id="现代实现"><a class="anchor" href="#现代实现">#</a>现代实现</h3>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch01/adt/modern.hpp">code/ch01/adt/modern.hpp</a></div><pre><code><span class="p">#pragma once</span>
+
+<span class="p">#include &lt;cstddef&gt;</span>
+<span class="p">#include &lt;limits&gt;</span>
+<span class="p">#include &lt;optional&gt;</span>
+<span class="p">#include &lt;stdexcept&gt;</span>
+<span class="p">#include &lt;vector&gt;</span>
+
+<span class="k">namespace</span> dsa::adt {
+
+<span class="c">// &gt;&gt;&gt; adt</span>
+<span class="k">class</span> RumorNetwork {
+<span class="k">public</span>:
+    <span class="k">static</span> <span class="k">constexpr</span> <span class="t">int</span> infinity = std::numeric_limits&lt;<span class="t">int</span>&gt;::max() / <span class="n">4</span>;
+
+    <span class="k">explicit</span> RumorNetwork(std::<span class="t">size_t</span> people)
+        : distance_(people, std::vector&lt;<span class="t">int</span>&gt;(people, infinity)) {
+        <span class="k">for</span> (std::<span class="t">size_t</span> person = <span class="n">0</span>; person &lt; people; ++person) {
+            distance_[person][person] = <span class="n">0</span>;
+        }
+    }
+
+    <span class="t">void</span> add_route(std::<span class="t">size_t</span> from, std::<span class="t">size_t</span> to, <span class="t">int</span> cost) {
+        <span class="k">if</span> (from &gt;= distance_.size() || to &gt;= distance_.size() || cost &lt; <span class="n">0</span>) {
+            <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;route&quot;</span>);
+        }
+        <span class="k">if</span> (cost &lt; distance_[from][to]) {
+            distance_[from][to] = cost;
+        }
+    }
+
+    [[nodiscard]] std::optional&lt;std::<span class="t">size_t</span>&gt; best_source() <span class="k">const</span> {
+        <span class="k">auto</span> shortest = distance_;
+        <span class="k">for</span> (std::<span class="t">size_t</span> via = <span class="n">0</span>; via &lt; shortest.size(); ++via) {
+            <span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; shortest.size(); ++from) {
+                <span class="k">for</span> (std::<span class="t">size_t</span> to = <span class="n">0</span>; to &lt; shortest.size(); ++to) {
+                    <span class="k">if</span> (shortest[from][via] != infinity &amp;&amp;
+                        shortest[via][to] != infinity &amp;&amp;
+                        shortest[from][to] &gt; shortest[from][via] + shortest[via][to]) {
+                        shortest[from][to] = shortest[from][via] + shortest[via][to];
+                    }
+                }
+            }
+        }
+
+        std::optional&lt;std::<span class="t">size_t</span>&gt; result;
+        <span class="t">int</span> smallest_eccentricity = infinity;
+        <span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; shortest.size(); ++from) {
+            <span class="t">int</span> largest_distance = <span class="n">0</span>;
+            <span class="k">for</span> (<span class="t">int</span> distance : shortest[from]) {
+                largest_distance = distance &gt; largest_distance ? distance : largest_distance;
+            }
+            <span class="k">if</span> (largest_distance &lt; smallest_eccentricity) {
+                smallest_eccentricity = largest_distance;
+                result = from;
+            }
+        }
+        <span class="k">return</span> result;
+    }
+
+<span class="k">private</span>:
+    std::vector&lt;std::vector&lt;<span class="t">int</span>&gt;&gt; distance_;
+};
+<span class="c">// &lt;&lt;&lt; adt</span>
+
+}  <span class="c">// namespace dsa::adt</span></code></pre></div>
+<h2 id="12-数据结构"><a class="anchor" href="#12-数据结构">#</a>1.2 数据结构</h2>
+<p>数据结构描述的是：按一定逻辑关系组织起来的数据，它们在计算机里怎么存放，以及定义在其上的运算。三件事要分开看——逻辑结构、存储结构、运算——后面各章都在这三层之间做选择。</p>
+<h3 id="121-数据的逻辑结构"><a class="anchor" href="#121-数据的逻辑结构">#</a>1.2.1 数据的逻辑结构</h3>
+<p>逻辑结构是从具体问题里抽出来的模型，只谈「有哪些结点、结点之间是什么关系」，不谈它们占几个字节。1.1 节经纪人之间的传播路径就是一个有向图：结点是人，关系是「消息能直接传给谁」。</p>
+<p>用集合的语言写，逻辑结构是一个二元组 <span class="math">B<span class="rel">=</span>(K,R)</span>。<span class="math">K</span> 是结点的有穷集合；关系集 <span class="math">R</span> 是定义在 <span class="math">K</span> 上的一组二元关系。若 <span class="math">&lt;k,k&#x27;&gt;<span class="rel">∈</span>r</span>，则称 <span class="math">k</span> 是 <span class="math">k&#x27;</span> 在关系 <span class="math">r</span> 上的前驱，<span class="math">k&#x27;</span> 是 <span class="math">k</span> 的后继。没有前驱的是开始结点，没有后继的是终止结点。</p>
+<p>教学计划是另一个常见例子。每门课是一个结点，全部必修课组成 <span class="math">K</span>；「必须先修」是 <span class="math">K</span> 上的一个关系。<code>&lt;程序设计, 数据结构&gt;</code> 表示必须先上程序设计，再上数据结构。没有先修约束的课可以并行开设。</p>
+<p>结点本身的类型可以很简单，也可以很复杂。整数、布尔、字符是基本类型；数组、结构、对象是复合类型。数据结构课关心的是结点之间的关系，所以通常把结点当作黑盒。</p>
+<p>本书讨论的结构，<span class="math">R</span> 里通常只有一个关系 <span class="math">r</span>。按 <span class="math">r</span> 的形态可以分成三类：</p>
+<ol>
+<li><strong>线性结构。</strong> 每个结点在关系上最多一个前驱、一个后继。有唯一的开始结点（无前驱）和唯一的终止结点（无后继），其余内部结点恰好一前一后。数组、链表、栈、队列都是线性结构。</li>
+<li><strong>树形结构。</strong> 有且仅有一个没有前驱的根；其余每个结点恰好一个前驱，后继数目不限。从根到任意结点都存在唯一的一条由关系元组串起来的路径。文件系统的目录就是树。</li>
+<li><strong>图结构。</strong> 前驱和后继的数目都不加限制。交通网、1.1 节的传言网都是图。</li>
+</ol>
+<p>树和图的分界是「每个结点是否至多一个直接前驱」；线和树的分界是「每个结点是否至多一个直接后继」。后面各章都建立在这三种关系上。</p>
+<h3 id="122-数据的存储结构"><a class="anchor" href="#122-数据的存储结构">#</a>1.2.2 数据的存储结构</h3>
+<p>存储结构回答的是：同一套逻辑关系，在计算机的存储器里怎么落下来。主存按字节编址，相邻单元的地址连续，并且可以按地址随机访问、访问时间基本相同。</p>
+<p>要把 <span class="math">(K,r)</span> 存进去，需要两层映射：每个结点 <span class="math">k</span> 对应存储器里一块连续区域；每个关系元组 <span class="math">&lt;k<sub>i</sub>,k<sub>j</sub>&gt;</span> 对应两块区域地址之间的某种关系——或者是地址相邻，或者是指针相指。同一种逻辑结构可以有多种映射。线性表既可以顺序存放，也可以链接存放，得到的就是顺序表和链表。</p>
+<p>常用的四种基本方法如下。</p>
+<p><strong>顺序方法</strong>把一组结点放进一片地址相邻的单元，逻辑上的先后用地址的先后表示。按下标访问因此是 <span class="math">O(<span class="upr">1</span>)</span>。程序语言里的数组就是顺序方法。它通常也是紧凑的：除了数据本身，几乎不存附加信息。存储密度定义为「真正的数据」所占空间与整块结构所占空间之比。非线性结构有时也能顺序存放，但要额外记下一些关系信息，例如完全二叉树按层编号后，孩子下标可以用 <span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">1</span></span>、<span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">2</span></span> 算出来。</p>
+<p><strong>链接方法</strong>在每个结点里附一个（或多个）指针域，专门存放后继的地址。结点因此分成数据域和指针域。需要一个结点同时挂多个后继时，就放多个指针。链接适合经常增删、长度事先不知道的结构。代价是：不知道指针时，只能从链头一个一个比下去；按位置访问不再是 <span class="math">O(<span class="upr">1</span>)</span>。</p>
+<p><strong>索引方法</strong>是顺序存储的推广。另造一张从整数下标到存储地址的表，每个表项是指向一条记录的指针。主文件可以无序、记录可以变长；检索时先在较小的索引里定位，再按地址读记录。数据量大、一次磁盘读写很贵时，索引的意义就是少读盘。图 1.4 画的就是「主文件无序、旁边一张按关键码排序的索引」：</p>
+<div class="codeblock" data-lang="text"><pre><code>主文件（无序）              线性索引（按 key 排序）
+┌────┬────────┐            ┌────┬────┐
+│ #  │ 记录   │            │key │位置│
+├────┼────────┤            ├────┼────┤
+│ 0  │ 张三   │◄───────────│ 12 │ 2  │
+│ 1  │ 李四   │            │ 27 │ 0  │
+│ 2  │ 王五   │            │ 35 │ 1  │
+└────┴────────┘            └────┴────┘</code></pre></div>
+<p><strong>散列方法</strong>是索引的延伸：不先造一张排好序的表，而是用散列函数从关键码直接算出地址，再把结点放进对应槽位。散列函数应当算得快，并且尽量把地址均匀铺开。冲突怎么处理、装载因子多高会退化，是第 10 章的内容。</p>
+<p>具体应用里这四种方法经常组合。树的「子结点表」就是顺序加链接；选哪一种，还要看定义在结构上的运算——要不要随机访问、会不会频繁插入、数据在内存还是外存。</p>
+<h3 id="123-抽象数据类型"><a class="anchor" href="#123-抽象数据类型">#</a>1.2.3 抽象数据类型</h3>
+<p>抽象意味着同一个概念可以有多种实现。一旦抽象问题被解决，许多同类问题就不必从头再来。用户自定义的类型，通常就是对「多种可能的存储和实现」做一次抽象。</p>
+<p>抽象数据类型（abstract data type，ADT）这个词是逐步形成的。二十世纪六七十年代，人们把用户自己定义的类型叫做抽象数据类型。更早的算法语言往往不提供这种机制。六十年代后期，为了把算法细节和数据的内部结构藏起来，Simula 67 引入了类，随后出现了模块：模块式给出外部看得见的运算接口，模块体存放对外不可见的私有数据和实现。接口与实现分离之后，用户才能真正自定义类型，达到数据抽象和信息隐蔽。在这个意义下，模块所定义的数据类型就叫做抽象数据类型。</p>
+<p>作为描述数据结构的理论工具，ADT 可以看成「定义了一组操作的抽象模型」。它把数据和操作封在一起，使用方只能通过这些操作访问数据，不能直接去翻内部表示。这样，讨论一种结构时可以先不管它是数组还是链表，只问它提供哪些运算、这些运算有什么约定。整数连同加、减、乘、除，就是一个最简单的 ADT。</p>
+<p>一般写成三元组 <span class="math">(D,R,P)</span>：</p>
+<div class="codeblock" data-lang="text"><pre><code>ADT 名字 {
+    数据对象 D：结点是什么
+    数据关系 R：结点之间有什么关系
+    基本操作 P：对外提供哪些运算
+}</code></pre></div>
+<p><span class="math">D</span> 和 <span class="math">R</span> 给出数据模型，是对数据的抽象；<span class="math">P</span> 给出这个模型能做什么，是对操作的抽象。</p>
+<p>在面向对象语言里，一组操作常常先写成接口，不透露实现。C++ 用类（以及类模板）的声明表示 ADT，用类的定义去实现它。因此，一个写好的 C++ 类同时承担两件事：它是某种存储结构，也是这组运算在该存储上的实现。</p>
+<p>这两层不要混：概念层上的 ADT 描述「问题需要什么运算」；实现层上的类描述「这些运算在内存里怎么做」。类本身还是一种普通类型，可以拿来定义变量，也就是对象。所以 ADT 也可以说成：数据的逻辑结构，加上定义在这个逻辑结构上的一组抽象运算。</p>
+<p>原书【代码1.2】用下面这个空模板来提醒读者「先写接口」：</p>
+<div class="codeblock" data-lang="text"><pre><code>template &lt;class Type&gt;
+class ClassName {
+private:
+    Type data;          // 取值类型和存储
+public:
+    void method();      // 对外运算
+};</code></pre></div>
+<p>原书习惯先写一个只有函数声明、没有任何实现的抽象基类（例如 <code>List&lt;T&gt;</code>），再让 <code>arrList</code> 继承它。本书各章不这么做，原因有两条：</p>
+<ul>
+<li><strong>它给不了多态。</strong> 基类之所以有用，是因为可以「拿基类指针指向派生对象」， 写一份代码同时适用于顺序表和链表。但本书各章的容器是<strong>模板</strong>，元素类型在编译期就定了， 彼此之间根本不需要互相替换；这个基类从头到尾没有一处用到。</li>
+<li><strong>它还会引入一个陷阱。</strong> 只要基类的析构函数不是 <code>virtual</code> 的，一旦有人写出 <code>List&lt;int&gt;* p = new ArrayList&lt;int&gt;; delete p;</code>，标准规定这是<strong>未定义行为</strong>—— 编译器不保证会发生什么：常见后果是只析构了基类那一层，派生类里 <code>new</code> 出来的缓冲区 没人释放，内存就漏了；也可能直接崩。「未定义行为」这个词在本书里会反复出现， 它的意思始终是「标准不再对程序的行为作任何承诺」，而不是「结果不确定但还能用」。</li>
+</ul>
+<p>所以运算直接写在实现类上。对元素类型的要求，正文里用一句话说清即可：例如顺序栈、 顺序表底层是 <code>new T[n]</code>，会把整块槽位都默认构造出来，所以 <code>T</code> 必须能默认构造。</p>
+<h2 id="13-算法"><a class="anchor" href="#13-算法">#</a>1.3 算法</h2>
+<p>算法研究可以追溯得很远。中文「算法」出自《周髀算经》；英文 algorithm 来自九世纪波斯数学家花拉子米（al-Khwarizmi）。Ada Lovelace 在 1842 年为巴贝奇分析机写过求解伯努利方程的程序，因此常被看作第一位程序员；那台机器没有建成，程序也没有真正跑过。二十世纪图灵提出图灵机，给「什么叫做可计算」一个精确模型，多数算法才可以稳定地写成交给计算机执行的程序。Knuth 在七十年代说，计算机科学就是研究算法的学问。</p>
+<p>按应用范围，算法分成数值的和非数值的；按工作方式，分成串行的和并行的。本书后面各章几乎都是非数值、串行的算法。</p>
+<h3 id="131-算法的概念"><a class="anchor" href="#131-算法的概念">#</a>1.3.1 算法的概念</h3>
+<p>算法是对特定问题求解过程的描述：为解决该问题而采取的、具体而有限的操作步骤。程序是算法的一种实现；计算机按程序一步一步做，就把问题解出来。</p>
+<p>描述一个算法，通常要说清输入是什么类型、输出应满足什么性质。辗转相除法的输入是两个正整数 <span class="math">n</span>、<span class="math">m</span>，输出是它们的最大公因子。高斯消元的输入是系数矩阵和右端常数，输出是使方程成立的一组变元取值。</p>
+<p>算法一般要满足四条性质。</p>
+<ol>
+<li><strong>通用。</strong> 凡是符合声明类型的输入，都能按同一套步骤求解，并且结果正确。不是只对书上那一组样例成立。</li>
+<li><strong>有效。</strong> 每一步都是人或机器能确切执行的动作，指令集是有限、明确的。辗转相除只用「整除取余、取商、判断余数是否为零」。每一步的结果也要有确定的类型，不能算完不知道得到的是什么。</li>
+<li><strong>确定。</strong> 做完这一步，下一步是什么必须说死：顺序往下、按条件分支、或者结束。不能停在「被锁住」的状态，也不能只写一句含糊的话。</li>
+<li><strong>有穷。</strong> 必须在有限步内停机，不能含死循环。注意：指令条数有限，并不自动保证执行步数有限——循环条件写错，有限条指令也可以转个没完。设计时要单独检查结束条件。</li>
+</ol>
+<p>程序是算法落在某种语言里的样子。同一算法可以有许多程序；一个程序如果对某类输入会永远循环，它就不是该问题的算法。</p>
+<h3 id="132-算法设计"><a class="anchor" href="#132-算法设计">#</a>1.3.2 算法设计</h3>
+<p>算法设计要回答：面对这一类问题，步骤从哪来。常用方法有穷举、回溯、分治、递归、贪心和动态规划。</p>
+<p><strong>穷举</strong>（枚举）把问题空间里的对象按某种规则一一列出来，逐个检查是否满足条件。对象必须有限，并且有明确的列举顺序。全局穷举往往太慢，但在局部很有用。<code>switch</code> 按离散取值分支，就是一种小范围穷举。</p>
+<p><strong>回溯</strong>（试探）按某种顺序枚举候选解。发现当前候选不可能成功，就放弃它、退回上一步换下一个，这个动作叫回溯；当前候选还不够大、但局部约束都满足，就把它扩大再试，这个动作叫向前试探。第 5、6、7 章的深度优先周游，以及第 3 章的背包，都是回溯。</p>
+<p><strong>分治</strong>把一个大问题剖成若干较小的、同类的子问题，分别求解，再把子问题的解合并成原问题的解。这是自顶向下的。如果子问题仍是原问题的缩小版，反复剖下去就会自然地写成递归。分治和递归经常成对出现。第 8 章的快排、归并，第 10 章的二分检索，都是分治。</p>
+<p><strong>贪心</strong>从初始状态出发，每一步按某个局部最优标准做一个不可撤回的选择，希望这些局部最优能拼成全局最优。度量标准选得对不对，是贪心能不能用的核心。<strong>动态规划</strong>也处理最优性问题，但子问题往往互相重叠：如果直接按分治递归，同一子问题会被算很多次。办法是把已经算过的答案存进一张表，以后直接查。第 7 章的 Prim、Kruskal、Dijkstra 是贪心；Floyd 是比较典型的动态规划。第 12 章的最优二叉搜索树也是动态规划。</p>
+<p>1.1 节的传言问题要任意两点最短路，并且顶点数很小，所以选 Floyd，而不是对每个起点跑一遍 Dijkstra。</p>
+<p>这几种方法可以组合、变形，也可以只拿来处理困难问题的特殊情形。后面各章会反复回到它们。</p>
+<h2 id="14-算法分析"><a class="anchor" href="#14-算法分析">#</a>1.4 算法分析</h2>
+<p>同一问题往往有多种算法，各有适用场合。算法分析用数学工具讨论每种算法的代价，目的是：在已有算法里选出比较合适的一种，或者看清该往哪个方向改进。</p>
+<p>Hartmanis 和 Stearns 把这种代价叫做计算复杂性。复杂性高，意思是跑这个算法要消耗的计算机资源多。最要紧的两种资源是时间（处理器）和空间（存储器）。本书后文说的「时间代价」「空间代价」，指的就是这两项。</p>
+<p>不能用墙上的秒数来比较算法。同一段程序在巨型机和 PC 上可以差几个数量级；换一种语言、换一个编译器，数字也会变。C 写的程序曾经比同一算法的 LISP 实现快近二十倍——那是实现环境的差别，不是算法的差别。所以分析时看的是：输入规模为 <span class="math">n</span> 时，算法做了多少次与具体机器无关的<strong>基本操作</strong>。规模一般指输入量的个数，排序里就是待排元素的个数；一次基本操作耗时应当与操作数的具体数值无关，例如两个机器字整数相加。</p>
+<p>若时间与规模成线性，<span class="math">t<span class="rel">=</span>cn</span>，规模乘 5，时间也乘 5。若 <span class="math">t<span class="rel">=</span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>n</span>，规模加倍，时间只加 1。后面各章的「<span class="math">O(n)</span>」「<span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>」都按这个口径读。</p>
+<h3 id="141-渐进分析方法"><a class="anchor" href="#141-渐进分析方法">#</a>1.4.1 渐进分析方法</h3>
+<p>精确计数往往是一个很复杂的函数。<span class="math">n</span> 很大时，不能显著改变量级的项都可以丢掉，剩下的近似在规模足够大时会贴近原值。这种方法叫渐进分析。例如</p>
+<div class="math math-display">f(n)<span class="rel">=</span>n<sup><span class="upr">2</span></sup><span class="bin">+</span><span class="upr">100</span>n<span class="bin">+</span>&thinsp;<span class="upr">log</span><sub><span class="upr">10</span></sub>n<span class="bin">+</span><span class="upr">1000</span></div>
+<p><span class="math">n<span class="rel">=</span><span class="upr">1</span></span> 时常数项 1000 最大；<span class="math">n<span class="rel">=</span><span class="upr">10</span></span> 时 <span class="math"><span class="upr">100</span>n</span> 与 1000 相当；<span class="math">n<span class="rel">=</span><span class="upr">100</span></span> 时前两项相当；<span class="math">n</span> 再大，二次项就压倒其余所有项。所以这个函数在 <span class="math">n</span> 很大时就是 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>。</p>
+<p>渐进分析是一种故意简化的模型，用来把注意力放在最重要的部分。并非任何时候都能忽略常数：只排 10 个数的算法，和排上万个数的算法，适用的实现可以完全不同。</p>
+<p><strong>大 O。</strong> 设 <span class="math">f</span>、<span class="math">g</span> 是从自然数到非负实数的函数。若存在正数 <span class="math">c</span> 和 <span class="math">N</span>，使得所有 <span class="math">n<span class="rel">≥</span>N</span> 都有 <span class="math">f(n)<span class="rel">≤</span>c g(n)</span>，则称 <span class="math">f(n)</span> 是 <span class="math">O(g(n))</span> 的。<span class="math">g</span> 是 <span class="math">f</span> 增长的一个上限：这个算法最多会差到什么程度。上限可以有很多，<span class="math">O(n)</span> 里的函数一定也在 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span> 里；习惯上取那个最小的、仍然成立的上限。</p>
+<p>几条常用性质：<span class="math">f</span> 是 <span class="math">O(g)</span>、<span class="math">g</span> 是 <span class="math">O(h)</span>，则 <span class="math">f</span> 是 <span class="math">O(h)</span>；两个 <span class="math">O(h)</span> 相加仍是 <span class="math">O(h)</span>；<span class="math">an<sup>k</sup></span> 是 <span class="math">O(n<sup>k</sup>)</span>；常数倍不改变阶；不同底的对数同阶，本书把 <span class="math"><span class="upr">log</span><sub><span class="upr">2</span></sub>n</span> 简写为 <span class="math"><span class="upr">log</span>&thinsp;n</span>。</p>
+<p>常见的上限有：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left"><span class="math">g(n)</span></th>
+<th style="text-align:left">名称</th>
+<th style="text-align:left">直观</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">1</span></span></td>
+<td style="text-align:left">常数</td>
+<td style="text-align:left">与 <span class="math">n</span> 无关</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">log</span>&thinsp;n</span></td>
+<td style="text-align:left">对数</td>
+<td style="text-align:left">比线性慢，二分检索</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">n</span></td>
+<td style="text-align:left">线性</td>
+<td style="text-align:left">扫一遍</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">n&thinsp;<span class="upr">log</span>&thinsp;n</span></td>
+<td style="text-align:left">线性对数</td>
+<td style="text-align:left">低于平方，快排 / 归并 / 许多树算法</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">n<sup><span class="upr">2</span></sup></span></td>
+<td style="text-align:left">平方</td>
+<td style="text-align:left"><span class="math"><span class="upr">1</span><span class="bin">+</span><span class="upr">2</span><span class="bin">+</span>⋯<span class="bin">+</span>n</span></td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">a<sup>n</sup></span></td>
+<td style="text-align:left">指数</td>
+<td style="text-align:left">比任何多项式都快，递归穷举时要小心</td>
+</tr>
+</tbody></table></div>
+<p>令时间单位为 <span class="math"><span class="upr">1</span> μ<span class="upr">s</span></span>，<span class="math">n<span class="rel">=</span><span class="upr">1000</span></span> 时：<span class="math">T(n)<span class="rel">=</span>n</span> 是 <span class="math"><span class="upr">1</span> <span class="upr">ms</span></span>；<span class="math">T(n)<span class="rel">=</span>n<sup><span class="upr">2</span></sup></span> 是 <span class="math"><span class="upr">1</span> <span class="upr">s</span></span>；<span class="math">T(n)<span class="rel">=</span>n<sup><span class="upr">3</span></sup></span> 约 16 分钟；<span class="math">T(n)<span class="rel">=</span><span class="upr">2</span><sup>n</sup></span> 大约 <span class="math"><span class="upr">10</span><sup><span class="upr">286</span></sup></span> 年，而地球年龄不超过 <span class="math"><span class="upr">10</span><sup><span class="upr">10</span></sup></span> 年。指数爆炸型算法能不用就不用。</p>
+<p>图 1.5 用同一组 <span class="math">n</span> 把这些阶摆在一起：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">阶</th>
+<th style="text-align:right"><span class="math">n<span class="rel">=</span><span class="upr">16</span></span></th>
+<th style="text-align:right"><span class="math">n<span class="rel">=</span><span class="upr">256</span></span></th>
+<th style="text-align:left">直觉</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">1</span></span></td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">1</td>
+<td style="text-align:left">常数</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">log</span>&thinsp;n</span></td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">8</td>
+<td style="text-align:left">二分</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">n</span></td>
+<td style="text-align:right">16</td>
+<td style="text-align:right">256</td>
+<td style="text-align:left">扫一遍</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">n&thinsp;<span class="upr">log</span>&thinsp;n</span></td>
+<td style="text-align:right">64</td>
+<td style="text-align:right">2048</td>
+<td style="text-align:left">快排 / 归并</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">n<sup><span class="upr">2</span></sup></span></td>
+<td style="text-align:right">256</td>
+<td style="text-align:right">65536</td>
+<td style="text-align:left">双重循环</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">2</span><sup>n</sup></span></td>
+<td style="text-align:right">65536</td>
+<td style="text-align:right">—</td>
+<td style="text-align:left">穷举子集</td>
+</tr>
+</tbody></table></div>
+<p><strong>Ω。</strong> 把大 O 定义里的不等式反过来：存在 <span class="math">c</span>、<span class="math">N</span>，使 <span class="math">n<span class="rel">≥</span>N</span> 时 <span class="math">f(n)<span class="rel">≥</span>c g(n)</span>，则 <span class="math">f</span> 是 <span class="math">Ω(g)</span> 的。这是增长的下限，习惯上取那个最大的、仍然成立的下限。</p>
+<p><strong>Θ。</strong> 若 <span class="math">f</span> 既是 <span class="math">O(g)</span> 又是 <span class="math">Ω(g)</span>，则称 <span class="math">f</span> 是 <span class="math">Θ(g)</span>：存在正常数 <span class="math">c<sub><span class="upr">1</span></sub></span>、<span class="math">c<sub><span class="upr">2</span></sub></span> 和正整数 <span class="math">N</span>，使 <span class="math">n&gt;N</span> 时</p>
+<div class="math math-display">c<sub><span class="upr">1</span></sub>g(n)<span class="rel">≤</span>f(n)<span class="rel">≤</span>c<sub><span class="upr">2</span></sub>g(n)</div>
+<p>例如 <span class="math">f(n)<span class="rel">=</span><span class="upr">100</span>n<sup><span class="upr">2</span></sup><span class="bin">+</span><span class="upr">5</span>n<span class="bin">+</span><span class="upr">500</span></span> 是 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>，可取 <span class="math">c<sub><span class="upr">1</span></sub><span class="rel">=</span><span class="upr">100</span></span>、<span class="math">c<sub><span class="upr">2</span></sub><span class="rel">=</span><span class="upr">105</span></span>、<span class="math">N<span class="rel">=</span><span class="upr">10</span></span>。</p>
+<p><strong>数一数基本操作。</strong> 对数组求和：</p>
+<div class="codeblock" data-lang="text"><pre><code>for (i = sum = 0; i &lt; n; i++)
+    sum += a[i];</code></pre></div>
+<p>循环前两次赋值，循环 <span class="math">n</span> 次、每次两次赋值，一共 <span class="math"><span class="upr">2</span><span class="bin">+</span><span class="upr">2</span>n</span> 次，即 <span class="math">O(n)</span>。</p>
+<p>两层循环求所有前缀和：外层 <span class="math">n</span> 次，内层第 <span class="math">i</span> 趟做约 <span class="math"><span class="upr">2</span>i</span> 次赋值，总和是 <span class="math"><span class="upr">1</span><span class="bin">+</span><span class="upr">3</span>n<span class="bin">+</span>n(n<span class="bin">−</span><span class="upr">1</span>)<span class="rel">=</span>O(n<sup><span class="upr">2</span></sup>)</span>。循环嵌套通常会提高阶，但不是必然：若内层每次只处理固定的 4 个元素，总赋值次数仍是 <span class="math">O(n)</span>。</p>
+<p>排序算法的时间主要花在比较和移动上，具体见第 8 章。</p>
+<h3 id="142-最佳最差和平均情况"><a class="anchor" href="#142-最佳最差和平均情况">#</a>1.4.2 最佳、最差和平均情况</h3>
+<p>即使规模相同，输入不同，有些算法的操作次数也会差很多。因为实际走哪条分支，往往取决于数据本身。所以分析时要说清是哪一种输入。</p>
+<p>顺序检索：目标在第一个位置，比较 1 次（最好）；目标不在表里，比较 <span class="math">n</span> 次（最坏）；等概率时平均 <span class="math">(n<span class="bin">+</span><span class="upr">1</span>)/<span class="upr">2</span></span>。快速排序平均 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，已经有序时退化成 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>。只报一个数字、不说针对哪种输入，这个数字没有意义。</p>
+<h3 id="143-时间和空间的折衷"><a class="anchor" href="#143-时间和空间的折衷">#</a>1.4.3 时间和空间的折衷</h3>
+<p>预排序、建索引、开散列表，都是先花时间或空间，再换检索时的时间。没有免费的加速。空间紧、时间松，和空间松、时间紧，选的结构会不一样。</p>
+<h3 id="144-求解问题时数据结构的选择和评价"><a class="anchor" href="#144-求解问题时数据结构的选择和评价">#</a>1.4.4 求解问题时数据结构的选择和评价</h3>
+<p>先看运算集合：要不要按下标访问，会不会在中间频繁插入删除，要不要按关键码直接找到记录。再看规模和存储层次：数据在内存还是外存，一次磁盘 I/O 往往比一次比较贵几个数量级。</p>
+<p>1.1 节要任意两点最短路，并且只有五个经纪人，邻接矩阵加 Floyd 是合适的：实现简单，三重循环在 <span class="math">n<span class="rel">=</span><span class="upr">5</span></span> 时可以忽略。顶点很多、边很少、只问单源最短路时，就应该换成邻接表加 Dijkstra。后面每一章都会再做一次这样的取舍。</p>
+<h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
+<p>本章从求解问题入手，引入数据结构、算法和衡量效率的方法。用计算机解题，是问题抽象、数据抽象和算法抽象：先把需求说清楚，再建成模型、选定结构和算法，最后用某种语言实现。</p>
+<p>数据结构管三件事：逻辑结构（结点之间是什么关系）、存储结构（这套关系在存储器里怎么落）、运算。逻辑结构按关系形态分成线性、树、图三类。同一种逻辑结构可以顺序、链接、索引或散列存放。ADT 把数据和运算封在一起，使用方只看见接口。</p>
+<p>算法是有限、确定、有效、有穷的指令序列。设计常用穷举、回溯、分治、递归、贪心和动态规划。分析不看墙上的秒数，而看基本操作次数随规模 <span class="math">n</span> 怎么长，用大 O、Ω、Θ 说话，并分清最好、最坏和平均。时间和空间往往可以互换。</p>
+<h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
+<h3 id="补充证明练习参考课程第-1-章"><a class="anchor" href="#补充证明练习参考课程第-1-章">#</a>补充证明练习（参考课程第 1 章）</h3>
+<ol>
+<li>精确计算下列双重循环中赋值语句 <code>a[i][j] = 1</code> 的执行次数，再给出数量级： <code>for (i=1; i&lt;n; ++i) for (j=n; j&gt;=i; --j) a[i][j]=1;</code></li>
+<li>对非负渐进函数证明 <code>max(f(n), g(n)) = Theta(f(n)+g(n))</code>。</li>
+<li>求解并用数学归纳法证明 <code>T(n)=2T(floor(n/2))+n</code> 的渐进阶。</li>
+<li>设计一个算法，从大到小依次输出顺序读入的三个整数 <span class="math">X</span>、<span class="math">Y</span>、<span class="math">Z</span>。</li>
+<li>举例说明什么是数据结构。</li>
+<li>数据有哪些存储方式？各有什么特点。</li>
+<li>分析下面程序段中循环体执行多少次。</li>
+</ol>
+<div class="codeblock" data-lang="text"><pre><code>int i = 0, s = 0, n = 100;
+do {
+    i = i + 1;
+    s = s + 10 * i;
+} while ((i &lt; n) &amp;&amp; (s &lt; n));</code></pre></div>
+<ol>
+<li>指出算法 A 的功能和时间复杂度。<span class="math">h</span>、<span class="math">g</span> 是同一个单循环链表上的两个结点指针。</li>
+</ol>
+<div class="codeblock" data-lang="text"><pre><code>void B(Node* s, Node* q) {
+    Node* p = s;
+    while (p-&gt;next != q) p = p-&gt;next;
+    p-&gt;next = s;
+}
+void A(Node* h, Node* g) {
+    B(h, g);
+    B(g, h);
+}</code></pre></div>
+<ol>
+<li>设 <span class="math">n</span> 是偶数，计算下列程序段结束后 <span class="math">m</span> 的值，并给出时间复杂度。</li>
+</ol>
+<div class="codeblock" data-lang="text"><pre><code>m = 0;
+for (i = 1; i &lt;= n; i++)
+    for (j = 2 * i; j &lt;= n; j++)
+        m = m + 1;</code></pre></div>
+<ol>
+<li>把下列运行时间写成大 O：<span class="math">T<sub><span class="upr">1</span></sub>(n)<span class="rel">=</span><span class="upr">1000</span></span>，<span class="math">T<sub><span class="upr">2</span></sub>(n)<span class="rel">=</span>n<sup><span class="upr">2</span></sup><span class="bin">+</span><span class="upr">1000</span>n</span>，<span class="math">T<sub><span class="upr">3</span></sub>(n)<span class="rel">=</span><span class="upr">3</span>n<sup><span class="upr">3</span></sup><span class="bin">+</span><span class="upr">100</span>n<sup><span class="upr">2</span></sup><span class="bin">+</span>n<span class="bin">+</span><span class="upr">1</span></span>。</li>
+<li>给出下面两个算法的时间复杂度：(1) 一层循环 <span class="math">i<span class="rel">=</span><span class="upr">1..</span>n</span> 做 <span class="math">x<span class="rel">=</span>x<span class="bin">+</span><span class="upr">1</span></span>；(2) 两层循环 <span class="math">i,j<span class="rel">=</span><span class="upr">1..</span>n</span> 做 <span class="math">x<span class="rel">=</span>x<span class="bin">+</span><span class="upr">1</span></span>。</li>
+<li>给出求两个整数最大公因数的算法，并分析时间和空间复杂度。</li>
+<li>计算机每秒 <span class="math"><span class="upr">10</span><sup><span class="upr">10</span></sup></span> 次操作，要求一小时内算完。下列复杂度各能处理多大的 <span class="math">n</span>：<span class="math">n<sup><span class="upr">2</span></sup></span>，<span class="math">n<sup><span class="upr">3</span></sup></span>，<span class="math"><span class="upr">100</span>n<sup><span class="upr">2</span></sup></span>，<span class="math">n&thinsp;<span class="upr">log</span><sub><span class="upr">10</span></sub>n</span>，<span class="math"><span class="upr">2</span><sup>n</sup></span>，<span class="math"><span class="upr">2</span><sup><span class="upr">2</span><sup>n</sup></sup></span>。</li>
+<li>已知 <span class="math">f(n)</span> 是 <span class="math">O(g(n))</span>。判断并证明或举反例：(1) <span class="math"><span class="upr">log</span><sub><span class="upr">2</span></sub>f(n)</span> 是 <span class="math">O(<span class="upr">log</span><sub><span class="upr">2</span></sub>g(n))</span>；(2) <span class="math"><span class="upr">2</span><sup>f(n)</sup></span> 是 <span class="math">O(<span class="upr">2</span><sup>g(n)</sup>)</span>；(3) <span class="math">f(n)<sup><span class="upr">2</span></sup></span> 是 <span class="math">O(g(n)<sup><span class="upr">2</span></sup>)</span>。</li>
+<li>计算下列递推的复杂度：(1) <span class="math">T(n)<span class="rel">=</span>T(⌈n/<span class="upr">2</span>⌉)<span class="bin">+</span><span class="upr">1</span></span>；(2) <span class="math">T(n)<span class="rel">=</span>T(⌊n/<span class="upr">2</span>⌋)<span class="bin">+</span>T(⌈n/<span class="upr">2</span>⌉)<span class="bin">+</span><span class="upr">1</span></span>；(3) <span class="math">T(n)<span class="rel">=</span><span class="upr">2</span>T(⌊n/<span class="upr">2</span>⌋)<span class="bin">+</span>n</span>。</li>
+</ol>
+<h2 id="上机题"><a class="anchor" href="#上机题">#</a>上机题</h2>
+<ol>
+<li><span class="math">m</span>、<span class="math">n</span> 是自然数。<span class="math">m</span> 可以写成若干个不超过 <span class="math">n</span> 的自然数之和，编写 <span class="math">f(m,n)</span> 计算有多少种写法。例如 <span class="math">f(<span class="upr">5</span>,<span class="upr">3</span>)<span class="rel">=</span><span class="upr">5</span></span>：<span class="math"><span class="upr">3</span><span class="bin">+</span><span class="upr">2</span></span>，<span class="math"><span class="upr">3</span><span class="bin">+</span><span class="upr">1</span><span class="bin">+</span><span class="upr">1</span></span>，<span class="math"><span class="upr">2</span><span class="bin">+</span><span class="upr">2</span><span class="bin">+</span><span class="upr">1</span></span>，<span class="math"><span class="upr">2</span><span class="bin">+</span><span class="upr">1</span><span class="bin">+</span><span class="upr">1</span><span class="bin">+</span><span class="upr">1</span></span>，<span class="math"><span class="upr">1</span><span class="bin">+</span><span class="upr">1</span><span class="bin">+</span><span class="upr">1</span><span class="bin">+</span><span class="upr">1</span><span class="bin">+</span><span class="upr">1</span></span>。</li>
+<li>用 C++ 类定义复数 ADT：内部用浮点数存实部和虚部；三个构造函数（默认、只给实部、同时给实部和虚部）；获取/修改实虚部，以及加减乘除；重载输出流。</li>
+</ol>
+<div class="pagenav"><a href="index.html"><span class="dir">← 上一篇</span>封面与导读</a><a href="ch02-linear-list.html" style="text-align:right"><span class="dir">下一篇 →</span>第2章 线性表</a></div>
+</main>
+<nav class="page"><b>本页</b><a href="#11-问题求解">1.1 问题求解</a><a href="#111-问题描述股市的传言" class="sub">1.1.1 问题描述：股市的传言</a><a href="#112-问题分析和抽象" class="sub">1.1.2 问题分析和抽象</a><a href="#为什么要取最慢的一项" class="sub">为什么要取“最慢的一项”</a><a href="#113-数据结构和算法设计" class="sub">1.1.3 数据结构和算法设计</a><a href="#实现导读" class="sub">实现导读</a><a href="#现代实现" class="sub">现代实现</a><a href="#12-数据结构">1.2 数据结构</a><a href="#121-数据的逻辑结构" class="sub">1.2.1 数据的逻辑结构</a><a href="#122-数据的存储结构" class="sub">1.2.2 数据的存储结构</a><a href="#123-抽象数据类型" class="sub">1.2.3 抽象数据类型</a><a href="#13-算法">1.3 算法</a><a href="#131-算法的概念" class="sub">1.3.1 算法的概念</a><a href="#132-算法设计" class="sub">1.3.2 算法设计</a><a href="#14-算法分析">1.4 算法分析</a><a href="#141-渐进分析方法" class="sub">1.4.1 渐进分析方法</a><a href="#142-最佳最差和平均情况" class="sub">1.4.2 最佳、最差和平均情况</a><a href="#143-时间和空间的折衷" class="sub">1.4.3 时间和空间的折衷</a><a href="#144-求解问题时数据结构的选择和评价" class="sub">1.4.4 求解问题时数据结构的选择和评价</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充证明练习参考课程第-1-章" class="sub">补充证明练习（参考课程第 1 章）</a><a href="#上机题">上机题</a></nav>
+</div>
+<footer>
+  本页由 <code>tools/build_site.py</code> 从 <code>book/ch01-adt.md</code> 生成
+  —— Markdown 是唯一事实源，请勿手改此文件。正文中的 C++ 代码块与 <code>code/</code> 下
+  通过测试的源码逐字一致（由 <code>tools/check_doc.py</code> 的 R3 保证）。
+</footer>
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('nav.page a'));
+  if(links.length){
+    var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a});
+    var seen=[];
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        var id=e.target.id;
+        if(e.isIntersecting){if(seen.indexOf(id)<0)seen.push(id)}
+        else{var i=seen.indexOf(id);if(i>=0)seen.splice(i,1)}
+      });
+      links.forEach(function(a){a.classList.remove('active')});
+      if(seen.length&&map[seen[0]])map[seen[0]].classList.add('active');
+    },{rootMargin:'0px 0px -75% 0px'});
+    [].slice.call(document.querySelectorAll('h2[id],h3[id]')).forEach(function(h){io.observe(h)});
+  }
+  [].slice.call(document.querySelectorAll('.codeblock')).forEach(function(block){
+    var button=document.createElement('button');
+    button.className='copy';button.type='button';button.textContent='复制';
+    button.addEventListener('click',function(){
+      var text=block.querySelector('code').textContent;
+      var done=function(){button.textContent='已复制';
+        setTimeout(function(){button.textContent='复制'},1200)};
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done,function(){button.textContent='复制失败'});
+      }else{
+        var area=document.createElement('textarea');area.value=text;document.body.appendChild(area);
+        area.select();try{document.execCommand('copy');done()}catch(e){button.textContent='复制失败'}
+        document.body.removeChild(area);
+      }
+    });
+    block.appendChild(button);
+  });
+})();
+</script>
+</body>
+</html>

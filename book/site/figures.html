@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>原书插图 · 现代 C++ 数据结构教程</title>
+<meta name="description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:title" content="原书插图">
+<meta property="og:description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:type" content="article">
+<style>
+:root{color-scheme:light;
+  --ink:#1a2230;--muted:#68758a;--faint:#93a0b3;--line:#dde3ec;--bg:#f3f5f9;--panel:#fff;
+  --soft:#eef1f7;--accent:#2f5fd0;--accent-soft:#e5ecfb;--warn:#b06a1c;--danger:#c0392b;
+  --kw:#8b2fa0;--ty:#0f6f8c;--st:#177245;--cm:#7d8899;--pp:#a3572a}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;
+  --ink:#e3e8f0;--muted:#98a3b5;--faint:#6f7c90;--line:#2b3342;--bg:#12151b;--panel:#171b22;
+  --soft:#1e232c;--accent:#84a9f5;--accent-soft:#1c2740;--warn:#dcae72;--danger:#e08a80;
+  --kw:#d79ae8;--ty:#7cc7dd;--st:#8fd0a4;--cm:#7b8598;--pp:#e0a97b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.8 system-ui,-apple-system,"Segoe UI","Noto Sans CJK SC","PingFang SC",sans-serif}
+a{color:var(--accent)}
+.masthead{background:var(--panel);border-bottom:1px solid var(--line);padding:30px 26px 24px}
+.masthead .inner{max-width:1440px;margin:0 auto}
+.masthead .eyebrow{font-size:13px;color:var(--muted);letter-spacing:.06em;margin:0 0 6px}
+.masthead .eyebrow a{text-decoration:none}
+.masthead h1{margin:0;font-size:clamp(23px,3.4vw,34px);line-height:1.25;letter-spacing:-.01em}
+.masthead p.sub{margin:10px 0 0;color:var(--muted);font-size:15px;max-width:62ch}
+.masthead .meta{margin:12px 0 0;font-size:13.5px;color:var(--muted)}
+.layout{max-width:1440px;margin:0 auto;padding:0 26px 80px;display:grid;
+  grid-template-columns:228px minmax(0,1fr) 208px;gap:40px;align-items:start}
+nav.book,nav.page{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;
+  padding:22px 0;font-size:14px;line-height:1.55}
+nav b{display:block;color:var(--faint);font-size:11.5px;letter-spacing:.1em;
+  text-transform:uppercase;margin:16px 0 8px}
+nav b:first-child{margin-top:0}
+nav a{display:block;padding:5px 10px;border-left:2px solid transparent;
+  color:var(--ink);text-decoration:none;border-radius:0 5px 5px 0}
+nav a:hover{background:var(--soft);color:var(--accent)}
+nav.book a.here{background:var(--accent-soft);border-left-color:var(--accent);
+  color:var(--accent);font-weight:600}
+nav.page a{color:var(--muted);font-size:13.5px;padding:4px 10px}
+nav.page a.sub{padding-left:22px;font-size:13px;color:var(--faint)}
+nav.page a.active{border-left-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+main{min-width:0;padding-top:24px}
+h1,h2,h3,h4{scroll-margin-top:16px}
+h2{font-size:24px;margin:48px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+h3{font-size:18.5px;margin:30px 0 10px}
+h4{font-size:16px;margin:22px 0 8px;color:var(--muted)}
+.anchor{float:left;margin-left:-1.05em;padding-right:.3em;color:transparent;
+  text-decoration:none;font-weight:400}
+h2:hover .anchor,h3:hover .anchor,h4:hover .anchor{color:var(--faint)}
+p{margin:0 0 15px}
+code{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  background:var(--soft);padding:2px 6px;border-radius:4px;word-break:break-word}
+.codeblock{position:relative;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px;margin:0 0 18px;overflow:hidden}
+.codeblock .srcbar{border-bottom:1px solid var(--line);background:var(--soft);
+  padding:6px 12px;font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+.codeblock .srcbar a{color:var(--muted);text-decoration:none}
+.codeblock .srcbar a:hover{color:var(--accent);text-decoration:underline}
+.codeblock pre{margin:0;padding:14px 16px;overflow:auto}
+.codeblock code{background:none;padding:0;font-size:13px;line-height:1.65;white-space:pre}
+.codeblock[data-lang=console] pre,.codeblock[data-lang=bash] pre{background:var(--soft)}
+.codeblock[data-lang=text]::after{content:"原书印刷";position:absolute;top:8px;right:10px;
+  font-size:11px;color:var(--faint);letter-spacing:.05em}
+.copy{position:absolute;top:6px;right:8px;border:1px solid var(--line);background:var(--panel);
+  color:var(--muted);border-radius:6px;font-size:12px;padding:2px 8px;cursor:pointer;opacity:0}
+.codeblock:hover .copy{opacity:1}
+.copy:hover{color:var(--accent);border-color:var(--accent)}
+.codeblock .srcbar~.copy{top:34px}
+.k{color:var(--kw)}.t{color:var(--ty)}.s{color:var(--st)}.c{color:var(--cm);font-style:italic}
+.n{color:var(--warn)}.p{color:var(--pp)}
+blockquote{margin:0 0 18px;padding:12px 18px;border-left:3px solid var(--accent);
+  background:var(--soft);border-radius:0 7px 7px 0}
+blockquote p:last-child{margin-bottom:0}
+.table-wrap{overflow-x:auto;margin:0 0 18px}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--panel)}
+th,td{border:1px solid var(--line);padding:8px 11px;vertical-align:top}
+th{background:var(--soft);font-weight:650}
+ul,ol{margin:0 0 15px;padding-left:26px}
+li{margin:6px 0}
+hr{border:0;border-top:1px solid var(--line);margin:34px 0}
+figure{margin:0 0 22px;padding:12px;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px}
+figure img{max-width:100%;display:block;margin:0 auto;border-radius:4px;background:#fff}
+figcaption{margin-top:9px;color:var(--muted);font-size:13.5px;text-align:center}
+.gallery-page{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:18px;align-items:start}
+.gallery-page>figure{margin:0}
+.gallery-page>h2,.gallery-page>h3,.gallery-page>p,.gallery-page>blockquote,
+.gallery-page>hr,.gallery-page>.pagenav{grid-column:1/-1}
+.math{font-family:"Latin Modern Math","Cambria Math",Georgia,serif;font-style:italic}
+.math .upr,.math .mono,.math .bold{font-style:normal}
+.math .mono{font-family:ui-monospace,Menlo,monospace}
+.math .bold{font-weight:700}
+.math sup,.math sub{font-size:.72em}
+.math .rel{margin:0 .28em;font-style:normal}
+.math .bin{margin:0 .16em;font-style:normal}
+.math-display{display:block;text-align:center;margin:18px 0;font-size:17px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+  font-size:.85em;line-height:1.15}
+.frac .num{border-bottom:1px solid currentColor;padding:0 .25em}
+.frac .den{padding:0 .25em}
+.sqrt{border-top:1px solid currentColor}
+.sqrt::before{content:"√";border-top:0}
+.tex-raw{border-bottom:1px dotted var(--danger);font-style:normal}
+.pagenav{display:flex;justify-content:space-between;gap:16px;margin:50px 0 0;
+  border-top:1px solid var(--line);padding-top:18px;font-size:14.5px}
+.pagenav a{text-decoration:none;max-width:46%}
+.pagenav .dir{display:block;color:var(--faint);font-size:12px}
+footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
+  font-size:13.5px;border-top:1px solid var(--line)}
+@media(max-width:1180px){
+  .layout{grid-template-columns:212px minmax(0,1fr);gap:32px}
+  nav.page{display:none}
+}
+@media(max-width:820px){
+  .layout{grid-template-columns:1fr;gap:0;padding:0 18px 60px}
+  nav.book{position:static;max-height:none;border-bottom:1px solid var(--line);
+    margin-bottom:14px;padding:14px 0}
+  .masthead{padding:22px 18px 18px}
+}
+@media print{
+  nav,.pagenav,.copy{display:none}
+  .layout{display:block;max-width:none}
+  body{background:#fff}
+  a{color:inherit;text-decoration:none}
+  .codeblock,figure,table{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header class="masthead"><div class="inner">
+<p class="eyebrow"><a href="index.html">现代 C++ 数据结构教程</a></p>  <h1>原书插图</h1>
+
+  <p class="meta"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/book/插图.md">Markdown 源文件</a>
+    · <a href="https://github.com/GMyhf/dsa-modernization">GitHub 仓库</a>
+    · <a href="errata.html">原书勘误</a></p>
+</div></header>
+<div class="layout">
+<nav class="book"><b>导读</b><a href="index.html">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="figures.html" class="here">原书插图</a><a href="errata.html">原书勘误</a></nav>
+<main class="gallery-page">
+<blockquote><p>从只读底稿 <code>dsa_raw.md</code> 抽出的原书插图。字节落在 <code>book/assets/</code>， alt 来自原书题注；少数图在底稿里没有独立题注，alt 会标明行号。 正文各章只引用教学需要的几张；其余集中在本图册，避免把教程拆碎。</p></blockquote>
+<h2 id="第1章-概论"><a class="anchor" href="#第1章-概论">#</a>第1章 概论</h2>
+<figure><img loading="lazy" src="../assets/4d3c879e7409ef1c.jpg" alt="图1.1 经纪人间的消息传递图"><figcaption>图1.1 经纪人间的消息传递图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/9c92f7de8d2fab34.jpg" alt="图1.3 经纪人间消息传递的相邻矩阵"><figcaption>图1.3 经纪人间消息传递的相邻矩阵</figcaption></figure>
+<figure><img loading="lazy" src="../assets/40916b3631d4d819.jpg" alt="第1章插图（底稿第 659 行，原书无独立题注）"><figcaption>第1章插图（底稿第 659 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/c33523f30da594f0.jpg" alt="图 1.5 常用函数的增长趋势"><figcaption>图 1.5 常用函数的增长趋势</figcaption></figure>
+<h2 id="第2章-线性表"><a class="anchor" href="#第2章-线性表">#</a>第2章 线性表</h2>
+<figure><img loading="lazy" src="../assets/6e2bc11926f0ec96.jpg" alt="图 2.4 单链表示例"><figcaption>图 2.4 单链表示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/6c7f366bed4583ff.jpg" alt="图2.5具有头、尾两指针的单链表"><figcaption>图2.5具有头、尾两指针的单链表</figcaption></figure>
+<figure><img loading="lazy" src="../assets/605c79846035cdf0.jpg" alt="(a) 带有头结点的空表"><figcaption>(a) 带有头结点的空表</figcaption></figure>
+<figure><img loading="lazy" src="../assets/3c36698567f5e7c2.jpg" alt="(b) 典型的带有头结点的单链表；图 2.6 引人头结点的单链表"><figcaption>(b) 典型的带有头结点的单链表；图 2.6 引人头结点的单链表</figcaption></figure>
+<figure><img loading="lazy" src="../assets/995a8257623869d1.jpg" alt="图 2.7 插入算法示意图"><figcaption>图 2.7 插入算法示意图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/8a7435561d286746.jpg" alt="(a) 删除前指针情况；(b) 删除后指针情况；图 2.8 删除示意图"><figcaption>(a) 删除前指针情况；(b) 删除后指针情况；图 2.8 删除示意图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/40ab93045c34a1bf.jpg" alt="图2.9 加入表头结点的双链表；图2.9中变量head用于指向表首结点，变量tail用于指向表尾结点。图2.10给出了相应的"><figcaption>图2.9 加入表头结点的双链表；图2.9中变量head用于指向表首结点，变量tail用于指向表尾结点。图2.10给出了相应的</figcaption></figure>
+<figure><img loading="lazy" src="../assets/ebdcb0d7054cf3a9.jpg" alt="图 2.10 双链表的结点"><figcaption>图 2.10 双链表的结点</figcaption></figure>
+<figure><img loading="lazy" src="../assets/f3aa5f7a9ea65ef6.jpg" alt="图2.11 双链表的删除操作示意"><figcaption>图2.11 双链表的删除操作示意</figcaption></figure>
+<figure><img loading="lazy" src="../assets/1f4184cafed5ae83.jpg" alt="图2.12 双链表插入操作示意"><figcaption>图2.12 双链表插入操作示意</figcaption></figure>
+<figure><img loading="lazy" src="../assets/89f9ff700933f475.jpg" alt="图2.13 循环链表示意图"><figcaption>图2.13 循环链表示意图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/a24d59d2527028cc.jpg" alt="图2.14 带头结点的循环链表示意图"><figcaption>图2.14 带头结点的循环链表示意图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/b8866e40fb846a83.jpg" alt="图 2.15 循环双链表示意图"><figcaption>图 2.15 循环双链表示意图</figcaption></figure>
+<h2 id="第3章-栈与队列"><a class="anchor" href="#第3章-栈与队列">#</a>第3章 栈与队列</h2>
+<figure><img loading="lazy" src="../assets/c8966e2bf43b41fc.jpg" alt="图 3.1 栈的示意图"><figcaption>图 3.1 栈的示意图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/68ddbf0cd26a38ce.jpg" alt="图3.2 栈的顺序存储结构示意"><figcaption>图3.2 栈的顺序存储结构示意</figcaption></figure>
+<figure><img loading="lazy" src="../assets/beaf7f838024b368.jpg" alt="第3章插图（底稿第 1898 行，原书无独立题注）"><figcaption>第3章插图（底稿第 1898 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/8ca1faecb428db01.jpg" alt="图 3.3 顺序栈的存储结构"><figcaption>图 3.3 顺序栈的存储结构</figcaption></figure>
+<figure><img loading="lazy" src="../assets/cc2722b736c01067.jpg" alt="图3.4 链式栈示意"><figcaption>图3.4 链式栈示意</figcaption></figure>
+<figure><img loading="lazy" src="../assets/9c7bc109efa7f350.jpg" alt="图3.6 运行时存储器的组织形式"><figcaption>图3.6 运行时存储器的组织形式</figcaption></figure>
+<figure><img loading="lazy" src="../assets/d573f60f354acc38.jpg" alt="图 3.7 活动记录的内容"><figcaption>图 3.7 活动记录的内容</figcaption></figure>
+<figure><img loading="lazy" src="../assets/b94046e379d40a44.jpg" alt="图3.8 递归计算factorial(4)时，内部栈的变化情况示意"><figcaption>图3.8 递归计算factorial(4)时，内部栈的变化情况示意</figcaption></figure>
+<figure><img loading="lazy" src="../assets/6a2814bcd8135888.jpg" alt="图3.9 队列的示例"><figcaption>图3.9 队列的示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/d552466644ef240e.jpg" alt="图 3.10 顺序队列的实现示意"><figcaption>图 3.10 顺序队列的实现示意</figcaption></figure>
+<figure><img loading="lazy" src="../assets/1bd12475cc238a23.jpg" alt="(a) 初始队列"><figcaption>(a) 初始队列</figcaption></figure>
+<figure><img loading="lazy" src="../assets/883f8220da76fa43.jpg" alt="(b) 新队列；图 3.11 顺序队列的一种实现方式"><figcaption>(b) 新队列；图 3.11 顺序队列的一种实现方式</figcaption></figure>
+<figure><img loading="lazy" src="../assets/c2b6f1bd82ce997a.jpg" alt="第3章插图（底稿第 2621 行，原书无独立题注）"><figcaption>第3章插图（底稿第 2621 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/35171d357a8442b0.jpg" alt="第3章插图（底稿第 2623 行，原书无独立题注）"><figcaption>第3章插图（底稿第 2623 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/b5473971d7d3f3e4.jpg" alt="图 3.12 循环队列的实现示例"><figcaption>图 3.12 循环队列的实现示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/c305cf854cc50a63.jpg" alt="图3.13 存储在同一个数组中的两个迎面增长的栈"><figcaption>图3.13 存储在同一个数组中的两个迎面增长的栈</figcaption></figure>
+<h2 id="第4章-字符串"><a class="anchor" href="#第4章-字符串">#</a>第4章 字符串</h2>
+<figure><img loading="lazy" src="../assets/ac445f2352c5273d.jpg" alt="图 4.1 C + + 标准字符串的变量说明示意图"><figcaption>图 4.1 C + + 标准字符串的变量说明示意图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/3fd8da33af3abe6c.jpg" alt="图4.2 在字符串 s1 中寻找并定位给定字符o&#x27;的位置"><figcaption>图4.2 在字符串 s1 中寻找并定位给定字符o&#x27;的位置</figcaption></figure>
+<figure><img loading="lazy" src="../assets/17558c608a970971.jpg" alt="图4.3 创建字符串的示意图"><figcaption>图4.3 创建字符串的示意图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/6c085626573ab8c6.jpg" alt="图4.4 赋值运算示意图"><figcaption>图4.4 赋值运算示意图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/a01806ddff22b2f2.jpg" alt="图 4.6 朴素匹配的示例"><figcaption>图 4.6 朴素匹配的示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/142c03839eb935b2.jpg" alt="图4.7 朴素匹配的最佳情况示例"><figcaption>图4.7 朴素匹配的最佳情况示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/5c96f8b81e576c27.jpg" alt="图4.8 匹配失败的最佳情况示例"><figcaption>图4.8 匹配失败的最佳情况示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/888fd277565dca5e.jpg" alt="图4.9 朴素匹配最差情况示例"><figcaption>图4.9 朴素匹配最差情况示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/4f9aa9617b2ddc56.jpg" alt="图 4.12 KMP 匹配示例"><figcaption>图 4.12 KMP 匹配示例</figcaption></figure>
+<h2 id="第5章-二叉树"><a class="anchor" href="#第5章-二叉树">#</a>第5章 二叉树</h2>
+<figure><img loading="lazy" src="../assets/b15c4b53d75f0514.jpg" alt="(c) 右子树为空 的二叉树"><figcaption>(c) 右子树为空 的二叉树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/36035100052aa951.jpg" alt="(d) 左子树为空 的二叉树"><figcaption>(d) 左子树为空 的二叉树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/e09b495998554e01.jpg" alt="(e) 左、右子树均非空的二叉树；图 5.1 二叉树的 5 种基本形态"><figcaption>(e) 左、右子树均非空的二叉树；图 5.1 二叉树的 5 种基本形态</figcaption></figure>
+<figure><img loading="lazy" src="../assets/18b96e9f11087ee8.jpg" alt="(a) 满二叉树"><figcaption>(a) 满二叉树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/ea5eff3e545173dc.jpg" alt="(b) 完全二叉树；图5.2 满二叉树和完全二叉树示例"><figcaption>(b) 完全二叉树；图5.2 满二叉树和完全二叉树示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/44cbdbcfda5553a1.jpg" alt="图 5.3 扩充二叉树"><figcaption>图 5.3 扩充二叉树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/2e8ea2a5a1df00a7.jpg" alt="图 5.4 二叉树的基本结构"><figcaption>图 5.4 二叉树的基本结构</figcaption></figure>
+<figure><img loading="lazy" src="../assets/7c6579b015042738.jpg" alt="图 5.5 二叉树示例"><figcaption>图 5.5 二叉树示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/b3d4ed61cc80d7d7.jpg" alt="图 5.6 表达式树"><figcaption>图 5.6 表达式树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/12374c97891a830a.jpg" alt="图 5.7 二叉树结点的存储结构"><figcaption>图 5.7 二叉树结点的存储结构</figcaption></figure>
+<figure><img loading="lazy" src="../assets/3b20bce2ee34a2d6.jpg" alt="图 5.8 图 5.5 中二叉树的二叉链表存储结构"><figcaption>图 5.8 图 5.5 中二叉树的二叉链表存储结构</figcaption></figure>
+<figure><img loading="lazy" src="../assets/c9511e778b95abc9.jpg" alt="第5章插图（底稿第 4103 行，原书无独立题注）"><figcaption>第5章插图（底稿第 4103 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/80797628fa510b2c.jpg" alt="图 5.9 完全二叉树的结点编号"><figcaption>图 5.9 完全二叉树的结点编号</figcaption></figure>
+<figure><img loading="lazy" src="../assets/c399e3356dac937f.jpg" alt="图 5.11 二叉搜索树"><figcaption>图 5.11 二叉搜索树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/0a48313219c39d1a.jpg" alt="(a) 没有左子树的情况"><figcaption>(a) 没有左子树的情况</figcaption></figure>
+<figure><img loading="lazy" src="../assets/7ef2452420903be5.jpg" alt="图 5.12 二叉搜索树的删除示例；(b) 有左子树的情况"><figcaption>图 5.12 二叉搜索树的删除示例；(b) 有左子树的情况</figcaption></figure>
+<figure><img loading="lazy" src="../assets/6656b628984f36ef.jpg" alt="图 5.13 改进的二叉搜索树的删除"><figcaption>图 5.13 改进的二叉搜索树的删除</figcaption></figure>
+<figure><img loading="lazy" src="../assets/28d7f967e0c2ebfa.jpg" alt="图 5.14 最小堆对应的完全二叉树"><figcaption>图 5.14 最小堆对应的完全二叉树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/7f6bb0c3af53cc2a.jpg" alt="图 5.15 在最小堆 5.14 中插入元素 13"><figcaption>图 5.15 在最小堆 5.14 中插入元素 13</figcaption></figure>
+<figure><img loading="lazy" src="../assets/ba38e1004230ab69.jpg" alt="图 5.16 在最小堆 5.14 中删除元素 14"><figcaption>图 5.16 在最小堆 5.14 中删除元素 14</figcaption></figure>
+<figure><img loading="lazy" src="../assets/d7354d550a2f5d79.jpg" alt="图 5.17 建堆过程示例"><figcaption>图 5.17 建堆过程示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/926b59674f2459f3.jpg" alt="(a) 外部路径为30"><figcaption>(a) 外部路径为30</figcaption></figure>
+<figure><img loading="lazy" src="../assets/5bf340fd02509f5d.jpg" alt="(b) 外部路径为31"><figcaption>(b) 外部路径为31</figcaption></figure>
+<figure><img loading="lazy" src="../assets/c06131477d8191a4.jpg" alt="(c) 外部路径为29；图 5.18 具有不同带权外部路径长度的二叉树"><figcaption>(c) 外部路径为29；图 5.18 具有不同带权外部路径长度的二叉树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/d91fc440e0e90baa.jpg" alt="(a) 过程 1"><figcaption>(a) 过程 1</figcaption></figure>
+<figure><img loading="lazy" src="../assets/8e540597e5d17326.jpg" alt="(b) 过程2"><figcaption>(b) 过程2</figcaption></figure>
+<figure><img loading="lazy" src="../assets/78acf6259a843351.jpg" alt="(c) 过程3；(d) 过程4"><figcaption>(c) 过程3；(d) 过程4</figcaption></figure>
+<figure><img loading="lazy" src="../assets/153c0d1c976af606.jpg" alt="图 5.19 Huffman 树的构造过程"><figcaption>图 5.19 Huffman 树的构造过程</figcaption></figure>
+<figure><img loading="lazy" src="../assets/0142058fd3aa6e04.jpg" alt="图 5.20 Huffman 编码示例"><figcaption>图 5.20 Huffman 编码示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/18f1bb0045ce3424.jpg" alt="图 5.21 习题 2 的图例"><figcaption>图 5.21 习题 2 的图例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/19e3667447e93b2e.jpg" alt="(a) 原二叉树"><figcaption>(a) 原二叉树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/5f654ff0405757c9.jpg" alt="(b) 镜面映射后的新二叉树；图 5.22 习题 7 的图例"><figcaption>(b) 镜面映射后的新二叉树；图 5.22 习题 7 的图例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/a8d8c140383fe73e.jpg" alt="图 5.23 中序穿线二叉树"><figcaption>图 5.23 中序穿线二叉树</figcaption></figure>
+<h2 id="第6章-树"><a class="anchor" href="#第6章-树">#</a>第6章 树</h2>
+<figure><img loading="lazy" src="../assets/42cd7ad7ac4d0fbe.jpg" alt="图 6.1 树形表示法"><figcaption>图 6.1 树形表示法</figcaption></figure>
+<figure><img loading="lazy" src="../assets/cbe226f029817187.jpg" alt="第6章插图（底稿第 4808 行，原书无独立题注）"><figcaption>第6章插图（底稿第 4808 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/96dfe5b8e80b4e18.jpg" alt="第6章插图（底稿第 4810 行，原书无独立题注）"><figcaption>第6章插图（底稿第 4810 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/a399c4ed41272dcb.jpg" alt="(a) 由 $\textstyle { T _ { 1 } }$ $T _ { 2 }$ 构成的森林"><figcaption>(a) 由 <span class="math">T<sub><span class="upr">1</span></sub></span> <span class="math">T<sub><span class="upr">2</span></sub></span> 构成的森林</figcaption></figure>
+<figure><img loading="lazy" src="../assets/5447a64d9a32c872.jpg" alt="(b)经连线、切线处理后的二叉树"><figcaption>(b)经连线、切线处理后的二叉树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/d6b8aba5bba23c9b.jpg" alt="(c) 进行旋转后的二叉树；图6.3 森林转换为二叉树"><figcaption>(c) 进行旋转后的二叉树；图6.3 森林转换为二叉树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/4a505daebf834546.jpg" alt="第6章插图（底稿第 4874 行，原书无独立题注）"><figcaption>第6章插图（底稿第 4874 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/902ea7ccf98f52a2.jpg" alt="图 6.4 二叉树转换为森林"><figcaption>图 6.4 二叉树转换为森林</figcaption></figure>
+<figure><img loading="lazy" src="../assets/903587cc33dc1265.jpg" alt="(a) 森林"><figcaption>(a) 森林</figcaption></figure>
+<figure><img loading="lazy" src="../assets/b114031f667ed22a.jpg" alt="第6章插图（底稿第 4959 行，原书无独立题注）"><figcaption>第6章插图（底稿第 4959 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/14db48b94fcee155.jpg" alt="(b) 森林对应的二叉树；图 6.5 森林和对应的二叉树"><figcaption>(b) 森林对应的二叉树；图 6.5 森林和对应的二叉树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/503a0fd264bb9231.jpg" alt="图6.6 以“子结点表”表示法实现图6.1中的树"><figcaption>图6.6 以“子结点表”表示法实现图6.1中的树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/8bf52bea5e1deae9.jpg" alt="图6.7“左子/右兄”表示两棵树"><figcaption>图6.7“左子/右兄”表示两棵树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/d4fafa1c3b802b3f.jpg" alt="图6.8 使用静态“左子/右兄”实现对树的归并"><figcaption>图6.8 使用静态“左子/右兄”实现对树的归并</figcaption></figure>
+<figure><img loading="lazy" src="../assets/2a4100d926809182.jpg" alt="(a) 树"><figcaption>(a) 树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/4fa7d442aa8cc526.jpg" alt="(b) 树的实现；图6.9 树的动态表示法"><figcaption>(b) 树的实现；图6.9 树的动态表示法</figcaption></figure>
+<figure><img loading="lazy" src="../assets/444a429faef0f9ad.jpg" alt="图 6.10 父指针表示法"><figcaption>图 6.10 父指针表示法</figcaption></figure>
+<figure><img loading="lazy" src="../assets/0eb44c9da6f987ca.jpg" alt="(a) 子集 $s _ { \mathrm { 1 } }$"><figcaption>(a) 子集 <span class="math">s<sub><span class="upr"><span class="upr">1</span></span></sub></span></figcaption></figure>
+<figure><img loading="lazy" src="../assets/465d256552667e43.jpg" alt="(b) 子集 $s _ { 2 }$"><figcaption>(b) 子集 <span class="math">s<sub><span class="upr">2</span></sub></span></figcaption></figure>
+<figure><img loading="lazy" src="../assets/99d1200487f038c2.jpg" alt="(c) 并集 S3；图 6.11 集合的表示方法"><figcaption>(c) 并集 S3；图 6.11 集合的表示方法</figcaption></figure>
+<figure><img loading="lazy" src="../assets/ed46ae90acc3311f.jpg" alt="(a) n 个集合"><figcaption>(a) n 个集合</figcaption></figure>
+<figure><img loading="lazy" src="../assets/63aeef5dd1c932ae.jpg" alt="(b) 合并操作；图 6.12 合并操作的一个极端情况"><figcaption>(b) 合并操作；图 6.12 合并操作的一个极端情况</figcaption></figure>
+<figure><img loading="lazy" src="../assets/1e0ac0ff58415c62.jpg" alt="第6章插图（底稿第 5345 行，原书无独立题注）"><figcaption>第6章插图（底稿第 5345 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/79da0aca1750084c.jpg" alt="图 6.13 路径压缩示例"><figcaption>图 6.13 路径压缩示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/ddf4082b075a6a12.jpg" alt="第6章插图（底稿第 5388 行，原书无独立题注）"><figcaption>第6章插图（底稿第 5388 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/59700ca6ca89690d.jpg" alt="图 6.16 带度数的后根次序表示法"><figcaption>图 6.16 带度数的后根次序表示法</figcaption></figure>
+<figure><img loading="lazy" src="../assets/c02b2adffb31959d.jpg" alt="图6.17 带双标记的层次次序表示法"><figcaption>图6.17 带双标记的层次次序表示法</figcaption></figure>
+<figure><img loading="lazy" src="../assets/da4645ec17539b4a.jpg" alt="(a) 满 3 叉树"><figcaption>(a) 满 3 叉树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/70c77f3dc176052a.jpg" alt="(b) 完全 3 叉树；图 6.18 满 3 叉树与完全 3 叉树"><figcaption>(b) 完全 3 叉树；图 6.18 满 3 叉树与完全 3 叉树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/1a3547a5024e47af.jpg" alt="第6章插图（底稿第 5584 行，原书无独立题注）"><figcaption>第6章插图（底稿第 5584 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/9f48eae15f40278b.jpg" alt="第6章插图（底稿第 5604 行，原书无独立题注）"><figcaption>第6章插图（底稿第 5604 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/a8ceb875fc9f472c.jpg" alt="图 6.21 上机题3 的图示"><figcaption>图 6.21 上机题3 的图示</figcaption></figure>
+<figure><img loading="lazy" src="../assets/5472b0276e934225.jpg" alt="第6章插图（底稿第 5633 行，原书无独立题注）"><figcaption>第6章插图（底稿第 5633 行，原书无独立题注）</figcaption></figure>
+<h2 id="第7章-图"><a class="anchor" href="#第7章-图">#</a>第7章 图</h2>
+<figure><img loading="lazy" src="../assets/bc292a79ef3d4901.jpg" alt="第7章插图（底稿第 5661 行，原书无独立题注）"><figcaption>第7章插图（底稿第 5661 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/10b534d497692bb7.jpg" alt="(a) 无向图 $G _ { 1 }$"><figcaption>(a) 无向图 <span class="math">G<sub><span class="upr">1</span></sub></span></figcaption></figure>
+<figure><img loading="lazy" src="../assets/25d6dac564f61138.jpg" alt="(b) 有向图 $G _ { 2 }$；图 7.2 图的示例"><figcaption>(b) 有向图 <span class="math">G<sub><span class="upr">2</span></sub></span>；图 7.2 图的示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/52611bcb58654135.jpg" alt="第7章插图（底稿第 5704 行，原书无独立题注）"><figcaption>第7章插图（底稿第 5704 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/34180d6d8500d9ba.jpg" alt="(a) 无向完全图"><figcaption>(a) 无向完全图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/d10d9832051a110f.jpg" alt="第7章插图（底稿第 5709 行，原书无独立题注）"><figcaption>第7章插图（底稿第 5709 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/db2df0ddd6922dd6.jpg" alt="(b) 有向完全图；图 7.3 完全图"><figcaption>(b) 有向完全图；图 7.3 完全图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/a358b30d8573ba80.jpg" alt="(a)无向图 $G _ { 1 }$ 的若干子图"><figcaption>(a)无向图 <span class="math">G<sub><span class="upr">1</span></sub></span> 的若干子图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/a05f9afc9df5ddac.jpg" alt="(b)有向图 $\pmb { G } _ { 2 }$ 的若干子图；图 7.4 图 7.2 的若干子图"><figcaption>(b)有向图 <span class="math"><span class="bold">G</span><sub><span class="upr">2</span></sub></span> 的若干子图；图 7.4 图 7.2 的若干子图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/8b4c061a2606e235.jpg" alt="第7章插图（底稿第 5728 行，原书无独立题注）"><figcaption>第7章插图（底稿第 5728 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/b8a3ba8c05f04723.jpg" alt="(a) 非连通的无向图 $G _ { 3 }$"><figcaption>(a) 非连通的无向图 <span class="math">G<sub><span class="upr">3</span></sub></span></figcaption></figure>
+<figure><img loading="lazy" src="../assets/9aeb77db24a803d1.jpg" alt="(b) 非连通无向图 $G _ { 3 }$ 的连通分量；图7.5 非连通无向图的连通分量示意图"><figcaption>(b) 非连通无向图 <span class="math">G<sub><span class="upr">3</span></sub></span> 的连通分量；图7.5 非连通无向图的连通分量示意图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/68c8cdd24e9e933e.jpg" alt="第7章插图（底稿第 5743 行，原书无独立题注）"><figcaption>第7章插图（底稿第 5743 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/34ee57b88e5f0ecd.jpg" alt="(a) 无向图 $G _ { 1 }$ 的生成树"><figcaption>(a) 无向图 <span class="math">G<sub><span class="upr">1</span></sub></span> 的生成树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/82e5407f9d315acf.jpg" alt="(b) 有向图 $G _ { 2 }$ 的生成树；图7.7 图 7.2 中无向图和有向图的生成树示例"><figcaption>(b) 有向图 <span class="math">G<sub><span class="upr">2</span></sub></span> 的生成树；图7.7 图 7.2 中无向图和有向图的生成树示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/5271d0e099d91472.jpg" alt="图 7.8 网络实例 $G _ { \mathfrak { a } }$"><figcaption>图 7.8 网络实例 <span class="math">G<sub><span class="frak">a</span></sub></span></figcaption></figure>
+<figure><img loading="lazy" src="../assets/f8441cb3aada79a2.jpg" alt="(a) 有向图"><figcaption>(a) 有向图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/2b763cb1499997b4.jpg" alt="图7.9 有向图及其生成森林；(b)有向图的生成森林"><figcaption>图7.9 有向图及其生成森林；(b)有向图的生成森林</figcaption></figure>
+<figure><img loading="lazy" src="../assets/2566484f65ef1b82.jpg" alt="第7章插图（底稿第 5978 行，原书无独立题注）"><figcaption>第7章插图（底稿第 5978 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/f0f154bdefe0c6b7.jpg" alt="图 7.12 无向图 $G _ { \mathfrak { t } }$ 的邻接表表示；图 7.13(a)所示为有向图 $G _ { 2 }$ 的邻接表表示。对于有向图，一条弧在邻接表中只出现一次。顶点 $v _ { i }$ 的边表的表目个数是该顶点的出度，因此邻接表也称为出边表；要知道顶点 $\pmb { v } _ { i }$ 的入度，必须遍历整个邻接表，查看有多少个边表目中的顶点(即弧头顶点)为 $\pmb { v } _ { i \circ }$ 为了便于确定顶点结点的入度，可以建立有向图的逆邻接表，如图7.13(b)所示。在有向图的逆邻接表中，顶点 $v _ { i }$ 的边表中表示的是以该顶点为终点的边，因此逆邻接表也称为人边表。逆邻接表中顶点 $v _ { i }$ 的边表的表目个数是该顶点的入度。"><figcaption>图 7.12 无向图 <span class="math">G<sub><span class="frak">t</span></sub></span> 的邻接表表示；图 7.13(a)所示为有向图 <span class="math">G<sub><span class="upr">2</span></sub></span> 的邻接表表示。对于有向图，一条弧在邻接表中只出现一次。顶点 <span class="math">v<sub>i</sub></span> 的边表的表目个数是该顶点的出度，因此邻接表也称为出边表；要知道顶点 <span class="math"><span class="bold">v</span><sub>i</sub></span> 的入度，必须遍历整个邻接表，查看有多少个边表目中的顶点(即弧头顶点)为 <span class="math"><span class="bold">v</span><sub>i∘</sub></span> 为了便于确定顶点结点的入度，可以建立有向图的逆邻接表，如图7.13(b)所示。在有向图的逆邻接表中，顶点 <span class="math">v<sub>i</sub></span> 的边表中表示的是以该顶点为终点的边，因此逆邻接表也称为人边表。逆邻接表中顶点 <span class="math">v<sub>i</sub></span> 的边表的表目个数是该顶点的入度。</figcaption></figure>
+<figure><img loading="lazy" src="../assets/4f6ccd84a6ce200f.jpg" alt="图 7.13 有向图 $G _ { \imath }$ 的邻接表和逆邻接表表示"><figcaption>图 7.13 有向图 <span class="math">G<sub>ı</sub></span> 的邻接表和逆邻接表表示</figcaption></figure>
+<figure><img loading="lazy" src="../assets/2d350b61ff4f49e8.jpg" alt="图 7.14 带权图 $G _ { 4 }$ 的邻接表表示"><figcaption>图 7.14 带权图 <span class="math">G<sub><span class="upr">4</span></sub></span> 的邻接表表示</figcaption></figure>
+<figure><img loading="lazy" src="../assets/462d5cf907d0b5d5.jpg" alt="图 7.15 有向图的十字链表示例"><figcaption>图 7.15 有向图的十字链表示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/a693901aec12e8f2.jpg" alt="图 7.16 有向图 G"><figcaption>图 7.16 有向图 G</figcaption></figure>
+<figure><img loading="lazy" src="../assets/62263a82a80da2a6.jpg" alt="第7章插图（底稿第 6191 行，原书无独立题注）"><figcaption>第7章插图（底稿第 6191 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/6db281e4c4929271.jpg" alt="第7章插图（底稿第 6214 行，原书无独立题注）"><figcaption>第7章插图（底稿第 6214 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/cf80cbf19e5853bc.jpg" alt="图 7.18 最短路径的示例"><figcaption>图 7.18 最短路径的示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/0cf0a196d127ad6b.jpg" alt="图7.19 单源最短路径的示例"><figcaption>图7.19 单源最短路径的示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/bf74b7d9c75cd16a.jpg" alt="图7.20 每对顶点间的最短路径的示例"><figcaption>图7.20 每对顶点间的最短路径的示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/bd68da3780041faa.jpg" alt="图 7.22 含(u,v)的回路"><figcaption>图 7.22 含(u,v)的回路</figcaption></figure>
+<figure><img loading="lazy" src="../assets/c45bf26c0fafb163.jpg" alt="第7章插图（底稿第 6463 行，原书无独立题注）"><figcaption>第7章插图（底稿第 6463 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/b35faad2ee3e712f.jpg" alt="(a) 步骤1"><figcaption>(a) 步骤1</figcaption></figure>
+<figure><img loading="lazy" src="../assets/a2798e7b4c9cd10d.jpg" alt="(b) 步骤2"><figcaption>(b) 步骤2</figcaption></figure>
+<figure><img loading="lazy" src="../assets/8451178705cfc0b7.jpg" alt="(c) 步骤3"><figcaption>(c) 步骤3</figcaption></figure>
+<figure><img loading="lazy" src="../assets/b2eeff805e1e1387.jpg" alt="第7章插图（底稿第 6481 行，原书无独立题注）"><figcaption>第7章插图（底稿第 6481 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/8caee68f13031c7a.jpg" alt="第7章插图（底稿第 6483 行，原书无独立题注）"><figcaption>第7章插图（底稿第 6483 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/3dbbbb84a8848992.jpg" alt="图7.24 Prim算法构造图 7.23中带权图的最小生成树的步骤"><figcaption>图7.24 Prim算法构造图 7.23中带权图的最小生成树的步骤</figcaption></figure>
+<figure><img loading="lazy" src="../assets/9c2bcea1c6538a88.jpg" alt="第7章插图（底稿第 6545 行，原书无独立题注）"><figcaption>第7章插图（底稿第 6545 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/2e6f338835f1b52d.jpg" alt="第7章插图（底稿第 6547 行，原书无独立题注）"><figcaption>第7章插图（底稿第 6547 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/728992fe49beb484.jpg" alt="第7章插图（底稿第 6549 行，原书无独立题注）"><figcaption>第7章插图（底稿第 6549 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/294ac6d8a70f9dd4.jpg" alt="第7章插图（底稿第 6551 行，原书无独立题注）"><figcaption>第7章插图（底稿第 6551 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/110907ecb5bdd075.jpg" alt="第7章插图（底稿第 6553 行，原书无独立题注）"><figcaption>第7章插图（底稿第 6553 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/183641faa960c187.jpg" alt="图 7.25 Kruskal 算法构造图 7.23 中带权图的最小生成树的步骤"><figcaption>图 7.25 Kruskal 算法构造图 7.23 中带权图的最小生成树的步骤</figcaption></figure>
+<figure><img loading="lazy" src="../assets/7299bd548c370323.jpg" alt="图 7.26 习题 1 的图例"><figcaption>图 7.26 习题 1 的图例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/879eedb7798f917d.jpg" alt="图 7.27 习题2 的图例"><figcaption>图 7.27 习题2 的图例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/e978726cc226f0d0.jpg" alt="图 7.28 习题 3 的图例"><figcaption>图 7.28 习题 3 的图例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/a37ce8f107d70626.jpg" alt="图 7.29 习题 4 的图例"><figcaption>图 7.29 习题 4 的图例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/55239c73555ac22c.jpg" alt="图 7.30 上机题 2 的图例"><figcaption>图 7.30 上机题 2 的图例</figcaption></figure>
+<h2 id="第8章-内排序"><a class="anchor" href="#第8章-内排序">#</a>第8章 内排序</h2>
+<figure><img loading="lazy" src="../assets/5493e0dcc0da4096.jpg" alt="图 8.1 插入排序"><figcaption>图 8.1 插入排序</figcaption></figure>
+<figure><img loading="lazy" src="../assets/9d5229db93db8c45.jpg" alt="图 8.2 Shell 排序"><figcaption>图 8.2 Shell 排序</figcaption></figure>
+<figure><img loading="lazy" src="../assets/20e8330096baff50.jpg" alt="第8章插图（底稿第 6971 行，原书无独立题注）"><figcaption>第8章插图（底稿第 6971 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/02aa74dc87e226d4.jpg" alt="第8章插图（底稿第 6973 行，原书无独立题注）"><figcaption>第8章插图（底稿第 6973 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/2153135dade44a2c.jpg" alt="(b)删除最大值78，用32替代；(c) 重新建堆后得到的序列"><figcaption>(b)删除最大值78，用32替代；(c) 重新建堆后得到的序列</figcaption></figure>
+<figure><img loading="lazy" src="../assets/7f0370f58c7602be.jpg" alt="(d) 得到新的序列；图 8.4 堆排序"><figcaption>(d) 得到新的序列；图 8.4 堆排序</figcaption></figure>
+<figure><img loading="lazy" src="../assets/7409006cccb82bee.jpg" alt="图 8.5 冒泡排序"><figcaption>图 8.5 冒泡排序</figcaption></figure>
+<figure><img loading="lazy" src="../assets/8585d3b42b280664.jpg" alt="第8章插图（底稿第 7076 行，原书无独立题注）"><figcaption>第8章插图（底稿第 7076 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/05b1ac3a282e906b.jpg" alt="图 8.7 分割过程"><figcaption>图 8.7 分割过程</figcaption></figure>
+<figure><img loading="lazy" src="../assets/3599737381e2502e.jpg" alt="图 8.8 归并排序"><figcaption>图 8.8 归并排序</figcaption></figure>
+<figure><img loading="lazy" src="../assets/bd0ba2ed5f871998.jpg" alt="图8.9 桶式排序示意图"><figcaption>图8.9 桶式排序示意图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/916c1027b215b0e1.jpg" alt="(b) 低位优先；图 8.10 基数排序"><figcaption>(b) 低位优先；图 8.10 基数排序</figcaption></figure>
+<figure><img loading="lazy" src="../assets/949a5a9d80c71e8a.jpg" alt="图 8.11 基于顺序存储和桶排序的基数排序"><figcaption>图 8.11 基于顺序存储和桶排序的基数排序</figcaption></figure>
+<figure><img loading="lazy" src="../assets/05b9395e55bd7fd9.jpg" alt="(b) 第一趟分配结果"><figcaption>(b) 第一趟分配结果</figcaption></figure>
+<figure><img loading="lazy" src="../assets/d386f8348dc243d1.jpg" alt="(d) 第二趟分配结果"><figcaption>(d) 第二趟分配结果</figcaption></figure>
+<figure><img loading="lazy" src="../assets/843ddedec33e2496.jpg" alt="(a) 待排序记录及索引"><figcaption>(a) 待排序记录及索引</figcaption></figure>
+<figure><img loading="lazy" src="../assets/f016f3c1910fedfe.jpg" alt="(b) 排序后的记录；图8.13 索引排序示意图"><figcaption>(b) 排序后的记录；图8.13 索引排序示意图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/2f6a20c1eb3f2d13.jpg" alt="图8.14 用判定树来模拟基于比较的排序"><figcaption>图8.14 用判定树来模拟基于比较的排序</figcaption></figure>
+<h2 id="第9章-文件管理与外排序"><a class="anchor" href="#第9章-文件管理与外排序">#</a>第9章 文件管理与外排序</h2>
+<figure><img loading="lazy" src="../assets/f23f55c21cffd0b7.jpg" alt="图9.1 置换选择算法流程"><figcaption>图9.1 置换选择算法流程</figcaption></figure>
+<figure><img loading="lazy" src="../assets/7486004c6161789b.jpg" alt="图 9.3 二路归并过程"><figcaption>图 9.3 二路归并过程</figcaption></figure>
+<figure><img loading="lazy" src="../assets/dffb7316183b2881.jpg" alt="第9章插图（底稿第 8396 行，原书无独立题注）"><figcaption>第9章插图（底稿第 8396 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/5472dfdf856d168f.jpg" alt="图 9.5 8 路归并的赢者树"><figcaption>图 9.5 8 路归并的赢者树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/bb27070d9ac01f78.jpg" alt="图 9.6 图 9.5 重构后的 8 路归并赢者树"><figcaption>图 9.6 图 9.5 重构后的 8 路归并赢者树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/93f3de38d2a0ccc4.jpg" alt="图9.7 8路归并的败者树示例"><figcaption>图9.7 8路归并的败者树示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/732bc1737a8dec83.jpg" alt="图 9.8 图 9.7 重构后的 8 路归并败者树"><figcaption>图 9.8 图 9.7 重构后的 8 路归并败者树</figcaption></figure>
+<h2 id="第10章-检索"><a class="anchor" href="#第10章-检索">#</a>第10章 检索</h2>
+<figure><img loading="lazy" src="../assets/0792c8837fab4a44.jpg" alt="图 10.1 二分检索 K = 18 的过程"><figcaption>图 10.1 二分检索 K = 18 的过程</figcaption></figure>
+<figure><img loading="lazy" src="../assets/5f0f882d1e9ec27f.jpg" alt="图10.2 二分检索的决策树"><figcaption>图10.2 二分检索的决策树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/980c030f1f50d7f9.jpg" alt="图 10.3 分块检索的存储表示"><figcaption>图 10.3 分块检索的存储表示</figcaption></figure>
+<figure><img loading="lazy" src="../assets/55bc014a79d6a905.jpg" alt="图 10.5 例 10.2 中关键码对应的散列表"><figcaption>图 10.5 例 10.2 中关键码对应的散列表</figcaption></figure>
+<figure><img loading="lazy" src="../assets/fe1490af9bcca8c0.jpg" alt="(a) 移位叠加；(b) 分界叠加；图 10.6 移位叠加和分界叠加"><figcaption>(a) 移位叠加；(b) 分界叠加；图 10.6 移位叠加和分界叠加</figcaption></figure>
+<figure><img loading="lazy" src="../assets/70ba08a893dc9d64.jpg" alt="图 10.7 开散列方法的图示"><figcaption>图 10.7 开散列方法的图示</figcaption></figure>
+<figure><img loading="lazy" src="../assets/7b7cd5373daa5ca9.jpg" alt="图10.8 散列文件组织"><figcaption>图10.8 散列文件组织</figcaption></figure>
+<figure><img loading="lazy" src="../assets/df08b72b2ef34643.jpg" alt="图10.11 用几种不同方法解决碰撞时散列表的平均检索长度"><figcaption>图10.11 用几种不同方法解决碰撞时散列表的平均检索长度</figcaption></figure>
+<figure><img loading="lazy" src="../assets/d31f80e5e4b41fa2.jpg" alt="图 10.12 双向有序表"><figcaption>图 10.12 双向有序表</figcaption></figure>
+<figure><img loading="lazy" src="../assets/e8d69df1bb8bad04.jpg" alt="图10.13 液晶七段数码管示意图"><figcaption>图10.13 液晶七段数码管示意图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/65b2b830d1a83b38.jpg" alt="第10章插图（底稿第 9825 行，原书无独立题注）"><figcaption>第10章插图（底稿第 9825 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/6b8ed3d88fe489c1.jpg" alt="图10.14 封锁方式的相容矩阵；图10.15 封锁管理子系统示意图"><figcaption>图10.14 封锁方式的相容矩阵；图10.15 封锁管理子系统示意图</figcaption></figure>
+<h2 id="第11章-索引技术"><a class="anchor" href="#第11章-索引技术">#</a>第11章 索引技术</h2>
+<figure><img loading="lazy" src="../assets/6e8a0ef3ed26c107.jpg" alt="图11.1 线性索引，图中的数据库记录不等长"><figcaption>图11.1 线性索引，图中的数据库记录不等长</figcaption></figure>
+<figure><img loading="lazy" src="../assets/0c75a3db9929b61e.jpg" alt="图 11.2 二级索引文件"><figcaption>图 11.2 二级索引文件</figcaption></figure>
+<figure><img loading="lazy" src="../assets/879fc43030b02cb8.jpg" alt="图 11.3 多分树"><figcaption>图 11.3 多分树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/97a7189d3ea9584c.jpg" alt="图 11.4 B 树结点的一般形式"><figcaption>图 11.4 B 树结点的一般形式</figcaption></figure>
+<figure><img loading="lazy" src="../assets/c931b6ab6b5af388.jpg" alt="(a) 3阶B树"><figcaption>(a) 3阶B树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/abd683e694687f5d.jpg" alt="(b) 画出外部空结点的 3阶 B 树"><figcaption>(b) 画出外部空结点的 3阶 B 树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/0cfe8b261f05015b.jpg" alt="(c) B 树的隐含指针，其中 $a _ { 1 } \sim a _ { 1 6 }$ 代表关键码所在主文件中具体磁盘块的索引地址；图 11.5 3 阶 B 树"><figcaption>(c) B 树的隐含指针，其中 <span class="math">a<sub><span class="upr">1</span></sub><span class="rel">∼</span>a<sub><span class="upr">1</span><span class="upr">6</span></sub></span> 代表关键码所在主文件中具体磁盘块的索引地址；图 11.5 3 阶 B 树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/3032fa408668c89e.jpg" alt="图11.6 在图 11.5的3阶 B 树中插入关键码14、55后的结果"><figcaption>图11.6 在图 11.5的3阶 B 树中插入关键码14、55后的结果</figcaption></figure>
+<figure><img loading="lazy" src="../assets/ea9001b8f902803b.jpg" alt="图11.7 在图11.5的 3阶 B 树中插入关键码19后导致根分裂"><figcaption>图11.7 在图11.5的 3阶 B 树中插入关键码19后导致根分裂</figcaption></figure>
+<figure><img loading="lazy" src="../assets/c71eb251fab8ea53.jpg" alt="(a) 5阶B 树"><figcaption>(a) 5阶B 树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/7393cd50941cc10e.jpg" alt="(b)删除120,先与后继交换，删后下溢出，向左邻借关键码"><figcaption>(b)删除120,先与后继交换，删后下溢出，向左邻借关键码</figcaption></figure>
+<figure><img loading="lazy" src="../assets/5bc0a43a72bcaeb3.jpg" alt="(c)继续删150,先交换，删后下溢出，合并操作传递到根；图11.8 5阶 B树，连续删除关键码120、150示意图6"><figcaption>(c)继续删150,先交换，删后下溢出，合并操作传递到根；图11.8 5阶 B树，连续删除关键码120、150示意图6</figcaption></figure>
+<figure><img loading="lazy" src="../assets/8573da94ca956749.jpg" alt="图 11.9 3 阶 B +树"><figcaption>图 11.9 3 阶 B +树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/bcafc0a9de581967.jpg" alt="图 11.10 在图 11.9的 3阶 B +树中插入15后，树增高一层"><figcaption>图 11.10 在图 11.9的 3阶 B +树中插入15后，树增高一层</figcaption></figure>
+<figure><img loading="lazy" src="../assets/ffef69f4b64e2e43.jpg" alt="图 11.11 从图 11.9的 3 阶 B + 树中删除 75 后"><figcaption>图 11.11 从图 11.9的 3 阶 B + 树中删除 75 后</figcaption></figure>
+<figure><img loading="lazy" src="../assets/3de9f1e64abee567.jpg" alt="图11.12 混合型 B+树，内部结点阶为4,叶结点阶5"><figcaption>图11.12 混合型 B+树，内部结点阶为4,叶结点阶5</figcaption></figure>
+<figure><img loading="lazy" src="../assets/c2cacd7eba558abe.jpg" alt="图 11.13 在图11.12混合型 B +树(内部结点阶为4,叶结点阶5)中，插入22后的结果"><figcaption>图 11.13 在图11.12混合型 B +树(内部结点阶为4,叶结点阶5)中，插入22后的结果</figcaption></figure>
+<figure><img loading="lazy" src="../assets/fe716221bc3bfed5.jpg" alt="图11.14 在图11.13混合型 B +树(内部结点阶为4,叶结点阶5)中，删除40后的结果"><figcaption>图11.14 在图11.13混合型 B +树(内部结点阶为4,叶结点阶5)中，删除40后的结果</figcaption></figure>
+<figure><img loading="lazy" src="../assets/9638eba45a5abef8.jpg" alt="(a)百货销售数据库记录以及 State=NY(纽约州)的位向量"><figcaption>(a)百货销售数据库记录以及 State=NY(纽约州)的位向量</figcaption></figure>
+<figure><img loading="lazy" src="../assets/012aa9549249f6c8.jpg" alt="(c) 数据域 Class的位向量集合；图11.15 百货销售数据库记录的位图索引示意"><figcaption>(c) 数据域 Class的位向量集合；图11.15 百货销售数据库记录的位图索引示意</figcaption></figure>
+<figure><img loading="lazy" src="../assets/32c09de96383c4de.jpg" alt="图 11.16 红黑树示意图"><figcaption>图 11.16 红黑树示意图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/4cd9c419025ff11a.jpg" alt="图11.17 父结点是红色，叔父结点是黑色的情况，旋转解决红红冲突"><figcaption>图11.17 父结点是红色，叔父结点是黑色的情况，旋转解决红红冲突</figcaption></figure>
+<figure><img loading="lazy" src="../assets/a333f195118c2445.jpg" alt="图11.18 叔父结点为黑色，进行重构调整每个结点的阶都保持原值，调整完成"><figcaption>图11.18 叔父结点为黑色，进行重构调整每个结点的阶都保持原值，调整完成</figcaption></figure>
+<figure><img loading="lazy" src="../assets/74d9765c86b0459e.jpg" alt="图11.19 父结点、叔父结点均为红色，则父和祖换色，然后递归处理方法"><figcaption>图11.19 父结点、叔父结点均为红色，则父和祖换色，然后递归处理方法</figcaption></figure>
+<figure><img loading="lazy" src="../assets/1a24097d7b698644.jpg" alt="图 11.20 红黑树插入示例"><figcaption>图 11.20 红黑树插入示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/dc4aa499811e6130.jpg" alt="图 11.21 情况 1(a):"><figcaption>图 11.21 情况 1(a):</figcaption></figure>
+<figure><img loading="lazy" src="../assets/d8199ab1b4f48019.jpg" alt="图11.22 情况1(b):双黑结点与红色侄子同边顺"><figcaption>图11.22 情况1(b):双黑结点与红色侄子同边顺</figcaption></figure>
+<figure><img loading="lazy" src="../assets/0314fc9126687660.jpg" alt="图11.23 情况2双黑的兄弟结点为黑色，且兄弟结点有两个黑色子结点"><figcaption>图11.23 情况2双黑的兄弟结点为黑色，且兄弟结点有两个黑色子结点</figcaption></figure>
+<figure><img loading="lazy" src="../assets/ea0f0114893b0d4b.jpg" alt="图 11.24 情况3双黑的兄弟结点为红色"><figcaption>图 11.24 情况3双黑的兄弟结点为红色</figcaption></figure>
+<figure><img loading="lazy" src="../assets/96123ad82e555db6.jpg" alt="图11.25红黑树连续删除90、70、80,引起的双黑调整示例"><figcaption>图11.25红黑树连续删除90、70、80,引起的双黑调整示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/f5d4fa1ba1a664f6.jpg" alt="图 11.26 习题 8. 的 3 阶 B 树图示"><figcaption>图 11.26 习题 8. 的 3 阶 B 树图示</figcaption></figure>
+<figure><img loading="lazy" src="../assets/c2dac0e37e1b2851.jpg" alt="图 11.27 习题9. 的4阶 B树"><figcaption>图 11.27 习题9. 的4阶 B树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/722c1d1d7948e14a.jpg" alt="图 11.28 习题 10. 的 3 阶 B 树"><figcaption>图 11.28 习题 10. 的 3 阶 B 树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/ed2d545e00b57235.jpg" alt="图 11.29 2 阶 $B ^ { \star }$ 树图示"><figcaption>图 11.29 2 阶 <span class="math">B<sup>⋆</sup></span> 树图示</figcaption></figure>
+<figure><img loading="lazy" src="../assets/b03c1f52b7542c5b.jpg" alt="图 11.30 混合型 $B ^ { + }$ 树，内部结点阶为4、叶结点阶为3"><figcaption>图 11.30 混合型 <span class="math">B<sup><span class="bin">+</span></sup></span> 树，内部结点阶为4、叶结点阶为3</figcaption></figure>
+<figure><img loading="lazy" src="../assets/1a187b1fcf4e3da2.jpg" alt="图 11.31 红黑树"><figcaption>图 11.31 红黑树</figcaption></figure>
+<h2 id="第12章-高级数据结构"><a class="anchor" href="#第12章-高级数据结构">#</a>第12章 高级数据结构</h2>
+<figure><img loading="lazy" src="../assets/ff4a0e68418ad4b3.jpg" alt="图 12.1 上三角矩阵和下三角矩阵，其中 c为常数"><figcaption>图 12.1 上三角矩阵和下三角矩阵，其中 c为常数</figcaption></figure>
+<figure><img loading="lazy" src="../assets/7243968f87b4e75b.jpg" alt="图 12.2 稀疏矩阵的十字链表"><figcaption>图 12.2 稀疏矩阵的十字链表</figcaption></figure>
+<figure><img loading="lazy" src="../assets/a6db78e33812566d.jpg" alt="图 12.3 纯线性结构表"><figcaption>图 12.3 纯线性结构表</figcaption></figure>
+<figure><img loading="lazy" src="../assets/bb0f924bd1bdec90.jpg" alt="图 12.4 纯表的树表示"><figcaption>图 12.4 纯表的树表示</figcaption></figure>
+<figure><img loading="lazy" src="../assets/77d1f64d0f2aad44.jpg" alt="图12.5一个再入表的例子，其中没有标志箭头的边都是指向下方的"><figcaption>图12.5一个再入表的例子，其中没有标志箭头的边都是指向下方的</figcaption></figure>
+<figure><img loading="lazy" src="../assets/9056eec6ba40c942.jpg" alt="图12.6 循环表可以看到这是一个有环图；图12.6中.因为 $L _ { 1 }$ 和 $L _ { 4 }$ 调用自身，导致了回路。其他没有箭头的边，方向都是从上至下的。循环表也可以算作一种存在回路的特殊再入表。"><figcaption>图12.6 循环表可以看到这是一个有环图；图12.6中.因为 <span class="math">L<sub><span class="upr">1</span></sub></span> 和 <span class="math">L<sub><span class="upr">4</span></sub></span> 调用自身，导致了回路。其他没有箭头的边，方向都是从上至下的。循环表也可以算作一种存在回路的特殊再入表。</figcaption></figure>
+<figure><img loading="lazy" src="../assets/08b834108b1ffee9.jpg" alt="图 12.7 没有头结点的广义表"><figcaption>图 12.7 没有头结点的广义表</figcaption></figure>
+<figure><img loading="lazy" src="../assets/a997a7dd44ffc121.jpg" alt="图 12.8 带头结点的广义表"><figcaption>图 12.8 带头结点的广义表</figcaption></figure>
+<figure><img loading="lazy" src="../assets/496aef5541eea022.jpg" alt="图12.9 带表头结点的循环广义表"><figcaption>图12.9 带表头结点的循环广义表</figcaption></figure>
+<figure><img loading="lazy" src="../assets/286284e4e113c3db.jpg" alt="(a) 初始状态的可利用空间表"><figcaption>(a) 初始状态的可利用空间表</figcaption></figure>
+<figure><img loading="lazy" src="../assets/13aa14b9eaf0d7ed.jpg" alt="(b) 系统运行一段时间后的可利用空间表；图12.10 结点等长的可利用空间表"><figcaption>(b) 系统运行一段时间后的可利用空间表；图12.10 结点等长的可利用空间表</figcaption></figure>
+<figure><img loading="lazy" src="../assets/da5cde034842c482.jpg" alt="(a) 空闲块的结构"><figcaption>(a) 空闲块的结构</figcaption></figure>
+<figure><img loading="lazy" src="../assets/176675b89214b438.jpg" alt="(b) 已分配块的结构；图12.11 存储器看到的块结构"><figcaption>(b) 已分配块的结构；图12.11 存储器看到的块结构</figcaption></figure>
+<figure><img loading="lazy" src="../assets/42591c39779d3b6f.jpg" alt="图 12.12 外部碎片和内部碎片"><figcaption>图 12.12 外部碎片和内部碎片</figcaption></figure>
+<figure><img loading="lazy" src="../assets/330b8aba58c19e68.jpg" alt="图 12.13 把块 M释放回可利用空间表"><figcaption>图 12.13 把块 M释放回可利用空间表</figcaption></figure>
+<figure><img loading="lazy" src="../assets/7fecd7778cd2b26e.jpg" alt="图 12.14 无用单元循环引用"><figcaption>图 12.14 无用单元循环引用</figcaption></figure>
+<figure><img loading="lazy" src="../assets/a71971eeeedd60de.jpg" alt="图 12.15 BST 的平衡性示意图"><figcaption>图 12.15 BST 的平衡性示意图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/2f63d4427c7ba023.jpg" alt="图 12.16 一棵二叉 Trie 树"><figcaption>图 12.16 一棵二叉 Trie 树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/31bf5d17531c99f5.jpg" alt="图 12.17 存储单词的 Trie 结构"><figcaption>图 12.17 存储单词的 Trie 结构</figcaption></figure>
+<figure><img loading="lazy" src="../assets/a08c66eba1f27251.jpg" alt="第12章插图（底稿第 11086 行，原书无独立题注）"><figcaption>第12章插图（底稿第 11086 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/5fa442714c931b76.jpg" alt="图 12.19 x表示那个位可以为 1 或者 0"><figcaption>图 12.19 x表示那个位可以为 1 或者 0</figcaption></figure>
+<figure><img loading="lazy" src="../assets/27144b83e26fc2eb.jpg" alt="图 12.20 最后得到的 PATRICIA Trie 结构"><figcaption>图 12.20 最后得到的 PATRICIA Trie 结构</figcaption></figure>
+<figure><img loading="lazy" src="../assets/69b4e6e2e509b6c1.jpg" alt="图 12.21 二叉搜索树"><figcaption>图 12.21 二叉搜索树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/1f30890a5d9e01a8.jpg" alt="图 12.22 关键码与图 12.21 相同的是一棵 BST"><figcaption>图 12.22 关键码与图 12.21 相同的是一棵 BST</figcaption></figure>
+<figure><img loading="lazy" src="../assets/75fcc4e3389b6567.jpg" alt="图 12.23 扩充二叉树"><figcaption>图 12.23 扩充二叉树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/1826934df94f553c.jpg" alt="图 12.24 最佳二叉搜索树"><figcaption>图 12.24 最佳二叉搜索树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/f1b118a907a2784a.jpg" alt="图12.25 退化为线性的二叉搜索树"><figcaption>图12.25 退化为线性的二叉搜索树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/6b92b3ac99984b30.jpg" alt="图12.26 具有不等权结点的二叉搜索树"><figcaption>图12.26 具有不等权结点的二叉搜索树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/e543a817bd675673.jpg" alt="图 12.27 构造最佳二叉搜索树的过程"><figcaption>图 12.27 构造最佳二叉搜索树的过程</figcaption></figure>
+<figure><img loading="lazy" src="../assets/ab04fde707fc0b65.jpg" alt="(a) 一棵 AVL 树"><figcaption>(a) 一棵 AVL 树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/2a466745af469534.jpg" alt="(b) 非 AVL 树的 BST；图 12.28 AVL 树与非 AVL 树"><figcaption>(b) 非 AVL 树的 BST；图 12.28 AVL 树与非 AVL 树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/3cd3a1d82f9fca27.jpg" alt="图 12.29 带平衡因子的 AVL 树"><figcaption>图 12.29 带平衡因子的 AVL 树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/f806d05fae1d193e.jpg" alt="(a) 被破坏的AVL树"><figcaption>(a) 被破坏的AVL树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/2a8101ef137dbe8c.jpg" alt="(b) 重新调整为AVL树；图 12.30 AVL 树的调整示意图"><figcaption>(b) 重新调整为AVL树；图 12.30 AVL 树的调整示意图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/919794a24a6d0752.jpg" alt="(a) LL不平衡"><figcaption>(a) LL不平衡</figcaption></figure>
+<figure><img loading="lazy" src="../assets/c2ddb113697e442b.jpg" alt="(b) LR不平衡"><figcaption>(b) LR不平衡</figcaption></figure>
+<figure><img loading="lazy" src="../assets/776ff7cb34bbd95d.jpg" alt="(c) RR不平衡"><figcaption>(c) RR不平衡</figcaption></figure>
+<figure><img loading="lazy" src="../assets/177187ec2696e070.jpg" alt="(d) RL不平衡；图12.31 AVL树的不平衡类型。圆圈表示结点；椭圆表示子树，内部符号表示其高度"><figcaption>(d) RL不平衡；图12.31 AVL树的不平衡类型。圆圈表示结点；椭圆表示子树，内部符号表示其高度</figcaption></figure>
+<figure><img loading="lazy" src="../assets/15e78aea8f0613c7.jpg" alt="图12.32 LL型不平衡经过单旋转后重新变成平衡结构，RR型单旋转类似"><figcaption>图12.32 LL型不平衡经过单旋转后重新变成平衡结构，RR型单旋转类似</figcaption></figure>
+<figure><img loading="lazy" src="../assets/ad9ee439aedaf3a3.jpg" alt="(b) 中间状态平衡因子无意义"><figcaption>(b) 中间状态平衡因子无意义</figcaption></figure>
+<figure><img loading="lazy" src="../assets/83e3cdd3592325c1.jpg" alt="(c) a的平衡因子为-1或0,b的平衡因子为0或+1；图 12.33 RL 型双旋转示意图，LR 型双旋转类似；图 12. 34 是从空 AVL 树开始，顺序插入单词 {cup, cop, copy, hit, hi, his, hia}后得到的 AVL树，单词之间按照字典顺序比较。"><figcaption>(c) a的平衡因子为-1或0,b的平衡因子为0或+1；图 12.33 RL 型双旋转示意图，LR 型双旋转类似；图 12. 34 是从空 AVL 树开始，顺序插入单词 {cup, cop, copy, hit, hi, his, hia}后得到的 AVL树，单词之间按照字典顺序比较。</figcaption></figure>
+<figure><img loading="lazy" src="../assets/38fc6390b74cb59c.jpg" alt="图 12.34 AVL 树的插入过程"><figcaption>图 12.34 AVL 树的插入过程</figcaption></figure>
+<figure><img loading="lazy" src="../assets/8da27f446e82cc95.jpg" alt="图 12.35 AVL 树删除之后的平衡操作"><figcaption>图 12.35 AVL 树删除之后的平衡操作</figcaption></figure>
+<figure><img loading="lazy" src="../assets/c9d3653538f773ad.jpg" alt="(a)删除结点c,则需要使用其中序前驱m"><figcaption>(a)删除结点c,则需要使用其中序前驱m</figcaption></figure>
+<figure><img loading="lazy" src="../assets/583a306938e9a07d.jpg" alt="(b) 删除结点g"><figcaption>(b) 删除结点g</figcaption></figure>
+<figure><img loading="lazy" src="../assets/c8bfd8ef7b82b925.jpg" alt="图 12.36 AVL 树的删除过程"><figcaption>图 12.36 AVL 树的删除过程</figcaption></figure>
+<figure><img loading="lazy" src="../assets/b559c4b072af21ab.jpg" alt="图 12.37 最接近于不平衡的 AVL 树"><figcaption>图 12.37 最接近于不平衡的 AVL 树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/9886016a74483c6a.jpg" alt="第12章插图（底稿第 11540 行，原书无独立题注）"><figcaption>第12章插图（底稿第 11540 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/edfc6e588d573c57.jpg" alt="(b) 旋转发生以后的树；图12.38 当被展开的结点是根结点的子结点时，才会发生伸展树的单旋转"><figcaption>(b) 旋转发生以后的树；图12.38 当被展开的结点是根结点的子结点时，才会发生伸展树的单旋转</figcaption></figure>
+<figure><img loading="lazy" src="../assets/d547f2b7c0b6510b.jpg" alt="(a)结点x、结点y、结点z为一字形的树结构"><figcaption>(a)结点x、结点y、结点z为一字形的树结构</figcaption></figure>
+<figure><img loading="lazy" src="../assets/4de16efb6c7a8e8d.jpg" alt="(b) 旋转发生之后的树结构；图12.39 伸展树的一字形旋转"><figcaption>(b) 旋转发生之后的树结构；图12.39 伸展树的一字形旋转</figcaption></figure>
+<figure><img loading="lazy" src="../assets/391e13f1809c09bf.jpg" alt="(a)结点x、结点y、结点z为之字形的树结构(b)旋转发生之后的树结构；图 12.40 伸展树的之字形旋转"><figcaption>(a)结点x、结点y、结点z为之字形的树结构(b)旋转发生之后的树结构；图 12.40 伸展树的之字形旋转</figcaption></figure>
+<figure><img loading="lazy" src="../assets/f536a99730156c47.jpg" alt="(d)f、a、g之字形旋转后；(e) a、h单旋转后，a最后成为根结点；图12.41 在伸展树中完成一次检索以后再展开的例子"><figcaption>(d)f、a、g之字形旋转后；(e) a、h单旋转后，a最后成为根结点；图12.41 在伸展树中完成一次检索以后再展开的例子</figcaption></figure>
+<figure><img loading="lazy" src="../assets/851f2f30b09fa8d8.jpg" alt="图12.42 半伸展和全伸展的区别"><figcaption>图12.42 半伸展和全伸展的区别</figcaption></figure>
+<figure><img loading="lazy" src="../assets/33419334fcc58ef5.jpg" alt="图12.43 连续两次访问结点T，半伸展树的变化示例"><figcaption>图12.43 连续两次访问结点T，半伸展树的变化示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/907d63faff8d37a9.jpg" alt="图12.44 外部结点存储记录信息的半伸展树"><figcaption>图12.44 外部结点存储记录信息的半伸展树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/2103775a9dd6abc2.jpg" alt="图 12.45 对图 12.44 连续读 aabg 后，半伸展树的变化过程"><figcaption>图 12.45 对图 12.44 连续读 aabg 后，半伸展树的变化过程</figcaption></figure>
+<figure><img loading="lazy" src="../assets/b79642f077ce5f4c.jpg" alt="第12章插图（底稿第 11733 行，原书无独立题注）"><figcaption>第12章插图（底稿第 11733 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/2aebcb9372fe2cbf.jpg" alt="图 12.47 带路径压缩的后缀树"><figcaption>图 12.47 带路径压缩的后缀树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/167befa8eb99152f.jpg" alt="第12章插图（底稿第 11816 行，原书无独立题注）"><figcaption>第12章插图（底稿第 11816 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/218b97554b914895.jpg" alt="图12.49 搜索引擎基本架构"><figcaption>图12.49 搜索引擎基本架构</figcaption></figure>
+<figure><img loading="lazy" src="../assets/9bd20c464a6a63e9.jpg" alt="图 12.50 Google的 Ajax 输入提示框"><figcaption>图 12.50 Google的 Ajax 输入提示框</figcaption></figure>
+<div class="pagenav"><a href="exercises.html"><span class="dir">← 上一篇</span>习题、上机题与参考答案</a><a href="errata.html" style="text-align:right"><span class="dir">下一篇 →</span>原书勘误</a></div>
+</main>
+<nav class="page"><b>本页</b><a href="#第1章-概论">第1章 概论</a><a href="#第2章-线性表">第2章 线性表</a><a href="#第3章-栈与队列">第3章 栈与队列</a><a href="#第4章-字符串">第4章 字符串</a><a href="#第5章-二叉树">第5章 二叉树</a><a href="#第6章-树">第6章 树</a><a href="#第7章-图">第7章 图</a><a href="#第8章-内排序">第8章 内排序</a><a href="#第9章-文件管理与外排序">第9章 文件管理与外排序</a><a href="#第10章-检索">第10章 检索</a><a href="#第11章-索引技术">第11章 索引技术</a><a href="#第12章-高级数据结构">第12章 高级数据结构</a></nav>
+</div>
+<footer>
+  本页由 <code>tools/build_site.py</code> 从 <code>book/插图.md</code> 生成
+  —— Markdown 是唯一事实源，请勿手改此文件。正文中的 C++ 代码块与 <code>code/</code> 下
+  通过测试的源码逐字一致（由 <code>tools/check_doc.py</code> 的 R3 保证）。
+</footer>
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('nav.page a'));
+  if(links.length){
+    var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a});
+    var seen=[];
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        var id=e.target.id;
+        if(e.isIntersecting){if(seen.indexOf(id)<0)seen.push(id)}
+        else{var i=seen.indexOf(id);if(i>=0)seen.splice(i,1)}
+      });
+      links.forEach(function(a){a.classList.remove('active')});
+      if(seen.length&&map[seen[0]])map[seen[0]].classList.add('active');
+    },{rootMargin:'0px 0px -75% 0px'});
+    [].slice.call(document.querySelectorAll('h2[id],h3[id]')).forEach(function(h){io.observe(h)});
+  }
+  [].slice.call(document.querySelectorAll('.codeblock')).forEach(function(block){
+    var button=document.createElement('button');
+    button.className='copy';button.type='button';button.textContent='复制';
+    button.addEventListener('click',function(){
+      var text=block.querySelector('code').textContent;
+      var done=function(){button.textContent='已复制';
+        setTimeout(function(){button.textContent='复制'},1200)};
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done,function(){button.textContent='复制失败'});
+      }else{
+        var area=document.createElement('textarea');area.value=text;document.body.appendChild(area);
+        area.select();try{document.execCommand('copy');done()}catch(e){button.textContent='复制失败'}
+        document.body.removeChild(area);
+      }
+    });
+    block.appendChild(button);
+  });
+})();
+</script>
+</body>
+</html>

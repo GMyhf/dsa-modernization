@@ -34,6 +34,8 @@ python3 tools/errata.py --check        # same, verify only (non-zero exit on gap
 python3 tools/check_code.py [unit]     # -Werror + ASan/UBSan and -O2, both must run green
 python3 tools/check_doc.py [file]      # book/ hygiene; --list-rules explains R1–R8
 python3 tools/sync_book.py --write     # push code/ sources into the book's code blocks
+python3 tools/build_site.py            # render book/*.md into the browsable site book/site/
+python3 tools/build_site.py --check    # same, verify only — the gate's "site is stale" arbiter
 python3 tools/vendor_figures.py <md>   # download remote figures into book/assets/
 python3 -m unittest discover -s tests -p 'test_*.py'          # tool self-tests only
 python3 -m unittest tests.test_check_doc.TestR3IncludeContract -v   # a single test class

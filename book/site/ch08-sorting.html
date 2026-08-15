@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第8章 内部排序 · 现代 C++ 数据结构教程</title>
+<meta name="description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:title" content="第8章 内部排序">
+<meta property="og:description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:type" content="article">
+<style>
+:root{color-scheme:light;
+  --ink:#1a2230;--muted:#68758a;--faint:#93a0b3;--line:#dde3ec;--bg:#f3f5f9;--panel:#fff;
+  --soft:#eef1f7;--accent:#2f5fd0;--accent-soft:#e5ecfb;--warn:#b06a1c;--danger:#c0392b;
+  --kw:#8b2fa0;--ty:#0f6f8c;--st:#177245;--cm:#7d8899;--pp:#a3572a}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;
+  --ink:#e3e8f0;--muted:#98a3b5;--faint:#6f7c90;--line:#2b3342;--bg:#12151b;--panel:#171b22;
+  --soft:#1e232c;--accent:#84a9f5;--accent-soft:#1c2740;--warn:#dcae72;--danger:#e08a80;
+  --kw:#d79ae8;--ty:#7cc7dd;--st:#8fd0a4;--cm:#7b8598;--pp:#e0a97b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.8 system-ui,-apple-system,"Segoe UI","Noto Sans CJK SC","PingFang SC",sans-serif}
+a{color:var(--accent)}
+.masthead{background:var(--panel);border-bottom:1px solid var(--line);padding:30px 26px 24px}
+.masthead .inner{max-width:1440px;margin:0 auto}
+.masthead .eyebrow{font-size:13px;color:var(--muted);letter-spacing:.06em;margin:0 0 6px}
+.masthead .eyebrow a{text-decoration:none}
+.masthead h1{margin:0;font-size:clamp(23px,3.4vw,34px);line-height:1.25;letter-spacing:-.01em}
+.masthead p.sub{margin:10px 0 0;color:var(--muted);font-size:15px;max-width:62ch}
+.masthead .meta{margin:12px 0 0;font-size:13.5px;color:var(--muted)}
+.layout{max-width:1440px;margin:0 auto;padding:0 26px 80px;display:grid;
+  grid-template-columns:228px minmax(0,1fr) 208px;gap:40px;align-items:start}
+nav.book,nav.page{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;
+  padding:22px 0;font-size:14px;line-height:1.55}
+nav b{display:block;color:var(--faint);font-size:11.5px;letter-spacing:.1em;
+  text-transform:uppercase;margin:16px 0 8px}
+nav b:first-child{margin-top:0}
+nav a{display:block;padding:5px 10px;border-left:2px solid transparent;
+  color:var(--ink);text-decoration:none;border-radius:0 5px 5px 0}
+nav a:hover{background:var(--soft);color:var(--accent)}
+nav.book a.here{background:var(--accent-soft);border-left-color:var(--accent);
+  color:var(--accent);font-weight:600}
+nav.page a{color:var(--muted);font-size:13.5px;padding:4px 10px}
+nav.page a.sub{padding-left:22px;font-size:13px;color:var(--faint)}
+nav.page a.active{border-left-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+main{min-width:0;padding-top:24px}
+h1,h2,h3,h4{scroll-margin-top:16px}
+h2{font-size:24px;margin:48px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+h3{font-size:18.5px;margin:30px 0 10px}
+h4{font-size:16px;margin:22px 0 8px;color:var(--muted)}
+.anchor{float:left;margin-left:-1.05em;padding-right:.3em;color:transparent;
+  text-decoration:none;font-weight:400}
+h2:hover .anchor,h3:hover .anchor,h4:hover .anchor{color:var(--faint)}
+p{margin:0 0 15px}
+code{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  background:var(--soft);padding:2px 6px;border-radius:4px;word-break:break-word}
+.codeblock{position:relative;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px;margin:0 0 18px;overflow:hidden}
+.codeblock .srcbar{border-bottom:1px solid var(--line);background:var(--soft);
+  padding:6px 12px;font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+.codeblock .srcbar a{color:var(--muted);text-decoration:none}
+.codeblock .srcbar a:hover{color:var(--accent);text-decoration:underline}
+.codeblock pre{margin:0;padding:14px 16px;overflow:auto}
+.codeblock code{background:none;padding:0;font-size:13px;line-height:1.65;white-space:pre}
+.codeblock[data-lang=console] pre,.codeblock[data-lang=bash] pre{background:var(--soft)}
+.codeblock[data-lang=text]::after{content:"原书印刷";position:absolute;top:8px;right:10px;
+  font-size:11px;color:var(--faint);letter-spacing:.05em}
+.copy{position:absolute;top:6px;right:8px;border:1px solid var(--line);background:var(--panel);
+  color:var(--muted);border-radius:6px;font-size:12px;padding:2px 8px;cursor:pointer;opacity:0}
+.codeblock:hover .copy{opacity:1}
+.copy:hover{color:var(--accent);border-color:var(--accent)}
+.codeblock .srcbar~.copy{top:34px}
+.k{color:var(--kw)}.t{color:var(--ty)}.s{color:var(--st)}.c{color:var(--cm);font-style:italic}
+.n{color:var(--warn)}.p{color:var(--pp)}
+blockquote{margin:0 0 18px;padding:12px 18px;border-left:3px solid var(--accent);
+  background:var(--soft);border-radius:0 7px 7px 0}
+blockquote p:last-child{margin-bottom:0}
+.table-wrap{overflow-x:auto;margin:0 0 18px}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--panel)}
+th,td{border:1px solid var(--line);padding:8px 11px;vertical-align:top}
+th{background:var(--soft);font-weight:650}
+ul,ol{margin:0 0 15px;padding-left:26px}
+li{margin:6px 0}
+hr{border:0;border-top:1px solid var(--line);margin:34px 0}
+figure{margin:0 0 22px;padding:12px;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px}
+figure img{max-width:100%;display:block;margin:0 auto;border-radius:4px;background:#fff}
+figcaption{margin-top:9px;color:var(--muted);font-size:13.5px;text-align:center}
+.gallery-page{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:18px;align-items:start}
+.gallery-page>figure{margin:0}
+.gallery-page>h2,.gallery-page>h3,.gallery-page>p,.gallery-page>blockquote,
+.gallery-page>hr,.gallery-page>.pagenav{grid-column:1/-1}
+.math{font-family:"Latin Modern Math","Cambria Math",Georgia,serif;font-style:italic}
+.math .upr,.math .mono,.math .bold{font-style:normal}
+.math .mono{font-family:ui-monospace,Menlo,monospace}
+.math .bold{font-weight:700}
+.math sup,.math sub{font-size:.72em}
+.math .rel{margin:0 .28em;font-style:normal}
+.math .bin{margin:0 .16em;font-style:normal}
+.math-display{display:block;text-align:center;margin:18px 0;font-size:17px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+  font-size:.85em;line-height:1.15}
+.frac .num{border-bottom:1px solid currentColor;padding:0 .25em}
+.frac .den{padding:0 .25em}
+.sqrt{border-top:1px solid currentColor}
+.sqrt::before{content:"√";border-top:0}
+.tex-raw{border-bottom:1px dotted var(--danger);font-style:normal}
+.pagenav{display:flex;justify-content:space-between;gap:16px;margin:50px 0 0;
+  border-top:1px solid var(--line);padding-top:18px;font-size:14.5px}
+.pagenav a{text-decoration:none;max-width:46%}
+.pagenav .dir{display:block;color:var(--faint);font-size:12px}
+footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
+  font-size:13.5px;border-top:1px solid var(--line)}
+@media(max-width:1180px){
+  .layout{grid-template-columns:212px minmax(0,1fr);gap:32px}
+  nav.page{display:none}
+}
+@media(max-width:820px){
+  .layout{grid-template-columns:1fr;gap:0;padding:0 18px 60px}
+  nav.book{position:static;max-height:none;border-bottom:1px solid var(--line);
+    margin-bottom:14px;padding:14px 0}
+  .masthead{padding:22px 18px 18px}
+}
+@media print{
+  nav,.pagenav,.copy{display:none}
+  .layout{display:block;max-width:none}
+  body{background:#fff}
+  a{color:inherit;text-decoration:none}
+  .codeblock,figure,table{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header class="masthead"><div class="inner">
+<p class="eyebrow"><a href="index.html">现代 C++ 数据结构教程</a></p>  <h1>第8章 内部排序</h1>
+
+  <p class="meta"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/book/ch08-sorting.md">Markdown 源文件</a>
+    · <a href="https://github.com/GMyhf/dsa-modernization">GitHub 仓库</a>
+    · <a href="errata.html">原书勘误</a></p>
+</div></header>
+<div class="layout">
+<nav class="book"><b>导读</b><a href="index.html">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html" class="here">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a></nav>
+<main>
+<p>排序把一个序列重排为非递减顺序。阅读时同时问四个问题：比较还是分配？是否稳定？额外空间多少？最好、平均、最坏时间是多少？</p>
+<p>源码：<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp" class="ext">全部手写排序</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/demo.cpp" class="ext">可运行示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/test.cpp" class="ext">对拍测试</a>。</p>
+<h2 id="81-排序问题的基本概念"><a class="anchor" href="#81-排序问题的基本概念">#</a>8.1 排序问题的基本概念</h2>
+<p>排序把一个序列重排，使关键码按非递减（或非递增）次序排列。内部排序假定数据能全部放进内存；数据必须在外存上多趟进出的，是第 9 章的外排序。</p>
+<p>读每一种方法时同时问四件事：它靠元素之间比较，还是靠关键码的数字结构做分配？相等的键排完之后相对次序变不变（稳定）？除了原序列还要多少额外空间？最好、平均、最坏各是什么时间？「稳定」不是装饰：按成绩排序时，两名同分学生若仍按原来的姓名顺序出现，后续按姓名再排才有意义。</p>
+<p>比较排序在最坏情况下至少需要 <span class="math">Ω(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 次比较，这是判定树给出的下界。插入、选择、冒泡是 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>；堆和归并最坏也是 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>；快排平均 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，已经有序时退化成 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>。计数和基数不是比较排序，代价取决于值域或位数。</p>
+<p>本章所有实现接受有符号整数，测试含重复和负数。没有用 <code>std::sort</code> / <code>std::make_heap</code> 替代手写算法。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">方法</th>
+<th style="text-align:left">平均时间</th>
+<th style="text-align:left">稳定性</th>
+<th style="text-align:left">主要特点</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">直接插入</td>
+<td style="text-align:left">O(n²)</td>
+<td style="text-align:left">稳定</td>
+<td style="text-align:left">小规模、近乎有序时简单有效</td>
+</tr>
+<tr>
+<td style="text-align:left">冒泡</td>
+<td style="text-align:left">O(n²)</td>
+<td style="text-align:left">稳定</td>
+<td style="text-align:left">教学直观，通常不作为通用选择</td>
+</tr>
+<tr>
+<td style="text-align:left">选择</td>
+<td style="text-align:left">O(n²)</td>
+<td style="text-align:left">不稳定</td>
+<td style="text-align:left">交换次数少</td>
+</tr>
+<tr>
+<td style="text-align:left">堆排序</td>
+<td style="text-align:left">O(n log n)</td>
+<td style="text-align:left">不稳定</td>
+<td style="text-align:left">最坏情况也有保证，原地排序</td>
+</tr>
+<tr>
+<td style="text-align:left">快速排序</td>
+<td style="text-align:left">O(n log n) 平均</td>
+<td style="text-align:left">不稳定</td>
+<td style="text-align:left">实务常用，坏划分时会退化</td>
+</tr>
+<tr>
+<td style="text-align:left">归并排序</td>
+<td style="text-align:left">O(n log n)</td>
+<td style="text-align:left">稳定</td>
+<td style="text-align:left">需要 O(n) 辅助空间</td>
+</tr>
+<tr>
+<td style="text-align:left">计数/基数</td>
+<td style="text-align:left">与值域或位数有关</td>
+<td style="text-align:left">可稳定</td>
+<td style="text-align:left">适合整数键，不是比较排序</td>
+</tr>
+</tbody></table></div>
+<p>「稳定」指相等键在排序前后的相对顺序不变。例如记录按成绩排序时，两名同分学生仍按原来的姓名顺序出现。本章所有实现接受有符号整数，测试含重复和负数。没有用 <code>std::sort</code> / <code>std::make_heap</code> 替代手写算法。</p>
+<h2 id="82-插入排序"><a class="anchor" href="#82-插入排序">#</a>8.2 插入排序</h2>
+<h3 id="821-先跑一遍"><a class="anchor" href="#821-先跑一遍">#</a>8.2.1 先跑一遍</h3>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/demo.cpp">code/ch08/sorting/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
+
+<span class="p">#include &lt;iostream&gt;</span>
+<span class="p">#include &lt;vector&gt;</span>
+
+<span class="k">namespace</span> {
+<span class="t">void</span> print(<span class="k">const</span> <span class="t">char</span>* name, <span class="k">const</span> std::vector&lt;<span class="t">int</span>&gt;&amp; values) {
+    std::cout &lt;&lt; name;
+    <span class="k">for</span> (<span class="t">int</span> value : values) {
+        std::cout &lt;&lt; <span class="s">&#x27; &#x27;</span> &lt;&lt; value;
+    }
+    std::cout &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+}
+}  <span class="c">// namespace</span>
+
+<span class="t">int</span> main() {
+    <span class="k">const</span> std::vector&lt;<span class="t">int</span>&gt; raw{<span class="n">3</span>, -<span class="n">2</span>, <span class="n">7</span>, <span class="n">3</span>, <span class="n">0</span>, -<span class="n">2</span>, <span class="n">9</span>, <span class="n">1</span>};
+
+    <span class="k">auto</span> insertion = raw;
+    dsa::sorting::insertion_sort(insertion);
+    print(<span class="s">&quot;插入:&quot;</span>, insertion);
+
+    <span class="k">auto</span> heap = raw;
+    dsa::sorting::heap_sort(heap);
+    print(<span class="s">&quot;堆排:&quot;</span>, heap);
+
+    <span class="k">auto</span> quick = raw;
+    dsa::sorting::quick_sort(quick);
+    print(<span class="s">&quot;快排:&quot;</span>, quick);
+
+    <span class="k">auto</span> radix = raw;
+    dsa::sorting::radix_sort(radix);
+    print(<span class="s">&quot;基数:&quot;</span>, radix);
+}</code></pre></div>
+<div class="codeblock" data-lang="bash"><pre><code>c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch08/sorting \
+    code/ch08/sorting/demo.cpp -o /tmp/sort-demo
+/tmp/sort-demo</code></pre></div>
+<div class="codeblock" data-lang="console"><pre><code>插入: -2 -2 0 1 3 3 7 9
+堆排: -2 -2 0 1 3 3 7 9
+快排: -2 -2 0 1 3 3 7 9
+基数: -2 -2 0 1 3 3 7 9</code></pre></div>
+<p>四种算法交出同一条非递减序列。插入排序保持两个 <code>-2</code>、两个 <code>3</code> 的相对次序；堆排和快排不保证这一点。</p>
+<p>直接插入把 <code>values[index]</code> 抽出来，向前挪动所有比它大的元素，把空位留给它。相等元素不越过彼此，所以稳定。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#insertion</a></div><pre><code><span class="c">// 算法8.1：直接插入排序。相等元素不越过彼此，故稳定。</span>
+<span class="k">inline</span> <span class="t">void</span> insertion_sort(std::vector&lt;<span class="t">int</span>&gt;&amp; values) {
+    <span class="k">for</span> (std::<span class="t">size_t</span> index = <span class="n">1</span>; index &lt; values.size(); ++index) {
+        <span class="k">const</span> <span class="t">int</span> value = values[index];
+        std::<span class="t">size_t</span> hole = index;
+        <span class="k">while</span> (hole != <span class="n">0</span> &amp;&amp; value &lt; values[hole - <span class="n">1</span>]) {
+            values[hole] = values[hole - <span class="n">1</span>];
+            --hole;
+        }
+        values[hole] = value;
+    }
+}</code></pre></div>
+<h3 id="822-shell-排序"><a class="anchor" href="#822-shell-排序">#</a>8.2.2 Shell 排序</h3>
+<p>增量每次减半的插入排序。不稳定，平均优于直接插入。实现见同一源文件中的 <code>shell_sort</code>。</p>
+<h2 id="83-选择排序"><a class="anchor" href="#83-选择排序">#</a>8.3 选择排序</h2>
+<h3 id="832-堆排序"><a class="anchor" href="#832-堆排序">#</a>8.3.2 堆排序</h3>
+<p>先把数组建成最大堆，再反复把堆顶与堆尾交换并缩小堆。<code>sift_down</code> 必须比较左右两个孩子。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#heap</a></div><pre><code><span class="c">// 算法8.4：手写最大堆筛选与堆排序，不委托 std::make_heap/sort_heap。</span>
+<span class="k">inline</span> <span class="t">void</span> sift_down(std::vector&lt;<span class="t">int</span>&gt;&amp; values, std::<span class="t">size_t</span> root, std::<span class="t">size_t</span> count) {
+    <span class="k">while</span> (root * <span class="n">2</span> + <span class="n">1</span> &lt; count) {
+        std::<span class="t">size_t</span> child = root * <span class="n">2</span> + <span class="n">1</span>;
+        <span class="k">if</span> (child + <span class="n">1</span> &lt; count &amp;&amp; values[child] &lt; values[child + <span class="n">1</span>]) ++child;
+        <span class="k">if</span> (values[root] &gt;= values[child]) <span class="k">return</span>;
+        <span class="k">using</span> std::swap;
+        swap(values[root], values[child]);
+        root = child;
+    }
+}
+
+<span class="k">inline</span> <span class="t">void</span> heap_sort(std::vector&lt;<span class="t">int</span>&gt;&amp; values) {
+    <span class="k">for</span> (std::<span class="t">size_t</span> root = values.size() / <span class="n">2</span>; root != <span class="n">0</span>; --root) {
+        sift_down(values, root - <span class="n">1</span>, values.size());
+    }
+    <span class="k">for</span> (std::<span class="t">size_t</span> end = values.size(); end &gt; <span class="n">1</span>; --end) {
+        <span class="k">using</span> std::swap;
+        swap(values[<span class="n">0</span>], values[end - <span class="n">1</span>]);
+        sift_down(values, <span class="n">0</span>, end - <span class="n">1</span>);
+    }
+}</code></pre></div>
+<h2 id="84-交换排序"><a class="anchor" href="#84-交换排序">#</a>8.4 交换排序</h2>
+<h3 id="842-快速排序"><a class="anchor" href="#842-快速排序">#</a>8.4.2 快速排序</h3>
+<p>选区间末元素为枢轴，把更小的元素换到左侧，再递归两边。全相等的输入必须也能结束。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#quick</a></div><pre><code><span class="k">inline</span> std::<span class="t">size_t</span> partition(std::vector&lt;<span class="t">int</span>&gt;&amp; values, std::<span class="t">size_t</span> first, std::<span class="t">size_t</span> last) {
+    <span class="k">const</span> <span class="t">int</span> pivot = values[last - <span class="n">1</span>];
+    std::<span class="t">size_t</span> boundary = first;
+    <span class="k">for</span> (std::<span class="t">size_t</span> index = first; index + <span class="n">1</span> &lt; last; ++index) {
+        <span class="k">if</span> (values[index] &lt; pivot) {
+            <span class="k">using</span> std::swap;
+            swap(values[boundary], values[index]);
+            ++boundary;
+        }
+    }
+    <span class="k">using</span> std::swap;
+    swap(values[boundary], values[last - <span class="n">1</span>]);
+    <span class="k">return</span> boundary;
+}
+
+<span class="k">inline</span> <span class="t">void</span> quick_sort_range(std::vector&lt;<span class="t">int</span>&gt;&amp; values, std::<span class="t">size_t</span> first, std::<span class="t">size_t</span> last) {
+    <span class="k">if</span> (last - first &lt; <span class="n">2</span>) <span class="k">return</span>;
+    <span class="k">const</span> std::<span class="t">size_t</span> middle = partition(values, first, last);
+    quick_sort_range(values, first, middle);
+    quick_sort_range(values, middle + <span class="n">1</span>, last);
+}
+
+<span class="c">// 算法8.6：手写快排。</span>
+<span class="k">inline</span> <span class="t">void</span> quick_sort(std::vector&lt;<span class="t">int</span>&gt;&amp; values) { quick_sort_range(values, <span class="n">0</span>, values.size()); }</code></pre></div>
+<h2 id="85-归并排序"><a class="anchor" href="#85-归并排序">#</a>8.5 归并排序</h2>
+<p>归并排序采用分治法：先把区间二分，递归地排好左右两个子区间，再用一次线性扫描把两个 有序区间合并。区间长度小于 2 时已经有序，因此递归可以停止。每一层合并总共扫描 <code>n</code> 个元素，递推式为</p>
+<div class="math math-display">T(n)<span class="rel">=</span><span class="upr">2</span>T(n/<span class="upr">2</span>)<span class="bin">+</span>Θ(n)<span class="rel">=</span>Θ(n&thinsp;<span class="upr">log</span>&thinsp;n).</div>
+<p>实现只分配一个与输入等长的缓冲区，并在所有递归层复用它；因此辅助空间为 <code>O(n)</code>，递归 调用栈另占 <code>O(log n)</code>。合并时使用“右侧严格更小才取右侧”的判断：相等元素先取左侧， 从而保持稳定性。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#merge</a></div><pre><code><span class="k">inline</span> <span class="t">void</span> merge_ranges(std::vector&lt;<span class="t">int</span>&gt;&amp; values, std::vector&lt;<span class="t">int</span>&gt;&amp; buffer,
+                         std::<span class="t">size_t</span> first, std::<span class="t">size_t</span> middle, std::<span class="t">size_t</span> last) {
+    std::<span class="t">size_t</span> left = first;
+    std::<span class="t">size_t</span> right = middle;
+    std::<span class="t">size_t</span> output = first;
+    <span class="k">while</span> (left &lt; middle &amp;&amp; right &lt; last) {
+        buffer[output++] = values[right] &lt; values[left] ? values[right++] : values[left++];
+    }
+    <span class="k">while</span> (left &lt; middle) buffer[output++] = values[left++];
+    <span class="k">while</span> (right &lt; last) buffer[output++] = values[right++];
+    <span class="k">for</span> (std::<span class="t">size_t</span> index = first; index &lt; last; ++index) values[index] = buffer[index];
+}
+
+<span class="k">inline</span> <span class="t">void</span> merge_sort_range(std::vector&lt;<span class="t">int</span>&gt;&amp; values, std::vector&lt;<span class="t">int</span>&gt;&amp; buffer,
+                             std::<span class="t">size_t</span> first, std::<span class="t">size_t</span> last) {
+    <span class="k">if</span> (last - first &lt; <span class="n">2</span>) <span class="k">return</span>;
+    <span class="k">const</span> std::<span class="t">size_t</span> middle = first + (last - first) / <span class="n">2</span>;
+    merge_sort_range(values, buffer, first, middle);
+    merge_sort_range(values, buffer, middle, last);
+    merge_ranges(values, buffer, first, middle, last);
+}
+
+<span class="c">// 算法8.8：两路归并排序。</span>
+<span class="k">inline</span> <span class="t">void</span> merge_sort(std::vector&lt;<span class="t">int</span>&gt;&amp; values) {
+    std::vector&lt;<span class="t">int</span>&gt; buffer(values.size());
+    merge_sort_range(values, buffer, <span class="n">0</span>, values.size());
+}</code></pre></div>
+<p>空序列和单元素序列都能直接通过；输入已经有序时，基础版本仍会完成全部归并，若需要跳过 无效归并可使用下一节的 <code>merge_sort_optimized</code>。</p>
+<h2 id="86-分配排序和索引排序"><a class="anchor" href="#86-分配排序和索引排序">#</a>8.6 分配排序和索引排序</h2>
+<h3 id="862-基数排序"><a class="anchor" href="#862-基数排序">#</a>8.6.2 基数排序</h3>
+<p>把有符号 <code>int</code> 的符号位翻转后，按字节做 4 趟计数收集。否则负数会按无符号序排到最大。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#radix</a></div><pre><code><span class="c">// 算法8.11：LSD 基数排序。翻转符号位使二补码有符号 int 按无符号序排序。</span>
+<span class="k">inline</span> <span class="t">void</span> radix_sort(std::vector&lt;<span class="t">int</span>&gt;&amp; values) {
+    std::vector&lt;<span class="t">int</span>&gt; buffer(values.size());
+    <span class="k">for</span> (<span class="t">unsigned</span> shift = <span class="n">0</span>; shift &lt; <span class="n">32</span>; shift += <span class="n">8</span>) {
+        std::<span class="t">size_t</span> counts[<span class="n">256</span>]{};
+        <span class="k">for</span> (<span class="t">int</span> value : values) {
+            <span class="k">const</span> <span class="k">auto</span> key = <span class="k">static_cast</span>&lt;std::uint32_t&gt;(value) ^ <span class="n">0x80000000U</span>;
+            ++counts[(key &gt;&gt; shift) &amp; <span class="n">0xffU</span>];
+        }
+        std::<span class="t">size_t</span> offset = <span class="n">0</span>;
+        <span class="k">for</span> (std::<span class="t">size_t</span>&amp; count : counts) { <span class="k">const</span> std::<span class="t">size_t</span> old = count; count = offset; offset += old; }
+        <span class="k">for</span> (<span class="t">int</span> value : values) {
+            <span class="k">const</span> <span class="k">auto</span> key = <span class="k">static_cast</span>&lt;std::uint32_t&gt;(value) ^ <span class="n">0x80000000U</span>;
+            buffer[counts[(key &gt;&gt; shift) &amp; <span class="n">0xffU</span>]++] = value;
+        }
+        values.swap(buffer);
+    }
+}</code></pre></div>
+<h2 id="87-排序算法的时间代价"><a class="anchor" href="#87-排序算法的时间代价">#</a>8.7 排序算法的时间代价</h2>
+<p>以下结论以“元素比较次数”为主要模型，并假定元素比较为 O(1)。比较排序在最坏情况下至少 Ω(n log n) 次比较。插入、选择、冒泡是 O(n²)；堆、归并最坏也是 O(n log n)；快排平均 O(n log n)、最坏 O(n²)，其中快排结论取决于枢轴策略和输入分布。计数和基数不是比较排序，代价取决于值域、位数和 辅助数组大小，不能直接与比较排序的比较次数横向等同。</p>
+<h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
+<p>内部排序假定数据能全部放进内存。比较排序有插入、选择、交换、归并、堆几条路线；分配排序（计数、基数）不靠元素之间比较。稳定与否、额外空间、最好/平均/最坏时间，是选择算法时要同时看的四件事。比较排序最坏至少 <span class="math">Ω(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 次比较。本章所有算法都是手写实现，不用标准库排序替代。</p>
+<h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
+<h3 id="补充复杂度题参考课程第-8-章"><a class="anchor" href="#补充复杂度题参考课程第-8-章">#</a>补充复杂度题（参考课程第 8 章）</h3>
+<ol>
+<li>用随机划分实现 Randomized-Select，求无序数组第 <code>k</code> 小元素，并说明期望复杂度。</li>
+<li>对字符串按长度分桶，再按字符位做稳定基数排序；证明总时间与所有字符串长度之和同阶。</li>
+<li>给出索引排序与直接排序的区别，并说明重复键时如何保持稳定性。</li>
+<li>对序列 <code>{49, 38, 65, 97, 76, 13, 27}</code> 分别画出直接插入、冒泡、简单选择的第一趟结果。</li>
+<li>说明为什么直接插入稳定、堆排序不稳定。举一个使堆排序打乱相等键次序的例子。</li>
+<li>写出快速排序一次划分的过程，并指出最坏输入。</li>
+<li>对 8 个元素用手算堆排序：先建大顶堆，再写出每一趟交换堆顶之后的数组。</li>
+<li>二路归并需要多少额外空间？能否原地归并？代价是什么。</li>
+<li>基数排序为什么对有符号整数要先处理符号位。</li>
+<li>在什么情况下你会选插入而不是快排？选堆而不是归并？</li>
+</ol>
+<h2 id="上机题"><a class="anchor" href="#上机题">#</a>上机题</h2>
+<ol>
+<li>用同一组随机数据比较插入、堆、快排、归并的运行时间，画出 <span class="math">n</span> 与时间的关系。</li>
+<li>构造使快排退化的输入，观察递归深度。</li>
+<li>实现带监视哨的插入排序，并与本章实现对拍。</li>
+<li>对含负数的整数序列验证基数排序与 <code>std::sort</code> 结果一致。</li>
+</ol>
+<div class="pagenav"><a href="ch07-graph.html"><span class="dir">← 上一篇</span>第7章 图</a><a href="ch09-external-sort.html" style="text-align:right"><span class="dir">下一篇 →</span>第9章 文件管理与外部排序</a></div>
+</main>
+<nav class="page"><b>本页</b><a href="#81-排序问题的基本概念">8.1 排序问题的基本概念</a><a href="#82-插入排序">8.2 插入排序</a><a href="#821-先跑一遍" class="sub">8.2.1 先跑一遍</a><a href="#822-shell-排序" class="sub">8.2.2 Shell 排序</a><a href="#83-选择排序">8.3 选择排序</a><a href="#832-堆排序" class="sub">8.3.2 堆排序</a><a href="#84-交换排序">8.4 交换排序</a><a href="#842-快速排序" class="sub">8.4.2 快速排序</a><a href="#85-归并排序">8.5 归并排序</a><a href="#86-分配排序和索引排序">8.6 分配排序和索引排序</a><a href="#862-基数排序" class="sub">8.6.2 基数排序</a><a href="#87-排序算法的时间代价">8.7 排序算法的时间代价</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充复杂度题参考课程第-8-章" class="sub">补充复杂度题（参考课程第 8 章）</a><a href="#上机题">上机题</a></nav>
+</div>
+<footer>
+  本页由 <code>tools/build_site.py</code> 从 <code>book/ch08-sorting.md</code> 生成
+  —— Markdown 是唯一事实源，请勿手改此文件。正文中的 C++ 代码块与 <code>code/</code> 下
+  通过测试的源码逐字一致（由 <code>tools/check_doc.py</code> 的 R3 保证）。
+</footer>
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('nav.page a'));
+  if(links.length){
+    var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a});
+    var seen=[];
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        var id=e.target.id;
+        if(e.isIntersecting){if(seen.indexOf(id)<0)seen.push(id)}
+        else{var i=seen.indexOf(id);if(i>=0)seen.splice(i,1)}
+      });
+      links.forEach(function(a){a.classList.remove('active')});
+      if(seen.length&&map[seen[0]])map[seen[0]].classList.add('active');
+    },{rootMargin:'0px 0px -75% 0px'});
+    [].slice.call(document.querySelectorAll('h2[id],h3[id]')).forEach(function(h){io.observe(h)});
+  }
+  [].slice.call(document.querySelectorAll('.codeblock')).forEach(function(block){
+    var button=document.createElement('button');
+    button.className='copy';button.type='button';button.textContent='复制';
+    button.addEventListener('click',function(){
+      var text=block.querySelector('code').textContent;
+      var done=function(){button.textContent='已复制';
+        setTimeout(function(){button.textContent='复制'},1200)};
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done,function(){button.textContent='复制失败'});
+      }else{
+        var area=document.createElement('textarea');area.value=text;document.body.appendChild(area);
+        area.select();try{document.execCommand('copy');done()}catch(e){button.textContent='复制失败'}
+        document.body.removeChild(area);
+      }
+    });
+    block.appendChild(button);
+  });
+})();
+</script>
+</body>
+</html>

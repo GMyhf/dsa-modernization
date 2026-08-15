@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第10章 检索 · 现代 C++ 数据结构教程</title>
+<meta name="description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:title" content="第10章 检索">
+<meta property="og:description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:type" content="article">
+<style>
+:root{color-scheme:light;
+  --ink:#1a2230;--muted:#68758a;--faint:#93a0b3;--line:#dde3ec;--bg:#f3f5f9;--panel:#fff;
+  --soft:#eef1f7;--accent:#2f5fd0;--accent-soft:#e5ecfb;--warn:#b06a1c;--danger:#c0392b;
+  --kw:#8b2fa0;--ty:#0f6f8c;--st:#177245;--cm:#7d8899;--pp:#a3572a}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;
+  --ink:#e3e8f0;--muted:#98a3b5;--faint:#6f7c90;--line:#2b3342;--bg:#12151b;--panel:#171b22;
+  --soft:#1e232c;--accent:#84a9f5;--accent-soft:#1c2740;--warn:#dcae72;--danger:#e08a80;
+  --kw:#d79ae8;--ty:#7cc7dd;--st:#8fd0a4;--cm:#7b8598;--pp:#e0a97b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.8 system-ui,-apple-system,"Segoe UI","Noto Sans CJK SC","PingFang SC",sans-serif}
+a{color:var(--accent)}
+.masthead{background:var(--panel);border-bottom:1px solid var(--line);padding:30px 26px 24px}
+.masthead .inner{max-width:1440px;margin:0 auto}
+.masthead .eyebrow{font-size:13px;color:var(--muted);letter-spacing:.06em;margin:0 0 6px}
+.masthead .eyebrow a{text-decoration:none}
+.masthead h1{margin:0;font-size:clamp(23px,3.4vw,34px);line-height:1.25;letter-spacing:-.01em}
+.masthead p.sub{margin:10px 0 0;color:var(--muted);font-size:15px;max-width:62ch}
+.masthead .meta{margin:12px 0 0;font-size:13.5px;color:var(--muted)}
+.layout{max-width:1440px;margin:0 auto;padding:0 26px 80px;display:grid;
+  grid-template-columns:228px minmax(0,1fr) 208px;gap:40px;align-items:start}
+nav.book,nav.page{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;
+  padding:22px 0;font-size:14px;line-height:1.55}
+nav b{display:block;color:var(--faint);font-size:11.5px;letter-spacing:.1em;
+  text-transform:uppercase;margin:16px 0 8px}
+nav b:first-child{margin-top:0}
+nav a{display:block;padding:5px 10px;border-left:2px solid transparent;
+  color:var(--ink);text-decoration:none;border-radius:0 5px 5px 0}
+nav a:hover{background:var(--soft);color:var(--accent)}
+nav.book a.here{background:var(--accent-soft);border-left-color:var(--accent);
+  color:var(--accent);font-weight:600}
+nav.page a{color:var(--muted);font-size:13.5px;padding:4px 10px}
+nav.page a.sub{padding-left:22px;font-size:13px;color:var(--faint)}
+nav.page a.active{border-left-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+main{min-width:0;padding-top:24px}
+h1,h2,h3,h4{scroll-margin-top:16px}
+h2{font-size:24px;margin:48px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+h3{font-size:18.5px;margin:30px 0 10px}
+h4{font-size:16px;margin:22px 0 8px;color:var(--muted)}
+.anchor{float:left;margin-left:-1.05em;padding-right:.3em;color:transparent;
+  text-decoration:none;font-weight:400}
+h2:hover .anchor,h3:hover .anchor,h4:hover .anchor{color:var(--faint)}
+p{margin:0 0 15px}
+code{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  background:var(--soft);padding:2px 6px;border-radius:4px;word-break:break-word}
+.codeblock{position:relative;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px;margin:0 0 18px;overflow:hidden}
+.codeblock .srcbar{border-bottom:1px solid var(--line);background:var(--soft);
+  padding:6px 12px;font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+.codeblock .srcbar a{color:var(--muted);text-decoration:none}
+.codeblock .srcbar a:hover{color:var(--accent);text-decoration:underline}
+.codeblock pre{margin:0;padding:14px 16px;overflow:auto}
+.codeblock code{background:none;padding:0;font-size:13px;line-height:1.65;white-space:pre}
+.codeblock[data-lang=console] pre,.codeblock[data-lang=bash] pre{background:var(--soft)}
+.codeblock[data-lang=text]::after{content:"原书印刷";position:absolute;top:8px;right:10px;
+  font-size:11px;color:var(--faint);letter-spacing:.05em}
+.copy{position:absolute;top:6px;right:8px;border:1px solid var(--line);background:var(--panel);
+  color:var(--muted);border-radius:6px;font-size:12px;padding:2px 8px;cursor:pointer;opacity:0}
+.codeblock:hover .copy{opacity:1}
+.copy:hover{color:var(--accent);border-color:var(--accent)}
+.codeblock .srcbar~.copy{top:34px}
+.k{color:var(--kw)}.t{color:var(--ty)}.s{color:var(--st)}.c{color:var(--cm);font-style:italic}
+.n{color:var(--warn)}.p{color:var(--pp)}
+blockquote{margin:0 0 18px;padding:12px 18px;border-left:3px solid var(--accent);
+  background:var(--soft);border-radius:0 7px 7px 0}
+blockquote p:last-child{margin-bottom:0}
+.table-wrap{overflow-x:auto;margin:0 0 18px}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--panel)}
+th,td{border:1px solid var(--line);padding:8px 11px;vertical-align:top}
+th{background:var(--soft);font-weight:650}
+ul,ol{margin:0 0 15px;padding-left:26px}
+li{margin:6px 0}
+hr{border:0;border-top:1px solid var(--line);margin:34px 0}
+figure{margin:0 0 22px;padding:12px;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px}
+figure img{max-width:100%;display:block;margin:0 auto;border-radius:4px;background:#fff}
+figcaption{margin-top:9px;color:var(--muted);font-size:13.5px;text-align:center}
+.gallery-page{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:18px;align-items:start}
+.gallery-page>figure{margin:0}
+.gallery-page>h2,.gallery-page>h3,.gallery-page>p,.gallery-page>blockquote,
+.gallery-page>hr,.gallery-page>.pagenav{grid-column:1/-1}
+.math{font-family:"Latin Modern Math","Cambria Math",Georgia,serif;font-style:italic}
+.math .upr,.math .mono,.math .bold{font-style:normal}
+.math .mono{font-family:ui-monospace,Menlo,monospace}
+.math .bold{font-weight:700}
+.math sup,.math sub{font-size:.72em}
+.math .rel{margin:0 .28em;font-style:normal}
+.math .bin{margin:0 .16em;font-style:normal}
+.math-display{display:block;text-align:center;margin:18px 0;font-size:17px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+  font-size:.85em;line-height:1.15}
+.frac .num{border-bottom:1px solid currentColor;padding:0 .25em}
+.frac .den{padding:0 .25em}
+.sqrt{border-top:1px solid currentColor}
+.sqrt::before{content:"√";border-top:0}
+.tex-raw{border-bottom:1px dotted var(--danger);font-style:normal}
+.pagenav{display:flex;justify-content:space-between;gap:16px;margin:50px 0 0;
+  border-top:1px solid var(--line);padding-top:18px;font-size:14.5px}
+.pagenav a{text-decoration:none;max-width:46%}
+.pagenav .dir{display:block;color:var(--faint);font-size:12px}
+footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
+  font-size:13.5px;border-top:1px solid var(--line)}
+@media(max-width:1180px){
+  .layout{grid-template-columns:212px minmax(0,1fr);gap:32px}
+  nav.page{display:none}
+}
+@media(max-width:820px){
+  .layout{grid-template-columns:1fr;gap:0;padding:0 18px 60px}
+  nav.book{position:static;max-height:none;border-bottom:1px solid var(--line);
+    margin-bottom:14px;padding:14px 0}
+  .masthead{padding:22px 18px 18px}
+}
+@media print{
+  nav,.pagenav,.copy{display:none}
+  .layout{display:block;max-width:none}
+  body{background:#fff}
+  a{color:inherit;text-decoration:none}
+  .codeblock,figure,table{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header class="masthead"><div class="inner">
+<p class="eyebrow"><a href="index.html">现代 C++ 数据结构教程</a></p>  <h1>第10章 检索</h1>
+
+  <p class="meta"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/book/ch10-search.md">Markdown 源文件</a>
+    · <a href="https://github.com/GMyhf/dsa-modernization">GitHub 仓库</a>
+    · <a href="errata.html">原书勘误</a></p>
+</div></header>
+<div class="layout">
+<nav class="book"><b>导读</b><a href="index.html">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html" class="here">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a></nav>
+<main>
+<p>检索的目标是在一组记录中找到目标键。顺序检索不要求有序；二分检索要求有序，靠每次排除一半区间加速；散列表用散列函数直接定位槽位，冲突时继续探测。</p>
+<p>源码：<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch10/search_hash/modern.hpp" class="ext">检索、集合和散列表</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch10/search_hash/demo.cpp" class="ext">可运行示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch10/search_hash/test.cpp" class="ext">墓碑探测测试</a>。</p>
+<p>检索是在一组记录里定位关键码等于给定值的那一条，或属性满足条件的那些条。成功就是至少找到一条，失败就是没有。精确匹配查单个值，范围查询查一个区间。</p>
+<p>平均检索长度 <span class="math"><span class="upr">ASL</span><span class="rel">=</span>∑P<sub>i</sub>C<sub>i</sub></span>，其中 <span class="math">P<sub>i</sub></span> 是查到第 i 个元素的概率，<span class="math">C<sub>i</sub></span> 是比较次数。衡量算法还要看额外空间和实现复杂度。</p>
+<p>可以把检索分成四类：基于线性表、按关键码直接访问（含散列）、树形索引、基于属性（倒排）。本章做前两类；树形索引见第 5、11、12 章，倒排见第 11 章。</p>
+<h2 id="101-基于线性表的检索"><a class="anchor" href="#101-基于线性表的检索">#</a>10.1 基于线性表的检索</h2>
+<p>数据放在数组或链表里，按给定值 <span class="math">K</span> 与表中元素比较，直到命中或能确定不在表中。这一节不要求散列函数，也不建树，只靠线性结构本身。</p>
+<h3 id="1011-顺序检索"><a class="anchor" href="#1011-顺序检索">#</a>10.1.1 顺序检索</h3>
+<p>从表头逐个比到表尾。表可以无序，实现最简单，链表和数组都能用。最好情况目标在第一个位置，比较 1 次；最坏情况目标不在表里，比较 <span class="math">n</span> 次；等概率时平均检索长度 <span class="math"><span class="upr">ASL</span><span class="rel">=</span>(n<span class="bin">+</span><span class="upr">1</span>)/<span class="upr">2</span></span>。有时在表尾放一个与 <span class="math">K</span> 相等的「监视哨」，循环里就不必每次都判断下标有没有出界，比较次数的常数会小一点，阶不变。</p>
+<h3 id="1012-二分检索"><a class="anchor" href="#1012-二分检索">#</a>10.1.2 二分检索</h3>
+<p>表必须按关键码有序，并且能按下标随机访问，所以适合数组，不适合链表。每次取当前区间的中点：相等则停；目标更大则丢掉左半，否则丢掉右半。区间长度每次至少减半，比较次数是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>。</p>
+<p>实现时用半开区间 <code>[first, last)</code>：中点是 <code>first + (last - first) / 2</code>，走左半时 <code>last = middle</code>，走右半时 <code>first = middle + 1</code>。这样不必写 <code>middle - 1</code>，无符号下标不会在 <code>middle == 0</code> 时下溢。循环条件是 <code>first &lt; last</code>；区间空了还没找到，就返回空。</p>
+<h3 id="1013-分块检索"><a class="anchor" href="#1013-分块检索">#</a>10.1.3 分块检索</h3>
+<p>把 <span class="math">n</span> 个元素分成 <span class="math">b</span> 块。块与块之间有序（后一块的最小关键码不小于前一块的最大关键码），块内部可以无序。另造一张块索引，每项记下该块的最大（或最小）关键码和块的起始位置。检索时先在索引上顺序或二分，确定目标可能在哪一块，再在那一块里顺序查。</p>
+<p>块数选 <span class="math"><span class="sqrt">n</span></span> 量级时，索引和块内的平均比较次数比较均衡，ASL 大约是 <span class="math">O(<span class="sqrt">n</span>)</span>，介于顺序的 <span class="math">O(n)</span> 和二分的 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span> 之间。它适合「主表很大、不能整表排序，但可以按块组织」的场合。本章不另写未验证的分块实现。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch10/search_hash/modern.hpp">code/ch10/search_hash/modern.hpp#sequential-binary</a></div><pre><code><span class="c">// 算法10.2：无需修改输入容器的顺序检索。</span>
+<span class="k">inline</span> std::optional&lt;std::<span class="t">size_t</span>&gt; sequential_search(<span class="k">const</span> std::vector&lt;<span class="t">int</span>&gt;&amp; values, <span class="t">int</span> key) {
+    <span class="k">for</span> (std::<span class="t">size_t</span> index = <span class="n">0</span>; index &lt; values.size(); ++index) {
+        <span class="k">if</span> (values[index] == key) <span class="k">return</span> index;
+    }
+    <span class="k">return</span> std::nullopt;
+}
+
+<span class="c">// 算法10.3：半开区间避免 `mid - 1` 在无符号下标下溢。</span>
+<span class="k">inline</span> std::optional&lt;std::<span class="t">size_t</span>&gt; binary_search(<span class="k">const</span> std::vector&lt;<span class="t">int</span>&gt;&amp; sorted_values, <span class="t">int</span> key) {
+    std::<span class="t">size_t</span> first = <span class="n">0</span>;
+    std::<span class="t">size_t</span> last = sorted_values.size();
+    <span class="k">while</span> (first &lt; last) {
+        <span class="k">const</span> std::<span class="t">size_t</span> middle = first + (last - first) / <span class="n">2</span>;
+        <span class="k">if</span> (sorted_values[middle] == key) <span class="k">return</span> middle;
+        <span class="k">if</span> (sorted_values[middle] &lt; key) first = middle + <span class="n">1</span>;
+        <span class="k">else</span> last = middle;
+    }
+    <span class="k">return</span> std::nullopt;
+}</code></pre></div>
+<h2 id="102-集合的检索"><a class="anchor" href="#102-集合的检索">#</a>10.2 集合的检索</h2>
+<p>检索也可以用来实现集合。集合只关心一个元素在不在里面，不保留重复，也不保证顺序。交、并、差、包含都可以建立在「是否属于」之上。</p>
+<h3 id="1021-集合的数学特性"><a class="anchor" href="#1021-集合的数学特性">#</a>10.2.1 集合的数学特性</h3>
+<p>集合的元素互异：同一个值不能出现两次。「<span class="math">x</span> 属于 <span class="math">S</span>」是一个命题，不是一个位置。所以插入一个已经在里面的键、删除一个不在里面的键，都是正常、可预期的失败，应当返回「没做成」，而不是抛异常或打印一行。空集上的任何包含询问都是假。</p>
+<h3 id="1022-计算机中的集合"><a class="anchor" href="#1022-计算机中的集合">#</a>10.2.2 计算机中的集合</h3>
+<p>同一组集合运算，底下可以用不同结构：线性表加顺序检索（实现简单，适合很小的集合）、有序表加二分、二叉搜索树、散列表。规模上去以后，线性表的 <span class="math">O(n)</span> 检索会拖垮交和并。本章的 <code>IntSet</code> 故意用线性表，把接口先钉死：<code>insert</code> / <code>erase</code> 返回 <code>bool</code>，<code>contains</code> 只回答在不在，<code>intersection</code> 和 <code>includes</code> 用检索组合出来。换成散列表时，调用方不用改。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch10/search_hash/modern.hpp">code/ch10/search_hash/modern.hpp#int-set</a></div><pre><code><span class="c">// 代码10.4、算法10.5–10.7：不重复整数集合。</span>
+<span class="k">class</span> IntSet {
+<span class="k">public</span>:
+    [[nodiscard]] <span class="t">bool</span> insert(<span class="t">int</span> value) {
+        <span class="k">if</span> (contains(value)) <span class="k">return</span> <span class="k">false</span>;
+        values_.push_back(value);
+        <span class="k">return</span> <span class="k">true</span>;
+    }
+    [[nodiscard]] <span class="t">bool</span> erase(<span class="t">int</span> value) {
+        <span class="k">const</span> <span class="k">auto</span> found = sequential_search(values_, value);
+        <span class="k">if</span> (!found) <span class="k">return</span> <span class="k">false</span>;
+        values_.erase(values_.begin() + <span class="k">static_cast</span>&lt;std::<span class="t">ptrdiff_t</span>&gt;(*found));
+        <span class="k">return</span> <span class="k">true</span>;
+    }
+    [[nodiscard]] <span class="t">bool</span> contains(<span class="t">int</span> value) <span class="k">const</span> { <span class="k">return</span> sequential_search(values_, value).has_value(); }
+    [[nodiscard]] IntSet intersection(<span class="k">const</span> IntSet&amp; other) <span class="k">const</span> {
+        IntSet result;
+        <span class="k">for</span> (<span class="t">int</span> value : values_) <span class="k">if</span> (other.contains(value)) (<span class="t">void</span>)result.insert(value);
+        <span class="k">return</span> result;
+    }
+    [[nodiscard]] <span class="t">bool</span> includes(<span class="k">const</span> IntSet&amp; other) <span class="k">const</span> {
+        <span class="k">for</span> (<span class="t">int</span> value : other.values_) <span class="k">if</span> (!contains(value)) <span class="k">return</span> <span class="k">false</span>;
+        <span class="k">return</span> <span class="k">true</span>;
+    }
+    [[nodiscard]] std::<span class="t">size_t</span> size() <span class="k">const</span> <span class="k">noexcept</span> { <span class="k">return</span> values_.size(); }
+<span class="k">private</span>:
+    std::vector&lt;<span class="t">int</span>&gt; values_;
+};</code></pre></div>
+<h2 id="103-散列方法"><a class="anchor" href="#103-散列方法">#</a>10.3 散列方法</h2>
+<p>前面的检索都要和表里的元素比较，至少看 <span class="math"><span class="upr">log</span>&thinsp;n</span> 或 <span class="math"><span class="sqrt">n</span></span> 个。散列换一条路：用函数从关键码直接算出槽位下标，期望一次就能到。它不保持键的次序，不能按范围遍历；装载因子过高或散列不均匀时，冲突变多，会退化成接近线性。</p>
+<h3 id="1031-散列函数"><a class="anchor" href="#1031-散列函数">#</a>10.3.1 散列函数</h3>
+<p>散列函数 <span class="math">h</span> 把关键码映到 <span class="math">{<span class="upr">0</span>,<span class="upr">1</span>,…,m<span class="bin">−</span><span class="upr">1</span>}</span>。它应当算得快，并且尽量把地址铺匀，否则很多键挤在同一段，再好的冲突处理也救不了。常见做法有：除留余数（<span class="math">h(k)<span class="rel">=</span>k&thinsp;<span class="upr">bmod</span>&thinsp;m</span>，<span class="math">m</span> 最好是素数）、折叠、平方取中、以及按字节处理的字符串散列。</p>
+<p>本章实现了 ELFHash：每个字节先左移 4 位再加进去，高 4 位若非零就折回到低位并清掉。字节按 <code>unsigned char</code> 读，避免 <code>char</code> 在有的平台上是有符号的、高位 1 被当成负数。它不是密码学哈希，只求快和够匀。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch10/search_hash/modern.hpp">code/ch10/search_hash/modern.hpp#elf-hash</a></div><pre><code><span class="c">// 算法10.8：ELFhash，逐字节处理，不把 char 的符号性带入散列。</span>
+<span class="k">inline</span> std::<span class="t">size_t</span> elf_hash(<span class="k">const</span> std::string&amp; text) <span class="k">noexcept</span> {
+    std::<span class="t">size_t</span> hash = <span class="n">0</span>;
+    <span class="k">for</span> (<span class="t">unsigned</span> <span class="t">char</span> character : text) {
+        hash = (hash &lt;&lt; <span class="n">4U</span>) + character;
+        <span class="k">const</span> std::<span class="t">size_t</span> high_bits = hash &amp; <span class="n">0xF0000000U</span>;
+        <span class="k">if</span> (high_bits != <span class="n">0</span>) hash ^= high_bits &gt;&gt; <span class="n">24U</span>;
+        hash &amp;= ~high_bits;
+    }
+    <span class="k">return</span> hash;
+}</code></pre></div>
+<h3 id="1032-开散列方法拉链法"><a class="anchor" href="#1032-开散列方法拉链法">#</a>10.3.2 开散列方法（拉链法）</h3>
+<p>开散列不在表内挤位置：每个槽挂一条链表（或动态数组），散列到同一地址的关键码都串在这条链上。插入是算地址再接到链头或链尾；查找、删除只在那一条链上走。删掉一个结点不会影响别的链，也不存在「探测序列被截断」的问题。</p>
+<p>装载因子 <span class="math">α<span class="rel">=</span>n/m</span> 可以大于 1，链只是变长。成功查找的期望比较次数大约是 <span class="math"><span class="upr">1</span><span class="bin">+</span>α/<span class="upr">2</span></span>。实现简单，空间上每个结点多一个指针。本章主实现是闭散列，开散列不另写一份。</p>
+<h3 id="1033-闭散列方法开地址法"><a class="anchor" href="#1033-闭散列方法开地址法">#</a>10.3.3 闭散列方法（开地址法）</h3>
+<p>闭散列把冲突消化在表内：回家地址被占了，就按某种规则探测下一个空槽。线性探测是最简单的一种——第 <span class="math">i</span> 次看 <span class="math">(h(k)<span class="bin">+</span>i)&thinsp;<span class="upr">bmod</span>&thinsp;m</span>。二次探测、双重散列是为了减轻「挤成一团」的一次聚集。</p>
+<p>表满了就插不进去，所以 <span class="math">α</span> 必须小于 1，实务上常在 0.5 到 0.7 之间扩表。删除是闭散列的难点：不能把槽直接标成空。否则沿这条探测链查找后面的键时，会在空槽处误判「从来没插入过」而提前停止。解决办法是给槽加第三种状态——除了「空」和「有元素」，再加一个<strong>墓碑</strong>（tombstone），意思是「这里曾经有元素，被删掉了，但探测链还要继续往下走」。</p>
+<p>假设表长为 5，键 1、6、11 的散列地址都为 1，于是它们依次放在槽 1、2、3：</p>
+<div class="codeblock" data-lang="text"><pre><code>槽:  0    1    2    3    4
+     空   1    6    11   空</code></pre></div>
+<p>删除键 1 后，若把槽 1 直接标为空，查找键 6 从槽 1 开始会误以为「从未插入过 6」并提前停止。墓碑表示「这里曾有元素，但探测链还要继续」。插入新键时可以复用第一个墓碑，但查重必须继续走到真正的空槽或找到同键为止。</p>
+<p>图 10.5 就是上面这张槽位表。</p>
+<p>散列表追求平均 O(1) 查找，前提是装载因子不过高且散列分布均匀；它不保持键的有序关系，不适合按范围遍历。</p>
+<h3 id="1034-闭散列表的算法"><a class="anchor" href="#1034-闭散列表的算法">#</a>10.3.4 闭散列表的算法</h3>
+<p>先跑一遍：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch10/search_hash/demo.cpp">code/ch10/search_hash/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
+
+<span class="p">#include &lt;iostream&gt;</span>
+
+<span class="t">int</span> main() {
+    dsa::search::HashTable table(<span class="n">5</span>);
+    <span class="k">if</span> (!table.insert(<span class="n">1</span>) || !table.insert(<span class="n">6</span>) || !table.insert(<span class="n">11</span>)) {
+        std::cout &lt;&lt; <span class="s">&quot;插入 1、6、11 失败\n&quot;</span>;
+        <span class="k">return</span> <span class="n">1</span>;
+    }
+
+    std::cout &lt;&lt; <span class="s">&quot;插入 1、6、11 后:\n&quot;</span>;
+    <span class="k">for</span> (std::<span class="t">size_t</span> index = <span class="n">0</span>; index &lt; table.capacity(); ++index) {
+        <span class="k">const</span> <span class="k">auto</span> slot = table.slot_at(index);
+        std::cout &lt;&lt; <span class="s">&quot;  槽 &quot;</span> &lt;&lt; index &lt;&lt; <span class="s">&quot;: &quot;</span>;
+        <span class="k">if</span> (slot.state == dsa::search::HashTable::SlotState::used) {
+            std::cout &lt;&lt; slot.key &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+        } <span class="k">else</span> <span class="k">if</span> (slot.state == dsa::search::HashTable::SlotState::tombstone) {
+            std::cout &lt;&lt; <span class="s">&quot;墓碑\n&quot;</span>;
+        } <span class="k">else</span> {
+            std::cout &lt;&lt; <span class="s">&quot;空\n&quot;</span>;
+        }
+    }
+
+    <span class="k">if</span> (!table.erase(<span class="n">1</span>)) {
+        std::cout &lt;&lt; <span class="s">&quot;删除 1 失败\n&quot;</span>;
+        <span class="k">return</span> <span class="n">1</span>;
+    }
+    std::cout &lt;&lt; <span class="s">&quot;删除 1 后仍能找到 6? &quot;</span> &lt;&lt; (table.contains(<span class="n">6</span>) ? <span class="s">&quot;是&quot;</span> : <span class="s">&quot;否&quot;</span>) &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+    <span class="k">if</span> (!table.insert(<span class="n">16</span>)) {
+        std::cout &lt;&lt; <span class="s">&quot;插入 16 失败\n&quot;</span>;
+        <span class="k">return</span> <span class="n">1</span>;
+    }
+    std::cout &lt;&lt; <span class="s">&quot;插入 16 后槽 1 是 &quot;</span>
+              &lt;&lt; table.slot_at(<span class="n">1</span>).key
+              &lt;&lt; <span class="s">&quot;（复用了墓碑）\n&quot;</span>;
+}</code></pre></div>
+<div class="codeblock" data-lang="bash"><pre><code>c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch10/search_hash \
+    code/ch10/search_hash/demo.cpp -o /tmp/hash-demo
+/tmp/hash-demo</code></pre></div>
+<div class="codeblock" data-lang="console"><pre><code>插入 1、6、11 后:
+  槽 0: 空
+  槽 1: 1
+  槽 2: 6
+  槽 3: 11
+  槽 4: 空
+删除 1 后仍能找到 6? 是
+插入 16 后槽 1 是 16（复用了墓碑）</code></pre></div>
+<p>若把删除写成「标空」而不是「标墓碑」，第二行会变成「否」——测试里有两条具名断言守住这件事。</p>
+<p><code>HashTable::home</code> 先取绝对值再取模，所以负键也能进表。<code>find_slot</code> 遇到 <code>empty</code> 就停，遇到 <code>tombstone</code> 继续；<code>insertion_slot</code> 记下沿途第一个墓碑，确认后方没有同键后复用它。按键删除返回 <code>bool</code>。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch10/search_hash/modern.hpp">code/ch10/search_hash/modern.hpp#hash-table</a></div><pre><code><span class="c">// 算法10.9–10.13：线性探测闭散列表，显式区分空、占用和墓碑。</span>
+<span class="k">class</span> HashTable {
+<span class="k">public</span>:
+    <span class="k">enum</span> <span class="k">class</span> SlotState { empty, used, tombstone };
+    <span class="k">struct</span> SlotView { <span class="t">int</span> key; SlotState state; };
+
+    <span class="k">explicit</span> HashTable(std::<span class="t">size_t</span> capacity) : slots_(capacity) {
+        <span class="k">if</span> (capacity == <span class="n">0</span>) <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;hash table capacity must be positive&quot;</span>);
+    }
+
+    [[nodiscard]] <span class="t">bool</span> insert(<span class="t">int</span> key) {
+        <span class="k">const</span> <span class="k">auto</span> target = insertion_slot(key);
+        <span class="k">if</span> (!target) <span class="k">return</span> <span class="k">false</span>;
+        Slot&amp; slot = slots_[*target];
+        <span class="k">if</span> (slot.state == SlotState::used) <span class="k">return</span> <span class="k">false</span>;
+        slot = Slot{key, SlotState::used};
+        ++size_;
+        <span class="k">return</span> <span class="k">true</span>;
+    }
+    [[nodiscard]] <span class="t">bool</span> contains(<span class="t">int</span> key) <span class="k">const</span> { <span class="k">return</span> find_slot(key).has_value(); }
+    [[nodiscard]] <span class="t">bool</span> erase(<span class="t">int</span> key) {
+        <span class="k">const</span> <span class="k">auto</span> found = find_slot(key);
+        <span class="k">if</span> (!found) <span class="k">return</span> <span class="k">false</span>;
+        slots_[*found].state = SlotState::tombstone;
+        --size_;
+        <span class="k">return</span> <span class="k">true</span>;
+    }
+    [[nodiscard]] std::<span class="t">size_t</span> size() <span class="k">const</span> <span class="k">noexcept</span> { <span class="k">return</span> size_; }
+    [[nodiscard]] std::<span class="t">size_t</span> capacity() <span class="k">const</span> <span class="k">noexcept</span> { <span class="k">return</span> slots_.size(); }
+    [[nodiscard]] SlotView slot_at(std::<span class="t">size_t</span> index) <span class="k">const</span> {
+        <span class="k">if</span> (index &gt;= slots_.size()) <span class="k">throw</span> std::out_of_range(<span class="s">&quot;hash table slot&quot;</span>);
+        <span class="k">return</span> SlotView{slots_[index].key, slots_[index].state};
+    }
+
+<span class="k">private</span>:
+    <span class="k">struct</span> Slot { <span class="t">int</span> key{<span class="n">0</span>}; SlotState state{SlotState::empty}; };
+    [[nodiscard]] std::<span class="t">size_t</span> home(<span class="t">int</span> key) <span class="k">const</span> <span class="k">noexcept</span> {
+        <span class="k">const</span> <span class="k">auto</span> magnitude = key &gt;= <span class="n">0</span> ? <span class="k">static_cast</span>&lt;<span class="t">long</span> <span class="t">long</span>&gt;(key) : -<span class="k">static_cast</span>&lt;<span class="t">long</span> <span class="t">long</span>&gt;(key);
+        <span class="k">return</span> <span class="k">static_cast</span>&lt;std::<span class="t">size_t</span>&gt;(magnitude) % slots_.size();
+    }
+    [[nodiscard]] std::optional&lt;std::<span class="t">size_t</span>&gt; find_slot(<span class="t">int</span> key) <span class="k">const</span> {
+        <span class="k">for</span> (std::<span class="t">size_t</span> step = <span class="n">0</span>; step &lt; slots_.size(); ++step) {
+            <span class="k">const</span> std::<span class="t">size_t</span> index = (home(key) + step) % slots_.size();
+            <span class="k">const</span> Slot&amp; slot = slots_[index];
+            <span class="k">if</span> (slot.state == SlotState::empty) <span class="k">return</span> std::nullopt;
+            <span class="k">if</span> (slot.state == SlotState::used &amp;&amp; slot.key == key) <span class="k">return</span> index;
+        }
+        <span class="k">return</span> std::nullopt;
+    }
+    [[nodiscard]] std::optional&lt;std::<span class="t">size_t</span>&gt; insertion_slot(<span class="t">int</span> key) <span class="k">const</span> {
+        std::optional&lt;std::<span class="t">size_t</span>&gt; first_tombstone;
+        <span class="k">for</span> (std::<span class="t">size_t</span> step = <span class="n">0</span>; step &lt; slots_.size(); ++step) {
+            <span class="k">const</span> std::<span class="t">size_t</span> index = (home(key) + step) % slots_.size();
+            <span class="k">const</span> Slot&amp; slot = slots_[index];
+            <span class="k">if</span> (slot.state == SlotState::used &amp;&amp; slot.key == key) <span class="k">return</span> index;
+            <span class="k">if</span> (slot.state == SlotState::tombstone &amp;&amp; !first_tombstone) first_tombstone = index;
+            <span class="k">if</span> (slot.state == SlotState::empty) <span class="k">return</span> first_tombstone ? first_tombstone : index;
+        }
+        <span class="k">return</span> first_tombstone;
+    }
+    std::vector&lt;Slot&gt; slots_;
+    std::<span class="t">size_t</span> size_{<span class="n">0</span>};
+};</code></pre></div>
+<h3 id="1035-散列方法的效率分析"><a class="anchor" href="#1035-散列方法的效率分析">#</a>10.3.5 散列方法的效率分析</h3>
+<p>成功检索的期望探测次数随装载因子 α 上升。线性探测大约是 <span class="math">(<span class="upr">1</span><span class="bin">+</span><span class="upr">1</span>/(<span class="upr">1</span><span class="bin">−</span>α))/<span class="upr">2</span></span>；拉链法是 <span class="math"><span class="upr">1</span><span class="bin">+</span>α/<span class="upr">2</span></span>。α 接近 1 时闭散列急剧变差，应扩表或改开散列。</p>
+<h3 id="1036-散列方法的应用"><a class="anchor" href="#1036-散列方法的应用">#</a>10.3.6 散列方法的应用</h3>
+<p>编译器符号表、缓存、去重都常用散列。需要范围查询或有序遍历时，应改用树或有序表。</p>
+<h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
+<p>检索是按关键码或属性定位记录。线性表上有顺序、二分和分块：分别要求无序、有序可随机访问、块间有序。集合只关心「在不在」，插入已存在或删除不存在都是正常失败。散列用函数直接定位槽位，期望 <span class="math">O(<span class="upr">1</span>)</span>；开散列把冲突挂到链上，闭散列在表内探测。闭散列删除必须留墓碑，否则会截断探测链。装载因子过高时要扩表。</p>
+<h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
+<h3 id="补充检索题参考课程第-10-章"><a class="anchor" href="#补充检索题参考课程第-10-章">#</a>补充检索题（参考课程第 10 章）</h3>
+<ol>
+<li>给定一个有序双向链表和当前指针，设计可向前或向后移动的检索算法，并求平均检索长度。</li>
+<li>说明堆排序后再对另一集合逐项二分检索时，总复杂度如何由排序成本和检索次数共同决定。</li>
+<li>比较拉链法和线性探测在装填因子变化时的成功检索代价。</li>
+<li>写出顺序检索在最好、最坏、等概率平均时的 ASL。</li>
+<li>用半开区间手算二分查找 18 在有序表 <code>{1,3,7,8,12,15,18,21}</code> 中的过程。</li>
+<li>分块检索的块数取多少时 ASL 较均衡？为什么。</li>
+<li>说明集合的 <code>insert</code> 为什么返回 <code>bool</code> 而不是抛异常。</li>
+<li>表长 5，依次插入 1、6、11，画出线性探测的槽；删除 1 后若标空，查找 6 会怎样。</li>
+<li>比较开散列与闭散列的删除、装载因子上限和指针开销。</li>
+<li>ELFHash 为什么按 <code>unsigned char</code> 读字节。</li>
+</ol>
+<h2 id="上机题"><a class="anchor" href="#上机题">#</a>上机题</h2>
+<ol>
+<li>对同一组随机键比较顺序、二分和散列的平均探测次数。</li>
+<li>实现闭散列的墓碑删除，并写测试：删掉头键后仍能查到其后的同址键。</li>
+<li>装载因子超过 0.7 时扩表再散列，观察聚集是否缓解。</li>
+<li>用 <code>IntSet</code> 的接口换上散列表实现，确认交、包含的测试不用改。</li>
+</ol>
+<div class="pagenav"><a href="ch09-external-sort.html"><span class="dir">← 上一篇</span>第9章 文件管理与外部排序</a><a href="ch11-index.html" style="text-align:right"><span class="dir">下一篇 →</span>第11章 索引技术</a></div>
+</main>
+<nav class="page"><b>本页</b><a href="#101-基于线性表的检索">10.1 基于线性表的检索</a><a href="#1011-顺序检索" class="sub">10.1.1 顺序检索</a><a href="#1012-二分检索" class="sub">10.1.2 二分检索</a><a href="#1013-分块检索" class="sub">10.1.3 分块检索</a><a href="#102-集合的检索">10.2 集合的检索</a><a href="#1021-集合的数学特性" class="sub">10.2.1 集合的数学特性</a><a href="#1022-计算机中的集合" class="sub">10.2.2 计算机中的集合</a><a href="#103-散列方法">10.3 散列方法</a><a href="#1031-散列函数" class="sub">10.3.1 散列函数</a><a href="#1032-开散列方法拉链法" class="sub">10.3.2 开散列方法（拉链法）</a><a href="#1033-闭散列方法开地址法" class="sub">10.3.3 闭散列方法（开地址法）</a><a href="#1034-闭散列表的算法" class="sub">10.3.4 闭散列表的算法</a><a href="#1035-散列方法的效率分析" class="sub">10.3.5 散列方法的效率分析</a><a href="#1036-散列方法的应用" class="sub">10.3.6 散列方法的应用</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充检索题参考课程第-10-章" class="sub">补充检索题（参考课程第 10 章）</a><a href="#上机题">上机题</a></nav>
+</div>
+<footer>
+  本页由 <code>tools/build_site.py</code> 从 <code>book/ch10-search.md</code> 生成
+  —— Markdown 是唯一事实源，请勿手改此文件。正文中的 C++ 代码块与 <code>code/</code> 下
+  通过测试的源码逐字一致（由 <code>tools/check_doc.py</code> 的 R3 保证）。
+</footer>
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('nav.page a'));
+  if(links.length){
+    var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a});
+    var seen=[];
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        var id=e.target.id;
+        if(e.isIntersecting){if(seen.indexOf(id)<0)seen.push(id)}
+        else{var i=seen.indexOf(id);if(i>=0)seen.splice(i,1)}
+      });
+      links.forEach(function(a){a.classList.remove('active')});
+      if(seen.length&&map[seen[0]])map[seen[0]].classList.add('active');
+    },{rootMargin:'0px 0px -75% 0px'});
+    [].slice.call(document.querySelectorAll('h2[id],h3[id]')).forEach(function(h){io.observe(h)});
+  }
+  [].slice.call(document.querySelectorAll('.codeblock')).forEach(function(block){
+    var button=document.createElement('button');
+    button.className='copy';button.type='button';button.textContent='复制';
+    button.addEventListener('click',function(){
+      var text=block.querySelector('code').textContent;
+      var done=function(){button.textContent='已复制';
+        setTimeout(function(){button.textContent='复制'},1200)};
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done,function(){button.textContent='复制失败'});
+      }else{
+        var area=document.createElement('textarea');area.value=text;document.body.appendChild(area);
+        area.select();try{document.execCommand('copy');done()}catch(e){button.textContent='复制失败'}
+        document.body.removeChild(area);
+      }
+    });
+    block.appendChild(button);
+  });
+})();
+</script>
+</body>
+</html>

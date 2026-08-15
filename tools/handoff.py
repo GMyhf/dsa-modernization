@@ -152,6 +152,8 @@ def run_verify():
         ["python3", "tools/errata.py", "--check"],
         # 3. 书稿：OCR 残留、编号、插图、以及「书上代码 == code/ 里的代码」。
         ["python3", "tools/check_doc.py"],
+        # 3b. 网页版：book/site/ 是 book/*.md 的产物，改了书稿不重新构建就会脱节。
+        ["python3", "tools/build_site.py", "--check"],
         # 4. 代码：真编译、真跑、Werror + ASan/UBSan。本项目最硬的一条。
         ["python3", "tools/check_code.py"],
     ]
