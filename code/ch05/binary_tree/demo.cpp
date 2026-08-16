@@ -1,19 +1,18 @@
-#include "modern.hpp"
+// 第 5 章「先跑一遍」：用教学版 BinaryTree 与 BinarySearchTree 走一遍四种周游与增删查。
+// 编译运行：
+//   g++ -std=c++17 -I code/ch05/binary_tree code/ch05/binary_tree/demo.cpp -o demo && ./demo
+#include "teaching.hpp"
 
 #include <iostream>
-#include <utility>
 
 int main() {
-    dsa::BinaryTree<char> left_leaf;
-    dsa::BinaryTree<char> right_leaf;
-    dsa::BinaryTree<char> left;
-    dsa::BinaryTree<char> right;
-    dsa::BinaryTree<char> root;
-    left_leaf.create_tree('D');
-    right_leaf.create_tree('E');
-    left.create_tree('B', std::move(left_leaf), std::move(right_leaf));
-    right.create_tree('C');
-    root.create_tree('A', std::move(left), std::move(right));
+    // 建一棵样例树：A 的左孩子 B（孩子 D、E），右孩子 C（叶子）
+    BinaryTree<char> d, e, b, c, root;
+    d.create_leaf('D');
+    e.create_leaf('E');
+    b.create_tree('B', d, e);      // d、e 的所有权转移给 b，之后两者变空
+    c.create_leaf('C');
+    root.create_tree('A', b, c);
 
     std::cout << "先序: ";
     root.preorder([](char value) { std::cout << value; });
@@ -25,12 +24,12 @@ int main() {
     root.level_order([](char value) { std::cout << value; });
     std::cout << '\n';
 
-    dsa::BinarySearchTree<int> tree;
+    BinarySearchTree<int> tree;
     for (int key : {8, 3, 10, 1, 6, 14, 4, 7}) {
         (void)tree.insert(key);
     }
     std::cout << "BST 中序:";
-    tree.inorder([](int key) { std::cout << ' ' << key; });
+    tree.inorder([](int key) { std::cout << ' ' << key; });   // 中序 = 升序
     std::cout << "\n含 6? " << (tree.contains(6) ? "是" : "否")
               << "  删 3 后含 3? ";
     (void)tree.remove(3);

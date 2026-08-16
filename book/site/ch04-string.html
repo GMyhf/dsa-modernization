@@ -155,21 +155,26 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <main>
 
 <p>字符串是字符的有限序列。先区分「保存字符串」的类与「在文本中找模式」的算法：前者处理容量、 复制和下标边界，后者处理比较顺序。朴素匹配在失配后移动模式；KMP 预先计算 <code>next</code> 信息，避免 重复比较已经知道相等的前缀。</p>
-<p>源码：<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/modern.hpp" class="ext">字符串类</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/demo.cpp" class="ext">字符串示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/pattern_matching/modern.hpp" class="ext">模式匹配</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/pattern_matching/demo.cpp" class="ext">匹配示例</a>。</p>
+<p>源码：<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/teaching.hpp" class="ext">字符串类·教学版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/modern.hpp" class="ext">字符串类·工程版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/demo.cpp" class="ext">字符串示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/pattern_matching/modern.hpp" class="ext">模式匹配</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/pattern_matching/demo.cpp" class="ext">匹配示例</a>。</p>
 <h2 id="先跑一遍"><a class="anchor" href="#先跑一遍">#</a>先跑一遍</h2>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/demo.cpp">code/ch04/string_class/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/demo.cpp">code/ch04/string_class/demo.cpp</a></div><pre><code><span class="c">// 第 4 章「先跑一遍」：用教学版 String 走一遍 append / substr / find。</span>
+<span class="c">// 编译运行：</span>
+<span class="c">//   g++ -std=c++17 -I code/ch04/string_class code/ch04/string_class/demo.cpp -o demo &amp;&amp; ./demo</span>
+<span class="p">#include &quot;teaching.hpp&quot;</span>
 
 <span class="p">#include &lt;iostream&gt;</span>
 
 <span class="t">int</span> main() {
-    dsa::String text = <span class="s">&quot;Hello&quot;</span>;
+    String text = <span class="s">&quot;Hello&quot;</span>;                       <span class="c">// 隐式转换：String(const char*)</span>
     text.append(<span class="s">&#x27; &#x27;</span>).append(<span class="s">&#x27;C&#x27;</span>).append(<span class="s">&#x27;+&#x27;</span>).append(<span class="s">&#x27;+&#x27;</span>);
     std::cout &lt;&lt; <span class="s">&quot;拼接后: &quot;</span> &lt;&lt; text.c_str() &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
-    <span class="k">const</span> <span class="k">auto</span> slice = text.substr(<span class="n">6</span>, <span class="n">3</span>);
+
+    <span class="k">const</span> String slice = text.substr(<span class="n">6</span>, <span class="n">3</span>);
     std::cout &lt;&lt; <span class="s">&quot;子串: &quot;</span> &lt;&lt; slice.c_str() &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
-    <span class="k">const</span> <span class="k">auto</span> found = text.find(<span class="s">&#x27;C&#x27;</span>);
+
+    <span class="c">// find 返回 optional：有值才解引用</span>
     std::cout &lt;&lt; <span class="s">&quot;首次出现 C 的下标: &quot;</span>;
-    <span class="k">if</span> (found) {
+    <span class="k">if</span> (<span class="k">const</span> <span class="k">auto</span> found = text.find(<span class="s">&#x27;C&#x27;</span>)) {
         std::cout &lt;&lt; *found &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
     } <span class="k">else</span> {
         std::cout &lt;&lt; <span class="s">&quot;无\n&quot;</span>;
@@ -214,33 +219,178 @@ KMP:  10
 <li><strong>修改器按值返回</strong>：<code>string append(const char c);</code>、<code>string concatenate(const char* s);</code> 都返回 <code>string</code> 而非引用。代码4.1 只有声明没有函数体，所以不能断定原书会丢结果； <strong>能断定的是签名含混</strong>——调用方无从判断 <code>s.append(&#x27;x&#x27;);</code> 是改了 <code>s</code>， 还是返回了一个新串而 <code>s</code> 原封不动。</li>
 </ol>
 <p>本书的 <code>String</code> 把这三处分别改为：类名大写、<code>bool empty()</code>、 <code>std::optional&lt;size_type&gt; find(...)</code>、修改器返回 <code>String&amp;</code>。</p>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/modern.hpp">code/ch04/string_class/modern.hpp#class-head</a></div><pre><code><span class="c">/// 变长字符串。内部保存一块以 &#x27;\0&#x27; 结尾的字符数组和当前长度。</span>
-<span class="c">///</span>
-<span class="c">/// 与原书 String 的差别：构造函数取 const char*（原书取 char*，</span>
-<span class="c">/// 使书中自己的例子 `String s1 = &quot;Hello&quot;;` 在 C++11 起就是非法转换）；</span>
-<span class="c">/// 越界抛 std::out_of_range，而不是 `return NULL` 让调用方拿到一个必然崩溃的对象；</span>
-<span class="c">/// 补齐五法则；不做任何 I/O。</span>
+<h2 id="42-字符串的存储结构和实现"><a class="anchor" href="#42-字符串的存储结构和实现">#</a>4.2 字符串的存储结构和实现</h2>
+<p><code>String</code> 采用动态变长的存储结构：内部持有一块以 <code>&#x27;\0&#x27;</code> 结尾的字符数组和当前长度， 构造时按初值长度分配，赋值时按新长度重新分配。这正是本节要教的内容， 所以缓冲区是<strong>裸 <code>char*</code></strong>——换成 <code>std::string</code> 这一节就没了。</p>
+<h3 id="教学版完整实现"><a class="anchor" href="#教学版完整实现">#</a>教学版：完整实现</h3>
+<p>下面是一份<strong>完整的、能直接编译运行的</strong>字符串类。一个文件、一个类。 后面 4.2.1–4.2.4 各节就是把它拆开逐段讲。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/teaching.hpp">code/ch04/string_class/teaching.hpp</a></div><pre><code><span class="c">// 字符串类 String —— 教学版。原书【代码4.1】【算法4.3】【算法4.4】【算法4.5】。</span>
+<span class="c">//</span>
+<span class="c">// 一个文件、一个类、能直接编译运行，给「第一次读这一节」的人看。</span>
+<span class="c">//</span>
+<span class="c">// 本节的教学内容是**字符串的变长存储管理**：动态分配、按长度重新开辟、拷贝与释放。</span>
+<span class="c">// 所以这里是手写的 char* 缓冲区，不是 std::string——换成 std::string，这一节就没了。</span>
+<span class="c">//</span>
+<span class="c">// 与 modern.hpp（工程版）的分工：</span>
+<span class="c">//   教学版  三法则（析构 + 拷贝构造 + 拷贝赋值）；</span>
+<span class="c">//   工程版  补齐移动语义（移动之后 data_ 为空，读取路径要多一层 raw() 兜底）、</span>
+<span class="c">//           比较运算符全家、copy-and-swap。</span>
+<span class="c">// 两份都在闸门里真编译真运行。先读这一份，4.2.5「进阶（选读）」再读那一份。</span>
+<span class="p">#pragma once</span>
+
+<span class="p">#include &lt;cstddef&gt;</span>
+<span class="p">#include &lt;cstring&gt;</span>
+<span class="p">#include &lt;optional&gt;</span>
+<span class="p">#include &lt;stdexcept&gt;</span>
+
 <span class="k">class</span> String {
 <span class="k">public</span>:
     <span class="k">using</span> size_type = std::<span class="t">size_t</span>;
 
-    <span class="c">/// 空串。注意它仍然持有一块 1 字节的缓冲区，于是 c_str() 永远可用、永不为空指针。</span>
-    String() : data_(<span class="k">new</span> <span class="t">char</span>[<span class="n">1</span>]{<span class="s">&#x27;\0&#x27;</span>}), size_(<span class="n">0</span>) {}
+    <span class="c">// 空串。**注意它仍然申请了 1 个字节**，里面放一个 &#x27;\0&#x27;。</span>
+    <span class="c">// 这样 c_str() 永远返回一个合法的 C 字符串，调用方不必先判空指针。</span>
+    String() : data_(<span class="k">new</span> <span class="t">char</span>[<span class="n">1</span>]), size_(<span class="n">0</span>) {
+        data_[<span class="n">0</span>] = <span class="s">&#x27;\0&#x27;</span>;
+    }
 
-    <span class="c">/// 从 C 字符串构造。故意**不加 explicit**：原书 `String s1 = &quot;Hello&quot;;` 这种写法</span>
-    <span class="c">/// 是本节的教学用例，保留它；代价是隐式转换，值得知道但这里可以接受。</span>
-    String(<span class="k">const</span> <span class="t">char</span>* s) {  <span class="c">// NOLINT(google-explicit-constructor)</span>
+    <span class="c">// 从 C 字符串构造。参数是 `const char*` 而不是原书的 `char*`——</span>
+    <span class="c">// 原书那个签名让它自己书里的例子 `String s1 = &quot;Hello&quot;;` 从 C++11 起就编译不过：</span>
+    <span class="c">// 字符串字面量的类型是 const char[6]，绑不到 char*。</span>
+    <span class="c">//</span>
+    <span class="c">// 这里**故意不加 explicit**，为的就是保住 `String s1 = &quot;Hello&quot;;` 这种写法。</span>
+    String(<span class="k">const</span> <span class="t">char</span>* s) {   <span class="c">// NOLINT(google-explicit-constructor)</span>
         <span class="k">if</span> (s == <span class="k">nullptr</span>) {
-            <span class="c">// 原书的 Substr 在越界时 `return NULL`，随后 strlen(nullptr) 当场 SEGV。</span>
-            <span class="c">// 这里把它挡在门口，并且说清楚是什么问题。</span>
             <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;String: 不能用空指针构造字符串&quot;</span>);
         }
         size_ = std::strlen(s);
         data_ = <span class="k">new</span> <span class="t">char</span>[size_ + <span class="n">1</span>];
-        std::memcpy(data_, s, size_ + <span class="n">1</span>);
-    }</code></pre></div>
-<h2 id="42-字符串的存储结构和实现"><a class="anchor" href="#42-字符串的存储结构和实现">#</a>4.2 字符串的存储结构和实现</h2>
-<p><code>String</code> 采用动态变长的存储结构：内部持有一块以 <code>&#x27;\0&#x27;</code> 结尾的字符数组和当前长度， 构造时按初值长度分配，赋值时按新长度重新分配。这正是本节要教的内容， 所以缓冲区是<strong>裸 <code>char*</code></strong>——换成 <code>std::string</code> 这一节就没了。</p>
+        std::memcpy(data_, s, size_ + <span class="n">1</span>);   <span class="c">// +1 把结尾那个 &#x27;\0&#x27; 也带上</span>
+    }
+
+    ~String() { <span class="k">delete</span>[] data_; }
+
+    <span class="c">// 三法则：自己管着 new 出来的缓冲区，拷贝必须自己写。</span>
+    <span class="c">// 原书正文里描述过赋值时「必须释放 s1 的原有空间」，却没有把拷贝构造和</span>
+    <span class="c">// 拷贝赋值作为清单给出。只有析构没有这两个，一次 `String b = a;` 就是二次释放。</span>
+    String(<span class="k">const</span> String&amp; other) : data_(<span class="k">new</span> <span class="t">char</span>[other.size_ + <span class="n">1</span>]), size_(other.size_) {
+        std::memcpy(data_, other.data_, size_ + <span class="n">1</span>);
+    }
+
+    String&amp; <span class="k">operator</span>=(<span class="k">const</span> String&amp; other) {
+        <span class="k">if</span> (<span class="k">this</span> == &amp;other) {
+            <span class="k">return</span> *<span class="k">this</span>;
+        }
+        <span class="t">char</span>* fresh = <span class="k">new</span> <span class="t">char</span>[other.size_ + <span class="n">1</span>];   <span class="c">// 先备好新的</span>
+        std::memcpy(fresh, other.data_, other.size_ + <span class="n">1</span>);
+        <span class="k">delete</span>[] data_;                            <span class="c">// 再释放旧的</span>
+        data_ = fresh;
+        size_ = other.size_;
+        <span class="k">return</span> *<span class="k">this</span>;
+    }
+
+    size_type size() <span class="k">const</span> { <span class="k">return</span> size_; }
+    size_type length() <span class="k">const</span> { <span class="k">return</span> size_; }
+    <span class="t">bool</span> empty() <span class="k">const</span> { <span class="k">return</span> size_ == <span class="n">0</span>; }
+    <span class="k">const</span> <span class="t">char</span>* c_str() <span class="k">const</span> { <span class="k">return</span> data_; }
+
+    <span class="t">void</span> clear() {
+        <span class="t">char</span>* fresh = <span class="k">new</span> <span class="t">char</span>[<span class="n">1</span>];
+        fresh[<span class="n">0</span>] = <span class="s">&#x27;\0&#x27;</span>;
+        <span class="k">delete</span>[] data_;
+        data_ = fresh;
+        size_ = <span class="n">0</span>;
+    }
+
+    <span class="c">// 按下标取字符。越界抛异常，不是返回一个随便什么值。</span>
+    <span class="t">char</span> at(size_type index) <span class="k">const</span> {
+        <span class="k">if</span> (index &gt;= size_) {
+            <span class="k">throw</span> std::out_of_range(<span class="s">&quot;String::at: 下标越界&quot;</span>);
+        }
+        <span class="k">return</span> data_[index];
+    }
+
+    <span class="c">// 在串尾添加一个字符。</span>
+    <span class="c">//</span>
+    <span class="c">// **变长存储的代价在这里看得最清楚**：字符串长度变了，就得重新申请一块、</span>
+    <span class="c">// 把老内容拷过去、再把老的还回去。所以 append 一个字符是 O(n)，不是 O(1)。</span>
+    <span class="c">//</span>
+    <span class="c">// 返回自身引用，于是 `s.append(&#x27;a&#x27;).append(&#x27;b&#x27;)` 可以连着写；</span>
+    <span class="c">// 原书【代码4.1】声明的是**按值返回**，调用方从签名看不出它改不改本串。</span>
+    String&amp; append(<span class="t">char</span> c) {
+        <span class="t">char</span>* fresh = <span class="k">new</span> <span class="t">char</span>[size_ + <span class="n">2</span>];        <span class="c">// 老内容 + 新字符 + &#x27;\0&#x27;</span>
+        std::memcpy(fresh, data_, size_);
+        fresh[size_] = c;
+        fresh[size_ + <span class="n">1</span>] = <span class="s">&#x27;\0&#x27;</span>;
+        <span class="k">delete</span>[] data_;
+        data_ = fresh;
+        ++size_;
+        <span class="k">return</span> *<span class="k">this</span>;
+    }
+
+    <span class="c">// 把 s 接在本串后面。同样是「重新申请、拷两段、释放旧的」。</span>
+    String&amp; concatenate(<span class="k">const</span> <span class="t">char</span>* s) {
+        <span class="k">if</span> (s == <span class="k">nullptr</span>) {
+            <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;String::concatenate: 空指针&quot;</span>);
+        }
+        size_type extra = std::strlen(s);
+        <span class="t">char</span>* fresh = <span class="k">new</span> <span class="t">char</span>[size_ + extra + <span class="n">1</span>];
+        std::memcpy(fresh, data_, size_);
+        std::memcpy(fresh + size_, s, extra + <span class="n">1</span>);
+        <span class="k">delete</span>[] data_;
+        data_ = fresh;
+        size_ += extra;
+        <span class="k">return</span> *<span class="k">this</span>;
+    }
+
+    <span class="c">// 【算法4.5】从 pos 开始取长度至多 len 的子串。</span>
+    <span class="c">//</span>
+    <span class="c">// 原书在 `pos &gt;= size` 时 `return NULL;`。那不是「返回空串」——</span>
+    <span class="c">// NULL 会去走 String(char*) 构造函数，然后 strlen(nullptr) 当场段错误。</span>
+    <span class="c">// 这里越界就抛异常，让错误停在发生的地方。</span>
+    <span class="c">// pos == size() 是合法的，得到空串（「从末尾取 0 个字符」）。</span>
+    String substr(size_type pos, size_type len) <span class="k">const</span> {
+        <span class="k">if</span> (pos &gt; size_) {
+            <span class="k">throw</span> std::out_of_range(<span class="s">&quot;String::substr: 起始位置越界&quot;</span>);
+        }
+        size_type available = size_ - pos;
+        size_type take = (len &lt; available) ? len : available;   <span class="c">// 原书的 if (n &gt; left) n = left</span>
+        String result;
+        <span class="t">char</span>* fresh = <span class="k">new</span> <span class="t">char</span>[take + <span class="n">1</span>];
+        std::memcpy(fresh, data_ + pos, take);
+        fresh[take] = <span class="s">&#x27;\0&#x27;</span>;
+        <span class="k">delete</span>[] result.data_;
+        result.data_ = fresh;
+        result.size_ = take;
+        <span class="k">return</span> result;
+    }
+
+    <span class="c">// 【算法4.4】从 start 开始查找字符 c。找到返回下标，没找到返回空 optional。</span>
+    <span class="c">// 原书用 -1 表示没找到——与「位置 0」只差一个符号，忘了判就会读错位置。</span>
+    std::optional&lt;size_type&gt; find(<span class="t">char</span> c, size_type start = <span class="n">0</span>) <span class="k">const</span> {
+        <span class="k">for</span> (size_type i = start; i &lt; size_; ++i) {
+            <span class="k">if</span> (data_[i] == c) {
+                <span class="k">return</span> i;
+            }
+        }
+        <span class="k">return</span> std::nullopt;
+    }
+
+    <span class="c">// 【算法4.3】三路比较：负 / 零 / 正 表示 小于 / 等于 / 大于。</span>
+    <span class="c">//</span>
+    <span class="c">// 原书自己实现了一个 strcmp，返回值固定为 -1/0/1，并在正文里说</span>
+    <span class="c">// 「这与 C/C++ 语言中通常的大小比较习惯不一致」——其实不一致的是原书自己：</span>
+    <span class="c">// 标准 strcmp 返回的就是差值的符号，调用方只该看符号，不该看具体数值。</span>
+    <span class="t">int</span> compare(<span class="k">const</span> String&amp; other) <span class="k">const</span> {
+        <span class="k">return</span> std::strcmp(data_, other.data_);
+    }
+
+<span class="k">private</span>:
+    <span class="t">char</span>* data_;       <span class="c">// 以 &#x27;\0&#x27; 结尾的字符数组，永远非空</span>
+    size_type size_;   <span class="c">// 字符个数，不含结尾的 &#x27;\0&#x27;</span>
+};
+
+<span class="k">inline</span> <span class="t">bool</span> <span class="k">operator</span>==(<span class="k">const</span> String&amp; a, <span class="k">const</span> String&amp; b) { <span class="k">return</span> a.compare(b) == <span class="n">0</span>; }
+<span class="k">inline</span> <span class="t">bool</span> <span class="k">operator</span>!=(<span class="k">const</span> String&amp; a, <span class="k">const</span> String&amp; b) { <span class="k">return</span> a.compare(b) != <span class="n">0</span>; }
+<span class="k">inline</span> <span class="t">bool</span> <span class="k">operator</span>&lt;(<span class="k">const</span> String&amp; a, <span class="k">const</span> String&amp; b) { <span class="k">return</span> a.compare(b) &lt; <span class="n">0</span>; }</code></pre></div>
 <h3 id="421-构造与所有权"><a class="anchor" href="#421-构造与所有权">#</a>4.2.1 构造与所有权</h3>
 <p>原书【算法4.4】的构造函数有两处问题。</p>
 <p>第一处，<code>assert(str != &#x27;\0&#x27;)</code> <strong>本身就编译不过</strong>：<code>&#x27;\0&#x27;</code> 是 <code>char</code> 而不是空指针常量， 拿指针与它比较是 ill-formed（<code>error: ISO C++ forbids comparison between pointer and integer</code>）。 而且即便改写成 <code>assert(str != nullptr)</code> 也是无效断言——<code>new</code> 失败时抛 <code>std::bad_alloc</code>，从不返回空指针；<code>assert</code> 更会在 <code>NDEBUG</code> 构建里整个消失。</p>
@@ -249,6 +399,26 @@ KMP:  10
 <p>而字符串字面量的类型是 <code>const char[6]</code>，转成 <code>char*</code> 在 C++11 起已被移除。 GCC 默认降级为警告，在本书的 <code>-Werror</code> 构建下即是错误。</p>
 <p>还有一处原书没有做的检查：构造函数对 <code>s == nullptr</code> 毫无防备—— 而 4.2.3 节的 <code>Substr</code> 恰好会喂给它一个空指针（见 4.2.3 节）。</p>
 <p>原书的类里有 <code>~string()</code>，却从未把拷贝构造与拷贝赋值作为清单给出 （正文描述过赋值时&quot;必须释放 s1 的原有空间&quot;，但没有代码）。 只要有析构而没有这两个，一次 <code>String b = a;</code> 就是二次释放—— 与第 2、3 章是同一个错误。</p>
+<p>教学版按<strong>三法则</strong>补齐了这两个（析构 + 拷贝构造 + 拷贝赋值）， 拷贝赋值走的是「先备好新缓冲区，再释放旧的，最后接管」——顺序反过来， 一旦 <code>new</code> 抛异常，对象就停在「指针已释放」的破碎状态。</p>
+<p>工程版还多两个<strong>移动</strong>操作，见 4.2.5。</p>
+<h3 id="422-追加与拼接"><a class="anchor" href="#422-追加与拼接">#</a>4.2.2 追加与拼接</h3>
+<p><code>append(char)</code> 与 <code>concatenate(const char*)</code> 的形状是一样的三步： <strong>重新申请一块、把老内容拷过去、释放旧块</strong>。所以追加一个字符是 O(n)，不是 O(1)—— 这就是变长串管理的代价，也是后面章节讨论&quot;预留容量&quot;的动机。</p>
+<p>两者都返回 <code>String&amp;</code>，于是 <code>s.append(&#x27;a&#x27;).append(&#x27;b&#x27;)</code> 可以连着写， 而且调用方从签名一眼看出它改的是本串。原书【代码4.1】声明的是<strong>按值返回</strong>， <code>s.append(&#x27;x&#x27;);</code> 到底改不改 <code>s</code>，从签名看不出来。</p>
+<h3 id="423-抽取子串"><a class="anchor" href="#423-抽取子串">#</a>4.2.3 抽取子串</h3>
+<p>原书【算法4.5】在起始位置越界时写 <code>return NULL;</code>。这里的返回类型是 <code>String</code>， 所以 <code>NULL</code> 不是&quot;空串&quot;：它先转成 <code>char*</code>，再走 <code>String(char*)</code> 构造函数， 于是 <code>strlen(nullptr)</code>。这段<strong>能编译</strong>，崩在运行期：</p>
+<div class="codeblock" data-lang="text"><pre><code>$ ./s7
+准备调用 s.Substr(99, 1)——原书会走到 return NULL 那一支
+runtime error: null pointer passed as argument 1, which is declared to never be null
+AddressSanitizer:DEADLYSIGNAL
+ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000</code></pre></div>
+<p>本书越界就抛 <code>std::out_of_range</code>，让错误停在发生的地方， 而不是变成调用方某处的段错误。</p>
+<p><code>pos == size()</code> 是<strong>合法</strong>的，得到空串——与&quot;从末尾取 0 个字符&quot;的直觉一致； <code>len</code> 超出剩余长度时<strong>截断</strong>而不报错，与原书的 <code>if (n &gt; left) n = left;</code> 语义一致。</p>
+<h3 id="424-查找与比较"><a class="anchor" href="#424-查找与比较">#</a>4.2.4 查找与比较</h3>
+<p>对应【算法4.4】的 <code>find</code> 返回 <code>std::optional&lt;size_type&gt;</code>：找到是下标，没找到是空盒子。 原书用 <code>-1</code> 表示没找到——与&quot;位置 0&quot;只差一个符号，调用方漏判就会把 &quot;没找到&quot;当成&quot;匹配在开头&quot;。这与 2.2.2 节 <code>getPos</code> 那一处是同一个问题、同一个改法。</p>
+<p>关于【算法4.3】：原书自己实现了一个 <code>strcmp</code>，固定返回 −1/0/1， 并在正文里说&quot;这与 C/C++ 语言中通常的大小比较习惯(0和非0)不一致&quot;。 其实标准 <code>strcmp</code> 返回的就是差值的符号，调用方本来就只该看符号—— 不一致的是原书固定返回 ±1 的写法。本书保持标准语义，并据此提供关系运算符。</p>
+<p>（另外补一句实测结论：原书那个与标准库同名同签名的 <code>strcmp</code> 定义， 既能编译也能链接，不构成冲突——这是我们查过之后否掉的一个猜测， 记在 <code>legacy.md</code> 第五节。）</p>
+<h3 id="425-进阶选读从教学版到工程版"><a class="anchor" href="#425-进阶选读从教学版到工程版">#</a>4.2.5 进阶（选读）：从教学版到工程版</h3>
+<p><strong>这一节可以整节跳过。</strong> 工程版在 <code>code/ch04/string_class/modern.hpp</code>。 它比教学版多的东西里，只有一件是这一章特有的：<strong>移动之后的那个空壳怎么办。</strong></p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/modern.hpp">code/ch04/string_class/modern.hpp#rule-of-five</a></div><pre><code><span class="c">// 原书只在正文里描述了赋值时&quot;必须释放 s1 的原有空间(delete [] s1.str)&quot;，</span>
 <span class="c">// 却没有把拷贝构造和拷贝赋值作为清单给出。只要有析构函数而没有这两个，</span>
 <span class="c">// 一次 `String b = a;` 就是二次释放——与第 2、3 章是同一个错误。</span>
@@ -286,100 +456,9 @@ String&amp; <span class="k">operator</span>=(String&amp;&amp; other) <span class
 }
 
 ~String() { <span class="k">delete</span>[] data_; }</code></pre></div>
-<p>移动操作声明为 <code>noexcept</code>，因此<strong>不能在里面分配</strong>。被移动方的指针置空， 读取路径统一走一个私有的 <code>raw()</code>：指针为空时返回静态空串。 于是&quot;被移动之后仍是可用的空串&quot;这个保证不花任何分配就成立， <code>c_str()</code> 也永远不会是空指针。</p>
-<h3 id="422-追加与拼接"><a class="anchor" href="#422-追加与拼接">#</a>4.2.2 追加与拼接</h3>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/modern.hpp">code/ch04/string_class/modern.hpp#append</a></div><pre><code><span class="c">/// 在串尾添加一个字符，返回自身引用。</span>
-<span class="c">///</span>
-<span class="c">/// 原书【代码4.1】声明的是 `string append(const char c);`——**按值返回**。</span>
-<span class="c">/// 代码4.1 只有声明没有函数体，所以「它到底改不改本串」在书里无从查证；</span>
-<span class="c">/// 而这正是问题所在：一个修改器按值返回，调用方无法从签名判断</span>
-<span class="c">/// `s.append(&#x27;x&#x27;);` 是改了 s 还是返回了一个新串而 s 原封不动。</span>
-<span class="c">/// 返回自身引用把这件事说死，同时支持链式调用。</span>
-String&amp; append(<span class="t">char</span> c) {
-    <span class="t">char</span>* fresh = <span class="k">new</span> <span class="t">char</span>[size_ + <span class="n">2</span>];
-    std::memcpy(fresh, raw(), size_);
-    fresh[size_] = c;
-    fresh[size_ + <span class="n">1</span>] = <span class="s">&#x27;\0&#x27;</span>;
-    <span class="k">delete</span>[] data_;
-    data_ = fresh;
-    ++size_;
-    <span class="k">return</span> *<span class="k">this</span>;
-}
-
-<span class="c">/// 把 s 连接在本串后面。s 为空指针时抛 std::invalid_argument。</span>
-String&amp; concatenate(<span class="k">const</span> <span class="t">char</span>* s) {
-    <span class="k">if</span> (s == <span class="k">nullptr</span>) {
-        <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;String::concatenate: 空指针&quot;</span>);
-    }
-    <span class="k">const</span> size_type extra = std::strlen(s);
-    <span class="t">char</span>* fresh = <span class="k">new</span> <span class="t">char</span>[size_ + extra + <span class="n">1</span>];
-    std::memcpy(fresh, raw(), size_);
-    std::memcpy(fresh + size_, s, extra + <span class="n">1</span>);
-    <span class="k">delete</span>[] data_;
-    data_ = fresh;
-    size_ += extra;
-    <span class="k">return</span> *<span class="k">this</span>;
-}
-
-String&amp; <span class="k">operator</span>+=(<span class="t">char</span> c) { <span class="k">return</span> append(c); }
-String&amp; <span class="k">operator</span>+=(<span class="k">const</span> String&amp; other) { <span class="k">return</span> concatenate(other.c_str()); }</code></pre></div>
-<p>每次追加都重新分配一块、拷贝、释放旧块——这就是变长串管理的代价， 也是后面章节讨论&quot;预留容量&quot;的动机。</p>
-<h3 id="423-抽取子串"><a class="anchor" href="#423-抽取子串">#</a>4.2.3 抽取子串</h3>
-<p>原书【算法4.5】在起始位置越界时写 <code>return NULL;</code>。这里的返回类型是 <code>String</code>， 所以 <code>NULL</code> 不是&quot;空串&quot;：它先转成 <code>char*</code>，再走 <code>String(char*)</code> 构造函数， 于是 <code>strlen(nullptr)</code>。这段<strong>能编译</strong>，崩在运行期：</p>
-<div class="codeblock" data-lang="text"><pre><code>$ ./s7
-准备调用 s.Substr(99, 1)——原书会走到 return NULL 那一支
-runtime error: null pointer passed as argument 1, which is declared to never be null
-AddressSanitizer:DEADLYSIGNAL
-ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000</code></pre></div>
-<p>本书越界就抛 <code>std::out_of_range</code>，让错误停在发生的地方， 而不是变成调用方某处的段错误。</p>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/modern.hpp">code/ch04/string_class/modern.hpp#substr</a></div><pre><code><span class="c">/// 从 pos 开始抽取长度至多为 len 的子串。</span>
-<span class="c">///</span>
-<span class="c">/// 原书【算法4.5】在 `pos &gt;= size` 时 `return NULL;`——那不是&quot;返回空串&quot;，</span>
-<span class="c">/// 而是拿 NULL 走 String(char*) 构造函数，接着 strlen(nullptr) 当场崩溃</span>
-<span class="c">/// （证据见 legacy.md 缺陷 3）。这里越界就抛 std::out_of_range，</span>
-<span class="c">/// 让错误停在发生的地方，而不是变成调用方某处的段错误。</span>
-<span class="c">///</span>
-<span class="c">/// pos == size() 是合法的，得到空串——与&quot;从末尾取 0 个字符&quot;的直觉一致。</span>
-[[nodiscard]] String substr(size_type pos, size_type len) <span class="k">const</span> {
-    <span class="k">if</span> (pos &gt; size_) {
-        <span class="k">throw</span> std::out_of_range(<span class="s">&quot;String::substr: 起始位置越界&quot;</span>);
-    }
-    <span class="k">const</span> size_type available = size_ - pos;
-    <span class="k">const</span> size_type take = len &lt; available ? len : available;  <span class="c">// 原书的 if (n &gt; left) n = left</span>
-    String result;
-    <span class="t">char</span>* fresh = <span class="k">new</span> <span class="t">char</span>[take + <span class="n">1</span>];
-    std::memcpy(fresh, raw() + pos, take);
-    fresh[take] = <span class="s">&#x27;\0&#x27;</span>;
-    <span class="k">delete</span>[] result.data_;
-    result.data_ = fresh;
-    result.size_ = take;
-    <span class="k">return</span> result;
-}</code></pre></div>
-<p><code>len</code> 超出剩余长度时<strong>截断</strong>而不报错，与原书的 <code>if (n &gt; left) n = left;</code> 语义一致。</p>
-<h3 id="424-查找与比较"><a class="anchor" href="#424-查找与比较">#</a>4.2.4 查找与比较</h3>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/modern.hpp">code/ch04/string_class/modern.hpp#find-compare</a></div><pre><code><span class="c">/// 从 start 开始查找字符 c，返回下标；没有则 std::nullopt。</span>
-<span class="c">/// 原书 `int find(const char c, const int start)` 用 -1 表示没找到，</span>
-<span class="c">/// 与&quot;位置 0&quot;只差一个符号。</span>
-[[nodiscard]] std::optional&lt;size_type&gt; find(<span class="t">char</span> c, size_type start = <span class="n">0</span>) <span class="k">const</span> {
-    <span class="k">for</span> (size_type i = start; i &lt; size_; ++i) {
-        <span class="k">if</span> (raw()[i] == c) {
-            <span class="k">return</span> i;
-        }
-    }
-    <span class="k">return</span> std::nullopt;
-}
-
-<span class="c">/// 三路比较，负/零/正 表示 小于/等于/大于。</span>
-<span class="c">///</span>
-<span class="c">/// 原书【算法4.3】自己实现了一个 strcmp，返回值固定为 -1/0/1，</span>
-<span class="c">/// 并在正文里指出&quot;这与 C/C++ 语言中通常的大小比较习惯(0和非0)不一致&quot;——</span>
-<span class="c">/// 其实不一致的是原书自己：标准 strcmp 返回的就是差值的符号，</span>
-<span class="c">/// 调用方只该看符号，不该看具体数值。这里保持标准语义。</span>
-[[nodiscard]] <span class="t">int</span> compare(<span class="k">const</span> String&amp; other) <span class="k">const</span> <span class="k">noexcept</span> {
-    <span class="k">return</span> std::strcmp(raw(), other.raw());
-}</code></pre></div>
-<p>关于【算法4.3】：原书自己实现了一个 <code>strcmp</code>，固定返回 −1/0/1， 并在正文里说&quot;这与 C/C++ 语言中通常的大小比较习惯(0和非0)不一致&quot;。 其实标准 <code>strcmp</code> 返回的就是差值的符号，调用方本来就只该看符号—— 不一致的是原书固定返回 ±1 的写法。本书保持标准语义，并据此提供关系运算符。</p>
-<p>（另外补一句实测结论：原书那个与标准库同名同签名的 <code>strcmp</code> 定义， 既能编译也能链接，不构成冲突——这是我们查过之后否掉的一个猜测， 记在 <code>legacy.md</code> 第五节。）</p>
+<p>移动操作声明为 <code>noexcept</code>，因此<strong>不能在里面分配</strong>——所以被移动方的 <code>data_</code> 只能置空，不能塞一块新的 1 字节缓冲区进去。可是教学版承诺过 「<code>c_str()</code> 永远不是空指针」，这个承诺不能因为被移动过就作废。</p>
+<p>工程版的解法是加一个私有的 <code>raw()</code>：<code>data_</code> 为空时返回一个静态空串。 读取路径全部走它，于是「被移动之后仍是可用的空串」这个保证<strong>不花任何分配</strong>就成立。 教学版没有移动操作，也就不需要这一层。</p>
+<p>其余的差别与前几章相同：<code>[[nodiscard]]</code>、<code>noexcept</code>、copy-and-swap、 关系运算符全家（<code>&lt; &gt; &lt;= &gt;=</code> 都由 <code>compare()</code> 派生）。</p>
 <h2 id="43-字符串的模式匹配"><a class="anchor" href="#43-字符串的模式匹配">#</a>4.3 字符串的模式匹配</h2>
 <p>给定目标串 T 和模式串 P，模式匹配要回答：P 是否作为 T 的连续子串出现， 若出现，首次出现在哪个位置。</p>
 <p>本节的教学内容是<strong>算法本身</strong>，因此下面的实现用 <code>std::string_view</code> 接收输入： 不拷贝、不拥有，把注意力留在匹配过程上。字符串容器的实现是 4.2 节的事。</p>
@@ -630,7 +709,7 @@ std::string::find 对照         = 2</code></pre></div>
 </ol>
 <div class="pagenav"><a href="ch03-stack.html"><span class="dir">← 上一篇</span>第3章 栈与队列</a><a href="ch05-binary-tree.html" style="text-align:right"><span class="dir">下一篇 →</span>第5章 二叉树</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#41-字符串的基本概念">4.1 字符串的基本概念</a><a href="#42-字符串的存储结构和实现">4.2 字符串的存储结构和实现</a><a href="#421-构造与所有权" class="sub">4.2.1 构造与所有权</a><a href="#422-追加与拼接" class="sub">4.2.2 追加与拼接</a><a href="#423-抽取子串" class="sub">4.2.3 抽取子串</a><a href="#424-查找与比较" class="sub">4.2.4 查找与比较</a><a href="#43-字符串的模式匹配">4.3 字符串的模式匹配</a><a href="#431-朴素的模式匹配算法" class="sub">4.3.1 朴素的模式匹配算法</a><a href="#432-字符串的特征向量" class="sub">4.3.2 字符串的特征向量</a><a href="#433-kmp-模式匹配算法" class="sub">4.3.3 KMP 模式匹配算法</a><a href="#与原书的对照">与原书的对照</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#41-字符串的基本概念">4.1 字符串的基本概念</a><a href="#42-字符串的存储结构和实现">4.2 字符串的存储结构和实现</a><a href="#教学版完整实现" class="sub">教学版：完整实现</a><a href="#421-构造与所有权" class="sub">4.2.1 构造与所有权</a><a href="#422-追加与拼接" class="sub">4.2.2 追加与拼接</a><a href="#423-抽取子串" class="sub">4.2.3 抽取子串</a><a href="#424-查找与比较" class="sub">4.2.4 查找与比较</a><a href="#425-进阶选读从教学版到工程版" class="sub">4.2.5 进阶（选读）：从教学版到工程版</a><a href="#43-字符串的模式匹配">4.3 字符串的模式匹配</a><a href="#431-朴素的模式匹配算法" class="sub">4.3.1 朴素的模式匹配算法</a><a href="#432-字符串的特征向量" class="sub">4.3.2 字符串的特征向量</a><a href="#433-kmp-模式匹配算法" class="sub">4.3.3 KMP 模式匹配算法</a><a href="#与原书的对照">与原书的对照</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch04-string.md</code> 生成

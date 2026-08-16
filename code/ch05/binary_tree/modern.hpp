@@ -189,6 +189,7 @@ public:
     }
 
 private:
+    // >>> iterative-destroy
     /// 释放整棵树。**迭代实现**，栈深度恒定。
     ///
     /// 递归版 `destroy(left); destroy(right); delete node;` 在退化成链的树上会压穿栈——
@@ -210,6 +211,7 @@ private:
             }
         }
     }
+    // <<< iterative-destroy
     /// 深拷贝整棵树。**迭代实现**，用显式栈代替调用栈。
     ///
     /// 递归版在退化树上同样会压穿栈，而且比 destroy 更早——实测纯左链 50 万结点即段错误。

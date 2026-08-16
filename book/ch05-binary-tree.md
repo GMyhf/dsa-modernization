@@ -2,8 +2,10 @@
 
 二叉树的每个结点最多有左、右两个孩子。周游回答「以什么顺序访问全部结点」；二叉搜索树加上左小右大；堆把最小（或最大）值放在根；Huffman 树不断合并两个最小权值。
 
-源码：[二叉树与二叉搜索树](../code/ch05/binary_tree/modern.hpp)、
-[最小堆与 Huffman 树](../code/ch05/heap_huffman/modern.hpp)、
+源码：[二叉树与二叉搜索树·教学版](../code/ch05/binary_tree/teaching.hpp)、
+[二叉树与二叉搜索树·工程版](../code/ch05/binary_tree/modern.hpp)、
+[最小堆与 Huffman 树·教学版](../code/ch05/heap_huffman/teaching.hpp)、
+[最小堆与 Huffman 树·工程版](../code/ch05/heap_huffman/modern.hpp)、
 [树的示例](../code/ch05/binary_tree/demo.cpp)、
 [堆与 Huffman 的示例](../code/ch05/heap_huffman/demo.cpp)。
 
@@ -58,22 +60,21 @@
 先建树并打印四种周游，再插一棵 BST：
 
 ```cpp file=code/ch05/binary_tree/demo.cpp
-#include "modern.hpp"
+// 第 5 章「先跑一遍」：用教学版 BinaryTree 与 BinarySearchTree 走一遍四种周游与增删查。
+// 编译运行：
+//   g++ -std=c++17 -I code/ch05/binary_tree code/ch05/binary_tree/demo.cpp -o demo && ./demo
+#include "teaching.hpp"
 
 #include <iostream>
-#include <utility>
 
 int main() {
-    dsa::BinaryTree<char> left_leaf;
-    dsa::BinaryTree<char> right_leaf;
-    dsa::BinaryTree<char> left;
-    dsa::BinaryTree<char> right;
-    dsa::BinaryTree<char> root;
-    left_leaf.create_tree('D');
-    right_leaf.create_tree('E');
-    left.create_tree('B', std::move(left_leaf), std::move(right_leaf));
-    right.create_tree('C');
-    root.create_tree('A', std::move(left), std::move(right));
+    // 建一棵样例树：A 的左孩子 B（孩子 D、E），右孩子 C（叶子）
+    BinaryTree<char> d, e, b, c, root;
+    d.create_leaf('D');
+    e.create_leaf('E');
+    b.create_tree('B', d, e);      // d、e 的所有权转移给 b，之后两者变空
+    c.create_leaf('C');
+    root.create_tree('A', b, c);
 
     std::cout << "先序: ";
     root.preorder([](char value) { std::cout << value; });
@@ -85,12 +86,12 @@ int main() {
     root.level_order([](char value) { std::cout << value; });
     std::cout << '\n';
 
-    dsa::BinarySearchTree<int> tree;
+    BinarySearchTree<int> tree;
     for (int key : {8, 3, 10, 1, 6, 14, 4, 7}) {
         (void)tree.insert(key);
     }
     std::cout << "BST 中序:";
-    tree.inorder([](int key) { std::cout << ' ' << key; });
+    tree.inorder([](int key) { std::cout << ' ' << key; });   // 中序 = 升序
     std::cout << "\n含 6? " << (tree.contains(6) ? "是" : "否")
               << "  删 3 后含 3? ";
     (void)tree.remove(3);
@@ -127,380 +128,381 @@ BST 中序: 1 3 4 6 7 8 10 14
 
 `create_tree` 先 `new` 出新根，再把两棵子树的根指针挪过来，最后才清空自己原来的树。这样即使 `new` 抛异常，调用方的两棵子树也不动。链式存储是本节主实现；完全二叉树还可以按 5.1.3 的编号放进数组，堆就是这种用法。
 
-```cpp file=code/ch05/binary_tree/modern.hpp#binary-tree
+#### 教学版：完整实现
+
+下面是一份**完整的、能直接编译运行的**二叉树与二叉搜索树。一个文件、两个类。
+**递归是这一章的正题**，所以周游、释放、深拷贝这里全部写成递归——
+形状和定义一样，一眼就能对上。5.4a 会说明递归的代价与工程版的处理。
+
+```cpp file=code/ch05/binary_tree/teaching.hpp
+// 二叉树与二叉搜索树 —— 教学版。
+// 原书【代码5.1】【代码5.2】【算法5.3】【算法5.7】【算法5.9】【算法5.10】。
+//
+// 一个文件、两个类、能直接编译运行，给「第一次读这一节」的人看。
+//
+//   BinaryTree         二叉链表：一个结点，两根指向孩子的链接；深度优先与层次周游。
+//   BinarySearchTree   在二叉树上加一条「左小右大」的约束，于是查找变成一路往下走。
+//
+// **递归是这一章的正题**，所以周游、释放、深拷贝这里全部写成递归——形状和定义一样，
+// 一眼就能对上。代价是递归深度等于树高：退化成一条链的树（比如按升序插入 BST）
+// 会把运行栈压穿。工程版把释放和深拷贝改成了迭代，见 5.x「进阶（选读）」。
+//
+// 与 modern.hpp（工程版）的分工：
+//   教学版  三法则 + 全递归；
+//   工程版  五法则、迭代释放（右旋拉直）、迭代深拷贝、强异常保证、非递归周游。
+#pragma once
+
+#include <cstddef>
+
+// ---------------------------------------------------------------------------
+// 二叉树（二叉链表）
+// ---------------------------------------------------------------------------
 template <typename T>
 class BinaryTree {
 public:
+    // 【代码5.1】二叉树结点：一个数据域 + 左右两根链接。
+    // 没有孩子就是 nullptr——这比原书用一个"空结点"表示要省事得多。
     struct Node {
         T value;
-        Node* left{nullptr};
-        Node* right{nullptr};
-
-        template <typename U>
-        explicit Node(U&& item) : value(std::forward<U>(item)) {}
+        Node* left;
+        Node* right;
     };
 
-    BinaryTree() noexcept = default;
+    BinaryTree() : root_(nullptr) {}
+
+    ~BinaryTree() { clear(); }
+
+    // 三法则：树管着一堆 new 出来的结点，拷贝必须自己写（而且必须是**深**拷贝）。
     BinaryTree(const BinaryTree& other) : root_(clone(other.root_)) {}
+
     BinaryTree& operator=(const BinaryTree& other) {
-        if (this != &other) {
-            BinaryTree copy(other);
-            swap(copy);
+        if (this == &other) {
+            return *this;
         }
+        Node* fresh = clone(other.root_);   // 先把新树建好
+        clear();                            // 再拆掉旧树
+        root_ = fresh;
         return *this;
     }
-    BinaryTree(BinaryTree&& other) noexcept : root_(other.release_root()) {}
-    BinaryTree& operator=(BinaryTree&& other) noexcept {
-        if (this != &other) {
-            make_empty();
-            root_ = other.release_root();
-        }
-        return *this;
-    }
-    ~BinaryTree() { make_empty(); }
 
-    void swap(BinaryTree& other) noexcept {
-        using std::swap;
-        swap(root_, other.root_);
-    }
+    bool empty() const { return root_ == nullptr; }
+    const Node* root() const { return root_; }
+    Node* root() { return root_; }
 
-    [[nodiscard]] bool empty() const noexcept { return root_ == nullptr; }
-    [[nodiscard]] const Node* root() const noexcept { return root_; }
-    [[nodiscard]] Node* root() noexcept { return root_; }
-
-    /// 构造一棵新树并接管两个子树，强异常保证：根结点创建失败时两棵子树不动。
-    template <typename U>
-    void create_tree(U&& value, BinaryTree&& left = {}, BinaryTree&& right = {}) {
-        Node* fresh = new Node(std::forward<U>(value));
-        fresh->left = left.release_root();
-        fresh->right = right.release_root();
-        make_empty();
+    // 造一棵新树：一个根，接上左右两棵子树。
+    // 两棵子树的所有权**转移**给新树——传进来的那两棵随即变空，
+    // 否则同一批结点会被两棵树各删一次。
+    void create_tree(const T& value, BinaryTree& left, BinaryTree& right) {
+        Node* fresh = new Node{value, left.root_, right.root_};
+        left.root_ = nullptr;
+        right.root_ = nullptr;
+        clear();
         root_ = fresh;
     }
 
-    /// 后序释放整个树。递归删除与递归周游同样受树高限制。
-    void make_empty() noexcept {
+    void create_leaf(const T& value) {
+        Node* fresh = new Node{value, nullptr, nullptr};
+        clear();
+        root_ = fresh;
+    }
+
+    // 【算法5.3】深度优先周游的三种次序。三个函数只差 visit 那一行的位置：
+    //   前序 根左右 · 中序 左根右 · 后序 左右根
+    template <typename Visitor>
+    void preorder(Visitor visit) const { preorder_impl(root_, visit); }
+
+    template <typename Visitor>
+    void inorder(Visitor visit) const { inorder_impl(root_, visit); }
+
+    template <typename Visitor>
+    void postorder(Visitor visit) const { postorder_impl(root_, visit); }
+
+    // 【算法5.7】层次周游：一层一层从左到右。
+    // 深度优先靠栈（这里是递归用的运行栈），广度优先靠**队列**。
+    template <typename Visitor>
+    void level_order(Visitor visit) const {
+        // 一条极简的链式队列，只在这个函数里用
+        struct Pending {
+            const Node* node;
+            Pending* next;
+        };
+        Pending* front = nullptr;
+        Pending* rear = nullptr;
+
+        if (root_ != nullptr) {
+            front = rear = new Pending{root_, nullptr};
+        }
+        while (front != nullptr) {
+            Pending* item = front;               // 出队
+            front = front->next;
+            if (front == nullptr) {
+                rear = nullptr;
+            }
+            const Node* node = item->node;
+            delete item;
+
+            visit(node->value);
+
+            if (node->left != nullptr) {         // 左右孩子依次入队
+                Pending* fresh = new Pending{node->left, nullptr};
+                if (rear == nullptr) { front = rear = fresh; } else { rear->next = fresh; rear = fresh; }
+            }
+            if (node->right != nullptr) {
+                Pending* fresh = new Pending{node->right, nullptr};
+                if (rear == nullptr) { front = rear = fresh; } else { rear->next = fresh; rear = fresh; }
+            }
+        }
+    }
+
+    // 结点数与高度：两个最典型的「先算孩子、再算自己」的递归。
+    std::size_t size() const { return count(root_); }
+    std::size_t height() const { return depth(root_); }
+
+    void clear() {
         destroy(root_);
         root_ = nullptr;
     }
 
-    // Stack Overflow Risk: 以下递归周游忠实保留原书算法5.3；病态深树可能耗尽调用栈。
-    template <typename Visitor>
-    void preorder(Visitor&& visit) const { preorder_impl(root_, visit); }
-    template <typename Visitor>
-    void inorder(Visitor&& visit) const { inorder_impl(root_, visit); }
-    template <typename Visitor>
-    void postorder(Visitor&& visit) const { postorder_impl(root_, visit); }
-
-    // 算法5.4 至 5.6：作为补充保留原书的手写栈式非递归周游。
-    template <typename Visitor>
-    void preorder_iterative(Visitor&& visit) const {
-        LinkedStack<const Node*> pending;
-        if (root_ != nullptr) pending.push(root_);
-        while (auto node = pending.pop()) {
-            visit((*node)->value);
-            if ((*node)->right != nullptr) pending.push((*node)->right);
-            if ((*node)->left != nullptr) pending.push((*node)->left);
-        }
-    }
-    template <typename Visitor>
-    void inorder_iterative(Visitor&& visit) const {
-        LinkedStack<const Node*> pending;
-        const Node* current = root_;
-        while (current != nullptr || !pending.empty()) {
-            while (current != nullptr) {
-                pending.push(current);
-                current = current->left;
-            }
-            current = *pending.pop();
-            visit(current->value);
-            current = current->right;
-        }
-    }
-    template <typename Visitor>
-    void postorder_iterative(Visitor&& visit) const {
-        struct Frame { const Node* node; bool expanded; };
-        LinkedStack<Frame> pending;
-        if (root_ != nullptr) pending.push(Frame{root_, false});
-        while (auto frame = pending.pop()) {
-            if (frame->expanded) {
-                visit(frame->node->value);
-            } else {
-                pending.push(Frame{frame->node, true});
-                if (frame->node->right != nullptr) pending.push(Frame{frame->node->right, false});
-                if (frame->node->left != nullptr) pending.push(Frame{frame->node->left, false});
-            }
-        }
-    }
-
-    /// 算法5.7 的层次周游。内部手写链式 FIFO，不以 STL queue 替代本章内容。
-    template <typename Visitor>
-    void level_order(Visitor&& visit) const {
-        struct Pending { const Node* node; Pending* next; };
-        Pending* front = nullptr;
-        Pending* back = nullptr;
-        auto enqueue = [&](const Node* node) {
-            Pending* item = new Pending{node, nullptr};
-            if (back == nullptr) front = item; else back->next = item;
-            back = item;
-        };
-        try {
-            if (root_ != nullptr) enqueue(root_);
-            while (front != nullptr) {
-                Pending* item = front;
-                front = front->next;
-                if (front == nullptr) back = nullptr;
-                const Node* node = item->node;
-                delete item;
-                visit(node->value);
-                if (node->left != nullptr) enqueue(node->left);
-                if (node->right != nullptr) enqueue(node->right);
-            }
-        } catch (...) {
-            while (front != nullptr) { Pending* item = front; front = front->next; delete item; }
-            throw;
-        }
-    }
-
-    [[nodiscard]] const Node* parent_of(const Node* wanted) const noexcept {
-        return parent_of_impl(root_, wanted);
-    }
-
 private:
-    /// 释放整棵树。**迭代实现**，栈深度恒定。
-    ///
-    /// 递归版 `destroy(left); destroy(right); delete node;` 在退化成链的树上会压穿栈——
-    /// 实测纯左链 100 万结点即段错误（`collab/UNVERIFIED-RISKS.md` 有复现方法）。
-    /// 这里用「右旋到没有左孩子，再沿右链删」的经典办法：每次旋转把左子树提上来，
-    /// 树被逐步拉直成一条右链，然后一个一个删。总代价仍是 O(n)，额外空间 O(1)，
-    /// 而且不分配内存，所以能保持 noexcept。
-    static void destroy(Node* node) noexcept {
-        while (node != nullptr) {
-            if (node->left != nullptr) {
-                Node* const left = node->left;   // 右旋：左孩子成为新的根
-                node->left = left->right;
-                left->right = node;
-                node = left;
-            } else {
-                Node* const right = node->right;
-                delete node;
-                node = right;
-            }
+    // 【代码5.8】后序释放：**必须先删两个孩子，再删自己**。
+    // 反过来先 delete node，node->left 就成了读已释放内存。
+    static void destroy(Node* node) {
+        if (node == nullptr) {
+            return;
         }
+        destroy(node->left);
+        destroy(node->right);
+        delete node;
     }
-    /// 深拷贝整棵树。**迭代实现**，用显式栈代替调用栈。
-    ///
-    /// 递归版在退化树上同样会压穿栈，而且比 destroy 更早——实测纯左链 50 万结点即段错误。
-    /// 显式栈的结点放在堆上，深度不再受线程栈限制；中途抛异常时回收已建好的部分，保持强异常保证。
+
+    // 深拷贝：形状和 destroy 一样，只是把"删"换成"建"。
     static Node* clone(const Node* node) {
         if (node == nullptr) {
             return nullptr;
         }
-        Node* copy_root = new Node(node->value);
-        try {
-            // 用本章自己那把手写链式栈，与迭代周游同一套零件。
-            LinkedStack<std::pair<const Node*, Node*>> pending;
-            pending.push({node, copy_root});
-            while (auto item = pending.pop()) {
-                const Node* const source = item->first;
-                Node* const target = item->second;
-                if (source->left != nullptr) {
-                    target->left = new Node(source->left->value);
-                    pending.push({source->left, target->left});
-                }
-                if (source->right != nullptr) {
-                    target->right = new Node(source->right->value);
-                    pending.push({source->right, target->right});
-                }
-            }
-        } catch (...) {
-            destroy(copy_root);
-            throw;
-        }
-        return copy_root;
+        return new Node{node->value, clone(node->left), clone(node->right)};
     }
-    static const Node* parent_of_impl(const Node* node, const Node* wanted) noexcept {
-        if (node == nullptr || wanted == nullptr) return nullptr;
-        if (node->left == wanted || node->right == wanted) return node;
-        if (const Node* left = parent_of_impl(node->left, wanted)) return left;
-        return parent_of_impl(node->right, wanted);
+
+    template <typename Visitor>
+    static void preorder_impl(const Node* node, Visitor& visit) {
+        if (node == nullptr) return;
+        visit(node->value);                 // 根
+        preorder_impl(node->left, visit);   // 左
+        preorder_impl(node->right, visit);  // 右
     }
-    template <typename Visitor> static void preorder_impl(const Node* node, Visitor& visit) {
-        if (node != nullptr) { visit(node->value); preorder_impl(node->left, visit); preorder_impl(node->right, visit); }
+
+    template <typename Visitor>
+    static void inorder_impl(const Node* node, Visitor& visit) {
+        if (node == nullptr) return;
+        inorder_impl(node->left, visit);    // 左
+        visit(node->value);                 // 根
+        inorder_impl(node->right, visit);   // 右
     }
-    template <typename Visitor> static void inorder_impl(const Node* node, Visitor& visit) {
-        if (node != nullptr) { inorder_impl(node->left, visit); visit(node->value); inorder_impl(node->right, visit); }
+
+    template <typename Visitor>
+    static void postorder_impl(const Node* node, Visitor& visit) {
+        if (node == nullptr) return;
+        postorder_impl(node->left, visit);  // 左
+        postorder_impl(node->right, visit); // 右
+        visit(node->value);                 // 根
     }
-    template <typename Visitor> static void postorder_impl(const Node* node, Visitor& visit) {
-        if (node != nullptr) { postorder_impl(node->left, visit); postorder_impl(node->right, visit); visit(node->value); }
+
+    static std::size_t count(const Node* node) {
+        return node == nullptr ? 0 : 1 + count(node->left) + count(node->right);
     }
-    Node* release_root() noexcept { Node* result = root_; root_ = nullptr; return result; }
-    Node* root_{nullptr};
+
+    static std::size_t depth(const Node* node) {
+        if (node == nullptr) return 0;
+        std::size_t l = depth(node->left);
+        std::size_t r = depth(node->right);
+        return 1 + (l > r ? l : r);
+    }
+
+    Node* root_;
 };
-```
 
-## 5.4 二叉搜索树
-
-二叉搜索树要求左子树的键都小于根、右子树都大于根。中序周游因此正好是排序。插入重复键、删除不存在的键都是可预期状态，返回 `false`，不抛异常。删除有左右孩子的结点时，用左子树里最右的前驱替换它：先把前驱从原位置摘下，再让它继承被删结点的两棵子树，最后只 `delete` 被删结点一次。漏掉「先脱离原父」会形成环或二次释放。
-
-```cpp file=code/ch05/binary_tree/modern.hpp#bst
-template <typename T, typename Compare = std::less<T>>
+// ---------------------------------------------------------------------------
+// 二叉搜索树
+//
+// 约束只有一条：**左子树的键都小于根，右子树的键都大于根**。
+// 有了它，查找就不必遍历全树——每比较一次就砍掉一半（前提是树是平衡的）。
+// ---------------------------------------------------------------------------
+template <typename T>
 class BinarySearchTree {
+public:
     struct Node {
         T value;
-        Node* left{nullptr};
-        Node* right{nullptr};
-        template <typename U> explicit Node(U&& item) : value(std::forward<U>(item)) {}
+        Node* left;
+        Node* right;
     };
 
-public:
-    BinarySearchTree() = default;
-    BinarySearchTree(const BinarySearchTree& other) : root_(clone(other.root_)), compare_(other.compare_) {}
-    BinarySearchTree& operator=(const BinarySearchTree& other) {
-        if (this != &other) { BinarySearchTree copy(other); swap(copy); }
-        return *this;
-    }
-    BinarySearchTree(BinarySearchTree&& other) : root_(other.root_), compare_(std::move(other.compare_)) { other.root_ = nullptr; }
-    BinarySearchTree& operator=(BinarySearchTree&& other) {
-        if (this != &other) { clear(); root_ = other.root_; other.root_ = nullptr; compare_ = std::move(other.compare_); }
-        return *this;
-    }
+    BinarySearchTree() : root_(nullptr) {}
+
     ~BinarySearchTree() { clear(); }
 
-    void swap(BinarySearchTree& other) {
-        using std::swap; swap(root_, other.root_); swap(compare_, other.compare_);
+    BinarySearchTree(const BinarySearchTree& other) : root_(clone(other.root_)) {}
+
+    BinarySearchTree& operator=(const BinarySearchTree& other) {
+        if (this == &other) {
+            return *this;
+        }
+        Node* fresh = clone(other.root_);
+        clear();
+        root_ = fresh;
+        return *this;
     }
-    [[nodiscard]] bool empty() const noexcept { return root_ == nullptr; }
 
-    /// 算法5.9：插入唯一键。重复键是可预期状态，返回 false。
-    bool insert(const T& value) { return insert_impl(value); }
-    bool insert(T&& value) { return insert_impl(std::move(value)); }
+    bool empty() const { return root_ == nullptr; }
 
-    [[nodiscard]] bool contains(const T& value) const {
+    // 【算法5.9】插入。一路比较着往下走，走到空位就把新结点挂上去。
+    // 键已存在时返回 false——重复键是可预期状态，不是错误，所以不抛异常。
+    bool insert(const T& value) {
+        Node** link = &root_;               // 指向「新结点该挂在哪根指针上」
+        while (*link != nullptr) {
+            if (value < (*link)->value) {
+                link = &(*link)->left;
+            } else if ((*link)->value < value) {
+                link = &(*link)->right;
+            } else {
+                return false;               // 已经有了
+            }
+        }
+        *link = new Node{value, nullptr, nullptr};
+        return true;
+    }
+
+    // 查找：同样一路往下走。树高是 h，代价就是 O(h)。
+    bool contains(const T& value) const {
         const Node* current = root_;
         while (current != nullptr) {
-            if (equivalent(value, current->value)) return true;
-            current = compare_(value, current->value) ? current->left : current->right;
+            if (value < current->value) {
+                current = current->left;
+            } else if (current->value < value) {
+                current = current->right;
+            } else {
+                return true;
+            }
         }
         return false;
     }
 
-    /// 算法5.10：删除不存在的键是幂等的可预期状态，返回 false（D-001 §3c）。
+    // 【算法5.10】删除。键不存在返回 false（幂等，不是错误）。
+    //
+    // 难点只有一个：被删结点有两个孩子时，谁来顶替它？
+    // 答案是**中序前驱**——左子树里最大的那个。它顶上来之后，
+    // 「左小右大」仍然成立，因为它比左子树其余的都大、比右子树全部都小。
     bool remove(const T& value) { return remove_impl(root_, value); }
-    void clear() noexcept { destroy(root_); root_ = nullptr; }
 
+    void clear() {
+        destroy(root_);
+        root_ = nullptr;
+    }
+
+    // 中序周游一棵 BST，得到的正是**升序**——这是「左小右大」的直接推论。
     template <typename Visitor>
-    void inorder(Visitor&& visit) const { inorder_impl(root_, visit); }
+    void inorder(Visitor visit) const { inorder_impl(root_, visit); }
 
 private:
-    [[nodiscard]] bool equivalent(const T& left, const T& right) const {
-        return !compare_(left, right) && !compare_(right, left);
-    }
-    template <typename U> bool insert_impl(U&& value) {
-        Node** link = &root_;
-        while (*link != nullptr) {
-            if (equivalent(value, (*link)->value)) return false;
-            link = compare_(value, (*link)->value) ? &(*link)->left : &(*link)->right;
+    static bool remove_impl(Node*& link, const T& value) {
+        if (link == nullptr) {
+            return false;
         }
-        *link = new Node(std::forward<U>(value));
-        return true;
-    }
-    bool remove_impl(Node*& link, const T& value) {
-        if (link == nullptr) return false;
-        if (compare_(value, link->value)) return remove_impl(link->left, value);
-        if (compare_(link->value, value)) return remove_impl(link->right, value);
+        if (value < link->value) {
+            return remove_impl(link->left, value);
+        }
+        if (link->value < value) {
+            return remove_impl(link->right, value);
+        }
+
         Node* removed = link;
-        if (removed->left == nullptr) { link = removed->right; delete removed; return true; }
+        if (removed->left == nullptr) {          // 没有左孩子：右孩子直接顶上
+            link = removed->right;
+            delete removed;
+            return true;
+        }
+
+        // 找中序前驱：从左孩子出发，一路向右走到底
         Node** predecessor_link = &removed->left;
-        while ((*predecessor_link)->right != nullptr) predecessor_link = &(*predecessor_link)->right;
+        while ((*predecessor_link)->right != nullptr) {
+            predecessor_link = &(*predecessor_link)->right;
+        }
         Node* replacement = *predecessor_link;
-        *predecessor_link = replacement->left;
+        *predecessor_link = replacement->left;   // 前驱可能还有左孩子，先接走
         replacement->left = removed->left;
         replacement->right = removed->right;
         link = replacement;
         delete removed;
         return true;
     }
-    /// 释放整棵树（与 BinaryTree 同法）。**迭代实现**，栈深度恒定。
-    ///
-    /// 递归版 `destroy(left); destroy(right); delete node;` 在退化成链的树上会压穿栈——
-    /// 实测纯左链 100 万结点即段错误（`collab/UNVERIFIED-RISKS.md` 有复现方法）。
-    /// 这里用「右旋到没有左孩子，再沿右链删」的经典办法：每次旋转把左子树提上来，
-    /// 树被逐步拉直成一条右链，然后一个一个删。总代价仍是 O(n)，额外空间 O(1)，
-    /// 而且不分配内存，所以能保持 noexcept。
-    static void destroy(Node* node) noexcept {
-        while (node != nullptr) {
-            if (node->left != nullptr) {
-                Node* const left = node->left;   // 右旋：左孩子成为新的根
-                node->left = left->right;
-                left->right = node;
-                node = left;
-            } else {
-                Node* const right = node->right;
-                delete node;
-                node = right;
-            }
-        }
+
+    static void destroy(Node* node) {
+        if (node == nullptr) return;
+        destroy(node->left);
+        destroy(node->right);
+        delete node;
     }
-    /// 深拷贝（与 BinaryTree 同法：显式栈代替调用栈，退化树上不压穿栈）。
+
     static Node* clone(const Node* node) {
-        if (node == nullptr) {
-            return nullptr;
-        }
-        Node* copy_root = new Node(node->value);
-        try {
-            // 用本章自己那把手写链式栈，与迭代周游同一套零件。
-            LinkedStack<std::pair<const Node*, Node*>> pending;
-            pending.push({node, copy_root});
-            while (auto item = pending.pop()) {
-                const Node* const source = item->first;
-                Node* const target = item->second;
-                if (source->left != nullptr) {
-                    target->left = new Node(source->left->value);
-                    pending.push({source->left, target->left});
-                }
-                if (source->right != nullptr) {
-                    target->right = new Node(source->right->value);
-                    pending.push({source->right, target->right});
-                }
-            }
-        } catch (...) {
-            destroy(copy_root);
-            throw;
-        }
-        return copy_root;
+        if (node == nullptr) return nullptr;
+        return new Node{node->value, clone(node->left), clone(node->right)};
     }
-    template <typename Visitor> static void inorder_impl(const Node* node, Visitor& visit) {
-        if (node != nullptr) { inorder_impl(node->left, visit); visit(node->value); inorder_impl(node->right, visit); }
+
+    template <typename Visitor>
+    static void inorder_impl(const Node* node, Visitor& visit) {
+        if (node == nullptr) return;
+        inorder_impl(node->left, visit);
+        visit(node->value);
+        inorder_impl(node->right, visit);
     }
-    Node* root_{nullptr};
-    Compare compare_{};
+
+    Node* root_;
 };
 ```
+
+
+## 5.4 二叉搜索树
+
+二叉搜索树要求左子树的键都小于根、右子树都大于根。中序周游因此正好是排序。插入重复键、删除不存在的键都是可预期状态，返回 `false`，不抛异常。删除有左右孩子的结点时，用左子树里最右的前驱替换它：先把前驱从原位置摘下，再让它继承被删结点的两棵子树，最后只 `delete` 被删结点一次。漏掉「先脱离原父」会形成环或二次释放。
+
+二叉搜索树的实现就在上面那份教学版清单里的 `BinarySearchTree`。三处值得停一下：
+
+- **插入用的是「指向指针的指针」** `Node** link`。它指向「新结点该挂在哪根指针上」，
+  于是「挂到根」和「挂到某个孩子」写成同一句 `*link = new Node{...}`，
+  空树不必另开一个分支。
+- **删除有两个孩子的结点时，用左子树里最右的那个（中序前驱）顶替。**
+  它比左子树其余的都大、比右子树全部都小，顶上来之后「左小右大」仍然成立。
+- **前驱自己可能还有一个左孩子**，顶替之前必须先把它接走
+  （`*predecessor_link = replacement->left;`）。漏了这一句，树上会出现环——
+  教学版的测试专门搭了一棵这样的树，去掉那句，中序周游立刻无限递归、ASan 报栈溢出。
+
 
 ## 5.5 堆与优先队列
 
 最小堆是一棵完全二叉树，父结点不大于孩子；用数组存时，下标 `i` 的孩子是 `2i+1` 和 `2i+2`。`sift_down` 必须比较左右两个孩子。空堆上 `remove_min()` 返回 `nullopt`。
 
 ```cpp file=code/ch05/heap_huffman/demo.cpp
-#include "modern.hpp"
+// 第 5 章「先跑一遍」：用教学版 MinHeap 与 HuffmanTree。
+// 编译运行：
+//   g++ -std=c++17 -I code/ch05/heap_huffman code/ch05/heap_huffman/demo.cpp -o demo && ./demo
+#include "teaching.hpp"
 
 #include <iostream>
 
 int main() {
-    dsa::MinHeap<int> heap;
+    MinHeap<int> heap;
     for (int value : {5, 1, 4, 2}) {
         heap.insert(value);
     }
     std::cout << "依次取出最小元:";
-    while (auto value = heap.remove_min()) {
+    while (auto value = heap.remove_min()) {   // 空堆返回 nullopt，循环自然结束
         std::cout << ' ' << *value;
     }
     std::cout << '\n';
 
     const int weights[] = {2, 3, 4, 7};
-    const dsa::HuffmanTree tree(weights, 4);
+    const HuffmanTree tree(weights, 4);
     std::cout << "权 2,3,4,7 的 Huffman 树根权 = " << tree.total_weight() << '\n';
+    std::cout << "带权路径长度 WPL = " << tree.weighted_path_length() << '\n';
 }
 ```
 
@@ -513,137 +515,345 @@ c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch05/heap_huffman \
 ```console
 依次取出最小元: 1 2 4 5
 权 2,3,4,7 的 Huffman 树根权 = 16
+带权路径长度 WPL = 30
 ```
 
-```cpp file=code/ch05/heap_huffman/modern.hpp#min-heap
+#### 教学版：完整实现
+
+最小堆与 Huffman 树放在同一个文件里——因为 Huffman 的构造规则
+「反复取两个最小的合并」正是堆的第一个真实用途，两节内容在这里接上。
+
+```cpp file=code/ch05/heap_huffman/teaching.hpp
+// 最小堆与 Huffman 树 —— 教学版。原书【代码5.11】【代码5.12】。
+//
+// 一个文件、两个类、能直接编译运行，给「第一次读这一节」的人看。
+//
+//   MinHeap      完全二叉树用**数组**存：下标 i 的孩子是 2i+1 和 2i+2，父亲是 (i-1)/2。
+//                不需要任何指针，这正是这一节最漂亮的地方。
+//   HuffmanTree  反复「取两个最小的合并」，用最小堆来取——这是堆的第一个真实用途。
+//
+// 与 modern.hpp（工程版）的分工：
+//   教学版  三法则、扩容不考虑异常、Huffman 构造不做溢出与失败清理；
+//   工程版  五法则、对元素类型的 static_assert、构造中途失败时逐个回收裸结点、
+//           权重相加的溢出检查。
+// 两份都在闸门里真编译真运行。先读这一份，5.5a「进阶（选读）」再读那一份。
+#pragma once
+
+#include <cstddef>
+#include <optional>
+#include <stdexcept>
+
+// ---------------------------------------------------------------------------
+// 最小堆
+//
+// 堆是一棵**完全二叉树**（除最后一层外每层排满，最后一层靠左连续），
+// 且每个结点都不大于它的孩子。完全二叉树可以按层次次序压进一个数组，
+// 于是父子关系变成下标算术：
+//
+//   下标 i 的左孩子  2i + 1
+//   下标 i 的右孩子  2i + 2
+//   下标 i 的父亲    (i - 1) / 2       （i > 0）
+//
+// 一根指针都不用。
+// ---------------------------------------------------------------------------
 template <typename T>
 class MinHeap {
 public:
-    static_assert(std::is_nothrow_move_constructible<T>::value && std::is_nothrow_move_assignable<T>::value,
-                  "MinHeap growth relies on non-throwing moves; use a noexcept-movable element type.");
+    using size_type = std::size_t;
 
-    MinHeap() = default;
-    MinHeap(const MinHeap& other) : data_(other.capacity_ ? new T[other.capacity_] : nullptr), size_(other.size_), capacity_(other.capacity_) {
-        try { for (std::size_t i = 0; i < size_; ++i) data_[i] = other.data_[i]; }
-        catch (...) { delete[] data_; throw; }
-    }
-    MinHeap& operator=(const MinHeap& other) { if (this != &other) { MinHeap copy(other); swap(copy); } return *this; }
-    MinHeap(MinHeap&& other) noexcept { swap(other); }
-    MinHeap& operator=(MinHeap&& other) noexcept {
-        if (this != &other) {
-            delete[] data_;
-            data_ = other.data_;
-            size_ = other.size_;
-            capacity_ = other.capacity_;
-            other.data_ = nullptr;
-            other.size_ = other.capacity_ = 0;
+    explicit MinHeap(size_type initial_capacity = 8)
+        : data_(new T[initial_capacity]), capacity_(initial_capacity), size_(0) {}
+
+    ~MinHeap() { delete[] data_; }
+
+    // 三法则：管着 new 出来的数组，拷贝必须自己写。
+    MinHeap(const MinHeap& other)
+        : data_(new T[other.capacity_]), capacity_(other.capacity_), size_(other.size_) {
+        for (size_type i = 0; i < size_; ++i) {
+            data_[i] = other.data_[i];
         }
+    }
+
+    MinHeap& operator=(const MinHeap& other) {
+        if (this == &other) {
+            return *this;
+        }
+        T* fresh = new T[other.capacity_];
+        for (size_type i = 0; i < other.size_; ++i) {
+            fresh[i] = other.data_[i];
+        }
+        delete[] data_;
+        data_ = fresh;
+        capacity_ = other.capacity_;
+        size_ = other.size_;
         return *this;
     }
-    ~MinHeap() { delete[] data_; }
-    void swap(MinHeap& other) noexcept { using std::swap; swap(data_, other.data_); swap(size_, other.size_); swap(capacity_, other.capacity_); }
-    [[nodiscard]] bool empty() const noexcept { return size_ == 0; }
-    [[nodiscard]] std::size_t size() const noexcept { return size_; }
-    void insert(const T& value) { ensure_capacity(); data_[size_] = value; sift_up(size_++); }
-    void insert(T&& value) { ensure_capacity(); data_[size_] = std::move(value); sift_up(size_++); }
-    [[nodiscard]] std::optional<T> remove_min() {
-        if (empty()) return std::nullopt;
-        T value = std::move(data_[0]);
-        --size_;
-        if (size_ == 0) return value;
-        data_[0] = std::move(data_[size_]);
-        sift_down(0);
-        return value;
+
+    bool empty() const { return size_ == 0; }
+    size_type size() const { return size_; }
+
+    // 插入：先放到数组末尾（也就是完全二叉树的最后一个位置），
+    // 再一路和父亲比较、必要时上浮。树高是 log n，所以代价是 O(log n)。
+    void insert(const T& value) {
+        if (size_ == capacity_) {
+            grow();
+        }
+        data_[size_] = value;
+        sift_up(size_);
+        ++size_;
     }
+
+    // 取走最小的那个（就是根，下标 0）。空堆返回空 optional。
+    //
+    // 手法是固定的：把**最后一个**元素搬到根上，长度减一，然后让它一路下沉。
+    // 为什么是最后一个？因为只有拿掉最后一个位置，剩下的才仍然是一棵完全二叉树。
+    std::optional<T> remove_min() {
+        if (empty()) {
+            return std::nullopt;
+        }
+        T smallest = data_[0];
+        --size_;
+        if (size_ > 0) {
+            data_[0] = data_[size_];
+            sift_down(0);
+        }
+        return smallest;
+    }
+
 private:
-    void ensure_capacity() {
-        if (size_ < capacity_) return;
-        const std::size_t next = capacity_ == 0 ? 4 : capacity_ * 2;
+    // 上浮：只要比父亲小就换上去。
+    void sift_up(size_type index) {
+        while (index > 0) {
+            size_type parent = (index - 1) / 2;
+            if (!(data_[index] < data_[parent])) {
+                break;                       // 已经不小于父亲，位置对了
+            }
+            T tmp = data_[index];
+            data_[index] = data_[parent];
+            data_[parent] = tmp;
+            index = parent;
+        }
+    }
+
+    // 下沉：和两个孩子里较小的那个比，比它大就换下去。
+    // **必须和较小的那个换**——跟较大的换会破坏「父亲不大于两个孩子」。
+    void sift_down(size_type index) {
+        for (;;) {
+            size_type left = index * 2 + 1;
+            size_type right = left + 1;
+            size_type smallest = index;
+            if (left < size_ && data_[left] < data_[smallest]) {
+                smallest = left;
+            }
+            if (right < size_ && data_[right] < data_[smallest]) {
+                smallest = right;
+            }
+            if (smallest == index) {
+                return;                      // 父亲已经最小，停
+            }
+            T tmp = data_[index];
+            data_[index] = data_[smallest];
+            data_[smallest] = tmp;
+            index = smallest;
+        }
+    }
+
+    void grow() {
+        size_type next = (capacity_ == 0) ? 1 : capacity_ * 2;
         T* fresh = new T[next];
-        // The class contract requires non-throwing move assignment, so the
-        // migration loop cannot fail. Allocation failure is thrown before fresh exists.
-        for (std::size_t i = 0; i < size_; ++i) fresh[i] = std::move(data_[i]);
+        for (size_type i = 0; i < size_; ++i) {
+            fresh[i] = data_[i];
+        }
         delete[] data_;
         data_ = fresh;
         capacity_ = next;
     }
-    void sift_up(std::size_t index) {
-        while (index != 0 && data_[index] < data_[(index - 1) / 2]) {
-            using std::swap;
-            swap(data_[index], data_[(index - 1) / 2]);
-            index = (index - 1) / 2;
+
+    T* data_;
+    size_type capacity_;
+    size_type size_;
+};
+
+// ---------------------------------------------------------------------------
+// Huffman 树
+//
+// 构造规则只有一句：**反复取出权最小的两棵树，合并成一棵新树放回去**，
+// 直到只剩一棵。「取最小的」正是最小堆的拿手好戏，两节内容在这里接上了。
+// ---------------------------------------------------------------------------
+class HuffmanTree {
+public:
+    struct Node {
+        int weight;
+        Node* left;
+        Node* right;
+    };
+
+    HuffmanTree() : root_(nullptr) {}
+
+    HuffmanTree(const int* weights, std::size_t count) : root_(nullptr) {
+        if (count == 0) {
+            return;
         }
-    }
-    void sift_down(std::size_t index) {
-        for (;;) {
-            const std::size_t left = index * 2 + 1;
-            const std::size_t right = left + 1;
-            std::size_t smallest = index;
-            if (left < size_ && data_[left] < data_[smallest]) smallest = left;
-            if (right < size_ && data_[right] < data_[smallest]) smallest = right;
-            if (smallest == index) return;
-            using std::swap;
-            swap(data_[index], data_[smallest]);
-            index = smallest;
+        if (weights == nullptr) {
+            throw std::invalid_argument("HuffmanTree: 权重数组是空指针");
         }
+
+        // **先把参数全查一遍，再动手 new。** 顺序反过来的话，
+        // 在第 k 个权重上发现非法值时前 k-1 个结点已经建好了，
+        // 抛出去就全漏了——LeakSanitizer 会当场把它报出来（作者第一版正是如此）。
+        for (std::size_t i = 0; i < count; ++i) {
+            if (weights[i] < 0) {
+                throw std::invalid_argument("HuffmanTree: 权重不能为负");
+            }
+        }
+
+        MinHeap<ByWeight> heap;
+        for (std::size_t i = 0; i < count; ++i) {
+            heap.insert(ByWeight{new Node{weights[i], nullptr, nullptr}});   // 每个权重先做成一棵单结点树
+        }
+
+        while (heap.size() > 1) {
+            Node* left = heap.remove_min()->node;      // 最小的
+            Node* right = heap.remove_min()->node;     // 次小的
+            Node* parent = new Node{left->weight + right->weight, left, right};
+            heap.insert(ByWeight{parent});
+        }
+        root_ = heap.remove_min()->node;
     }
-    T* data_{nullptr};
-    std::size_t size_{0};
-    std::size_t capacity_{0};
+
+    ~HuffmanTree() { destroy(root_); }
+
+    // 这棵树不支持拷贝：结点是裸指针，深拷贝要写一整套，而 Huffman 树建好就只读。
+    // 明确 `= delete` 好过让编译器悄悄生成一个会二次释放的版本。
+    HuffmanTree(const HuffmanTree&) = delete;
+    HuffmanTree& operator=(const HuffmanTree&) = delete;
+
+    const Node* root() const { return root_; }
+
+    // 根的权重就是所有叶子权重之和。
+    int total_weight() const { return root_ == nullptr ? 0 : root_->weight; }
+
+    // 带权路径长度(WPL)：每个叶子的权重乘以它的深度，再求和。
+    // Huffman 树的意义就在于它让这个数最小。
+    int weighted_path_length() const { return wpl(root_, 0); }
+
+private:
+    // 放进堆里的是「一棵树的根指针」，比较的是它的权重。
+    struct ByWeight {
+        Node* node;
+        bool operator<(const ByWeight& other) const {
+            return node->weight < other.node->weight;
+        }
+    };
+
+    static void destroy(Node* node) {
+        if (node == nullptr) return;
+        destroy(node->left);
+        destroy(node->right);
+        delete node;
+    }
+
+    static int wpl(const Node* node, int depth) {
+        if (node == nullptr) return 0;
+        if (node->left == nullptr && node->right == nullptr) {
+            return node->weight * depth;      // 叶子
+        }
+        return wpl(node->left, depth + 1) + wpl(node->right, depth + 1);
+    }
+
+    Node* root_;
 };
 ```
+
+`remove_min` 的手法是固定的：**把最后一个元素搬到根上，长度减一，再让它下沉**。
+为什么是最后一个？因为只有拿掉最后一个位置，剩下的才仍然是一棵完全二叉树。
+下沉时**必须和两个孩子里较小的那个交换**——跟较大的换会破坏「父亲不大于两个孩子」。
+
 
 ## 5.6 Huffman 树及其应用
 
-Huffman 树反复取出两个最小权，合成它们的和，直到只剩一棵——这就是前缀编码的那棵树。根权等于全部叶子权之和。合并时若 `new` 父结点失败，会拆开并销毁已经取出的两棵子树。
+Huffman 树反复取出两个最小权，合成它们的和，直到只剩一棵——这就是前缀编码的那棵树。
+根权等于全部叶子权之和。实现就在 5.5 那份教学版清单里的 `HuffmanTree`。
+
+**为什么用堆**：每一轮都要「取当前最小的两棵」。用数组线性扫是 O(n) 一轮、
+总共 O(n²)；用最小堆是 O(log n) 一轮、总共 O(n log n)。这是 5.5 节那个数据结构
+在这里换来的东西。
+
+衡量一棵 Huffman 树好不好，用**带权路径长度**(WPL)：每个叶子的权重乘以它的深度再求和。
+以原书的权 2、3、4、7 为例，合并过程是 2+3=5 → 4+5=9 → 7+9=16，
+于是 2 和 3 落在第 3 层、4 在第 2 层、7 在第 1 层：
+
+$$\mathrm{WPL} = 2\times3 + 3\times3 + 4\times2 + 7\times1 = 30$$
+
+Huffman 树的意义就是让这个数最小——权大的离根近，编码就短。
+教学版的测试把 30 这个数字直接写成断言：合并时若取的不是最小的两个，它立刻变红。
+
+**教学版有一处值得单独说的写法**：构造函数**先把全部权重检查一遍，再动手 `new`**。
+顺序反过来的话，在第 k 个权重上发现负数时前 k−1 个结点已经建好了，一抛就全漏。
+这不是纸上推演——本书作者第一版正是先检查边建，LeakSanitizer 当场把它报了出来：
 
 ```text
-class HuffmanTree {
-    struct Node { int weight; Node* left{nullptr}; Node* right{nullptr}; explicit Node(int w):weight(w){} };
-    struct ByWeight { Node* node{nullptr}; bool operator<(const ByWeight& other) const noexcept { return node->weight < other.node->weight; } };
-public:
-    HuffmanTree()=default;
-    explicit HuffmanTree(const int* weights, std::size_t count) {
-        if (count == 0) return;
-        if (weights == nullptr) throw std::invalid_argument("non-empty Huffman input requires weights");
-        MinHeap<ByWeight> heap;
-        try {
-            for (std::size_t i = 0; i < count; ++i) {
-                if (weights[i] < 0) throw std::invalid_argument("Huffman weights must be non-negative");
-                Node* leaf = new Node(weights[i]);
-                try { heap.insert(ByWeight{leaf}); }
-                catch (...) { delete leaf; throw; }
-            }
-            while (heap.size() > 1) {
-                Node* left = heap.remove_min()->node;
-                Node* right = heap.remove_min()->node;
-                Node* parent = nullptr;
-                try {
-                    if (left->weight > std::numeric_limits<int>::max() - right->weight) {
-                        throw std::overflow_error("Huffman weight sum overflows int");
-                    }
-                    parent = new Node(left->weight + right->weight);
-                    parent->left = left;
-                    parent->right = right;
-                    heap.insert(ByWeight{parent});
-                } catch (...) {
-                    if (parent != nullptr) { parent->left = parent->right = nullptr; delete parent; }
-                    destroy(left);
-                    destroy(right);
-                    throw;
-                }
-            }
-            root_ = heap.remove_min()->node;
-        } catch (...) {
-            while (auto item = heap.remove_min()) destroy(item->node);
-            throw;
+==2738715==ERROR: LeakSanitizer: detected memory leaks
+Direct leak of 24 byte(s) in 1 object(s) allocated from:
+    #1 HuffmanTree::HuffmanTree(int const*, unsigned long) teaching.hpp:180
+```
+
+### 5.6a 进阶（选读）：从教学版到工程版
+
+**这一节可以整节跳过。** 工程版在 `code/ch05/binary_tree/modern.hpp` 与
+`code/ch05/heap_huffman/modern.hpp`，与教学版的差别有四处，第一处是本章特有的。
+
+**一、递归的深度限制，以及怎么绕开。**
+教学版的 `destroy` 与 `clone` 都是递归的——形状和树的定义一样，好读。
+代价是**递归深度等于树高**：一棵退化成链的树（比如按升序往 BST 里插入）会把运行栈压穿。
+本机实测（Linux/gcc 13.3/8MB 栈）：纯左链 50 万结点，递归 `clone` 即段错误；
+100 万结点，递归 `destroy` 段错误。
+
+工程版把两者都改成迭代。`destroy` 用的是一个漂亮的办法——**右旋到没有左孩子，
+再沿右链删**：每次旋转把左子树提上来，树被逐步拉直成一条右链，然后一个一个删。
+总代价仍是 O(n)，额外空间 O(1)，而且不分配内存，所以能保持 `noexcept`：
+
+```cpp file=code/ch05/binary_tree/modern.hpp#iterative-destroy
+/// 释放整棵树。**迭代实现**，栈深度恒定。
+///
+/// 递归版 `destroy(left); destroy(right); delete node;` 在退化成链的树上会压穿栈——
+/// 实测纯左链 100 万结点即段错误（`collab/UNVERIFIED-RISKS.md` 有复现方法）。
+/// 这里用「右旋到没有左孩子，再沿右链删」的经典办法：每次旋转把左子树提上来，
+/// 树被逐步拉直成一条右链，然后一个一个删。总代价仍是 O(n)，额外空间 O(1)，
+/// 而且不分配内存，所以能保持 noexcept。
+static void destroy(Node* node) noexcept {
+    while (node != nullptr) {
+        if (node->left != nullptr) {
+            Node* const left = node->left;   // 右旋：左孩子成为新的根
+            node->left = left->right;
+            left->right = node;
+            node = left;
+        } else {
+            Node* const right = node->right;
+            delete node;
+            node = right;
         }
     }
-    HuffmanTree(const HuffmanTree&)=delete; HuffmanTree& operator=(const HuffmanTree&)=delete;
-    HuffmanTree(HuffmanTree&& other)noexcept:root_(other.root_){other.root_=nullptr;} HuffmanTree& operator=(HuffmanTree&& other)noexcept{if(this!=&other){destroy(root_);root_=other.root_;other.root_=nullptr;}return *this;} ~HuffmanTree(){destroy(root_);} [[nodiscard]] int total_weight()const noexcept{return root_?root_->weight:0;}
-private: static void destroy(Node*n)noexcept{if(n){destroy(n->left);destroy(n->right);delete n;}} Node* root_{nullptr};
-};
+}
 ```
+
+`clone` 则用一把**显式栈**代替调用栈——结点放在堆上，深度不再受线程栈限制；
+中途抛异常时回收已建好的部分，保持强异常保证。用的正是本章自己那把手写链式栈。
+
+**注意这条与 D-001 §3d 不冲突**：**周游**的递归版仍是主教学实现（递归结构正是要教的），
+被改成迭代的只有**释放与深拷贝**这两件与教学无关的杂务。原书【算法5.4】–【算法5.6】
+的非递归周游作为补充保留在工程版里。
+
+**二、`MinHeap` 对元素类型的编译期约束。**
+工程版类头有一条 `static_assert`，要求 `T` 的移动构造与移动赋值都 `noexcept`——
+扩容搬迁靠的就是它们，判据与 3.1.2a 说过的是同一条。
+
+**三、Huffman 构造的两处防御。**
+工程版在合并前检查 `left->weight + right->weight` 会不会溢出 `int`，
+并用层层 `try/catch` 保证「中途任何一步失败，已经取出来的裸结点都被回收」。
+教学版只做了参数预检查，这两处留给进阶。
+
+**四、其余与前几章相同**：五法则、`[[nodiscard]]`、`noexcept`、copy-and-swap。
 
 ## 本章小结
 
