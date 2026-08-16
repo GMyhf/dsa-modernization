@@ -2,7 +2,8 @@
 
 检索的目标是在一组记录中找到目标键。顺序检索不要求有序；二分检索要求有序，靠每次排除一半区间加速；散列表用散列函数直接定位槽位，冲突时继续探测。
 
-源码：[检索、集合和散列表](../code/ch10/search_hash/modern.hpp)、
+源码：[检索、集合和散列表·教学版](../code/ch10/search_hash/teaching.hpp)、
+[检索、集合和散列表·工程版](../code/ch10/search_hash/modern.hpp)、
 [可运行示例](../code/ch10/search_hash/demo.cpp)、
 [墓碑探测测试](../code/ch10/search_hash/test.cpp)。
 
@@ -32,28 +33,275 @@
 
 块数选 $\sqrt{n}$ 量级时，索引和块内的平均比较次数比较均衡，ASL 大约是 $O(\sqrt{n})$，介于顺序的 $O(n)$ 和二分的 $O(\log n)$ 之间。它适合「主表很大、不能整表排序，但可以按块组织」的场合。本章不另写未验证的分块实现。
 
-```cpp file=code/ch10/search_hash/modern.hpp#sequential-binary
-// 算法10.2：无需修改输入容器的顺序检索。
+### 教学版：完整实现
+
+本章的四件东西——两种检索、集合、散列函数、闭散列表——放在同一个文件里。
+后面 10.2、10.3 各节就是把它拆开逐段讲。
+
+```cpp file=code/ch10/search_hash/teaching.hpp
+// 检索、集合与散列 —— 教学版。
+// 原书【代码10.1】【算法10.2】–【算法10.13】。
+//
+// 一个文件、能直接编译运行，给「第一次读这一章」的人看。
+//
+//   sequential_search / binary_search   线性表上的两种检索
+//   IntSet                              不重复整数集合与集合运算
+//   elf_hash                            ELF 散列函数
+//   HashTable                           线性探测的闭散列表，含「墓碑」删除
+//
+// 与 modern.hpp（工程版）的分工：教学版把 `[[nodiscard]]`/`noexcept` 和压成一行的
+// if 分支全部展开，其余逻辑一模一样。这一章没有手写存储管理，所以没有三法则/五法则
+// 之分——`std::vector` 在这里只是「一块连续的槽位」，不是被它替换掉的教学内容
+// （见 unit.json 的 d001_exceptions）。
+#pragma once
+
+#include <cstddef>
+#include <optional>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
+// ---------------------------------------------------------------------------
+// 10.1 基于线性表的检索
+// ---------------------------------------------------------------------------
+
+// 【算法10.2】顺序检索：从头比到尾。找到返回下标，没找到返回空 optional。
+// 代价 O(n)。它对数据没有任何要求——这是它唯一的优点，也是全部优点。
 inline std::optional<std::size_t> sequential_search(const std::vector<int>& values, int key) {
     for (std::size_t index = 0; index < values.size(); ++index) {
-        if (values[index] == key) return index;
+        if (values[index] == key) {
+            return index;
+        }
     }
     return std::nullopt;
 }
 
-// 算法10.3：半开区间避免 `mid - 1` 在无符号下标下溢。
+// 【算法10.3】二分检索：要求**已排好序**，每比较一次砍掉一半，代价 O(log n)。
+//
+// 这里用的是**半开区间** [first, last)：`last` 指向"最后一个候选的下一个"。
+// 为什么不用书上常见的闭区间 [low, high]？因为闭区间在没找到时要写 `high = mid - 1`，
+// 而下标是无符号的，`mid == 0` 时这一句会下溢成一个天文数字。
+// 半开区间只写 `last = middle`，永远不减 1，这个坑就不存在。
 inline std::optional<std::size_t> binary_search(const std::vector<int>& sorted_values, int key) {
     std::size_t first = 0;
     std::size_t last = sorted_values.size();
     while (first < last) {
-        const std::size_t middle = first + (last - first) / 2;
-        if (sorted_values[middle] == key) return middle;
-        if (sorted_values[middle] < key) first = middle + 1;
-        else last = middle;
+        // 写成 first + (last - first) / 2 而不是 (first + last) / 2：
+        // 后者在两个下标都很大时会溢出。
+        std::size_t middle = first + (last - first) / 2;
+        if (sorted_values[middle] == key) {
+            return middle;
+        }
+        if (sorted_values[middle] < key) {
+            first = middle + 1;    // 目标在右半边
+        } else {
+            last = middle;         // 目标在左半边
+        }
     }
     return std::nullopt;
 }
+
+// ---------------------------------------------------------------------------
+// 10.2 集合的检索
+//
+// 【代码10.4】【算法10.5】–【算法10.7】：用一个不含重复元素的表表示集合。
+// 所有运算都建立在「查一个元素在不在集合里」之上，而这里的查是顺序检索 O(n)——
+// 所以交集是 O(n·m)。10.3 节的散列就是来把这个 O(n) 压成 O(1) 的。
+// ---------------------------------------------------------------------------
+class IntSet {
+public:
+    // 插入。已经有了就返回 false——集合不含重复元素，这是可预期状态，不是错误。
+    bool insert(int value) {
+        if (contains(value)) {
+            return false;
+        }
+        values_.push_back(value);
+        return true;
+    }
+
+    bool erase(int value) {
+        std::optional<std::size_t> found = sequential_search(values_, value);
+        if (!found) {
+            return false;
+        }
+        values_.erase(values_.begin() + static_cast<std::ptrdiff_t>(*found));
+        return true;
+    }
+
+    bool contains(int value) const {
+        return sequential_search(values_, value).has_value();
+    }
+
+    // 交集：本集合里凡是对方也有的，都收进结果。
+    IntSet intersection(const IntSet& other) const {
+        IntSet result;
+        for (int value : values_) {
+            if (other.contains(value)) {
+                (void)result.insert(value);
+            }
+        }
+        return result;
+    }
+
+    // 包含：对方的每个元素本集合都得有。
+    bool includes(const IntSet& other) const {
+        for (int value : other.values_) {
+            if (!contains(value)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    std::size_t size() const { return values_.size(); }
+
+private:
+    std::vector<int> values_;
+};
+
+// ---------------------------------------------------------------------------
+// 10.3 散列方法
+// ---------------------------------------------------------------------------
+
+// 【算法10.8】ELF 散列：把字符串搅成一个整数。
+//
+// 逐字节读的是 `unsigned char` 而不是 `char`——`char` 在多数平台上是有符号的，
+// 中文等非 ASCII 字节会变成负数，一进位运算就带出符号扩展，散列值随平台而变。
+inline std::size_t elf_hash(const std::string& text) {
+    std::size_t hash = 0;
+    for (unsigned char character : text) {
+        hash = (hash << 4U) + character;        // 左移 4 位，腾出位置放新字节
+        std::size_t high_bits = hash & 0xF0000000U;   // 溢出到高 4 位的那部分
+        if (high_bits != 0) {
+            hash ^= high_bits >> 24U;           // 折回低位，别让它白白丢掉
+        }
+        hash &= ~high_bits;                     // 再把高 4 位清掉
+    }
+    return hash;
+}
+
+// 【算法10.9】–【算法10.13】线性探测的闭散列表。
+//
+// 「闭散列」是指所有元素都住在表里，不另开链表。key 先由散列函数算出一个
+// **基地址**(home)；那一格被占了就往后一格一格找，这就是**线性探测**。
+//
+// 删除是这里唯一的难点。直接把槽位标成「空」是**错的**：
+//
+//   假设 A 和 B 的基地址都是 3，A 占了 3，B 探测一格住进 4。
+//   现在删掉 A，把 3 标成空。再查 B：从 3 开始，看到「空」就认定 B 不在表里——
+//   可 B 明明就在 4 号槽。**探测链被这个空格截断了。**
+//
+// 所以删除只能把槽位标成**墓碑**(tombstone)：查找路过它继续往下走，
+// 插入则可以覆盖它。三种状态因此缺一不可。
+class HashTable {
+public:
+    enum class SlotState { empty, used, tombstone };
+
+    struct SlotView {
+        int key;
+        SlotState state;
+    };
+
+    explicit HashTable(std::size_t capacity) : slots_(capacity), size_(0) {
+        if (capacity == 0) {
+            throw std::invalid_argument("HashTable: 容量必须为正");
+        }
+    }
+
+    // 插入。键已存在返回 false；表满且没有墓碑可用也返回 false。
+    bool insert(int key) {
+        std::optional<std::size_t> target = insertion_slot(key);
+        if (!target) {
+            return false;                       // 表满，插不进去
+        }
+        if (slots_[*target].state == SlotState::used) {
+            return false;                       // 键已经在表里
+        }
+        slots_[*target].key = key;
+        slots_[*target].state = SlotState::used;
+        ++size_;
+        return true;
+    }
+
+    bool contains(int key) const { return find_slot(key).has_value(); }
+
+    // 删除：**标墓碑，不标空**。理由见上面类注释里那三行推演。
+    bool erase(int key) {
+        std::optional<std::size_t> found = find_slot(key);
+        if (!found) {
+            return false;
+        }
+        slots_[*found].state = SlotState::tombstone;
+        --size_;
+        return true;
+    }
+
+    std::size_t size() const { return size_; }
+    std::size_t capacity() const { return slots_.size(); }
+
+    // 让调用方（和测试）能看到每一格的状态，方便观察探测过程。
+    SlotView slot_at(std::size_t index) const {
+        if (index >= slots_.size()) {
+            throw std::out_of_range("HashTable::slot_at: 下标越界");
+        }
+        return SlotView{slots_[index].key, slots_[index].state};
+    }
+
+private:
+    struct Slot {
+        int key = 0;
+        SlotState state = SlotState::empty;
+    };
+
+    // 基地址：key 取绝对值再对表长取模。
+    // 先转成 long long 再取绝对值，是因为 INT_MIN 的相反数在 int 里放不下。
+    std::size_t home(int key) const {
+        long long magnitude = (key >= 0) ? key : -static_cast<long long>(key);
+        return static_cast<std::size_t>(magnitude) % slots_.size();
+    }
+
+    // 查找：从基地址起一格一格往后走。
+    //   碰到「空」  → 探测链到头了，键不在表里；
+    //   碰到「墓碑」→ 继续走（这正是墓碑存在的意义）；
+    //   碰到「占用」且键相同 → 找到了。
+    std::optional<std::size_t> find_slot(int key) const {
+        for (std::size_t step = 0; step < slots_.size(); ++step) {
+            std::size_t index = (home(key) + step) % slots_.size();
+            if (slots_[index].state == SlotState::empty) {
+                return std::nullopt;
+            }
+            if (slots_[index].state == SlotState::used && slots_[index].key == key) {
+                return index;
+            }
+        }
+        return std::nullopt;                    // 走遍全表也没有
+    }
+
+    // 找插入位置。比查找多做一件事：**记住路上第一个墓碑**。
+    // 走到「空」时优先返回那个墓碑——回收墓碑，探测链才不会越来越长。
+    // 但必须先走到「空」或找到同键才能停，否则会把一个已存在的键插第二遍。
+    std::optional<std::size_t> insertion_slot(int key) const {
+        std::optional<std::size_t> first_tombstone;
+        for (std::size_t step = 0; step < slots_.size(); ++step) {
+            std::size_t index = (home(key) + step) % slots_.size();
+            if (slots_[index].state == SlotState::used && slots_[index].key == key) {
+                return index;                   // 键已存在
+            }
+            if (slots_[index].state == SlotState::tombstone && !first_tombstone) {
+                first_tombstone = index;
+            }
+            if (slots_[index].state == SlotState::empty) {
+                return first_tombstone ? first_tombstone : std::optional<std::size_t>(index);
+            }
+        }
+        return first_tombstone;                 // 全表没有空格，只能指望墓碑
+    }
+
+    std::vector<Slot> slots_;
+    std::size_t size_;
+};
 ```
+
 
 ## 10.2 集合的检索
 
@@ -67,36 +315,10 @@ inline std::optional<std::size_t> binary_search(const std::vector<int>& sorted_v
 
 同一组集合运算，底下可以用不同结构：线性表加顺序检索（实现简单，适合很小的集合）、有序表加二分、二叉搜索树、散列表。规模上去以后，线性表的 $O(n)$ 检索会拖垮交和并。本章的 `IntSet` 故意用线性表，把接口先钉死：`insert` / `erase` 返回 `bool`，`contains` 只回答在不在，`intersection` 和 `includes` 用检索组合出来。换成散列表时，调用方不用改。
 
-```cpp file=code/ch10/search_hash/modern.hpp#int-set
-// 代码10.4、算法10.5–10.7：不重复整数集合。
-class IntSet {
-public:
-    [[nodiscard]] bool insert(int value) {
-        if (contains(value)) return false;
-        values_.push_back(value);
-        return true;
-    }
-    [[nodiscard]] bool erase(int value) {
-        const auto found = sequential_search(values_, value);
-        if (!found) return false;
-        values_.erase(values_.begin() + static_cast<std::ptrdiff_t>(*found));
-        return true;
-    }
-    [[nodiscard]] bool contains(int value) const { return sequential_search(values_, value).has_value(); }
-    [[nodiscard]] IntSet intersection(const IntSet& other) const {
-        IntSet result;
-        for (int value : values_) if (other.contains(value)) (void)result.insert(value);
-        return result;
-    }
-    [[nodiscard]] bool includes(const IntSet& other) const {
-        for (int value : other.values_) if (!contains(value)) return false;
-        return true;
-    }
-    [[nodiscard]] std::size_t size() const noexcept { return values_.size(); }
-private:
-    std::vector<int> values_;
-};
-```
+`IntSet` 的实现见上面那份清单。注意它的每一个运算最后都落到 `contains`，
+而 `contains` 是顺序检索 O(n)——所以交集是 O(n·m)。**10.3 节的散列就是来把这个
+O(n) 压成 O(1) 的**，接口一个字都不用改。
+
 
 ## 10.3 散列方法
 
@@ -108,19 +330,11 @@ private:
 
 本章实现了 ELFHash：每个字节先左移 4 位再加进去，高 4 位若非零就折回到低位并清掉。字节按 `unsigned char` 读，避免 `char` 在有的平台上是有符号的、高位 1 被当成负数。它不是密码学哈希，只求快和够匀。
 
-```cpp file=code/ch10/search_hash/modern.hpp#elf-hash
-// 算法10.8：ELFhash，逐字节处理，不把 char 的符号性带入散列。
-inline std::size_t elf_hash(const std::string& text) noexcept {
-    std::size_t hash = 0;
-    for (unsigned char character : text) {
-        hash = (hash << 4U) + character;
-        const std::size_t high_bits = hash & 0xF0000000U;
-        if (high_bits != 0) hash ^= high_bits >> 24U;
-        hash &= ~high_bits;
-    }
-    return hash;
-}
-```
+`elf_hash` 的实现见上面那份清单。它逐字节读的是 `unsigned char`——
+教学版的测试里有一条拿 UTF-8 的「中」（E4 B8 AD）做输入：按无符号读得到
+`0xF02D`，按有符号读会被符号扩展成 `0xFFFFFF000FFF00DD`。两者天差地别，
+所以这一条能把两种写法分开。
+
 
 ### 10.3.2 开散列方法（拉链法）
 
@@ -153,12 +367,15 @@ inline std::size_t elf_hash(const std::string& text) noexcept {
 
 
 ```cpp file=code/ch10/search_hash/demo.cpp
-#include "modern.hpp"
+// 第 10 章「先跑一遍」：用教学版 HashTable 观察线性探测与墓碑删除。
+// 编译运行：
+//   g++ -std=c++17 -I code/ch10/search_hash code/ch10/search_hash/demo.cpp -o demo && ./demo
+#include "teaching.hpp"
 
 #include <iostream>
 
 int main() {
-    dsa::search::HashTable table(5);
+    HashTable table(5);
     if (!table.insert(1) || !table.insert(6) || !table.insert(11)) {
         std::cout << "插入 1、6、11 失败\n";
         return 1;
@@ -168,9 +385,9 @@ int main() {
     for (std::size_t index = 0; index < table.capacity(); ++index) {
         const auto slot = table.slot_at(index);
         std::cout << "  槽 " << index << ": ";
-        if (slot.state == dsa::search::HashTable::SlotState::used) {
+        if (slot.state == HashTable::SlotState::used) {
             std::cout << slot.key << '\n';
-        } else if (slot.state == dsa::search::HashTable::SlotState::tombstone) {
+        } else if (slot.state == HashTable::SlotState::tombstone) {
             std::cout << "墓碑\n";
         } else {
             std::cout << "空\n";
@@ -213,71 +430,20 @@ c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch10/search_hash \
 
 `HashTable::home` 先取绝对值再取模，所以负键也能进表。`find_slot` 遇到 `empty` 就停，遇到 `tombstone` 继续；`insertion_slot` 记下沿途第一个墓碑，确认后方没有同键后复用它。按键删除返回 `bool`。
 
-```cpp file=code/ch10/search_hash/modern.hpp#hash-table
-// 算法10.9–10.13：线性探测闭散列表，显式区分空、占用和墓碑。
-class HashTable {
-public:
-    enum class SlotState { empty, used, tombstone };
-    struct SlotView { int key; SlotState state; };
+`HashTable` 的实现见上面那份清单。三处值得停一下，教学版的测试各有一条具名断言守着：
 
-    explicit HashTable(std::size_t capacity) : slots_(capacity) {
-        if (capacity == 0) throw std::invalid_argument("hash table capacity must be positive");
-    }
+- **删除只能标墓碑。** 上面那段推演不是纸上谈兵——把 `erase` 改成标 `empty`，
+  「删掉 3 之后 10 还找不找得到」这条立刻变红。
+- **插入要回收墓碑**，否则表用久了探测链只会越来越长。
+- **回收墓碑时不能提前停**：碰到墓碑就返回，会把一个已经在后面的键插第二遍。
+  这一条最隐蔽，所以单列了一个用例。
 
-    [[nodiscard]] bool insert(int key) {
-        const auto target = insertion_slot(key);
-        if (!target) return false;
-        Slot& slot = slots_[*target];
-        if (slot.state == SlotState::used) return false;
-        slot = Slot{key, SlotState::used};
-        ++size_;
-        return true;
-    }
-    [[nodiscard]] bool contains(int key) const { return find_slot(key).has_value(); }
-    [[nodiscard]] bool erase(int key) {
-        const auto found = find_slot(key);
-        if (!found) return false;
-        slots_[*found].state = SlotState::tombstone;
-        --size_;
-        return true;
-    }
-    [[nodiscard]] std::size_t size() const noexcept { return size_; }
-    [[nodiscard]] std::size_t capacity() const noexcept { return slots_.size(); }
-    [[nodiscard]] SlotView slot_at(std::size_t index) const {
-        if (index >= slots_.size()) throw std::out_of_range("hash table slot");
-        return SlotView{slots_[index].key, slots_[index].state};
-    }
+### 10.3.4a 进阶（选读）：工程版差在哪
 
-private:
-    struct Slot { int key{0}; SlotState state{SlotState::empty}; };
-    [[nodiscard]] std::size_t home(int key) const noexcept {
-        const auto magnitude = key >= 0 ? static_cast<long long>(key) : -static_cast<long long>(key);
-        return static_cast<std::size_t>(magnitude) % slots_.size();
-    }
-    [[nodiscard]] std::optional<std::size_t> find_slot(int key) const {
-        for (std::size_t step = 0; step < slots_.size(); ++step) {
-            const std::size_t index = (home(key) + step) % slots_.size();
-            const Slot& slot = slots_[index];
-            if (slot.state == SlotState::empty) return std::nullopt;
-            if (slot.state == SlotState::used && slot.key == key) return index;
-        }
-        return std::nullopt;
-    }
-    [[nodiscard]] std::optional<std::size_t> insertion_slot(int key) const {
-        std::optional<std::size_t> first_tombstone;
-        for (std::size_t step = 0; step < slots_.size(); ++step) {
-            const std::size_t index = (home(key) + step) % slots_.size();
-            const Slot& slot = slots_[index];
-            if (slot.state == SlotState::used && slot.key == key) return index;
-            if (slot.state == SlotState::tombstone && !first_tombstone) first_tombstone = index;
-            if (slot.state == SlotState::empty) return first_tombstone ? first_tombstone : index;
-        }
-        return first_tombstone;
-    }
-    std::vector<Slot> slots_;
-    std::size_t size_{0};
-};
-```
+工程版在 `code/ch10/search_hash/modern.hpp`。这一章没有手写存储管理，
+所以没有三法则/五法则之分，差别只有标注与排版：查询函数标了 `[[nodiscard]]`
+（防止「查了却忘了看结果」）与 `noexcept`，若干 `if` 分支压成一行。逻辑完全一致。
+
 
 ### 10.3.5 散列方法的效率分析
 

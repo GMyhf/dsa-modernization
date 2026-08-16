@@ -1391,27 +1391,105 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
 };</code></pre></div>
 <h4 id="323a-进阶选读从教学版到工程版"><a class="anchor" href="#323a-进阶选读从教学版到工程版">#</a>3.2.3a 进阶（选读）：从教学版到工程版</h4>
 <p><strong>这一节可以整节跳过。</strong> 工程版（<code>code/ch03/queue/modern.hpp</code>）与教学版的差别， 和 3.1.2a、3.1.3a 里说过的完全是同一批：补齐移动构造与移动赋值、 拷贝赋值改用 copy-and-swap、查询函数标 <code>[[nodiscard]]</code> 与 <code>noexcept</code>、 读队头改为返回 <code>const T*</code>（零拷贝，但指针会随下一次修改失效）。</p>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/queue/modern.hpp">code/ch03/queue/modern.hpp#array-queue</a></div><pre><code><span class="k">template</span> &lt;<span class="k">typename</span> T&gt;
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/queue/modern.hpp">code/ch03/queue/modern.hpp#array-queue</a></div><pre><code><span class="c">/// 循环队列。牺牲一个槽位区分「空」与「满」：逻辑容量 n 时实际申请 n+1 格。</span>
+<span class="k">template</span> &lt;<span class="k">typename</span> T&gt;
 <span class="k">class</span> ArrayQueue {
 <span class="k">public</span>:
-    <span class="k">explicit</span> ArrayQueue(std::<span class="t">size_t</span> capacity) : slots_(capacity + <span class="n">1</span>), data_(slots_ ? <span class="k">new</span> T[slots_] : <span class="k">nullptr</span>) {}
-    ArrayQueue(<span class="k">const</span> ArrayQueue&amp; other) : slots_(other.slots_), front_(other.front_), rear_(other.rear_), data_(slots_ ? <span class="k">new</span> T[slots_] : <span class="k">nullptr</span>) { <span class="k">for</span> (std::<span class="t">size_t</span> i = front_; i != rear_; i = (i + <span class="n">1</span>) % slots_) data_[i] = other.data_[i]; }
-    ArrayQueue&amp; <span class="k">operator</span>=(<span class="k">const</span> ArrayQueue&amp; other) { <span class="k">if</span> (<span class="k">this</span> != &amp;other) { ArrayQueue copy(other); swap(copy); } <span class="k">return</span> *<span class="k">this</span>; }
+    <span class="k">explicit</span> ArrayQueue(std::<span class="t">size_t</span> capacity)
+        : slots_(capacity + <span class="n">1</span>), data_(slots_ ? <span class="k">new</span> T[slots_] : <span class="k">nullptr</span>) {}
+
+    ArrayQueue(<span class="k">const</span> ArrayQueue&amp; other)
+        : slots_(other.slots_),
+          front_(other.front_),
+          rear_(other.rear_),
+          data_(other.slots_ ? <span class="k">new</span> T[other.slots_] : <span class="k">nullptr</span>) {
+        <span class="k">for</span> (std::<span class="t">size_t</span> i = front_; i != rear_; i = (i + <span class="n">1</span>) % slots_) {
+            data_[i] = other.data_[i];
+        }
+    }
+
+    ArrayQueue&amp; <span class="k">operator</span>=(<span class="k">const</span> ArrayQueue&amp; other) {
+        <span class="k">if</span> (<span class="k">this</span> != &amp;other) {
+            ArrayQueue copy(other);
+            swap(copy);
+        }
+        <span class="k">return</span> *<span class="k">this</span>;
+    }
+
     ArrayQueue(ArrayQueue&amp;&amp; other) <span class="k">noexcept</span> { swap(other); }
-    ArrayQueue&amp; <span class="k">operator</span>=(ArrayQueue&amp;&amp; other) <span class="k">noexcept</span> { <span class="k">if</span> (<span class="k">this</span> != &amp;other) { ArrayQueue moved(std::move(other)); swap(moved); } <span class="k">return</span> *<span class="k">this</span>; }
+
+    ArrayQueue&amp; <span class="k">operator</span>=(ArrayQueue&amp;&amp; other) <span class="k">noexcept</span> {
+        <span class="k">if</span> (<span class="k">this</span> != &amp;other) {
+            ArrayQueue moved(std::move(other));
+            swap(moved);
+        }
+        <span class="k">return</span> *<span class="k">this</span>;
+    }
+
     ~ArrayQueue() { <span class="k">delete</span>[] data_; }
-    <span class="t">void</span> swap(ArrayQueue&amp; other) <span class="k">noexcept</span> { <span class="k">using</span> std::swap; swap(slots_, other.slots_); swap(front_, other.front_); swap(rear_, other.rear_); swap(data_, other.data_); }
+
+    <span class="t">void</span> swap(ArrayQueue&amp; other) <span class="k">noexcept</span> {
+        <span class="k">using</span> std::swap;
+        swap(slots_, other.slots_);
+        swap(front_, other.front_);
+        swap(rear_, other.rear_);
+        swap(data_, other.data_);
+    }
+
     [[nodiscard]] <span class="t">bool</span> empty() <span class="k">const</span> <span class="k">noexcept</span> { <span class="k">return</span> front_ == rear_; }
-    [[nodiscard]] <span class="t">bool</span> full() <span class="k">const</span> <span class="k">noexcept</span> { <span class="k">return</span> slots_ != <span class="n">0</span> &amp;&amp; (rear_ + <span class="n">1</span>) % slots_ == front_; }
-    [[nodiscard]] std::<span class="t">size_t</span> size() <span class="k">const</span> <span class="k">noexcept</span> { <span class="k">return</span> rear_ &gt;= front_ ? rear_ - front_ : slots_ - front_ + rear_; }
-    [[nodiscard]] <span class="t">bool</span> enqueue(<span class="k">const</span> T&amp; value) { <span class="k">if</span> (full()) <span class="k">return</span> <span class="k">false</span>; data_[rear_] = value; rear_ = (rear_ + <span class="n">1</span>) % slots_; <span class="k">return</span> <span class="k">true</span>; }
-    [[nodiscard]] <span class="t">bool</span> enqueue(T&amp;&amp; value) { <span class="k">if</span> (full()) <span class="k">return</span> <span class="k">false</span>; data_[rear_] = std::move(value); rear_ = (rear_ + <span class="n">1</span>) % slots_; <span class="k">return</span> <span class="k">true</span>; }
-    [[nodiscard]] std::optional&lt;T&gt; dequeue() { <span class="k">if</span> (empty()) <span class="k">return</span> std::nullopt; T value = std::move(data_[front_]); front_ = (front_ + <span class="n">1</span>) % slots_; <span class="k">return</span> value; }
-    [[nodiscard]] <span class="k">const</span> T* front() <span class="k">const</span> <span class="k">noexcept</span> { <span class="k">return</span> empty() ? <span class="k">nullptr</span> : &amp;data_[front_]; }
+
+    <span class="c">/// 满：rear 再往前一格就撞上 front。那一格就是被牺牲掉的槽位。</span>
+    [[nodiscard]] <span class="t">bool</span> full() <span class="k">const</span> <span class="k">noexcept</span> {
+        <span class="k">return</span> slots_ != <span class="n">0</span> &amp;&amp; (rear_ + <span class="n">1</span>) % slots_ == front_;
+    }
+
+    [[nodiscard]] std::<span class="t">size_t</span> size() <span class="k">const</span> <span class="k">noexcept</span> {
+        <span class="k">return</span> rear_ &gt;= front_ ? rear_ - front_ : slots_ - front_ + rear_;
+    }
+
+    <span class="c">/// 入队。队满返回 false——顺序队列的容量是固定的。</span>
+    [[nodiscard]] <span class="t">bool</span> enqueue(<span class="k">const</span> T&amp; value) {
+        <span class="k">if</span> (full()) {
+            <span class="k">return</span> <span class="k">false</span>;
+        }
+        data_[rear_] = value;
+        rear_ = (rear_ + <span class="n">1</span>) % slots_;
+        <span class="k">return</span> <span class="k">true</span>;
+    }
+
+    [[nodiscard]] <span class="t">bool</span> enqueue(T&amp;&amp; value) {
+        <span class="k">if</span> (full()) {
+            <span class="k">return</span> <span class="k">false</span>;
+        }
+        data_[rear_] = std::move(value);
+        rear_ = (rear_ + <span class="n">1</span>) % slots_;
+        <span class="k">return</span> <span class="k">true</span>;
+    }
+
+    <span class="c">/// 出队。空队列返回 std::nullopt（D-001 §3c）。</span>
+    [[nodiscard]] std::optional&lt;T&gt; dequeue() {
+        <span class="k">if</span> (empty()) {
+            <span class="k">return</span> std::nullopt;
+        }
+        T value = std::move(data_[front_]);
+        front_ = (front_ + <span class="n">1</span>) % slots_;
+        <span class="k">return</span> value;
+    }
+
+    <span class="c">/// 零拷贝地看一眼队头。空队列返回 nullptr；指针在下一次修改后即失效（D-001 §3b）。</span>
+    [[nodiscard]] <span class="k">const</span> T* front() <span class="k">const</span> <span class="k">noexcept</span> {
+        <span class="k">return</span> empty() ? <span class="k">nullptr</span> : &amp;data_[front_];
+    }
+
     <span class="t">void</span> clear() <span class="k">noexcept</span> { front_ = rear_ = <span class="n">0</span>; }
-<span class="k">private</span>: std::<span class="t">size_t</span> slots_{<span class="n">0</span>}, front_{<span class="n">0</span>}, rear_{<span class="n">0</span>}; T* data_{<span class="k">nullptr</span>};
+
+<span class="k">private</span>:
+    std::<span class="t">size_t</span> slots_{<span class="n">0</span>};   <span class="c">// 数组格数 = 容量 + 1</span>
+    std::<span class="t">size_t</span> front_{<span class="n">0</span>};
+    std::<span class="t">size_t</span> rear_{<span class="n">0</span>};
+    T* data_{<span class="k">nullptr</span>};
 };</code></pre></div>
-<p>工程版为了压缩篇幅把每个函数写成了一行，这也正是 D-012 要分层的理由之一： <strong>一行一个函数省的是纸，费的是读者的眼睛</strong>。教学版一行一句，同样的逻辑读起来 不需要横向找分号。</p>
+<p>这份工程版一度把每个函数压成一行，最长的一行 239 个字符——印在书上，读者要 横向找分号才知道函数在哪结束。2026-08-16 已把它排开，逻辑一字未改。 <strong>一行一个函数省的是纸，费的是读者的眼睛</strong>，这也正是 D-012 要分层的理由之一。</p>
 <h2 id="33-栈与队列的比较"><a class="anchor" href="#33-栈与队列的比较">#</a>3.3 栈与队列的比较</h2>
 <h3 id="331-顺序栈与链式栈"><a class="anchor" href="#331-顺序栈与链式栈">#</a>3.3.1 顺序栈与链式栈</h3>
 <p>顺序栈预分配连续缓冲区，扩容要搬迁；链式栈按需分配，没有「栈满」，但每个结点多一个指针。两者的 <code>push</code>/<code>pop</code> 都是 O(1)。</p>

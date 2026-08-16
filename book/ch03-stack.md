@@ -1571,31 +1571,109 @@ private:
 读队头改为返回 `const T*`（零拷贝，但指针会随下一次修改失效）。
 
 ```cpp file=code/ch03/queue/modern.hpp#array-queue
+/// 循环队列。牺牲一个槽位区分「空」与「满」：逻辑容量 n 时实际申请 n+1 格。
 template <typename T>
 class ArrayQueue {
 public:
-    explicit ArrayQueue(std::size_t capacity) : slots_(capacity + 1), data_(slots_ ? new T[slots_] : nullptr) {}
-    ArrayQueue(const ArrayQueue& other) : slots_(other.slots_), front_(other.front_), rear_(other.rear_), data_(slots_ ? new T[slots_] : nullptr) { for (std::size_t i = front_; i != rear_; i = (i + 1) % slots_) data_[i] = other.data_[i]; }
-    ArrayQueue& operator=(const ArrayQueue& other) { if (this != &other) { ArrayQueue copy(other); swap(copy); } return *this; }
+    explicit ArrayQueue(std::size_t capacity)
+        : slots_(capacity + 1), data_(slots_ ? new T[slots_] : nullptr) {}
+
+    ArrayQueue(const ArrayQueue& other)
+        : slots_(other.slots_),
+          front_(other.front_),
+          rear_(other.rear_),
+          data_(other.slots_ ? new T[other.slots_] : nullptr) {
+        for (std::size_t i = front_; i != rear_; i = (i + 1) % slots_) {
+            data_[i] = other.data_[i];
+        }
+    }
+
+    ArrayQueue& operator=(const ArrayQueue& other) {
+        if (this != &other) {
+            ArrayQueue copy(other);
+            swap(copy);
+        }
+        return *this;
+    }
+
     ArrayQueue(ArrayQueue&& other) noexcept { swap(other); }
-    ArrayQueue& operator=(ArrayQueue&& other) noexcept { if (this != &other) { ArrayQueue moved(std::move(other)); swap(moved); } return *this; }
+
+    ArrayQueue& operator=(ArrayQueue&& other) noexcept {
+        if (this != &other) {
+            ArrayQueue moved(std::move(other));
+            swap(moved);
+        }
+        return *this;
+    }
+
     ~ArrayQueue() { delete[] data_; }
-    void swap(ArrayQueue& other) noexcept { using std::swap; swap(slots_, other.slots_); swap(front_, other.front_); swap(rear_, other.rear_); swap(data_, other.data_); }
+
+    void swap(ArrayQueue& other) noexcept {
+        using std::swap;
+        swap(slots_, other.slots_);
+        swap(front_, other.front_);
+        swap(rear_, other.rear_);
+        swap(data_, other.data_);
+    }
+
     [[nodiscard]] bool empty() const noexcept { return front_ == rear_; }
-    [[nodiscard]] bool full() const noexcept { return slots_ != 0 && (rear_ + 1) % slots_ == front_; }
-    [[nodiscard]] std::size_t size() const noexcept { return rear_ >= front_ ? rear_ - front_ : slots_ - front_ + rear_; }
-    [[nodiscard]] bool enqueue(const T& value) { if (full()) return false; data_[rear_] = value; rear_ = (rear_ + 1) % slots_; return true; }
-    [[nodiscard]] bool enqueue(T&& value) { if (full()) return false; data_[rear_] = std::move(value); rear_ = (rear_ + 1) % slots_; return true; }
-    [[nodiscard]] std::optional<T> dequeue() { if (empty()) return std::nullopt; T value = std::move(data_[front_]); front_ = (front_ + 1) % slots_; return value; }
-    [[nodiscard]] const T* front() const noexcept { return empty() ? nullptr : &data_[front_]; }
+
+    /// 满：rear 再往前一格就撞上 front。那一格就是被牺牲掉的槽位。
+    [[nodiscard]] bool full() const noexcept {
+        return slots_ != 0 && (rear_ + 1) % slots_ == front_;
+    }
+
+    [[nodiscard]] std::size_t size() const noexcept {
+        return rear_ >= front_ ? rear_ - front_ : slots_ - front_ + rear_;
+    }
+
+    /// 入队。队满返回 false——顺序队列的容量是固定的。
+    [[nodiscard]] bool enqueue(const T& value) {
+        if (full()) {
+            return false;
+        }
+        data_[rear_] = value;
+        rear_ = (rear_ + 1) % slots_;
+        return true;
+    }
+
+    [[nodiscard]] bool enqueue(T&& value) {
+        if (full()) {
+            return false;
+        }
+        data_[rear_] = std::move(value);
+        rear_ = (rear_ + 1) % slots_;
+        return true;
+    }
+
+    /// 出队。空队列返回 std::nullopt（D-001 §3c）。
+    [[nodiscard]] std::optional<T> dequeue() {
+        if (empty()) {
+            return std::nullopt;
+        }
+        T value = std::move(data_[front_]);
+        front_ = (front_ + 1) % slots_;
+        return value;
+    }
+
+    /// 零拷贝地看一眼队头。空队列返回 nullptr；指针在下一次修改后即失效（D-001 §3b）。
+    [[nodiscard]] const T* front() const noexcept {
+        return empty() ? nullptr : &data_[front_];
+    }
+
     void clear() noexcept { front_ = rear_ = 0; }
-private: std::size_t slots_{0}, front_{0}, rear_{0}; T* data_{nullptr};
+
+private:
+    std::size_t slots_{0};   // 数组格数 = 容量 + 1
+    std::size_t front_{0};
+    std::size_t rear_{0};
+    T* data_{nullptr};
 };
 ```
 
-工程版为了压缩篇幅把每个函数写成了一行，这也正是 D-012 要分层的理由之一：
-**一行一个函数省的是纸，费的是读者的眼睛**。教学版一行一句，同样的逻辑读起来
-不需要横向找分号。
+这份工程版一度把每个函数压成一行，最长的一行 239 个字符——印在书上，读者要
+横向找分号才知道函数在哪结束。2026-08-16 已把它排开，逻辑一字未改。
+**一行一个函数省的是纸，费的是读者的眼睛**，这也正是 D-012 要分层的理由之一。
 
 ## 3.3 栈与队列的比较
 

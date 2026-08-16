@@ -1,9 +1,12 @@
-#include "modern.hpp"
+// 第 10 章「先跑一遍」：用教学版 HashTable 观察线性探测与墓碑删除。
+// 编译运行：
+//   g++ -std=c++17 -I code/ch10/search_hash code/ch10/search_hash/demo.cpp -o demo && ./demo
+#include "teaching.hpp"
 
 #include <iostream>
 
 int main() {
-    dsa::search::HashTable table(5);
+    HashTable table(5);
     if (!table.insert(1) || !table.insert(6) || !table.insert(11)) {
         std::cout << "插入 1、6、11 失败\n";
         return 1;
@@ -13,9 +16,9 @@ int main() {
     for (std::size_t index = 0; index < table.capacity(); ++index) {
         const auto slot = table.slot_at(index);
         std::cout << "  槽 " << index << ": ";
-        if (slot.state == dsa::search::HashTable::SlotState::used) {
+        if (slot.state == HashTable::SlotState::used) {
             std::cout << slot.key << '\n';
-        } else if (slot.state == dsa::search::HashTable::SlotState::tombstone) {
+        } else if (slot.state == HashTable::SlotState::tombstone) {
             std::cout << "墓碑\n";
         } else {
             std::cout << "空\n";
