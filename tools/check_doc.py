@@ -144,6 +144,131 @@ def parse_info(info):
     return lang, path, anchor or None
 
 
+# `#fn:名字` —— 按**函数名**取切片，源码里不需要留任何标记。
+#
+# 为什么要有它：`// >>> anchor` 得写进源码。书稿印切片时无所谓（读者看不到整个文件），
+# 但 D-012 之后 `teaching.hpp` 是**整块印出来**的——往里塞十几对锚点注释，
+# 等于把 D-012 刚清掉的噪声又请回来。课件（`book/slides/`）每页只放一个函数，
+# 需求量更大。于是改成按名字找：源码干干净净，引用方写 `#fn:push` 即可。
+#
+# 代价写明：函数改名 → 引用失效并报错（这是好事，比悄悄印错强）；
+# 同名重载全部一并取出（讲课时本来就该一起看），中间空一行隔开。
+FUNCTION_REF = re.compile(r"^fn:(.+)$")
+
+
+# 定义与调用长得很像。判据落在**参数表右括号后面是什么**上：
+#   `void push(const T& v) {`      → `)` 之后是 `{`      定义
+#   `ArrayStack(size_type n = 8)`  → 下一行是 `: data_(` 定义（构造函数初始化列表）
+#   `bool full() const { ... }`    → 跳过 const 之后是 `{` 定义
+#   `void clear();`                → `)` 之后是 `;`      声明，不是定义
+#   `if (full()) {`                → `)` 之后是 `)`      调用，不是定义
+# 最后一条是真踩过的：找 `full` 时把 `enqueue` 里那句 `if (full())` 连同它的
+# if 块一起当成了函数体切出来。
+QUALIFIERS = {"const", "noexcept", "override", "final", "mutable", "constexpr"}
+
+
+def _match_paren(stripped, line_index, column):
+    """从 `(` 开始找配对的 `)`，返回它的 (行, 列)；找不到返回 None。"""
+    depth = 0
+    for row in range(line_index, len(stripped)):
+        text = stripped[row]
+        begin = column if row == line_index else 0
+        for col in range(begin, len(text)):
+            if text[col] == "(":
+                depth += 1
+            elif text[col] == ")":
+                depth -= 1
+                if depth == 0:
+                    return row, col
+    return None
+
+
+def _is_definition(stripped, row, col):
+    """参数表收尾之后第一个有意义的字符是 `{` 或 `:` 才算定义。"""
+    word = ""
+    for scan in range(row, min(row + 4, len(stripped))):
+        text = stripped[scan]
+        begin = col + 1 if scan == row else 0
+        for ch in text[begin:]:
+            if ch.isspace():
+                if word and word not in QUALIFIERS:
+                    return False
+                word = ""
+                continue
+            if ch.isalnum() or ch == "_":
+                word += ch
+                continue
+            if word and word not in QUALIFIERS:
+                return False
+            word = ""
+            return ch in "{:"
+        if word and word not in QUALIFIERS:
+            return False
+        word = ""
+    return False
+
+
+def read_function(path: Path, name):
+    """取出名为 name 的函数定义（含紧邻其上的注释）。多个重载依次取出。"""
+    lines = path.read_text(encoding="utf-8").splitlines()
+    stripped, in_block = [], False
+    for line in lines:
+        code, in_block = strip_comments_and_strings(line, in_block)
+        stripped.append(code)
+
+    # `\b` 在这里不够用：析构函数 `~ArrayStack(` 的 `~` 前面是空格，两个都是
+    # 非单词字符，`\b` 不成立。而且若只排除单词字符，找 `ArrayStack` 会把
+    # `~ArrayStack` 一起命中。所以前瞻要按名字分两种。
+    boundary = "(?<![A-Za-z0-9_])" if name.startswith("~") else "(?<![A-Za-z0-9_~])"
+    pattern = re.compile(boundary + re.escape(name) + r"\s*\(")
+
+    chunks, index = [], 0
+    while index < len(stripped):
+        found = pattern.search(stripped[index])
+        if not found:
+            index += 1
+            continue
+        opening = stripped[index].find("(", found.start())
+        closed = _match_paren(stripped, index, opening)
+        if not closed or not _is_definition(stripped, closed[0], closed[1]):
+            index += 1
+            continue
+
+        # 从函数体的 `{` 数到配对的 `}`
+        depth, seen, row = 0, False, closed[0]
+        while row < len(stripped):
+            for ch in stripped[row]:
+                if ch == "{":
+                    depth += 1
+                    seen = True
+                elif ch == "}":
+                    depth -= 1
+            if seen and depth == 0:
+                break
+            row += 1
+        if not seen or row >= len(stripped):
+            index += 1
+            continue
+
+        # 把紧贴在上面的注释一起带上——教学代码的注释就是内容的一半
+        top = index
+        while top > 0 and lines[top - 1].strip().startswith("//"):
+            top -= 1
+        chunks.append("\n".join(lines[top:row + 1]))
+        index = row + 1
+    if not chunks:
+        return None, f"{path} 里没有名为 `{name}` 的函数定义"
+    return "\n\n".join(chunks), None
+
+
+def read_slice(path: Path, anchor):
+    """按引用取切片：`#fn:名字` 走函数名，其余走 `// >>> 锚点`。"""
+    match = FUNCTION_REF.match(anchor)
+    if match:
+        return read_function(path, match.group(1).strip())
+    return read_anchor(path, anchor)
+
+
 def read_anchor(path: Path, anchor):
     """取 `// >>> anchor` 与 `// <<< anchor` 之间的内容（不含标记行本身）。"""
     lines = path.read_text(encoding="utf-8").splitlines()
@@ -274,7 +399,7 @@ def check_file(path: Path, listings, sources=None):
                 add(block["start"], f"R3 file={ref} 不存在")
                 continue
             if anchor:
-                expected, err = read_anchor(target, anchor)
+                expected, err = read_slice(target, anchor)
                 if err:
                     add(block["start"], f"R3 {err}")
                     continue

@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parent.parent
 BOOK = ROOT / "book"
 sys.path.insert(0, str(ROOT / "tools"))
 
-from check_doc import iter_blocks, normalize, parse_info, read_anchor, rel_label  # noqa: E402
+from check_doc import iter_blocks, normalize, parse_info, read_slice, rel_label  # noqa: E402
 
 
 def sync_file(path: Path, write=False):
@@ -40,7 +40,7 @@ def sync_file(path: Path, write=False):
             print(f"❌ {rel_label(path)}:{block['start']}  file={ref} 不存在")
             return False, 0
         if anchor:
-            content, err = read_anchor(target, anchor)
+            content, err = read_slice(target, anchor)
             if err:
                 print(f"❌ {rel_label(path)}:{block['start']}  {err}")
                 return False, 0

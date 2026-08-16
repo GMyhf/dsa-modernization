@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第3章 栈与队列</title>
+<style>
+:root{--bg:#fdfdfc;--fg:#1a1a18;--muted:#6b6b66;--line:#dcdcd6;--accent:#8a4b2a;
+--code-bg:#f5f4f0;--kw:#8a4b2a;--ty:#2c6b57;--st:#7a5c1e;--cm:#8a8a84;--nu:#4a5aa8}
+:root[data-theme="dark"]{--bg:#16161a;--fg:#ececea;--muted:#a0a09a;--line:#33333a;
+--accent:#e0a074;--code-bg:#1e1e24;--kw:#e0a074;--ty:#7fd0b0;--st:#d8c088;--cm:#7a7a84;--nu:#9ab0f0}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--fg)}
+body{font-family:-apple-system,"Segoe UI","Noto Sans CJK SC","Source Han Sans SC",
+"Microsoft YaHei",sans-serif;overflow:hidden}
+.deck{position:relative;height:100vh}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;
+padding:4.2vmin 6vmin 9vmin;overflow:auto}
+.slide.current{display:flex}
+.slide .anchor{display:none}
+.slide h1{font-size:clamp(26px,4.4vmin,52px);margin:0 0 3vmin;line-height:1.25;
+letter-spacing:-.01em;border-bottom:3px solid var(--accent);padding-bottom:1.6vmin}
+.slide h2{font-size:clamp(20px,3.1vmin,34px);margin:2.4vmin 0 1.2vmin}
+.slide h3{font-size:clamp(17px,2.5vmin,27px);margin:2vmin 0 1vmin;color:var(--muted)}
+.slide p,.slide li{font-size:clamp(15px,2.5vmin,28px);line-height:1.55;margin:.7vmin 0}
+.slide ul,.slide ol{margin:1vmin 0;padding-left:3.4vmin}
+.slide li{margin:.9vmin 0}
+.slide strong{color:var(--accent)}
+.slide blockquote{margin:1.6vmin 0;padding:.6vmin 0 .6vmin 2.4vmin;
+border-left:4px solid var(--line);color:var(--muted)}
+.slide table{border-collapse:collapse;font-size:clamp(13px,2.1vmin,23px);margin:1.4vmin 0}
+.slide th,.slide td{border:1px solid var(--line);padding:.7vmin 1.4vmin;text-align:left}
+.slide th{background:var(--code-bg)}
+.table-wrap{overflow-x:auto;max-width:100%}
+.slide img{max-width:100%;max-height:52vh;object-fit:contain;display:block;margin:1.4vmin auto}
+.codeblock{background:var(--code-bg);border:1px solid var(--line);border-radius:6px;
+margin:1.4vmin 0;overflow:hidden}
+.codeblock pre{margin:0;padding:1.6vmin 2vmin;overflow-x:auto}
+.codeblock code{font-family:"SF Mono",Menlo,Consolas,"Noto Sans Mono CJK SC",monospace;
+font-size:clamp(11px,1.95vmin,21px);line-height:1.5;white-space:pre}
+.srcbar{font-size:clamp(9px,1.3vmin,13px);padding:.5vmin 2vmin;color:var(--muted);
+border-bottom:1px solid var(--line);font-family:"SF Mono",Menlo,monospace}
+.srcbar a{color:var(--muted);text-decoration:none}
+.k{color:var(--kw)}.t{color:var(--ty)}.s{color:var(--st)}.c{color:var(--cm);font-style:italic}
+.n{color:var(--nu)}.p{color:var(--fg)}
+.math{font-style:italic}.math-display{text-align:center;margin:2vmin 0;
+font-size:clamp(16px,2.8vmin,30px)}
+.upr{font-style:normal}.bold{font-weight:700}
+code{background:var(--code-bg);padding:.1em .34em;border-radius:4px;
+font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.86em}
+hr{border:0;border-top:1px solid var(--line);margin:2vmin 0}
+.chrome{position:fixed;left:0;right:0;bottom:0;height:5.4vmin;min-height:26px;
+display:flex;align-items:center;gap:1.6vmin;padding:0 2vmin;
+border-top:1px solid var(--line);background:var(--bg);font-size:clamp(10px,1.6vmin,15px);
+color:var(--muted)}
+.chrome .grow{flex:1}
+.chrome b{color:var(--fg);font-weight:600}
+.bar{position:fixed;left:0;bottom:0;height:3px;background:var(--accent);
+transition:width .18s ease;z-index:5}
+.notes{position:fixed;left:0;right:0;bottom:5.4vmin;max-height:34vh;overflow:auto;
+padding:1.6vmin 2.4vmin;background:var(--code-bg);border-top:2px solid var(--accent);
+font-size:clamp(13px,2vmin,20px);line-height:1.5;display:none}
+.notes.on{display:block}
+.notes p{margin:.5em 0}
+.notes:before{content:"演讲者备注";display:block;font-size:.72em;letter-spacing:.08em;
+color:var(--accent);margin-bottom:.5em}
+.overview{position:fixed;inset:0;background:var(--bg);overflow:auto;padding:3vmin;
+display:none;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1.6vmin;z-index:20}
+.overview.on{display:grid}
+.thumb{border:2px solid var(--line);border-radius:6px;padding:1.2vmin;cursor:pointer;
+font-size:13px;line-height:1.35;min-height:88px;overflow:hidden;background:var(--bg)}
+.thumb:hover{border-color:var(--accent)}
+.thumb.here{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.thumb .no{color:var(--muted);font-size:11px}
+.help{position:fixed;inset:0;background:rgba(0,0,0,.62);display:none;z-index:30;
+align-items:center;justify-content:center}
+.help.on{display:flex}
+.help div{background:var(--bg);padding:3vmin 4vmin;border-radius:10px;max-width:520px;
+font-size:15px;line-height:1.9}
+.help kbd{background:var(--code-bg);border:1px solid var(--line);border-radius:4px;
+padding:.1em .5em;font-family:monospace;margin-right:.6em}
+@media print{
+  html,body{height:auto;overflow:visible}
+  .chrome,.bar,.notes,.overview,.help{display:none!important}
+  .deck{height:auto}
+  .slide{display:flex!important;position:relative;inset:auto;page-break-after:always;
+  height:100vh;border:0}
+}
+</style></head><body>
+<div class="deck"><section class="slide" data-notes="&lt;p&gt;开场先问一句：为什么要专门讲这两种结构？它们的操作比线性表&lt;strong&gt;更少&lt;/strong&gt;。
+答案是——正因为限制了存取点，实现可以更快、更简单，而且这个限制恰好匹配
+一大类问题（递归、括号匹配、表达式求值、BFS）。&lt;/p&gt;"><h1 id="第3章-栈与队列"><a class="anchor" href="#第3章-栈与队列">#</a>第3章 栈与队列</h1>
+<p><strong>限制存取点的线性表</strong></p>
+<ul>
+<li>栈：只在一端进出，后进先出（LIFO）</li>
+<li>队列：一端进、另一端出，先进先出（FIFO）</li>
+</ul>
+<p>本章代码全部来自 <code>code/ch03/</code>，真编译、真跑过。</p></section><section class="slide" data-notes="&lt;p&gt;那两处会在讲到顺序栈时当场演示。这是本章最有价值的教学时刻之一——
+让学生看到「书上印的」和「能跑的」是两回事。&lt;/p&gt;"><h1 id="这一章讲什么"><a class="anchor" href="#这一章讲什么">#</a>这一章讲什么</h1>
+<ul>
+<li><strong>3.1 栈</strong>：ADT、顺序栈、链式栈</li>
+<li><strong>3.1.4 表达式求值</strong>：后缀求值 + 中缀转后缀</li>
+<li><strong>3.1.5 栈与递归</strong>：运行栈、递归改循环</li>
+<li><strong>3.2 队列</strong>：循环队列、链式队列</li>
+<li><strong>3.3 比较</strong>：什么时候用哪个</li>
+</ul>
+<p>一条暗线：<strong>原书这一章的代码，有两处按印刷原样根本编译不过。</strong></p></section><section class="slide" data-notes=""><h1 id="31-栈"><a class="anchor" href="#31-栈">#</a>3.1 栈</h1>
+<p>栈(stack)是<strong>限定仅在一端进行插入和删除</strong>的线性表。</p>
+<ul>
+<li>那一端叫<strong>栈顶</strong>(top)，另一端叫<strong>栈底</strong>(bottom)</li>
+<li>元素按<strong>后进先出</strong>(LIFO, last in first out)访问</li>
+</ul>
+<figure><img loading="lazy" src="../../assets/c8966e2bf43b41fc.jpg" alt="图 3.1 栈的示意图"><figcaption>图 3.1 栈的示意图</figcaption></figure></section><section class="slide" data-notes="&lt;p&gt;先不说 optional，让学生自己想「没有」怎么表达。
+常见答案：返回 -1、返回 bool + 出参、抛异常。
+这三个都有问题，下面逐个拆。&lt;/p&gt;"><h1 id="栈的抽象数据类型"><a class="anchor" href="#栈的抽象数据类型">#</a>栈的抽象数据类型</h1>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">运算</th>
+<th style="text-align:left">含义</th>
+<th style="text-align:left">时间代价</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><code>push(x)</code></td>
+<td style="text-align:left">把 x 压到栈顶</td>
+<td style="text-align:left">摊还 O(1)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>pop()</code></td>
+<td style="text-align:left">弹出栈顶并带回来；空栈返回「没有」</td>
+<td style="text-align:left">O(1)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>top()</code></td>
+<td style="text-align:left">只看栈顶，不弹出；空栈返回「没有」</td>
+<td style="text-align:left">O(1)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>empty()</code> / <code>size()</code></td>
+<td style="text-align:left">判空、长度</td>
+<td style="text-align:left">O(1)</td>
+</tr>
+</tbody></table></div>
+<p><strong>「空栈返回『没有』」这四个字，C++17 里有精确的表达方式</strong>——待会儿见分晓。</p></section><section class="slide" data-notes="&lt;p&gt;让学生举手。答案：前两个可以，第三个不行——3 先出说明 1、2 还在栈里且 2 在 1 上面，
+那么 1 不可能在 2 之前出来。
+可行的出栈序列个数是 Catalan 数 C(n) = (2n)! / (n!(n+1)!)，n=4 时是 14。
+这是第 5 章还要再遇到的数——二叉树形态数也是它。&lt;/p&gt;"><h1 id="先问一个问题"><a class="anchor" href="#先问一个问题">#</a>先问一个问题</h1>
+<p>入栈顺序是 1, 2, 3, 4，<strong>出栈顺序可以有哪些？</strong></p>
+<ul>
+<li><code>1 2 3 4</code> 可以吗？</li>
+<li><code>4 3 2 1</code> 可以吗？</li>
+<li><code>3 1 4 2</code> 可以吗？</li>
+</ul></section><section class="slide" data-notes=""><h1 id="312-顺序栈存储结构"><a class="anchor" href="#312-顺序栈存储结构">#</a>3.1.2 顺序栈：存储结构</h1>
+<p>用一块<strong>连续数组</strong>存元素。哪一端当栈顶？</p>
+<ul>
+<li>下标 0 当栈顶 → 每次 push/pop 都要搬动全部元素，<strong>O(n)</strong></li>
+<li><strong>表尾当栈顶</strong> → 只动最后一个位置，<strong>O(1)</strong></li>
+</ul>
+<div class="codeblock" data-lang="text"><pre><code>下标     0     1     2     3     4     …
+内容    [A]   [B]   [C]    ?     ?     …
+               ▲
+            size_ = 3   （栈顶是 C，下一个 push 写到 3）</code></pre></div>
+<p><code>size_</code> 既是元素个数，也是下一个空位的下标——<strong>一个变量干两件事</strong>。</p></section><section class="slide" data-notes="&lt;p&gt;先让学生看清楚只有三个成员。很多人以为栈很复杂，其实就这三样。
+构造函数里的初值 8 给多少都不影响正确性——因为满了会自动翻倍。&lt;/p&gt;"><h1 id="教学版三个成员"><a class="anchor" href="#教学版三个成员">#</a>教学版：三个成员</h1>
+<div class="codeblock" data-lang="text"><pre><code>T* data_;             指向底层数组
+size_type capacity_;  数组能放多少个
+size_type size_;      现在放了几个（同时也是下一个空位的下标）</code></pre></div>
+<p>整份实现在 <code>code/ch03/array_stack/teaching.hpp</code>——<strong>一个文件、一个类， 抄下来就能编译</strong>。下面几页把它拆开逐段看。</p></section><section class="slide" data-notes="&lt;p&gt;grow 里那三行的顺序是考点：先申请新的、再搬、最后才 delete 旧的。
+反过来写就是读已经还回去的内存。现场可以演示：把 delete 挪到循环前面，
+ASan 立刻报 heap-use-after-free。&lt;/p&gt;"><h1 id="入栈满了就翻倍"><a class="anchor" href="#入栈满了就翻倍">#</a>入栈：满了就翻倍</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/teaching.hpp">code/ch03/array_stack/teaching.hpp#fn:push</a></div><pre><code><span class="c">// 入栈。满了就翻倍，所以不会有「栈满溢出」这回事。</span>
+<span class="t">void</span> push(<span class="k">const</span> T&amp; value) {
+    <span class="k">if</span> (size_ == capacity_) {
+        grow();
+    }
+    data_[size_] = value;
+    ++size_;
+}</code></pre></div>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/teaching.hpp">code/ch03/array_stack/teaching.hpp#fn:grow</a></div><pre><code><span class="c">// 扩容：申请一块两倍大的，把老元素搬过去，再把老的还回去。</span>
+<span class="c">// 每个元素在均摊意义下只被搬运常数次，所以 push 的摊还代价仍是 O(1)。</span>
+<span class="t">void</span> grow() {
+    size_type next = (capacity_ == <span class="n">0</span>) ? <span class="n">1</span> : capacity_ * <span class="n">2</span>;
+    T* fresh = <span class="k">new</span> T[next];
+    <span class="k">for</span> (size_type i = <span class="n">0</span>; i &lt; size_; ++i) {
+        fresh[i] = data_[i];
+    }
+    <span class="k">delete</span>[] data_;       <span class="c">// 先搬完再释放旧的，顺序反了就会读到已释放的内存</span>
+    data_ = fresh;
+    capacity_ = next;
+}</code></pre></div></section><section class="slide" data-notes="&lt;p&gt;对延迟敏感的场合（实时系统）要单独考虑这一点。
+这是「摊还」和「最坏情况」的区别，第 8 章讲排序时还会用到。&lt;/p&gt;"><h1 id="为什么是翻倍而不是加一"><a class="anchor" href="#为什么是翻倍而不是加一">#</a>为什么是「翻倍」而不是「加一」</h1>
+<ul>
+<li>加一：push n 个元素总共搬 <span class="math"><span class="upr">1</span><span class="bin">+</span><span class="upr">2</span><span class="bin">+</span>⋯<span class="bin">+</span>n<span class="rel">=</span>O(n<sup><span class="upr">2</span></sup>)</span> 次</li>
+<li>翻倍：总搬运次数 <span class="math"><span class="upr">1</span><span class="bin">+</span><span class="upr">2</span><span class="bin">+</span><span class="upr">4</span><span class="bin">+</span>⋯<span class="bin">+</span>n&lt;<span class="upr">2</span>n</span></li>
+</ul>
+<p>平摊到每次 push 就是<strong>常数</strong>——这就是<strong>摊还 O(1)</strong>。</p>
+<blockquote><p>摊还的意思：单次操作偶尔很贵（那一次要搬走全部 n 个）， 但两次扩容之间至少发生了 n 次 push，分摊下去每次仍然便宜。 注意它说的是<strong>平均</strong>，不是保证——那一次搬迁真的会卡住。</p></blockquote></section><section class="slide" data-notes="&lt;p&gt;这类 bug 极难查，因为出错的地方和崩溃的地方隔得很远。
+std::optional 把「有没有值」搬进了类型：取值之前必须先判断。&lt;/p&gt;"><h1 id="出栈空栈怎么办"><a class="anchor" href="#出栈空栈怎么办">#</a>出栈：空栈怎么办</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/teaching.hpp">code/ch03/array_stack/teaching.hpp#fn:pop</a></div><pre><code><span class="c">// 出栈并把元素带回来。空栈返回空的 optional，不是错误，也不打印任何东西。</span>
+std::optional&lt;T&gt; pop() {
+    <span class="k">if</span> (empty()) {
+        <span class="k">return</span> std::nullopt;
+    }
+    --size_;
+    <span class="k">return</span> data_[size_];
+}</code></pre></div>
+<p>原书写的是 <code>bool pop(T &amp; item)</code>——用<strong>出参</strong>带值、用<strong>返回值</strong>带成败。</p>
+<p><strong>问题</strong>：调用方忘了检查返回值，读到的就是那个从没被修改过的 <code>item</code>。 程序不崩，只是默默按错误数据继续跑。</p></section><section class="slide" data-notes="&lt;p&gt;这是本章第一个「书上印的 ≠ 能跑的」时刻。
+强调：命名规则不是洁癖——数据成员和成员函数重名，语言直接拒绝。
+本书的做法：栈顶位置叫 size_，top() 留给成员函数。&lt;/p&gt;"><h1 id="原书这里编译不过"><a class="anchor" href="#原书这里编译不过">#</a>原书这里编译不过</h1>
+<p>原书【代码3.2】的顺序栈，三个成员是 <code>int mSize</code>、<code>int top</code>、<code>T* st</code>。</p>
+<div class="codeblock" data-lang="text"><pre><code>legacy.cpp:65:5: error: ‘bool arrStack&lt;T&gt;::top(T&amp;)’
+    conflicts with a previous declaration</code></pre></div>
+<p><strong><code>int top</code> 与成员函数 <code>bool top(T&amp;)</code> 重名。</strong> 整个类按印刷原样进不了编译器。</p>
+<p>同一本书第 3.1.3 节的链式栈<strong>犯了同一个错</strong>。</p></section><section class="slide" data-notes="&lt;p&gt;现场跑一遍这个例子，效果最好。
+两个对象持有同一根指针，各析构一次 → 同一块内存释放两次。
+小数据量下往往还不当场崩，所以它能一路活到生产环境。&lt;/p&gt;"><h1 id="更安静的一个错三法则"><a class="anchor" href="#更安静的一个错三法则">#</a>更安静的一个错：三法则</h1>
+<p>原书 <code>arrStack</code> 有析构函数，<strong>却没有拷贝构造</strong>。</p>
+<div class="codeblock" data-lang="text"><pre><code>$ cat drv2.cpp
+int main(){ arrStack&lt;int&gt; a(4); a.push(7); arrStack&lt;int&gt; b = a; }
+$ g++ -std=c++17 -fsanitize=address -g drv2.cpp -o drv2 &amp;&amp; ./drv2
+==2331703==ERROR: AddressSanitizer: attempting double-free
+    #0 operator delete[](void*)
+    #1 arrStack&lt;int&gt;::~arrStack()</code></pre></div>
+<p><code>-Wall -Wextra -Wpedantic</code> <strong>一句警告都不给</strong>。</p></section><section class="slide" data-notes="&lt;p&gt;上面这两个函数是一起取出来的：构造函数申请内存，拷贝构造就必须自己写。
+理由很直白：你之所以要写析构函数，是因为你在管资源；
+既然在管资源，编译器那份「逐成员照抄」的拷贝就一定是错的。
+
+工程版还会补移动构造和移动赋值，那叫五法则——它们不修正确性，只修性能。
+初学阶段守住三法则就已经是&lt;strong&gt;正确&lt;/strong&gt;的了。&lt;/p&gt;"><h1 id="三法则rule-of-three"><a class="anchor" href="#三法则rule-of-three">#</a>三法则（Rule of Three）</h1>
+<p>一个类只要自己写了<strong>析构、拷贝构造、拷贝赋值</strong>中的任意一个， 通常这三个都得写。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/teaching.hpp">code/ch03/array_stack/teaching.hpp#fn:ArrayStack</a></div><pre><code><span class="c">// 构造：先要一小块数组。容量不够时会自动翻倍，所以初值给多少都不影响正确性。</span>
+<span class="k">explicit</span> ArrayStack(size_type initial_capacity = <span class="n">8</span>)
+    : data_(<span class="k">new</span> T[initial_capacity]), capacity_(initial_capacity), size_(<span class="n">0</span>) {}
+
+<span class="c">// 拷贝构造：**必须自己写**。</span>
+<span class="c">// 不写的话编译器生成的版本会把 data_ 这根指针照抄一份，于是两个栈指向同一块</span>
+<span class="c">// 内存，各析构一次 —— 同一块内存被释放两次。原书 arrStack 正是漏了这个。</span>
+ArrayStack(<span class="k">const</span> ArrayStack&amp; other)
+    : data_(<span class="k">new</span> T[other.capacity_]), capacity_(other.capacity_), size_(other.size_) {
+    <span class="k">for</span> (size_type i = <span class="n">0</span>; i &lt; size_; ++i) {
+        data_[i] = other.data_[i];
+    }
+}</code></pre></div></section><section class="slide" data-notes=""><h1 id="313-链式栈"><a class="anchor" href="#313-链式栈">#</a>3.1.3 链式栈</h1>
+<p>结点分散在堆上，压栈只是<strong>接一个新结点</strong>。</p>
+<figure><img loading="lazy" src="../../assets/cc2722b736c01067.jpg" alt="图3.4 链式栈示意"><figcaption>图3.4 链式栈示意</figcaption></figure>
+<p><strong>没有「栈满」这回事</strong>——这是它与顺序栈最大的差别。</p></section><section class="slide" data-notes="&lt;p&gt;push 三步：造新结点、让它指向原栈顶、栈顶指向它。顺序不能乱。
+pop 四步：摘下栈顶、取值、栈顶后移、释放结点。
+注意释放必须在取值之后。&lt;/p&gt;"><h1 id="链式栈的入栈与出栈"><a class="anchor" href="#链式栈的入栈与出栈">#</a>链式栈的入栈与出栈</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/linked_stack/teaching.hpp">code/ch03/linked_stack/teaching.hpp#fn:push</a></div><pre><code><span class="c">// 入栈：造一个新结点，让它指向原来的栈顶，再让栈顶指向它。</span>
+<span class="c">// **没有「栈满」这回事**——这正是链式栈相对顺序栈最大的差别。</span>
+<span class="t">void</span> push(<span class="k">const</span> T&amp; value) {
+    Node* fresh = <span class="k">new</span> Node;
+    fresh-&gt;value = value;
+    fresh-&gt;next = top_;
+    top_ = fresh;
+    ++size_;
+}</code></pre></div>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/linked_stack/teaching.hpp">code/ch03/linked_stack/teaching.hpp#fn:pop</a></div><pre><code><span class="c">// 出栈：把栈顶结点摘下来，取走它的值，再释放它。空栈返回空 optional。</span>
+std::optional&lt;T&gt; pop() {
+    <span class="k">if</span> (empty()) {
+        <span class="k">return</span> std::nullopt;
+    }
+    Node* dying = top_;
+    T value = dying-&gt;value;
+    top_ = dying-&gt;next;
+    <span class="k">delete</span> dying;
+    --size_;
+    <span class="k">return</span> value;
+}</code></pre></div></section><section class="slide" data-notes="&lt;p&gt;不要给「哪个更好」的答案，给判据。
+补一句：链式栈的 clear 必须用循环，不能用递归——十万级链长会把运行栈压穿。
+本书的测试用 80 万结点守着这条。&lt;/p&gt;"><h1 id="顺序栈-vs-链式栈"><a class="anchor" href="#顺序栈-vs-链式栈">#</a>顺序栈 vs 链式栈</h1>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left"></th>
+<th style="text-align:left">顺序栈</th>
+<th style="text-align:left">链式栈</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">存储</td>
+<td style="text-align:left">一块连续数组</td>
+<td style="text-align:left">分散结点</td>
+</tr>
+<tr>
+<td style="text-align:left">每个元素额外开销</td>
+<td style="text-align:left">无</td>
+<td style="text-align:left">一根指针（8 字节）</td>
+</tr>
+<tr>
+<td style="text-align:left">栈满</td>
+<td style="text-align:left">需要扩容</td>
+<td style="text-align:left"><strong>不存在</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">缓存局部性</td>
+<td style="text-align:left">好</td>
+<td style="text-align:left">差</td>
+</tr>
+<tr>
+<td style="text-align:left">扩容时的抖动</td>
+<td style="text-align:left">有（那一次搬全部）</td>
+<td style="text-align:left">无</td>
+</tr>
+</tbody></table></div>
+<p><strong>结论</strong>：元素多且大小可预估 → 顺序栈；深度波动大或元素很大 → 链式栈。</p></section><section class="slide" data-notes="&lt;p&gt;现场手动走一遍 &amp;quot;3 4 + 2 *&amp;quot;。
+让学生注意：先弹出的是&lt;strong&gt;右&lt;/strong&gt;操作数。减法和除法顺序反了就错。&lt;/p&gt;"><h1 id="314-表达式求值"><a class="anchor" href="#314-表达式求值">#</a>3.1.4 表达式求值</h1>
+<p><strong>后缀表达式</strong>（逆波兰式）不需要括号，也不需要优先级：</p>
+<ul>
+<li>遇操作数 → <strong>压栈</strong></li>
+<li>遇操作符 → <strong>弹出两个</strong>，算完再压回</li>
+<li>读完时栈里剩下的唯一元素就是结果</li>
+</ul>
+<div class="codeblock" data-lang="text"><pre><code>3 4 + 2 *     →   压 3、压 4、弹出算 3+4=7 压回、压 2、弹出算 7*2=14</code></pre></div></section><section class="slide" data-notes="&lt;p&gt;现场让学生跟着念一遍。两个要点：
+1. &lt;strong&gt;先弹出的是右操作数&lt;/strong&gt;——减法和除法顺序反了就错，这是最常见的 bug；
+2. 读完时栈里必须&lt;strong&gt;恰好一个&lt;/strong&gt;元素。多了说明操作数多余，少了说明操作符多余，
+   两种都要报错。原书是 cerr 打一行然后继续跑。
+另外提一句原书那个更隐蔽的 bug：GetTwoOperands 在第二个操作数缺失时
+已经把第一个弹掉了，返回 false 时栈已经被破坏。&lt;/p&gt;"><h1 id="手动走一遍-3-4-2"><a class="anchor" href="#手动走一遍-3-4-2">#</a>手动走一遍 <code>3 4 + 2 *</code></h1>
+<div class="codeblock" data-lang="text"><pre><code>读到    栈内容      动作
+ 3      [3]         压栈
+ 4      [3 4]       压栈
+ +      [7]         弹出 4 和 3, 算 3+4=7, 压回
+ 2      [7 2]       压栈
+ *      [14]        弹出 2 和 7, 算 7*2=14, 压回
+读完    [14]        栈里唯一的元素就是结果</code></pre></div>
+<p>实现见 <code>code/ch03/expression_eval/modern.hpp</code>，正文 3.1.4 逐条讲。</p></section><section class="slide" data-notes="&lt;p&gt;原书把规则讲全了，却把代码留成了练习（「有兴趣的读者可作为练习」）。
+本书补上了——不补的话 3.1.4 只剩半个应用。
+编译器把算术式变成机器指令，走的就是这条路。&lt;/p&gt;"><h1 id="可人写的是中缀式"><a class="anchor" href="#可人写的是中缀式">#</a>可人写的是中缀式</h1>
+<p><code>23 + (34 * 45) / (5 + 6 + 7)</code></p>
+<p>中间隔着一步转换——<strong>这才是栈最典型的应用</strong>。 括号和优先级造成的「先算什么」，全靠一把栈记住。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">遇到</th>
+<th style="text-align:left">做什么</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">操作数</td>
+<td style="text-align:left">直接输出</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>(</code></td>
+<td style="text-align:left">入栈</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>)</code></td>
+<td style="text-align:left">反复弹出并输出，直到遇到 <code>(</code>；<code>(</code> 弹掉但不输出</td>
+</tr>
+<tr>
+<td style="text-align:left">运算符</td>
+<td style="text-align:left">栈顶优先级<strong>不低于</strong>当前就反复弹出；然后当前入栈</td>
+</tr>
+<tr>
+<td style="text-align:left">扫描结束</td>
+<td style="text-align:left">栈里剩下的依次弹出输出</td>
+</tr>
+</tbody></table></div></section><section class="slide" data-notes="&lt;p&gt;把 &lt;code&gt;&amp;lt;&lt;/code&gt; 写成 &lt;code&gt;&amp;lt;=&lt;/code&gt; 它立刻变红——这就是「有牙的测试」该有的样子。
+可以现场改一下演示。&lt;/p&gt;"><h1 id="不低于三个字是承重的"><a class="anchor" href="#不低于三个字是承重的">#</a>「不低于」三个字是承重的</h1>
+<p>如果写成「高于」，同优先级时就不先弹：</p>
+<div class="codeblock" data-lang="text"><pre><code>1 - 2 - 3   →   转成  1 2 3 - -   →   求值 1-(2-3) = 2      ✗
+                正确  1 2 - 3 -   →   求值 (1-2)-3 = -4     ✓</code></pre></div>
+<p><strong>左结合</strong>是靠这一个符号保住的。测试里有一条专门算这个数。</p></section><section class="slide" data-notes="&lt;p&gt;两个例子对照着走，学生就能看出「弹不弹」这个判断是全部难点所在。
+再补一句：负号和减号靠「上一个记号是什么」区分——
+&lt;code&gt;-3 + 5&lt;/code&gt; 开头那个是符号，&lt;code&gt;3 - 5&lt;/code&gt; 里那个是运算符。&lt;/p&gt;"><h1 id="手动走一遍-1-2-3"><a class="anchor" href="#手动走一遍-1-2-3">#</a>手动走一遍 <code>1 + 2 * 3</code></h1>
+<div class="codeblock" data-lang="text"><pre><code>读到    输出         运算符栈    说明
+ 1      1            []
+ +      1            [+]         栈空, 直接压
+ 2      1 2          [+]
+ *      1 2          [+ *]       * 优先级高于 +, 不弹
+ 3      1 2 3        [+ *]
+读完    1 2 3 * +    []          依次弹出</code></pre></div>
+<p>换成 <code>1 * 2 + 3</code> 再走一遍：读到 <code>+</code> 时栈顶是 <code>*</code>，<strong>优先级不低于它，要先弹</strong>。</p>
+<p>实现见 <code>code/ch03/expression_eval/modern.hpp</code>，正文 3.1.4 有完整规则表。</p></section><section class="slide" data-notes="&lt;p&gt;所以「递归会爆栈」不是玄学——运行栈是有限的（Linux 默认 8 MB）。
+下一页有实测数字。&lt;/p&gt;"><h1 id="315-栈与递归"><a class="anchor" href="#315-栈与递归">#</a>3.1.5 栈与递归</h1>
+<p><strong>递归的实现本身就是一个栈。</strong> 每次函数调用，运行栈上压入一条<strong>活动记录</strong>：</p>
+<figure><img loading="lazy" src="../../assets/d573f60f354acc38.jpg" alt="图 3.7 活动记录的内容"><figcaption>图 3.7 活动记录的内容</figcaption></figure>
+<ul>
+<li>返回地址、参数、局部变量、返回值</li>
+<li>函数返回时弹出这条记录</li>
+</ul></section><section class="slide" data-notes="&lt;p&gt;最反直觉的是 -O2 那一行：编译器把尾递归转成了循环，一次自调用都没有。
+汇编确认过。
+这意味着：&lt;strong&gt;递归深度的安全边界由优化级别决定&lt;/strong&gt;——debug 崩、release 过。
+这种不确定性不该出现在教材实现里，所以本书的容器析构一律写成迭代。&lt;/p&gt;"><h1 id="运行栈有多大三个档位三种结果"><a class="anchor" href="#运行栈有多大三个档位三种结果">#</a>运行栈有多大：三个档位，三种结果</h1>
+<p>同一份递归源码，Linux / gcc 13.3 / <code>ulimit -s</code> 默认 8 MB：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">构建档</th>
+<th style="text-align:left">20 万层</th>
+<th style="text-align:left">50 万层</th>
+<th style="text-align:left">100 万层</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><code>-O0</code>（不优化）</td>
+<td style="text-align:left">通过</td>
+<td style="text-align:left"><strong>段错误</strong></td>
+<td style="text-align:left">段错误</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>-O1</code> + ASan/UBSan</td>
+<td style="text-align:left">通过</td>
+<td style="text-align:left"><strong>stack-overflow</strong></td>
+<td style="text-align:left">stack-overflow</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>-O2</code></td>
+<td style="text-align:left">通过</td>
+<td style="text-align:left">通过</td>
+<td style="text-align:left"><strong>通过</strong></td>
+</tr>
+</tbody></table></div>
+<p>改成显式栈（数据压进 <code>ArrayStack</code>，也就是放到<strong>堆</strong>上）： 三档在 <strong>1000 万层</strong>都通过。</p></section><section class="slide" data-notes=""><h1 id="32-队列"><a class="anchor" href="#32-队列">#</a>3.2 队列</h1>
+<p>一端进、另一端出，<strong>先进先出</strong>(FIFO)。</p>
+<figure><img loading="lazy" src="../../assets/6a2814bcd8135888.jpg" alt="图3.9 队列的示例"><figcaption>图3.9 队列的示例</figcaption></figure>
+<ul>
+<li>插入端叫<strong>队尾</strong>(rear)，删除端叫<strong>队头</strong>(front)</li>
+<li>空队列上取元素是<strong>可预期状态</strong>，返回空 <code>optional</code></li>
+</ul></section><section class="slide" data-notes="&lt;p&gt;绕回是靠取模实现的：rear_ = (rear_ + 1) % slots_。
+漏了取模就是数组越界，ASan 当场报 heap-buffer-overflow。&lt;/p&gt;"><h1 id="顺序队列为什么要循环"><a class="anchor" href="#顺序队列为什么要循环">#</a>顺序队列：为什么要「循环」</h1>
+<p>队列两头都要动。若队头固定在下标 0，每次出队都要把后面全部前移，<strong>O(n)</strong>。</p>
+<p><strong>让队头也往后走</strong>——走到数组末尾就绕回下标 0，整块数组当成一个圈用。</p>
+<figure><img loading="lazy" src="../../assets/b5473971d7d3f3e4.jpg" alt="图 3.12 循环队列的实现示例"><figcaption>图 3.12 循环队列的实现示例</figcaption></figure></section><section class="slide" data-notes="&lt;p&gt;也可以另存一个 count 变量来区分，那样不浪费槽位但多一个要维护的状态。
+原书选了前者，本书照办——教材的选择要和教材一致，学生才对得上。&lt;/p&gt;"><h1 id="空和满怎么分"><a class="anchor" href="#空和满怎么分">#</a>空和满怎么分</h1>
+<p>绕回之后有个麻烦：<code>front == rear</code> <strong>既可能是空、也可能是满</strong>。</p>
+<p>原书的办法：<strong>牺牲一个槽位</strong>。</p>
+<ul>
+<li>约定「rear 的下一格就是 front」时算满</li>
+<li>于是 n+1 个槽位最多装 n 个元素，两种状态分得开</li>
+</ul>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/queue/teaching.hpp">code/ch03/queue/teaching.hpp#fn:full</a></div><pre><code><span class="c">// 满的判据：rear 再往前走一格就撞上 front。那一格就是被牺牲掉的槽位。</span>
+<span class="t">bool</span> full() <span class="k">const</span> { <span class="k">return</span> (rear_ + <span class="n">1</span>) % slots_ == front_; }</code></pre></div></section><section class="slide" data-notes="&lt;p&gt;两段并排看效果最好：同一个 FIFO 语义，存储换了，代码形状完全不同。
+顺序队列那段的关键是 &lt;code&gt;% slots_&lt;/code&gt;；链式那段的关键是 rear_ 的两个分支。&lt;/p&gt;"><h1 id="两种入队放在一起看"><a class="anchor" href="#两种入队放在一起看">#</a>两种入队，放在一起看</h1>
+<p>上面是<strong>顺序队列</strong>（取模绕回、队满返回 false），下面是<strong>链式队列</strong> （没有队满，靠队尾指针保持 O(1)）。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/queue/teaching.hpp">code/ch03/queue/teaching.hpp#fn:enqueue</a></div><pre><code><span class="c">// 入队。队满返回 false——顺序队列的容量是固定的，这是它与链式队列的核心差别。</span>
+<span class="t">bool</span> enqueue(<span class="k">const</span> T&amp; value) {
+    <span class="k">if</span> (full()) {
+        <span class="k">return</span> <span class="k">false</span>;
+    }
+    data_[rear_] = value;
+    rear_ = (rear_ + <span class="n">1</span>) % slots_;    <span class="c">// 走到末尾就绕回 0，取模不能漏</span>
+    <span class="k">return</span> <span class="k">true</span>;
+}
+
+<span class="c">// 入队：新结点接到队尾。队列原来是空的话，它同时也是队头。</span>
+<span class="t">void</span> enqueue(<span class="k">const</span> T&amp; value) {
+    Node* fresh = <span class="k">new</span> Node;
+    fresh-&gt;value = value;
+    fresh-&gt;next = <span class="k">nullptr</span>;
+    <span class="k">if</span> (rear_ == <span class="k">nullptr</span>) {
+        front_ = rear_ = fresh;
+    } <span class="k">else</span> {
+        rear_-&gt;next = fresh;
+        rear_ = fresh;
+    }
+    ++size_;
+}</code></pre></div>
+<p>没有队尾指针的话，每次入队都得从队头走到尾，<strong>O(n)</strong>。</p></section><section class="slide" data-notes="&lt;p&gt;去掉那两行，AddressSanitizer 立刻报 heap-use-after-free。
+教学版的测试里有一条「出队到空再入队」专门守着它。
+现场演示效果很好——因为不删那两行的话，普通用例全绿。&lt;/p&gt;"><h1 id="两种出队-一处容易漏的地方"><a class="anchor" href="#两种出队-一处容易漏的地方">#</a>两种出队 + 一处容易漏的地方</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/queue/teaching.hpp">code/ch03/queue/teaching.hpp#fn:dequeue</a></div><pre><code><span class="c">// 出队。空队列返回空 optional，不是错误，也不打印任何东西。</span>
+std::optional&lt;T&gt; dequeue() {
+    <span class="k">if</span> (empty()) {
+        <span class="k">return</span> std::nullopt;
+    }
+    T value = data_[front_];
+    front_ = (front_ + <span class="n">1</span>) % slots_;
+    <span class="k">return</span> value;
+}
+
+<span class="c">// 出队：摘下队头结点。摘完若队列空了，队尾指针也必须置空，</span>
+<span class="c">// 否则它就成了一根指向已释放内存的野指针。</span>
+std::optional&lt;T&gt; dequeue() {
+    <span class="k">if</span> (empty()) {
+        <span class="k">return</span> std::nullopt;
+    }
+    Node* dying = front_;
+    T value = dying-&gt;value;
+    front_ = dying-&gt;next;
+    <span class="k">if</span> (front_ == <span class="k">nullptr</span>) {
+        rear_ = <span class="k">nullptr</span>;
+    }
+    <span class="k">delete</span> dying;
+    --size_;
+    <span class="k">return</span> value;
+}</code></pre></div>
+<p><strong>链式队列出队把队列摘空时，队尾指针必须一起置空</strong>—— 否则它就是一根指向已释放结点的野指针，下一次入队会写进已释放的内存。</p></section><section class="slide" data-notes=""><h1 id="33-栈与队列的比较"><a class="anchor" href="#33-栈与队列的比较">#</a>3.3 栈与队列的比较</h1>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left"></th>
+<th style="text-align:left">栈</th>
+<th style="text-align:left">队列</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">存取点</td>
+<td style="text-align:left">一端</td>
+<td style="text-align:left">两端</td>
+</tr>
+<tr>
+<td style="text-align:left">次序</td>
+<td style="text-align:left">后进先出</td>
+<td style="text-align:left">先进先出</td>
+</tr>
+<tr>
+<td style="text-align:left">典型用途</td>
+<td style="text-align:left">递归、括号匹配、表达式求值、DFS</td>
+<td style="text-align:left">排队服务、BFS、缓冲区</td>
+</tr>
+<tr>
+<td style="text-align:left">顺序实现的坑</td>
+<td style="text-align:left">扩容</td>
+<td style="text-align:left">绕回 + 空满判据</td>
+</tr>
+<tr>
+<td style="text-align:left">链式实现的坑</td>
+<td style="text-align:left">深链递归析构</td>
+<td style="text-align:left">空掉时的队尾指针</td>
+</tr>
+</tbody></table></div>
+<p><strong>两者都是「限制存取点的线性表」</strong>——限制换来的是 O(1) 的操作和更简单的实现。</p></section><section class="slide" data-notes="&lt;p&gt;留一句话收尾：这一章的两个结构都很简单，难的是「边界」——
+空、满、只剩一个、刚好摘空。本书的测试用例大半在这些地方。&lt;/p&gt;"><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
+<ul>
+<li><strong>栈 = LIFO，队列 = FIFO</strong>；限制存取点换来 O(1)</li>
+<li>顺序实现要处理<strong>扩容</strong>（翻倍 → 摊还 O(1)）和<strong>循环绕回</strong></li>
+<li>链式实现没有容量上限，代价是每元素一根指针 + 缓存局部性</li>
+<li>空状态用 <code>std::optional</code>，<strong>不用</strong> <code>bool</code> + 出参</li>
+<li>自己管资源就要守<strong>三法则</strong>——原书这一章漏了两次</li>
+<li>递归的背后就是运行栈；改显式栈 = 把数据从栈搬到堆</li>
+</ul></section><section class="slide" data-notes="&lt;p&gt;布置作业时强调最后这一句。学生最容易写出「顺手测一下」的用例——
+那种用例在原书那份有 bug 的实现上同样全绿，等于没测。&lt;/p&gt;"><h1 id="习题与上机"><a class="anchor" href="#习题与上机">#</a>习题与上机</h1>
+<ul>
+<li><strong>书面</strong>：Catalan 数（出栈序列个数）、双栈模拟队列、中缀转后缀手工演算</li>
+<li><strong>上机</strong>：<code>code/ch03/</code> 下每个单元都有 <code>teaching_test.cpp</code>， 先跑通，再<strong>故意改坏一处</strong>，看哪条断言变红</li>
+</ul>
+<div class="codeblock" data-lang="bash"><pre><code>python3 tools/check_code.py code/ch03/array_stack</code></pre></div>
+<blockquote><p>判据：<strong>把实现退回原书的写法，必须有一条断言会红。</strong> 写不出这样的用例，说明还没想清楚那条性质是什么。</p></blockquote></section></div>
+<div class="bar"></div>
+<div class="notes"></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第3章 栈与队列</div><div class="thumb"><div class="no">2</div>这一章讲什么</div><div class="thumb"><div class="no">3</div>3.1 栈</div><div class="thumb"><div class="no">4</div>栈的抽象数据类型</div><div class="thumb"><div class="no">5</div>先问一个问题</div><div class="thumb"><div class="no">6</div>3.1.2 顺序栈：存储结构</div><div class="thumb"><div class="no">7</div>教学版：三个成员</div><div class="thumb"><div class="no">8</div>入栈：满了就翻倍</div><div class="thumb"><div class="no">9</div>为什么是「翻倍」而不是「加一」</div><div class="thumb"><div class="no">10</div>出栈：空栈怎么办</div><div class="thumb"><div class="no">11</div>原书这里编译不过</div><div class="thumb"><div class="no">12</div>更安静的一个错：三法则</div><div class="thumb"><div class="no">13</div>三法则（Rule of Three）</div><div class="thumb"><div class="no">14</div>3.1.3 链式栈</div><div class="thumb"><div class="no">15</div>链式栈的入栈与出栈</div><div class="thumb"><div class="no">16</div>顺序栈 vs 链式栈</div><div class="thumb"><div class="no">17</div>3.1.4 表达式求值</div><div class="thumb"><div class="no">18</div>手动走一遍 `3 4 + 2 *`</div><div class="thumb"><div class="no">19</div>可人写的是中缀式</div><div class="thumb"><div class="no">20</div>「不低于」三个字是承重的</div><div class="thumb"><div class="no">21</div>手动走一遍 `1 + 2 * 3`</div><div class="thumb"><div class="no">22</div>3.1.5 栈与递归</div><div class="thumb"><div class="no">23</div>运行栈有多大：三个档位，三种结果</div><div class="thumb"><div class="no">24</div>3.2 队列</div><div class="thumb"><div class="no">25</div>顺序队列：为什么要「循环」</div><div class="thumb"><div class="no">26</div>空和满怎么分</div><div class="thumb"><div class="no">27</div>两种入队，放在一起看</div><div class="thumb"><div class="no">28</div>两种出队 + 一处容易漏的地方</div><div class="thumb"><div class="no">29</div>3.3 栈与队列的比较</div><div class="thumb"><div class="no">30</div>本章小结</div><div class="thumb"><div class="no">31</div>习题与上机</div></div>
+<div class="help"><div>
+<p><b>放映快捷键</b></p>
+<p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
+<p><kbd>N</kbd>演讲者备注　<kbd>O</kbd>缩略图总览　<kbd>F</kbd>全屏　<kbd>D</kbd>深色</p>
+<p><kbd>?</kbd>这张帮助　<kbd>Esc</kbd>关闭</p>
+<p style="color:var(--muted);font-size:.9em">
+导出 PDF：浏览器打印（Ctrl/Cmd+P），每页一张幻灯片。</p>
+</div></div>
+<div class="chrome">
+<b>第3章 栈与队列</b><span>现代 C++ 数据结构教程</span>
+<span class="grow"></span>
+<a href="index.html" style="color:var(--muted)">目录</a>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 31</b>
+</div>
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var total=slides.length, at=0;
+  var bar=document.querySelector('.bar'), now=document.getElementById('now');
+  var notes=document.querySelector('.notes'), over=document.querySelector('.overview');
+  var help=document.querySelector('.help');
+  function show(n,push){
+    at=Math.max(0,Math.min(total-1,n));
+    slides.forEach(function(s,i){s.classList.toggle('current',i===at);});
+    bar.style.width=((at+1)/total*100)+'%';
+    now.textContent=(at+1)+' / '+total;
+    notes.innerHTML=slides[at].getAttribute('data-notes')||'';
+    document.querySelectorAll('.thumb').forEach(function(t,i){
+      t.classList.toggle('here',i===at);});
+    if(push!==false){history.replaceState(null,'','#'+(at+1));}
+    slides[at].scrollTop=0;
+  }
+  function go(d){show(at+d);}
+  document.addEventListener('keydown',function(e){
+    if(e.metaKey||e.ctrlKey||e.altKey)return;
+    var k=e.key;
+    if(help.classList.contains('on')&&k!=='?'){help.classList.remove('on');return;}
+    if(over.classList.contains('on')&&(k==='Escape'||k==='o'||k==='O')){
+      over.classList.remove('on');return;}
+    if(k==='ArrowRight'||k==='PageDown'||k===' '||k==='j'){go(1);e.preventDefault();}
+    else if(k==='ArrowLeft'||k==='PageUp'||k==='k'){go(-1);e.preventDefault();}
+    else if(k==='Home'){show(0);}
+    else if(k==='End'){show(total-1);}
+    else if(k==='n'||k==='N'){notes.classList.toggle('on');}
+    else if(k==='o'||k==='O'){over.classList.toggle('on');}
+    else if(k==='d'||k==='D'){
+      var dark=document.documentElement.getAttribute('data-theme')==='dark';
+      document.documentElement.setAttribute('data-theme',dark?'light':'dark');}
+    else if(k==='f'||k==='F'){
+      if(document.fullscreenElement){document.exitFullscreen();}
+      else{document.documentElement.requestFullscreen();}}
+    else if(k==='?'){help.classList.toggle('on');}
+  });
+  document.querySelectorAll('.thumb').forEach(function(t,i){
+    t.addEventListener('click',function(){over.classList.remove('on');show(i);});});
+  window.addEventListener('hashchange',function(){
+    var n=parseInt(location.hash.slice(1),10);
+    if(n>=1&&n<=total)show(n-1,false);});
+  var start=parseInt(location.hash.slice(1),10);
+  show(start>=1&&start<=total?start-1:0,false);
+})();
+</script>
+</body></html>

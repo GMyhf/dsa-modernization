@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>现代 C++ 数据结构教程 · 课件</title>
+<style>
+:root{--bg:#fdfdfc;--fg:#1a1a18;--muted:#6b6b66;--line:#dcdcd6;--accent:#8a4b2a;
+--code-bg:#f5f4f0;--kw:#8a4b2a;--ty:#2c6b57;--st:#7a5c1e;--cm:#8a8a84;--nu:#4a5aa8}
+:root[data-theme="dark"]{--bg:#16161a;--fg:#ececea;--muted:#a0a09a;--line:#33333a;
+--accent:#e0a074;--code-bg:#1e1e24;--kw:#e0a074;--ty:#7fd0b0;--st:#d8c088;--cm:#7a7a84;--nu:#9ab0f0}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--fg)}
+body{font-family:-apple-system,"Segoe UI","Noto Sans CJK SC","Source Han Sans SC",
+"Microsoft YaHei",sans-serif;overflow:hidden}
+.deck{position:relative;height:100vh}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;
+padding:4.2vmin 6vmin 9vmin;overflow:auto}
+.slide.current{display:flex}
+.slide .anchor{display:none}
+.slide h1{font-size:clamp(26px,4.4vmin,52px);margin:0 0 3vmin;line-height:1.25;
+letter-spacing:-.01em;border-bottom:3px solid var(--accent);padding-bottom:1.6vmin}
+.slide h2{font-size:clamp(20px,3.1vmin,34px);margin:2.4vmin 0 1.2vmin}
+.slide h3{font-size:clamp(17px,2.5vmin,27px);margin:2vmin 0 1vmin;color:var(--muted)}
+.slide p,.slide li{font-size:clamp(15px,2.5vmin,28px);line-height:1.55;margin:.7vmin 0}
+.slide ul,.slide ol{margin:1vmin 0;padding-left:3.4vmin}
+.slide li{margin:.9vmin 0}
+.slide strong{color:var(--accent)}
+.slide blockquote{margin:1.6vmin 0;padding:.6vmin 0 .6vmin 2.4vmin;
+border-left:4px solid var(--line);color:var(--muted)}
+.slide table{border-collapse:collapse;font-size:clamp(13px,2.1vmin,23px);margin:1.4vmin 0}
+.slide th,.slide td{border:1px solid var(--line);padding:.7vmin 1.4vmin;text-align:left}
+.slide th{background:var(--code-bg)}
+.table-wrap{overflow-x:auto;max-width:100%}
+.slide img{max-width:100%;max-height:52vh;object-fit:contain;display:block;margin:1.4vmin auto}
+.codeblock{background:var(--code-bg);border:1px solid var(--line);border-radius:6px;
+margin:1.4vmin 0;overflow:hidden}
+.codeblock pre{margin:0;padding:1.6vmin 2vmin;overflow-x:auto}
+.codeblock code{font-family:"SF Mono",Menlo,Consolas,"Noto Sans Mono CJK SC",monospace;
+font-size:clamp(11px,1.95vmin,21px);line-height:1.5;white-space:pre}
+.srcbar{font-size:clamp(9px,1.3vmin,13px);padding:.5vmin 2vmin;color:var(--muted);
+border-bottom:1px solid var(--line);font-family:"SF Mono",Menlo,monospace}
+.srcbar a{color:var(--muted);text-decoration:none}
+.k{color:var(--kw)}.t{color:var(--ty)}.s{color:var(--st)}.c{color:var(--cm);font-style:italic}
+.n{color:var(--nu)}.p{color:var(--fg)}
+.math{font-style:italic}.math-display{text-align:center;margin:2vmin 0;
+font-size:clamp(16px,2.8vmin,30px)}
+.upr{font-style:normal}.bold{font-weight:700}
+code{background:var(--code-bg);padding:.1em .34em;border-radius:4px;
+font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.86em}
+hr{border:0;border-top:1px solid var(--line);margin:2vmin 0}
+.chrome{position:fixed;left:0;right:0;bottom:0;height:5.4vmin;min-height:26px;
+display:flex;align-items:center;gap:1.6vmin;padding:0 2vmin;
+border-top:1px solid var(--line);background:var(--bg);font-size:clamp(10px,1.6vmin,15px);
+color:var(--muted)}
+.chrome .grow{flex:1}
+.chrome b{color:var(--fg);font-weight:600}
+.bar{position:fixed;left:0;bottom:0;height:3px;background:var(--accent);
+transition:width .18s ease;z-index:5}
+.notes{position:fixed;left:0;right:0;bottom:5.4vmin;max-height:34vh;overflow:auto;
+padding:1.6vmin 2.4vmin;background:var(--code-bg);border-top:2px solid var(--accent);
+font-size:clamp(13px,2vmin,20px);line-height:1.5;display:none}
+.notes.on{display:block}
+.notes p{margin:.5em 0}
+.notes:before{content:"演讲者备注";display:block;font-size:.72em;letter-spacing:.08em;
+color:var(--accent);margin-bottom:.5em}
+.overview{position:fixed;inset:0;background:var(--bg);overflow:auto;padding:3vmin;
+display:none;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1.6vmin;z-index:20}
+.overview.on{display:grid}
+.thumb{border:2px solid var(--line);border-radius:6px;padding:1.2vmin;cursor:pointer;
+font-size:13px;line-height:1.35;min-height:88px;overflow:hidden;background:var(--bg)}
+.thumb:hover{border-color:var(--accent)}
+.thumb.here{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.thumb .no{color:var(--muted);font-size:11px}
+.help{position:fixed;inset:0;background:rgba(0,0,0,.62);display:none;z-index:30;
+align-items:center;justify-content:center}
+.help.on{display:flex}
+.help div{background:var(--bg);padding:3vmin 4vmin;border-radius:10px;max-width:520px;
+font-size:15px;line-height:1.9}
+.help kbd{background:var(--code-bg);border:1px solid var(--line);border-radius:4px;
+padding:.1em .5em;font-family:monospace;margin-right:.6em}
+@media print{
+  html,body{height:auto;overflow:visible}
+  .chrome,.bar,.notes,.overview,.help{display:none!important}
+  .deck{height:auto}
+  .slide{display:flex!important;position:relative;inset:auto;page-break-after:always;
+  height:100vh;border:0}
+}
+
+body{overflow:auto;font-family:-apple-system,"Segoe UI","Noto Sans CJK SC",sans-serif;
+max-width:760px;margin:0 auto;padding:48px 24px;line-height:1.7}
+h1{font-size:30px;margin:0 0 6px}
+p.sub{color:var(--muted);margin:0 0 32px}
+a.deck{display:block;padding:14px 18px;margin:8px 0;border:1px solid var(--line);
+border-radius:8px;text-decoration:none;color:var(--fg)}
+a.deck:hover{border-color:var(--accent)}
+a.deck b{display:block;font-size:18px}
+a.deck span{color:var(--muted);font-size:14px}
+</style></head><body>
+<h1>现代 C++ 数据结构教程 · 课件</h1>
+<p class="sub">由 <code>book/slides/*.md</code> 渲染。幻灯片上的每一段 C++
+都来自 <code>code/</code> 下真编译真跑过的文件，由闸门的 R3 逐字核对。</p>
+<a class="deck" href="ch03-stack.html"><b>第3章 栈与队列</b><span>31 页</span></a>
+</body></html>

@@ -154,6 +154,8 @@ def run_verify():
         ["python3", "tools/check_doc.py"],
         # 3b. 网页版：book/site/ 是 book/*.md 的产物，改了书稿不重新构建就会脱节。
         ["python3", "tools/build_site.py", "--check"],
+        # 3c. 课件：同理，book/slides/site/ 是 book/slides/*.md 的产物。
+        ["python3", "tools/build_slides.py", "--check"],
         # 4. 代码：真编译、真跑、Werror + ASan/UBSan。本项目最硬的一条。
         ["python3", "tools/check_code.py"],
     ]
