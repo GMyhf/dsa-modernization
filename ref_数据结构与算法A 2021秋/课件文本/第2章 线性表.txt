@@ -1,0 +1,520 @@
+# 第2章 线性表.pptx
+
+> 由 tools/extract_slides.py 从课件抽出的纯文本，仅含文字与演讲者备注；
+> 图片、公式排版、动画一概丢失。**原始课件才是依据**，本文件只为便于检索与对照。
+
+共 43 页。
+
+===== 幻灯片 1 =====
+第二章 线性表
+邹磊
+zoulei@pku.edu.cn
+北京大学王选计算机所
+
+===== 幻灯片 2 =====
+内容概要
+
+===== 幻灯片 3 =====
+2.1 线性表
+线性表的概念
+线性表的存储结构
+顺序表—向量
+链表
+线性表的典型操作
+
+===== 幻灯片 4 =====
+线性表的概念
+--- 演讲者备注 ---
+反对称性: 集合 X 上的二元关系 R 是反对称的，当且仅当对于X里的任意元素a, b，若a R-关系于 b 且 b R-关系于 a，则a=b。例如：
+设X={1,2,3}，X上的两个二元关系为R1={(1,1),(1,2),(2,3),(3,1)}, R2={(1,2),(2,1),(2,3),(3,1)}。R1是反对称的，R2则不然
+传递性：若a 关系到 b 且 b 关系到 c， 则 a 关系到 c。
+
+===== 幻灯片 5 =====
+举例
+开始节点（首结点）
+终止节点（尾结点）
+内部节点
+n2的前驱
+n1的后继
+长度为k
+要求：内部结点具有相同的数据类型
+每个元素都有自己的位置【0，n-1】
+
+===== 幻灯片 6 =====
+线性表运算分类
+list()：创建线性表的一个实例（即构造函数）
+~list()：线性表消亡（即析构函数）
+获取有关当前线性表的信息
+位置寻内容，内容找位置
+访问线性表并改变线性表的内容或结构
+插入、删除、更改等
+线性表的辅助性管理操作
+游标、当前长度
+
+===== 幻灯片 7 =====
+线性表ADT
+template<class T>
+class List { //线性表类模板list，模板参数T
+void clear() ; //置空线性表
+bool isEmpty(); //线性表为空返回true；
+void append(const T value) //表尾添加元素value，表长加1；
+void insert(int p, T value) ; //在p处插入value，表长加1；
+void delete(int p); //删去第p元素，表长减1；
+bool getPos(int &p, T value) //查找value，并返回其位置；
+bool getvalue(const int p, T & value); //把p位置的值返到value
+bool setvalue(const int p, T & value); //用value修改p处值；
+}
+
+===== 幻灯片 8 =====
+存储结构
+定长、静态的存储结构
+又称为向量型的一维数组结构
+地址相邻表达线性关系，存储在连续的地址空间，随机访问，但长度固定
+变长、动态的存储结构
+链式存储结构
+指针指向表达线性关系
+动态数组
+提供空间表管理，为长度变化提供方法，长度增大，可申请大空间
+--- 演讲者备注 ---
+顺序文件的修改1．顺序文件的修改操作 由于文件中的记录不能像向量空间的数据那样"移动"，故只能通过复制整个文件的方法实现插人、删除和修改等更新操作。2．批量处理方式实现顺序文件的更新（1）批量处理方式工作原理： ① 把所有对顺序文件(以下称主文件)的更新请求，都放入一个较小的事务文件中。 ② 当事务文件变得足够大时，将事务文件按主关键字排序， ③ 再按事务文件对主文件进行一次全面的更新，产生一个新的主文件。 ④ 最后，清空事务文件，以便积累此后的更新内容。
+
+===== 幻灯片 9 =====
+2.2 顺序表—向量
+顺序表(Sequential list)，又称向量(Vector)
+采用定长的一维数组存储结构
+主要特性:
+元素的类型相同
+存储在连续的空间中，每个元素唯一的索引值（下标），读写元素方便
+使用常数作为向量长度，程序运行时保持不变
+
+===== 幻灯片 10 =====
+逻辑和存储结构
+
+===== 幻灯片 11 =====
+向量的类定义
+enum Boolean {False,True};
+const int Max_length = 100;
+Template <class T> //假定顺序表的元素类型T
+class list { //顺序表，向量
+private :
+T* nodelist; //私有变量，存储顺序表实例的向量
+int maxSize; //私有变量，顺序表实例的最大长度
+int curLen; //私有变量，顺序表实例的当前长度
+int position; //私有变量，当前处理位置
+public:
+list(const int size); //构造算子，实参是表实例的最大长度
+~list(); //析构算子，用于将该表实例删去
+
+===== 幻灯片 12 =====
+arrList(const int size) {// 创建一个新顺序表，参数为表实例的最大长度
+maxSize = size;
+aList = new T[maxSize];
+curLen = position = 0;
+}
+~arrList() { // 析构函数，用于消除该表实例
+delete [] aList;
+}
+void clear() { // 将顺序表存储的内容清除，成为空表
+delete [] aList;
+curLen = position = 0;
+aList = new T[maxSize];}
+
+===== 幻灯片 13 =====
+void clear(); //将顺序表存储的内容清除，成为空表
+int length(); //返回此顺序表的当前实际长度
+bool append(const T value); //表尾增一新元素，表长加1
+bool insert(const int p, const T value); //在p位置插入值value，表长加1
+bool delete(const int p); //删去位置p的元素，表长减1；
+bool setValue(int p, const T value); //用value修改位置p的元素值
+bool getvalue(const int p, T & value); //把p位置值返回到变量value中
+// 查找值为value的元素，并返回第1次出现的位置
+bool getPos(int &p, const T value);
+}
+
+===== 幻灯片 14 =====
+查找元素
+目的: 查找某个值的位置
+template <class T> // 假定顺序表的元素类型为T
+bool arrList<T> :: getPos (int & p, const T value) {
+int i; // 元素下标
+for (i = 0; i < n; i++) // 依次比较
+if (value == aList[i]) { // 下标为i的元素与value相等
+p = i; // 将下标由参数p返回
+return true;
+}
+return false; // 顺序表没有元素值为value的元素
+}
+O(n)
+
+===== 幻灯片 15 =====
+插入元素运算
+bool insert(const int p, const T vlaue)
+在当前下标 p= t 位置插入元素新值value
+curr_len=k
+条件判断： 1、当前下标[0，curr_len]；（是否越界？）
+2、当前长度（<msize）（是否溢出？）
+3、要先移动，腾出空间，再插入！
+--- 演讲者备注 ---
+插入操作
+首先，要看当前向量是不是已经满了，即curr_len=msize；当前插入位置是不是超过了curr_len；
+然后，从curr_len到t的位置移动元素；
+下一步，是插入元素；
+最后，修改辅助变量：当前长度值。
+
+===== 幻灯片 16 =====
+插入算法
+template <class T> // 假定顺序表的元素类型为T
+bool arrList<T> :: insert(int p, const T value) {
+int i;
+if (curLen >= maxSize) // 检查顺序表是否溢出
+return false;
+if (p < 0 || p > curLen) // 检查插入位置是否合法
+return false;
+for (i = curLen; i > p; i--)
+aList[i] = aList[i-1]; // 从表尾curLen -1起往右移动直到p
+aList[p] = value; // 位置p处插入新元素
+curLen++; // 表的实际长度增1
+return true;
+}
+--- 演讲者备注 ---
+条件运算的比较，在做复杂性分析的时候，一般不做考虑；
+
+===== 幻灯片 17 =====
+算法执行时间
+主要代价
+元素的移动
+元素总个数为n，各个位置插入的概率相等为p＝1/(n+1)
+平均移动元素次数为
+总时间开销估计为 O(n)
+
+===== 幻灯片 18 =====
+删除元素运算
+Delete (const int p)
+下标t位置值作为返回值，并删去该元素
+条件判断： 1、当前下标[0，curr_len）删除位置是否有效？
+2、当前长度（>0）是否向下溢出？
+3、删除后，t后元素向前依次移动！
+
+===== 幻灯片 19 =====
+删除算法
+template <class T> // 顺序表的元素类型为T
+bool arrList<T> :: delete(int p) {
+int i;
+if (curLen <= 0 ) // 检查顺序表是否为空
+return false ;
+if (p < 0 || p > curLen-1) // 检查删除位置是否合法
+return false ;
+for (i = p; i < curLen-1; i++)
+aList[i] = aList[i+1]; // 从位置p开始每个元素左移直到curLen,
+curLen--; // 表的实际长度减1
+return true;
+}
+
+===== 幻灯片 20 =====
+算法时间代价
+与插入操作相似，O(n)
+顺序表读取元素方便，时间代价为O(1)
+但插入、删除操作则付出时间代价O(n)
+
+===== 幻灯片 21 =====
+2.3 链表(Linked List)
+链表(linked list)
+指针指向保持前驱关系，节点不必物理相邻
+动态申请/释放空间，长度动态变化（插入/删除）
+在非线性结构（如树、图）中的应用
+分类
+单链表
+双链表
+循环链表
+
+===== 幻灯片 22 =====
+单链表
+结点类型以及变量说明
+struct ListNode
+{
+ELEM data； //存放线性表结点的数据;
+ListNode * next; //存放指向后继结点的指针；
+};
+typedef ListNode * ListPtr;
+ListPtr head, tail; // head是分别指向单链表头、尾结点的指针；
+--- 演讲者备注 ---
+通过指针把它的一串存储结点链接成一个链
+存储结点由两部分组成：
+data字段
+link字段
+访问要求
+访问链表中的一个节点，必须从头（first）开始，找到该元素节点的位置。复杂度是O(k)级别
+
+===== 幻灯片 23 =====
+类型定义
+template <class T> class lnkList : public List<T> {
+private:
+Link<T> *head, tail; // 单链表的头、尾指针
+Link<T> *setPos(int p); // 返回线性表指向第p个元素的指针值
+public:
+lnkList(ints); // 构造函数
+~lnkList(); // 析构函数
+bool isEmpty(); // 判断链表是否为空
+void clear(); // 将链表存储的内容清除，成为空表
+int length(); // 返回此顺序表的当前实际长度
+bool append(T value); // 在表尾添加一个元素value，表的长度增1
+bool insert(int p, T value); // 在位置p插入一个元素value，表的长度增1
+bool delete(int p); // 删除位置p上的元素，表的长度减 1
+bool getValue(int p, T value); // 返回位置p的元素值
+bool getPos(int p, const T value); // 查找值为value的元素，并返回第1次出现的位置
+}
+
+===== 幻灯片 24 =====
+单链表头节点
+Header Node（或称“哨兵” ）
+不被作为表中的实际元素，值忽略
+head指向该节点
+访问
+必须从head开始查找链表中的元素
+为什么要引入头结点呢？？
+--- 演讲者备注 ---
+通过指针把它的一串存储结点链接成一个链
+存储结点由两部分组成：
+data字段
+link字段
+访问要求
+访问链表中的一个节点，必须从头（first）开始，找到该元素节点的位置。复杂度是O(k)级别
+
+===== 幻灯片 25 =====
+链表检索
+// 返回位置i处的结点指针
+template <class T> // 线性表的元素类型为T
+Link<T> * lnkList <T>:: setPos(int i) {
+int count = 0;
+if (i <= -1) return head; // i 为-1则定位到头结点
+Link<T> *p = head->next;
+while (p != NULL && count < i) { // 若i为0则定位到第1个结点
+p = p-> next;
+count++;
+};
+return p; // 或者为空，或者指向第i个节点！
+} // i从0开始！
+
+===== 幻灯片 26 =====
+链表插入: bool insert(int i, T value)
+p
+q
+p＝setPos(i-1)
+q＝new ListNode
+…
+…
+p
+q
+…
+…
+p
+q
+…
+…
+q->next=p->next
+p->next=q
+
+===== 幻灯片 27 =====
+插入算法
+ListNode * Insert(int i, T value)
+{
+ListNode *p，*q;
+q = new ListNode; //产生一个新结点空间q
+p = setPos(i-1); //找到待插位置的前一个位置p
+if (p == NULL ) return false; //位置i无效
+q->data = value;
+q->next = p->next;
+p->next = q;
+if(q->next == NULL )
+tail=q; //当插入元素是最后位置时维护尾指针
+return true;
+}
+指针调整过程
+
+===== 幻灯片 28 =====
+链表删除: bool delete(int i)
+x
+p
+p next = d next;
+d（待删节点）
+d = pnext;
+delete(d)
+P节点不能不存在或者为尾节点！！
+p = setPos(i-1);
+--- 演讲者备注 ---
+注意处理尾结点为空的情况
+
+===== 幻灯片 29 =====
+删除算法
+template <class T> // 线性表的元素类型为T
+bool lnkList<T>:: delete(const int i) {
+Link<T> *p, *d;
+if ((p = setPos(i-1)) == NULL || p == tail) { // 待删结点不存在;
+cout << " 非法删除点 " <<endl; return false;
+}
+d = p->next; // d是真正待删结点
+if (d == tail) { // 待删结点为尾结点，则修改尾指针
+tail = p;
+p->next = NULL:
+delete d;
+}
+else { p->next = d->next; delete d; } // 删除结点d并修改链指针
+return true;
+}
+
+===== 幻灯片 30 =====
+设置头结点的好处
+由于开始结点的位置被存放在头结点的指针域中，所以在链表的第一个位置上的操作就和在表的其它位置上操作一致，无须进行特殊处理;
+无论链表是否为空，其头指针是指向头结点的非空指针（空表中头结点的指针域空），因此空表和非空表的处理也就统一了。
+
+===== 幻灯片 31 =====
+举例：不带头结点 vs 带头结点
+10
+不带头结点
+20
+23
+12
+15
+head
+curr
+tail
+带头结点
+15
+20
+23
+12
+head
+curr
+tail
+10
+
+===== 幻灯片 32 =====
+无头结点的插入算法
+//无头结点，须对i为0的插入位置作特殊处理
+ListNode * Insert(int i, T value){
+if ( i==0){
+s = new ListNode; //生成新结点
+s->data = value; s->next = head; // 插入到链表L中
+head = s; // 修改链头指针L
+}else{
+……（见27页） //同有头结点算法的处理;
+}
+return true;
+}
+
+===== 幻灯片 33 =====
+单链表分析
+单链表的不足之处
+link字段仅仅指向后继结点，不能有效地找到前驱
+为弥补上述不足
+引入双链表
+节点增加一个指向前驱的指针
+
+===== 幻灯片 34 =====
+双链表
+类型说明
+struct DblListNode
+{
+T data;
+DblListNode *prev;
+DblListNode *next;
+};
+struct DoubleList
+{
+DblListNode * head，*tail;
+};
+指向前驱结点
+指向后继结点
+data
+next
+prev
+--- 演讲者备注 ---
+单链表的主要不足之处是：
+link字段仅仅指向后继结点，不能有效地找到前驱
+双链表弥补了上述不足之处
+增加一个指向前驱的指针
+
+===== 幻灯片 35 =====
+删除结点示意图
+删除p所指的结点setPos(i)
+p
+p->prev->next=p->next;
+p->next->prev=p->prev;
+p
+p->prev=NULL;
+p->next=NULL;
+p
+^
+^
+delete(p)
+
+===== 幻灯片 36 =====
+插入结点示意图
+在p所指结点后插入一个新的结点setPos(i-1)
+插入和删除都要注意边界条件的判断！
+p
+q
+q->next=p->next
+q->prev=p
+p->next=q
+q->next->prev=q
+new q;
+①
+④
+②
+③
+要注意操作的次序！
+
+===== 幻灯片 37 =====
+循环链表
+将单链表或者双链表的头尾结点链接起来，就是一个循环链表。
+不增加额外存储花销，却给不少操作带来了方便
+从循环表中任一结点出发，都能访问到表中其他结点。
+
+===== 幻灯片 38 =====
+几种主要链表比较
+
+===== 幻灯片 39 =====
+2.4 线性表实现方法的比较
+顺序表的主要优点
+没有使用指针，不用花费额外开销
+线性表元素的访问非常便利
+链表的主要优点
+无需事先了解线性表的长度
+允许线性表的长度动态变化
+能够适应经常插入删除内部元素的情况
+顺序表适合存储静态数据，链表适合动态数据
+
+===== 幻灯片 40 =====
+顺序表和链表的比较
+顺序表
+插入、删除运算时间代价O(n)，查找则可常数时间完成
+预先申请固定长度的数组
+如果整个数组元素很满，则没有结构性存储开销
+链表
+插入、删除运算时间代价O(1)，但找第i个元素时间代价O(n)
+利用指针动态地按照需要为表中新的元素分配存储空间
+每个元素都有结构性存储开销
+
+===== 幻灯片 41 =====
+应用场合的选择
+顺序表不适用的场合
+经常插入删除时，不宜使用顺序表
+线性表的最大长度也是一个重要因素
+链表不适用的场合
+当读操作比插入删除操作频率大时，不应选择链表
+当指针的存储开销，和整个结点内容所占空间相比其比例较大时，应该慎重选择
+
+===== 幻灯片 42 =====
+思考
+带表头与不带表头的单链表？
+处理链表需要注意的问题？
+线性表实现方法的比较？
+插入、删除、查找等代价
+顺序表和链表的选择？
+结点变化的动态性
+存储密度
+
+===== 幻灯片 43 =====
+联系信息：
+电子邮件：zoulei@pku.edu.cn
