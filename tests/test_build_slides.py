@@ -181,6 +181,71 @@ class TestFunctionSlice(unittest.TestCase):
         self.assertNotIn("after_", text)
 
 
+
+class TestDensityGuard(unittest.TestCase):
+    """单页太满就警告——这是上一轮留下的开放问题，这一轮补上判据。
+
+    数字是量出来的（见 `MAX_SLIDE_LINES` 的注释），不是拍的。
+    它只警告不挡构建：代码页滚一下还能接受，要点页超了基本是没拆干净。
+    """
+
+    def test_threshold_is_pinned(self):
+        """阈值一改，全部课件的排版结论就变了，得有人重新过一遍。"""
+        self.assertEqual(build_slides.MAX_SLIDE_LINES, 32)
+
+    def test_crowded_slide_is_reported(self):
+        import io
+        import contextlib
+
+        with tempfile.TemporaryDirectory() as tmp:
+            deck = Path(tmp) / "ch99-test.md"
+            body = "\n".join(f"- 第 {i} 条要点" for i in range(60))
+            deck.write_text(f"---\ntitle: 探针\n---\n\n# 太满的一页\n\n{body}\n",
+                            encoding="utf-8")
+            saved_slides, saved_site = build_slides.SLIDES, build_slides.SITE
+            build_slides.SLIDES = Path(tmp)
+            build_slides.SITE = Path(tmp) / "site"
+            try:
+                buf = io.StringIO()
+                with contextlib.redirect_stdout(buf):
+                    build_slides.build()
+                out = buf.getvalue()
+            finally:
+                build_slides.SLIDES, build_slides.SITE = saved_slides, saved_site
+        self.assertIn("太满的一页", out)
+        self.assertIn("投影上放不下", out)
+
+    def test_normal_slide_is_not_reported(self):
+        import io
+        import contextlib
+
+        with tempfile.TemporaryDirectory() as tmp:
+            deck = Path(tmp) / "ch99-test.md"
+            deck.write_text("---\ntitle: 探针\n---\n\n# 正常一页\n\n- 一\n- 二\n",
+                            encoding="utf-8")
+            saved_slides, saved_site = build_slides.SLIDES, build_slides.SITE
+            build_slides.SLIDES = Path(tmp)
+            build_slides.SITE = Path(tmp) / "site"
+            try:
+                buf = io.StringIO()
+                with contextlib.redirect_stdout(buf):
+                    build_slides.build()
+                out = buf.getvalue()
+            finally:
+                build_slides.SLIDES, build_slides.SITE = saved_slides, saved_site
+        self.assertNotIn("投影上放不下", out)
+
+    def test_committed_decks_are_all_within_budget(self):
+        """入库的 12 份课件本身也当锚：以后加页超了，这里就红。"""
+        import io
+        import contextlib
+
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            build_slides.build(check_only=True)
+        self.assertNotIn("投影上放不下", buf.getvalue())
+
+
 class TestRenderedDeck(unittest.TestCase):
     """拿入库的那份课件当锚：渲染器改坏了，这里立刻能看出来。"""
 

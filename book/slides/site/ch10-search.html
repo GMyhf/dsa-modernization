@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第10章 检索</title>
+<style>
+:root{--bg:#fdfdfc;--fg:#1a1a18;--muted:#6b6b66;--line:#dcdcd6;--accent:#8a4b2a;
+--code-bg:#f5f4f0;--kw:#8a4b2a;--ty:#2c6b57;--st:#7a5c1e;--cm:#8a8a84;--nu:#4a5aa8}
+:root[data-theme="dark"]{--bg:#16161a;--fg:#ececea;--muted:#a0a09a;--line:#33333a;
+--accent:#e0a074;--code-bg:#1e1e24;--kw:#e0a074;--ty:#7fd0b0;--st:#d8c088;--cm:#7a7a84;--nu:#9ab0f0}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--fg)}
+body{font-family:-apple-system,"Segoe UI","Noto Sans CJK SC","Source Han Sans SC",
+"Microsoft YaHei",sans-serif;overflow:hidden}
+.deck{position:relative;height:100vh}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;
+padding:4.2vmin 6vmin 9vmin;overflow:auto}
+.slide.current{display:flex}
+.slide .anchor{display:none}
+.slide h1{font-size:clamp(26px,4.4vmin,52px);margin:0 0 3vmin;line-height:1.25;
+letter-spacing:-.01em;border-bottom:3px solid var(--accent);padding-bottom:1.6vmin}
+.slide h2{font-size:clamp(20px,3.1vmin,34px);margin:2.4vmin 0 1.2vmin}
+.slide h3{font-size:clamp(17px,2.5vmin,27px);margin:2vmin 0 1vmin;color:var(--muted)}
+.slide p,.slide li{font-size:clamp(15px,2.5vmin,28px);line-height:1.55;margin:.7vmin 0}
+.slide ul,.slide ol{margin:1vmin 0;padding-left:3.4vmin}
+.slide li{margin:.9vmin 0}
+.slide strong{color:var(--accent)}
+.slide blockquote{margin:1.6vmin 0;padding:.6vmin 0 .6vmin 2.4vmin;
+border-left:4px solid var(--line);color:var(--muted)}
+.slide table{border-collapse:collapse;font-size:clamp(13px,2.1vmin,23px);margin:1.4vmin 0}
+.slide th,.slide td{border:1px solid var(--line);padding:.7vmin 1.4vmin;text-align:left}
+.slide th{background:var(--code-bg)}
+.table-wrap{overflow-x:auto;max-width:100%}
+.slide img{max-width:100%;max-height:52vh;object-fit:contain;display:block;margin:1.4vmin auto}
+.codeblock{background:var(--code-bg);border:1px solid var(--line);border-radius:6px;
+margin:1.4vmin 0;overflow:hidden}
+.codeblock pre{margin:0;padding:1.6vmin 2vmin;overflow-x:auto}
+.codeblock code{font-family:"SF Mono",Menlo,Consolas,"Noto Sans Mono CJK SC",monospace;
+font-size:clamp(11px,1.95vmin,21px);line-height:1.5;white-space:pre}
+.srcbar{font-size:clamp(9px,1.3vmin,13px);padding:.5vmin 2vmin;color:var(--muted);
+border-bottom:1px solid var(--line);font-family:"SF Mono",Menlo,monospace}
+.srcbar a{color:var(--muted);text-decoration:none}
+.k{color:var(--kw)}.t{color:var(--ty)}.s{color:var(--st)}.c{color:var(--cm);font-style:italic}
+.n{color:var(--nu)}.p{color:var(--fg)}
+.math{font-style:italic}.math-display{text-align:center;margin:2vmin 0;
+font-size:clamp(16px,2.8vmin,30px)}
+.upr{font-style:normal}.bold{font-weight:700}
+code{background:var(--code-bg);padding:.1em .34em;border-radius:4px;
+font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.86em}
+hr{border:0;border-top:1px solid var(--line);margin:2vmin 0}
+.chrome{position:fixed;left:0;right:0;bottom:0;height:5.4vmin;min-height:26px;
+display:flex;align-items:center;gap:1.6vmin;padding:0 2vmin;
+border-top:1px solid var(--line);background:var(--bg);font-size:clamp(10px,1.6vmin,15px);
+color:var(--muted)}
+.chrome .grow{flex:1}
+.chrome b{color:var(--fg);font-weight:600}
+.bar{position:fixed;left:0;bottom:0;height:3px;background:var(--accent);
+transition:width .18s ease;z-index:5}
+.notes{position:fixed;left:0;right:0;bottom:5.4vmin;max-height:34vh;overflow:auto;
+padding:1.6vmin 2.4vmin;background:var(--code-bg);border-top:2px solid var(--accent);
+font-size:clamp(13px,2vmin,20px);line-height:1.5;display:none}
+.notes.on{display:block}
+.notes p{margin:.5em 0}
+.notes:before{content:"演讲者备注";display:block;font-size:.72em;letter-spacing:.08em;
+color:var(--accent);margin-bottom:.5em}
+.overview{position:fixed;inset:0;background:var(--bg);overflow:auto;padding:3vmin;
+display:none;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1.6vmin;z-index:20}
+.overview.on{display:grid}
+.thumb{border:2px solid var(--line);border-radius:6px;padding:1.2vmin;cursor:pointer;
+font-size:13px;line-height:1.35;min-height:88px;overflow:hidden;background:var(--bg)}
+.thumb:hover{border-color:var(--accent)}
+.thumb.here{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.thumb .no{color:var(--muted);font-size:11px}
+.help{position:fixed;inset:0;background:rgba(0,0,0,.62);display:none;z-index:30;
+align-items:center;justify-content:center}
+.help.on{display:flex}
+.help div{background:var(--bg);padding:3vmin 4vmin;border-radius:10px;max-width:520px;
+font-size:15px;line-height:1.9}
+.help kbd{background:var(--code-bg);border:1px solid var(--line);border-radius:4px;
+padding:.1em .5em;font-family:monospace;margin-right:.6em}
+@media print{
+  html,body{height:auto;overflow:visible}
+  .chrome,.bar,.notes,.overview,.help{display:none!important}
+  .deck{height:auto}
+  .slide{display:flex!important;position:relative;inset:auto;page-break-after:always;
+  height:100vh;border:0}
+}
+</style></head><body>
+<div class="deck"><section class="slide" data-notes=""><h1 id="第10章-检索"><a class="anchor" href="#第10章-检索">#</a>第10章 检索</h1>
+<p><strong>在一组记录里找到关键码等于给定值的那一条。</strong></p>
+<ul>
+<li>10.1 基于线性表：顺序、二分、分块</li>
+<li>10.2 集合</li>
+<li>10.3 散列：<strong>用函数直接算出位置</strong></li>
+</ul>
+<p>衡量指标：平均检索长度 <span class="math"><span class="upr">ASL</span><span class="rel">=</span>∑P<sub>i</sub>C<sub>i</sub></span>。</p></section><section class="slide" data-notes="&lt;p&gt;可以追问：如果查询集中在少数几个元素上（比如按热度），平均会小很多。
+这就是「自组织线性表」的动机——把刚访问过的往前挪。&lt;/p&gt;"><h1 id="1011-顺序检索"><a class="anchor" href="#1011-顺序检索">#</a>10.1.1 顺序检索</h1>
+<p>从头比到尾。<strong>对数据没有任何要求</strong>——这是它唯一的优点，也是全部优点。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">情况</th>
+<th style="text-align:left">比较次数</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">最好</td>
+<td style="text-align:left">1</td>
+</tr>
+<tr>
+<td style="text-align:left">最坏</td>
+<td style="text-align:left">n</td>
+</tr>
+<tr>
+<td style="text-align:left">平均（等概率）</td>
+<td style="text-align:left"><span class="math"><span class="frac"><span class="num">n<span class="bin">+</span><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span></span></td>
+</tr>
+</tbody></table></div></section><section class="slide" data-notes=""><h1 id="1012-二分检索"><a class="anchor" href="#1012-二分检索">#</a>10.1.2 二分检索</h1>
+<figure><img loading="lazy" src="../../assets/0792c8837fab4a44.jpg" alt="图 10.1 二分检索 K = 18 的过程"><figcaption>图 10.1 二分检索 K = 18 的过程</figcaption></figure>
+<p><strong>要求已排好序</strong>，每比较一次砍掉一半，<span class="math">O(<span class="upr">log</span>&thinsp;n)</span>。</p></section><section class="slide" data-notes="&lt;p&gt;两处值得讲：
+
+1. &lt;strong&gt;半开区间 [first, last)&lt;/strong&gt;。书上常见的闭区间写法在没找到时要写
+   &lt;code&gt;high = mid - 1&lt;/code&gt;，而下标是无符号的，mid == 0 时这一句会下溢成天文数字。
+   半开区间只写 &lt;code&gt;last = middle&lt;/code&gt;，永远不减 1，这个坑就不存在。
+   现场可以改一下：ASan/UBSan 当场报越界。
+
+2. &lt;code&gt;first + (last - first) / 2&lt;/code&gt; 而不是 &lt;code&gt;(first + last) / 2&lt;/code&gt;——
+   后者在两个下标都很大时会溢出。这是个经典的库级 bug（Java 的 binarySearch
+   曾经就有）。&lt;/p&gt;"><h1 id="二分的一个坑无符号下溢"><a class="anchor" href="#二分的一个坑无符号下溢">#</a>二分的一个坑：无符号下溢</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch10/search_hash/teaching.hpp">code/ch10/search_hash/teaching.hpp#fn:binary_search</a></div><pre><code><span class="c">// 【算法10.3】二分检索：要求**已排好序**，每比较一次砍掉一半，代价 O(log n)。</span>
+<span class="c">//</span>
+<span class="c">// 这里用的是**半开区间** [first, last)：`last` 指向&quot;最后一个候选的下一个&quot;。</span>
+<span class="c">// 为什么不用书上常见的闭区间 [low, high]？因为闭区间在没找到时要写 `high = mid - 1`，</span>
+<span class="c">// 而下标是无符号的，`mid == 0` 时这一句会下溢成一个天文数字。</span>
+<span class="c">// 半开区间只写 `last = middle`，永远不减 1，这个坑就不存在。</span>
+<span class="k">inline</span> std::optional&lt;std::<span class="t">size_t</span>&gt; binary_search(<span class="k">const</span> std::vector&lt;<span class="t">int</span>&gt;&amp; sorted_values, <span class="t">int</span> key) {
+    std::<span class="t">size_t</span> first = <span class="n">0</span>;
+    std::<span class="t">size_t</span> last = sorted_values.size();
+    <span class="k">while</span> (first &lt; last) {
+        <span class="c">// 写成 first + (last - first) / 2 而不是 (first + last) / 2：</span>
+        <span class="c">// 后者在两个下标都很大时会溢出。</span>
+        std::<span class="t">size_t</span> middle = first + (last - first) / <span class="n">2</span>;
+        <span class="k">if</span> (sorted_values[middle] == key) {
+            <span class="k">return</span> middle;
+        }
+        <span class="k">if</span> (sorted_values[middle] &lt; key) {
+            first = middle + <span class="n">1</span>;    <span class="c">// 目标在右半边</span>
+        } <span class="k">else</span> {
+            last = middle;         <span class="c">// 目标在左半边</span>
+        }
+    }
+    <span class="k">return</span> std::nullopt;
+}</code></pre></div></section><section class="slide" data-notes=""><h1 id="决策树二分为什么是-log-n"><a class="anchor" href="#决策树二分为什么是-log-n">#</a>决策树：二分为什么是 <span class="math"><span class="upr">log</span>&thinsp;n</span></h1>
+<figure><img loading="lazy" src="../../assets/5f0f882d1e9ec27f.jpg" alt="图10.2 二分检索的决策树"><figcaption>图10.2 二分检索的决策树</figcaption></figure>
+<p>每次比较对应树上下降一层，树高就是最坏比较次数。</p>
+<p>n 个元素的判定树高度是 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>(n<span class="bin">+</span><span class="upr">1</span>)⌉</span>—— <strong>这也是比较模型下检索的下界</strong>：n 个可能的答案至少需要 <span class="math"><span class="upr">log</span><sub><span class="upr">2</span></sub>n</span> 次比较区分。</p></section><section class="slide" data-notes="&lt;p&gt;它的适用场合是：主表很大、不能整表排序，但可以按块组织。
+第 11 章的索引技术就是这个思路的推广。&lt;/p&gt;"><h1 id="1013-分块检索"><a class="anchor" href="#1013-分块检索">#</a>10.1.3 分块检索</h1>
+<figure><img loading="lazy" src="../../assets/980c030f1f50d7f9.jpg" alt="图 10.3 分块检索的存储表示"><figcaption>图 10.3 分块检索的存储表示</figcaption></figure>
+<p>把 n 个元素分成 b 块：<strong>块间有序，块内可以无序</strong>。 另造一张块索引记下每块的最大关键码。</p>
+<p>先在索引里找到块，再在块内顺序查。块数取 <span class="math"><span class="sqrt">n</span></span> 量级时 ASL 约 <span class="math">O(<span class="sqrt">n</span>)</span>—— <strong>介于顺序的 <span class="math">O(n)</span> 和二分的 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span> 之间</strong>。</p></section><section class="slide" data-notes=""><h1 id="102-集合"><a class="anchor" href="#102-集合">#</a>10.2 集合</h1>
+<p>集合只关心「在不在」，不保留重复，也不保证顺序。</p>
+<p>所有运算都建立在<strong>「是否属于」</strong>之上：</p>
+<div class="codeblock" data-lang="text"><pre><code>交集   本集合里凡是对方也有的
+包含   对方的每个元素本集合都得有</code></pre></div>
+<p>本书的 <code>IntSet</code> 故意用线性表 + 顺序检索—— <strong>于是交集是 <span class="math">O(n<span class="bin">×</span>m)</span></strong>。</p>
+<p><strong>10.3 节的散列就是来把那个 <span class="math">O(n)</span> 压成 <span class="math">O(<span class="upr">1</span>)</span> 的</strong>，接口一个字都不用改。</p></section><section class="slide" data-notes=""><h1 id="103-散列换一条路"><a class="anchor" href="#103-散列换一条路">#</a>10.3 散列：换一条路</h1>
+<p>前面的检索都要<strong>和表里的元素比较</strong>，至少看 <span class="math"><span class="upr">log</span>&thinsp;n</span> 或 <span class="math"><span class="sqrt">n</span></span> 个。</p>
+<p>散列<strong>不比较</strong>：用函数从关键码直接算出槽位下标，期望一次到位。</p>
+<p>代价一并写明：</p>
+<ul>
+<li><strong>不保持次序</strong>，不能按范围遍历</li>
+<li>装载因子高或散列不均匀时，退化成接近线性</li>
+</ul></section><section class="slide" data-notes="&lt;p&gt;逐字节读的是 &lt;strong&gt;unsigned char&lt;/strong&gt; 而不是 char——char 在多数平台上是有符号的，
+中文等非 ASCII 字节会变成负数，一进位运算就带出符号扩展，散列值随平台而变。
+
+教学版的测试里有一条拿 UTF-8 的「中」（E4 B8 AD）做输入：
+按无符号读得到 0xF02D，按有符号读会被符号扩展成 0xFFFFFF000FFF00DD。&lt;/p&gt;"><h1 id="1031-散列函数"><a class="anchor" href="#1031-散列函数">#</a>10.3.1 散列函数</h1>
+<p>好的散列函数要<strong>算得快</strong>，并且<strong>把地址铺匀</strong>。</p>
+<p>常见做法：除留余数（<span class="math">h(k)<span class="rel">=</span>k&thinsp;<span class="upr">bmod</span>&thinsp;m</span>，m 取素数）、折叠、平方取中。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch10/search_hash/teaching.hpp">code/ch10/search_hash/teaching.hpp#fn:elf_hash</a></div><pre><code><span class="c">// 【算法10.8】ELF 散列：把字符串搅成一个整数。</span>
+<span class="c">//</span>
+<span class="c">// 逐字节读的是 `unsigned char` 而不是 `char`——`char` 在多数平台上是有符号的，</span>
+<span class="c">// 中文等非 ASCII 字节会变成负数，一进位运算就带出符号扩展，散列值随平台而变。</span>
+<span class="k">inline</span> std::<span class="t">size_t</span> elf_hash(<span class="k">const</span> std::string&amp; text) {
+    std::<span class="t">size_t</span> hash = <span class="n">0</span>;
+    <span class="k">for</span> (<span class="t">unsigned</span> <span class="t">char</span> character : text) {
+        hash = (hash &lt;&lt; <span class="n">4U</span>) + character;        <span class="c">// 左移 4 位，腾出位置放新字节</span>
+        std::<span class="t">size_t</span> high_bits = hash &amp; <span class="n">0xF0000000U</span>;   <span class="c">// 溢出到高 4 位的那部分</span>
+        <span class="k">if</span> (high_bits != <span class="n">0</span>) {
+            hash ^= high_bits &gt;&gt; <span class="n">24U</span>;           <span class="c">// 折回低位，别让它白白丢掉</span>
+        }
+        hash &amp;= ~high_bits;                     <span class="c">// 再把高 4 位清掉</span>
+    }
+    <span class="k">return</span> hash;
+}</code></pre></div></section><section class="slide" data-notes=""><h1 id="1032-开散列拉链法"><a class="anchor" href="#1032-开散列拉链法">#</a>10.3.2 开散列（拉链法）</h1>
+<figure><img loading="lazy" src="../../assets/70ba08a893dc9d64.jpg" alt="图 10.7 开散列方法的图示"><figcaption>图 10.7 开散列方法的图示</figcaption></figure>
+<p>冲突的元素挂成一条链。</p>
+<ul>
+<li>优点：装载因子可以大于 1；删除简单</li>
+<li>缺点：额外的指针空间；缓存局部性差</li>
+</ul></section><section class="slide" data-notes=""><h1 id="1033-闭散列开地址法"><a class="anchor" href="#1033-闭散列开地址法">#</a>10.3.3 闭散列（开地址法）</h1>
+<p><strong>所有元素都住在表里</strong>，不另开链表。</p>
+<p>关键码先由散列函数算出<strong>基地址</strong>；那一格被占了就往后找——<strong>线性探测</strong>。</p>
+<div class="codeblock" data-lang="text"><pre><code>表长 7,  插入 3, 10, 17   (三者的基地址都是 3)
+
+槽位   0   1   2   3    4    5    6
+内容               [3] [10] [17]</code></pre></div></section><section class="slide" data-notes=""><h1 id="删除这一节的核心难点"><a class="anchor" href="#删除这一节的核心难点">#</a>删除：这一节的核心难点</h1>
+<p><strong>直接把槽位标成「空」是错的。</strong></p>
+<div class="codeblock" data-lang="text"><pre><code>A 和 B 的基地址都是 3
+A 占了槽 3,  B 探测一格住进槽 4
+
+删掉 A, 把槽 3 标成空
+再查 B:  从槽 3 开始, 看到「空」就认定 B 不在表里
+         可 B 明明就在槽 4</code></pre></div>
+<p><strong>探测链被这个空格截断了。</strong></p></section><section class="slide" data-notes="&lt;p&gt;教学版的测试专门守着这条：把 erase 改成标 empty，
+「删掉 3 之后 10 还找不找得到」这条断言立刻变红。现场可以演示。&lt;/p&gt;"><h1 id="解法墓碑"><a class="anchor" href="#解法墓碑">#</a>解法：墓碑</h1>
+<p>槽位要有<strong>三种</strong>状态：空、占用、<strong>墓碑</strong>。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch10/search_hash/teaching.hpp">code/ch10/search_hash/teaching.hpp#fn:erase</a></div><pre><code><span class="t">bool</span> erase(<span class="t">int</span> value) {
+    std::optional&lt;std::<span class="t">size_t</span>&gt; found = sequential_search(values_, value);
+    <span class="k">if</span> (!found) {
+        <span class="k">return</span> <span class="k">false</span>;
+    }
+    values_.erase(values_.begin() + <span class="k">static_cast</span>&lt;std::<span class="t">ptrdiff_t</span>&gt;(*found));
+    <span class="k">return</span> <span class="k">true</span>;
+}
+
+<span class="c">// 删除：**标墓碑，不标空**。理由见上面类注释里那三行推演。</span>
+<span class="t">bool</span> erase(<span class="t">int</span> key) {
+    std::optional&lt;std::<span class="t">size_t</span>&gt; found = find_slot(key);
+    <span class="k">if</span> (!found) {
+        <span class="k">return</span> <span class="k">false</span>;
+    }
+    slots_[*found].state = SlotState::tombstone;
+    --size_;
+    <span class="k">return</span> <span class="k">true</span>;
+}</code></pre></div>
+<ul>
+<li><strong>查找</strong>路过墓碑要<strong>继续走</strong></li>
+<li><strong>插入</strong>可以<strong>覆盖</strong>墓碑</li>
+</ul></section><section class="slide" data-notes="&lt;p&gt;这一条最隐蔽，教学版单列了一个用例：
+表里已有 10（在槽 4），槽 3 是墓碑，此时再插 10 必须返回 false。
+碰到墓碑就返回的实现会插出两个 10 来。&lt;/p&gt;"><h1 id="插入回收墓碑但不能提前停"><a class="anchor" href="#插入回收墓碑但不能提前停">#</a>插入：回收墓碑，但不能提前停</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch10/search_hash/teaching.hpp">code/ch10/search_hash/teaching.hpp#fn:insertion_slot</a></div><pre><code><span class="c">// 找插入位置。比查找多做一件事：**记住路上第一个墓碑**。</span>
+<span class="c">// 走到「空」时优先返回那个墓碑——回收墓碑，探测链才不会越来越长。</span>
+<span class="c">// 但必须先走到「空」或找到同键才能停，否则会把一个已存在的键插第二遍。</span>
+std::optional&lt;std::<span class="t">size_t</span>&gt; insertion_slot(<span class="t">int</span> key) <span class="k">const</span> {
+    std::optional&lt;std::<span class="t">size_t</span>&gt; first_tombstone;
+    <span class="k">for</span> (std::<span class="t">size_t</span> step = <span class="n">0</span>; step &lt; slots_.size(); ++step) {
+        std::<span class="t">size_t</span> index = (home(key) + step) % slots_.size();
+        <span class="k">if</span> (slots_[index].state == SlotState::used &amp;&amp; slots_[index].key == key) {
+            <span class="k">return</span> index;                   <span class="c">// 键已存在</span>
+        }
+        <span class="k">if</span> (slots_[index].state == SlotState::tombstone &amp;&amp; !first_tombstone) {
+            first_tombstone = index;
+        }
+        <span class="k">if</span> (slots_[index].state == SlotState::empty) {
+            <span class="k">return</span> first_tombstone ? first_tombstone : std::optional&lt;std::<span class="t">size_t</span>&gt;(index);
+        }
+    }
+    <span class="k">return</span> first_tombstone;                 <span class="c">// 全表没有空格，只能指望墓碑</span>
+}</code></pre></div>
+<p><strong>记住路上第一个墓碑，但必须先走到「空」或找到同键才能停。</strong></p>
+<p>提前停会把一个已经在后面的键<strong>插第二遍</strong>。</p></section><section class="slide" data-notes="&lt;p&gt;线性探测还有一个问题叫「聚集」：连续被占的一段会越来越长，
+因为落在这一段任何位置的新键都会排到段尾，使段更长。
+二次探测和双散列就是为了打散聚集。&lt;/p&gt;"><h1 id="1035-效率分析"><a class="anchor" href="#1035-效率分析">#</a>10.3.5 效率分析</h1>
+<p>设装载因子 <span class="math">α<span class="rel">=</span>n/m</span>：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">方法</th>
+<th style="text-align:left">成功检索 ASL</th>
+<th style="text-align:left">不成功检索 ASL</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">拉链法</td>
+<td style="text-align:left"><span class="math"><span class="upr">1</span><span class="bin">+</span>α/<span class="upr">2</span></span></td>
+<td style="text-align:left"><span class="math">α</span></td>
+</tr>
+<tr>
+<td style="text-align:left">线性探测</td>
+<td style="text-align:left"><span class="math"><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span>(<span class="upr">1</span><span class="bin">+</span><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den"><span class="upr">1</span><span class="bin">−</span>α</span></span>)</span></td>
+<td style="text-align:left"><span class="math"><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span>(<span class="upr">1</span><span class="bin">+</span><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den">(<span class="upr">1</span><span class="bin">−</span>α)<sup><span class="upr">2</span></sup></span></span>)</span></td>
+</tr>
+</tbody></table></div>
+<p><strong>注意最后一列</strong>：<span class="math">α<span class="rel">→</span><span class="upr">1</span></span> 时它<strong>爆炸</strong>。</p>
+<p>所以闭散列表通常在 <span class="math">α</span> 超过 0.5–0.75 时就要扩容重散列。</p></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
+<ul>
+<li>顺序检索 <span class="math">O(n)</span> 不要求有序；二分 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span> 要求有序；分块 <span class="math">O(<span class="sqrt">n</span>)</span> 折中</li>
+<li>二分要用<strong>半开区间</strong>，避开无符号下溢；中点用 <code>first + (last-first)/2</code></li>
+<li>比较模型下检索的下界是 <span class="math">Ω(<span class="upr">log</span>&thinsp;n)</span></li>
+<li>散列<strong>不比较</strong>，期望 <span class="math">O(<span class="upr">1</span>)</span>；代价是不保序、会退化</li>
+<li>闭散列的删除必须标<strong>墓碑</strong>，否则探测链断掉</li>
+<li>插入要<strong>回收墓碑</strong>，但不能碰到墓碑就停——会插出重复键</li>
+</ul></section><section class="slide" data-notes=""><h1 id="上机"><a class="anchor" href="#上机">#</a>上机</h1>
+<div class="codeblock" data-lang="bash"><pre><code>python3 tools/check_code.py code/ch10/search_hash</code></pre></div>
+<p>故意改坏一处，看哪条断言变红：</p>
+<ul>
+<li>把二分的 <code>last = middle</code> 改成闭区间的 <code>last = middle - 1</code></li>
+<li>把 <code>erase</code> 改成标 <code>empty</code> 而不是墓碑</li>
+<li>让 <code>insertion_slot</code> 碰到墓碑就返回</li>
+<li>把 <code>elf_hash</code> 的 <code>unsigned char</code> 改成 <code>char</code></li>
+</ul>
+<blockquote><p>最后一条只有拿非 ASCII 字节做输入才看得出来——测试里那条用例就是为它写的。</p></blockquote></section></div>
+<div class="bar"></div>
+<div class="notes"></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第10章 检索</div><div class="thumb"><div class="no">2</div>10.1.1 顺序检索</div><div class="thumb"><div class="no">3</div>10.1.2 二分检索</div><div class="thumb"><div class="no">4</div>二分的一个坑：无符号下溢</div><div class="thumb"><div class="no">5</div>决策树：二分为什么是 $\log n$</div><div class="thumb"><div class="no">6</div>10.1.3 分块检索</div><div class="thumb"><div class="no">7</div>10.2 集合</div><div class="thumb"><div class="no">8</div>10.3 散列：换一条路</div><div class="thumb"><div class="no">9</div>10.3.1 散列函数</div><div class="thumb"><div class="no">10</div>10.3.2 开散列（拉链法）</div><div class="thumb"><div class="no">11</div>10.3.3 闭散列（开地址法）</div><div class="thumb"><div class="no">12</div>删除：这一节的核心难点</div><div class="thumb"><div class="no">13</div>解法：墓碑</div><div class="thumb"><div class="no">14</div>插入：回收墓碑，但不能提前停</div><div class="thumb"><div class="no">15</div>10.3.5 效率分析</div><div class="thumb"><div class="no">16</div>本章小结</div><div class="thumb"><div class="no">17</div>上机</div></div>
+<div class="help"><div>
+<p><b>放映快捷键</b></p>
+<p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
+<p><kbd>N</kbd>演讲者备注　<kbd>O</kbd>缩略图总览　<kbd>F</kbd>全屏　<kbd>D</kbd>深色</p>
+<p><kbd>?</kbd>这张帮助　<kbd>Esc</kbd>关闭</p>
+<p style="color:var(--muted);font-size:.9em">
+导出 PDF：浏览器打印（Ctrl/Cmd+P），每页一张幻灯片。</p>
+</div></div>
+<div class="chrome">
+<b>第10章 检索</b><span>现代 C++ 数据结构教程</span>
+<span class="grow"></span>
+<a href="index.html" style="color:var(--muted)">目录</a>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 17</b>
+</div>
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var total=slides.length, at=0;
+  var bar=document.querySelector('.bar'), now=document.getElementById('now');
+  var notes=document.querySelector('.notes'), over=document.querySelector('.overview');
+  var help=document.querySelector('.help');
+  function show(n,push){
+    at=Math.max(0,Math.min(total-1,n));
+    slides.forEach(function(s,i){s.classList.toggle('current',i===at);});
+    bar.style.width=((at+1)/total*100)+'%';
+    now.textContent=(at+1)+' / '+total;
+    notes.innerHTML=slides[at].getAttribute('data-notes')||'';
+    document.querySelectorAll('.thumb').forEach(function(t,i){
+      t.classList.toggle('here',i===at);});
+    if(push!==false){history.replaceState(null,'','#'+(at+1));}
+    slides[at].scrollTop=0;
+  }
+  function go(d){show(at+d);}
+  document.addEventListener('keydown',function(e){
+    if(e.metaKey||e.ctrlKey||e.altKey)return;
+    var k=e.key;
+    if(help.classList.contains('on')&&k!=='?'){help.classList.remove('on');return;}
+    if(over.classList.contains('on')&&(k==='Escape'||k==='o'||k==='O')){
+      over.classList.remove('on');return;}
+    if(k==='ArrowRight'||k==='PageDown'||k===' '||k==='j'){go(1);e.preventDefault();}
+    else if(k==='ArrowLeft'||k==='PageUp'||k==='k'){go(-1);e.preventDefault();}
+    else if(k==='Home'){show(0);}
+    else if(k==='End'){show(total-1);}
+    else if(k==='n'||k==='N'){notes.classList.toggle('on');}
+    else if(k==='o'||k==='O'){over.classList.toggle('on');}
+    else if(k==='d'||k==='D'){
+      var dark=document.documentElement.getAttribute('data-theme')==='dark';
+      document.documentElement.setAttribute('data-theme',dark?'light':'dark');}
+    else if(k==='f'||k==='F'){
+      if(document.fullscreenElement){document.exitFullscreen();}
+      else{document.documentElement.requestFullscreen();}}
+    else if(k==='?'){help.classList.toggle('on');}
+  });
+  document.querySelectorAll('.thumb').forEach(function(t,i){
+    t.addEventListener('click',function(){over.classList.remove('on');show(i);});});
+  window.addEventListener('hashchange',function(){
+    var n=parseInt(location.hash.slice(1),10);
+    if(n>=1&&n<=total)show(n-1,false);});
+  var start=parseInt(location.hash.slice(1),10);
+  show(start>=1&&start<=total?start-1:0,false);
+})();
+</script>
+</body></html>

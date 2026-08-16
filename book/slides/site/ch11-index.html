@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第11章 索引技术</title>
+<style>
+:root{--bg:#fdfdfc;--fg:#1a1a18;--muted:#6b6b66;--line:#dcdcd6;--accent:#8a4b2a;
+--code-bg:#f5f4f0;--kw:#8a4b2a;--ty:#2c6b57;--st:#7a5c1e;--cm:#8a8a84;--nu:#4a5aa8}
+:root[data-theme="dark"]{--bg:#16161a;--fg:#ececea;--muted:#a0a09a;--line:#33333a;
+--accent:#e0a074;--code-bg:#1e1e24;--kw:#e0a074;--ty:#7fd0b0;--st:#d8c088;--cm:#7a7a84;--nu:#9ab0f0}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--fg)}
+body{font-family:-apple-system,"Segoe UI","Noto Sans CJK SC","Source Han Sans SC",
+"Microsoft YaHei",sans-serif;overflow:hidden}
+.deck{position:relative;height:100vh}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;
+padding:4.2vmin 6vmin 9vmin;overflow:auto}
+.slide.current{display:flex}
+.slide .anchor{display:none}
+.slide h1{font-size:clamp(26px,4.4vmin,52px);margin:0 0 3vmin;line-height:1.25;
+letter-spacing:-.01em;border-bottom:3px solid var(--accent);padding-bottom:1.6vmin}
+.slide h2{font-size:clamp(20px,3.1vmin,34px);margin:2.4vmin 0 1.2vmin}
+.slide h3{font-size:clamp(17px,2.5vmin,27px);margin:2vmin 0 1vmin;color:var(--muted)}
+.slide p,.slide li{font-size:clamp(15px,2.5vmin,28px);line-height:1.55;margin:.7vmin 0}
+.slide ul,.slide ol{margin:1vmin 0;padding-left:3.4vmin}
+.slide li{margin:.9vmin 0}
+.slide strong{color:var(--accent)}
+.slide blockquote{margin:1.6vmin 0;padding:.6vmin 0 .6vmin 2.4vmin;
+border-left:4px solid var(--line);color:var(--muted)}
+.slide table{border-collapse:collapse;font-size:clamp(13px,2.1vmin,23px);margin:1.4vmin 0}
+.slide th,.slide td{border:1px solid var(--line);padding:.7vmin 1.4vmin;text-align:left}
+.slide th{background:var(--code-bg)}
+.table-wrap{overflow-x:auto;max-width:100%}
+.slide img{max-width:100%;max-height:52vh;object-fit:contain;display:block;margin:1.4vmin auto}
+.codeblock{background:var(--code-bg);border:1px solid var(--line);border-radius:6px;
+margin:1.4vmin 0;overflow:hidden}
+.codeblock pre{margin:0;padding:1.6vmin 2vmin;overflow-x:auto}
+.codeblock code{font-family:"SF Mono",Menlo,Consolas,"Noto Sans Mono CJK SC",monospace;
+font-size:clamp(11px,1.95vmin,21px);line-height:1.5;white-space:pre}
+.srcbar{font-size:clamp(9px,1.3vmin,13px);padding:.5vmin 2vmin;color:var(--muted);
+border-bottom:1px solid var(--line);font-family:"SF Mono",Menlo,monospace}
+.srcbar a{color:var(--muted);text-decoration:none}
+.k{color:var(--kw)}.t{color:var(--ty)}.s{color:var(--st)}.c{color:var(--cm);font-style:italic}
+.n{color:var(--nu)}.p{color:var(--fg)}
+.math{font-style:italic}.math-display{text-align:center;margin:2vmin 0;
+font-size:clamp(16px,2.8vmin,30px)}
+.upr{font-style:normal}.bold{font-weight:700}
+code{background:var(--code-bg);padding:.1em .34em;border-radius:4px;
+font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.86em}
+hr{border:0;border-top:1px solid var(--line);margin:2vmin 0}
+.chrome{position:fixed;left:0;right:0;bottom:0;height:5.4vmin;min-height:26px;
+display:flex;align-items:center;gap:1.6vmin;padding:0 2vmin;
+border-top:1px solid var(--line);background:var(--bg);font-size:clamp(10px,1.6vmin,15px);
+color:var(--muted)}
+.chrome .grow{flex:1}
+.chrome b{color:var(--fg);font-weight:600}
+.bar{position:fixed;left:0;bottom:0;height:3px;background:var(--accent);
+transition:width .18s ease;z-index:5}
+.notes{position:fixed;left:0;right:0;bottom:5.4vmin;max-height:34vh;overflow:auto;
+padding:1.6vmin 2.4vmin;background:var(--code-bg);border-top:2px solid var(--accent);
+font-size:clamp(13px,2vmin,20px);line-height:1.5;display:none}
+.notes.on{display:block}
+.notes p{margin:.5em 0}
+.notes:before{content:"演讲者备注";display:block;font-size:.72em;letter-spacing:.08em;
+color:var(--accent);margin-bottom:.5em}
+.overview{position:fixed;inset:0;background:var(--bg);overflow:auto;padding:3vmin;
+display:none;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1.6vmin;z-index:20}
+.overview.on{display:grid}
+.thumb{border:2px solid var(--line);border-radius:6px;padding:1.2vmin;cursor:pointer;
+font-size:13px;line-height:1.35;min-height:88px;overflow:hidden;background:var(--bg)}
+.thumb:hover{border-color:var(--accent)}
+.thumb.here{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.thumb .no{color:var(--muted);font-size:11px}
+.help{position:fixed;inset:0;background:rgba(0,0,0,.62);display:none;z-index:30;
+align-items:center;justify-content:center}
+.help.on{display:flex}
+.help div{background:var(--bg);padding:3vmin 4vmin;border-radius:10px;max-width:520px;
+font-size:15px;line-height:1.9}
+.help kbd{background:var(--code-bg);border:1px solid var(--line);border-radius:4px;
+padding:.1em .5em;font-family:monospace;margin-right:.6em}
+@media print{
+  html,body{height:auto;overflow:visible}
+  .chrome,.bar,.notes,.overview,.help{display:none!important}
+  .deck{height:auto}
+  .slide{display:flex!important;position:relative;inset:auto;page-break-after:always;
+  height:100vh;border:0}
+}
+</style></head><body>
+<div class="deck"><section class="slide" data-notes="&lt;p&gt;第 9 章已经建立了「一次磁盘访问约等于十万次内存访问」这个量级感。
+这一章所有设计的动机都是它，可以先回头指一下。&lt;/p&gt;"><h1 id="第11章-索引技术"><a class="anchor" href="#第11章-索引技术">#</a>第11章 索引技术</h1>
+<p><strong>数据在磁盘上时，怎么快速定位。</strong></p>
+<ul>
+<li>11.1 线性索引、二级索引</li>
+<li>11.3 倒排索引</li>
+<li>11.4 B 树与 B+ 树</li>
+<li>11.5 位图与签名</li>
+</ul>
+<p>一条主线：<strong>每一种索引都在换同一件东西——用附加空间少读几次盘。</strong></p></section><section class="slide" data-notes=""><h1 id="111-线性索引"><a class="anchor" href="#111-线性索引">#</a>11.1 线性索引</h1>
+<figure><img loading="lazy" src="../../assets/6e8a0ef3ed26c107.jpg" alt="图11.1 线性索引，图中的数据库记录不等长"><figcaption>图11.1 线性索引，图中的数据库记录不等长</figcaption></figure>
+<ul>
+<li><strong>主文件</strong>：记录物理无序、长度可以不等</li>
+<li><strong>索引</strong>：按关键码<strong>排好序</strong>，每项是 (关键码, 存储位置)</li>
+</ul>
+<p>索引小得多，可以整个读进内存二分；数据只在确定位置后读<strong>一次</strong>。</p></section><section class="slide" data-notes="&lt;p&gt;本书的实现里埋了一个 page_reads() 计数器，把「读了几页」量出来，
+上机题就用它。实现见 code/ch11/linear_index/modern.hpp。&lt;/p&gt;"><h1 id="二级索引索引本身也放不下怎么办"><a class="anchor" href="#二级索引索引本身也放不下怎么办">#</a>二级索引：索引本身也放不下怎么办</h1>
+<figure><img loading="lazy" src="../../assets/0c75a3db9929b61e.jpg" alt="图 11.2 二级索引文件"><figcaption>图 11.2 二级索引文件</figcaption></figure>
+<p>再给索引建一层索引。二级索引常驻内存，一级索引在盘上。</p>
+<div class="codeblock" data-lang="text"><pre><code>稠密 2 层索引:
+    查不到 -&gt; 读 1 页  (只读了索引页)
+    命中   -&gt; 读 2 页  (索引页 + 数据页)</code></pre></div>
+<p><strong>多出来的那一页就是数据页——索引里没有就不必去读。</strong></p></section><section class="slide" data-notes=""><h1 id="113-倒排索引"><a class="anchor" href="#113-倒排索引">#</a>11.3 倒排索引</h1>
+<p>从「文档 → 它含哪些词」翻转成「词 → 它出现在哪些文档」。</p>
+<div class="codeblock" data-lang="text"><pre><code>文档 1: the quick brown fox
+文档 2: the lazy dog
+
+倒排表:
+  the    -&gt; [1, 2]
+  quick  -&gt; [1]
+  brown  -&gt; [1]
+  fox    -&gt; [1]
+  lazy   -&gt; [2]
+  dog    -&gt; [2]</code></pre></div>
+<p><strong>这就是搜索引擎的基础数据结构。</strong></p></section><section class="slide" data-notes="&lt;p&gt;「AND 查询 = 求交，OR 查询 = 求并」，这就是布尔检索模型。
+
+有序是关键：如果倒排表无序，每次求交都要 O(n*m) 或者先排序。
+所以插入时就维持有序，代价摊到建索引的时候。&lt;/p&gt;"><h1 id="倒排表的交并"><a class="anchor" href="#倒排表的交并">#</a>倒排表的交并</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/inverted_index/modern.hpp">code/ch11/inverted_index/modern.hpp#fn:intersect</a></div><pre><code><span class="c">// &gt;&gt;&gt; inverted-intersect</span>
+    <span class="c">/// 有序表求交。归并一遍，两个指针各走一趟，代价 O(n+m)。</span>
+    [[nodiscard]] <span class="k">static</span> std::vector&lt;<span class="t">int</span>&gt; intersect(<span class="k">const</span> std::vector&lt;<span class="t">int</span>&gt;&amp; left,
+                                                    <span class="k">const</span> std::vector&lt;<span class="t">int</span>&gt;&amp; right) {
+        std::vector&lt;<span class="t">int</span>&gt; out;
+        std::<span class="t">size_t</span> i = <span class="n">0</span>;
+        std::<span class="t">size_t</span> j = <span class="n">0</span>;
+        <span class="k">while</span> (i &lt; left.size() &amp;&amp; j &lt; right.size()) {
+            <span class="k">if</span> (left[i] &lt; right[j]) {
+                ++i;
+            } <span class="k">else</span> <span class="k">if</span> (right[j] &lt; left[i]) {
+                ++j;
+            } <span class="k">else</span> {
+                out.push_back(left[i]);
+                ++i;
+                ++j;
+            }
+        }
+        <span class="k">return</span> out;
+    }</code></pre></div>
+<p>倒排表<strong>保持有序</strong>，所以求交是「双指针并行走一遍」，<span class="math">O(n<span class="bin">+</span>m)</span>—— 不是 <span class="math">O(n<span class="bin">×</span>m)</span>。</p></section><section class="slide" data-notes="&lt;p&gt;所以倒排表里每一项还要记这个词在文档里的&lt;strong&gt;位置列表&lt;/strong&gt;。
+短语查询 = 先求交拿到候选文档，再在候选里检查位置是否连续。
+
+代价：位置信息让索引大好几倍。这又是一次空间换时间。&lt;/p&gt;"><h1 id="短语查询要位置信息"><a class="anchor" href="#短语查询要位置信息">#</a>短语查询要位置信息</h1>
+<p>光有「哪些文档含这个词」不够——<code>&quot;quick brown&quot;</code> 要求两个词<strong>相邻</strong>。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/inverted_index/modern.hpp">code/ch11/inverted_index/modern.hpp#fn:phrase_query</a></div><pre><code><span class="c">/// 短语查询：先求交把候选文档缩小，再用位置是否相邻过滤。</span>
+[[nodiscard]] std::vector&lt;<span class="t">int</span>&gt; phrase_query(<span class="k">const</span> std::vector&lt;std::string&gt;&amp; phrase) <span class="k">const</span> {
+    <span class="k">if</span> (phrase.empty()) {
+        <span class="k">return</span> {};
+    }
+    std::vector&lt;<span class="t">int</span>&gt; candidates = and_query(phrase);
+    std::vector&lt;<span class="t">int</span>&gt; out;
+    <span class="k">for</span> (<span class="k">const</span> <span class="t">int</span> doc : candidates) {
+        <span class="k">for</span> (<span class="k">const</span> <span class="t">int</span> start : positions_of(phrase.front(), doc)) {
+            <span class="t">bool</span> adjacent = <span class="k">true</span>;
+            <span class="k">for</span> (std::<span class="t">size_t</span> step = <span class="n">1</span>; step &lt; phrase.size() &amp;&amp; adjacent; ++step) {
+                adjacent = has_position(phrase[step], doc, start + <span class="k">static_cast</span>&lt;<span class="t">int</span>&gt;(step));
+            }
+            <span class="k">if</span> (adjacent) {
+                out.push_back(doc);
+                <span class="k">break</span>;
+            }
+        }
+    }
+    <span class="k">return</span> out;
+}</code></pre></div></section><section class="slide" data-notes=""><h1 id="114-b-树为磁盘设计的树"><a class="anchor" href="#114-b-树为磁盘设计的树">#</a>11.4 B 树：为磁盘设计的树</h1>
+<p>第 5 章的二叉搜索树在磁盘上<strong>很糟</strong>：树高 <span class="math"><span class="upr">log</span><sub><span class="upr">2</span></sub>n</span>， 每下降一层就是<strong>一次磁盘访问</strong>。</p>
+<p><span class="math">n<span class="rel">=</span><span class="upr">10</span><sup><span class="upr">6</span></sup></span> 时 <span class="math"><span class="upr">log</span><sub><span class="upr">2</span></sub>n<span class="rel">≈</span><span class="upr">20</span></span> 次。</p>
+<p><strong>B 树的想法</strong>：把结点做大，让一个结点正好装满一页。</p>
+<p><span class="math">m</span> 阶 B 树的高度是 <span class="math"><span class="upr">log</span><sub>m</sub>n</span>——<span class="math">m<span class="rel">=</span><span class="upr">100</span></span> 时只要 3 层。</p></section><section class="slide" data-notes=""><h1 id="b-树的结构"><a class="anchor" href="#b-树的结构">#</a>B 树的结构</h1>
+<figure><img loading="lazy" src="../../assets/97a7189d3ea9584c.jpg" alt="图 11.4 B 树结点的一般形式"><figcaption>图 11.4 B 树结点的一般形式</figcaption></figure>
+<p><span class="math">m</span> 阶 B 树：</p>
+<ul>
+<li>每个结点至多 <span class="math">m</span> 个孩子、<span class="math">m<span class="bin">−</span><span class="upr">1</span></span> 个关键码</li>
+<li>除根外，每个结点至少 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 个孩子（<strong>半满</strong>）</li>
+<li>所有叶子在<strong>同一层</strong></li>
+</ul>
+<p>「半满」和「叶子同层」这两条一起保证了树高是 <span class="math">O(<span class="upr">log</span><sub>m</sub>n)</span>。</p></section><section class="slide" data-notes=""><h1 id="插入导致分裂"><a class="anchor" href="#插入导致分裂">#</a>插入导致分裂</h1>
+<figure><img loading="lazy" src="../../assets/ea9001b8f902803b.jpg" alt="图11.7 在3阶 B 树中插入关键码19后导致根分裂"><figcaption>图11.7 在3阶 B 树中插入关键码19后导致根分裂</figcaption></figure>
+<p>结点满了就<strong>从中间劈开</strong>，中间那个关键码升到父结点。</p>
+<p>父结点也满就继续往上劈——<strong>根分裂时树才长高一层</strong>。</p>
+<p><strong>B 树是从叶子往上长的</strong>，这是它始终平衡的原因。</p></section><section class="slide" data-notes=""><h1 id="b-树数据全在叶子"><a class="anchor" href="#b-树数据全在叶子">#</a>B+ 树：数据全在叶子</h1>
+<figure><img loading="lazy" src="../../assets/8573da94ca956749.jpg" alt="图 11.9 3 阶 B +树"><figcaption>图 11.9 3 阶 B +树</figcaption></figure>
+<ul>
+<li>内部结点<strong>只存关键码</strong>（当路标），不存数据</li>
+<li>数据全部在叶子，叶子之间用指针<strong>串成一条链</strong></li>
+</ul>
+<p>两个直接好处：</p>
+<ul>
+<li>内部结点更小 → 一页能装更多路标 → 树更矮</li>
+<li><strong>范围查询</strong>只需定位一次，然后顺着叶子链扫</li>
+</ul></section><section class="slide" data-notes="&lt;p&gt;定位到起点 O(log n)，之后每个结果只花 O(1)。
+B 树做同样的事要反复中序周游，跨结点时得回到父亲——这就是数据库
+几乎一律用 B+ 树而不是 B 树的原因。
+
+本书的实现里同样有 page_reads()/page_writes() 计数器。&lt;/p&gt;"><h1 id="范围查询b-树的看家本领"><a class="anchor" href="#范围查询b-树的看家本领">#</a>范围查询：B+ 树的看家本领</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/bplus_tree/modern.hpp">code/ch11/bplus_tree/modern.hpp#bplus-range</a></div><pre><code><span class="c">/// 范围扫描：找到下限所在的叶，然后沿叶链横着走，不再回到内部结点。</span>
+[[nodiscard]] std::vector&lt;std::pair&lt;<span class="t">int</span>, std::string&gt;&gt; range(<span class="t">int</span> low, <span class="t">int</span> high) <span class="k">const</span> {
+    std::vector&lt;std::pair&lt;<span class="t">int</span>, std::string&gt;&gt; out;
+    <span class="k">if</span> (low &gt; high) {
+        <span class="k">return</span> out;
+    }
+    <span class="k">const</span> Node* node = root_.get();
+    <span class="k">while</span> (!node-&gt;leaf) {
+        ++reads_;
+        node = node-&gt;children[child_slot(*node, low)].get();
+    }
+    <span class="k">while</span> (node != <span class="k">nullptr</span>) {
+        ++reads_;
+        <span class="k">for</span> (std::<span class="t">size_t</span> i = <span class="n">0</span>; i &lt; node-&gt;keys.size(); ++i) {
+            <span class="k">if</span> (node-&gt;keys[i] &gt; high) {
+                <span class="k">return</span> out;
+            }
+            <span class="k">if</span> (node-&gt;keys[i] &gt;= low) {
+                out.emplace_back(node-&gt;keys[i], node-&gt;values[i]);
+            }
+        }
+        node = node-&gt;next;
+    }
+    <span class="k">return</span> out;
+}</code></pre></div></section><section class="slide" data-notes="&lt;p&gt;可以现场把「复制」改成「移动」，然后跑范围查询——单点查询依然全绿，
+只有范围查询的断言会红。这正是「有牙的测试」该抓到的东西。&lt;/p&gt;"><h1 id="叶子分裂与内部分裂不一样"><a class="anchor" href="#叶子分裂与内部分裂不一样">#</a>叶子分裂与内部分裂不一样</h1>
+<div class="codeblock" data-lang="text"><pre><code>叶子分裂:   中间那个关键码**复制**一份上去
+            (叶子仍然保留它, 因为数据在叶子)
+
+内部分裂:   中间那个关键码**移动**上去
+            (内部结点只是路标, 不必留)</code></pre></div>
+<p><strong>这一处最容易写错</strong>，而且写错的表现很隐蔽： 范围查询会漏掉边界上的键，单点查询却全对。</p>
+<p>实现见 <code>code/ch11/bplus_tree/modern.hpp</code> 的 <code>split_leaf</code> 与 <code>split_internal</code>。</p></section><section class="slide" data-notes=""><h1 id="115-位图索引"><a class="anchor" href="#115-位图索引">#</a>11.5 位图索引</h1>
+<figure><img loading="lazy" src="../../assets/012aa9549249f6c8.jpg" alt="图11.15 百货销售数据库记录的位图索引示意"><figcaption>图11.15 百货销售数据库记录的位图索引示意</figcaption></figure>
+<p>对<strong>取值很少</strong>的字段（性别、州、类别）， 给每个取值造一个位向量：第 i 位表示「第 i 条记录是不是这个值」。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/bitmap_index/modern.hpp">code/ch11/bitmap_index/modern.hpp#fn:select_and</a></div><pre><code><span class="c">// &gt;&gt;&gt; bitmap-ops</span>
+    <span class="c">/// 「与」：逐字 `&amp;`。`word_ops()` 数的就是这里做了几次字运算。</span>
+    [[nodiscard]] std::vector&lt;std::<span class="t">size_t</span>&gt; select_and(<span class="k">const</span> std::string&amp; a,
+                                                      <span class="k">const</span> std::string&amp; b) <span class="k">const</span> {
+        <span class="k">return</span> to_records(combine(bitmap(a), bitmap(b), Op::And));
+    }</code></pre></div>
+<p><strong>多条件组合退化成按位与</strong>——一次处理 64 条记录。</p></section><section class="slide" data-notes="&lt;p&gt;游程编码：连续的 0 或 1 记成「值 + 个数」。
+真实系统里用的是 WAH / EWAH 这类「能直接在压缩态上做位运算」的编码，
+不用解压就能求交——那才是位图索引真正的杀手锏。本书只做到游程编码。&lt;/p&gt;"><h1 id="位图的代价与压缩"><a class="anchor" href="#位图的代价与压缩">#</a>位图的代价与压缩</h1>
+<ul>
+<li>字段取值 <strong>少</strong> → 位图小，效率极高</li>
+<li>字段取值 <strong>多</strong>（比如身份证号）→ 位图数量爆炸，完全不能用</li>
+</ul>
+<p>位向量往往极其稀疏（大片的 0），所以要压缩：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/bitmap_index/modern.hpp">code/ch11/bitmap_index/modern.hpp#fn:run_length_encode</a></div><pre><code><span class="c">// &gt;&gt;&gt; bitmap-compression</span>
+<span class="c">/// 字级游程压缩：把连续相同的机器字压成「重复次数 + 字值」两项。</span>
+<span class="c">/// 低基数列的位图大片全 0，这样能压得很小；随机稠密位图反而会变大——如实呈现，不粉饰。</span>
+<span class="k">inline</span> std::vector&lt;std::uint64_t&gt; run_length_encode(<span class="k">const</span> std::vector&lt;std::uint64_t&gt;&amp; bits) {
+    std::vector&lt;std::uint64_t&gt; out;
+    std::<span class="t">size_t</span> i = <span class="n">0</span>;
+    <span class="k">while</span> (i &lt; bits.size()) {
+        std::<span class="t">size_t</span> run = <span class="n">1</span>;
+        <span class="k">while</span> (i + run &lt; bits.size() &amp;&amp; bits[i + run] == bits[i]) {
+            ++run;
+        }
+        out.push_back(<span class="k">static_cast</span>&lt;std::uint64_t&gt;(run));
+        out.push_back(bits[i]);
+        i += run;
+    }
+    <span class="k">return</span> out;
+}</code></pre></div></section><section class="slide" data-notes=""><h1 id="各种索引怎么选"><a class="anchor" href="#各种索引怎么选">#</a>各种索引怎么选</h1>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">场景</th>
+<th style="text-align:left">用什么</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">主文件无序、记录不等长</td>
+<td style="text-align:left">线性索引</td>
+</tr>
+<tr>
+<td style="text-align:left">索引本身也很大</td>
+<td style="text-align:left">二级 / 多级索引</td>
+</tr>
+<tr>
+<td style="text-align:left">全文检索、布尔查询</td>
+<td style="text-align:left"><strong>倒排索引</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">范围查询、有序遍历</td>
+<td style="text-align:left"><strong>B+ 树</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">低基数字段、多条件组合</td>
+<td style="text-align:left"><strong>位图</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">只问「在不在」、允许误判</td>
+<td style="text-align:left">签名 / 布隆过滤器</td>
+</tr>
+</tbody></table></div></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
+<ul>
+<li>索引的本质：<strong>用附加空间换更少的磁盘访问</strong></li>
+<li>线性索引让主文件可以无序、变长；多级索引解决索引本身太大</li>
+<li>倒排索引把「文档→词」翻转成「词→文档」，交并靠<strong>有序</strong>做到 <span class="math">O(n<span class="bin">+</span>m)</span></li>
+<li>B 树把结点做成一页大，树高从 <span class="math"><span class="upr">log</span><sub><span class="upr">2</span></sub>n</span> 降到 <span class="math"><span class="upr">log</span><sub>m</sub>n</span></li>
+<li><strong>B+ 树数据全在叶子且串成链</strong>，所以范围查询只定位一次</li>
+<li>位图索引适合<strong>低基数</strong>字段，多条件组合退化成按位与</li>
+</ul></section><section class="slide" data-notes=""><h1 id="上机"><a class="anchor" href="#上机">#</a>上机</h1>
+<div class="codeblock" data-lang="bash"><pre><code>python3 tools/check_code.py code/ch11/bplus_tree
+python3 tools/check_code.py code/ch11/inverted_index</code></pre></div>
+<ul>
+<li>用 <code>page_reads()</code> 量一量：同样的查询，1 层索引和 2 层索引各读几页</li>
+<li>在 B+ 树里做一次范围查询，数一数跨了几个叶结点</li>
+<li>把叶子分裂的「复制」改成「移动」，看范围查询漏掉了什么</li>
+</ul>
+<blockquote><p>B+ 树的测试里有一条 <code>validate()</code>：每次插入删除后都检查 「所有叶子同层、每个结点半满、叶子链有序」这三条不变量。</p></blockquote></section></div>
+<div class="bar"></div>
+<div class="notes"></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第11章 索引技术</div><div class="thumb"><div class="no">2</div>11.1 线性索引</div><div class="thumb"><div class="no">3</div>二级索引：索引本身也放不下怎么办</div><div class="thumb"><div class="no">4</div>11.3 倒排索引</div><div class="thumb"><div class="no">5</div>倒排表的交并</div><div class="thumb"><div class="no">6</div>短语查询要位置信息</div><div class="thumb"><div class="no">7</div>11.4 B 树：为磁盘设计的树</div><div class="thumb"><div class="no">8</div>B 树的结构</div><div class="thumb"><div class="no">9</div>插入导致分裂</div><div class="thumb"><div class="no">10</div>B+ 树：数据全在叶子</div><div class="thumb"><div class="no">11</div>范围查询：B+ 树的看家本领</div><div class="thumb"><div class="no">12</div>叶子分裂与内部分裂不一样</div><div class="thumb"><div class="no">13</div>11.5 位图索引</div><div class="thumb"><div class="no">14</div>位图的代价与压缩</div><div class="thumb"><div class="no">15</div>各种索引怎么选</div><div class="thumb"><div class="no">16</div>本章小结</div><div class="thumb"><div class="no">17</div>上机</div></div>
+<div class="help"><div>
+<p><b>放映快捷键</b></p>
+<p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
+<p><kbd>N</kbd>演讲者备注　<kbd>O</kbd>缩略图总览　<kbd>F</kbd>全屏　<kbd>D</kbd>深色</p>
+<p><kbd>?</kbd>这张帮助　<kbd>Esc</kbd>关闭</p>
+<p style="color:var(--muted);font-size:.9em">
+导出 PDF：浏览器打印（Ctrl/Cmd+P），每页一张幻灯片。</p>
+</div></div>
+<div class="chrome">
+<b>第11章 索引技术</b><span>现代 C++ 数据结构教程</span>
+<span class="grow"></span>
+<a href="index.html" style="color:var(--muted)">目录</a>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 17</b>
+</div>
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var total=slides.length, at=0;
+  var bar=document.querySelector('.bar'), now=document.getElementById('now');
+  var notes=document.querySelector('.notes'), over=document.querySelector('.overview');
+  var help=document.querySelector('.help');
+  function show(n,push){
+    at=Math.max(0,Math.min(total-1,n));
+    slides.forEach(function(s,i){s.classList.toggle('current',i===at);});
+    bar.style.width=((at+1)/total*100)+'%';
+    now.textContent=(at+1)+' / '+total;
+    notes.innerHTML=slides[at].getAttribute('data-notes')||'';
+    document.querySelectorAll('.thumb').forEach(function(t,i){
+      t.classList.toggle('here',i===at);});
+    if(push!==false){history.replaceState(null,'','#'+(at+1));}
+    slides[at].scrollTop=0;
+  }
+  function go(d){show(at+d);}
+  document.addEventListener('keydown',function(e){
+    if(e.metaKey||e.ctrlKey||e.altKey)return;
+    var k=e.key;
+    if(help.classList.contains('on')&&k!=='?'){help.classList.remove('on');return;}
+    if(over.classList.contains('on')&&(k==='Escape'||k==='o'||k==='O')){
+      over.classList.remove('on');return;}
+    if(k==='ArrowRight'||k==='PageDown'||k===' '||k==='j'){go(1);e.preventDefault();}
+    else if(k==='ArrowLeft'||k==='PageUp'||k==='k'){go(-1);e.preventDefault();}
+    else if(k==='Home'){show(0);}
+    else if(k==='End'){show(total-1);}
+    else if(k==='n'||k==='N'){notes.classList.toggle('on');}
+    else if(k==='o'||k==='O'){over.classList.toggle('on');}
+    else if(k==='d'||k==='D'){
+      var dark=document.documentElement.getAttribute('data-theme')==='dark';
+      document.documentElement.setAttribute('data-theme',dark?'light':'dark');}
+    else if(k==='f'||k==='F'){
+      if(document.fullscreenElement){document.exitFullscreen();}
+      else{document.documentElement.requestFullscreen();}}
+    else if(k==='?'){help.classList.toggle('on');}
+  });
+  document.querySelectorAll('.thumb').forEach(function(t,i){
+    t.addEventListener('click',function(){over.classList.remove('on');show(i);});});
+  window.addEventListener('hashchange',function(){
+    var n=parseInt(location.hash.slice(1),10);
+    if(n>=1&&n<=total)show(n-1,false);});
+  var start=parseInt(location.hash.slice(1),10);
+  show(start>=1&&start<=total?start-1:0,false);
+})();
+</script>
+</body></html>

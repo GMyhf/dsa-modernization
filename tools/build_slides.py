@@ -64,6 +64,15 @@ FENCE = re.compile(r"^\s*```")
 # 这样课件源文件直接读也不会被讲稿打断。
 NOTE_BLOCK = re.compile(r"<!--\s*备注\s*(.*?)-->", re.S)
 
+# 单页超过这么多行就警告（不挡构建）。
+#
+# 数字是量出来的：正文字号 clamp(15px,2.5vmin,28px)、代码 clamp(11px,1.95vmin,21px)，
+# 1080p 投影上代码约 21px × 1.5 行距 = 31px 一行；一页正文区约 890px，
+# 于是**28 行左右就满了**，再多就要滚动——讲课时滚动很糟。
+# 阈值放宽到 32 是给「整页只有一段代码」留的余地：那种页滚一下还能接受，
+# 而要点页超过 32 行基本是没拆干净。
+MAX_SLIDE_LINES = 32
+
 
 def split_front_matter(text):
     """开头那段 `---` 包起来的元信息。没有就返回空。"""
@@ -120,6 +129,9 @@ def render_deck(path: Path, ctx):
         anchors = build_site.Anchors() if hasattr(build_site, "Anchors") else _Anchors()
         body, headings = render_blocks(lines, ctx, anchors)
         title = headings[0][1] if headings else ""
+        visible = [ln for ln in lines if ln.strip()]
+        if len(visible) > MAX_SLIDE_LINES and hasattr(ctx, "crowded"):
+            ctx.crowded.append((path.name, title or "（无标题）", len(visible)))
         note_html = "".join(f"<p>{render_inline(n, ctx)}</p>" for n in notes)
         slides.append((title, "".join(body), note_html))
     return meta, slides
@@ -356,6 +368,7 @@ def build(check_only=False, out_dir=None, assets_href=None):
     build_site.ASSETS_HREF = assets_href or ASSETS_HREF
     try:
         ctx = Context()
+        ctx.crowded = []   # build_site 的 Context 没有这一项，课件自己加
         decks, pages = [], {}
         for src in sources:
             ctx.page = src.name
@@ -370,6 +383,10 @@ def build(check_only=False, out_dir=None, assets_href=None):
     finally:
         build_site.ASSETS_HREF = saved
 
+    if ctx.crowded:
+        for deck, title, count in ctx.crowded:
+            print(f"⚠️  {deck} 的「{title}」有 {count} 行，投影上放不下"
+                  f"（超过 {MAX_SLIDE_LINES} 行就会滚动）")
     if ctx.unknown_tex:
         print(f"⚠️  {len(ctx.unknown_tex)} 个没认出来的 LaTeX 命令："
               f"{', '.join(sorted(ctx.unknown_tex)[:6])}")

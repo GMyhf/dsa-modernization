@@ -118,6 +118,7 @@ MATH_SYMBOLS = {
     "approx": "≈", "sim": "∼", "equiv": "≡", "pm": "±", "mp": "∓",
     "in": "∈", "notin": "∉", "subset": "⊂", "subseteq": "⊆", "cup": "∪",
     "cap": "∩", "emptyset": "∅", "infty": "∞", "to": "→", "rightarrow": "→",
+    "ll": "≪", "gg": "≫", "propto": "∝", "setminus": "∖", "supseteq": "⊇",
     "leftarrow": "←", "Rightarrow": "⇒", "leftrightarrow": "↔", "mapsto": "↦",
     "sum": "∑", "prod": "∏", "int": "∫", "star": "⋆", "circ": "∘",
     "lceil": "⌈", "rceil": "⌉", "lfloor": "⌊", "rfloor": "⌋",

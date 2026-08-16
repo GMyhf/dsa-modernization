@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第6章 树</title>
+<style>
+:root{--bg:#fdfdfc;--fg:#1a1a18;--muted:#6b6b66;--line:#dcdcd6;--accent:#8a4b2a;
+--code-bg:#f5f4f0;--kw:#8a4b2a;--ty:#2c6b57;--st:#7a5c1e;--cm:#8a8a84;--nu:#4a5aa8}
+:root[data-theme="dark"]{--bg:#16161a;--fg:#ececea;--muted:#a0a09a;--line:#33333a;
+--accent:#e0a074;--code-bg:#1e1e24;--kw:#e0a074;--ty:#7fd0b0;--st:#d8c088;--cm:#7a7a84;--nu:#9ab0f0}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--fg)}
+body{font-family:-apple-system,"Segoe UI","Noto Sans CJK SC","Source Han Sans SC",
+"Microsoft YaHei",sans-serif;overflow:hidden}
+.deck{position:relative;height:100vh}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;
+padding:4.2vmin 6vmin 9vmin;overflow:auto}
+.slide.current{display:flex}
+.slide .anchor{display:none}
+.slide h1{font-size:clamp(26px,4.4vmin,52px);margin:0 0 3vmin;line-height:1.25;
+letter-spacing:-.01em;border-bottom:3px solid var(--accent);padding-bottom:1.6vmin}
+.slide h2{font-size:clamp(20px,3.1vmin,34px);margin:2.4vmin 0 1.2vmin}
+.slide h3{font-size:clamp(17px,2.5vmin,27px);margin:2vmin 0 1vmin;color:var(--muted)}
+.slide p,.slide li{font-size:clamp(15px,2.5vmin,28px);line-height:1.55;margin:.7vmin 0}
+.slide ul,.slide ol{margin:1vmin 0;padding-left:3.4vmin}
+.slide li{margin:.9vmin 0}
+.slide strong{color:var(--accent)}
+.slide blockquote{margin:1.6vmin 0;padding:.6vmin 0 .6vmin 2.4vmin;
+border-left:4px solid var(--line);color:var(--muted)}
+.slide table{border-collapse:collapse;font-size:clamp(13px,2.1vmin,23px);margin:1.4vmin 0}
+.slide th,.slide td{border:1px solid var(--line);padding:.7vmin 1.4vmin;text-align:left}
+.slide th{background:var(--code-bg)}
+.table-wrap{overflow-x:auto;max-width:100%}
+.slide img{max-width:100%;max-height:52vh;object-fit:contain;display:block;margin:1.4vmin auto}
+.codeblock{background:var(--code-bg);border:1px solid var(--line);border-radius:6px;
+margin:1.4vmin 0;overflow:hidden}
+.codeblock pre{margin:0;padding:1.6vmin 2vmin;overflow-x:auto}
+.codeblock code{font-family:"SF Mono",Menlo,Consolas,"Noto Sans Mono CJK SC",monospace;
+font-size:clamp(11px,1.95vmin,21px);line-height:1.5;white-space:pre}
+.srcbar{font-size:clamp(9px,1.3vmin,13px);padding:.5vmin 2vmin;color:var(--muted);
+border-bottom:1px solid var(--line);font-family:"SF Mono",Menlo,monospace}
+.srcbar a{color:var(--muted);text-decoration:none}
+.k{color:var(--kw)}.t{color:var(--ty)}.s{color:var(--st)}.c{color:var(--cm);font-style:italic}
+.n{color:var(--nu)}.p{color:var(--fg)}
+.math{font-style:italic}.math-display{text-align:center;margin:2vmin 0;
+font-size:clamp(16px,2.8vmin,30px)}
+.upr{font-style:normal}.bold{font-weight:700}
+code{background:var(--code-bg);padding:.1em .34em;border-radius:4px;
+font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.86em}
+hr{border:0;border-top:1px solid var(--line);margin:2vmin 0}
+.chrome{position:fixed;left:0;right:0;bottom:0;height:5.4vmin;min-height:26px;
+display:flex;align-items:center;gap:1.6vmin;padding:0 2vmin;
+border-top:1px solid var(--line);background:var(--bg);font-size:clamp(10px,1.6vmin,15px);
+color:var(--muted)}
+.chrome .grow{flex:1}
+.chrome b{color:var(--fg);font-weight:600}
+.bar{position:fixed;left:0;bottom:0;height:3px;background:var(--accent);
+transition:width .18s ease;z-index:5}
+.notes{position:fixed;left:0;right:0;bottom:5.4vmin;max-height:34vh;overflow:auto;
+padding:1.6vmin 2.4vmin;background:var(--code-bg);border-top:2px solid var(--accent);
+font-size:clamp(13px,2vmin,20px);line-height:1.5;display:none}
+.notes.on{display:block}
+.notes p{margin:.5em 0}
+.notes:before{content:"演讲者备注";display:block;font-size:.72em;letter-spacing:.08em;
+color:var(--accent);margin-bottom:.5em}
+.overview{position:fixed;inset:0;background:var(--bg);overflow:auto;padding:3vmin;
+display:none;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1.6vmin;z-index:20}
+.overview.on{display:grid}
+.thumb{border:2px solid var(--line);border-radius:6px;padding:1.2vmin;cursor:pointer;
+font-size:13px;line-height:1.35;min-height:88px;overflow:hidden;background:var(--bg)}
+.thumb:hover{border-color:var(--accent)}
+.thumb.here{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.thumb .no{color:var(--muted);font-size:11px}
+.help{position:fixed;inset:0;background:rgba(0,0,0,.62);display:none;z-index:30;
+align-items:center;justify-content:center}
+.help.on{display:flex}
+.help div{background:var(--bg);padding:3vmin 4vmin;border-radius:10px;max-width:520px;
+font-size:15px;line-height:1.9}
+.help kbd{background:var(--code-bg);border:1px solid var(--line);border-radius:4px;
+padding:.1em .5em;font-family:monospace;margin-right:.6em}
+@media print{
+  html,body{height:auto;overflow:visible}
+  .chrome,.bar,.notes,.overview,.help{display:none!important}
+  .deck{height:auto}
+  .slide{display:flex!important;position:relative;inset:auto;page-break-after:always;
+  height:100vh;border:0}
+}
+</style></head><body>
+<div class="deck"><section class="slide" data-notes="&lt;p&gt;这一章表示法特别多，学生容易记乱。
+建议每讲一种就问同一个问题：「这种存法下，找父亲要多久？找孩子要多久？」
+答案不同，正是它们各自存在的理由。&lt;/p&gt;"><h1 id="第6章-树"><a class="anchor" href="#第6章-树">#</a>第6章 树</h1>
+<p><strong>一般树</strong>：每个结点可以有任意多个孩子。</p>
+<ul>
+<li>6.1 定义、森林与二叉树的等价转换、周游</li>
+<li>6.2 链式存储：四种表示法 + 并查集</li>
+<li>6.3 顺序存储：四种表示法</li>
+<li>6.4 K 叉树</li>
+</ul>
+<p>一条主线：<strong>同一棵树，存法不同，能高效做的运算就不同</strong>。</p></section><section class="slide" data-notes=""><h1 id="611-树与森林"><a class="anchor" href="#611-树与森林">#</a>6.1.1 树与森林</h1>
+<figure><img loading="lazy" src="../../assets/42cd7ad7ac4d0fbe.jpg" alt="图 6.1 树形表示法"><figcaption>图 6.1 树形表示法</figcaption></figure>
+<ul>
+<li><strong>树</strong>：n 个结点的有限集合，有一个根，其余分成互不相交的子树</li>
+<li><strong>森林</strong>：m 棵互不相交的树的集合</li>
+</ul>
+<p>把一棵树的根去掉，剩下的就是森林——这个观察后面反复用到。</p></section><section class="slide" data-notes="&lt;p&gt;这是本章最重要的一个观念：一般树的问题都可以搬到二叉树上解决，
+第 5 章那套算法直接复用。
+一个推论：由&lt;strong&gt;一棵树&lt;/strong&gt;转出的二叉树，其右子树一定为空——
+因为根没有兄弟。森林转出来的才会有右子树。&lt;/p&gt;"><h1 id="612-森林与二叉树可以互相转换"><a class="anchor" href="#612-森林与二叉树可以互相转换">#</a>6.1.2 森林与二叉树可以互相转换</h1>
+<figure><img loading="lazy" src="../../assets/14db48b94fcee155.jpg" alt="图 6.5 森林和对应的二叉树"><figcaption>图 6.5 森林和对应的二叉树</figcaption></figure>
+<p>规则只有两条：</p>
+<ul>
+<li>结点的<strong>第一个孩子</strong> → 二叉树的<strong>左</strong>孩子</li>
+<li>结点的<strong>下一个兄弟</strong> → 二叉树的<strong>右</strong>孩子</li>
+</ul>
+<p>这就是「左子/右兄」表示法。</p></section><section class="slide" data-notes="&lt;p&gt;可以给一道现场题：一棵二叉树的右子树非空，说明原来的森林至少有几棵树？
+答案：至少两棵。&lt;/p&gt;"><h1 id="转换的两个方向"><a class="anchor" href="#转换的两个方向">#</a>转换的两个方向</h1>
+<figure><img loading="lazy" src="../../assets/d6b8aba5bba23c9b.jpg" alt="图6.3 森林转换为二叉树"><figcaption>图6.3 森林转换为二叉树</figcaption></figure>
+<p><strong>森林 → 二叉树</strong>：连兄弟、留长子、旋转 45 度。</p>
+<p><strong>二叉树 → 森林</strong>：反过来做。任何二叉树都能转回唯一的森林。</p></section><section class="slide" data-notes="&lt;p&gt;注意树没有「中序」——根只有一个位置可放（最前或最后），
+因为孩子不止两个，没有「中间」可言。&lt;/p&gt;"><h1 id="614-树的周游"><a class="anchor" href="#614-树的周游">#</a>6.1.4 树的周游</h1>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">周游</th>
+<th style="text-align:left">做法</th>
+<th style="text-align:left">对应二叉树的</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><strong>先根</strong></td>
+<td style="text-align:left">先访问根，再依次周游各棵子树</td>
+<td style="text-align:left">前序</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>后根</strong></td>
+<td style="text-align:left">先依次周游各棵子树，再访问根</td>
+<td style="text-align:left">中序</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>广度优先</strong></td>
+<td style="text-align:left">一层一层，用队列</td>
+<td style="text-align:left">层次</td>
+</tr>
+</tbody></table></div>
+<p><strong>「按先根次序周游树」等于「对应二叉树的前序周游」</strong>—— 这是上一页那个转换的直接推论。</p></section><section class="slide" data-notes=""><h1 id="先根与后根"><a class="anchor" href="#先根与后根">#</a>先根与后根</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp">code/ch06/general_tree/modern.hpp#fn:pre</a></div><pre><code><span class="k">static</span> <span class="t">void</span> pre(Node* node, Visitor&amp; visitor) {
+    <span class="k">for</span> (; node != <span class="k">nullptr</span>; node = node-&gt;sibling) {
+        visitor(node-&gt;value);
+        pre(node-&gt;child, visitor);
+    }
+}</code></pre></div>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp">code/ch06/general_tree/modern.hpp#fn:post</a></div><pre><code><span class="k">static</span> <span class="t">void</span> post(Node* node, Visitor&amp; visitor) {
+    <span class="k">for</span> (; node != <span class="k">nullptr</span>; node = node-&gt;sibling) {
+        post(node-&gt;child, visitor);
+        visitor(node-&gt;value);
+    }
+}</code></pre></div>
+<p>两个函数只差 <code>visitor(node-&gt;value)</code> 那一行的位置—— 和第 5 章的三种周游是同一个套路。</p></section><section class="slide" data-notes=""><h1 id="62-链式存储四种表示法"><a class="anchor" href="#62-链式存储四种表示法">#</a>6.2 链式存储：四种表示法</h1>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">表示法</th>
+<th style="text-align:left">结点里存什么</th>
+<th style="text-align:left">找孩子</th>
+<th style="text-align:left">找父亲</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">子结点表</td>
+<td style="text-align:left">一张孩子链表</td>
+<td style="text-align:left">快</td>
+<td style="text-align:left"><strong>慢</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">指针数组</td>
+<td style="text-align:left">固定长的孩子指针数组</td>
+<td style="text-align:left">快</td>
+<td style="text-align:left">慢</td>
+</tr>
+<tr>
+<td style="text-align:left">静态左子/右兄</td>
+<td style="text-align:left">数组下标表示两条链</td>
+<td style="text-align:left">中</td>
+<td style="text-align:left">慢</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>动态左子/右兄</strong></td>
+<td style="text-align:left">两根指针</td>
+<td style="text-align:left">中</td>
+<td style="text-align:left">慢</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>父指针</strong></td>
+<td style="text-align:left">一根指向父亲的指针</td>
+<td style="text-align:left"><strong>慢</strong></td>
+<td style="text-align:left"><strong>快</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>没有哪种都快</strong>——最后两行是本章要展开的两个。</p></section><section class="slide" data-notes=""><h1 id="子结点表为什么不够用"><a class="anchor" href="#子结点表为什么不够用">#</a>子结点表：为什么不够用</h1>
+<figure><img loading="lazy" src="../../assets/503a0fd264bb9231.jpg" alt="图6.6 以「子结点表」表示法实现图6.1中的树"><figcaption>图6.6 以「子结点表」表示法实现图6.1中的树</figcaption></figure>
+<p>每个结点挂一条孩子链表。找孩子很快。</p>
+<p><strong>但找父亲要扫遍全表</strong>——而且每个结点的孩子数不定， 数组要么浪费要么不够。</p></section><section class="slide" data-notes="&lt;p&gt;两个函数都要同步维护三条链接：parent、child、sibling。
+少维护一条，父树里就留下悬垂指针。
+
+注意 insert_next 里 &lt;code&gt;next-&amp;gt;parent = node-&amp;gt;parent&lt;/code&gt;——&lt;strong&gt;兄弟共享父结点&lt;/strong&gt;。
+这是最容易写错的一行。&lt;/p&gt;"><h1 id="624-动态左子右兄"><a class="anchor" href="#624-动态左子右兄">#</a>6.2.4 动态「左子/右兄」</h1>
+<p>结点只留<strong>两根</strong>指针：第一个孩子、下一个兄弟。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp">code/ch06/general_tree/modern.hpp#fn:insert_first</a></div><pre><code>Node* insert_first(Node* parent, <span class="k">const</span> T&amp; value) {
+    <span class="k">if</span> (parent == <span class="k">nullptr</span>) {
+        <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;parent must not be null&quot;</span>);
+    }
+    Node* node = <span class="k">new</span> Node(value);
+    node-&gt;sibling = parent-&gt;child;
+    node-&gt;parent = parent;
+    parent-&gt;child = node;
+    <span class="k">return</span> node;
+}</code></pre></div>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp">code/ch06/general_tree/modern.hpp#fn:insert_next</a></div><pre><code>Node* insert_next(Node* node, <span class="k">const</span> T&amp; value) {
+    <span class="k">if</span> (node == <span class="k">nullptr</span>) {
+        <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;node must not be null&quot;</span>);
+    }
+    Node* next = <span class="k">new</span> Node(value);
+    next-&gt;sibling = node-&gt;sibling;
+    next-&gt;parent = node-&gt;parent;
+    node-&gt;sibling = next;
+    <span class="k">return</span> next;
+}</code></pre></div></section><section class="slide" data-notes="&lt;p&gt;顺序不能反：必须先把结点从「父亲的孩子链」或「根的兄弟链」上摘下来，
+才能销毁它。反过来做，父树里就留下一根指向已释放内存的指针。
+
+那个 &lt;code&gt;Node** link&lt;/code&gt; 的手法和第 5 章 BST 插入是同一个：
+它指向「这个结点是被谁指着的」，于是「是长子」和「是某个兄弟」写成同一段代码。&lt;/p&gt;"><h1 id="删子树先脱开再销毁"><a class="anchor" href="#删子树先脱开再销毁">#</a>删子树：先脱开，再销毁</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp">code/ch06/general_tree/modern.hpp#fn:delete_subtree</a></div><pre><code><span class="t">void</span> delete_subtree(Node* node) {
+    <span class="k">if</span> (node == <span class="k">nullptr</span>) {
+        <span class="k">return</span>;
+    }
+
+    Node** link = node-&gt;parent == <span class="k">nullptr</span> ? &amp;root_ : &amp;node-&gt;parent-&gt;child;
+    <span class="k">while</span> (*link != <span class="k">nullptr</span> &amp;&amp; *link != node) {
+        link = &amp;(*link)-&gt;sibling;
+    }
+    <span class="k">if</span> (*link != node) {
+        <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;node is not part of this tree&quot;</span>);
+    }
+
+    *link = node-&gt;sibling;
+    node-&gt;sibling = <span class="k">nullptr</span>;
+    destroy(node);
+}</code></pre></div></section><section class="slide" data-notes=""><h1 id="625-父指针表示法"><a class="anchor" href="#625-父指针表示法">#</a>6.2.5 父指针表示法</h1>
+<figure><img loading="lazy" src="../../assets/444a429faef0f9ad.jpg" alt="图 6.10 父指针表示法"><figcaption>图 6.10 父指针表示法</figcaption></figure>
+<p>每个结点只存<strong>一根指向父亲的指针</strong>。</p>
+<ul>
+<li>找父亲、找祖先：<strong>快</strong></li>
+<li>找孩子：得扫遍全表</li>
+</ul>
+<p>看着很废——但它恰好匹配一类问题：<strong>判断两个元素在不在同一个集合里</strong>。</p></section><section class="slide" data-notes=""><h1 id="并查集等价类问题"><a class="anchor" href="#并查集等价类问题">#</a>并查集：等价类问题</h1>
+<figure><img loading="lazy" src="../../assets/99d1200487f038c2.jpg" alt="图 6.11 集合的表示方法"><figcaption>图 6.11 集合的表示方法</figcaption></figure>
+<p>给一堆等价对 (A,B)、(C,K)、…，要能回答「x 和 y 同类吗」。</p>
+<ul>
+<li><strong>find(x)</strong>：沿父指针一路走到根，根就是这个集合的代表</li>
+<li><strong>unite(x, y)</strong>：把一棵树的根挂到另一棵的根下</li>
+</ul>
+<p>只用到「往上走」，所以父指针表示法正好。</p></section><section class="slide" data-notes=""><h1 id="朴素做法会退化成一条链"><a class="anchor" href="#朴素做法会退化成一条链">#</a>朴素做法会退化成一条链</h1>
+<figure><img loading="lazy" src="../../assets/63aeef5dd1c932ae.jpg" alt="图 6.12 合并操作的一个极端情况"><figcaption>图 6.12 合并操作的一个极端情况</figcaption></figure>
+<p>每次都把 B 挂到 A 下面，n 次合并之后树高 n， <code>find</code> 退化成 <strong>O(n)</strong>。</p>
+<p>原书给了两条改进，本书都实现了。</p></section><section class="slide" data-notes="&lt;p&gt;为什么能把深度限制在 O(log n)：每次合并树高最多加 1，
+而元素个数&lt;strong&gt;至少翻倍&lt;/strong&gt;，所以任何结点的深度最多增加 log n 次。
+
+&lt;strong&gt;别和「按秩合并」混了&lt;/strong&gt;：按秩比的是树高，按重量比的是元素个数。
+两者复杂度同阶，但在同一组等价对上会长出&lt;strong&gt;形状不同&lt;/strong&gt;的树。
+本书按原书口径用重量——课程习题按这个口径出题，换成按秩就对不上答案。&lt;/p&gt;"><h1 id="改进一重量权衡合并规则"><a class="anchor" href="#改进一重量权衡合并规则">#</a>改进一：重量权衡合并规则</h1>
+<p><strong>看两个集合的元素个数，令含元素少的树根指向含元素多的根。</strong></p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp">code/ch06/general_tree/modern.hpp#fn:unite</a></div><pre><code><span class="t">bool</span> unite(std::<span class="t">size_t</span> left, std::<span class="t">size_t</span> right) {
+    left = find(left);
+    right = find(right);
+    <span class="k">if</span> (left == right) {
+        <span class="k">return</span> <span class="k">false</span>;  <span class="c">// 已经同类：幂等的可预期失败（D-001 §3c）</span>
+    }
+    <span class="c">// 重量权衡：小树挂到大树下。并列时把**值大的根**挂到值小的根下——</span>
+    <span class="c">// 原书没有规定并列怎么办，这个口径取自课程第 6 章习题 8 的原话</span>
+    <span class="c">// 「当两棵树规模同样大时，使结点值较大的根结点作为值较小的根结点的子结点」，</span>
+    <span class="c">// 这样书里的实现能直接用来核对那道题的答案。</span>
+    <span class="k">if</span> (size_[left] &lt; size_[right] || (size_[left] == size_[right] &amp;&amp; left &gt; right)) {
+        std::swap(left, right);
+    }
+    parent_[right] = left;
+    size_[left] += size_[right];
+    <span class="k">return</span> <span class="k">true</span>;
+}</code></pre></div></section><section class="slide" data-notes=""><h1 id="改进二路径压缩"><a class="anchor" href="#改进二路径压缩">#</a>改进二：路径压缩</h1>
+<figure><img loading="lazy" src="../../assets/79da0aca1750084c.jpg" alt="图 6.13 路径压缩示例"><figcaption>图 6.13 路径压缩示例</figcaption></figure>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp">code/ch06/general_tree/modern.hpp#fn:find</a></div><pre><code>std::<span class="t">size_t</span> find(std::<span class="t">size_t</span> index) {
+    <span class="k">if</span> (index &gt;= parent_.size()) {
+        <span class="k">throw</span> std::out_of_range(<span class="s">&quot;disjoint-set index&quot;</span>);
+    }
+    <span class="k">if</span> (parent_[index] != index) {
+        parent_[index] = find(parent_[index]);  <span class="c">// 【算法6.9】路径压缩</span>
+    }
+    <span class="k">return</span> parent_[index];
+}</code></pre></div>
+<p><code>find</code> 在返回根之前，把沿途<strong>每个结点的父指针都直接改成根</strong>。</p>
+<p>两条改进合起来，m 次操作的摊还代价是 <span class="math">O(m α(n))</span>—— <span class="math">α</span> 是反 Ackermann 函数，实际中不超过 5。</p></section><section class="slide" data-notes=""><h1 id="63-顺序存储四种表示法"><a class="anchor" href="#63-顺序存储四种表示法">#</a>6.3 顺序存储：四种表示法</h1>
+<p>树也可以压成一个<strong>线性序列</strong>存到文件里。关键是： 序列本身丢掉了结构，要靠附加信息把结构恢复出来。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">表示法</th>
+<th style="text-align:left">每个结点附加什么</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">带右链的先根次序</td>
+<td style="text-align:left">一个 <code>rlink</code> 下标 + 一个 <code>ltag</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>带双标记的先根次序</strong></td>
+<td style="text-align:left"><code>ltag</code> + <code>rtag</code>，各 1 bit</td>
+</tr>
+<tr>
+<td style="text-align:left">带度数的后根次序</td>
+<td style="text-align:left">这个结点有几个孩子</td>
+</tr>
+<tr>
+<td style="text-align:left">带双标记的层次次序</td>
+<td style="text-align:left"><code>ltag</code> + <code>rtag</code>，但按层排</td>
+</tr>
+</tbody></table></div></section><section class="slide" data-notes=""><h1 id="带双标记的先根次序"><a class="anchor" href="#带双标记的先根次序">#</a>带双标记的先根次序</h1>
+<figure><img loading="lazy" src="../../assets/ddf4082b075a6a12.jpg" alt="图6.14 带右链的先根次序表示法"><figcaption>图6.14 带右链的先根次序表示法</figcaption></figure>
+<div class="codeblock" data-lang="text"><pre><code>先根次序   A  B  C  E  F  D  G  H  J  I
+ltag       0  0  0  0  1  1  1  0  1  1     0 = 有孩子
+rtag       0  1  0  1  1  1  0  0  1  1     0 = 有下一个兄弟</code></pre></div>
+<p><strong>光靠这三行就能把链恢复出来</strong>，靠的是先根次序的一条性质： 任何结点的子树都<strong>紧跟在它后面</strong>，子树排完才轮到它的下一个兄弟。</p></section><section class="slide" data-notes="&lt;p&gt;原书这段代码在 ltag==1 分支里直接 aStack.top()，&lt;strong&gt;没有判空&lt;/strong&gt;。
+标志位不自洽的输入（比如两个结点都说「没孩子、没兄弟」）会让它对空栈取顶，
+那是未定义行为。本书判空并抛异常，另加一条「末结点仍声称有孩子」的收尾检查。
+
+顺带一提：这条清单此前被台账认领却根本没有实现，2026-08-16 对照课程课件时发现的。&lt;/p&gt;"><h1 id="重建用一把栈"><a class="anchor" href="#重建用一把栈">#</a>重建：用一把栈</h1>
+<p>「谁是某个结点的右兄弟」要等它整棵子树扫完才知道——用栈记着：</p>
+<div class="codeblock" data-lang="text"><pre><code>扫每个结点:
+    rtag == 0 (还有下一个兄弟)  -&gt;  把它压栈
+    建一个新结点
+    ltag == 0 (有孩子)          -&gt;  新结点就是它的长子
+    ltag == 1 (没孩子, 子树到头) -&gt;  弹一个出来, 新结点是那个的右兄弟</code></pre></div>
+<p>完整实现是原书【算法6.10】，见 <code>code/ch06/general_tree/modern.hpp</code>。</p></section><section class="slide" data-notes=""><h1 id="64-k-叉树"><a class="anchor" href="#64-k-叉树">#</a>6.4 K 叉树</h1>
+<figure><img loading="lazy" src="../../assets/70c77f3dc176052a.jpg" alt="图 6.18 满 3 叉树与完全 3 叉树"><figcaption>图 6.18 满 3 叉树与完全 3 叉树</figcaption></figure>
+<p>二叉树的自然推广：每个结点最多 K 个孩子，<strong>而且孩子的位置有区分</strong>。</p>
+<p>完全 K 叉树同样可以按层次编号进数组：</p>
+<div class="codeblock" data-lang="text"><pre><code>下标 i 的第 j 个孩子   K*i + j + 1      (j = 0 .. K-1)
+下标 i 的父亲          (i - 1) / K</code></pre></div>
+<p>第 11 章的 B 树、B+ 树就是 K 叉树的一种。</p></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
+<ul>
+<li>一般树的问题可以通过「左子/右兄」搬到<strong>二叉树</strong>上解决</li>
+<li>先根周游 = 对应二叉树的前序；后根周游 = 中序；树没有中序</li>
+<li>存法决定能高效做什么：<strong>子结点表找孩子快，父指针找祖先快</strong></li>
+<li>并查集用父指针 + <strong>重量权衡合并</strong> + <strong>路径压缩</strong>，摊还近似 <span class="math">O(<span class="upr">1</span>)</span></li>
+<li>顺序存储要靠附加标志位把结构恢复出来；重建时用栈</li>
+<li>K 叉树是二叉树的推广，完全 K 叉树同样能进数组</li>
+</ul></section><section class="slide" data-notes=""><h1 id="上机"><a class="anchor" href="#上机">#</a>上机</h1>
+<div class="codeblock" data-lang="bash"><pre><code>python3 tools/check_code.py code/ch06/general_tree</code></pre></div>
+<p>故意改坏一处，看哪条断言变红：</p>
+<ul>
+<li><code>insert_next</code> 里把 <code>next-&gt;parent = node-&gt;parent</code> 改成 <code>= node</code></li>
+<li><code>delete_subtree</code> 里先销毁再脱链</li>
+<li><code>unite</code> 改成按秩合并（比树高而不是比元素个数）</li>
+<li>重建算法里把「扫到没有孩子才弹栈」改成「每个结点都弹」</li>
+</ul>
+<blockquote><p>第三条会让「规模 3 的集合与规模 2 的集合合并、根应是前者」那条断言变红—— 两种规则长出的树形状不同。</p></blockquote></section></div>
+<div class="bar"></div>
+<div class="notes"></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第6章 树</div><div class="thumb"><div class="no">2</div>6.1.1 树与森林</div><div class="thumb"><div class="no">3</div>6.1.2 森林与二叉树可以互相转换</div><div class="thumb"><div class="no">4</div>转换的两个方向</div><div class="thumb"><div class="no">5</div>6.1.4 树的周游</div><div class="thumb"><div class="no">6</div>先根与后根</div><div class="thumb"><div class="no">7</div>6.2 链式存储：四种表示法</div><div class="thumb"><div class="no">8</div>子结点表：为什么不够用</div><div class="thumb"><div class="no">9</div>6.2.4 动态「左子/右兄」</div><div class="thumb"><div class="no">10</div>删子树：先脱开，再销毁</div><div class="thumb"><div class="no">11</div>6.2.5 父指针表示法</div><div class="thumb"><div class="no">12</div>并查集：等价类问题</div><div class="thumb"><div class="no">13</div>朴素做法会退化成一条链</div><div class="thumb"><div class="no">14</div>改进一：重量权衡合并规则</div><div class="thumb"><div class="no">15</div>改进二：路径压缩</div><div class="thumb"><div class="no">16</div>6.3 顺序存储：四种表示法</div><div class="thumb"><div class="no">17</div>带双标记的先根次序</div><div class="thumb"><div class="no">18</div>重建：用一把栈</div><div class="thumb"><div class="no">19</div>6.4 K 叉树</div><div class="thumb"><div class="no">20</div>本章小结</div><div class="thumb"><div class="no">21</div>上机</div></div>
+<div class="help"><div>
+<p><b>放映快捷键</b></p>
+<p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
+<p><kbd>N</kbd>演讲者备注　<kbd>O</kbd>缩略图总览　<kbd>F</kbd>全屏　<kbd>D</kbd>深色</p>
+<p><kbd>?</kbd>这张帮助　<kbd>Esc</kbd>关闭</p>
+<p style="color:var(--muted);font-size:.9em">
+导出 PDF：浏览器打印（Ctrl/Cmd+P），每页一张幻灯片。</p>
+</div></div>
+<div class="chrome">
+<b>第6章 树</b><span>现代 C++ 数据结构教程</span>
+<span class="grow"></span>
+<a href="index.html" style="color:var(--muted)">目录</a>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 21</b>
+</div>
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var total=slides.length, at=0;
+  var bar=document.querySelector('.bar'), now=document.getElementById('now');
+  var notes=document.querySelector('.notes'), over=document.querySelector('.overview');
+  var help=document.querySelector('.help');
+  function show(n,push){
+    at=Math.max(0,Math.min(total-1,n));
+    slides.forEach(function(s,i){s.classList.toggle('current',i===at);});
+    bar.style.width=((at+1)/total*100)+'%';
+    now.textContent=(at+1)+' / '+total;
+    notes.innerHTML=slides[at].getAttribute('data-notes')||'';
+    document.querySelectorAll('.thumb').forEach(function(t,i){
+      t.classList.toggle('here',i===at);});
+    if(push!==false){history.replaceState(null,'','#'+(at+1));}
+    slides[at].scrollTop=0;
+  }
+  function go(d){show(at+d);}
+  document.addEventListener('keydown',function(e){
+    if(e.metaKey||e.ctrlKey||e.altKey)return;
+    var k=e.key;
+    if(help.classList.contains('on')&&k!=='?'){help.classList.remove('on');return;}
+    if(over.classList.contains('on')&&(k==='Escape'||k==='o'||k==='O')){
+      over.classList.remove('on');return;}
+    if(k==='ArrowRight'||k==='PageDown'||k===' '||k==='j'){go(1);e.preventDefault();}
+    else if(k==='ArrowLeft'||k==='PageUp'||k==='k'){go(-1);e.preventDefault();}
+    else if(k==='Home'){show(0);}
+    else if(k==='End'){show(total-1);}
+    else if(k==='n'||k==='N'){notes.classList.toggle('on');}
+    else if(k==='o'||k==='O'){over.classList.toggle('on');}
+    else if(k==='d'||k==='D'){
+      var dark=document.documentElement.getAttribute('data-theme')==='dark';
+      document.documentElement.setAttribute('data-theme',dark?'light':'dark');}
+    else if(k==='f'||k==='F'){
+      if(document.fullscreenElement){document.exitFullscreen();}
+      else{document.documentElement.requestFullscreen();}}
+    else if(k==='?'){help.classList.toggle('on');}
+  });
+  document.querySelectorAll('.thumb').forEach(function(t,i){
+    t.addEventListener('click',function(){over.classList.remove('on');show(i);});});
+  window.addEventListener('hashchange',function(){
+    var n=parseInt(location.hash.slice(1),10);
+    if(n>=1&&n<=total)show(n-1,false);});
+  var start=parseInt(location.hash.slice(1),10);
+  show(start>=1&&start<=total?start-1:0,false);
+})();
+</script>
+</body></html>

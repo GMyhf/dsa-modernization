@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第1章 概论</title>
+<style>
+:root{--bg:#fdfdfc;--fg:#1a1a18;--muted:#6b6b66;--line:#dcdcd6;--accent:#8a4b2a;
+--code-bg:#f5f4f0;--kw:#8a4b2a;--ty:#2c6b57;--st:#7a5c1e;--cm:#8a8a84;--nu:#4a5aa8}
+:root[data-theme="dark"]{--bg:#16161a;--fg:#ececea;--muted:#a0a09a;--line:#33333a;
+--accent:#e0a074;--code-bg:#1e1e24;--kw:#e0a074;--ty:#7fd0b0;--st:#d8c088;--cm:#7a7a84;--nu:#9ab0f0}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--fg)}
+body{font-family:-apple-system,"Segoe UI","Noto Sans CJK SC","Source Han Sans SC",
+"Microsoft YaHei",sans-serif;overflow:hidden}
+.deck{position:relative;height:100vh}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;
+padding:4.2vmin 6vmin 9vmin;overflow:auto}
+.slide.current{display:flex}
+.slide .anchor{display:none}
+.slide h1{font-size:clamp(26px,4.4vmin,52px);margin:0 0 3vmin;line-height:1.25;
+letter-spacing:-.01em;border-bottom:3px solid var(--accent);padding-bottom:1.6vmin}
+.slide h2{font-size:clamp(20px,3.1vmin,34px);margin:2.4vmin 0 1.2vmin}
+.slide h3{font-size:clamp(17px,2.5vmin,27px);margin:2vmin 0 1vmin;color:var(--muted)}
+.slide p,.slide li{font-size:clamp(15px,2.5vmin,28px);line-height:1.55;margin:.7vmin 0}
+.slide ul,.slide ol{margin:1vmin 0;padding-left:3.4vmin}
+.slide li{margin:.9vmin 0}
+.slide strong{color:var(--accent)}
+.slide blockquote{margin:1.6vmin 0;padding:.6vmin 0 .6vmin 2.4vmin;
+border-left:4px solid var(--line);color:var(--muted)}
+.slide table{border-collapse:collapse;font-size:clamp(13px,2.1vmin,23px);margin:1.4vmin 0}
+.slide th,.slide td{border:1px solid var(--line);padding:.7vmin 1.4vmin;text-align:left}
+.slide th{background:var(--code-bg)}
+.table-wrap{overflow-x:auto;max-width:100%}
+.slide img{max-width:100%;max-height:52vh;object-fit:contain;display:block;margin:1.4vmin auto}
+.codeblock{background:var(--code-bg);border:1px solid var(--line);border-radius:6px;
+margin:1.4vmin 0;overflow:hidden}
+.codeblock pre{margin:0;padding:1.6vmin 2vmin;overflow-x:auto}
+.codeblock code{font-family:"SF Mono",Menlo,Consolas,"Noto Sans Mono CJK SC",monospace;
+font-size:clamp(11px,1.95vmin,21px);line-height:1.5;white-space:pre}
+.srcbar{font-size:clamp(9px,1.3vmin,13px);padding:.5vmin 2vmin;color:var(--muted);
+border-bottom:1px solid var(--line);font-family:"SF Mono",Menlo,monospace}
+.srcbar a{color:var(--muted);text-decoration:none}
+.k{color:var(--kw)}.t{color:var(--ty)}.s{color:var(--st)}.c{color:var(--cm);font-style:italic}
+.n{color:var(--nu)}.p{color:var(--fg)}
+.math{font-style:italic}.math-display{text-align:center;margin:2vmin 0;
+font-size:clamp(16px,2.8vmin,30px)}
+.upr{font-style:normal}.bold{font-weight:700}
+code{background:var(--code-bg);padding:.1em .34em;border-radius:4px;
+font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.86em}
+hr{border:0;border-top:1px solid var(--line);margin:2vmin 0}
+.chrome{position:fixed;left:0;right:0;bottom:0;height:5.4vmin;min-height:26px;
+display:flex;align-items:center;gap:1.6vmin;padding:0 2vmin;
+border-top:1px solid var(--line);background:var(--bg);font-size:clamp(10px,1.6vmin,15px);
+color:var(--muted)}
+.chrome .grow{flex:1}
+.chrome b{color:var(--fg);font-weight:600}
+.bar{position:fixed;left:0;bottom:0;height:3px;background:var(--accent);
+transition:width .18s ease;z-index:5}
+.notes{position:fixed;left:0;right:0;bottom:5.4vmin;max-height:34vh;overflow:auto;
+padding:1.6vmin 2.4vmin;background:var(--code-bg);border-top:2px solid var(--accent);
+font-size:clamp(13px,2vmin,20px);line-height:1.5;display:none}
+.notes.on{display:block}
+.notes p{margin:.5em 0}
+.notes:before{content:"演讲者备注";display:block;font-size:.72em;letter-spacing:.08em;
+color:var(--accent);margin-bottom:.5em}
+.overview{position:fixed;inset:0;background:var(--bg);overflow:auto;padding:3vmin;
+display:none;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1.6vmin;z-index:20}
+.overview.on{display:grid}
+.thumb{border:2px solid var(--line);border-radius:6px;padding:1.2vmin;cursor:pointer;
+font-size:13px;line-height:1.35;min-height:88px;overflow:hidden;background:var(--bg)}
+.thumb:hover{border-color:var(--accent)}
+.thumb.here{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.thumb .no{color:var(--muted);font-size:11px}
+.help{position:fixed;inset:0;background:rgba(0,0,0,.62);display:none;z-index:30;
+align-items:center;justify-content:center}
+.help.on{display:flex}
+.help div{background:var(--bg);padding:3vmin 4vmin;border-radius:10px;max-width:520px;
+font-size:15px;line-height:1.9}
+.help kbd{background:var(--code-bg);border:1px solid var(--line);border-radius:4px;
+padding:.1em .5em;font-family:monospace;margin-right:.6em}
+@media print{
+  html,body{height:auto;overflow:visible}
+  .chrome,.bar,.notes,.overview,.help{display:none!important}
+  .deck{height:auto}
+  .slide{display:flex!important;position:relative;inset:auto;page-break-after:always;
+  height:100vh;border:0}
+}
+</style></head><body>
+<div class="deck"><section class="slide" data-notes="&lt;p&gt;第 1 章最容易讲空。办法是：不要先讲定义，先给一个学生会做但做不好的问题，
+让他们自己撞上「组织方式决定了能不能算」这件事，再回头补定义。&lt;/p&gt;"><h1 id="第1章-概论"><a class="anchor" href="#第1章-概论">#</a>第1章 概论</h1>
+<p><strong>这门课到底在教什么</strong></p>
+<ul>
+<li>数据结构：数据怎么组织</li>
+<li>算法：怎么在这个组织上算</li>
+<li>算法分析：凭什么说一个比另一个好</li>
+</ul>
+<p>先用一个真问题把三者串起来。</p></section><section class="slide" data-notes=""><h1 id="11-一个真问题股市的传言"><a class="anchor" href="#11-一个真问题股市的传言">#</a>1.1 一个真问题：股市的传言</h1>
+<p>某交易所有若干经纪人，<strong>消息只在认识的人之间传</strong>，每传一步花的时间不同。</p>
+<p>要回答的是：</p>
+<ul>
+<li>从谁开始放风，能让<strong>所有人</strong>最快知道？</li>
+<li>那个「最快」到底是多少？</li>
+</ul>
+<figure><img loading="lazy" src="../../assets/4d3c879e7409ef1c.jpg" alt="图1.1 经纪人间的消息传递图"><figcaption>图1.1 经纪人间的消息传递图</figcaption></figure></section><section class="slide" data-notes="&lt;p&gt;这一步是「问题求解」的核心动作：把应用语言翻译成结构语言。
+学生最容易在最后一行出错，直接去求平均或者求总和。
+可以问一句：如果取平均，会发生什么？（会挑出一个「对多数人快、对个别人极慢」的起点。）&lt;/p&gt;"><h1 id="先把问题抽象掉"><a class="anchor" href="#先把问题抽象掉">#</a>先把问题抽象掉</h1>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">现实</th>
+<th style="text-align:left">抽象成</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">经纪人</td>
+<td style="text-align:left">顶点</td>
+</tr>
+<tr>
+<td style="text-align:left">「A 认识 B」</td>
+<td style="text-align:left">边</td>
+</tr>
+<tr>
+<td style="text-align:left">传一步花的时间</td>
+<td style="text-align:left">边上的权</td>
+</tr>
+<tr>
+<td style="text-align:left">从 s 放风到所有人知道</td>
+<td style="text-align:left">s 到<strong>最远</strong>那个顶点的最短路</td>
+</tr>
+</tbody></table></div>
+<p><strong>最后一行是全题的关键</strong>：要的不是平均，是<strong>最慢的那一项</strong>—— 消息传完的时刻由最后一个知道的人决定。</p></section><section class="slide" data-notes=""><h1 id="用什么存这张图"><a class="anchor" href="#用什么存这张图">#</a>用什么存这张图</h1>
+<p>相邻矩阵：<code>m[i][j]</code> 是 i 到 j 一步的时间，不通就是「无穷大」。</p>
+<figure><img loading="lazy" src="../../assets/9c92f7de8d2fab34.jpg" alt="图1.3 经纪人间消息传递的相邻矩阵"><figcaption>图1.3 经纪人间消息传递的相邻矩阵</figcaption></figure>
+<ul>
+<li>存储量 <span class="math">V<sup><span class="upr">2</span></sup></span>，跟边多少无关</li>
+<li>问「i 和 j 之间有没有边」是 O(1)</li>
+</ul>
+<p>第 7 章会讲另一种存法（邻接表），以及<strong>为什么没有哪种总是更好</strong>。</p></section><section class="slide" data-notes="&lt;p&gt;最经典的错法：把 k 的循环放到里层。
+k 的含义是「只允许经过前 k 个顶点中转」，它必须是&lt;strong&gt;最外层&lt;/strong&gt;——
+放到里层，递推式就不成立了，而且往往还能跑出「看起来差不多」的结果。
+这是本章最值得当场演示的一处。&lt;/p&gt;"><h1 id="算法floyd"><a class="anchor" href="#算法floyd">#</a>算法：Floyd</h1>
+<p>对每一对 (i, j)，问「允许经过前 k 个顶点中转时，最短是多少」：</p>
+<div class="codeblock" data-lang="text"><pre><code>d[k][i][j] = min( d[k-1][i][j] ,  d[k-1][i][k] + d[k-1][k][j] )
+                  不经过 k          经过 k</code></pre></div>
+<p>k 从 0 数到 V-1，答案就是 d[V-1]。代价 <span class="math">O(V<sup><span class="upr">3</span></sup>)</span>，<strong>与边数无关</strong>。</p></section><section class="slide" data-notes="&lt;p&gt;三处值得说：
+1. k（这里叫 via）在最外层；
+2. infinity 取的是 INT_MAX/4 而不是 INT_MAX——两个 infinity 相加会溢出，
+   而溢出是未定义行为；
+3. 返回 optional：图不连通时&lt;strong&gt;没有&lt;/strong&gt;这样的起点，那不是错误，是可预期状态。&lt;/p&gt;"><h1 id="实现两件事在一个函数里"><a class="anchor" href="#实现两件事在一个函数里">#</a>实现：两件事在一个函数里</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch01/adt/modern.hpp">code/ch01/adt/modern.hpp#fn:best_source</a></div><pre><code>[[nodiscard]] std::optional&lt;std::<span class="t">size_t</span>&gt; best_source() <span class="k">const</span> {
+    <span class="k">auto</span> shortest = distance_;
+    <span class="k">for</span> (std::<span class="t">size_t</span> via = <span class="n">0</span>; via &lt; shortest.size(); ++via) {
+        <span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; shortest.size(); ++from) {
+            <span class="k">for</span> (std::<span class="t">size_t</span> to = <span class="n">0</span>; to &lt; shortest.size(); ++to) {
+                <span class="k">if</span> (shortest[from][via] != infinity &amp;&amp;
+                    shortest[via][to] != infinity &amp;&amp;
+                    shortest[from][to] &gt; shortest[from][via] + shortest[via][to]) {
+                    shortest[from][to] = shortest[from][via] + shortest[via][to];
+                }
+            }
+        }
+    }
+
+    std::optional&lt;std::<span class="t">size_t</span>&gt; result;
+    <span class="t">int</span> smallest_eccentricity = infinity;
+    <span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; shortest.size(); ++from) {
+        <span class="t">int</span> largest_distance = <span class="n">0</span>;
+        <span class="k">for</span> (<span class="t">int</span> distance : shortest[from]) {
+            largest_distance = distance &gt; largest_distance ? distance : largest_distance;
+        }
+        <span class="k">if</span> (largest_distance &lt; smallest_eccentricity) {
+            smallest_eccentricity = largest_distance;
+            result = from;
+        }
+    }
+    <span class="k">return</span> result;
+}</code></pre></div>
+<p>先跑 Floyd，再对每个起点取<strong>这一行的最大值</strong>，最后在所有起点里取最小。</p></section><section class="slide" data-notes=""><h1 id="12-数据结构三个层次"><a class="anchor" href="#12-数据结构三个层次">#</a>1.2 数据结构：三个层次</h1>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">层次</th>
+<th style="text-align:left">回答什么</th>
+<th style="text-align:left">例子</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><strong>逻辑结构</strong></td>
+<td style="text-align:left">元素之间有什么关系</td>
+<td style="text-align:left">线性、树形、图</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>存储结构</strong></td>
+<td style="text-align:left">关系怎么落到内存里</td>
+<td style="text-align:left">顺序、链接、索引、散列</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>运算</strong></td>
+<td style="text-align:left">能对它做什么</td>
+<td style="text-align:left">插入、删除、检索</td>
+</tr>
+</tbody></table></div>
+<p><strong>同一个逻辑结构可以有多种存储结构</strong>——线性表既能顺序存（顺序表）， 也能链接存（链表），这就是第 2 章的全部内容。</p></section><section class="slide" data-notes="&lt;p&gt;后面每一章都落在这三类里，可以先把全书地图画出来：
+第 2-4 章线性，第 5-6 章树形，第 7 章图，第 8-12 章是在这些结构上做算法。&lt;/p&gt;"><h1 id="逻辑结构的三分"><a class="anchor" href="#逻辑结构的三分">#</a>逻辑结构的三分</h1>
+<ul>
+<li><strong>线性</strong>：每个结点至多一个前驱、至多一个后继</li>
+<li><strong>树形</strong>：至多一个前驱，可以有多个后继</li>
+<li><strong>图</strong>：前驱后继都可以有多个</li>
+</ul>
+<p>两条分界线：</p>
+<ul>
+<li>树和图的分界：<strong>每个结点是否至多一个直接前驱</strong></li>
+<li>线和树的分界：<strong>每个结点是否至多一个直接后继</strong></li>
+</ul></section><section class="slide" data-notes="&lt;p&gt;索引和散列在第 10、11 章才展开，这里只要学生记住「有四种」。
+特别提醒：索引表的空间是&lt;strong&gt;附加&lt;/strong&gt;在数据之外的。&lt;/p&gt;"><h1 id="四种存储方法"><a class="anchor" href="#四种存储方法">#</a>四种存储方法</h1>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">方法</th>
+<th style="text-align:left">怎么表示「相邻」</th>
+<th style="text-align:left">代价</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><strong>顺序</strong></td>
+<td style="text-align:left">地址相邻</td>
+<td style="text-align:left">按下标 O(1)；插删要搬</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>链接</strong></td>
+<td style="text-align:left">指针相指</td>
+<td style="text-align:left">插删只改指针；按位置要走</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>索引</strong></td>
+<td style="text-align:left">另造一张表，存地址</td>
+<td style="text-align:left">多一份空间；换来快速定位</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>散列</strong></td>
+<td style="text-align:left">由关键码<strong>算</strong>出地址</td>
+<td style="text-align:left">期望 O(1)；不保序，会冲突</td>
+</tr>
+</tbody></table></div></section><section class="slide" data-notes="&lt;p&gt;找 52：索引里二分到第 3 列，读出 [2]，直接取第 2 块——只读一块。
+再看每块的宽度：五块长度各不相同。正因为长度不等，
+「第 k 块在哪」没法用「起始地址 + k × 块长」算出来，只能查表。
+这就是原书说「索引函数并非数组那样的简单线性函数」的意思。&lt;/p&gt;"><h1 id="索引逻辑有序物理无序"><a class="anchor" href="#索引逻辑有序物理无序">#</a>索引：逻辑有序，物理无序</h1>
+<div class="codeblock" data-lang="text"><pre><code>存储区的数据 -- 物理无序, 而且每块长度不等
++----------------+----------+------------+--------------+--------+
+| [1] 73         | [2] 52   | [3] 42     | [4] 98       | [5] 37 |
++----------------+----------+------------+--------------+--------+
+
+线性索引 -- 附加在数据之外的一张小表
++------+------+------+------+------+
+|  37  |  42  |  52  |  73  |  98  |   关键码: 升序
++------+------+------+------+------+
+| [5]  | [3]  | [2]  | [1]  | [4]  |   指向第几块: 乱序
++------+------+------+------+------+</code></pre></div>
+<p><strong>这两行的错位就是索引的全部意义</strong>：上面能二分，下面一块没搬过。</p></section><section class="slide" data-notes="&lt;p&gt;原书用一个「成员函数非纯虚、析构函数非 virtual」的空基类来表达抽象。
+那样的基类给不了任何多态，反而埋下「通过基类指针删派生对象」的未定义行为。
+在 C++ 里，模板本身就承担了这层抽象——本书各章都不设基类。&lt;/p&gt;"><h1 id="123-抽象数据类型"><a class="anchor" href="#123-抽象数据类型">#</a>1.2.3 抽象数据类型</h1>
+<p><strong>ADT = 一组运算 + 它们的约定</strong>，不是一个类，更不是一个基类。</p>
+<div class="codeblock" data-lang="text"><pre><code>ADT 名字 {
+    数据对象 D: 结点是什么
+    数据关系 R: 结点之间有什么关系
+    基本操作 P: 对外提供哪些运算
+}</code></pre></div>
+<p>用它的人只能通过这些运算访问数据，<strong>不能去翻内部表示</strong>—— 所以换实现不用改调用方。</p></section><section class="slide" data-notes="&lt;p&gt;强调一句：常数和低阶项不是不重要，是&lt;strong&gt;不能用来区分算法&lt;/strong&gt;。
+n 小的时候 O(n^2) 完全可能比 O(n log n) 快，这在第 8 章讲插入排序时会再遇到。&lt;/p&gt;"><h1 id="14-算法分析为什么要看增长趋势"><a class="anchor" href="#14-算法分析为什么要看增长趋势">#</a>1.4 算法分析：为什么要看增长趋势</h1>
+<p>程序跑多久跟机器、编译器、输入都有关。要比较<strong>算法</strong>而不是<strong>这次运行</strong>， 就只能看「输入变大时，代价怎么涨」。</p>
+<figure><img loading="lazy" src="../../assets/c33523f30da594f0.jpg" alt="图 1.5 常用函数的增长趋势"><figcaption>图 1.5 常用函数的增长趋势</figcaption></figure></section><section class="slide" data-notes="&lt;p&gt;可以举个反例：说「插入排序是 O(n^2)」对，说「插入排序是 Θ(n^2)」就错了——
+输入已经有序时它是 Θ(n)。所以最好情况/最坏情况必须分开说。&lt;/p&gt;"><h1 id="大-oωθ"><a class="anchor" href="#大-oωθ">#</a>大 O、Ω、Θ</h1>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">记号</th>
+<th style="text-align:left">含义</th>
+<th style="text-align:left">日常说法</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><span class="math">O(f)</span></td>
+<td style="text-align:left">增长<strong>不快于</strong> <span class="math">f</span></td>
+<td style="text-align:left">上界</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">Ω(f)</span></td>
+<td style="text-align:left">增长<strong>不慢于</strong> <span class="math">f</span></td>
+<td style="text-align:left">下界</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">Θ(f)</span></td>
+<td style="text-align:left">上下界都是 <span class="math">f</span></td>
+<td style="text-align:left">恰好这么快</td>
+</tr>
+</tbody></table></div>
+<p>平时说「这个算法是 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>」，严格说往往应该是 <span class="math">Θ</span>。 <strong>说 <span class="math">O</span> 永远不会错，只是可能说少了。</strong></p></section><section class="slide" data-notes="&lt;p&gt;可以追问：如果查询集中在前几个元素（比如按热度排序），平均次数会小很多。
+这就是「自组织线性表」的动机，第 10 章会提。&lt;/p&gt;"><h1 id="最好最坏平均"><a class="anchor" href="#最好最坏平均">#</a>最好、最坏、平均</h1>
+<p>以<strong>顺序检索</strong>为例，表长 n：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">情况</th>
+<th style="text-align:left">比较次数</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">最好</td>
+<td style="text-align:left">1（第一个就是）</td>
+</tr>
+<tr>
+<td style="text-align:left">最坏</td>
+<td style="text-align:left">n（不在表里）</td>
+</tr>
+<tr>
+<td style="text-align:left">平均（等概率）</td>
+<td style="text-align:left"><span class="math"><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den">n</span></span>(<span class="upr">1</span><span class="bin">+</span><span class="upr">2</span><span class="bin">+</span>⋯<span class="bin">+</span>n)<span class="rel">=</span><span class="frac"><span class="num">n<span class="bin">+</span><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span></span></td>
+</tr>
+</tbody></table></div>
+<p>平均情况<strong>依赖于输入的概率分布</strong>——等概率只是一个假设，不是事实。</p></section><section class="slide" data-notes=""><h1 id="143-时间与空间的折衷"><a class="anchor" href="#143-时间与空间的折衷">#</a>1.4.3 时间与空间的折衷</h1>
+<ul>
+<li>存下来 → 省时间，费空间（查表、缓存、索引）</li>
+<li>现算 → 省空间，费时间</li>
+</ul>
+<p><strong>本书里这条折衷反复出现</strong>：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">章</th>
+<th style="text-align:left">折衷在哪</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">第 2 章</td>
+<td style="text-align:left">链表每个结点多一根指针，换来 O(1) 插删</td>
+</tr>
+<tr>
+<td style="text-align:left">第 6 章</td>
+<td style="text-align:left">双链表多一根 prev，换来 O(1) 删除已知结点</td>
+</tr>
+<tr>
+<td style="text-align:left">第 10 章</td>
+<td style="text-align:left">散列表用空闲槽位换期望 O(1) 检索</td>
+</tr>
+<tr>
+<td style="text-align:left">第 11 章</td>
+<td style="text-align:left">索引用附加空间换少读盘</td>
+</tr>
+</tbody></table></div></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
+<ul>
+<li>问题求解的第一步是<strong>抽象</strong>：把应用语言翻译成结构语言</li>
+<li>数据结构分三层：<strong>逻辑结构、存储结构、运算</strong></li>
+<li>同一逻辑结构可以有多种存储；选哪种要看<strong>在它上面做什么运算</strong></li>
+<li>ADT 是一组运算，不是一个基类</li>
+<li>算法分析看<strong>增长趋势</strong>；最好/最坏/平均必须分开说</li>
+<li>时间和空间是可以互换的，没有免费的午餐</li>
+</ul></section><section class="slide" data-notes=""><h1 id="上机"><a class="anchor" href="#上机">#</a>上机</h1>
+<div class="codeblock" data-lang="bash"><pre><code>python3 tools/check_code.py code/ch01/adt</code></pre></div>
+<ul>
+<li>读 <code>code/ch01/adt/modern.hpp</code>，找出 <code>infinity</code> 为什么不取 <code>INT_MAX</code></li>
+<li>改一处：把 Floyd 的 <code>k</code> 循环挪到里层，看哪条断言变红</li>
+</ul>
+<blockquote><p>全书的判据都是一样的：<strong>把实现改回错的写法，必须有一条断言会红。</strong></p></blockquote></section></div>
+<div class="bar"></div>
+<div class="notes"></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第1章 概论</div><div class="thumb"><div class="no">2</div>1.1 一个真问题：股市的传言</div><div class="thumb"><div class="no">3</div>先把问题抽象掉</div><div class="thumb"><div class="no">4</div>用什么存这张图</div><div class="thumb"><div class="no">5</div>算法：Floyd</div><div class="thumb"><div class="no">6</div>实现：两件事在一个函数里</div><div class="thumb"><div class="no">7</div>1.2 数据结构：三个层次</div><div class="thumb"><div class="no">8</div>逻辑结构的三分</div><div class="thumb"><div class="no">9</div>四种存储方法</div><div class="thumb"><div class="no">10</div>索引：逻辑有序，物理无序</div><div class="thumb"><div class="no">11</div>1.2.3 抽象数据类型</div><div class="thumb"><div class="no">12</div>1.4 算法分析：为什么要看增长趋势</div><div class="thumb"><div class="no">13</div>大 O、Ω、Θ</div><div class="thumb"><div class="no">14</div>最好、最坏、平均</div><div class="thumb"><div class="no">15</div>1.4.3 时间与空间的折衷</div><div class="thumb"><div class="no">16</div>本章小结</div><div class="thumb"><div class="no">17</div>上机</div></div>
+<div class="help"><div>
+<p><b>放映快捷键</b></p>
+<p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
+<p><kbd>N</kbd>演讲者备注　<kbd>O</kbd>缩略图总览　<kbd>F</kbd>全屏　<kbd>D</kbd>深色</p>
+<p><kbd>?</kbd>这张帮助　<kbd>Esc</kbd>关闭</p>
+<p style="color:var(--muted);font-size:.9em">
+导出 PDF：浏览器打印（Ctrl/Cmd+P），每页一张幻灯片。</p>
+</div></div>
+<div class="chrome">
+<b>第1章 概论</b><span>现代 C++ 数据结构教程</span>
+<span class="grow"></span>
+<a href="index.html" style="color:var(--muted)">目录</a>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 17</b>
+</div>
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var total=slides.length, at=0;
+  var bar=document.querySelector('.bar'), now=document.getElementById('now');
+  var notes=document.querySelector('.notes'), over=document.querySelector('.overview');
+  var help=document.querySelector('.help');
+  function show(n,push){
+    at=Math.max(0,Math.min(total-1,n));
+    slides.forEach(function(s,i){s.classList.toggle('current',i===at);});
+    bar.style.width=((at+1)/total*100)+'%';
+    now.textContent=(at+1)+' / '+total;
+    notes.innerHTML=slides[at].getAttribute('data-notes')||'';
+    document.querySelectorAll('.thumb').forEach(function(t,i){
+      t.classList.toggle('here',i===at);});
+    if(push!==false){history.replaceState(null,'','#'+(at+1));}
+    slides[at].scrollTop=0;
+  }
+  function go(d){show(at+d);}
+  document.addEventListener('keydown',function(e){
+    if(e.metaKey||e.ctrlKey||e.altKey)return;
+    var k=e.key;
+    if(help.classList.contains('on')&&k!=='?'){help.classList.remove('on');return;}
+    if(over.classList.contains('on')&&(k==='Escape'||k==='o'||k==='O')){
+      over.classList.remove('on');return;}
+    if(k==='ArrowRight'||k==='PageDown'||k===' '||k==='j'){go(1);e.preventDefault();}
+    else if(k==='ArrowLeft'||k==='PageUp'||k==='k'){go(-1);e.preventDefault();}
+    else if(k==='Home'){show(0);}
+    else if(k==='End'){show(total-1);}
+    else if(k==='n'||k==='N'){notes.classList.toggle('on');}
+    else if(k==='o'||k==='O'){over.classList.toggle('on');}
+    else if(k==='d'||k==='D'){
+      var dark=document.documentElement.getAttribute('data-theme')==='dark';
+      document.documentElement.setAttribute('data-theme',dark?'light':'dark');}
+    else if(k==='f'||k==='F'){
+      if(document.fullscreenElement){document.exitFullscreen();}
+      else{document.documentElement.requestFullscreen();}}
+    else if(k==='?'){help.classList.toggle('on');}
+  });
+  document.querySelectorAll('.thumb').forEach(function(t,i){
+    t.addEventListener('click',function(){over.classList.remove('on');show(i);});});
+  window.addEventListener('hashchange',function(){
+    var n=parseInt(location.hash.slice(1),10);
+    if(n>=1&&n<=total)show(n-1,false);});
+  var start=parseInt(location.hash.slice(1),10);
+  show(start>=1&&start<=total?start-1:0,false);
+})();
+</script>
+</body></html>

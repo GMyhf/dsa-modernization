@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第7章 图</title>
+<style>
+:root{--bg:#fdfdfc;--fg:#1a1a18;--muted:#6b6b66;--line:#dcdcd6;--accent:#8a4b2a;
+--code-bg:#f5f4f0;--kw:#8a4b2a;--ty:#2c6b57;--st:#7a5c1e;--cm:#8a8a84;--nu:#4a5aa8}
+:root[data-theme="dark"]{--bg:#16161a;--fg:#ececea;--muted:#a0a09a;--line:#33333a;
+--accent:#e0a074;--code-bg:#1e1e24;--kw:#e0a074;--ty:#7fd0b0;--st:#d8c088;--cm:#7a7a84;--nu:#9ab0f0}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--fg)}
+body{font-family:-apple-system,"Segoe UI","Noto Sans CJK SC","Source Han Sans SC",
+"Microsoft YaHei",sans-serif;overflow:hidden}
+.deck{position:relative;height:100vh}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;
+padding:4.2vmin 6vmin 9vmin;overflow:auto}
+.slide.current{display:flex}
+.slide .anchor{display:none}
+.slide h1{font-size:clamp(26px,4.4vmin,52px);margin:0 0 3vmin;line-height:1.25;
+letter-spacing:-.01em;border-bottom:3px solid var(--accent);padding-bottom:1.6vmin}
+.slide h2{font-size:clamp(20px,3.1vmin,34px);margin:2.4vmin 0 1.2vmin}
+.slide h3{font-size:clamp(17px,2.5vmin,27px);margin:2vmin 0 1vmin;color:var(--muted)}
+.slide p,.slide li{font-size:clamp(15px,2.5vmin,28px);line-height:1.55;margin:.7vmin 0}
+.slide ul,.slide ol{margin:1vmin 0;padding-left:3.4vmin}
+.slide li{margin:.9vmin 0}
+.slide strong{color:var(--accent)}
+.slide blockquote{margin:1.6vmin 0;padding:.6vmin 0 .6vmin 2.4vmin;
+border-left:4px solid var(--line);color:var(--muted)}
+.slide table{border-collapse:collapse;font-size:clamp(13px,2.1vmin,23px);margin:1.4vmin 0}
+.slide th,.slide td{border:1px solid var(--line);padding:.7vmin 1.4vmin;text-align:left}
+.slide th{background:var(--code-bg)}
+.table-wrap{overflow-x:auto;max-width:100%}
+.slide img{max-width:100%;max-height:52vh;object-fit:contain;display:block;margin:1.4vmin auto}
+.codeblock{background:var(--code-bg);border:1px solid var(--line);border-radius:6px;
+margin:1.4vmin 0;overflow:hidden}
+.codeblock pre{margin:0;padding:1.6vmin 2vmin;overflow-x:auto}
+.codeblock code{font-family:"SF Mono",Menlo,Consolas,"Noto Sans Mono CJK SC",monospace;
+font-size:clamp(11px,1.95vmin,21px);line-height:1.5;white-space:pre}
+.srcbar{font-size:clamp(9px,1.3vmin,13px);padding:.5vmin 2vmin;color:var(--muted);
+border-bottom:1px solid var(--line);font-family:"SF Mono",Menlo,monospace}
+.srcbar a{color:var(--muted);text-decoration:none}
+.k{color:var(--kw)}.t{color:var(--ty)}.s{color:var(--st)}.c{color:var(--cm);font-style:italic}
+.n{color:var(--nu)}.p{color:var(--fg)}
+.math{font-style:italic}.math-display{text-align:center;margin:2vmin 0;
+font-size:clamp(16px,2.8vmin,30px)}
+.upr{font-style:normal}.bold{font-weight:700}
+code{background:var(--code-bg);padding:.1em .34em;border-radius:4px;
+font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.86em}
+hr{border:0;border-top:1px solid var(--line);margin:2vmin 0}
+.chrome{position:fixed;left:0;right:0;bottom:0;height:5.4vmin;min-height:26px;
+display:flex;align-items:center;gap:1.6vmin;padding:0 2vmin;
+border-top:1px solid var(--line);background:var(--bg);font-size:clamp(10px,1.6vmin,15px);
+color:var(--muted)}
+.chrome .grow{flex:1}
+.chrome b{color:var(--fg);font-weight:600}
+.bar{position:fixed;left:0;bottom:0;height:3px;background:var(--accent);
+transition:width .18s ease;z-index:5}
+.notes{position:fixed;left:0;right:0;bottom:5.4vmin;max-height:34vh;overflow:auto;
+padding:1.6vmin 2.4vmin;background:var(--code-bg);border-top:2px solid var(--accent);
+font-size:clamp(13px,2vmin,20px);line-height:1.5;display:none}
+.notes.on{display:block}
+.notes p{margin:.5em 0}
+.notes:before{content:"演讲者备注";display:block;font-size:.72em;letter-spacing:.08em;
+color:var(--accent);margin-bottom:.5em}
+.overview{position:fixed;inset:0;background:var(--bg);overflow:auto;padding:3vmin;
+display:none;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1.6vmin;z-index:20}
+.overview.on{display:grid}
+.thumb{border:2px solid var(--line);border-radius:6px;padding:1.2vmin;cursor:pointer;
+font-size:13px;line-height:1.35;min-height:88px;overflow:hidden;background:var(--bg)}
+.thumb:hover{border-color:var(--accent)}
+.thumb.here{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.thumb .no{color:var(--muted);font-size:11px}
+.help{position:fixed;inset:0;background:rgba(0,0,0,.62);display:none;z-index:30;
+align-items:center;justify-content:center}
+.help.on{display:flex}
+.help div{background:var(--bg);padding:3vmin 4vmin;border-radius:10px;max-width:520px;
+font-size:15px;line-height:1.9}
+.help kbd{background:var(--code-bg);border:1px solid var(--line);border-radius:4px;
+padding:.1em .5em;font-family:monospace;margin-right:.6em}
+@media print{
+  html,body{height:auto;overflow:visible}
+  .chrome,.bar,.notes,.overview,.help{display:none!important}
+  .deck{height:auto}
+  .slide{display:flex!important;position:relative;inset:auto;page-break-after:always;
+  height:100vh;border:0}
+}
+</style></head><body>
+<div class="deck"><section class="slide" data-notes=""><h1 id="第7章-图"><a class="anchor" href="#第7章-图">#</a>第7章 图</h1>
+<p><strong>结点之间的关系可以是任意的</strong>——比线性、树形都复杂。</p>
+<ul>
+<li>7.3 存储：相邻矩阵 vs 邻接表</li>
+<li>7.4 周游：DFS、BFS、拓扑排序</li>
+<li>7.5 最短路径：Dijkstra、Floyd</li>
+<li>7.6 最小生成树：Prim、Kruskal</li>
+</ul>
+<p>一条主线：<strong>几乎每个算法的代价，都取决于图怎么存</strong>。</p></section><section class="slide" data-notes=""><h1 id="71-基本术语"><a class="anchor" href="#71-基本术语">#</a>7.1 基本术语</h1>
+<figure><img loading="lazy" src="../../assets/25d6dac564f61138.jpg" alt="图 7.2 图的示例"><figcaption>图 7.2 图的示例</figcaption></figure>
+<ul>
+<li><span class="math">G<span class="rel">=</span>(V,E)</span>：顶点集 + 边集</li>
+<li><strong>无向图</strong>的边是顶点对 <span class="math">(u,v)</span>；<strong>有向图</strong>的边（弧）是序偶 <span class="math">⟨u,v⟩</span></li>
+<li><strong>度</strong>：无向图看关联的边数；有向图分<strong>入度</strong>和<strong>出度</strong></li>
+<li><strong>路径</strong>、<strong>回路</strong>、<strong>连通</strong>、<strong>连通分量</strong></li>
+</ul></section><section class="slide" data-notes=""><h1 id="连通与强连通"><a class="anchor" href="#连通与强连通">#</a>连通与强连通</h1>
+<figure><img loading="lazy" src="../../assets/9aeb77db24a803d1.jpg" alt="图7.5 非连通无向图的连通分量"><figcaption>图7.5 非连通无向图的连通分量</figcaption></figure>
+<ul>
+<li>无向图：任意两点有路径 → <strong>连通</strong>；极大连通子图 → <strong>连通分量</strong></li>
+<li>有向图：任意两点<strong>互相</strong>可达 → <strong>强连通</strong>；极大者 → <strong>强连通分量</strong></li>
+</ul>
+<figure><img loading="lazy" src="../../assets/68c8cdd24e9e933e.jpg" alt="图 7.6 有向图的两个强连通分量"><figcaption>图 7.6 有向图的两个强连通分量</figcaption></figure></section><section class="slide" data-notes="&lt;p&gt;infinity 取 INT_MAX/4 而不是 INT_MAX——Floyd 里两个 infinity 会相加，
+用 INT_MAX 就溢出了，而有符号溢出是未定义行为。这一处第 1 章也讲过。
+
+无向图加边要加两次，本书用 directed 参数表达。&lt;/p&gt;"><h1 id="731-相邻矩阵"><a class="anchor" href="#731-相邻矩阵">#</a>7.3.1 相邻矩阵</h1>
+<p><code>m[i][j]</code> 是 i 到 j 一条边的权，不通就是「无穷大」。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#graph-build</a></div><pre><code><span class="k">explicit</span> Graph(std::<span class="t">size_t</span> count) : adjacency_(count, std::vector&lt;<span class="t">int</span>&gt;(count, infinity)) {
+    <span class="k">for</span> (std::<span class="t">size_t</span> vertex = <span class="n">0</span>; vertex &lt; count; ++vertex) {
+        adjacency_[vertex][vertex] = <span class="n">0</span>;
+    }
+}
+
+[[nodiscard]] std::<span class="t">size_t</span> vertices() <span class="k">const</span> <span class="k">noexcept</span> { <span class="k">return</span> adjacency_.size(); }
+
+<span class="t">void</span> add_edge(std::<span class="t">size_t</span> from, std::<span class="t">size_t</span> to, <span class="t">int</span> weight, <span class="t">bool</span> directed = <span class="k">true</span>) {
+    check_vertex(from);
+    check_vertex(to);
+    <span class="k">if</span> (weight &lt; <span class="n">0</span>) {
+        <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;negative edge&quot;</span>);
+    }
+    adjacency_[from][to] = weight;
+    <span class="k">if</span> (!directed) {
+        adjacency_[to][from] = weight;
+    }
+}</code></pre></div></section><section class="slide" data-notes=""><h1 id="732-邻接表"><a class="anchor" href="#732-邻接表">#</a>7.3.2 邻接表</h1>
+<figure><img loading="lazy" src="../../assets/f0f154bdefe0c6b7.jpg" alt="图 7.12 无向图的邻接表表示"><figcaption>图 7.12 无向图的邻接表表示</figcaption></figure>
+<p>每个顶点挂一条<strong>边表</strong>，只存<strong>实际存在</strong>的边。</p></section><section class="slide" data-notes="&lt;p&gt;本书的 GraphList 里埋了一个教学计数器 scan_steps()，
+可以把「扫过多少条边」量出来，让 O(V+E) 和 O(V^2) 的差别不是纸上说说。
+上机题就用它。&lt;/p&gt;"><h1 id="两种存法的代价对照"><a class="anchor" href="#两种存法的代价对照">#</a>两种存法的代价对照</h1>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left"></th>
+<th style="text-align:left">相邻矩阵</th>
+<th style="text-align:left">邻接表</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">存储量</td>
+<td style="text-align:left"><span class="math">V<sup><span class="upr">2</span></sup></span></td>
+<td style="text-align:left"><span class="math">V<span class="bin">+</span>E</span></td>
+</tr>
+<tr>
+<td style="text-align:left">遍历某点的邻居</td>
+<td style="text-align:left"><span class="math">O(V)</span>，要扫整行</td>
+<td style="text-align:left"><span class="math">O(<span class="upr">deg</span>&thinsp;v)</span></td>
+</tr>
+<tr>
+<td style="text-align:left">问 (u,v) 有没有边</td>
+<td style="text-align:left"><strong><span class="math">O(<span class="upr">1</span>)</span></strong></td>
+<td style="text-align:left"><span class="math">O(<span class="upr">deg</span>&thinsp;u)</span></td>
+</tr>
+<tr>
+<td style="text-align:left">DFS / BFS 全图</td>
+<td style="text-align:left"><span class="math">O(V<sup><span class="upr">2</span></sup>)</span></td>
+<td style="text-align:left"><strong><span class="math">O(V<span class="bin">+</span>E)</span></strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>稀疏图（<span class="math">E≪V<sup><span class="upr">2</span></sup></span>）用邻接表；稠密图或频繁问「这两点之间有没有边」用矩阵。</strong></p>
+<p><strong>没有哪种总是更好</strong>——这正是本章要比较的东西。</p></section><section class="slide" data-notes="&lt;p&gt;树的周游不需要 seen，因为树没有回路。这是图与树的第一个实质差别。
+DFS 递归写法的深度是路径长度，极端图上仍有爆栈风险——第 3 章那张表适用。&lt;/p&gt;"><h1 id="74-深度优先周游"><a class="anchor" href="#74-深度优先周游">#</a>7.4 深度优先周游</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#dfs</a></div><pre><code>[[nodiscard]] std::vector&lt;std::<span class="t">size_t</span>&gt; dfs(std::<span class="t">size_t</span> source) <span class="k">const</span> {
+    check_vertex(source);
+    std::vector&lt;<span class="t">bool</span>&gt; seen(vertices());
+    std::vector&lt;std::<span class="t">size_t</span>&gt; result;
+    visit_depth_first(source, seen, result);
+    <span class="k">return</span> result;
+}</code></pre></div>
+<p><strong>「一条路走到黑，走不动了退回来」</strong>——和二叉树的前序周游是同一个形状， 只是多了一个 <code>seen</code> 数组：图里有回路，不标记就会绕圈。</p></section><section class="slide" data-notes="&lt;p&gt;BFS 用队列，DFS 用栈（递归的运行栈）——这个对偶第 5 章讲二叉树时已经出现过。
+
+BFS 的一个重要性质：在&lt;strong&gt;无权图&lt;/strong&gt;上，它给出的就是最短路（按边数）。
+Dijkstra 可以看成 BFS 在带权图上的推广，把队列换成了优先队列。&lt;/p&gt;"><h1 id="广度优先周游"><a class="anchor" href="#广度优先周游">#</a>广度优先周游</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#bfs</a></div><pre><code>[[nodiscard]] std::vector&lt;std::<span class="t">size_t</span>&gt; bfs(std::<span class="t">size_t</span> source) <span class="k">const</span> {
+    check_vertex(source);
+    std::vector&lt;<span class="t">bool</span>&gt; seen(vertices());
+    std::queue&lt;std::<span class="t">size_t</span>&gt; queue;
+    std::vector&lt;std::<span class="t">size_t</span>&gt; result;
+    queue.push(source);
+    seen[source] = <span class="k">true</span>;
+    <span class="k">while</span> (!queue.empty()) {
+        <span class="k">const</span> std::<span class="t">size_t</span> from = queue.front();
+        queue.pop();
+        result.push_back(from);
+        <span class="k">for</span> (std::<span class="t">size_t</span> to = <span class="n">0</span>; to &lt; vertices(); ++to) {
+            <span class="k">if</span> (adjacency_[from][to] &lt; infinity &amp;&amp; !seen[to]) {
+                seen[to] = <span class="k">true</span>;
+                queue.push(to);
+            }
+        }
+    }
+    <span class="k">return</span> result;
+}</code></pre></div></section><section class="slide" data-notes=""><h1 id="743-拓扑排序"><a class="anchor" href="#743-拓扑排序">#</a>7.4.3 拓扑排序</h1>
+<figure><img loading="lazy" src="../../assets/6db281e4c4929271.jpg" alt="图 7.17 表示课程优先关系的有向无环图"><figcaption>图 7.17 表示课程优先关系的有向无环图</figcaption></figure>
+<p>给有向无环图（DAG）排一个线性次序，使<strong>每条边都从前指向后</strong>。</p>
+<p>「先修课」就是典型场景。</p></section><section class="slide" data-notes=""><h1 id="拓扑排序不断摘入度为-0-的点"><a class="anchor" href="#拓扑排序不断摘入度为-0-的点">#</a>拓扑排序：不断摘入度为 0 的点</h1>
+<div class="codeblock" data-lang="text"><pre><code>算出每个顶点的入度
+把入度为 0 的都放进队列
+只要队列非空:
+    出队一个 v, 输出它
+    对 v 的每个后继 w: 入度减一, 减到 0 就入队</code></pre></div>
+<p>两种结局：</p>
+<ul>
+<li>所有顶点都输出了 → 排序成功</li>
+<li>还有顶点没输出，却找不到入度 0 的 → <strong>图里有环</strong></li>
+</ul>
+<p><strong>所以拓扑排序顺带就是一个环检测算法。</strong></p>
+<p>实现见 <code>code/ch07/graph/modern.hpp</code> 的 <code>topological_sort</code>。</p></section><section class="slide" data-notes=""><h1 id="751-单源最短路dijkstra"><a class="anchor" href="#751-单源最短路dijkstra">#</a>7.5.1 单源最短路：Dijkstra</h1>
+<figure><img loading="lazy" src="../../assets/0cf0a196d127ad6b.jpg" alt="图7.19 单源最短路径的示例"><figcaption>图7.19 单源最短路径的示例</figcaption></figure>
+<p>每一轮：在<strong>还没确定</strong>的顶点里挑一个当前距离最小的， 把它标为确定，然后用它去松弛邻居。</p></section><section class="slide" data-notes="&lt;p&gt;常见误解：把所有边权统一加一个常数就能处理负权。&lt;strong&gt;不行&lt;/strong&gt;——
+加常数会按路径的&lt;strong&gt;边数&lt;/strong&gt;增加不同的总量，边多的路径被罚得更重，
+最短路的次序因此会变。这是课程习题里的一道题。
+负权要用 Bellman-Ford。&lt;/p&gt;"><h1 id="dijkstra-的实现"><a class="anchor" href="#dijkstra-的实现">#</a>Dijkstra 的实现</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#dijkstra</a></div><pre><code>[[nodiscard]] std::vector&lt;<span class="t">int</span>&gt; dijkstra(std::<span class="t">size_t</span> source) <span class="k">const</span> {
+    check_vertex(source);
+    std::vector&lt;<span class="t">int</span>&gt; distance(vertices(), infinity);
+    std::vector&lt;<span class="t">bool</span>&gt; used(vertices());
+    distance[source] = <span class="n">0</span>;
+    <span class="k">for</span> (std::<span class="t">size_t</span> count = <span class="n">0</span>; count &lt; vertices(); ++count) {
+        <span class="k">const</span> std::<span class="t">size_t</span> from = nearest_unvisited(distance, used);
+        <span class="k">if</span> (from == vertices() || distance[from] == infinity) {
+            <span class="k">break</span>;
+        }
+        used[from] = <span class="k">true</span>;
+        <span class="k">for</span> (std::<span class="t">size_t</span> to = <span class="n">0</span>; to &lt; vertices(); ++to) {
+            <span class="k">if</span> (adjacency_[from][to] &lt; infinity &amp;&amp;
+                distance[to] &gt; distance[from] + adjacency_[from][to]) {
+                distance[to] = distance[from] + adjacency_[from][to];
+            }
+        }
+    }
+    <span class="k">return</span> distance;
+}</code></pre></div>
+<p><strong>前提：边权非负。</strong> 有负权边时这个「挑最小就确定」的贪心不成立。</p></section><section class="slide" data-notes="&lt;p&gt;这是第 1 章那个股市传言问题用的算法，可以回头指一下。
+代价 O(V^3)，与边数无关，所以稠密图上比跑 V 次 Dijkstra 还划算。&lt;/p&gt;"><h1 id="752-每对顶点floyd"><a class="anchor" href="#752-每对顶点floyd">#</a>7.5.2 每对顶点：Floyd</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#floyd</a></div><pre><code>[[nodiscard]] std::vector&lt;std::vector&lt;<span class="t">int</span>&gt;&gt; floyd() <span class="k">const</span> {
+    <span class="k">auto</span> distance = adjacency_;
+    <span class="k">for</span> (std::<span class="t">size_t</span> via = <span class="n">0</span>; via &lt; vertices(); ++via) {
+        <span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; vertices(); ++from) {
+            <span class="k">for</span> (std::<span class="t">size_t</span> to = <span class="n">0</span>; to &lt; vertices(); ++to) {
+                <span class="k">if</span> (distance[from][via] &lt; infinity &amp;&amp; distance[via][to] &lt; infinity) {
+                    distance[from][to] = std::min(
+                        distance[from][to], distance[from][via] + distance[via][to]);
+                }
+            }
+        }
+    }
+    <span class="k">return</span> distance;
+}</code></pre></div>
+<p>递推的含义：<strong>允许经过前 k 个顶点中转时的最短路</strong>。</p>
+<p><strong>k 必须在最外层</strong>——它是「允许中转的集合」，放到里层递推就不成立了。</p></section><section class="slide" data-notes=""><h1 id="76-最小生成树"><a class="anchor" href="#76-最小生成树">#</a>7.6 最小生成树</h1>
+<figure><img loading="lazy" src="../../assets/5271d0e099d91472.jpg" alt="图 7.8 网络实例"><figcaption>图 7.8 网络实例</figcaption></figure>
+<p>连通带权无向图的<strong>生成树</strong>里，边权总和最小的那一棵。</p>
+<p>两个经典算法，思路完全不同：</p>
+<ul>
+<li><strong>Prim</strong>：从一个点开始长，每次加一条「连到树外最便宜」的边</li>
+<li><strong>Kruskal</strong>：把边按权排序，能不成环就加</li>
+</ul></section><section class="slide" data-notes="&lt;p&gt;Prim 和 Dijkstra 长得极像，都是「每轮挑一个最小的加进来」。
+差别在&lt;strong&gt;比什么&lt;/strong&gt;：Dijkstra 比的是「到源点的距离」，
+Prim 比的是「到当前树的距离」。一个字之差，结果完全不同。
+
+这也是课程习题里的一道题：AB=2, BC=2, AC=3 时，
+Dijkstra 树总权 5，MST 总权 4。&lt;/p&gt;"><h1 id="prim从点出发"><a class="anchor" href="#prim从点出发">#</a>Prim：从点出发</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#prim</a></div><pre><code>[[nodiscard]] std::optional&lt;std::vector&lt;Edge&gt;&gt; prim(std::<span class="t">size_t</span> source) <span class="k">const</span> {
+    check_vertex(source);
+    std::vector&lt;<span class="t">int</span>&gt; distance(vertices(), infinity);
+    std::vector&lt;std::<span class="t">size_t</span>&gt; predecessor(vertices());
+    std::vector&lt;<span class="t">bool</span>&gt; used(vertices());
+    std::vector&lt;Edge&gt; result;
+    distance[source] = <span class="n">0</span>;
+    <span class="k">for</span> (std::<span class="t">size_t</span> count = <span class="n">0</span>; count &lt; vertices(); ++count) {
+        <span class="k">const</span> std::<span class="t">size_t</span> from = nearest_unvisited(distance, used);
+        <span class="k">if</span> (from == vertices() || distance[from] == infinity) {
+            <span class="k">return</span> std::nullopt;
+        }
+        used[from] = <span class="k">true</span>;
+        <span class="k">if</span> (from != source) {
+            result.push_back({predecessor[from], from, distance[from]});
+        }
+        <span class="k">for</span> (std::<span class="t">size_t</span> to = <span class="n">0</span>; to &lt; vertices(); ++to) {
+            <span class="k">if</span> (!used[to] &amp;&amp; adjacency_[from][to] &lt; distance[to]) {
+                distance[to] = adjacency_[from][to];
+                predecessor[to] = from;
+            }
+        }
+    }
+    <span class="k">return</span> result;
+}</code></pre></div></section><section class="slide" data-notes="&lt;p&gt;这是全书结构复用最漂亮的一处：第 6 章讲父指针表示法时看不出用途，
+到这里成了 Kruskal 的核心零件。可以回头指一下。
+
+稀疏图上 Kruskal 好（边少，排序快），稠密图上 Prim 好。
+实现见 code/ch07/graph/modern.hpp 的 kruskal。&lt;/p&gt;"><h1 id="kruskal从边出发"><a class="anchor" href="#kruskal从边出发">#</a>Kruskal：从边出发</h1>
+<div class="codeblock" data-lang="text"><pre><code>把所有边按权从小到大排序
+依次考察每条边 (u, v):
+    u 和 v 已经连通吗?
+        是 -&gt; 加进来会成环, 跳过
+        否 -&gt; 加入生成树, 把两个集合合并
+直到选够 V-1 条边</code></pre></div>
+<p><strong>「已经连通吗」怎么判？</strong> 用第 6 章的<strong>并查集</strong>—— 两个端点 <code>find</code> 到同一个根就说明成环。</p>
+<p>代价：排序的 <span class="math">O(E&thinsp;<span class="upr">log</span>&thinsp;E)</span> 主导。</p></section><section class="slide" data-notes="&lt;p&gt;这是最常见的一个混淆，值得单独一页。
+可以让学生自己在纸上画一遍，比直接给结论有效。&lt;/p&gt;"><h1 id="最短路树-最小生成树"><a class="anchor" href="#最短路树-最小生成树">#</a>最短路树 ≠ 最小生成树</h1>
+<div class="codeblock" data-lang="text"><pre><code>三个点:  A-B = 2    B-C = 2    A-C = 3
+
+从 A 出发的 Dijkstra 树:  A-B(2) + A-C(3) = 5
+最小生成树:               A-B(2) + B-C(2) = 4</code></pre></div>
+<ul>
+<li><strong>Dijkstra</strong> 保证每个点到<strong>源点</strong>的距离最短</li>
+<li><strong>MST</strong> 保证<strong>总权</strong>最小</li>
+</ul>
+<p>两个目标不同，结果自然不同。</p></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
+<ul>
+<li>图的存法决定算法代价：稀疏用<strong>邻接表</strong>，稠密用<strong>相邻矩阵</strong></li>
+<li>DFS 用栈、BFS 用队列；图有回路，所以必须标记 <code>seen</code></li>
+<li>拓扑排序顺带是<strong>环检测</strong></li>
+<li>Dijkstra 要求<strong>边权非负</strong>；统一加常数<strong>不能</strong>修复负权</li>
+<li>Floyd 的 k 必须在<strong>最外层</strong>，<span class="math">O(V<sup><span class="upr">3</span></sup>)</span>，与边数无关</li>
+<li>Kruskal 用第 6 章的<strong>并查集</strong>判环</li>
+<li><strong>最短路树不是最小生成树</strong>——目标不同</li>
+</ul></section><section class="slide" data-notes=""><h1 id="上机"><a class="anchor" href="#上机">#</a>上机</h1>
+<div class="codeblock" data-lang="bash"><pre><code>python3 tools/check_code.py code/ch07/graph
+python3 tools/check_code.py code/ch07/adjacency_list</code></pre></div>
+<ul>
+<li>用 <code>GraphList::scan_steps()</code> 量一量：同一张稀疏图上， 邻接表和相邻矩阵各扫了多少条边</li>
+<li>把 Floyd 的 k 循环挪到里层，看哪条断言变红</li>
+<li>构造一个带负权边的图，看 Dijkstra 给出什么</li>
+</ul>
+<blockquote><p>邻接表和相邻矩阵两套实现在测试里<strong>逐项对拍</strong>： 同一张图上，所有算法必须给出同样的答案。</p></blockquote></section></div>
+<div class="bar"></div>
+<div class="notes"></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第7章 图</div><div class="thumb"><div class="no">2</div>7.1 基本术语</div><div class="thumb"><div class="no">3</div>连通与强连通</div><div class="thumb"><div class="no">4</div>7.3.1 相邻矩阵</div><div class="thumb"><div class="no">5</div>7.3.2 邻接表</div><div class="thumb"><div class="no">6</div>两种存法的代价对照</div><div class="thumb"><div class="no">7</div>7.4 深度优先周游</div><div class="thumb"><div class="no">8</div>广度优先周游</div><div class="thumb"><div class="no">9</div>7.4.3 拓扑排序</div><div class="thumb"><div class="no">10</div>拓扑排序：不断摘入度为 0 的点</div><div class="thumb"><div class="no">11</div>7.5.1 单源最短路：Dijkstra</div><div class="thumb"><div class="no">12</div>Dijkstra 的实现</div><div class="thumb"><div class="no">13</div>7.5.2 每对顶点：Floyd</div><div class="thumb"><div class="no">14</div>7.6 最小生成树</div><div class="thumb"><div class="no">15</div>Prim：从点出发</div><div class="thumb"><div class="no">16</div>Kruskal：从边出发</div><div class="thumb"><div class="no">17</div>最短路树 ≠ 最小生成树</div><div class="thumb"><div class="no">18</div>本章小结</div><div class="thumb"><div class="no">19</div>上机</div></div>
+<div class="help"><div>
+<p><b>放映快捷键</b></p>
+<p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
+<p><kbd>N</kbd>演讲者备注　<kbd>O</kbd>缩略图总览　<kbd>F</kbd>全屏　<kbd>D</kbd>深色</p>
+<p><kbd>?</kbd>这张帮助　<kbd>Esc</kbd>关闭</p>
+<p style="color:var(--muted);font-size:.9em">
+导出 PDF：浏览器打印（Ctrl/Cmd+P），每页一张幻灯片。</p>
+</div></div>
+<div class="chrome">
+<b>第7章 图</b><span>现代 C++ 数据结构教程</span>
+<span class="grow"></span>
+<a href="index.html" style="color:var(--muted)">目录</a>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 19</b>
+</div>
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var total=slides.length, at=0;
+  var bar=document.querySelector('.bar'), now=document.getElementById('now');
+  var notes=document.querySelector('.notes'), over=document.querySelector('.overview');
+  var help=document.querySelector('.help');
+  function show(n,push){
+    at=Math.max(0,Math.min(total-1,n));
+    slides.forEach(function(s,i){s.classList.toggle('current',i===at);});
+    bar.style.width=((at+1)/total*100)+'%';
+    now.textContent=(at+1)+' / '+total;
+    notes.innerHTML=slides[at].getAttribute('data-notes')||'';
+    document.querySelectorAll('.thumb').forEach(function(t,i){
+      t.classList.toggle('here',i===at);});
+    if(push!==false){history.replaceState(null,'','#'+(at+1));}
+    slides[at].scrollTop=0;
+  }
+  function go(d){show(at+d);}
+  document.addEventListener('keydown',function(e){
+    if(e.metaKey||e.ctrlKey||e.altKey)return;
+    var k=e.key;
+    if(help.classList.contains('on')&&k!=='?'){help.classList.remove('on');return;}
+    if(over.classList.contains('on')&&(k==='Escape'||k==='o'||k==='O')){
+      over.classList.remove('on');return;}
+    if(k==='ArrowRight'||k==='PageDown'||k===' '||k==='j'){go(1);e.preventDefault();}
+    else if(k==='ArrowLeft'||k==='PageUp'||k==='k'){go(-1);e.preventDefault();}
+    else if(k==='Home'){show(0);}
+    else if(k==='End'){show(total-1);}
+    else if(k==='n'||k==='N'){notes.classList.toggle('on');}
+    else if(k==='o'||k==='O'){over.classList.toggle('on');}
+    else if(k==='d'||k==='D'){
+      var dark=document.documentElement.getAttribute('data-theme')==='dark';
+      document.documentElement.setAttribute('data-theme',dark?'light':'dark');}
+    else if(k==='f'||k==='F'){
+      if(document.fullscreenElement){document.exitFullscreen();}
+      else{document.documentElement.requestFullscreen();}}
+    else if(k==='?'){help.classList.toggle('on');}
+  });
+  document.querySelectorAll('.thumb').forEach(function(t,i){
+    t.addEventListener('click',function(){over.classList.remove('on');show(i);});});
+  window.addEventListener('hashchange',function(){
+    var n=parseInt(location.hash.slice(1),10);
+    if(n>=1&&n<=total)show(n-1,false);});
+  var start=parseInt(location.hash.slice(1),10);
+  show(start>=1&&start<=total?start-1:0,false);
+})();
+</script>
+</body></html>

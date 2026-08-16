@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第12章 高级数据结构</title>
+<style>
+:root{--bg:#fdfdfc;--fg:#1a1a18;--muted:#6b6b66;--line:#dcdcd6;--accent:#8a4b2a;
+--code-bg:#f5f4f0;--kw:#8a4b2a;--ty:#2c6b57;--st:#7a5c1e;--cm:#8a8a84;--nu:#4a5aa8}
+:root[data-theme="dark"]{--bg:#16161a;--fg:#ececea;--muted:#a0a09a;--line:#33333a;
+--accent:#e0a074;--code-bg:#1e1e24;--kw:#e0a074;--ty:#7fd0b0;--st:#d8c088;--cm:#7a7a84;--nu:#9ab0f0}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--fg)}
+body{font-family:-apple-system,"Segoe UI","Noto Sans CJK SC","Source Han Sans SC",
+"Microsoft YaHei",sans-serif;overflow:hidden}
+.deck{position:relative;height:100vh}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;
+padding:4.2vmin 6vmin 9vmin;overflow:auto}
+.slide.current{display:flex}
+.slide .anchor{display:none}
+.slide h1{font-size:clamp(26px,4.4vmin,52px);margin:0 0 3vmin;line-height:1.25;
+letter-spacing:-.01em;border-bottom:3px solid var(--accent);padding-bottom:1.6vmin}
+.slide h2{font-size:clamp(20px,3.1vmin,34px);margin:2.4vmin 0 1.2vmin}
+.slide h3{font-size:clamp(17px,2.5vmin,27px);margin:2vmin 0 1vmin;color:var(--muted)}
+.slide p,.slide li{font-size:clamp(15px,2.5vmin,28px);line-height:1.55;margin:.7vmin 0}
+.slide ul,.slide ol{margin:1vmin 0;padding-left:3.4vmin}
+.slide li{margin:.9vmin 0}
+.slide strong{color:var(--accent)}
+.slide blockquote{margin:1.6vmin 0;padding:.6vmin 0 .6vmin 2.4vmin;
+border-left:4px solid var(--line);color:var(--muted)}
+.slide table{border-collapse:collapse;font-size:clamp(13px,2.1vmin,23px);margin:1.4vmin 0}
+.slide th,.slide td{border:1px solid var(--line);padding:.7vmin 1.4vmin;text-align:left}
+.slide th{background:var(--code-bg)}
+.table-wrap{overflow-x:auto;max-width:100%}
+.slide img{max-width:100%;max-height:52vh;object-fit:contain;display:block;margin:1.4vmin auto}
+.codeblock{background:var(--code-bg);border:1px solid var(--line);border-radius:6px;
+margin:1.4vmin 0;overflow:hidden}
+.codeblock pre{margin:0;padding:1.6vmin 2vmin;overflow-x:auto}
+.codeblock code{font-family:"SF Mono",Menlo,Consolas,"Noto Sans Mono CJK SC",monospace;
+font-size:clamp(11px,1.95vmin,21px);line-height:1.5;white-space:pre}
+.srcbar{font-size:clamp(9px,1.3vmin,13px);padding:.5vmin 2vmin;color:var(--muted);
+border-bottom:1px solid var(--line);font-family:"SF Mono",Menlo,monospace}
+.srcbar a{color:var(--muted);text-decoration:none}
+.k{color:var(--kw)}.t{color:var(--ty)}.s{color:var(--st)}.c{color:var(--cm);font-style:italic}
+.n{color:var(--nu)}.p{color:var(--fg)}
+.math{font-style:italic}.math-display{text-align:center;margin:2vmin 0;
+font-size:clamp(16px,2.8vmin,30px)}
+.upr{font-style:normal}.bold{font-weight:700}
+code{background:var(--code-bg);padding:.1em .34em;border-radius:4px;
+font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.86em}
+hr{border:0;border-top:1px solid var(--line);margin:2vmin 0}
+.chrome{position:fixed;left:0;right:0;bottom:0;height:5.4vmin;min-height:26px;
+display:flex;align-items:center;gap:1.6vmin;padding:0 2vmin;
+border-top:1px solid var(--line);background:var(--bg);font-size:clamp(10px,1.6vmin,15px);
+color:var(--muted)}
+.chrome .grow{flex:1}
+.chrome b{color:var(--fg);font-weight:600}
+.bar{position:fixed;left:0;bottom:0;height:3px;background:var(--accent);
+transition:width .18s ease;z-index:5}
+.notes{position:fixed;left:0;right:0;bottom:5.4vmin;max-height:34vh;overflow:auto;
+padding:1.6vmin 2.4vmin;background:var(--code-bg);border-top:2px solid var(--accent);
+font-size:clamp(13px,2vmin,20px);line-height:1.5;display:none}
+.notes.on{display:block}
+.notes p{margin:.5em 0}
+.notes:before{content:"演讲者备注";display:block;font-size:.72em;letter-spacing:.08em;
+color:var(--accent);margin-bottom:.5em}
+.overview{position:fixed;inset:0;background:var(--bg);overflow:auto;padding:3vmin;
+display:none;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1.6vmin;z-index:20}
+.overview.on{display:grid}
+.thumb{border:2px solid var(--line);border-radius:6px;padding:1.2vmin;cursor:pointer;
+font-size:13px;line-height:1.35;min-height:88px;overflow:hidden;background:var(--bg)}
+.thumb:hover{border-color:var(--accent)}
+.thumb.here{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.thumb .no{color:var(--muted);font-size:11px}
+.help{position:fixed;inset:0;background:rgba(0,0,0,.62);display:none;z-index:30;
+align-items:center;justify-content:center}
+.help.on{display:flex}
+.help div{background:var(--bg);padding:3vmin 4vmin;border-radius:10px;max-width:520px;
+font-size:15px;line-height:1.9}
+.help kbd{background:var(--code-bg);border:1px solid var(--line);border-radius:4px;
+padding:.1em .5em;font-family:monospace;margin-right:.6em}
+@media print{
+  html,body{height:auto;overflow:visible}
+  .chrome,.bar,.notes,.overview,.help{display:none!important}
+  .deck{height:auto}
+  .slide{display:flex!important;position:relative;inset:auto;page-break-after:always;
+  height:100vh;border:0}
+}
+</style></head><body>
+<div class="deck"><section class="slide" data-notes=""><h1 id="第12章-高级数据结构"><a class="anchor" href="#第12章-高级数据结构">#</a>第12章 高级数据结构</h1>
+<ul>
+<li>12.1 多维数组：特殊矩阵、稀疏矩阵</li>
+<li>12.2 广义表与<strong>存储管理</strong></li>
+<li>12.3 Trie 与 Patricia</li>
+<li>12.4 改进的二叉搜索树：最佳 BST、AVL、伸展树</li>
+</ul>
+<p>这一章的共同点：<strong>都是在前面某个结构上，为一类特定需求做的改造。</strong></p></section><section class="slide" data-notes="&lt;p&gt;可以给个数量级：大矩阵上，按行遍历和按列遍历的耗时可以差几倍到十几倍，
+而两者的渐进复杂度完全一样。这又是「渐进分析不是全部」的例子。&lt;/p&gt;"><h1 id="1211-多维数组怎么存"><a class="anchor" href="#1211-多维数组怎么存">#</a>12.1.1 多维数组怎么存</h1>
+<p>二维数组要压成一维，两种次序：</p>
+<div class="codeblock" data-lang="text"><pre><code>行优先:  a[i][j] 的偏移 = i * n + j        C/C++ 用这个
+列优先:  a[i][j] 的偏移 = j * m + i        Fortran 用这个</code></pre></div>
+<p><strong>这不只是约定</strong>：按行遍历一个行优先数组是顺序访存， 按列遍历就是每次跨 n 个元素——<strong>缓存命中率天差地别</strong>。</p></section><section class="slide" data-notes=""><h1 id="1212-特殊矩阵只存有用的"><a class="anchor" href="#1212-特殊矩阵只存有用的">#</a>12.1.2 特殊矩阵：只存有用的</h1>
+<figure><img loading="lazy" src="../../assets/ff4a0e68418ad4b3.jpg" alt="图 12.1 上三角矩阵和下三角矩阵"><figcaption>图 12.1 上三角矩阵和下三角矩阵</figcaption></figure>
+<p>对称矩阵、三角矩阵有大量重复或恒为常数的元素。 只存一半，用一个下标映射函数找回来：</p>
+<div class="codeblock" data-lang="text"><pre><code>下三角 (i &gt;= j):   偏移 = i*(i+1)/2 + j</code></pre></div>
+<p>空间从 <span class="math">n<sup><span class="upr">2</span></sup></span> 降到 <span class="math">n(n<span class="bin">+</span><span class="upr">1</span>)/<span class="upr">2</span></span>，<strong>代价是每次访问多算一次下标</strong>。</p></section><section class="slide" data-notes="&lt;p&gt;「十字」就是指每个结点有两根指针：右指针连同一行的下一个，
+下指针连同一列的下一个。
+
+代价：按行遍历和按列遍历都是 O(该行/列的非零数)，很快；
+但随机访问 a[i][j] 要沿链走，不再是 O(1)。&lt;/p&gt;"><h1 id="1213-稀疏矩阵十字链表"><a class="anchor" href="#1213-稀疏矩阵十字链表">#</a>12.1.3 稀疏矩阵：十字链表</h1>
+<figure><img loading="lazy" src="../../assets/7243968f87b4e75b.jpg" alt="图 12.2 稀疏矩阵的十字链表"><figcaption>图 12.2 稀疏矩阵的十字链表</figcaption></figure>
+<p>非零元素极少时，只存非零元。每个结点同时挂在<strong>行链</strong>和<strong>列链</strong>上。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/sparse_matrix/modern.hpp">code/ch12/sparse_matrix/modern.hpp#fn:get</a></div><pre><code>[[nodiscard]] <span class="t">int</span> get(std::<span class="t">size_t</span> row, std::<span class="t">size_t</span> col) <span class="k">const</span> {
+    check(row, col);
+    <span class="k">for</span> (<span class="k">const</span> Node* p = row_heads_[row]; p != <span class="k">nullptr</span> &amp;&amp; p-&gt;col &lt;= col; p = p-&gt;right) {
+        ++steps_;
+        <span class="k">if</span> (p-&gt;col == col) {
+            <span class="k">return</span> p-&gt;value;
+        }
+    }
+    <span class="k">return</span> <span class="n">0</span>;  <span class="c">// 没有存的位置就是零，不是错误</span>
+}</code></pre></div></section><section class="slide" data-notes=""><h1 id="1221-广义表"><a class="anchor" href="#1221-广义表">#</a>12.2.1 广义表</h1>
+<p>表里的元素<strong>可以是原子，也可以是另一张表</strong>：</p>
+<div class="codeblock" data-lang="text"><pre><code>A = ()              空表
+B = (a, (b, c))     第二个元素是子表
+C = (a, C)          递归表!</code></pre></div>
+<p>树是广义表的特例（子表不共享、不递归）。 <strong>广义表允许共享和递归</strong>——所以它不能用简单的递归析构。</p></section><section class="slide" data-notes="&lt;p&gt;这就是 shared_ptr 的原理。但本书&lt;strong&gt;手写&lt;/strong&gt;它，因为 12.2 的教学点正是
+「共享的存储怎么管」——用 shared_ptr 就把这一节删掉了。
+
+引用计数有个著名的软肋：&lt;strong&gt;收不回环&lt;/strong&gt;。C = (a, C) 这种递归表，
+引用计数永远不会归零。所以才有下一节的标记-清扫。&lt;/p&gt;"><h1 id="1222-共享带来的问题什么时候能删"><a class="anchor" href="#1222-共享带来的问题什么时候能删">#</a>12.2.2 共享带来的问题：什么时候能删</h1>
+<p>一张子表可能被多张表引用。<strong>谁负责释放？</strong></p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/gen_list/modern.hpp">code/ch12/gen_list/modern.hpp#fn:release</a></div><pre><code><span class="k">static</span> <span class="t">void</span> release(GenNode* node) <span class="k">noexcept</span> {
+    <span class="c">// 计数归零才真正删除；共享的子表因此只会被删一次。</span>
+    <span class="k">while</span> (node != <span class="k">nullptr</span> &amp;&amp; --node-&gt;refs == <span class="n">0</span>) {
+        GenNode* <span class="k">const</span> head = node-&gt;head;
+        GenNode* <span class="k">const</span> tail = node-&gt;tail;
+        <span class="k">delete</span> node;
+        <span class="c">// 表尾用循环走，长表不会把栈压穿；表头递归，深度由嵌套层数决定。</span>
+        release(head);
+        node = tail;
+    }
+}</code></pre></div>
+<p>答案：<strong>引用计数</strong>。每被引用一次加一，释放一次减一，减到 0 才真删。</p></section><section class="slide" data-notes="&lt;p&gt;适用前提是&lt;strong&gt;结点大小固定&lt;/strong&gt;——这样任何一个空闲结点都能满足任何一次分配，
+不需要挑，也不会产生碎片。下一页讲大小不定时怎么办。&lt;/p&gt;"><h1 id="1223-可利用空间表"><a class="anchor" href="#1223-可利用空间表">#</a>12.2.3 可利用空间表</h1>
+<p>系统的 <code>new</code>/<code>delete</code> 太通用也太慢。<strong>固定大小</strong>的结点可以自己管：</p>
+<div class="codeblock" data-lang="text"><pre><code>把释放的结点串成一条链  -&gt;  「可利用空间表」
+分配: 从链头摘一个       O(1), 不回到系统分配器
+释放: 挂回链头           O(1)
+链空了才向系统要一批</code></pre></div>
+<p>这就是<strong>对象池</strong>。代价：内存不还给系统。</p>
+<p>实现见 <code>code/ch12/optimal_bst/modern.hpp</code> 的 <code>ReusableNodePool</code>。</p></section><section class="slide" data-notes=""><h1 id="变长块的分配策略"><a class="anchor" href="#变长块的分配策略">#</a>变长块的分配策略</h1>
+<p>块大小不定时，从空闲块里挑哪一个？</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">策略</th>
+<th style="text-align:left">做法</th>
+<th style="text-align:left">特点</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><strong>首次适配</strong></td>
+<td style="text-align:left">从头找第一个够大的</td>
+<td style="text-align:left">快；小碎片堆在前端</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>最佳适配</strong></td>
+<td style="text-align:left">找最接近的</td>
+<td style="text-align:left">省空间；产生大量极小碎片</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>最差适配</strong></td>
+<td style="text-align:left">找最大的</td>
+<td style="text-align:left">剩下的块还够用；大块很快耗尽</td>
+</tr>
+</tbody></table></div>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/memory_allocator/modern.hpp">code/ch12/memory_allocator/modern.hpp#fit-strategies</a></div><pre><code><span class="c">/// 从空闲区里挑哪一块，原书 12.2.3 给了三种经典策略：</span>
+<span class="c">///</span>
+<span class="c">/// | 策略 | 挑哪块 | 后果 |</span>
+<span class="c">/// | --- | --- | --- |</span>
+<span class="c">/// | 首次适应 First | 从头扫，第一块够大的就用 | 最快；小碎片会在低地址堆积 |</span>
+<span class="c">/// | 最佳适应 Best | 刚好够用的**最小**块 | 省下的大块留着；剩下的碎片最碎 |</span>
+<span class="c">/// | 最坏适应 Worst | 当前**最大**的块 | 剩下的还大到能再用；大块很快被拆光 |</span>
+<span class="c">///</span>
+<span class="c">/// 三者只在「挑哪一块」这一步不同，分裂与合并完全一样。判断实现有没有写对，</span>
+<span class="c">/// 唯一的办法是造一组**大小不同的空闲块**，看三种策略是不是挑了不同的那一块——</span>
+<span class="c">/// 只在一块空闲区上测，三种策略的结果必然相同，那样的测试等于没写。</span>
+<span class="k">enum</span> <span class="k">class</span> Fit { First, Best, Worst };</code></pre></div></section><section class="slide" data-notes="&lt;p&gt;边界标识法（boundary tag）：在每块的头尾各放一个标记，
+这样释放时可以 O(1) 地看到左右邻居是不是空闲。
+本书的 BoundaryAllocator 就是它。&lt;/p&gt;"><h1 id="释放相邻空闲块要合并"><a class="anchor" href="#释放相邻空闲块要合并">#</a>释放：相邻空闲块要合并</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/memory_allocator/modern.hpp">code/ch12/memory_allocator/modern.hpp#fn:coalesce</a></div><pre><code><span class="c">/// 与左右两侧的空闲块合并。**先合右再合左**：先处理右边，左边的下标才不会失效。</span>
+<span class="c">/// 不合并的话，外部碎片只会越积越多——这是本节的正题。</span>
+<span class="t">void</span> coalesce(std::<span class="t">size_t</span> index) {
+    <span class="k">if</span> (index + <span class="n">1</span> &lt; blocks_.size() &amp;&amp; blocks_[index + <span class="n">1</span>].free) {
+        blocks_[index].size += blocks_[index + <span class="n">1</span>].size;
+        blocks_.erase(blocks_.begin() + <span class="k">static_cast</span>&lt;std::<span class="t">ptrdiff_t</span>&gt;(index) + <span class="n">1</span>);
+    }
+    <span class="k">if</span> (index &gt; <span class="n">0</span> &amp;&amp; blocks_[index - <span class="n">1</span>].free) {
+        blocks_[index - <span class="n">1</span>].size += blocks_[index].size;
+        blocks_.erase(blocks_.begin() + <span class="k">static_cast</span>&lt;std::<span class="t">ptrdiff_t</span>&gt;(index));
+    }
+}</code></pre></div>
+<p>不合并的话，一段连续内存会被切成越来越多的小块， 最后「总空闲量很大，却分配不出一个中等块」——<strong>外部碎片</strong>。</p></section><section class="slide" data-notes="&lt;p&gt;两个阶段：
+1. &lt;strong&gt;标记&lt;/strong&gt;：从根集合出发做一次可达性遍历，把能到的都打上标记；
+2. &lt;strong&gt;清扫&lt;/strong&gt;：扫一遍全部结点，没标记的回收，标记的清掉标记等下一轮。
+
+代价：清扫要扫全堆，而且通常要&lt;strong&gt;停下程序&lt;/strong&gt;（stop-the-world）。
+好处：环能被回收，因为环上的结点从根不可达。
+
+这就是 Java/Go 垃圾回收的最基本形态。&lt;/p&gt;"><h1 id="1224-标记-清扫收回环"><a class="anchor" href="#1224-标记-清扫收回环">#</a>12.2.4 标记-清扫：收回环</h1>
+<p>引用计数收不回环。另一条路：<strong>从根出发，能到达的都是活的，其余全收。</strong></p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/storage_recovery/modern.hpp">code/ch12/storage_recovery/modern.hpp#fn:mark</a></div><pre><code><span class="c">/// 标记阶段用**显式栈**，不用递归——对象图可以很深，</span>
+<span class="c">/// 而 GC 恰恰是在内存吃紧时跑的，那时最不该再去吃调用栈（D-001 §2b 同一个判据）。</span>
+<span class="t">void</span> mark(<span class="k">const</span> std::vector&lt;Node*&gt;&amp; roots) {
+    std::vector&lt;Node*&gt; pending;
+    <span class="k">for</span> (Node* root : roots) {
+        <span class="k">if</span> (root != <span class="k">nullptr</span> &amp;&amp; !root-&gt;marked) {
+            root-&gt;marked = <span class="k">true</span>;
+            pending.push_back(root);
+        }
+    }
+    <span class="k">while</span> (!pending.empty()) {
+        Node* node = pending.back();
+        pending.pop_back();
+        <span class="k">for</span> (Node* next : node-&gt;edges) {
+            <span class="k">if</span> (next != <span class="k">nullptr</span> &amp;&amp; !next-&gt;marked) {
+                next-&gt;marked = <span class="k">true</span>;   <span class="c">// 先标记再入栈：环不会让这里转不出来</span>
+                pending.push_back(next);
+            }
+        }
+    }
+}</code></pre></div></section><section class="slide" data-notes=""><h1 id="123-trie按字符分层"><a class="anchor" href="#123-trie按字符分层">#</a>12.3 Trie：按字符分层</h1>
+<p>不比较整个键，而是<strong>一层一个字符</strong>往下走。</p>
+<div class="codeblock" data-lang="text"><pre><code>插入 do, dog, dozen:
+
+        root
+         |d
+        (d)
+         |o
+        (o)*         &lt;- do 到此结束
+        /   \
+      g/     \z
+    (g)*     (z)
+              |e
+             (e)
+              |n
+             (n)*</code></pre></div>
+<p>查找代价只与<strong>键的长度</strong>有关，与集合大小无关。</p></section><section class="slide" data-notes="&lt;p&gt;Trie 的代价：分支因子大时（比如 26 个字母）结点极其臃肿，
+而且大量结点只有一个孩子（长的公共后缀）。
+
+两条改进：
+1. 只用 0/1 分支（二叉 Trie），把字符按位拆开；
+2. 把「只有一个孩子」的链压成一个结点——这就是 PATRICIA。&lt;/p&gt;"><h1 id="最长前缀匹配"><a class="anchor" href="#最长前缀匹配">#</a>最长前缀匹配</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/trie/modern.hpp">code/ch12/trie/modern.hpp#trie-longest-prefix</a></div><pre><code><span class="c">/// 最长前缀匹配：走到走不动为止，回退到最近的词尾。IP 路由查表就是这个动作。</span>
+[[nodiscard]] std::string longest_prefix_of(std::string_view text) <span class="k">const</span> {
+    <span class="k">const</span> Node* node = &amp;root_;
+    std::<span class="t">size_t</span> best = <span class="n">0</span>;
+    <span class="k">for</span> (std::<span class="t">size_t</span> i = <span class="n">0</span>; i &lt; text.size(); ++i) {
+        <span class="k">if</span> (!is_letter(text[i])) {
+            <span class="k">break</span>;
+        }
+        <span class="k">const</span> Node* next = node-&gt;children[index_of(text[i])].get();
+        <span class="k">if</span> (next == <span class="k">nullptr</span>) {
+            <span class="k">break</span>;
+        }
+        node = next;
+        <span class="k">if</span> (node-&gt;terminal) {
+            best = i + <span class="n">1</span>;
+        }
+    }
+    <span class="k">return</span> std::string(text.substr(<span class="n">0</span>, best));
+}</code></pre></div>
+<p><strong>走不动就回退到最近一个词尾</strong>——路由表的最长前缀匹配就是这个。</p></section><section class="slide" data-notes=""><h1 id="patricia把单孩子链压掉"><a class="anchor" href="#patricia把单孩子链压掉">#</a>Patricia：把单孩子链压掉</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/trie/modern.hpp">code/ch12/trie/modern.hpp#patricia-bits</a></div><pre><code><span class="k">static</span> <span class="t">bool</span> bit_of(std::string_view key, std::<span class="t">size_t</span> index) <span class="k">noexcept</span> {
+    <span class="k">const</span> std::<span class="t">size_t</span> byte = index / <span class="n">8</span>;
+    <span class="k">if</span> (byte &gt;= key.size()) {
+        <span class="k">return</span> <span class="k">false</span>;  <span class="c">// 越过关键码长度，一律读 0</span>
+    }
+    <span class="k">const</span> <span class="k">auto</span> value = <span class="k">static_cast</span>&lt;<span class="t">unsigned</span> <span class="t">char</span>&gt;(key[byte]);
+    <span class="k">return</span> ((value &gt;&gt; (<span class="n">7</span> - index % <span class="n">8</span>)) &amp; <span class="n">1U</span>) != <span class="n">0</span>;
+}
+
+<span class="k">static</span> optional_bit first_differing_bit(std::string_view a, std::string_view b) {
+    <span class="k">const</span> std::<span class="t">size_t</span> longest = a.size() &gt; b.size() ? a.size() : b.size();
+    <span class="k">const</span> std::<span class="t">size_t</span> bits = (longest + <span class="n">1</span>) * <span class="n">8</span>;  <span class="c">// +1 让「一个是另一个的前缀」也能分开</span>
+    <span class="k">for</span> (std::<span class="t">size_t</span> i = <span class="n">0</span>; i &lt; bits; ++i) {
+        <span class="k">if</span> (bit_of(a, i) != bit_of(b, i)) {
+            <span class="k">return</span> {<span class="k">true</span>, i};
+        }
+    }
+    <span class="k">return</span> {};
+}</code></pre></div>
+<p>每个内部结点记「从第几位开始不同」，<strong>直接跳过公共前缀</strong>。</p>
+<p>结点数从「键的总长度」降到「键的个数」。</p></section><section class="slide" data-notes=""><h1 id="1241-最佳二叉搜索树"><a class="anchor" href="#1241-最佳二叉搜索树">#</a>12.4.1 最佳二叉搜索树</h1>
+<p>如果<strong>预先知道</strong>每个键的访问频率，可以让高频键离根更近。</p>
+<p>这是一道典型的<strong>动态规划</strong>：</p>
+<div class="codeblock" data-lang="text"><pre><code>c[i][j] = 键 i..j 构成的子树的最小代价
+
+c[i][j] = min over k in [i,j] (  c[i][k-1] + c[k+1][j]  ) + w[i..j]
+                                  左子树       右子树      这段的总频率</code></pre></div>
+<p><strong>最后那项 <code>w[i..j]</code> 最难想</strong>：子树整体下沉一层， 里面每个键的深度都加 1，总代价就加上它们的频率之和。</p>
+<p>代价 <span class="math">O(n<sup><span class="upr">3</span></sup>)</span>，可用四边形不等式优化到 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>。 实现见 <code>code/ch12/optimal_bst/modern.hpp</code>。</p></section><section class="slide" data-notes="&lt;p&gt;插入后若失衡，只需在&lt;strong&gt;最低的失衡结点&lt;/strong&gt;上做一次旋转（单旋或双旋）即可修复，
+O(1) 次旋转。删除可能需要一路旋转到根，O(log n) 次。
+
+四种情形：LL 右单旋、RR 左单旋、LR 先左后右、RL 先右后左。
+可以在黑板上画一遍 LL 和 LR，另外两种对称。&lt;/p&gt;"><h1 id="1242-avl-树靠旋转维持平衡"><a class="anchor" href="#1242-avl-树靠旋转维持平衡">#</a>12.4.2 AVL 树：靠旋转维持平衡</h1>
+<p>BST 最坏会退化成一条链。<strong>AVL 的约束</strong>：任何结点左右子树高度差不超过 1。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/balanced_trees/modern.hpp">code/ch12/balanced_trees/modern.hpp#fn:balance_factor</a></div><pre><code><span class="c">/// 平衡因子：右子树高 − 左子树高。绝对值超过 1 就要旋转。</span>
+<span class="k">static</span> <span class="t">int</span> balance_factor(<span class="k">const</span> std::unique_ptr&lt;Node&gt;&amp; node) {
+    <span class="k">return</span> node ? height_of(node-&gt;right) - height_of(node-&gt;left) : <span class="n">0</span>;
+}</code></pre></div>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/balanced_trees/modern.hpp">code/ch12/balanced_trees/modern.hpp#fn:rotate_left</a></div><pre><code><span class="k">static</span> std::unique_ptr&lt;Node&gt; rotate_left(std::unique_ptr&lt;Node&gt; x) {
+    <span class="k">auto</span> y = std::move(x-&gt;right);
+    x-&gt;right = std::move(y-&gt;left);
+    refresh(x.get());
+    y-&gt;left = std::move(x);
+    refresh(y.get());
+    <span class="k">return</span> y;
+}
+
+<span class="k">static</span> <span class="t">void</span> rotate_left(std::unique_ptr&lt;Node&gt;&amp; t) {
+    <span class="k">auto</span> r = std::move(t-&gt;right);
+    t-&gt;right = std::move(r-&gt;left);
+    r-&gt;left = std::move(t);
+    t = std::move(r);
+}</code></pre></div></section><section class="slide" data-notes="&lt;p&gt;额外好处：刚访问过的元素在根附近，天然适合有局部性的访问模式——
+这一点 AVL 给不了。
+实现见 code/ch12/balanced_trees/modern.hpp 的 splay。&lt;/p&gt;"><h1 id="1243-伸展树不存平衡信息"><a class="anchor" href="#1243-伸展树不存平衡信息">#</a>12.4.3 伸展树：不存平衡信息</h1>
+<p>AVL 每个结点要存高度或平衡因子。<strong>伸展树一个字节都不存。</strong></p>
+<p>规则：<strong>每次访问一个结点，就把它旋转到根</strong>（splay）。</p>
+<div class="codeblock" data-lang="text"><pre><code>zig       父亲就是根        -&gt; 单旋一次
+zig-zig   与父亲同向        -&gt; 先转**父亲**, 再转自己
+zig-zag   与父亲异向        -&gt; 先转自己, 再转自己</code></pre></div>
+<p><strong>关键是 zig-zig 那一行</strong>：先转父亲再转自己，而不是连着转两次自己。 正是这个「成对」让树的深度被摊还地压下来。</p>
+<p>单次可能 <span class="math">O(n)</span>，但<strong>任意 m 次操作的摊还代价是 <span class="math">O(m&thinsp;<span class="upr">log</span>&thinsp;n)</span></strong>。</p></section><section class="slide" data-notes=""><h1 id="三种改进的-bst-对照"><a class="anchor" href="#三种改进的-bst-对照">#</a>三种改进的 BST 对照</h1>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left"></th>
+<th style="text-align:left">最佳 BST</th>
+<th style="text-align:left">AVL</th>
+<th style="text-align:left">伸展树</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">需要什么</td>
+<td style="text-align:left"><strong>预知</strong>访问频率</td>
+<td style="text-align:left">每结点存平衡信息</td>
+<td style="text-align:left">什么都不存</td>
+</tr>
+<tr>
+<td style="text-align:left">单次代价</td>
+<td style="text-align:left"><span class="math">O(<span class="upr">log</span>&thinsp;n)</span></td>
+<td style="text-align:left"><span class="math">O(<span class="upr">log</span>&thinsp;n)</span></td>
+<td style="text-align:left">最坏 <span class="math">O(n)</span></td>
+</tr>
+<tr>
+<td style="text-align:left">摊还代价</td>
+<td style="text-align:left">—</td>
+<td style="text-align:left"><span class="math">O(<span class="upr">log</span>&thinsp;n)</span></td>
+<td style="text-align:left"><span class="math">O(<span class="upr">log</span>&thinsp;n)</span></td>
+</tr>
+<tr>
+<td style="text-align:left">构造</td>
+<td style="text-align:left"><span class="math">O(n<sup><span class="upr">3</span></sup>)</span> 动态规划</td>
+<td style="text-align:left">边插边转</td>
+<td style="text-align:left">边访问边转</td>
+</tr>
+<tr>
+<td style="text-align:left">适合</td>
+<td style="text-align:left">静态、频率已知</td>
+<td style="text-align:left">通用</td>
+<td style="text-align:left">访问有<strong>局部性</strong></td>
+</tr>
+</tbody></table></div></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
+<ul>
+<li>多维数组的存储次序影响<strong>缓存</strong>，渐进复杂度看不出来</li>
+<li>稀疏矩阵用十字链表：行列遍历快，随机访问变慢</li>
+<li>广义表允许<strong>共享和递归</strong> → 引用计数管共享，标记-清扫收环</li>
+<li>变长块分配要选<strong>适配策略</strong>，释放要<strong>合并相邻空闲块</strong></li>
+<li>Trie 的代价只与<strong>键长</strong>有关；Patricia 压掉单孩子链</li>
+<li>最佳 BST 用动态规划；AVL 靠旋转；<strong>伸展树什么都不存，靠摊还</strong></li>
+</ul></section><section class="slide" data-notes=""><h1 id="上机"><a class="anchor" href="#上机">#</a>上机</h1>
+<div class="codeblock" data-lang="bash"><pre><code>python3 tools/check_code.py code/ch12/trie
+python3 tools/check_code.py code/ch12/balanced_trees</code></pre></div>
+<ul>
+<li>给同一组键分别建 Trie 和 Patricia，比一比结点数</li>
+<li>往 AVL 里按<strong>升序</strong>插入 1..1000，量一下树高（对比普通 BST）</li>
+<li>在伸展树上反复访问同一个键，看它是不是一直在根附近</li>
+</ul>
+<blockquote><p>平衡树的测试里有一条不变量检查：每次插入删除后都验证 「任何结点左右子树高度差不超过 1」。</p></blockquote></section></div>
+<div class="bar"></div>
+<div class="notes"></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第12章 高级数据结构</div><div class="thumb"><div class="no">2</div>12.1.1 多维数组怎么存</div><div class="thumb"><div class="no">3</div>12.1.2 特殊矩阵：只存有用的</div><div class="thumb"><div class="no">4</div>12.1.3 稀疏矩阵：十字链表</div><div class="thumb"><div class="no">5</div>12.2.1 广义表</div><div class="thumb"><div class="no">6</div>12.2.2 共享带来的问题：什么时候能删</div><div class="thumb"><div class="no">7</div>12.2.3 可利用空间表</div><div class="thumb"><div class="no">8</div>变长块的分配策略</div><div class="thumb"><div class="no">9</div>释放：相邻空闲块要合并</div><div class="thumb"><div class="no">10</div>12.2.4 标记-清扫：收回环</div><div class="thumb"><div class="no">11</div>12.3 Trie：按字符分层</div><div class="thumb"><div class="no">12</div>最长前缀匹配</div><div class="thumb"><div class="no">13</div>Patricia：把单孩子链压掉</div><div class="thumb"><div class="no">14</div>12.4.1 最佳二叉搜索树</div><div class="thumb"><div class="no">15</div>12.4.2 AVL 树：靠旋转维持平衡</div><div class="thumb"><div class="no">16</div>12.4.3 伸展树：不存平衡信息</div><div class="thumb"><div class="no">17</div>三种改进的 BST 对照</div><div class="thumb"><div class="no">18</div>本章小结</div><div class="thumb"><div class="no">19</div>上机</div></div>
+<div class="help"><div>
+<p><b>放映快捷键</b></p>
+<p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
+<p><kbd>N</kbd>演讲者备注　<kbd>O</kbd>缩略图总览　<kbd>F</kbd>全屏　<kbd>D</kbd>深色</p>
+<p><kbd>?</kbd>这张帮助　<kbd>Esc</kbd>关闭</p>
+<p style="color:var(--muted);font-size:.9em">
+导出 PDF：浏览器打印（Ctrl/Cmd+P），每页一张幻灯片。</p>
+</div></div>
+<div class="chrome">
+<b>第12章 高级数据结构</b><span>现代 C++ 数据结构教程</span>
+<span class="grow"></span>
+<a href="index.html" style="color:var(--muted)">目录</a>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 19</b>
+</div>
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var total=slides.length, at=0;
+  var bar=document.querySelector('.bar'), now=document.getElementById('now');
+  var notes=document.querySelector('.notes'), over=document.querySelector('.overview');
+  var help=document.querySelector('.help');
+  function show(n,push){
+    at=Math.max(0,Math.min(total-1,n));
+    slides.forEach(function(s,i){s.classList.toggle('current',i===at);});
+    bar.style.width=((at+1)/total*100)+'%';
+    now.textContent=(at+1)+' / '+total;
+    notes.innerHTML=slides[at].getAttribute('data-notes')||'';
+    document.querySelectorAll('.thumb').forEach(function(t,i){
+      t.classList.toggle('here',i===at);});
+    if(push!==false){history.replaceState(null,'','#'+(at+1));}
+    slides[at].scrollTop=0;
+  }
+  function go(d){show(at+d);}
+  document.addEventListener('keydown',function(e){
+    if(e.metaKey||e.ctrlKey||e.altKey)return;
+    var k=e.key;
+    if(help.classList.contains('on')&&k!=='?'){help.classList.remove('on');return;}
+    if(over.classList.contains('on')&&(k==='Escape'||k==='o'||k==='O')){
+      over.classList.remove('on');return;}
+    if(k==='ArrowRight'||k==='PageDown'||k===' '||k==='j'){go(1);e.preventDefault();}
+    else if(k==='ArrowLeft'||k==='PageUp'||k==='k'){go(-1);e.preventDefault();}
+    else if(k==='Home'){show(0);}
+    else if(k==='End'){show(total-1);}
+    else if(k==='n'||k==='N'){notes.classList.toggle('on');}
+    else if(k==='o'||k==='O'){over.classList.toggle('on');}
+    else if(k==='d'||k==='D'){
+      var dark=document.documentElement.getAttribute('data-theme')==='dark';
+      document.documentElement.setAttribute('data-theme',dark?'light':'dark');}
+    else if(k==='f'||k==='F'){
+      if(document.fullscreenElement){document.exitFullscreen();}
+      else{document.documentElement.requestFullscreen();}}
+    else if(k==='?'){help.classList.toggle('on');}
+  });
+  document.querySelectorAll('.thumb').forEach(function(t,i){
+    t.addEventListener('click',function(){over.classList.remove('on');show(i);});});
+  window.addEventListener('hashchange',function(){
+    var n=parseInt(location.hash.slice(1),10);
+    if(n>=1&&n<=total)show(n-1,false);});
+  var start=parseInt(location.hash.slice(1),10);
+  show(start>=1&&start<=total?start-1:0,false);
+})();
+</script>
+</body></html>

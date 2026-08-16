@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第2章 线性表</title>
+<style>
+:root{--bg:#fdfdfc;--fg:#1a1a18;--muted:#6b6b66;--line:#dcdcd6;--accent:#8a4b2a;
+--code-bg:#f5f4f0;--kw:#8a4b2a;--ty:#2c6b57;--st:#7a5c1e;--cm:#8a8a84;--nu:#4a5aa8}
+:root[data-theme="dark"]{--bg:#16161a;--fg:#ececea;--muted:#a0a09a;--line:#33333a;
+--accent:#e0a074;--code-bg:#1e1e24;--kw:#e0a074;--ty:#7fd0b0;--st:#d8c088;--cm:#7a7a84;--nu:#9ab0f0}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--fg)}
+body{font-family:-apple-system,"Segoe UI","Noto Sans CJK SC","Source Han Sans SC",
+"Microsoft YaHei",sans-serif;overflow:hidden}
+.deck{position:relative;height:100vh}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;
+padding:4.2vmin 6vmin 9vmin;overflow:auto}
+.slide.current{display:flex}
+.slide .anchor{display:none}
+.slide h1{font-size:clamp(26px,4.4vmin,52px);margin:0 0 3vmin;line-height:1.25;
+letter-spacing:-.01em;border-bottom:3px solid var(--accent);padding-bottom:1.6vmin}
+.slide h2{font-size:clamp(20px,3.1vmin,34px);margin:2.4vmin 0 1.2vmin}
+.slide h3{font-size:clamp(17px,2.5vmin,27px);margin:2vmin 0 1vmin;color:var(--muted)}
+.slide p,.slide li{font-size:clamp(15px,2.5vmin,28px);line-height:1.55;margin:.7vmin 0}
+.slide ul,.slide ol{margin:1vmin 0;padding-left:3.4vmin}
+.slide li{margin:.9vmin 0}
+.slide strong{color:var(--accent)}
+.slide blockquote{margin:1.6vmin 0;padding:.6vmin 0 .6vmin 2.4vmin;
+border-left:4px solid var(--line);color:var(--muted)}
+.slide table{border-collapse:collapse;font-size:clamp(13px,2.1vmin,23px);margin:1.4vmin 0}
+.slide th,.slide td{border:1px solid var(--line);padding:.7vmin 1.4vmin;text-align:left}
+.slide th{background:var(--code-bg)}
+.table-wrap{overflow-x:auto;max-width:100%}
+.slide img{max-width:100%;max-height:52vh;object-fit:contain;display:block;margin:1.4vmin auto}
+.codeblock{background:var(--code-bg);border:1px solid var(--line);border-radius:6px;
+margin:1.4vmin 0;overflow:hidden}
+.codeblock pre{margin:0;padding:1.6vmin 2vmin;overflow-x:auto}
+.codeblock code{font-family:"SF Mono",Menlo,Consolas,"Noto Sans Mono CJK SC",monospace;
+font-size:clamp(11px,1.95vmin,21px);line-height:1.5;white-space:pre}
+.srcbar{font-size:clamp(9px,1.3vmin,13px);padding:.5vmin 2vmin;color:var(--muted);
+border-bottom:1px solid var(--line);font-family:"SF Mono",Menlo,monospace}
+.srcbar a{color:var(--muted);text-decoration:none}
+.k{color:var(--kw)}.t{color:var(--ty)}.s{color:var(--st)}.c{color:var(--cm);font-style:italic}
+.n{color:var(--nu)}.p{color:var(--fg)}
+.math{font-style:italic}.math-display{text-align:center;margin:2vmin 0;
+font-size:clamp(16px,2.8vmin,30px)}
+.upr{font-style:normal}.bold{font-weight:700}
+code{background:var(--code-bg);padding:.1em .34em;border-radius:4px;
+font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.86em}
+hr{border:0;border-top:1px solid var(--line);margin:2vmin 0}
+.chrome{position:fixed;left:0;right:0;bottom:0;height:5.4vmin;min-height:26px;
+display:flex;align-items:center;gap:1.6vmin;padding:0 2vmin;
+border-top:1px solid var(--line);background:var(--bg);font-size:clamp(10px,1.6vmin,15px);
+color:var(--muted)}
+.chrome .grow{flex:1}
+.chrome b{color:var(--fg);font-weight:600}
+.bar{position:fixed;left:0;bottom:0;height:3px;background:var(--accent);
+transition:width .18s ease;z-index:5}
+.notes{position:fixed;left:0;right:0;bottom:5.4vmin;max-height:34vh;overflow:auto;
+padding:1.6vmin 2.4vmin;background:var(--code-bg);border-top:2px solid var(--accent);
+font-size:clamp(13px,2vmin,20px);line-height:1.5;display:none}
+.notes.on{display:block}
+.notes p{margin:.5em 0}
+.notes:before{content:"演讲者备注";display:block;font-size:.72em;letter-spacing:.08em;
+color:var(--accent);margin-bottom:.5em}
+.overview{position:fixed;inset:0;background:var(--bg);overflow:auto;padding:3vmin;
+display:none;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1.6vmin;z-index:20}
+.overview.on{display:grid}
+.thumb{border:2px solid var(--line);border-radius:6px;padding:1.2vmin;cursor:pointer;
+font-size:13px;line-height:1.35;min-height:88px;overflow:hidden;background:var(--bg)}
+.thumb:hover{border-color:var(--accent)}
+.thumb.here{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.thumb .no{color:var(--muted);font-size:11px}
+.help{position:fixed;inset:0;background:rgba(0,0,0,.62);display:none;z-index:30;
+align-items:center;justify-content:center}
+.help.on{display:flex}
+.help div{background:var(--bg);padding:3vmin 4vmin;border-radius:10px;max-width:520px;
+font-size:15px;line-height:1.9}
+.help kbd{background:var(--code-bg);border:1px solid var(--line);border-radius:4px;
+padding:.1em .5em;font-family:monospace;margin-right:.6em}
+@media print{
+  html,body{height:auto;overflow:visible}
+  .chrome,.bar,.notes,.overview,.help{display:none!important}
+  .deck{height:auto}
+  .slide{display:flex!important;position:relative;inset:auto;page-break-after:always;
+  height:100vh;border:0}
+}
+</style></head><body>
+<div class="deck"><section class="slide" data-notes="&lt;p&gt;这一章是全书第一个「同一 ADT 两种实现」的例子，后面每一章都会重复这个模式。
+让学生带着一个问题听：什么时候该用哪个？答案在 2.4 节，但过程比答案重要。&lt;/p&gt;"><h1 id="第2章-线性表"><a class="anchor" href="#第2章-线性表">#</a>第2章 线性表</h1>
+<p><strong>一串同类型元素，排成唯一的先后次序</strong></p>
+<ul>
+<li>顺序表：元素连续放在数组里</li>
+<li>链表：用链接保存相邻关系</li>
+</ul>
+<p>一条主线：<strong>同一个逻辑结构，两种存储结构，代价完全不同</strong>。</p></section><section class="slide" data-notes="&lt;p&gt;这张表可以贴在黑板一角，整章都指着它讲。
+最后一行的对比是本章的落点：顺序表和链表在「插入」上都是 O(n)，
+但慢的原因完全不同，所以适用场合也不同。&lt;/p&gt;"><h1 id="21-线性表的抽象数据类型"><a class="anchor" href="#21-线性表的抽象数据类型">#</a>2.1 线性表的抽象数据类型</h1>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">运算</th>
+<th style="text-align:left">含义</th>
+<th style="text-align:left">顺序表</th>
+<th style="text-align:left">链表</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><code>at(i)</code></td>
+<td style="text-align:left">按下标取值</td>
+<td style="text-align:left"><strong>O(1)</strong></td>
+<td style="text-align:left">O(n)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>find(x)</code></td>
+<td style="text-align:left">按内容查位置</td>
+<td style="text-align:left">O(n)</td>
+<td style="text-align:left">O(n)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>insert(i, x)</code></td>
+<td style="text-align:left">在位置 i 插入</td>
+<td style="text-align:left">O(n) 搬元素</td>
+<td style="text-align:left">O(n) 找前驱</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>remove(i)</code></td>
+<td style="text-align:left">删除位置 i</td>
+<td style="text-align:left">O(n) 搬元素</td>
+<td style="text-align:left">O(n) 找前驱</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>append(x)</code></td>
+<td style="text-align:left">表尾追加</td>
+<td style="text-align:left">摊还 O(1)</td>
+<td style="text-align:left">O(1)（有尾指针）</td>
+</tr>
+</tbody></table></div>
+<p><strong>两个 O(n) 不是同一回事</strong>：一个在搬数据，一个在走指针。</p></section><section class="slide" data-notes="&lt;p&gt;本书把这组运算直接定义在 ArrayList&amp;lt;T&amp;gt; 上，不另设基类——
+理由和第 3 章一样：空基类给不了多态，却会带来非虚析构的未定义行为。&lt;/p&gt;"><h1 id="原书这里编译不过"><a class="anchor" href="#原书这里编译不过">#</a>原书这里编译不过</h1>
+<p>原书用一个类模板 <code>List&lt;T&gt;</code> 写这组运算，那份清单有两处硬伤：</p>
+<div class="codeblock" data-lang="text"><pre><code>bool delete(const int p);        &lt;- delete 是 C++ 关键字, 不能作函数名
+class List { void clear(); ... } &lt;- 通篇没有 public:</code></pre></div>
+<p>第二条尤其值得停一下：<code>class</code> 的默认访问权限是 private， 于是这个<strong>抽象数据类型的每一个运算都调不到</strong>。</p>
+<p><strong>一个所有运算都私有的 ADT，语法上成立，语义上是空的。</strong></p></section><section class="slide" data-notes=""><h1 id="22-顺序表地址公式"><a class="anchor" href="#22-顺序表地址公式">#</a>2.2 顺序表：地址公式</h1>
+<p>元素连续存放，每个占 L 个单元，首地址 b：</p>
+<div class="math math-display"><span class="upr">loc</span>(k<sub>i</sub>)<span class="rel">=</span>b<span class="bin">+</span>i<span class="bin">×</span>L</div>
+<p><strong>只要知道基地址，任一元素的地址都能直接算出来</strong>—— 所以按下标取值是 O(1)。这就是「随机存取」。</p>
+<p>物理相邻表示了逻辑相邻。</p></section><section class="slide" data-notes=""><h1 id="教学版三个成员"><a class="anchor" href="#教学版三个成员">#</a>教学版：三个成员</h1>
+<div class="codeblock" data-lang="text"><pre><code>T* data_;             指向底层数组
+size_type capacity_;  数组能放多少个
+size_type size_;      现在放了几个</code></pre></div>
+<p>整份实现在 <code>code/ch02/array_list/teaching.hpp</code>——一个文件、一个类。</p>
+<p>后面几页把它拆开逐段看。</p></section><section class="slide" data-notes="&lt;p&gt;为什么越界是「抛异常」而不是「返回 optional」？
+因为它不是可预期状态：调用方给了一个不存在的位置，那是调用方的 bug。
+可预期的「没有」（比如 find 找不到）才用 optional。这条口径全书统一。&lt;/p&gt;"><h1 id="按下标取值与改值"><a class="anchor" href="#按下标取值与改值">#</a>按下标取值与改值</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/teaching.hpp">code/ch02/array_list/teaching.hpp#fn:at</a></div><pre><code><span class="c">// 按下标读取，O(1)——这是顺序表相对链表的看家本领。</span>
+<span class="c">// 下标非法是**调用方的错误**，不是可预期状态，所以抛异常而不是返回 optional。</span>
+<span class="k">const</span> T&amp; at(size_type index) <span class="k">const</span> {
+    <span class="k">if</span> (index &gt;= size_) {
+        <span class="k">throw</span> std::out_of_range(<span class="s">&quot;ArrayList::at: 下标越界&quot;</span>);
+    }
+    <span class="k">return</span> data_[index];
+}
+
+T&amp; at(size_type index) {
+    <span class="k">if</span> (index &gt;= size_) {
+        <span class="k">throw</span> std::out_of_range(<span class="s">&quot;ArrayList::at: 下标越界&quot;</span>);
+    }
+    <span class="k">return</span> data_[index];
+}</code></pre></div>
+<p>先查下标合不合法，然后直接 <code>data_[index]</code>，<strong>没有循环</strong>。</p>
+<p>越界抛 <code>std::out_of_range</code>——原书是打印一行再返回 false。</p></section><section class="slide" data-notes=""><h1 id="按内容查找没找到怎么说"><a class="anchor" href="#按内容查找没找到怎么说">#</a>按内容查找：「没找到」怎么说</h1>
+<p>原书的签名是：</p>
+<div class="codeblock" data-lang="text"><pre><code>bool getPos(int&amp; p, const T value);</code></pre></div>
+<p>一次调用带回两件事：找没找到（返回值）、在第几位（出参 p）。</p>
+<div class="codeblock" data-lang="text"><pre><code>int p;
+list.getPos(p, 20);     // 忘了看返回值
+use(p);                 // 用的是一个从没被写过的 p</code></pre></div>
+<p><strong>程序不崩，只是默默按错误的下标继续跑。</strong></p></section><section class="slide" data-notes="&lt;p&gt;对空盒子直接 * 取值是未定义行为，用 .value() 取会抛 bad_optional_access。
+两条路都不会像 int p 那样悄悄给你一个看似正常的垃圾值。
+
+一句话：原来靠调用方自觉，现在靠类型系统。&lt;/p&gt;"><h1 id="现代写法把两件事合成一个"><a class="anchor" href="#现代写法把两件事合成一个">#</a>现代写法：把两件事合成一个</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/teaching.hpp">code/ch02/array_list/teaching.hpp#fn:find</a></div><pre><code><span class="c">// 按内容查找，O(n)。找到返回下标，没找到返回空 optional。</span>
+<span class="c">// 原书【算法2.3】用 `bool getPos(int&amp; p, const T value)`：忘了看返回值，</span>
+<span class="c">// 就会读到一个从没被写过的 p。这里「找没找到」是返回值类型的一部分。</span>
+std::optional&lt;size_type&gt; find(<span class="k">const</span> T&amp; value) <span class="k">const</span> {
+    <span class="k">for</span> (size_type i = <span class="n">0</span>; i &lt; size_; ++i) {
+        <span class="k">if</span> (data_[i] == value) {
+            <span class="k">return</span> i;
+        }
+    }
+    <span class="k">return</span> std::nullopt;
+}</code></pre></div>
+<p><code>std::optional&lt;size_type&gt;</code> 是一个「可能装着下标的盒子」： 找到了盒子里是下标，没找到盒子是空的。</p>
+<p><strong>取值必须先开盒</strong>，而开盒这一步绕不过去。</p></section><section class="slide" data-notes="&lt;p&gt;循环&lt;strong&gt;倒着走&lt;/strong&gt;是考点：若改成从 pos 起递增地 data_[i+1] = data_[i]，
+第一次搬完就把 data_[pos+1] 覆盖掉了，后面搬的全是同一个值。
+现场改一下演示，效果很好。&lt;/p&gt;"><h1 id="插入搬-on-个元素"><a class="anchor" href="#插入搬-on-个元素">#</a>插入：搬 O(n) 个元素</h1>
+<figure><img loading="lazy" src="../../assets/995a8257623869d1.jpg" alt="图 2.7 插入算法示意图"><figcaption>图 2.7 插入算法示意图</figcaption></figure>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/teaching.hpp">code/ch02/array_list/teaching.hpp#fn:insert</a></div><pre><code><span class="c">// 在位置 pos 插入，pos 可以等于 size()（追加到表尾）。</span>
+<span class="c">// 代价 O(n)：pos 之后的元素都要右移一位。这正是顺序表与链表要对比的地方。</span>
+<span class="t">void</span> insert(size_type pos, <span class="k">const</span> T&amp; value) {
+    <span class="k">if</span> (pos &gt; size_) {
+        <span class="k">throw</span> std::out_of_range(<span class="s">&quot;ArrayList::insert: 插入位置非法&quot;</span>);
+    }
+    <span class="k">if</span> (size_ == capacity_) {
+        grow();
+    }
+    <span class="k">for</span> (size_type i = size_; i &gt; pos; --i) {
+        data_[i] = data_[i - <span class="n">1</span>];   <span class="c">// 从后往前搬，否则会自己覆盖自己</span>
+    }
+    data_[pos] = value;
+    ++size_;
+}</code></pre></div></section><section class="slide" data-notes=""><h1 id="扩容翻倍不是加一"><a class="anchor" href="#扩容翻倍不是加一">#</a>扩容：翻倍，不是加一</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/teaching.hpp">code/ch02/array_list/teaching.hpp#fn:grow</a></div><pre><code><span class="c">// 扩容：申请两倍大的新数组，搬过去，再释放旧的。</span>
+<span class="c">// 翻倍而不是加一，才能让 append 的摊还代价保持 O(1)。</span>
+<span class="t">void</span> grow() {
+    size_type next = (capacity_ == <span class="n">0</span>) ? <span class="n">1</span> : capacity_ * <span class="n">2</span>;
+    T* fresh = <span class="k">new</span> T[next];
+    <span class="k">for</span> (size_type i = <span class="n">0</span>; i &lt; size_; ++i) {
+        fresh[i] = data_[i];
+    }
+    <span class="k">delete</span>[] data_;       <span class="c">// 先搬完再释放旧的，顺序反了就会读到已释放的内存</span>
+    data_ = fresh;
+    capacity_ = next;
+}</code></pre></div>
+<ul>
+<li>加一：追加 n 个元素总共搬 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span> 次</li>
+<li>翻倍：总搬运次数 <span class="math">&lt;<span class="upr">2</span>n</span>，平摊到每次是<strong>常数</strong></li>
+</ul>
+<p><code>delete[]</code> 必须在搬完之后——顺序反了就是读已释放的内存。</p></section><section class="slide" data-notes="&lt;p&gt;这次循环&lt;strong&gt;正着走&lt;/strong&gt;。另外它多做一件事：把被删的元素返回给调用方。
+原书的 delete 返回 bool，被删的值就此丢失，调用方得先 getValue 再 delete 两步走。&lt;/p&gt;"><h1 id="删除插入的镜像"><a class="anchor" href="#删除插入的镜像">#</a>删除：插入的镜像</h1>
+<figure><img loading="lazy" src="../../assets/8a7435561d286746.jpg" alt="图 2.8 删除示意图"><figcaption>图 2.8 删除示意图</figcaption></figure>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/teaching.hpp">code/ch02/array_list/teaching.hpp#fn:remove</a></div><pre><code><span class="c">// 删除 pos 上的元素并返回它。代价同样是 O(n)：后面的元素都要左移一位。</span>
+T remove(size_type pos) {
+    <span class="k">if</span> (pos &gt;= size_) {
+        <span class="k">throw</span> std::out_of_range(<span class="s">&quot;ArrayList::remove: 下标越界&quot;</span>);
+    }
+    T removed = data_[pos];
+    <span class="k">for</span> (size_type i = pos; i + <span class="n">1</span> &lt; size_; ++i) {
+        data_[i] = data_[i + <span class="n">1</span>];
+    }
+    --size_;
+    <span class="k">return</span> removed;
+}</code></pre></div></section><section class="slide" data-notes="&lt;p&gt;-Wall -Wextra -Wpedantic 一句警告都不给，小数据量下往往也不当场崩。
+第 3 章有这个 bug 的 ASan 报告，可以翻回去看。
+
+三法则：写了析构、拷贝构造、拷贝赋值中的任意一个，通常这三个都得写。
+理由：你之所以要写析构，是因为你在管资源；既然在管资源，
+编译器那份「逐成员照抄」的拷贝就一定是错的。&lt;/p&gt;"><h1 id="三法则原书最硬的一处错"><a class="anchor" href="#三法则原书最硬的一处错">#</a>三法则：原书最硬的一处错</h1>
+<p>原书 <code>arrList</code> 有析构函数，<strong>却没有拷贝构造与拷贝赋值</strong>。</p>
+<p>一句 <code>arrList&lt;int&gt; b = a;</code> 之后，两个对象持有<strong>同一根指针</strong>， 各析构一次 → 同一块内存被释放两次。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/teaching.hpp">code/ch02/array_list/teaching.hpp#fn:ArrayList</a></div><pre><code><span class="k">explicit</span> ArrayList(size_type initial_capacity = <span class="n">8</span>)
+    : data_(<span class="k">new</span> T[initial_capacity]), capacity_(initial_capacity), size_(<span class="n">0</span>) {}
+
+<span class="c">// 三法则：自己管着 new 出来的数组，就得自己写拷贝构造和拷贝赋值。</span>
+<span class="c">// 不写的话编译器会照抄指针，两个表指向同一块内存，各析构一次 → 二次释放。</span>
+ArrayList(<span class="k">const</span> ArrayList&amp; other)
+    : data_(<span class="k">new</span> T[other.capacity_]), capacity_(other.capacity_), size_(other.size_) {
+    <span class="k">for</span> (size_type i = <span class="n">0</span>; i &lt; size_; ++i) {
+        data_[i] = other.data_[i];
+    }
+}</code></pre></div></section><section class="slide" data-notes="&lt;p&gt;顺带一提：原书那个 position，在书中展示的所有算法里一次都没被用到。&lt;/p&gt;"><h1 id="一个被删掉的设计游标"><a class="anchor" href="#一个被删掉的设计游标">#</a>一个被删掉的设计：游标</h1>
+<p>原书的 <code>arrList</code> 里还有第四个成员 <code>int position</code>，配 <code>setPos / next / prev</code> 用来「依次处理元素」。</p>
+<p><strong>遍历状态一旦住进容器，三件事同时坏掉</strong>：</p>
+<ul>
+<li><code>const</code> 对象没法遍历（游标要改）</li>
+<li>两处代码不能同时遍历</li>
+<li>嵌套遍历直接互相踩</li>
+</ul>
+<p>本书删掉它，改为提供 <code>begin() / end()</code>——<code>range-for</code> 因此可以直接用。</p></section><section class="slide" data-notes=""><h1 id="23-链表换一种存储"><a class="anchor" href="#23-链表换一种存储">#</a>2.3 链表：换一种存储</h1>
+<figure><img loading="lazy" src="../../assets/6e2bc11926f0ec96.jpg" alt="图 2.4 单链表示例"><figcaption>图 2.4 单链表示例</figcaption></figure>
+<ul>
+<li>结点可以<strong>散落</strong>在内存里，靠链接域表示「谁在谁后面」</li>
+<li>给定前驱结点后，插入或删除只改<strong>常数条</strong>指针</li>
+<li>代价：要找到那个前驱，仍须从表头循链，<strong>O(n)</strong></li>
+</ul></section><section class="slide" data-notes="&lt;p&gt;这就是原书 setPos(-1) 那个技巧的实质。现代接口不暴露 -1 这个特殊位置，
+predecessor_at(0) 直接返回头结点。
+可以让学生自己写一遍不带头结点的插入，感受一下多出来的那个 if。&lt;/p&gt;"><h1 id="头结点让表头不再是特例"><a class="anchor" href="#头结点让表头不再是特例">#</a>头结点：让表头不再是特例</h1>
+<figure><img loading="lazy" src="../../assets/3c36698567f5e7c2.jpg" alt="图 2.6 引人头结点的单链表"><figcaption>图 2.6 引人头结点的单链表</figcaption></figure>
+<p><strong>头结点是一个不存放数据的哨兵</strong>，永远排在第一个真元素前面。</p>
+<p>有了它，「在表头插入」和「在中间插入」变成同一句话： <strong>找到前驱，改它的 next</strong>。空表也不必另写一套分支。</p></section><section class="slide" data-notes=""><h1 id="尾指针让-append-变成-o1"><a class="anchor" href="#尾指针让-append-变成-o1">#</a>尾指针：让 append 变成 O(1)</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/teaching.hpp">code/ch02/linked_list/teaching.hpp#fn:append</a></div><pre><code><span class="c">// 在表尾追加。**因为存了 tail_，这里是 O(1)**；没有它就得每次从头走到尾。</span>
+<span class="t">void</span> append(<span class="k">const</span> T&amp; value) {
+    Node* fresh = <span class="k">new</span> Node;
+    fresh-&gt;value = value;
+    fresh-&gt;next = <span class="k">nullptr</span>;
+    tail_-&gt;next = fresh;
+    tail_ = fresh;
+    ++size_;
+}</code></pre></div>
+<p><strong>没有它，每次追加都得从头走到尾。</strong></p>
+<p><code>append</code> 单列一个函数而不是转调 <code>insert(size_)</code>，正是因为有它—— 转调就白白退化成 O(n) 了。</p></section><section class="slide" data-notes=""><h1 id="循链定位返回前驱"><a class="anchor" href="#循链定位返回前驱">#</a>循链定位：返回「前驱」</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/teaching.hpp">code/ch02/linked_list/teaching.hpp#fn:predecessor_at</a></div><pre><code><span class="c">// 返回位置 pos 的前驱结点。pos == 0 时前驱就是头结点——</span>
+<span class="c">// 这正是头结点存在的意义：表头不再是特例。</span>
+Node* predecessor_at(size_type pos) <span class="k">const</span> {
+    <span class="k">if</span> (pos &gt; size_) {
+        <span class="k">throw</span> std::out_of_range(<span class="s">&quot;LinkedList: 下标越界&quot;</span>);
+    }
+    Node* predecessor = head_;
+    <span class="k">for</span> (size_type i = <span class="n">0</span>; i &lt; pos; ++i) {
+        predecessor = predecessor-&gt;next;
+    }
+    <span class="k">return</span> predecessor;
+}</code></pre></div>
+<p><strong>为什么返回前驱而不是结点本身？</strong> 因为插入和删除都要改前驱的 <code>next</code>， 而单链表从一个结点走不回它的前一个。</p>
+<p>一个函数同时服务两处——这是头结点带来的简化。</p></section><section class="slide" data-notes="&lt;p&gt;第 2 条是教学版测试里专门守着的：用「删到空表再 append」把它钉死，
+去掉那两行 AddressSanitizer 立刻报 heap-use-after-free。
+现场演示效果好，因为不删那两行的话普通用例全绿。&lt;/p&gt;"><h1 id="删除两件事不能漏"><a class="anchor" href="#删除两件事不能漏">#</a>删除：两件事不能漏</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/teaching.hpp">code/ch02/linked_list/teaching.hpp#fn:remove</a></div><pre><code><span class="c">// 删除位置 pos 上的元素并返回它。同样是「先定位前驱，再改一条链接」。</span>
+T remove(size_type pos) {
+    <span class="k">if</span> (pos &gt;= size_) {
+        <span class="k">throw</span> std::out_of_range(<span class="s">&quot;LinkedList::remove: 下标越界&quot;</span>);
+    }
+    Node* predecessor = predecessor_at(pos);
+    Node* dying = predecessor-&gt;next;
+    T value = dying-&gt;value;
+    predecessor-&gt;next = dying-&gt;next;
+    <span class="k">if</span> (dying == tail_) {         <span class="c">// 删的是最后一个，尾指针退回前驱</span>
+        tail_ = predecessor;
+    }
+    <span class="k">delete</span> dying;
+    --size_;
+    <span class="k">return</span> value;
+}</code></pre></div>
+<ol>
+<li><strong>被删结点必须 <code>delete</code></strong>，只摘链不释放就是内存泄漏</li>
+<li><strong>删的若是尾结点，<code>tail_</code> 必须回退</strong>——不回退，下一次 <code>append</code> 就写进已释放的内存</li>
+</ol></section><section class="slide" data-notes=""><h1 id="234-双链表多一根指针买什么"><a class="anchor" href="#234-双链表多一根指针买什么">#</a>2.3.4 双链表：多一根指针买什么</h1>
+<figure><img loading="lazy" src="../../assets/ebdcb0d7054cf3a9.jpg" alt="图 2.10 双链表的结点"><figcaption>图 2.10 双链表的结点</figcaption></figure>
+<p>多出来的 <code>prev</code>（64 位机上 8 字节）只买到一件事，但很值：</p>
+<p><strong>已知一个结点时，删除它是 O(1)。</strong></p>
+<p>单链表要做同一件事，得先从头走到它的前驱——O(n)， 因为单链表从一个结点走不回前一个。</p></section><section class="slide" data-notes="&lt;p&gt;少改一根，表在&lt;strong&gt;正向&lt;/strong&gt;遍历时看起来完全正常，只有反着走或者删中间结点时才炸。
+教学版的测试因此正着走一遍、倒着走一遍，断言两个结果互为逆序。&lt;/p&gt;"><h1 id="双链表的删除两侧都要改"><a class="anchor" href="#双链表的删除两侧都要改">#</a>双链表的删除：两侧都要改</h1>
+<figure><img loading="lazy" src="../../assets/f3aa5f7a9ea65ef6.jpg" alt="图2.11 双链表的删除操作示意"><figcaption>图2.11 双链表的删除操作示意</figcaption></figure>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/doubly_linked_list/teaching.hpp">code/ch02/doubly_linked_list/teaching.hpp#fn:erase_node</a></div><pre><code><span class="c">// 摘掉一个已知的结点，O(1)。**这是双链表的看家本领**：</span>
+<span class="c">// 单链表要做同一件事，得先从头走到它的前驱，O(n)。</span>
+T erase_node(Node* node) {
+    T value = node-&gt;value;
+    <span class="k">if</span> (node-&gt;prev != <span class="k">nullptr</span>) {
+        node-&gt;prev-&gt;next = node-&gt;next;
+    } <span class="k">else</span> {
+        head_ = node-&gt;next;     <span class="c">// 删的是表头</span>
+    }
+    <span class="k">if</span> (node-&gt;next != <span class="k">nullptr</span>) {
+        node-&gt;next-&gt;prev = node-&gt;prev;
+    } <span class="k">else</span> {
+        tail_ = node-&gt;prev;     <span class="c">// 删的是表尾</span>
+    }
+    <span class="k">delete</span> node;
+    --size_;
+    <span class="k">return</span> value;
+}</code></pre></div></section><section class="slide" data-notes=""><h1 id="232a-所有权工具怎么选"><a class="anchor" href="#232a-所有权工具怎么选">#</a>2.3.2a 所有权工具怎么选</h1>
+<p>「为什么不全用 <code>unique_ptr</code>？」——判据是<strong>结构形态</strong>，不是偏好。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">形态</th>
+<th style="text-align:left">用什么</th>
+<th style="text-align:left">理由</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">链</td>
+<td style="text-align:left">裸指针 + 迭代释放</td>
+<td style="text-align:left"><code>unique_ptr</code> 的析构是<strong>递归</strong>的，深度正比于链长</td>
+</tr>
+<tr>
+<td style="text-align:left">树</td>
+<td style="text-align:left"><code>unique_ptr</code></td>
+<td style="text-align:left">也递归，但深度 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span></td>
+</tr>
+<tr>
+<td style="text-align:left">一整块缓冲区</td>
+<td style="text-align:left">裸 <code>T*</code> + 三法则</td>
+<td style="text-align:left">换 <code>unique_ptr&lt;T[]&gt;</code> 只省一句 <code>delete[]</code></td>
+</tr>
+<tr>
+<td style="text-align:left">共享</td>
+<td style="text-align:left">手写引用计数</td>
+<td style="text-align:left"><code>unique_ptr</code> 语义上不成立</td>
+</tr>
+</tbody></table></div></section><section class="slide" data-notes="&lt;p&gt;递归深度的安全边界由优化级别决定——这种不确定性不该出现在教材实现里。
+所以本书所有链式结构的析构一律写成迭代。
+这不是审美判断，是上面这张表。&lt;/p&gt;"><h1 id="链那一行有实测支撑"><a class="anchor" href="#链那一行有实测支撑">#</a>「链那一行」有实测支撑</h1>
+<p>本机 8 MB 栈，<code>RecursiveChain</code>（<code>unique_ptr&lt;Node&gt; next</code>）：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">构建档</th>
+<th style="text-align:left">最大安全结点数</th>
+<th style="text-align:left">崩溃于</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><code>-O0 -g</code></td>
+<td style="text-align:left">≈ 57,625</td>
+<td style="text-align:left">58,601</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>-O2</code></td>
+<td style="text-align:left">≈ 523,329</td>
+<td style="text-align:left">524,306</td>
+</tr>
+</tbody></table></div>
+<p>同规模下<strong>迭代释放</strong>的版本在 <code>-O0</code> 跑到 500 万结点无恙。</p>
+<p><strong>两档差九倍</strong>是最关键的一点：debug 崩、release 过。</p></section><section class="slide" data-notes="&lt;p&gt;补一句现实：现代机器上缓存局部性的影响常常压过渐进复杂度，
+n 不大时 vector 往往比 list 快，哪怕理论上后者插删更优。
+这也是「渐进分析不是全部」的一个好例子。&lt;/p&gt;"><h1 id="24-顺序表与链表的比较"><a class="anchor" href="#24-顺序表与链表的比较">#</a>2.4 顺序表与链表的比较</h1>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left"></th>
+<th style="text-align:left">顺序表</th>
+<th style="text-align:left">链表</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">按下标访问</td>
+<td style="text-align:left"><strong>O(1)</strong></td>
+<td style="text-align:left">O(n)</td>
+</tr>
+<tr>
+<td style="text-align:left">已知前驱后插删</td>
+<td style="text-align:left">O(n) 搬元素</td>
+<td style="text-align:left"><strong>O(1)</strong> 改指针</td>
+</tr>
+<tr>
+<td style="text-align:left">每元素额外空间</td>
+<td style="text-align:left">无</td>
+<td style="text-align:left">一根指针</td>
+</tr>
+<tr>
+<td style="text-align:left">空间是否预分配</td>
+<td style="text-align:left">是（可能浪费/不够）</td>
+<td style="text-align:left">否（用多少要多少）</td>
+</tr>
+<tr>
+<td style="text-align:left">缓存局部性</td>
+<td style="text-align:left"><strong>好</strong></td>
+<td style="text-align:left">差</td>
+</tr>
+</tbody></table></div>
+<p><strong>选哪个看运算</strong>：随机访问多 → 顺序表；频繁在已知位置插删 → 链表。</p></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
+<ul>
+<li>同一个线性表 ADT，两种存储结构，<strong>代价互补</strong></li>
+<li>顺序表：地址公式 → O(1) 随机存取；插删要搬</li>
+<li>链表：链接域 → O(1) 改指针；定位要走</li>
+<li><strong>头结点</strong>消掉表头特例，<strong>尾指针</strong>让 append 变 O(1)</li>
+<li>自己管资源就要守<strong>三法则</strong>——原书这一章又漏了一次</li>
+<li>遍历状态不要住进容器（<code>begin()/end()</code> 而不是内部游标）</li>
+<li>智能指针的判据是<strong>结构形态</strong>，链上用递归析构会爆栈</li>
+</ul></section><section class="slide" data-notes=""><h1 id="上机"><a class="anchor" href="#上机">#</a>上机</h1>
+<div class="codeblock" data-lang="bash"><pre><code>python3 tools/check_code.py code/ch02/array_list
+python3 tools/check_code.py code/ch02/linked_list</code></pre></div>
+<p>故意改坏一处，看哪条断言变红：</p>
+<ul>
+<li>把 <code>insert</code> 的搬移循环改成正着走</li>
+<li>把 <code>grow</code> 的 <code>delete[]</code> 挪到拷贝循环之前</li>
+<li>删掉 <code>remove</code> 里回退 <code>tail_</code> 的那两行</li>
+</ul>
+<blockquote><p><strong>写不出「会红」的用例，说明还没想清楚那条性质是什么。</strong></p></blockquote></section></div>
+<div class="bar"></div>
+<div class="notes"></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第2章 线性表</div><div class="thumb"><div class="no">2</div>2.1 线性表的抽象数据类型</div><div class="thumb"><div class="no">3</div>原书这里编译不过</div><div class="thumb"><div class="no">4</div>2.2 顺序表：地址公式</div><div class="thumb"><div class="no">5</div>教学版：三个成员</div><div class="thumb"><div class="no">6</div>按下标取值与改值</div><div class="thumb"><div class="no">7</div>按内容查找：「没找到」怎么说</div><div class="thumb"><div class="no">8</div>现代写法：把两件事合成一个</div><div class="thumb"><div class="no">9</div>插入：搬 O(n) 个元素</div><div class="thumb"><div class="no">10</div>扩容：翻倍，不是加一</div><div class="thumb"><div class="no">11</div>删除：插入的镜像</div><div class="thumb"><div class="no">12</div>三法则：原书最硬的一处错</div><div class="thumb"><div class="no">13</div>一个被删掉的设计：游标</div><div class="thumb"><div class="no">14</div>2.3 链表：换一种存储</div><div class="thumb"><div class="no">15</div>头结点：让表头不再是特例</div><div class="thumb"><div class="no">16</div>尾指针：让 append 变成 O(1)</div><div class="thumb"><div class="no">17</div>循链定位：返回「前驱」</div><div class="thumb"><div class="no">18</div>删除：两件事不能漏</div><div class="thumb"><div class="no">19</div>2.3.4 双链表：多一根指针买什么</div><div class="thumb"><div class="no">20</div>双链表的删除：两侧都要改</div><div class="thumb"><div class="no">21</div>2.3.2a 所有权工具怎么选</div><div class="thumb"><div class="no">22</div>「链那一行」有实测支撑</div><div class="thumb"><div class="no">23</div>2.4 顺序表与链表的比较</div><div class="thumb"><div class="no">24</div>本章小结</div><div class="thumb"><div class="no">25</div>上机</div></div>
+<div class="help"><div>
+<p><b>放映快捷键</b></p>
+<p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
+<p><kbd>N</kbd>演讲者备注　<kbd>O</kbd>缩略图总览　<kbd>F</kbd>全屏　<kbd>D</kbd>深色</p>
+<p><kbd>?</kbd>这张帮助　<kbd>Esc</kbd>关闭</p>
+<p style="color:var(--muted);font-size:.9em">
+导出 PDF：浏览器打印（Ctrl/Cmd+P），每页一张幻灯片。</p>
+</div></div>
+<div class="chrome">
+<b>第2章 线性表</b><span>现代 C++ 数据结构教程</span>
+<span class="grow"></span>
+<a href="index.html" style="color:var(--muted)">目录</a>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 25</b>
+</div>
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var total=slides.length, at=0;
+  var bar=document.querySelector('.bar'), now=document.getElementById('now');
+  var notes=document.querySelector('.notes'), over=document.querySelector('.overview');
+  var help=document.querySelector('.help');
+  function show(n,push){
+    at=Math.max(0,Math.min(total-1,n));
+    slides.forEach(function(s,i){s.classList.toggle('current',i===at);});
+    bar.style.width=((at+1)/total*100)+'%';
+    now.textContent=(at+1)+' / '+total;
+    notes.innerHTML=slides[at].getAttribute('data-notes')||'';
+    document.querySelectorAll('.thumb').forEach(function(t,i){
+      t.classList.toggle('here',i===at);});
+    if(push!==false){history.replaceState(null,'','#'+(at+1));}
+    slides[at].scrollTop=0;
+  }
+  function go(d){show(at+d);}
+  document.addEventListener('keydown',function(e){
+    if(e.metaKey||e.ctrlKey||e.altKey)return;
+    var k=e.key;
+    if(help.classList.contains('on')&&k!=='?'){help.classList.remove('on');return;}
+    if(over.classList.contains('on')&&(k==='Escape'||k==='o'||k==='O')){
+      over.classList.remove('on');return;}
+    if(k==='ArrowRight'||k==='PageDown'||k===' '||k==='j'){go(1);e.preventDefault();}
+    else if(k==='ArrowLeft'||k==='PageUp'||k==='k'){go(-1);e.preventDefault();}
+    else if(k==='Home'){show(0);}
+    else if(k==='End'){show(total-1);}
+    else if(k==='n'||k==='N'){notes.classList.toggle('on');}
+    else if(k==='o'||k==='O'){over.classList.toggle('on');}
+    else if(k==='d'||k==='D'){
+      var dark=document.documentElement.getAttribute('data-theme')==='dark';
+      document.documentElement.setAttribute('data-theme',dark?'light':'dark');}
+    else if(k==='f'||k==='F'){
+      if(document.fullscreenElement){document.exitFullscreen();}
+      else{document.documentElement.requestFullscreen();}}
+    else if(k==='?'){help.classList.toggle('on');}
+  });
+  document.querySelectorAll('.thumb').forEach(function(t,i){
+    t.addEventListener('click',function(){over.classList.remove('on');show(i);});});
+  window.addEventListener('hashchange',function(){
+    var n=parseInt(location.hash.slice(1),10);
+    if(n>=1&&n<=total)show(n-1,false);});
+  var start=parseInt(location.hash.slice(1),10);
+  show(start>=1&&start<=total?start-1:0,false);
+})();
+</script>
+</body></html>

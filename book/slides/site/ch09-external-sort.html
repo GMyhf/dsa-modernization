@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第9章 文件管理和外排序</title>
+<style>
+:root{--bg:#fdfdfc;--fg:#1a1a18;--muted:#6b6b66;--line:#dcdcd6;--accent:#8a4b2a;
+--code-bg:#f5f4f0;--kw:#8a4b2a;--ty:#2c6b57;--st:#7a5c1e;--cm:#8a8a84;--nu:#4a5aa8}
+:root[data-theme="dark"]{--bg:#16161a;--fg:#ececea;--muted:#a0a09a;--line:#33333a;
+--accent:#e0a074;--code-bg:#1e1e24;--kw:#e0a074;--ty:#7fd0b0;--st:#d8c088;--cm:#7a7a84;--nu:#9ab0f0}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--fg)}
+body{font-family:-apple-system,"Segoe UI","Noto Sans CJK SC","Source Han Sans SC",
+"Microsoft YaHei",sans-serif;overflow:hidden}
+.deck{position:relative;height:100vh}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;
+padding:4.2vmin 6vmin 9vmin;overflow:auto}
+.slide.current{display:flex}
+.slide .anchor{display:none}
+.slide h1{font-size:clamp(26px,4.4vmin,52px);margin:0 0 3vmin;line-height:1.25;
+letter-spacing:-.01em;border-bottom:3px solid var(--accent);padding-bottom:1.6vmin}
+.slide h2{font-size:clamp(20px,3.1vmin,34px);margin:2.4vmin 0 1.2vmin}
+.slide h3{font-size:clamp(17px,2.5vmin,27px);margin:2vmin 0 1vmin;color:var(--muted)}
+.slide p,.slide li{font-size:clamp(15px,2.5vmin,28px);line-height:1.55;margin:.7vmin 0}
+.slide ul,.slide ol{margin:1vmin 0;padding-left:3.4vmin}
+.slide li{margin:.9vmin 0}
+.slide strong{color:var(--accent)}
+.slide blockquote{margin:1.6vmin 0;padding:.6vmin 0 .6vmin 2.4vmin;
+border-left:4px solid var(--line);color:var(--muted)}
+.slide table{border-collapse:collapse;font-size:clamp(13px,2.1vmin,23px);margin:1.4vmin 0}
+.slide th,.slide td{border:1px solid var(--line);padding:.7vmin 1.4vmin;text-align:left}
+.slide th{background:var(--code-bg)}
+.table-wrap{overflow-x:auto;max-width:100%}
+.slide img{max-width:100%;max-height:52vh;object-fit:contain;display:block;margin:1.4vmin auto}
+.codeblock{background:var(--code-bg);border:1px solid var(--line);border-radius:6px;
+margin:1.4vmin 0;overflow:hidden}
+.codeblock pre{margin:0;padding:1.6vmin 2vmin;overflow-x:auto}
+.codeblock code{font-family:"SF Mono",Menlo,Consolas,"Noto Sans Mono CJK SC",monospace;
+font-size:clamp(11px,1.95vmin,21px);line-height:1.5;white-space:pre}
+.srcbar{font-size:clamp(9px,1.3vmin,13px);padding:.5vmin 2vmin;color:var(--muted);
+border-bottom:1px solid var(--line);font-family:"SF Mono",Menlo,monospace}
+.srcbar a{color:var(--muted);text-decoration:none}
+.k{color:var(--kw)}.t{color:var(--ty)}.s{color:var(--st)}.c{color:var(--cm);font-style:italic}
+.n{color:var(--nu)}.p{color:var(--fg)}
+.math{font-style:italic}.math-display{text-align:center;margin:2vmin 0;
+font-size:clamp(16px,2.8vmin,30px)}
+.upr{font-style:normal}.bold{font-weight:700}
+code{background:var(--code-bg);padding:.1em .34em;border-radius:4px;
+font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.86em}
+hr{border:0;border-top:1px solid var(--line);margin:2vmin 0}
+.chrome{position:fixed;left:0;right:0;bottom:0;height:5.4vmin;min-height:26px;
+display:flex;align-items:center;gap:1.6vmin;padding:0 2vmin;
+border-top:1px solid var(--line);background:var(--bg);font-size:clamp(10px,1.6vmin,15px);
+color:var(--muted)}
+.chrome .grow{flex:1}
+.chrome b{color:var(--fg);font-weight:600}
+.bar{position:fixed;left:0;bottom:0;height:3px;background:var(--accent);
+transition:width .18s ease;z-index:5}
+.notes{position:fixed;left:0;right:0;bottom:5.4vmin;max-height:34vh;overflow:auto;
+padding:1.6vmin 2.4vmin;background:var(--code-bg);border-top:2px solid var(--accent);
+font-size:clamp(13px,2vmin,20px);line-height:1.5;display:none}
+.notes.on{display:block}
+.notes p{margin:.5em 0}
+.notes:before{content:"演讲者备注";display:block;font-size:.72em;letter-spacing:.08em;
+color:var(--accent);margin-bottom:.5em}
+.overview{position:fixed;inset:0;background:var(--bg);overflow:auto;padding:3vmin;
+display:none;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1.6vmin;z-index:20}
+.overview.on{display:grid}
+.thumb{border:2px solid var(--line);border-radius:6px;padding:1.2vmin;cursor:pointer;
+font-size:13px;line-height:1.35;min-height:88px;overflow:hidden;background:var(--bg)}
+.thumb:hover{border-color:var(--accent)}
+.thumb.here{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.thumb .no{color:var(--muted);font-size:11px}
+.help{position:fixed;inset:0;background:rgba(0,0,0,.62);display:none;z-index:30;
+align-items:center;justify-content:center}
+.help.on{display:flex}
+.help div{background:var(--bg);padding:3vmin 4vmin;border-radius:10px;max-width:520px;
+font-size:15px;line-height:1.9}
+.help kbd{background:var(--code-bg);border:1px solid var(--line);border-radius:4px;
+padding:.1em .5em;font-family:monospace;margin-right:.6em}
+@media print{
+  html,body{height:auto;overflow:visible}
+  .chrome,.bar,.notes,.overview,.help{display:none!important}
+  .deck{height:auto}
+  .slide{display:flex!important;position:relative;inset:auto;page-break-after:always;
+  height:100vh;border:0}
+}
+</style></head><body>
+<div class="deck"><section class="slide" data-notes=""><h1 id="第9章-文件管理和外排序"><a class="anchor" href="#第9章-文件管理和外排序">#</a>第9章 文件管理和外排序</h1>
+<p><strong>数据放不进内存的时候，怎么排序。</strong></p>
+<p>前八章所有算法都有一个隐含前提：<strong>任意元素的访问代价相同</strong>。 一旦数据在磁盘上，这个前提就没了。</p>
+<ul>
+<li>9.1 内存与外存的代价差在哪</li>
+<li>9.3 置换选择、二路外排序、多路归并</li>
+</ul></section><section class="slide" data-notes="&lt;p&gt;这就是为什么外排序全靠&lt;strong&gt;归并&lt;/strong&gt;而不是快排：归并只需要顺序读写，
+快排的分割要来回跳。第 8 章说「归并需要 O(n) 额外空间所以不如快排流行」，
+到了外存这个结论完全反过来。&lt;/p&gt;"><h1 id="91-一次磁盘访问有多贵"><a class="anchor" href="#91-一次磁盘访问有多贵">#</a>9.1 一次磁盘访问有多贵</h1>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left"></th>
+<th style="text-align:left">典型量级</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">主存访问</td>
+<td style="text-align:left">几十<strong>纳秒</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">磁盘寻道 + 旋转</td>
+<td style="text-align:left">几<strong>毫秒</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">差距</td>
+<td style="text-align:left"><strong>约 10 万倍</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>所以外排序的代价不数比较次数，数「读写了多少次外存」。</strong></p>
+<p>一个直接推论：<strong>顺序读写远比随机读写划算</strong>—— 寻道一次之后连续读一大块，摊到每个字节上几乎免费。</p></section><section class="slide" data-notes=""><h1 id="外排序的基本套路"><a class="anchor" href="#外排序的基本套路">#</a>外排序的基本套路</h1>
+<div class="codeblock" data-lang="text"><pre><code>第一阶段: 分段读进内存, 排好, 写回磁盘   -&gt;  若干个「顺串」(run)
+第二阶段: 把这些顺串归并成一个有序文件</code></pre></div>
+<p>两个阶段各有优化空间：</p>
+<ul>
+<li>第一阶段：顺串<strong>越长越好</strong>（顺串少，归并的轮数就少）</li>
+<li>第二阶段：一次归并<strong>越多路越好</strong>（路数多，轮数少）</li>
+</ul></section><section class="slide" data-notes=""><h1 id="931-置换选择让顺串更长"><a class="anchor" href="#931-置换选择让顺串更长">#</a>9.3.1 置换选择：让顺串更长</h1>
+<p>朴素做法：内存能装 M 个，就每次读 M 个排好写出去，顺串长度恰好 M。</p>
+<p><strong>置换选择能让顺串平均长到 2M。</strong></p>
+<figure><img loading="lazy" src="../../assets/f23f55c21cffd0b7.jpg" alt="图9.1 置换选择算法流程"><figcaption>图9.1 置换选择算法流程</figcaption></figure></section><section class="slide" data-notes="&lt;p&gt;为什么平均是 2M：可以用「扫雪机模型」直观解释——
+雪均匀落下，扫雪机绕圈扫，稳态下每圈扫掉的雪量是圈内存量的两倍。
+输入随机时顺串平均长度就是 2M。
+输入本来就近乎有序时，能长得更多，极端情况一个顺串装下全部。&lt;/p&gt;"><h1 id="置换选择怎么做到的"><a class="anchor" href="#置换选择怎么做到的">#</a>置换选择：怎么做到的</h1>
+<div class="codeblock" data-lang="text"><pre><code>内存里维持一个最小堆, 装满 M 个
+反复:
+    取出堆顶, 写进当前顺串
+    读入下一个记录:
+        它 &gt;= 刚写出的那个吗?
+            是 -&gt; 放进堆, 还能进当前顺串
+            否 -&gt; 冻结它, 等下一个顺串再用
+    堆空了 -&gt; 当前顺串结束, 解冻全部冻结的记录</code></pre></div>
+<p><strong>关键在「冻结」</strong>：比刚写出的值小的记录进不了当前顺串， 但它仍然占着内存，参与下一轮。</p></section><section class="slide" data-notes=""><h1 id="932-二路外排序"><a class="anchor" href="#932-二路外排序">#</a>9.3.2 二路外排序</h1>
+<figure><img loading="lazy" src="../../assets/7486004c6161789b.jpg" alt="图 9.3 二路归并过程"><figcaption>图 9.3 二路归并过程</figcaption></figure>
+<p>每轮把顺串两两归并，顺串数减半。m 个顺串要 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>m⌉</span> 轮。</p>
+<p><strong>每一轮都要把整个文件读一遍写一遍</strong>—— 所以总的外存访问量是 <span class="math"><span class="upr">2</span>N⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>m⌉</span>。</p>
+<p><strong>要减少轮数，就得提高归并路数。</strong></p></section><section class="slide" data-notes=""><h1 id="933-多路归并瓶颈在哪"><a class="anchor" href="#933-多路归并瓶颈在哪">#</a>9.3.3 多路归并：瓶颈在哪</h1>
+<p>k 路归并时，每输出一个记录都要在 k 个候选里挑最小的。</p>
+<ul>
+<li>线性扫：<span class="math">k<span class="bin">−</span><span class="upr">1</span></span> 次比较</li>
+<li>总代价：<span class="math">N(k<span class="bin">−</span><span class="upr">1</span>)</span> 次比较</li>
+</ul>
+<p><strong>路数 k 增大，轮数降了，但每步的比较次数升了</strong>——两者对冲。</p>
+<p>要真正受益，就得让「挑最小」变便宜：<strong>选择树</strong>。</p></section><section class="slide" data-notes="&lt;p&gt;建树 O(k)。取走根之后，只有从那片叶子到根的这一条路径需要重算——
+&lt;strong&gt;O(log k)&lt;/strong&gt;，而不是 O(k)。
+于是 k 路归并的总比较次数从 N(k-1) 降到 N log k。&lt;/p&gt;"><h1 id="赢者树"><a class="anchor" href="#赢者树">#</a>赢者树</h1>
+<figure><img loading="lazy" src="../../assets/dffb7316183b2881.jpg" alt="图9.4 含有5 个选手的赢者树"><figcaption>图9.4 含有5 个选手的赢者树</figcaption></figure>
+<ul>
+<li>叶子是 k 个候选（各归并段的当前记录）</li>
+<li>每个内部结点记<strong>两个孩子里的赢家</strong>（较小者）</li>
+<li>根就是全局最小</li>
+</ul></section><section class="slide" data-notes="&lt;p&gt;换掉一片叶子后，沿着它到根的路径逐层重赛。
+每层要看&lt;strong&gt;兄弟&lt;/strong&gt;是谁——所以赢者树重构时要访问兄弟结点。
+下一页的败者树就是为了省掉这一步。&lt;/p&gt;"><h1 id="赢者树的重构"><a class="anchor" href="#赢者树的重构">#</a>赢者树的重构</h1>
+<figure><img loading="lazy" src="../../assets/bb27070d9ac01f78.jpg" alt="图 9.6 图 9.5 重构后的 8 路归并赢者树"><figcaption>图 9.6 图 9.5 重构后的 8 路归并赢者树</figcaption></figure>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch09/external_sort/modern.hpp">code/ch09/external_sort/modern.hpp#fn:replace</a></div><pre><code><span class="t">void</span> replace(std::<span class="t">size_t</span> player, <span class="t">int</span> value) {
+    <span class="k">if</span> (player &gt;= players_.size()) {
+        <span class="k">throw</span> std::out_of_range(<span class="s">&quot;tournament player&quot;</span>);
+    }
+    players_[player] = value;
+    std::<span class="t">size_t</span> node = leaf_base_ + player;
+    tree_[node] = player;
+    <span class="k">while</span> (node &gt; <span class="n">1</span>) {
+        node /= <span class="n">2</span>;
+        tree_[node] = detail::TournamentOps::better(players_, tree_[node * <span class="n">2</span>],
+                                                    tree_[node * <span class="n">2</span> + <span class="n">1</span>]);
+    }
+}
+
+<span class="t">void</span> replace(std::<span class="t">size_t</span> player, <span class="t">int</span> value) {
+    <span class="k">if</span> (player &gt;= players_.size()) {
+        <span class="k">throw</span> std::out_of_range(<span class="s">&quot;tournament player&quot;</span>);
+    }
+    players_[player] = value;
+    subtree_winner_[leaf_base_ + player] = player;
+    <span class="k">for</span> (std::<span class="t">size_t</span> node = (leaf_base_ + player) / <span class="n">2</span>; node &gt; <span class="n">0</span>; node /= <span class="n">2</span>) {
+        replay_node(node);
+    }
+    champion_ = subtree_winner_[<span class="n">1</span>];
+}</code></pre></div></section><section class="slide" data-notes="&lt;p&gt;两种树的信息量是等价的，只是把「谁输了」记在哪里不同。
+败者树多一个「冠军」槽（下标 0）存全局赢家。
+
+这是本章最容易讲糊的地方，建议对着图 9.7 和图 9.8 走一遍完整的重构过程。
+实现见 code/ch09/external_sort/modern.hpp。&lt;/p&gt;"><h1 id="败者树省掉看兄弟"><a class="anchor" href="#败者树省掉看兄弟">#</a>败者树：省掉「看兄弟」</h1>
+<figure><img loading="lazy" src="../../assets/93f3de38d2a0ccc4.jpg" alt="图9.7 8路归并的败者树示例"><figcaption>图9.7 8路归并的败者树示例</figcaption></figure>
+<p>内部结点记的是<strong>输家</strong>，赢家继续往上比。</p>
+<ul>
+<li>赢者树重构：每层要<strong>读兄弟结点</strong>才知道跟谁比</li>
+<li>败者树重构：每层直接跟<strong>本结点记录的输家</strong>比</li>
+</ul>
+<p><strong>少一次访存</strong>。这在多路归并的内层循环里是实打实的收益。</p></section><section class="slide" data-notes=""><h1 id="代价小结"><a class="anchor" href="#代价小结">#</a>代价小结</h1>
+<p>设文件 N 条记录、内存装 M 条、k 路归并：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">环节</th>
+<th style="text-align:left">代价</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">生成顺串（置换选择）</td>
+<td style="text-align:left">顺串平均长 <span class="math"><span class="upr">2</span>M</span>，段数约 <span class="math">N/<span class="upr">2</span>M</span></td>
+</tr>
+<tr>
+<td style="text-align:left">归并轮数</td>
+<td style="text-align:left"><span class="math">⌈<span class="upr">log</span><sub>k</sub>(N/<span class="upr">2</span>M)⌉</span></td>
+</tr>
+<tr>
+<td style="text-align:left">每轮外存访问</td>
+<td style="text-align:left"><span class="math"><span class="upr">2</span>N</span>（读一遍写一遍）</td>
+</tr>
+<tr>
+<td style="text-align:left">每步挑最小（选择树）</td>
+<td style="text-align:left"><span class="math">O(<span class="upr">log</span>&thinsp;k)</span></td>
+</tr>
+</tbody></table></div>
+<p><strong>优化的两个方向</strong>：置换选择减少<strong>段数</strong>，多路归并减少<strong>轮数</strong>。</p></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
+<ul>
+<li>外排序数的是<strong>外存访问次数</strong>，不是比较次数</li>
+<li><strong>顺序读写远比随机读写划算</strong>——所以外排序全靠归并</li>
+<li><strong>置换选择</strong>把顺串平均长度从 M 提到 2M，段数减半</li>
+<li>多路归并降低轮数，但「挑最小」会变贵</li>
+<li><strong>选择树</strong>把挑最小从 <span class="math">O(k)</span> 降到 <span class="math">O(<span class="upr">log</span>&thinsp;k)</span></li>
+<li><strong>败者树</strong>比赢者树少一次访存：重构时不必读兄弟</li>
+</ul></section><section class="slide" data-notes=""><h1 id="上机"><a class="anchor" href="#上机">#</a>上机</h1>
+<div class="codeblock" data-lang="bash"><pre><code>python3 tools/check_code.py code/ch09/external_sort</code></pre></div>
+<ul>
+<li>用一组随机数据跑置换选择，量一下顺串的实际长度分布</li>
+<li>把败者树的重构改成「读兄弟」，确认结果不变但访存变多</li>
+<li>手工在图 9.7 上走一遍重构，再和程序输出对照</li>
+</ul>
+<blockquote><p>测试里赢者树和败者树<strong>逐项对拍</strong>：同一组输入，输出序列必须完全相同。</p></blockquote></section></div>
+<div class="bar"></div>
+<div class="notes"></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第9章 文件管理和外排序</div><div class="thumb"><div class="no">2</div>9.1 一次磁盘访问有多贵</div><div class="thumb"><div class="no">3</div>外排序的基本套路</div><div class="thumb"><div class="no">4</div>9.3.1 置换选择：让顺串更长</div><div class="thumb"><div class="no">5</div>置换选择：怎么做到的</div><div class="thumb"><div class="no">6</div>9.3.2 二路外排序</div><div class="thumb"><div class="no">7</div>9.3.3 多路归并：瓶颈在哪</div><div class="thumb"><div class="no">8</div>赢者树</div><div class="thumb"><div class="no">9</div>赢者树的重构</div><div class="thumb"><div class="no">10</div>败者树：省掉「看兄弟」</div><div class="thumb"><div class="no">11</div>代价小结</div><div class="thumb"><div class="no">12</div>本章小结</div><div class="thumb"><div class="no">13</div>上机</div></div>
+<div class="help"><div>
+<p><b>放映快捷键</b></p>
+<p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
+<p><kbd>N</kbd>演讲者备注　<kbd>O</kbd>缩略图总览　<kbd>F</kbd>全屏　<kbd>D</kbd>深色</p>
+<p><kbd>?</kbd>这张帮助　<kbd>Esc</kbd>关闭</p>
+<p style="color:var(--muted);font-size:.9em">
+导出 PDF：浏览器打印（Ctrl/Cmd+P），每页一张幻灯片。</p>
+</div></div>
+<div class="chrome">
+<b>第9章 文件管理和外排序</b><span>现代 C++ 数据结构教程</span>
+<span class="grow"></span>
+<a href="index.html" style="color:var(--muted)">目录</a>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 13</b>
+</div>
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var total=slides.length, at=0;
+  var bar=document.querySelector('.bar'), now=document.getElementById('now');
+  var notes=document.querySelector('.notes'), over=document.querySelector('.overview');
+  var help=document.querySelector('.help');
+  function show(n,push){
+    at=Math.max(0,Math.min(total-1,n));
+    slides.forEach(function(s,i){s.classList.toggle('current',i===at);});
+    bar.style.width=((at+1)/total*100)+'%';
+    now.textContent=(at+1)+' / '+total;
+    notes.innerHTML=slides[at].getAttribute('data-notes')||'';
+    document.querySelectorAll('.thumb').forEach(function(t,i){
+      t.classList.toggle('here',i===at);});
+    if(push!==false){history.replaceState(null,'','#'+(at+1));}
+    slides[at].scrollTop=0;
+  }
+  function go(d){show(at+d);}
+  document.addEventListener('keydown',function(e){
+    if(e.metaKey||e.ctrlKey||e.altKey)return;
+    var k=e.key;
+    if(help.classList.contains('on')&&k!=='?'){help.classList.remove('on');return;}
+    if(over.classList.contains('on')&&(k==='Escape'||k==='o'||k==='O')){
+      over.classList.remove('on');return;}
+    if(k==='ArrowRight'||k==='PageDown'||k===' '||k==='j'){go(1);e.preventDefault();}
+    else if(k==='ArrowLeft'||k==='PageUp'||k==='k'){go(-1);e.preventDefault();}
+    else if(k==='Home'){show(0);}
+    else if(k==='End'){show(total-1);}
+    else if(k==='n'||k==='N'){notes.classList.toggle('on');}
+    else if(k==='o'||k==='O'){over.classList.toggle('on');}
+    else if(k==='d'||k==='D'){
+      var dark=document.documentElement.getAttribute('data-theme')==='dark';
+      document.documentElement.setAttribute('data-theme',dark?'light':'dark');}
+    else if(k==='f'||k==='F'){
+      if(document.fullscreenElement){document.exitFullscreen();}
+      else{document.documentElement.requestFullscreen();}}
+    else if(k==='?'){help.classList.toggle('on');}
+  });
+  document.querySelectorAll('.thumb').forEach(function(t,i){
+    t.addEventListener('click',function(){over.classList.remove('on');show(i);});});
+  window.addEventListener('hashchange',function(){
+    var n=parseInt(location.hash.slice(1),10);
+    if(n>=1&&n<=total)show(n-1,false);});
+  var start=parseInt(location.hash.slice(1),10);
+  show(start>=1&&start<=total?start-1:0,false);
+})();
+</script>
+</body></html>
