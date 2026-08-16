@@ -7,8 +7,11 @@
 源码：[顺序表·教学版](../code/ch02/array_list/teaching.hpp)、
 [顺序表·工程版](../code/ch02/array_list/modern.hpp)、
 [顺序表示例](../code/ch02/array_list/demo.cpp)、
-[链表](../code/ch02/linked_list/modern.hpp)、
-[链表示例](../code/ch02/linked_list/demo.cpp)。
+[链表·教学版](../code/ch02/linked_list/teaching.hpp)、
+[链表·工程版](../code/ch02/linked_list/modern.hpp)、
+[链表示例](../code/ch02/linked_list/demo.cpp)、
+[双链表·教学版](../code/ch02/doubly_linked_list/teaching.hpp)、
+[双链表·工程版](../code/ch02/doubly_linked_list/modern.hpp)。
 
 ## 先跑一遍
 
@@ -59,15 +62,19 @@ c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch02/array_list \
 `insert(1, 20)` 要把后面的元素右移一位，这是顺序表的固有代价。链表同一组操作只改两条链接，但按位置找前驱仍是 O(n)：
 
 ```cpp file=code/ch02/linked_list/demo.cpp
-#include "modern.hpp"
+// 第 2 章「先跑一遍」：用教学版 LinkedList 走一遍 append / insert / remove。
+// 编译运行：
+//   g++ -std=c++17 -I code/ch02/linked_list code/ch02/linked_list/demo.cpp -o demo && ./demo
+#include "teaching.hpp"
 
 #include <iostream>
 
 int main() {
-    dsa::LinkedList<int> values;
+    LinkedList<int> values;
     values.append(10);
     values.append(30);
     values.insert(1, 20);
+
     std::cout << "链表:";
     for (int value : values) {
         std::cout << ' ' << value;
@@ -652,71 +659,226 @@ void ensure_capacity() {
 插入或删除只改常数条指针。代价也必须如实保留：要按位置找到那个前驱，仍须从表头循链，
 所以按位置访问、查找、插入和删除的总时间仍是 O(n)。
 
-### 2.3.1 单链结点与头结点
+### 教学版：完整实现
 
-【代码2.6】单链表的结点定义。
+下面是一份**完整的、能直接编译运行的**单链表。一个文件、一个类。
+后面 2.3.1–2.3.3 各节就是把它拆开逐段讲。
 
-```cpp file=code/ch02/linked_list/modern.hpp#node-types
-/// 原书【代码2.6】的单链结点：数据域与指向后继的链接域。
-///
-/// 实际容器把它藏在私有实现里，避免调用方任意改坏链；这里保留独立类型，
-/// 因为后续栈、队列可复用同一种结点形状。
-template <typename T>
-struct SinglyLink {
-    T data;
-    SinglyLink* next{nullptr};
+```cpp file=code/ch02/linked_list/teaching.hpp
+// 单链表 LinkedList —— 教学版。原书【代码2.6】【代码2.7】【算法2.8】–【算法2.11】。
+//
+// 一个文件、一个类、能直接编译运行，给「第一次读这一节」的人看。
+// 保留链表要教的全部内容：结点分散存储、带头结点、尾指针让 append 保持 O(1)、
+// 按位置查找必须循链 O(n)、插入删除在定位之后只改常数条链接。
+//
+// 与 modern.hpp（工程版）的分工：
+//   教学版  三法则（析构 + 拷贝构造 + 拷贝赋值），头结点里放一个不用的 T；
+//   工程版  补齐移动语义，并把头结点做成不含 T 的哨兵基类，
+//           这样 T 就不必可默认构造——代价是多一层继承和一堆 static_cast。
+// 两份都在闸门里真编译真运行。先读这一份，2.3.5「进阶（选读）」再读那一份。
+#pragma once
 
-    template <typename U>
-    explicit SinglyLink(U&& value, SinglyLink* successor = nullptr)
-        : data(std::forward<U>(value)), next(successor) {}
-};
+#include <cstddef>
+#include <optional>
+#include <stdexcept>
 
-/// 原书【代码2.12】的双链结点：额外保存前驱链接。
-template <typename T>
-struct DoublyLink {
-    T data;
-    DoublyLink* next{nullptr};
-    DoublyLink* prev{nullptr};
-
-    template <typename U>
-    explicit DoublyLink(U&& value, DoublyLink* predecessor = nullptr, DoublyLink* successor = nullptr)
-        : data(std::forward<U>(value)), next(successor), prev(predecessor) {}
-};
-```
-
-【代码2.6结束】
-
-`LinkedList<T>` 在对象内嵌一个不承载 `T` 的头结点。它等价于原书的“第 -1 个结点”，
-从而表头插入和删除都变成“修改某个前驱的 `next`”；空表不必另写一套分支。尾指针指向
-最后一个实际结点，空表时回指头结点，故 `append` 不需要从头寻找末尾。
-
-【代码2.7】单链表的类型定义。
-
-```cpp file=code/ch02/linked_list/modern.hpp#class-head
-/// 带头结点、尾指针的单链表。
-///
-/// 原书的 `setPos(-1)` 返回头结点；本实现把这个实现细节留在 predecessor_at，
-/// 对外位置统一为 [0, size()]。按值查找返回 optional，位置错误抛 out_of_range。
 template <typename T>
 class LinkedList {
-    // 头结点只保存链接，不保存 T：哨兵不代表元素，因此不要求 T 默认构造。
-    // Node 继承 NodeBase 后，定位和接链逻辑只需操作 next，结点布局也不重复。
-    struct NodeBase {
-        NodeBase* next{nullptr};
-    };
-    struct Node final : NodeBase {
+private:
+    // 结点(node)：一个数据域，加一根指向后继的链接。原书【代码2.6】。
+    // 它是实现细节，所以放在 private 里——调用方拿不到指针，就改不坏链。
+    struct Node {
         T value;
-
-        template <typename U>
-        explicit Node(U&& item, NodeBase* successor = nullptr)
-            // 完美转发保留左值拷贝、右值移动两条路径，避免无谓的 T 临时对象。
-            : NodeBase{successor}, value(std::forward<U>(item)) {}
+        Node* next;
     };
 
 public:
     using value_type = T;
     using size_type = std::size_t;
+
+    // 头结点(head node)是一个**不存放数据**的哨兵结点，永远排在第一个真元素前面。
+    // 它的作用是消掉「在表头插入 / 删除表头」这个特例：有了它，任何位置的插入
+    // 都变成「找到前驱，改它的 next」，一套代码走遍全表。
+    LinkedList() : head_(new Node), tail_(head_), size_(0) {
+        head_->next = nullptr;
+    }
+
+    ~LinkedList() {
+        clear();
+        delete head_;      // 头结点是构造时 new 的，最后要还回去
+    }
+
+    // 三法则：这个类管着一串 new 出来的结点，拷贝必须自己写。
+    LinkedList(const LinkedList& other) : head_(new Node), tail_(head_), size_(0) {
+        head_->next = nullptr;
+        for (Node* source = other.head_->next; source != nullptr; source = source->next) {
+            append(source->value);
+        }
+    }
+
+    LinkedList& operator=(const LinkedList& other) {
+        if (this == &other) {
+            return *this;
+        }
+        clear();
+        for (Node* source = other.head_->next; source != nullptr; source = source->next) {
+            append(source->value);
+        }
+        return *this;
+    }
+
+    bool empty() const { return size_ == 0; }
+    size_type size() const { return size_; }
+
+    // 删掉全部真元素，头结点留着。
+    void clear() {
+        Node* current = head_->next;
+        while (current != nullptr) {
+            Node* dying = current;
+            current = current->next;
+            delete dying;
+        }
+        head_->next = nullptr;
+        tail_ = head_;         // 表空了，尾指针退回头结点
+        size_ = 0;
+    }
+
+    // 在表尾追加。**因为存了 tail_，这里是 O(1)**；没有它就得每次从头走到尾。
+    void append(const T& value) {
+        Node* fresh = new Node;
+        fresh->value = value;
+        fresh->next = nullptr;
+        tail_->next = fresh;
+        tail_ = fresh;
+        ++size_;
+    }
+
+    // 在位置 pos 插入，pos 可以等于 size()（追加到表尾）。
+    // 两步：① 循链找到 pos 的**前驱**，O(n)；② 改两条链接，O(1)。
+    // 这就是链表与顺序表的分工——链表的插入不搬元素，但定位要走。
+    void insert(size_type pos, const T& value) {
+        Node* predecessor = predecessor_at(pos);
+        Node* fresh = new Node;
+        fresh->value = value;
+        fresh->next = predecessor->next;
+        predecessor->next = fresh;
+        if (predecessor == tail_) {   // 插在表尾，尾指针要跟上
+            tail_ = fresh;
+        }
+        ++size_;
+    }
+
+    // 删除位置 pos 上的元素并返回它。同样是「先定位前驱，再改一条链接」。
+    T remove(size_type pos) {
+        if (pos >= size_) {
+            throw std::out_of_range("LinkedList::remove: 下标越界");
+        }
+        Node* predecessor = predecessor_at(pos);
+        Node* dying = predecessor->next;
+        T value = dying->value;
+        predecessor->next = dying->next;
+        if (dying == tail_) {         // 删的是最后一个，尾指针退回前驱
+            tail_ = predecessor;
+        }
+        delete dying;
+        --size_;
+        return value;
+    }
+
+    // 按位置取值：链表**不是**随机存取的，只能从头一个一个数过去，O(n)。
+    // 这一条是 2.4 节拿链表和顺序表对比的关键。
+    const T& at(size_type pos) const { return node_at(pos)->value; }
+    T& at(size_type pos) { return node_at(pos)->value; }
+
+    // 按内容查找，O(n)。找到返回位置，没找到返回空 optional。
+    std::optional<size_type> find(const T& value) const {
+        size_type pos = 0;
+        for (Node* current = head_->next; current != nullptr; current = current->next) {
+            if (current->value == value) {
+                return pos;
+            }
+            ++pos;
+        }
+        return std::nullopt;
+    }
+
+    // 链表没有连续下标，range-for 要靠迭代器。这个迭代器就是一根被包起来的
+    // 结点指针：`*it` 取值，`++it` 顺着 next 走一步，走到 nullptr 就是结束。
+    class Iterator {
+    public:
+        explicit Iterator(Node* node) : node_(node) {}
+        T& operator*() const { return node_->value; }
+        Iterator& operator++() {
+            node_ = node_->next;
+            return *this;
+        }
+        bool operator!=(const Iterator& other) const { return node_ != other.node_; }
+
+    private:
+        Node* node_;
+    };
+
+    Iterator begin() { return Iterator(head_->next); }   // 从第一个**真**元素开始
+    Iterator end() { return Iterator(nullptr); }
+
+private:
+    // 返回位置 pos 的前驱结点。pos == 0 时前驱就是头结点——
+    // 这正是头结点存在的意义：表头不再是特例。
+    Node* predecessor_at(size_type pos) const {
+        if (pos > size_) {
+            throw std::out_of_range("LinkedList: 下标越界");
+        }
+        Node* predecessor = head_;
+        for (size_type i = 0; i < pos; ++i) {
+            predecessor = predecessor->next;
+        }
+        return predecessor;
+    }
+
+    Node* node_at(size_type pos) const {
+        if (pos >= size_) {
+            throw std::out_of_range("LinkedList::at: 下标越界");
+        }
+        Node* current = head_->next;
+        for (size_type i = 0; i < pos; ++i) {
+            current = current->next;
+        }
+        return current;
+    }
+
+    Node* head_;          // 头结点（哨兵，不存数据）
+    Node* tail_;          // 最后一个结点；表空时等于 head_
+    size_type size_;
+};
 ```
+
+编译运行：
+
+```bash
+g++ -std=c++17 -Wall -Wextra demo.cpp -o demo && ./demo
+```
+
+### 2.3.1 单链结点与头结点
+
+【代码2.6】单链表的结点定义。
+
+结点(node)就是上面那个 `Node`：**一个数据域，加一根指向后继的链接域**。
+原书把它写成独立的 `Link<T>`；这里放在 `LinkedList` 的 private 区里，
+因为调用方拿不到结点指针，就没法改坏链。
+
+【代码2.6结束】
+
+`LinkedList<T>` 还有一个**头结点**(head node)：一个不存放数据的哨兵，
+永远排在第一个真元素前面。它等价于原书的"第 -1 个结点"。
+有了它，表头插入和删除都变成"修改某个前驱的 `next`"，空表也不必另写一套分支——
+这就是 `predecessor_at(0)` 能直接返回头结点的原因。
+
+尾指针 `tail_` 指向最后一个实际结点，空表时回指头结点，
+所以 `append` 不需要从头寻找末尾，是 O(1)。
+
+【代码2.7】单链表的类型定义。
+
+见上面教学版清单的类头：三个成员——头结点、尾指针、长度。
 
 【代码2.7结束】
 
@@ -724,52 +886,26 @@ public:
 
 【算法2.8】带有头结点的单链表构造函数与析构函数。
 
-本实现的头结点嵌入对象本身，不需要动态分配；`clear()` 沿 `next` 逐结点释放实际结点，
-析构函数调用它。复制构造采用“先逐个接入新链，失败即清理”的规则，避免半成品对象在
-元素复制抛异常时泄漏。
+教学版的构造函数 `new` 出头结点，析构函数先 `clear()` 掉全部真元素、再把头结点还回去。
+`clear()` 沿 `next` **逐个循环释放**，不是递归——链长十万级时递归释放会耗尽运行栈，
+这一点第 3 章 3.1.3 有实测数字。
 
-构造与析构路径的核心代码如下；析构只调用迭代式 `clear()`，不会递归释放整条链：
+两处一漏就出事，教学版的测试各有一条断言盯着：
 
-```text
-LinkedList() noexcept = default;
-~LinkedList() { clear(); }
-```
-
-```cpp file=code/ch02/linked_list/modern.hpp#clear
-void clear() noexcept {
-    NodeBase* current = head_.next;
-    while (current != nullptr) {
-        NodeBase* following = current->next;
-        delete static_cast<Node*>(current);
-        current = following;
-    }
-    head_.next = nullptr;
-    tail_ = &head_;
-    size_ = 0;
-}
-```
+- `clear()` 之后 `tail_` 必须退回头结点。不退，下一次 `append` 就写进已释放的内存，
+  AddressSanitizer 报 `heap-use-after-free`。
+- 析构里那句 `delete head_` 不能漏。漏了，每个链表对象泄漏一个结点，
+  LeakSanitizer 会报。
 
 【算法2.8结束】
 
 【算法2.9】寻找链表的第 i 个结点。
 
-定位从头结点开始逐步走 `next`，不新建任何结点。原书的 `setPos(-1)` 是处理头结点的
-技巧；现代接口不暴露 -1 这个特殊位置，内部 `predecessor_at(0)` 直接返回头结点。
+定位从头结点开始逐步走 `next`，不新建任何结点，O(n)。原书的 `setPos(-1)` 是处理
+头结点的技巧；教学版不暴露 -1 这个特殊位置，`predecessor_at(0)` 直接返回头结点。
 
-定位循环的现代实现如下。返回“前驱”使插入、删除都能统一改写一条 `next` 链接：
-
-```cpp file=code/ch02/linked_list/modern.hpp#locate
-[[nodiscard]] NodeBase* predecessor_at(size_type pos) {
-    if (pos > size_) {
-        throw std::out_of_range("LinkedList: 下标越界");
-    }
-    NodeBase* predecessor = &head_;  // 相当于原书 setPos(-1)
-    for (size_type i = 0; i < pos; ++i) {
-        predecessor = predecessor->next;
-    }
-    return predecessor;
-}
-```
+**返回"前驱"而不是"结点本身"**，是因为插入和删除都要改前驱的 `next`——
+单链表从一个结点走不回它的前一个。一个函数同时服务两处，这是头结点带来的简化。
 
 【算法2.9结束】
 
@@ -863,62 +999,323 @@ void clear() noexcept {
 
 【算法2.10】插入单链表的第 i 个结点。
 
-```cpp file=code/ch02/linked_list/modern.hpp#insert
-/// 尾插直接经 tail_ 接链，O(1)。不能转调 insert(size_)，后者必须循链定位前驱。
-void append(const T& value) { append_impl(value); }
-void append(T&& value) { append_impl(std::move(value)); }
+教学版的 `insert(pos, value)` 分两步：① 循链找到 pos 的**前驱**，O(n)；
+② 改两条链接，O(1)。
 
-void insert(size_type pos, const T& value) { insert_impl(pos, value); }
-void insert(size_type pos, T&& value) { insert_impl(pos, std::move(value)); }
-```
+**这就是链表与顺序表的分工**：顺序表的 `insert` 不用找（下标直接算），
+但要搬 O(n) 个元素；链表不搬任何元素，但要走 O(n) 步去找。
+两者的 O(n) 是不同的东西——一个在搬数据，一个在走指针。
+
+`append` 单列一个函数而不是转调 `insert(size_)`，正是因为有 `tail_`：
+尾插不需要定位，直接接在 `tail_` 后面，**O(1)**。转调 `insert` 就白白退化成 O(n) 了。
+插在表尾时 `tail_` 必须跟着往后挪，教学版的测试有一条专门验它。
 
 【算法2.10结束】
 
-插入先定位前驱、再构造新结点、最后接入链接；结点构造或分配失败时，链接和长度尚未变化。
-若前驱恰是尾结点，同步让 `tail_` 指向新结点。给定前驱后的接链是 O(1)，定位仍是 O(n)。
-
 【算法2.11】单链表的删除算法。
 
-```cpp file=code/ch02/linked_list/modern.hpp#remove
-T remove(size_type pos) {
-    NodeBase* predecessor = predecessor_at(pos);
-    NodeBase* removed = predecessor->next;
-    if (removed == nullptr) {
-        throw std::out_of_range("LinkedList::remove: 下标越界");
-    }
-    // 先移动出值；若 T 的移动构造抛，链接尚未改变，容器仍完整。
-    T value = std::move(static_cast<Node*>(removed)->value);
-    predecessor->next = removed->next;
-    if (removed == tail_) {
-        tail_ = predecessor;
-    }
-    delete static_cast<Node*>(removed);
-    --size_;
-    return value;
-}
-```
+删除同样是「定位前驱 → 改一条链接」，但有两件事不能漏：
+
+1. **被删结点必须 `delete`**，只摘链不释放就是内存泄漏；
+2. **删的若是尾结点，`tail_` 必须回退到前驱**。不回退，下一次 `append`
+   就写进已释放的内存——教学版的测试用「删到空表再 append」把这条钉死了，
+   去掉那两行，AddressSanitizer 立刻报 `heap-use-after-free`。
+
+位置不合法统一抛 `std::out_of_range`，容器不打印任何提示。
 
 【算法2.11结束】
-
-删除不能只摘除链接：被删结点必须释放，且删除尾结点后 `tail_` 必须回退到前驱。否则下一次
-`append` 会写入已释放内存。位置不合法统一抛 `std::out_of_range`，容器不打印提示。
 
 ### 2.3.4 双链结点
 
 【代码2.12】双链表的结点定义和实现。
 
-上面的 `DoublyLink<T>` 已保留 `prev` 与 `next` 两个链接域。双链表删除某一结点时，需要
-同时维护前驱的 `next` 和后继的 `prev`；这能高效向前走，但每个结点多一个指针且不变量更多。
-原书在此只给出结点定义，没有给出完整双链表算法；本书补充 `DoublyLinkedList<T>`，用前后端指针
-实现双端插入删除、按位置插入删除、双向链接维护、拷贝和移动。结点由容器拥有，接口不暴露裸所有权。
+双链结点比单链结点多一根 `prev`。多出来的那个指针（64 位机上 8 字节）
+只买到一件事，但这件事很值：**已知一个结点时，删除它是 O(1)**。
+单链表要做同一件事得先从头走到它的前驱，O(n)——因为单链表从一个结点走不回前一个。
+
+原书在此只给出结点定义，没有给出完整的双链表算法。
 
 【代码2.12结束】
 
-原书的代码 2.12 只有双链结点定义，并没有完整的双链表操作；下面明确标出本书新增的核心操作，
-以免把原书的结点定义和现代容器实现混为一谈。插入必须同时接好 `prev` 与 `next`，删除则
-必须同时修复两侧链接，并在删除首尾结点时更新 `head_`/`tail_`。
+【本书补充实现】完整的双链表。
 
-【本书补充实现】双链表在指定结点前插入与删除。
+```cpp file=code/ch02/doubly_linked_list/teaching.hpp
+// 双链表 DoublyLinkedList —— 教学版。原书【代码2.12】的双链结点。
+//
+// 一个文件、一个类、能直接编译运行，给「第一次读这一节」的人看。
+//
+// 双链表比单链表每个结点多存一根 `prev`。多出来的空间买到的是一件事：
+// **已知结点位置时，插入和删除都是 O(1)**——不必像单链表那样先循链找前驱。
+// 这是本节唯一值得多花那份空间的理由，全部教学内容都围绕它。
+//
+// 与 modern.hpp（工程版）的分工：
+//   教学版  三法则，插入/删除各写成一段直白的改链；
+//   工程版  补齐移动语义，并把「表头 / 表中 / 表尾」三种情形合并进一个
+//           insert_before(pos)——省代码，但初读时那几个 nullptr 分支很绕。
+// 两份都在闸门里真编译真运行。先读这一份，2.3.5「进阶（选读）」再读那一份。
+#pragma once
+
+#include <cstddef>
+#include <stdexcept>
+
+template <typename T>
+class DoublyLinkedList {
+private:
+    // 双链结点：数据 + 前驱链接 + 后继链接。
+    struct Node {
+        T value;
+        Node* prev;
+        Node* next;
+    };
+
+public:
+    using value_type = T;
+    using size_type = std::size_t;
+
+    DoublyLinkedList() : head_(nullptr), tail_(nullptr), size_(0) {}
+
+    ~DoublyLinkedList() { clear(); }
+
+    // 三法则：这个类管着一串 new 出来的结点，拷贝必须自己写。
+    DoublyLinkedList(const DoublyLinkedList& other)
+        : head_(nullptr), tail_(nullptr), size_(0) {
+        for (Node* source = other.head_; source != nullptr; source = source->next) {
+            push_back(source->value);
+        }
+    }
+
+    DoublyLinkedList& operator=(const DoublyLinkedList& other) {
+        if (this == &other) {
+            return *this;
+        }
+        clear();
+        for (Node* source = other.head_; source != nullptr; source = source->next) {
+            push_back(source->value);
+        }
+        return *this;
+    }
+
+    bool empty() const { return size_ == 0; }
+    size_type size() const { return size_; }
+
+    void clear() {
+        Node* current = head_;
+        while (current != nullptr) {
+            Node* dying = current;
+            current = current->next;
+            delete dying;
+        }
+        head_ = tail_ = nullptr;
+        size_ = 0;
+    }
+
+    // 表头插入，O(1)。要改的链接一共三处：新结点的 next、原表头的 prev、head_。
+    void push_front(const T& value) {
+        Node* fresh = new Node;
+        fresh->value = value;
+        fresh->prev = nullptr;
+        fresh->next = head_;
+        if (head_ != nullptr) {
+            head_->prev = fresh;
+        } else {
+            tail_ = fresh;      // 原来是空表，新结点同时也是表尾
+        }
+        head_ = fresh;
+        ++size_;
+    }
+
+    // 表尾插入，O(1)。与 push_front 完全对称。
+    void push_back(const T& value) {
+        Node* fresh = new Node;
+        fresh->value = value;
+        fresh->prev = tail_;
+        fresh->next = nullptr;
+        if (tail_ != nullptr) {
+            tail_->next = fresh;
+        } else {
+            head_ = fresh;      // 原来是空表，新结点同时也是表头
+        }
+        tail_ = fresh;
+        ++size_;
+    }
+
+    T pop_front() {
+        if (empty()) {
+            throw std::out_of_range("DoublyLinkedList::pop_front: 表空");
+        }
+        return erase_node(head_);
+    }
+
+    T pop_back() {
+        if (empty()) {
+            throw std::out_of_range("DoublyLinkedList::pop_back: 表空");
+        }
+        return erase_node(tail_);
+    }
+
+    // 在位置 pos 插入。定位仍是 O(n)——双链表省掉的是「找前驱」，不是「找位置」。
+    void insert(size_type pos, const T& value) {
+        if (pos > size_) {
+            throw std::out_of_range("DoublyLinkedList::insert: 位置非法");
+        }
+        if (pos == 0) {
+            push_front(value);
+            return;
+        }
+        if (pos == size_) {
+            push_back(value);
+            return;
+        }
+        Node* successor = node_at(pos);          // 新结点要插在它前面
+        Node* predecessor = successor->prev;     // O(1)：prev 现成的，不用循链
+        Node* fresh = new Node;
+        fresh->value = value;
+        fresh->prev = predecessor;
+        fresh->next = successor;
+        predecessor->next = fresh;
+        successor->prev = fresh;
+        ++size_;
+    }
+
+    T erase(size_type pos) { return erase_node(node_at(pos)); }
+
+    const T& at(size_type pos) const { return node_at(pos)->value; }
+    T& at(size_type pos) { return node_at(pos)->value; }
+
+    // 迭代器：一根被包起来的结点指针。双链表的迭代器可以 `--`，单链表的不行——
+    // 这也是那根 prev 买到的东西。
+    class Iterator {
+    public:
+        explicit Iterator(Node* node) : node_(node) {}
+        T& operator*() const { return node_->value; }
+        Iterator& operator++() {
+            node_ = node_->next;
+            return *this;
+        }
+        Iterator& operator--() {
+            node_ = node_->prev;
+            return *this;
+        }
+        bool operator!=(const Iterator& other) const { return node_ != other.node_; }
+
+    private:
+        Node* node_;
+    };
+
+    Iterator begin() { return Iterator(head_); }
+    Iterator end() { return Iterator(nullptr); }
+
+private:
+    // 摘掉一个已知的结点，O(1)。**这是双链表的看家本领**：
+    // 单链表要做同一件事，得先从头走到它的前驱，O(n)。
+    T erase_node(Node* node) {
+        T value = node->value;
+        if (node->prev != nullptr) {
+            node->prev->next = node->next;
+        } else {
+            head_ = node->next;     // 删的是表头
+        }
+        if (node->next != nullptr) {
+            node->next->prev = node->prev;
+        } else {
+            tail_ = node->prev;     // 删的是表尾
+        }
+        delete node;
+        --size_;
+        return value;
+    }
+
+    Node* node_at(size_type pos) const {
+        if (pos >= size_) {
+            throw std::out_of_range("DoublyLinkedList: 下标越界");
+        }
+        Node* current = head_;
+        for (size_type i = 0; i < pos; ++i) {
+            current = current->next;
+        }
+        return current;
+    }
+
+    Node* head_;
+    Node* tail_;
+    size_type size_;
+};
+```
+
+三处值得停一下：
+
+- **插入和删除都要同时改两侧链接**。少改一根，表在**正向**遍历时看起来完全正常，
+  只有反着走或者删中间结点时才炸。教学版的测试因此正着走一遍、倒着走一遍，
+  断言两个结果互为逆序——漏掉 `successor->prev = fresh;` 这一条就红。
+- **首尾是特例，但只有两个**：插入时若新结点成了表头/表尾，`head_`/`tail_` 要跟着改；
+  删除时若删掉的是表头/表尾，同样要改。四个分支写清楚就没有别的坑了。
+- **迭代器可以 `--`**。单链表的不行。这也是那根 `prev` 买到的东西。
+
+【本书补充实现结束】
+
+### 2.3.5 进阶（选读）：从教学版到工程版
+
+**这一节可以整节跳过。** 工程版（`code/ch02/linked_list/modern.hpp` 与
+`code/ch02/doubly_linked_list/modern.hpp`）在教学版之上补三件事。
+
+**一、头结点不再存 `T`。** 教学版的头结点是一个完整的 `Node`，里面那个 `value`
+从头到尾没人用——代价是 `T` 必须可默认构造。工程版把结点拆成两层：
+
+```cpp file=code/ch02/linked_list/modern.hpp#class-head
+/// 带头结点、尾指针的单链表。
+///
+/// 原书的 `setPos(-1)` 返回头结点；本实现把这个实现细节留在 predecessor_at，
+/// 对外位置统一为 [0, size()]。按值查找返回 optional，位置错误抛 out_of_range。
+template <typename T>
+class LinkedList {
+    // 头结点只保存链接，不保存 T：哨兵不代表元素，因此不要求 T 默认构造。
+    // Node 继承 NodeBase 后，定位和接链逻辑只需操作 next，结点布局也不重复。
+    struct NodeBase {
+        NodeBase* next{nullptr};
+    };
+    struct Node final : NodeBase {
+        T value;
+
+        template <typename U>
+        explicit Node(U&& item, NodeBase* successor = nullptr)
+            // 完美转发保留左值拷贝、右值移动两条路径，避免无谓的 T 临时对象。
+            : NodeBase{successor}, value(std::forward<U>(item)) {}
+    };
+
+public:
+    using value_type = T;
+    using size_type = std::size_t;
+```
+
+`NodeBase` 只有链接域，头结点用它；真正存数据的 `Node` 继承它。
+于是头结点不含 `T`，`LinkedList<不可默认构造的类型>` 也能用了。
+代价是链上走的是 `NodeBase*`，取值时到处要写 `static_cast<Node*>`：
+
+```cpp file=code/ch02/linked_list/modern.hpp#clear
+void clear() noexcept {
+    NodeBase* current = head_.next;
+    while (current != nullptr) {
+        NodeBase* following = current->next;
+        delete static_cast<Node*>(current);
+        current = following;
+    }
+    head_.next = nullptr;
+    tail_ = &head_;
+    size_ = 0;
+}
+```
+
+**这是一次实打实的交换**：多一层继承和一堆强制转换，换 `T` 少一条约束。
+教学版选了前者，工程版选了后者。
+
+**二、拷贝到一半失败时要自己收拾。** 构造函数抛出时，这个对象的析构函数**不会运行**——
+它还没构造完，语言不认为它存在。所以工程版的拷贝构造把循环包进 `try/catch`，
+失败时先 `clear()` 掉已经接上的半截链再重新抛出。教学版没有这一段。
+
+**三、移动语义、`[[nodiscard]]`、`noexcept`。** 与 2.2.5 说过的完全一样，不再重复。
+
+双链表这边，工程版还把「表头 / 表中 / 表尾」三种插入情形合并进一个
+`insert_before(pos)`——省代码，但初读时那几个 `nullptr` 分支很绕：
 
 ```cpp file=code/ch02/doubly_linked_list/modern.hpp#dll-insert-before
 template <typename U>
@@ -956,12 +1353,9 @@ T erase_node(Node* node) {
 }
 ```
 
-【本书补充实现结束】
-
-完整可运行实现见 `code/ch02/doubly_linked_list/modern.hpp`；单链实现仍见 `code/ch02/linked_list/modern.hpp`。
-测试覆盖头/中/尾插入、删尾后的尾指针
-修复、深拷贝、移动、元素构造异常和 move-only 元素；变异自检还确认“删尾不回退 tail”会在
-后续尾插崩溃，“复制构造失败不清理”会留下元素对象。原书逐条证据见
+工程版的测试覆盖头/中/尾插入、删尾后的尾指针修复、深拷贝、移动、元素构造异常和
+move-only 元素；变异自检还确认"删尾不回退 tail"会在后续尾插崩溃，
+"复制构造失败不清理"会留下元素对象。原书逐条证据见
 `code/ch02/linked_list/legacy.md`。
 
 ## 2.4 线性表实现方法的比较

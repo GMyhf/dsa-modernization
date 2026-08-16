@@ -155,7 +155,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <main>
 
 <p>线性表把一串同类型元素排成唯一的先后次序。顺序表把元素连续放在数组里，能 O(1) 按下标访问； 链表用链接保存相邻关系，能在已知结点位置 O(1) 插入或删除。关键是区分「按位置找元素」和 「已知结点后改链接」这两类操作。</p>
-<p>源码：<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/teaching.hpp" class="ext">顺序表·教学版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/modern.hpp" class="ext">顺序表·工程版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/demo.cpp" class="ext">顺序表示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/modern.hpp" class="ext">链表</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/demo.cpp" class="ext">链表示例</a>。</p>
+<p>源码：<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/teaching.hpp" class="ext">顺序表·教学版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/modern.hpp" class="ext">顺序表·工程版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/demo.cpp" class="ext">顺序表示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/teaching.hpp" class="ext">链表·教学版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/modern.hpp" class="ext">链表·工程版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/demo.cpp" class="ext">链表示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/doubly_linked_list/teaching.hpp" class="ext">双链表·教学版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/doubly_linked_list/modern.hpp" class="ext">双链表·工程版</a>。</p>
 <h2 id="先跑一遍"><a class="anchor" href="#先跑一遍">#</a>先跑一遍</h2>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/demo.cpp">code/ch02/array_list/demo.cpp</a></div><pre><code><span class="c">// 第 2 章「先跑一遍」：用教学版 ArrayList 走一遍 append / insert / find / remove。</span>
 <span class="c">// 编译运行：</span>
@@ -193,15 +193,19 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 查找 20 的下标: 1
 删除位置 1 得到 20，剩余: 10 30</code></pre></div>
 <p><code>insert(1, 20)</code> 要把后面的元素右移一位，这是顺序表的固有代价。链表同一组操作只改两条链接，但按位置找前驱仍是 O(n)：</p>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/demo.cpp">code/ch02/linked_list/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/demo.cpp">code/ch02/linked_list/demo.cpp</a></div><pre><code><span class="c">// 第 2 章「先跑一遍」：用教学版 LinkedList 走一遍 append / insert / remove。</span>
+<span class="c">// 编译运行：</span>
+<span class="c">//   g++ -std=c++17 -I code/ch02/linked_list code/ch02/linked_list/demo.cpp -o demo &amp;&amp; ./demo</span>
+<span class="p">#include &quot;teaching.hpp&quot;</span>
 
 <span class="p">#include &lt;iostream&gt;</span>
 
 <span class="t">int</span> main() {
-    dsa::LinkedList&lt;<span class="t">int</span>&gt; values;
+    LinkedList&lt;<span class="t">int</span>&gt; values;
     values.append(<span class="n">10</span>);
     values.append(<span class="n">30</span>);
     values.insert(<span class="n">1</span>, <span class="n">20</span>);
+
     std::cout &lt;&lt; <span class="s">&quot;链表:&quot;</span>;
     <span class="k">for</span> (<span class="t">int</span> value : values) {
         std::cout &lt;&lt; <span class="s">&#x27; &#x27;</span> &lt;&lt; value;
@@ -756,91 +760,216 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 <p>完整实现见 <code>code/ch02/array_list/modern.hpp</code>，测试见同目录 <code>test.cpp</code> （47 项断言，覆盖上表每一行；用 <code>python3 tools/check_code.py</code> 在 <code>-Werror</code> + ASan/UBSan 与 <code>-O2</code> 两种构建下各跑一遍）。</p>
 <h2 id="23-链表"><a class="anchor" href="#23-链表">#</a>2.3 链表</h2>
 <p>顺序表用物理相邻表示逻辑相邻，所以按下标读取是 O(1)，但中间插入和删除需要搬动 后续元素。链表把逻辑相邻写进结点的链接域：结点可以散落在内存中；给定一个前驱结点后， 插入或删除只改常数条指针。代价也必须如实保留：要按位置找到那个前驱，仍须从表头循链， 所以按位置访问、查找、插入和删除的总时间仍是 O(n)。</p>
-<h3 id="231-单链结点与头结点"><a class="anchor" href="#231-单链结点与头结点">#</a>2.3.1 单链结点与头结点</h3>
-<p>【代码2.6】单链表的结点定义。</p>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/modern.hpp">code/ch02/linked_list/modern.hpp#node-types</a></div><pre><code><span class="c">/// 原书【代码2.6】的单链结点：数据域与指向后继的链接域。</span>
-<span class="c">///</span>
-<span class="c">/// 实际容器把它藏在私有实现里，避免调用方任意改坏链；这里保留独立类型，</span>
-<span class="c">/// 因为后续栈、队列可复用同一种结点形状。</span>
-<span class="k">template</span> &lt;<span class="k">typename</span> T&gt;
-<span class="k">struct</span> SinglyLink {
-    T data;
-    SinglyLink* next{<span class="k">nullptr</span>};
+<h3 id="教学版完整实现-1"><a class="anchor" href="#教学版完整实现-1">#</a>教学版：完整实现</h3>
+<p>下面是一份<strong>完整的、能直接编译运行的</strong>单链表。一个文件、一个类。 后面 2.3.1–2.3.3 各节就是把它拆开逐段讲。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/teaching.hpp">code/ch02/linked_list/teaching.hpp</a></div><pre><code><span class="c">// 单链表 LinkedList —— 教学版。原书【代码2.6】【代码2.7】【算法2.8】–【算法2.11】。</span>
+<span class="c">//</span>
+<span class="c">// 一个文件、一个类、能直接编译运行，给「第一次读这一节」的人看。</span>
+<span class="c">// 保留链表要教的全部内容：结点分散存储、带头结点、尾指针让 append 保持 O(1)、</span>
+<span class="c">// 按位置查找必须循链 O(n)、插入删除在定位之后只改常数条链接。</span>
+<span class="c">//</span>
+<span class="c">// 与 modern.hpp（工程版）的分工：</span>
+<span class="c">//   教学版  三法则（析构 + 拷贝构造 + 拷贝赋值），头结点里放一个不用的 T；</span>
+<span class="c">//   工程版  补齐移动语义，并把头结点做成不含 T 的哨兵基类，</span>
+<span class="c">//           这样 T 就不必可默认构造——代价是多一层继承和一堆 static_cast。</span>
+<span class="c">// 两份都在闸门里真编译真运行。先读这一份，2.3.5「进阶（选读）」再读那一份。</span>
+<span class="p">#pragma once</span>
 
-    <span class="k">template</span> &lt;<span class="k">typename</span> U&gt;
-    <span class="k">explicit</span> SinglyLink(U&amp;&amp; value, SinglyLink* successor = <span class="k">nullptr</span>)
-        : data(std::forward&lt;U&gt;(value)), next(successor) {}
-};
+<span class="p">#include &lt;cstddef&gt;</span>
+<span class="p">#include &lt;optional&gt;</span>
+<span class="p">#include &lt;stdexcept&gt;</span>
 
-<span class="c">/// 原书【代码2.12】的双链结点：额外保存前驱链接。</span>
-<span class="k">template</span> &lt;<span class="k">typename</span> T&gt;
-<span class="k">struct</span> DoublyLink {
-    T data;
-    DoublyLink* next{<span class="k">nullptr</span>};
-    DoublyLink* prev{<span class="k">nullptr</span>};
-
-    <span class="k">template</span> &lt;<span class="k">typename</span> U&gt;
-    <span class="k">explicit</span> DoublyLink(U&amp;&amp; value, DoublyLink* predecessor = <span class="k">nullptr</span>, DoublyLink* successor = <span class="k">nullptr</span>)
-        : data(std::forward&lt;U&gt;(value)), next(successor), prev(predecessor) {}
-};</code></pre></div>
-<p>【代码2.6结束】</p>
-<p><code>LinkedList&lt;T&gt;</code> 在对象内嵌一个不承载 <code>T</code> 的头结点。它等价于原书的“第 -1 个结点”， 从而表头插入和删除都变成“修改某个前驱的 <code>next</code>”；空表不必另写一套分支。尾指针指向 最后一个实际结点，空表时回指头结点，故 <code>append</code> 不需要从头寻找末尾。</p>
-<p>【代码2.7】单链表的类型定义。</p>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/modern.hpp">code/ch02/linked_list/modern.hpp#class-head</a></div><pre><code><span class="c">/// 带头结点、尾指针的单链表。</span>
-<span class="c">///</span>
-<span class="c">/// 原书的 `setPos(-1)` 返回头结点；本实现把这个实现细节留在 predecessor_at，</span>
-<span class="c">/// 对外位置统一为 [0, size()]。按值查找返回 optional，位置错误抛 out_of_range。</span>
 <span class="k">template</span> &lt;<span class="k">typename</span> T&gt;
 <span class="k">class</span> LinkedList {
-    <span class="c">// 头结点只保存链接，不保存 T：哨兵不代表元素，因此不要求 T 默认构造。</span>
-    <span class="c">// Node 继承 NodeBase 后，定位和接链逻辑只需操作 next，结点布局也不重复。</span>
-    <span class="k">struct</span> NodeBase {
-        NodeBase* next{<span class="k">nullptr</span>};
-    };
-    <span class="k">struct</span> Node final : NodeBase {
+<span class="k">private</span>:
+    <span class="c">// 结点(node)：一个数据域，加一根指向后继的链接。原书【代码2.6】。</span>
+    <span class="c">// 它是实现细节，所以放在 private 里——调用方拿不到指针，就改不坏链。</span>
+    <span class="k">struct</span> Node {
         T value;
-
-        <span class="k">template</span> &lt;<span class="k">typename</span> U&gt;
-        <span class="k">explicit</span> Node(U&amp;&amp; item, NodeBase* successor = <span class="k">nullptr</span>)
-            <span class="c">// 完美转发保留左值拷贝、右值移动两条路径，避免无谓的 T 临时对象。</span>
-            : NodeBase{successor}, value(std::forward&lt;U&gt;(item)) {}
+        Node* next;
     };
 
 <span class="k">public</span>:
     <span class="k">using</span> value_type = T;
-    <span class="k">using</span> size_type = std::<span class="t">size_t</span>;</code></pre></div>
+    <span class="k">using</span> size_type = std::<span class="t">size_t</span>;
+
+    <span class="c">// 头结点(head node)是一个**不存放数据**的哨兵结点，永远排在第一个真元素前面。</span>
+    <span class="c">// 它的作用是消掉「在表头插入 / 删除表头」这个特例：有了它，任何位置的插入</span>
+    <span class="c">// 都变成「找到前驱，改它的 next」，一套代码走遍全表。</span>
+    LinkedList() : head_(<span class="k">new</span> Node), tail_(head_), size_(<span class="n">0</span>) {
+        head_-&gt;next = <span class="k">nullptr</span>;
+    }
+
+    ~LinkedList() {
+        clear();
+        <span class="k">delete</span> head_;      <span class="c">// 头结点是构造时 new 的，最后要还回去</span>
+    }
+
+    <span class="c">// 三法则：这个类管着一串 new 出来的结点，拷贝必须自己写。</span>
+    LinkedList(<span class="k">const</span> LinkedList&amp; other) : head_(<span class="k">new</span> Node), tail_(head_), size_(<span class="n">0</span>) {
+        head_-&gt;next = <span class="k">nullptr</span>;
+        <span class="k">for</span> (Node* source = other.head_-&gt;next; source != <span class="k">nullptr</span>; source = source-&gt;next) {
+            append(source-&gt;value);
+        }
+    }
+
+    LinkedList&amp; <span class="k">operator</span>=(<span class="k">const</span> LinkedList&amp; other) {
+        <span class="k">if</span> (<span class="k">this</span> == &amp;other) {
+            <span class="k">return</span> *<span class="k">this</span>;
+        }
+        clear();
+        <span class="k">for</span> (Node* source = other.head_-&gt;next; source != <span class="k">nullptr</span>; source = source-&gt;next) {
+            append(source-&gt;value);
+        }
+        <span class="k">return</span> *<span class="k">this</span>;
+    }
+
+    <span class="t">bool</span> empty() <span class="k">const</span> { <span class="k">return</span> size_ == <span class="n">0</span>; }
+    size_type size() <span class="k">const</span> { <span class="k">return</span> size_; }
+
+    <span class="c">// 删掉全部真元素，头结点留着。</span>
+    <span class="t">void</span> clear() {
+        Node* current = head_-&gt;next;
+        <span class="k">while</span> (current != <span class="k">nullptr</span>) {
+            Node* dying = current;
+            current = current-&gt;next;
+            <span class="k">delete</span> dying;
+        }
+        head_-&gt;next = <span class="k">nullptr</span>;
+        tail_ = head_;         <span class="c">// 表空了，尾指针退回头结点</span>
+        size_ = <span class="n">0</span>;
+    }
+
+    <span class="c">// 在表尾追加。**因为存了 tail_，这里是 O(1)**；没有它就得每次从头走到尾。</span>
+    <span class="t">void</span> append(<span class="k">const</span> T&amp; value) {
+        Node* fresh = <span class="k">new</span> Node;
+        fresh-&gt;value = value;
+        fresh-&gt;next = <span class="k">nullptr</span>;
+        tail_-&gt;next = fresh;
+        tail_ = fresh;
+        ++size_;
+    }
+
+    <span class="c">// 在位置 pos 插入，pos 可以等于 size()（追加到表尾）。</span>
+    <span class="c">// 两步：① 循链找到 pos 的**前驱**，O(n)；② 改两条链接，O(1)。</span>
+    <span class="c">// 这就是链表与顺序表的分工——链表的插入不搬元素，但定位要走。</span>
+    <span class="t">void</span> insert(size_type pos, <span class="k">const</span> T&amp; value) {
+        Node* predecessor = predecessor_at(pos);
+        Node* fresh = <span class="k">new</span> Node;
+        fresh-&gt;value = value;
+        fresh-&gt;next = predecessor-&gt;next;
+        predecessor-&gt;next = fresh;
+        <span class="k">if</span> (predecessor == tail_) {   <span class="c">// 插在表尾，尾指针要跟上</span>
+            tail_ = fresh;
+        }
+        ++size_;
+    }
+
+    <span class="c">// 删除位置 pos 上的元素并返回它。同样是「先定位前驱，再改一条链接」。</span>
+    T remove(size_type pos) {
+        <span class="k">if</span> (pos &gt;= size_) {
+            <span class="k">throw</span> std::out_of_range(<span class="s">&quot;LinkedList::remove: 下标越界&quot;</span>);
+        }
+        Node* predecessor = predecessor_at(pos);
+        Node* dying = predecessor-&gt;next;
+        T value = dying-&gt;value;
+        predecessor-&gt;next = dying-&gt;next;
+        <span class="k">if</span> (dying == tail_) {         <span class="c">// 删的是最后一个，尾指针退回前驱</span>
+            tail_ = predecessor;
+        }
+        <span class="k">delete</span> dying;
+        --size_;
+        <span class="k">return</span> value;
+    }
+
+    <span class="c">// 按位置取值：链表**不是**随机存取的，只能从头一个一个数过去，O(n)。</span>
+    <span class="c">// 这一条是 2.4 节拿链表和顺序表对比的关键。</span>
+    <span class="k">const</span> T&amp; at(size_type pos) <span class="k">const</span> { <span class="k">return</span> node_at(pos)-&gt;value; }
+    T&amp; at(size_type pos) { <span class="k">return</span> node_at(pos)-&gt;value; }
+
+    <span class="c">// 按内容查找，O(n)。找到返回位置，没找到返回空 optional。</span>
+    std::optional&lt;size_type&gt; find(<span class="k">const</span> T&amp; value) <span class="k">const</span> {
+        size_type pos = <span class="n">0</span>;
+        <span class="k">for</span> (Node* current = head_-&gt;next; current != <span class="k">nullptr</span>; current = current-&gt;next) {
+            <span class="k">if</span> (current-&gt;value == value) {
+                <span class="k">return</span> pos;
+            }
+            ++pos;
+        }
+        <span class="k">return</span> std::nullopt;
+    }
+
+    <span class="c">// 链表没有连续下标，range-for 要靠迭代器。这个迭代器就是一根被包起来的</span>
+    <span class="c">// 结点指针：`*it` 取值，`++it` 顺着 next 走一步，走到 nullptr 就是结束。</span>
+    <span class="k">class</span> Iterator {
+    <span class="k">public</span>:
+        <span class="k">explicit</span> Iterator(Node* node) : node_(node) {}
+        T&amp; <span class="k">operator</span>*() <span class="k">const</span> { <span class="k">return</span> node_-&gt;value; }
+        Iterator&amp; <span class="k">operator</span>++() {
+            node_ = node_-&gt;next;
+            <span class="k">return</span> *<span class="k">this</span>;
+        }
+        <span class="t">bool</span> <span class="k">operator</span>!=(<span class="k">const</span> Iterator&amp; other) <span class="k">const</span> { <span class="k">return</span> node_ != other.node_; }
+
+    <span class="k">private</span>:
+        Node* node_;
+    };
+
+    Iterator begin() { <span class="k">return</span> Iterator(head_-&gt;next); }   <span class="c">// 从第一个**真**元素开始</span>
+    Iterator end() { <span class="k">return</span> Iterator(<span class="k">nullptr</span>); }
+
+<span class="k">private</span>:
+    <span class="c">// 返回位置 pos 的前驱结点。pos == 0 时前驱就是头结点——</span>
+    <span class="c">// 这正是头结点存在的意义：表头不再是特例。</span>
+    Node* predecessor_at(size_type pos) <span class="k">const</span> {
+        <span class="k">if</span> (pos &gt; size_) {
+            <span class="k">throw</span> std::out_of_range(<span class="s">&quot;LinkedList: 下标越界&quot;</span>);
+        }
+        Node* predecessor = head_;
+        <span class="k">for</span> (size_type i = <span class="n">0</span>; i &lt; pos; ++i) {
+            predecessor = predecessor-&gt;next;
+        }
+        <span class="k">return</span> predecessor;
+    }
+
+    Node* node_at(size_type pos) <span class="k">const</span> {
+        <span class="k">if</span> (pos &gt;= size_) {
+            <span class="k">throw</span> std::out_of_range(<span class="s">&quot;LinkedList::at: 下标越界&quot;</span>);
+        }
+        Node* current = head_-&gt;next;
+        <span class="k">for</span> (size_type i = <span class="n">0</span>; i &lt; pos; ++i) {
+            current = current-&gt;next;
+        }
+        <span class="k">return</span> current;
+    }
+
+    Node* head_;          <span class="c">// 头结点（哨兵，不存数据）</span>
+    Node* tail_;          <span class="c">// 最后一个结点；表空时等于 head_</span>
+    size_type size_;
+};</code></pre></div>
+<p>编译运行：</p>
+<div class="codeblock" data-lang="bash"><pre><code>g++ -std=c++17 -Wall -Wextra demo.cpp -o demo &amp;&amp; ./demo</code></pre></div>
+<h3 id="231-单链结点与头结点"><a class="anchor" href="#231-单链结点与头结点">#</a>2.3.1 单链结点与头结点</h3>
+<p>【代码2.6】单链表的结点定义。</p>
+<p>结点(node)就是上面那个 <code>Node</code>：<strong>一个数据域，加一根指向后继的链接域</strong>。 原书把它写成独立的 <code>Link&lt;T&gt;</code>；这里放在 <code>LinkedList</code> 的 private 区里， 因为调用方拿不到结点指针，就没法改坏链。</p>
+<p>【代码2.6结束】</p>
+<p><code>LinkedList&lt;T&gt;</code> 还有一个<strong>头结点</strong>(head node)：一个不存放数据的哨兵， 永远排在第一个真元素前面。它等价于原书的&quot;第 -1 个结点&quot;。 有了它，表头插入和删除都变成&quot;修改某个前驱的 <code>next</code>&quot;，空表也不必另写一套分支—— 这就是 <code>predecessor_at(0)</code> 能直接返回头结点的原因。</p>
+<p>尾指针 <code>tail_</code> 指向最后一个实际结点，空表时回指头结点， 所以 <code>append</code> 不需要从头寻找末尾，是 O(1)。</p>
+<p>【代码2.7】单链表的类型定义。</p>
+<p>见上面教学版清单的类头：三个成员——头结点、尾指针、长度。</p>
 <p>【代码2.7结束】</p>
 <h3 id="232-构析与循链定位"><a class="anchor" href="#232-构析与循链定位">#</a>2.3.2 构析与循链定位</h3>
 <p>【算法2.8】带有头结点的单链表构造函数与析构函数。</p>
-<p>本实现的头结点嵌入对象本身，不需要动态分配；<code>clear()</code> 沿 <code>next</code> 逐结点释放实际结点， 析构函数调用它。复制构造采用“先逐个接入新链，失败即清理”的规则，避免半成品对象在 元素复制抛异常时泄漏。</p>
-<p>构造与析构路径的核心代码如下；析构只调用迭代式 <code>clear()</code>，不会递归释放整条链：</p>
-<div class="codeblock" data-lang="text"><pre><code>LinkedList() noexcept = default;
-~LinkedList() { clear(); }</code></pre></div>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/modern.hpp">code/ch02/linked_list/modern.hpp#clear</a></div><pre><code><span class="t">void</span> clear() <span class="k">noexcept</span> {
-    NodeBase* current = head_.next;
-    <span class="k">while</span> (current != <span class="k">nullptr</span>) {
-        NodeBase* following = current-&gt;next;
-        <span class="k">delete</span> <span class="k">static_cast</span>&lt;Node*&gt;(current);
-        current = following;
-    }
-    head_.next = <span class="k">nullptr</span>;
-    tail_ = &amp;head_;
-    size_ = <span class="n">0</span>;
-}</code></pre></div>
+<p>教学版的构造函数 <code>new</code> 出头结点，析构函数先 <code>clear()</code> 掉全部真元素、再把头结点还回去。 <code>clear()</code> 沿 <code>next</code> <strong>逐个循环释放</strong>，不是递归——链长十万级时递归释放会耗尽运行栈， 这一点第 3 章 3.1.3 有实测数字。</p>
+<p>两处一漏就出事，教学版的测试各有一条断言盯着：</p>
+<ul>
+<li><code>clear()</code> 之后 <code>tail_</code> 必须退回头结点。不退，下一次 <code>append</code> 就写进已释放的内存， AddressSanitizer 报 <code>heap-use-after-free</code>。</li>
+<li>析构里那句 <code>delete head_</code> 不能漏。漏了，每个链表对象泄漏一个结点， LeakSanitizer 会报。</li>
+</ul>
 <p>【算法2.8结束】</p>
 <p>【算法2.9】寻找链表的第 i 个结点。</p>
-<p>定位从头结点开始逐步走 <code>next</code>，不新建任何结点。原书的 <code>setPos(-1)</code> 是处理头结点的 技巧；现代接口不暴露 -1 这个特殊位置，内部 <code>predecessor_at(0)</code> 直接返回头结点。</p>
-<p>定位循环的现代实现如下。返回“前驱”使插入、删除都能统一改写一条 <code>next</code> 链接：</p>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/modern.hpp">code/ch02/linked_list/modern.hpp#locate</a></div><pre><code>[[nodiscard]] NodeBase* predecessor_at(size_type pos) {
-    <span class="k">if</span> (pos &gt; size_) {
-        <span class="k">throw</span> std::out_of_range(<span class="s">&quot;LinkedList: 下标越界&quot;</span>);
-    }
-    NodeBase* predecessor = &amp;head_;  <span class="c">// 相当于原书 setPos(-1)</span>
-    <span class="k">for</span> (size_type i = <span class="n">0</span>; i &lt; pos; ++i) {
-        predecessor = predecessor-&gt;next;
-    }
-    <span class="k">return</span> predecessor;
-}</code></pre></div>
+<p>定位从头结点开始逐步走 <code>next</code>，不新建任何结点，O(n)。原书的 <code>setPos(-1)</code> 是处理 头结点的技巧；教学版不暴露 -1 这个特殊位置，<code>predecessor_at(0)</code> 直接返回头结点。</p>
+<p><strong>返回&quot;前驱&quot;而不是&quot;结点本身&quot;</strong>，是因为插入和删除都要改前驱的 <code>next</code>—— 单链表从一个结点走不回它的前一个。一个函数同时服务两处，这是头结点带来的简化。</p>
 <p>【算法2.9结束】</p>
 <h3 id="232a-所有权工具怎么选"><a class="anchor" href="#232a-所有权工具怎么选">#</a>2.3.2a 所有权工具怎么选</h3>
 <p>读到这里会有一个很自然的疑问：既然现代 C++ 有 <code>std::unique_ptr</code>，为什么 <code>clear()</code> 还在手写 <code>delete</code>？把 <code>next</code> 声明成 <code>std::unique_ptr&lt;Node&gt;</code> 不是更省事吗——没有 <code>delete</code>，没有析构函数，五法则一条都不用写。</p>
@@ -945,39 +1074,273 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 <p><code>code/ch02/ownership</code> 把两种写法并排放着，复现命令和完整数字在该目录的 <code>legacy.md</code>。写工程代码时默认用智能指针是对的；本书在少数几处不用，是因为<strong>那几处的所有权本身就是要教的内容</strong>，而且换过去有可测的代价。</p>
 <h3 id="233-插入与删除"><a class="anchor" href="#233-插入与删除">#</a>2.3.3 插入与删除</h3>
 <p>【算法2.10】插入单链表的第 i 个结点。</p>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/modern.hpp">code/ch02/linked_list/modern.hpp#insert</a></div><pre><code><span class="c">/// 尾插直接经 tail_ 接链，O(1)。不能转调 insert(size_)，后者必须循链定位前驱。</span>
-<span class="t">void</span> append(<span class="k">const</span> T&amp; value) { append_impl(value); }
-<span class="t">void</span> append(T&amp;&amp; value) { append_impl(std::move(value)); }
-
-<span class="t">void</span> insert(size_type pos, <span class="k">const</span> T&amp; value) { insert_impl(pos, value); }
-<span class="t">void</span> insert(size_type pos, T&amp;&amp; value) { insert_impl(pos, std::move(value)); }</code></pre></div>
+<p>教学版的 <code>insert(pos, value)</code> 分两步：① 循链找到 pos 的<strong>前驱</strong>，O(n)； ② 改两条链接，O(1)。</p>
+<p><strong>这就是链表与顺序表的分工</strong>：顺序表的 <code>insert</code> 不用找（下标直接算）， 但要搬 O(n) 个元素；链表不搬任何元素，但要走 O(n) 步去找。 两者的 O(n) 是不同的东西——一个在搬数据，一个在走指针。</p>
+<p><code>append</code> 单列一个函数而不是转调 <code>insert(size_)</code>，正是因为有 <code>tail_</code>： 尾插不需要定位，直接接在 <code>tail_</code> 后面，<strong>O(1)</strong>。转调 <code>insert</code> 就白白退化成 O(n) 了。 插在表尾时 <code>tail_</code> 必须跟着往后挪，教学版的测试有一条专门验它。</p>
 <p>【算法2.10结束】</p>
-<p>插入先定位前驱、再构造新结点、最后接入链接；结点构造或分配失败时，链接和长度尚未变化。 若前驱恰是尾结点，同步让 <code>tail_</code> 指向新结点。给定前驱后的接链是 O(1)，定位仍是 O(n)。</p>
 <p>【算法2.11】单链表的删除算法。</p>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/modern.hpp">code/ch02/linked_list/modern.hpp#remove</a></div><pre><code>T remove(size_type pos) {
-    NodeBase* predecessor = predecessor_at(pos);
-    NodeBase* removed = predecessor-&gt;next;
-    <span class="k">if</span> (removed == <span class="k">nullptr</span>) {
-        <span class="k">throw</span> std::out_of_range(<span class="s">&quot;LinkedList::remove: 下标越界&quot;</span>);
-    }
-    <span class="c">// 先移动出值；若 T 的移动构造抛，链接尚未改变，容器仍完整。</span>
-    T value = std::move(<span class="k">static_cast</span>&lt;Node*&gt;(removed)-&gt;value);
-    predecessor-&gt;next = removed-&gt;next;
-    <span class="k">if</span> (removed == tail_) {
-        tail_ = predecessor;
-    }
-    <span class="k">delete</span> <span class="k">static_cast</span>&lt;Node*&gt;(removed);
-    --size_;
-    <span class="k">return</span> value;
-}</code></pre></div>
+<p>删除同样是「定位前驱 → 改一条链接」，但有两件事不能漏：</p>
+<ol>
+<li><strong>被删结点必须 <code>delete</code></strong>，只摘链不释放就是内存泄漏；</li>
+<li><strong>删的若是尾结点，<code>tail_</code> 必须回退到前驱</strong>。不回退，下一次 <code>append</code> 就写进已释放的内存——教学版的测试用「删到空表再 append」把这条钉死了， 去掉那两行，AddressSanitizer 立刻报 <code>heap-use-after-free</code>。</li>
+</ol>
+<p>位置不合法统一抛 <code>std::out_of_range</code>，容器不打印任何提示。</p>
 <p>【算法2.11结束】</p>
-<p>删除不能只摘除链接：被删结点必须释放，且删除尾结点后 <code>tail_</code> 必须回退到前驱。否则下一次 <code>append</code> 会写入已释放内存。位置不合法统一抛 <code>std::out_of_range</code>，容器不打印提示。</p>
 <h3 id="234-双链结点"><a class="anchor" href="#234-双链结点">#</a>2.3.4 双链结点</h3>
 <p>【代码2.12】双链表的结点定义和实现。</p>
-<p>上面的 <code>DoublyLink&lt;T&gt;</code> 已保留 <code>prev</code> 与 <code>next</code> 两个链接域。双链表删除某一结点时，需要 同时维护前驱的 <code>next</code> 和后继的 <code>prev</code>；这能高效向前走，但每个结点多一个指针且不变量更多。 原书在此只给出结点定义，没有给出完整双链表算法；本书补充 <code>DoublyLinkedList&lt;T&gt;</code>，用前后端指针 实现双端插入删除、按位置插入删除、双向链接维护、拷贝和移动。结点由容器拥有，接口不暴露裸所有权。</p>
+<p>双链结点比单链结点多一根 <code>prev</code>。多出来的那个指针（64 位机上 8 字节） 只买到一件事，但这件事很值：<strong>已知一个结点时，删除它是 O(1)</strong>。 单链表要做同一件事得先从头走到它的前驱，O(n)——因为单链表从一个结点走不回前一个。</p>
+<p>原书在此只给出结点定义，没有给出完整的双链表算法。</p>
 <p>【代码2.12结束】</p>
-<p>原书的代码 2.12 只有双链结点定义，并没有完整的双链表操作；下面明确标出本书新增的核心操作， 以免把原书的结点定义和现代容器实现混为一谈。插入必须同时接好 <code>prev</code> 与 <code>next</code>，删除则 必须同时修复两侧链接，并在删除首尾结点时更新 <code>head_</code>/<code>tail_</code>。</p>
-<p>【本书补充实现】双链表在指定结点前插入与删除。</p>
+<p>【本书补充实现】完整的双链表。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/doubly_linked_list/teaching.hpp">code/ch02/doubly_linked_list/teaching.hpp</a></div><pre><code><span class="c">// 双链表 DoublyLinkedList —— 教学版。原书【代码2.12】的双链结点。</span>
+<span class="c">//</span>
+<span class="c">// 一个文件、一个类、能直接编译运行，给「第一次读这一节」的人看。</span>
+<span class="c">//</span>
+<span class="c">// 双链表比单链表每个结点多存一根 `prev`。多出来的空间买到的是一件事：</span>
+<span class="c">// **已知结点位置时，插入和删除都是 O(1)**——不必像单链表那样先循链找前驱。</span>
+<span class="c">// 这是本节唯一值得多花那份空间的理由，全部教学内容都围绕它。</span>
+<span class="c">//</span>
+<span class="c">// 与 modern.hpp（工程版）的分工：</span>
+<span class="c">//   教学版  三法则，插入/删除各写成一段直白的改链；</span>
+<span class="c">//   工程版  补齐移动语义，并把「表头 / 表中 / 表尾」三种情形合并进一个</span>
+<span class="c">//           insert_before(pos)——省代码，但初读时那几个 nullptr 分支很绕。</span>
+<span class="c">// 两份都在闸门里真编译真运行。先读这一份，2.3.5「进阶（选读）」再读那一份。</span>
+<span class="p">#pragma once</span>
+
+<span class="p">#include &lt;cstddef&gt;</span>
+<span class="p">#include &lt;stdexcept&gt;</span>
+
+<span class="k">template</span> &lt;<span class="k">typename</span> T&gt;
+<span class="k">class</span> DoublyLinkedList {
+<span class="k">private</span>:
+    <span class="c">// 双链结点：数据 + 前驱链接 + 后继链接。</span>
+    <span class="k">struct</span> Node {
+        T value;
+        Node* prev;
+        Node* next;
+    };
+
+<span class="k">public</span>:
+    <span class="k">using</span> value_type = T;
+    <span class="k">using</span> size_type = std::<span class="t">size_t</span>;
+
+    DoublyLinkedList() : head_(<span class="k">nullptr</span>), tail_(<span class="k">nullptr</span>), size_(<span class="n">0</span>) {}
+
+    ~DoublyLinkedList() { clear(); }
+
+    <span class="c">// 三法则：这个类管着一串 new 出来的结点，拷贝必须自己写。</span>
+    DoublyLinkedList(<span class="k">const</span> DoublyLinkedList&amp; other)
+        : head_(<span class="k">nullptr</span>), tail_(<span class="k">nullptr</span>), size_(<span class="n">0</span>) {
+        <span class="k">for</span> (Node* source = other.head_; source != <span class="k">nullptr</span>; source = source-&gt;next) {
+            push_back(source-&gt;value);
+        }
+    }
+
+    DoublyLinkedList&amp; <span class="k">operator</span>=(<span class="k">const</span> DoublyLinkedList&amp; other) {
+        <span class="k">if</span> (<span class="k">this</span> == &amp;other) {
+            <span class="k">return</span> *<span class="k">this</span>;
+        }
+        clear();
+        <span class="k">for</span> (Node* source = other.head_; source != <span class="k">nullptr</span>; source = source-&gt;next) {
+            push_back(source-&gt;value);
+        }
+        <span class="k">return</span> *<span class="k">this</span>;
+    }
+
+    <span class="t">bool</span> empty() <span class="k">const</span> { <span class="k">return</span> size_ == <span class="n">0</span>; }
+    size_type size() <span class="k">const</span> { <span class="k">return</span> size_; }
+
+    <span class="t">void</span> clear() {
+        Node* current = head_;
+        <span class="k">while</span> (current != <span class="k">nullptr</span>) {
+            Node* dying = current;
+            current = current-&gt;next;
+            <span class="k">delete</span> dying;
+        }
+        head_ = tail_ = <span class="k">nullptr</span>;
+        size_ = <span class="n">0</span>;
+    }
+
+    <span class="c">// 表头插入，O(1)。要改的链接一共三处：新结点的 next、原表头的 prev、head_。</span>
+    <span class="t">void</span> push_front(<span class="k">const</span> T&amp; value) {
+        Node* fresh = <span class="k">new</span> Node;
+        fresh-&gt;value = value;
+        fresh-&gt;prev = <span class="k">nullptr</span>;
+        fresh-&gt;next = head_;
+        <span class="k">if</span> (head_ != <span class="k">nullptr</span>) {
+            head_-&gt;prev = fresh;
+        } <span class="k">else</span> {
+            tail_ = fresh;      <span class="c">// 原来是空表，新结点同时也是表尾</span>
+        }
+        head_ = fresh;
+        ++size_;
+    }
+
+    <span class="c">// 表尾插入，O(1)。与 push_front 完全对称。</span>
+    <span class="t">void</span> push_back(<span class="k">const</span> T&amp; value) {
+        Node* fresh = <span class="k">new</span> Node;
+        fresh-&gt;value = value;
+        fresh-&gt;prev = tail_;
+        fresh-&gt;next = <span class="k">nullptr</span>;
+        <span class="k">if</span> (tail_ != <span class="k">nullptr</span>) {
+            tail_-&gt;next = fresh;
+        } <span class="k">else</span> {
+            head_ = fresh;      <span class="c">// 原来是空表，新结点同时也是表头</span>
+        }
+        tail_ = fresh;
+        ++size_;
+    }
+
+    T pop_front() {
+        <span class="k">if</span> (empty()) {
+            <span class="k">throw</span> std::out_of_range(<span class="s">&quot;DoublyLinkedList::pop_front: 表空&quot;</span>);
+        }
+        <span class="k">return</span> erase_node(head_);
+    }
+
+    T pop_back() {
+        <span class="k">if</span> (empty()) {
+            <span class="k">throw</span> std::out_of_range(<span class="s">&quot;DoublyLinkedList::pop_back: 表空&quot;</span>);
+        }
+        <span class="k">return</span> erase_node(tail_);
+    }
+
+    <span class="c">// 在位置 pos 插入。定位仍是 O(n)——双链表省掉的是「找前驱」，不是「找位置」。</span>
+    <span class="t">void</span> insert(size_type pos, <span class="k">const</span> T&amp; value) {
+        <span class="k">if</span> (pos &gt; size_) {
+            <span class="k">throw</span> std::out_of_range(<span class="s">&quot;DoublyLinkedList::insert: 位置非法&quot;</span>);
+        }
+        <span class="k">if</span> (pos == <span class="n">0</span>) {
+            push_front(value);
+            <span class="k">return</span>;
+        }
+        <span class="k">if</span> (pos == size_) {
+            push_back(value);
+            <span class="k">return</span>;
+        }
+        Node* successor = node_at(pos);          <span class="c">// 新结点要插在它前面</span>
+        Node* predecessor = successor-&gt;prev;     <span class="c">// O(1)：prev 现成的，不用循链</span>
+        Node* fresh = <span class="k">new</span> Node;
+        fresh-&gt;value = value;
+        fresh-&gt;prev = predecessor;
+        fresh-&gt;next = successor;
+        predecessor-&gt;next = fresh;
+        successor-&gt;prev = fresh;
+        ++size_;
+    }
+
+    T erase(size_type pos) { <span class="k">return</span> erase_node(node_at(pos)); }
+
+    <span class="k">const</span> T&amp; at(size_type pos) <span class="k">const</span> { <span class="k">return</span> node_at(pos)-&gt;value; }
+    T&amp; at(size_type pos) { <span class="k">return</span> node_at(pos)-&gt;value; }
+
+    <span class="c">// 迭代器：一根被包起来的结点指针。双链表的迭代器可以 `--`，单链表的不行——</span>
+    <span class="c">// 这也是那根 prev 买到的东西。</span>
+    <span class="k">class</span> Iterator {
+    <span class="k">public</span>:
+        <span class="k">explicit</span> Iterator(Node* node) : node_(node) {}
+        T&amp; <span class="k">operator</span>*() <span class="k">const</span> { <span class="k">return</span> node_-&gt;value; }
+        Iterator&amp; <span class="k">operator</span>++() {
+            node_ = node_-&gt;next;
+            <span class="k">return</span> *<span class="k">this</span>;
+        }
+        Iterator&amp; <span class="k">operator</span>--() {
+            node_ = node_-&gt;prev;
+            <span class="k">return</span> *<span class="k">this</span>;
+        }
+        <span class="t">bool</span> <span class="k">operator</span>!=(<span class="k">const</span> Iterator&amp; other) <span class="k">const</span> { <span class="k">return</span> node_ != other.node_; }
+
+    <span class="k">private</span>:
+        Node* node_;
+    };
+
+    Iterator begin() { <span class="k">return</span> Iterator(head_); }
+    Iterator end() { <span class="k">return</span> Iterator(<span class="k">nullptr</span>); }
+
+<span class="k">private</span>:
+    <span class="c">// 摘掉一个已知的结点，O(1)。**这是双链表的看家本领**：</span>
+    <span class="c">// 单链表要做同一件事，得先从头走到它的前驱，O(n)。</span>
+    T erase_node(Node* node) {
+        T value = node-&gt;value;
+        <span class="k">if</span> (node-&gt;prev != <span class="k">nullptr</span>) {
+            node-&gt;prev-&gt;next = node-&gt;next;
+        } <span class="k">else</span> {
+            head_ = node-&gt;next;     <span class="c">// 删的是表头</span>
+        }
+        <span class="k">if</span> (node-&gt;next != <span class="k">nullptr</span>) {
+            node-&gt;next-&gt;prev = node-&gt;prev;
+        } <span class="k">else</span> {
+            tail_ = node-&gt;prev;     <span class="c">// 删的是表尾</span>
+        }
+        <span class="k">delete</span> node;
+        --size_;
+        <span class="k">return</span> value;
+    }
+
+    Node* node_at(size_type pos) <span class="k">const</span> {
+        <span class="k">if</span> (pos &gt;= size_) {
+            <span class="k">throw</span> std::out_of_range(<span class="s">&quot;DoublyLinkedList: 下标越界&quot;</span>);
+        }
+        Node* current = head_;
+        <span class="k">for</span> (size_type i = <span class="n">0</span>; i &lt; pos; ++i) {
+            current = current-&gt;next;
+        }
+        <span class="k">return</span> current;
+    }
+
+    Node* head_;
+    Node* tail_;
+    size_type size_;
+};</code></pre></div>
+<p>三处值得停一下：</p>
+<ul>
+<li><strong>插入和删除都要同时改两侧链接</strong>。少改一根，表在<strong>正向</strong>遍历时看起来完全正常， 只有反着走或者删中间结点时才炸。教学版的测试因此正着走一遍、倒着走一遍， 断言两个结果互为逆序——漏掉 <code>successor-&gt;prev = fresh;</code> 这一条就红。</li>
+<li><strong>首尾是特例，但只有两个</strong>：插入时若新结点成了表头/表尾，<code>head_</code>/<code>tail_</code> 要跟着改； 删除时若删掉的是表头/表尾，同样要改。四个分支写清楚就没有别的坑了。</li>
+<li><strong>迭代器可以 <code>--</code></strong>。单链表的不行。这也是那根 <code>prev</code> 买到的东西。</li>
+</ul>
+<p>【本书补充实现结束】</p>
+<h3 id="235-进阶选读从教学版到工程版"><a class="anchor" href="#235-进阶选读从教学版到工程版">#</a>2.3.5 进阶（选读）：从教学版到工程版</h3>
+<p><strong>这一节可以整节跳过。</strong> 工程版（<code>code/ch02/linked_list/modern.hpp</code> 与 <code>code/ch02/doubly_linked_list/modern.hpp</code>）在教学版之上补三件事。</p>
+<p><strong>一、头结点不再存 <code>T</code>。</strong> 教学版的头结点是一个完整的 <code>Node</code>，里面那个 <code>value</code> 从头到尾没人用——代价是 <code>T</code> 必须可默认构造。工程版把结点拆成两层：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/modern.hpp">code/ch02/linked_list/modern.hpp#class-head</a></div><pre><code><span class="c">/// 带头结点、尾指针的单链表。</span>
+<span class="c">///</span>
+<span class="c">/// 原书的 `setPos(-1)` 返回头结点；本实现把这个实现细节留在 predecessor_at，</span>
+<span class="c">/// 对外位置统一为 [0, size()]。按值查找返回 optional，位置错误抛 out_of_range。</span>
+<span class="k">template</span> &lt;<span class="k">typename</span> T&gt;
+<span class="k">class</span> LinkedList {
+    <span class="c">// 头结点只保存链接，不保存 T：哨兵不代表元素，因此不要求 T 默认构造。</span>
+    <span class="c">// Node 继承 NodeBase 后，定位和接链逻辑只需操作 next，结点布局也不重复。</span>
+    <span class="k">struct</span> NodeBase {
+        NodeBase* next{<span class="k">nullptr</span>};
+    };
+    <span class="k">struct</span> Node final : NodeBase {
+        T value;
+
+        <span class="k">template</span> &lt;<span class="k">typename</span> U&gt;
+        <span class="k">explicit</span> Node(U&amp;&amp; item, NodeBase* successor = <span class="k">nullptr</span>)
+            <span class="c">// 完美转发保留左值拷贝、右值移动两条路径，避免无谓的 T 临时对象。</span>
+            : NodeBase{successor}, value(std::forward&lt;U&gt;(item)) {}
+    };
+
+<span class="k">public</span>:
+    <span class="k">using</span> value_type = T;
+    <span class="k">using</span> size_type = std::<span class="t">size_t</span>;</code></pre></div>
+<p><code>NodeBase</code> 只有链接域，头结点用它；真正存数据的 <code>Node</code> 继承它。 于是头结点不含 <code>T</code>，<code>LinkedList&lt;不可默认构造的类型&gt;</code> 也能用了。 代价是链上走的是 <code>NodeBase*</code>，取值时到处要写 <code>static_cast&lt;Node*&gt;</code>：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/modern.hpp">code/ch02/linked_list/modern.hpp#clear</a></div><pre><code><span class="t">void</span> clear() <span class="k">noexcept</span> {
+    NodeBase* current = head_.next;
+    <span class="k">while</span> (current != <span class="k">nullptr</span>) {
+        NodeBase* following = current-&gt;next;
+        <span class="k">delete</span> <span class="k">static_cast</span>&lt;Node*&gt;(current);
+        current = following;
+    }
+    head_.next = <span class="k">nullptr</span>;
+    tail_ = &amp;head_;
+    size_ = <span class="n">0</span>;
+}</code></pre></div>
+<p><strong>这是一次实打实的交换</strong>：多一层继承和一堆强制转换，换 <code>T</code> 少一条约束。 教学版选了前者，工程版选了后者。</p>
+<p><strong>二、拷贝到一半失败时要自己收拾。</strong> 构造函数抛出时，这个对象的析构函数<strong>不会运行</strong>—— 它还没构造完，语言不认为它存在。所以工程版的拷贝构造把循环包进 <code>try/catch</code>， 失败时先 <code>clear()</code> 掉已经接上的半截链再重新抛出。教学版没有这一段。</p>
+<p><strong>三、移动语义、<code>[[nodiscard]]</code>、<code>noexcept</code>。</strong> 与 2.2.5 说过的完全一样，不再重复。</p>
+<p>双链表这边，工程版还把「表头 / 表中 / 表尾」三种插入情形合并进一个 <code>insert_before(pos)</code>——省代码，但初读时那几个 <code>nullptr</code> 分支很绕：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/doubly_linked_list/modern.hpp">code/ch02/doubly_linked_list/modern.hpp#dll-insert-before</a></div><pre><code><span class="k">template</span> &lt;<span class="k">typename</span> U&gt;
 Node* insert_before(Node* pos, U&amp;&amp; value) {
     <span class="c">// 先构造结点；构造失败时原链完全未改变。</span>
@@ -1008,8 +1371,7 @@ Node* insert_before(Node* pos, U&amp;&amp; value) {
     --size_;
     <span class="k">return</span> value;
 }</code></pre></div>
-<p>【本书补充实现结束】</p>
-<p>完整可运行实现见 <code>code/ch02/doubly_linked_list/modern.hpp</code>；单链实现仍见 <code>code/ch02/linked_list/modern.hpp</code>。 测试覆盖头/中/尾插入、删尾后的尾指针 修复、深拷贝、移动、元素构造异常和 move-only 元素；变异自检还确认“删尾不回退 tail”会在 后续尾插崩溃，“复制构造失败不清理”会留下元素对象。原书逐条证据见 <code>code/ch02/linked_list/legacy.md</code>。</p>
+<p>工程版的测试覆盖头/中/尾插入、删尾后的尾指针修复、深拷贝、移动、元素构造异常和 move-only 元素；变异自检还确认&quot;删尾不回退 tail&quot;会在后续尾插崩溃， &quot;复制构造失败不清理&quot;会留下元素对象。原书逐条证据见 <code>code/ch02/linked_list/legacy.md</code>。</p>
 <h2 id="24-线性表实现方法的比较"><a class="anchor" href="#24-线性表实现方法的比较">#</a>2.4 线性表实现方法的比较</h2>
 <p>顺序表按下标随机访问是 O(1)，插入删除要搬动后续元素，平均 O(n)；链表在已知前驱时插入删除是 O(1)，但按位置找前驱仍是 O(n)。顺序表局部性好、无指针开销；链表按需分配、没有预留空洞。选择取决于「按位置读」多，还是「在已知结点旁改链接」多。</p>
 <p>不要用顺序表的场合：经常在表中间插入删除，或事先不知道长度上限。不要用链表的场合：按位置读远比插入删除多，或者指针本身比结点内容还占空间。</p>
@@ -1034,7 +1396,7 @@ Node* insert_before(Node* pos, U&amp;&amp; value) {
 </ol>
 <div class="pagenav"><a href="ch01-adt.html"><span class="dir">← 上一篇</span>第1章 概论</a><a href="ch03-stack.html" style="text-align:right"><span class="dir">下一篇 →</span>第3章 栈与队列</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#21-线性表的概念">2.1 线性表的概念</a><a href="#22-顺序表">2.2 顺序表</a><a href="#教学版完整实现" class="sub">教学版：完整实现</a><a href="#221-存储与所有权" class="sub">2.2.1 存储与所有权</a><a href="#222-顺序表的检索" class="sub">2.2.2 顺序表的检索</a><a href="#223-顺序表的插入" class="sub">2.2.3 顺序表的插入</a><a href="#224-顺序表的删除" class="sub">2.2.4 顺序表的删除</a><a href="#225-进阶选读从教学版到工程版" class="sub">2.2.5 进阶（选读）：从教学版到工程版</a><a href="#与原书的对照">与原书的对照</a><a href="#23-链表">2.3 链表</a><a href="#231-单链结点与头结点" class="sub">2.3.1 单链结点与头结点</a><a href="#232-构析与循链定位" class="sub">2.3.2 构析与循链定位</a><a href="#232a-所有权工具怎么选" class="sub">2.3.2a 所有权工具怎么选</a><a href="#233-插入与删除" class="sub">2.3.3 插入与删除</a><a href="#234-双链结点" class="sub">2.3.4 双链结点</a><a href="#24-线性表实现方法的比较">2.4 线性表实现方法的比较</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#21-线性表的概念">2.1 线性表的概念</a><a href="#22-顺序表">2.2 顺序表</a><a href="#教学版完整实现" class="sub">教学版：完整实现</a><a href="#221-存储与所有权" class="sub">2.2.1 存储与所有权</a><a href="#222-顺序表的检索" class="sub">2.2.2 顺序表的检索</a><a href="#223-顺序表的插入" class="sub">2.2.3 顺序表的插入</a><a href="#224-顺序表的删除" class="sub">2.2.4 顺序表的删除</a><a href="#225-进阶选读从教学版到工程版" class="sub">2.2.5 进阶（选读）：从教学版到工程版</a><a href="#与原书的对照">与原书的对照</a><a href="#23-链表">2.3 链表</a><a href="#教学版完整实现-1" class="sub">教学版：完整实现</a><a href="#231-单链结点与头结点" class="sub">2.3.1 单链结点与头结点</a><a href="#232-构析与循链定位" class="sub">2.3.2 构析与循链定位</a><a href="#232a-所有权工具怎么选" class="sub">2.3.2a 所有权工具怎么选</a><a href="#233-插入与删除" class="sub">2.3.3 插入与删除</a><a href="#234-双链结点" class="sub">2.3.4 双链结点</a><a href="#235-进阶选读从教学版到工程版" class="sub">2.3.5 进阶（选读）：从教学版到工程版</a><a href="#24-线性表实现方法的比较">2.4 线性表实现方法的比较</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch02-linear-list.md</code> 生成

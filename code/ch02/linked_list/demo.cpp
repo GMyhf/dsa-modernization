@@ -1,12 +1,16 @@
-#include "modern.hpp"
+// 第 2 章「先跑一遍」：用教学版 LinkedList 走一遍 append / insert / remove。
+// 编译运行：
+//   g++ -std=c++17 -I code/ch02/linked_list code/ch02/linked_list/demo.cpp -o demo && ./demo
+#include "teaching.hpp"
 
 #include <iostream>
 
 int main() {
-    dsa::LinkedList<int> values;
+    LinkedList<int> values;
     values.append(10);
     values.append(30);
     values.insert(1, 20);
+
     std::cout << "链表:";
     for (int value : values) {
         std::cout << ' ' << value;

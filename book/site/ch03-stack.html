@@ -155,7 +155,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <main>
 
 <p>栈是「最后放入、最先取出」，适合递归调用、括号匹配和表达式计算；队列是「先放入、先取出」， 适合排队服务和广度优先搜索。空栈、空队列是正常状态，现代接口以 <code>std::optional</code> 返回。</p>
-<p>源码：<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/teaching.hpp" class="ext">顺序栈·教学版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/modern.hpp" class="ext">顺序栈·工程版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/demo.cpp" class="ext">栈示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/linked_stack/modern.hpp" class="ext">链式栈</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/expression_eval/modern.hpp" class="ext">表达式求值</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/knapsack/modern.hpp" class="ext">背包</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/queue/modern.hpp" class="ext">队列</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/queue/demo.cpp" class="ext">队列示例</a>。</p>
+<p>源码：<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/teaching.hpp" class="ext">顺序栈·教学版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/modern.hpp" class="ext">顺序栈·工程版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/demo.cpp" class="ext">栈示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/linked_stack/teaching.hpp" class="ext">链式栈·教学版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/linked_stack/modern.hpp" class="ext">链式栈·工程版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/expression_eval/modern.hpp" class="ext">表达式求值</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/knapsack/modern.hpp" class="ext">背包</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/queue/teaching.hpp" class="ext">队列·教学版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/queue/modern.hpp" class="ext">队列·工程版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/queue/demo.cpp" class="ext">队列示例</a>。</p>
 <h2 id="先跑一遍"><a class="anchor" href="#先跑一遍">#</a>先跑一遍</h2>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/demo.cpp">code/ch03/array_stack/demo.cpp</a></div><pre><code><span class="c">// 第 3 章「先跑一遍」：用教学版 ArrayStack 走一遍 push / top / pop。</span>
 <span class="c">// 编译运行：</span>
@@ -189,12 +189,16 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 空栈再弹? 空</code></pre></div>
 <p>后进先出：最后压入的 3 最先出来。空栈上 <code>pop()</code> 返回空 optional，不打印、不崩溃。</p>
 <p>循环队列牺牲一个槽位区分空与满，所以逻辑容量 3 实际申请 4 个槽：</p>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/queue/demo.cpp">code/ch03/queue/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/queue/demo.cpp">code/ch03/queue/demo.cpp</a></div><pre><code><span class="c">// 第 3 章「先跑一遍」：用教学版 ArrayQueue 走一遍 enqueue / dequeue，</span>
+<span class="c">// 顺便看看「牺牲一个槽位」的效果——逻辑容量 3 就真的只装得下 3 个。</span>
+<span class="c">// 编译运行：</span>
+<span class="c">//   g++ -std=c++17 -I code/ch03/queue code/ch03/queue/demo.cpp -o demo &amp;&amp; ./demo</span>
+<span class="p">#include &quot;teaching.hpp&quot;</span>
 
 <span class="p">#include &lt;iostream&gt;</span>
 
 <span class="t">int</span> main() {
-    dsa::ArrayQueue&lt;<span class="t">int</span>&gt; queue(<span class="n">3</span>);
+    ArrayQueue&lt;<span class="t">int</span>&gt; queue(<span class="n">3</span>);
     <span class="k">if</span> (!queue.enqueue(<span class="n">1</span>) || !queue.enqueue(<span class="n">2</span>) || !queue.enqueue(<span class="n">3</span>)) {
         std::cout &lt;&lt; <span class="s">&quot;入队失败\n&quot;</span>;
         <span class="k">return</span> <span class="n">1</span>;
@@ -554,30 +558,132 @@ std::optional&lt;T&gt; top() <span class="k">const</span> {
 <p>这四条写在类里而不是文档里，是因为<strong>编译期报错永远比运行期谜案便宜</strong>。 教学版没有它们：<code>T</code> 不合格时报错会发生在模板实例化的深处，信息难看，但同样报错。 这是可读性与报错质量之间的一次交换，教学版选了前者。</p>
 <h3 id="313-链式栈"><a class="anchor" href="#313-链式栈">#</a>3.1.3 链式栈</h3>
 <p>采用链式存储结构的栈称为链式栈。结点分散在堆上，压栈只是接一个新结点， <strong>不需要连续空间，也没有&quot;栈满&quot;这回事</strong>——这正是它与顺序栈的核心差别。</p>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/linked_stack/modern.hpp">code/ch03/linked_stack/modern.hpp#class-head</a></div><pre><code><span class="c">/// 链式栈：结点分散在堆上，压栈只是接一个新结点，不需要连续空间、也不需要扩容。</span>
-<span class="c">///</span>
-<span class="c">/// 与原书 lnkStack 的差别：`top` 这个名字只留给成员函数（原书 `Link&lt;T&gt;* top`</span>
-<span class="c">/// 与 `bool top(T&amp;)` 重名，导致整个类编译不过）；补齐五法则；不做任何 I/O；</span>
-<span class="c">/// 出栈返回 `std::optional&lt;T&gt;`。</span>
+<h4 id="教学版完整实现-1"><a class="anchor" href="#教学版完整实现-1">#</a>教学版：完整实现</h4>
+<p>接口形状和 3.1.2 的 <code>ArrayStack</code> 刻意保持一致——同一个抽象数据类型， 换一种存储结构，两者才好拿来对比。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/linked_stack/teaching.hpp">code/ch03/linked_stack/teaching.hpp</a></div><pre><code><span class="c">// 链式栈 LinkedStack —— 教学版。</span>
+<span class="c">//</span>
+<span class="c">// 一个文件、一个类、能直接编译运行，给「第一次读这一节」的人看。</span>
+<span class="c">// 本节要教的是「同一个 ADT 换一种存储结构」：顺序栈用连续数组，链式栈用结点串联。</span>
+<span class="c">// 所以接口形状与 ArrayStack 刻意保持一致，两者才好拿来对比。</span>
+<span class="c">//</span>
+<span class="c">// 与 modern.hpp（工程版）的分工：</span>
+<span class="c">//   教学版  三法则（析构 + 拷贝构造 + 拷贝赋值），正确，但拷贝多一点；</span>
+<span class="c">//   工程版  在此之上补齐移动语义、拷贝失败时的清理、零拷贝的 peek()。</span>
+<span class="c">// 两份都在闸门里真编译真运行。先读这一份，3.1.3a「进阶（选读）」再读那一份。</span>
+<span class="p">#pragma once</span>
+
+<span class="p">#include &lt;cstddef&gt;</span>
+<span class="p">#include &lt;optional&gt;</span>
+
 <span class="k">template</span> &lt;<span class="k">typename</span> T&gt;
 <span class="k">class</span> LinkedStack {
+<span class="k">public</span>:
+    <span class="k">using</span> value_type = T;
+    <span class="k">using</span> size_type = std::<span class="t">size_t</span>;
+
+    <span class="c">// 链式栈**不需要预设容量**，所以构造函数没有参数。</span>
+    <span class="c">// 原书的 `lnkStack(int defSize)` 是从顺序栈那边照抄过来的，那个参数一次都没用过。</span>
+    LinkedStack() : top_(<span class="k">nullptr</span>), size_(<span class="n">0</span>) {}
+
+    ~LinkedStack() { clear(); }
+
+    <span class="c">// 三法则：这个类自己管着一串 new 出来的结点，拷贝必须自己写。</span>
+    <span class="c">// 不写的话两个栈会共享同一串结点，各析构一次 → 二次释放。</span>
+    <span class="c">// 原书 lnkStack 有析构函数却没有这两个，与顺序栈是同一个错误。</span>
+    LinkedStack(<span class="k">const</span> LinkedStack&amp; other) : top_(<span class="k">nullptr</span>), size_(<span class="n">0</span>) {
+        copy_from(other);
+    }
+
+    LinkedStack&amp; <span class="k">operator</span>=(<span class="k">const</span> LinkedStack&amp; other) {
+        <span class="k">if</span> (<span class="k">this</span> == &amp;other) {
+            <span class="k">return</span> *<span class="k">this</span>;
+        }
+        clear();
+        copy_from(other);
+        <span class="k">return</span> *<span class="k">this</span>;
+    }
+
+    <span class="c">// 入栈：造一个新结点，让它指向原来的栈顶，再让栈顶指向它。</span>
+    <span class="c">// **没有「栈满」这回事**——这正是链式栈相对顺序栈最大的差别。</span>
+    <span class="t">void</span> push(<span class="k">const</span> T&amp; value) {
+        Node* fresh = <span class="k">new</span> Node;
+        fresh-&gt;value = value;
+        fresh-&gt;next = top_;
+        top_ = fresh;
+        ++size_;
+    }
+
+    <span class="c">// 出栈：把栈顶结点摘下来，取走它的值，再释放它。空栈返回空 optional。</span>
+    std::optional&lt;T&gt; pop() {
+        <span class="k">if</span> (empty()) {
+            <span class="k">return</span> std::nullopt;
+        }
+        Node* dying = top_;
+        T value = dying-&gt;value;
+        top_ = dying-&gt;next;
+        <span class="k">delete</span> dying;
+        --size_;
+        <span class="k">return</span> value;
+    }
+
+    std::optional&lt;T&gt; top() <span class="k">const</span> {
+        <span class="k">if</span> (empty()) {
+            <span class="k">return</span> std::nullopt;
+        }
+        <span class="k">return</span> top_-&gt;value;
+    }
+
+    <span class="t">bool</span> empty() <span class="k">const</span> { <span class="k">return</span> top_ == <span class="k">nullptr</span>; }
+    size_type size() <span class="k">const</span> { <span class="k">return</span> size_; }
+
+    <span class="c">// 逐个释放结点。**用循环，不要用递归**——链长十万级时递归析构会把运行栈撑爆。</span>
+    <span class="c">// 第 5 章有实测数字。</span>
+    <span class="t">void</span> clear() {
+        <span class="k">while</span> (top_ != <span class="k">nullptr</span>) {
+            Node* dying = top_;
+            top_ = top_-&gt;next;
+            <span class="k">delete</span> dying;
+        }
+        size_ = <span class="n">0</span>;
+    }
+
+<span class="k">private</span>:
     <span class="k">struct</span> Node {
         T value;
         Node* next;
-
-        <span class="k">template</span> &lt;<span class="k">typename</span> U&gt;
-        Node(U&amp;&amp; item, Node* successor) : value(std::forward&lt;U&gt;(item)), next(successor) {}
     };
 
-<span class="k">public</span>:
-    <span class="k">using</span> value_type = T;
-    <span class="k">using</span> size_type = std::<span class="t">size_t</span>;</code></pre></div>
+    <span class="c">// 拷贝一串结点：原栈是「顶 → 底」，新栈也要按同样次序串起来，</span>
+    <span class="c">// 所以从原栈的顶开始走，每次把新结点接到上一个新结点的后面。</span>
+    <span class="t">void</span> copy_from(<span class="k">const</span> LinkedStack&amp; other) {
+        Node** tail = &amp;top_;             <span class="c">// 指向「下一个新结点该挂在哪」</span>
+        <span class="k">for</span> (Node* source = other.top_; source != <span class="k">nullptr</span>; source = source-&gt;next) {
+            Node* fresh = <span class="k">new</span> Node;
+            fresh-&gt;value = source-&gt;value;
+            fresh-&gt;next = <span class="k">nullptr</span>;
+            *tail = fresh;
+            tail = &amp;fresh-&gt;next;
+            ++size_;
+        }
+    }
+
+    Node* top_;           <span class="c">// 栈顶结点；空栈时是 nullptr</span>
+    size_type size_;      <span class="c">// 结点个数</span>
+};</code></pre></div>
+<p>三处值得对着上一节看：</p>
+<ul>
+<li><strong>没有 <code>capacity</code>，也没有 <code>grow()</code>。</strong> 链式栈不需要连续空间，压多少个都不用扩容。 顺序栈那一节大半篇幅在讲扩容，这里整段消失了。</li>
+<li><strong>代价在别处</strong>：每个元素多带一根 <code>next</code> 指针（64 位机上 8 字节）， 而且结点分散在堆上，缓存局部性不如顺序栈的连续数组。 3.3.1 节把这笔账算完。</li>
+<li><strong><code>clear()</code> 用循环，不用递归。</strong> 链式结构最自然的写法是递归释放， 但深链会耗尽运行栈。教学版的测试用 80 万个结点压栈再整体析构， 正是为这条兜底：把 <code>clear()</code> 换成递归释放，AddressSanitizer 当场报 <code>stack-overflow</code>，回溯指到递归那一行。</li>
+</ul>
 <p>原书【代码3.4】的 <code>lnkStack</code> 有一处与顺序栈<strong>完全相同</strong>的错误： 成员 <code>Link&lt;T&gt;* top</code> 与成员函数 <code>bool top(T&amp;)</code> 重名，整个类编译不过。 同一本书在两个存储结构上犯了同一个命名错误，两处都没有被编译器验证过。</p>
 <p>另有两处值得指出：</p>
 <ul>
 <li><strong>构造函数是 <code>lnkStack(int defSize)</code>，而那个参数从未被使用。</strong> 链式栈不需要预设容量，这个参数是从 <code>arrStack(int size)</code> 照抄来的； 更麻烦的是它没有默认构造函数，使用者被迫为一个无意义的参数编个数出来。</li>
-<li><strong>有 <code>~lnkStack(){ clear(); }</code> 却没有拷贝构造与拷贝赋值。</strong> 这是本书第五次遇到同一个错误（顺序栈、顺序表、链表、字符串、链式栈）。</li>
+<li><strong>有 <code>~lnkStack(){ clear(); }</code> 却没有拷贝构造与拷贝赋值。</strong> 这是本书第五次遇到同一个错误（顺序栈、顺序表、链表、字符串、链式栈）。 教学版按三法则补齐了这两个。</li>
 </ul>
+<h4 id="313a-进阶选读从教学版到工程版"><a class="anchor" href="#313a-进阶选读从教学版到工程版">#</a>3.1.3a 进阶（选读）：从教学版到工程版</h4>
+<p><strong>这一节可以整节跳过。</strong> 工程版 （<code>code/ch03/linked_stack/modern.hpp</code>）在教学版之上补三件事： 移动语义、拷贝到一半失败时的清理、零拷贝的 <code>peek()</code>。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/linked_stack/modern.hpp">code/ch03/linked_stack/modern.hpp#rule-of-five</a></div><pre><code><span class="c">// 原书有 `~lnkStack(){ clear(); }` 却没有拷贝构造与拷贝赋值：</span>
 <span class="c">// 一次 `lnkStack&lt;int&gt; b = a;` 之后两个栈共享同一串结点，各自析构一次 → 二次释放。</span>
 <span class="c">// 与顺序栈、顺序表、链表、字符串是同一个错误，本书第五次遇到它。</span>
@@ -619,7 +725,8 @@ LinkedStack&amp; <span class="k">operator</span>=(LinkedStack&amp;&amp; other) <
 }
 
 ~LinkedStack() { clear(); }</code></pre></div>
-<p>压栈与出栈：</p>
+<p>比教学版多出来的那段 <code>try/catch</code> 值得说一句：<strong>构造函数抛出时，这个对象的析构函数 不会运行</strong>——它还没构造完，语言不认为它存在。所以拷贝到一半失败时，已经接上去的 那半截链必须在 <code>catch</code> 里自己收拾掉，否则就漏了。教学版没有这一段， 代价是「元素拷贝抛异常时会漏结点」，与 3.1.2a 里顺序栈那条是同一笔账。</p>
+<p>压栈与出栈的工程版：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/linked_stack/modern.hpp">code/ch03/linked_stack/modern.hpp#push-pop</a></div><pre><code><span class="c">/// 入栈：接一个新结点。**没有&quot;栈满&quot;这回事**——这正是链式栈相对顺序栈的差别，</span>
 <span class="c">/// 原书顺序栈那边要判 `top == mSize - 1` 并打印&quot;栈满溢出&quot;。</span>
 <span class="t">void</span> push(<span class="k">const</span> T&amp; item) { top_ = <span class="k">new</span> Node(item, top_); ++size_; }
@@ -646,7 +753,8 @@ LinkedStack&amp; <span class="k">operator</span>=(LinkedStack&amp;&amp; other) <
 [[nodiscard]] <span class="k">const</span> T* peek() <span class="k">const</span> <span class="k">noexcept</span> {
     <span class="k">return</span> top_ == <span class="k">nullptr</span> ? <span class="k">nullptr</span> : &amp;top_-&gt;value;
 }</code></pre></div>
-<p><strong>一处实现上的取舍</strong>：<code>clear()</code> 与析构都写成<strong>迭代</strong>而非递归。 链式结构最自然的写法是递归释放，但深链会耗尽调用栈——第 5 章有实测数字。 本书的测试用 20 万个结点压栈再全部弹出，正是为这条兜底。</p>
+<p>工程版另给了一个 <code>peek()</code>，与 3.1.2a 里的分工完全一样：<code>top()</code> 返回可以带走的副本， <code>peek()</code> 零拷贝但指针会失效。教学版只有 <code>top()</code>。</p>
+<p><strong>两版共同的一处取舍</strong>：<code>clear()</code> 与析构都写成<strong>迭代</strong>而非递归。 链式结构最自然的写法是递归释放，但深链会耗尽运行栈——本机实测， 把 <code>clear()</code> 换成递归后 40 万结点仍能过、80 万结点 ASan 报 <code>stack-overflow</code>； 迭代版在 200 万结点下无恙。教学版的测试就把门槛定在 80 万。</p>
 <h3 id="314-表达式求值"><a class="anchor" href="#314-表达式求值">#</a>3.1.4 表达式求值</h3>
 <p>后缀（逆波兰）表达式不需要括号，也不需要优先级规则：求值时<strong>遇操作数压栈， 遇操作符弹出两个算完再压回</strong>，读到末尾时栈里剩下的唯一元素就是结果。 这条主线本书一字未改，用的还是本章自己的 <code>ArrayStack&lt;double&gt;</code>。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/expression_eval/modern.hpp">code/ch03/expression_eval/modern.hpp#evaluate</a></div><pre><code><span class="c">/// 对后缀（逆波兰）表达式求值。记号之间用空白分隔，例如 &quot;3 4 + 2 *&quot; → 14。</span>
@@ -1070,7 +1178,219 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
 <h3 id="321-队列的抽象数据类型"><a class="anchor" href="#321-队列的抽象数据类型">#</a>3.2.1 队列的抽象数据类型</h3>
 <p>常用运算是入队 <code>enqueue</code>、出队 <code>dequeue</code>、读队头，以及判空。顺序实现还需要判满。原书【代码3.13】同样把这些运算写成一个假抽象基类；本书直接定义在 <code>ArrayQueue</code> 与 <code>LinkedQueue</code> 上。</p>
 <h3 id="322-顺序队列"><a class="anchor" href="#322-顺序队列">#</a>3.2.2 顺序队列</h3>
-<p>循环队列牺牲一个槽位区分空与满：逻辑容量为 n 时实际申请 n+1 个槽。<code>front_ == rear_</code> 为空，<code>(rear_ + 1) % slots_ == front_</code> 为满。这正是章首 demo 里「容量 3 时第 4 个入不进去」的原因。</p>
+<p>队列两头都要动：入队动队尾，出队动队头。如果队头固定在下标 0，每次出队都要把后面 所有元素前移一位，O(n)。所以真正的做法是<strong>让队头也往后走</strong>——走到数组末尾就绕回 下标 0，整块数组被当成一个圈来用，这就是<strong>循环队列</strong>。</p>
+<p>绕回之后有个麻烦：<code>front == rear</code> 既可能是空、也可能是满，分不开。原书的办法是 <strong>牺牲一个槽位</strong>：约定「rear 的下一格就是 front」时算满，于是 n+1 个槽位最多装 n 个元素，两种状态就分得开了。这正是章首 demo 里「容量 3 时第 4 个入不进去」的原因。</p>
+<h3 id="323-链式队列"><a class="anchor" href="#323-链式队列">#</a>3.2.3 链式队列</h3>
+<p>链式队列的结点分散在堆上，<strong>没有「队满」这回事</strong>。除了队头指针，还要一个<strong>队尾指针</strong>： 没有它，每次入队都得从队头走到尾，O(n)；有了它，入队和出队都是 O(1)。</p>
+<p>一处容易漏的地方：<strong>出队把队列摘空时，队尾指针必须一起置空</strong>， 否则它就成了一根指向已释放结点的野指针，下一次入队会写进已释放的内存。 教学版的测试里有一条专门盯着它——去掉那两行，AddressSanitizer 立刻报 <code>heap-use-after-free</code>。</p>
+<h4 id="教学版完整实现-2"><a class="anchor" href="#教学版完整实现-2">#</a>教学版：完整实现</h4>
+<p>两个类放在同一个文件里，正好对着看：同一个先进先出的抽象数据类型， 一个用固定大小的连续数组，一个用堆上的结点。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/queue/teaching.hpp">code/ch03/queue/teaching.hpp</a></div><pre><code><span class="c">// 队列 —— 教学版。原书【代码3.13】【代码3.14】【代码3.15】。</span>
+<span class="c">//</span>
+<span class="c">// 一个文件、两个类、能直接编译运行：</span>
+<span class="c">//   ArrayQueue   顺序队列（循环队列），元素放在一块固定大小的连续数组里；</span>
+<span class="c">//   LinkedQueue  链式队列，结点分散在堆上，队尾指针让入队保持 O(1)。</span>
+<span class="c">//</span>
+<span class="c">// 与 modern.hpp（工程版）的分工：</span>
+<span class="c">//   教学版  三法则（析构 + 拷贝构造 + 拷贝赋值），一行一句，正确但拷贝多一点；</span>
+<span class="c">//   工程版  在此之上补齐移动语义与 copy-and-swap。</span>
+<span class="c">// 两份都在闸门里真编译真运行。先读这一份，3.2.3a「进阶（选读）」再读那一份。</span>
+<span class="p">#pragma once</span>
+
+<span class="p">#include &lt;cstddef&gt;</span>
+<span class="p">#include &lt;optional&gt;</span>
+
+<span class="c">// ---------------------------------------------------------------------------</span>
+<span class="c">// 顺序队列（循环队列）</span>
+<span class="c">//</span>
+<span class="c">// 队列两头都要动：入队动队尾，出队动队头。如果队头固定在下标 0，每次出队都要把</span>
+<span class="c">// 后面所有元素前移一位，O(n)。所以真正的做法是让队头也往后走——走到数组末尾就</span>
+<span class="c">// 绕回下标 0，数组被当成一个圈来用，这就是「循环队列」。</span>
+<span class="c">//</span>
+<span class="c">// 绕回之后有个麻烦：`front == rear` 既可能是空、也可能是满，分不开。</span>
+<span class="c">// 原书的办法是**牺牲一个槽位**：约定「rear 的下一格就是 front」时算满，</span>
+<span class="c">// 于是 n 个槽位最多装 n-1 个元素，两种状态就分得开了。本书照办。</span>
+<span class="c">// ---------------------------------------------------------------------------</span>
+<span class="k">template</span> &lt;<span class="k">typename</span> T&gt;
+<span class="k">class</span> ArrayQueue {
+<span class="k">public</span>:
+    <span class="k">using</span> value_type = T;
+    <span class="k">using</span> size_type = std::<span class="t">size_t</span>;
+
+    <span class="c">// capacity 是「最多能装几个元素」，所以内部要多要一个槽位。</span>
+    <span class="k">explicit</span> ArrayQueue(size_type capacity)
+        : slots_(capacity + <span class="n">1</span>), data_(<span class="k">new</span> T[capacity + <span class="n">1</span>]), front_(<span class="n">0</span>), rear_(<span class="n">0</span>) {}
+
+    ~ArrayQueue() { <span class="k">delete</span>[] data_; }
+
+    ArrayQueue(<span class="k">const</span> ArrayQueue&amp; other)
+        : slots_(other.slots_), data_(<span class="k">new</span> T[other.slots_]),
+          front_(other.front_), rear_(other.rear_) {
+        <span class="k">for</span> (size_type i = front_; i != rear_; i = (i + <span class="n">1</span>) % slots_) {
+            data_[i] = other.data_[i];
+        }
+    }
+
+    ArrayQueue&amp; <span class="k">operator</span>=(<span class="k">const</span> ArrayQueue&amp; other) {
+        <span class="k">if</span> (<span class="k">this</span> == &amp;other) {
+            <span class="k">return</span> *<span class="k">this</span>;
+        }
+        T* fresh = <span class="k">new</span> T[other.slots_];
+        <span class="k">for</span> (size_type i = other.front_; i != other.rear_; i = (i + <span class="n">1</span>) % other.slots_) {
+            fresh[i] = other.data_[i];
+        }
+        <span class="k">delete</span>[] data_;
+        data_ = fresh;
+        slots_ = other.slots_;
+        front_ = other.front_;
+        rear_ = other.rear_;
+        <span class="k">return</span> *<span class="k">this</span>;
+    }
+
+    <span class="t">bool</span> empty() <span class="k">const</span> { <span class="k">return</span> front_ == rear_; }
+
+    <span class="c">// 满的判据：rear 再往前走一格就撞上 front。那一格就是被牺牲掉的槽位。</span>
+    <span class="t">bool</span> full() <span class="k">const</span> { <span class="k">return</span> (rear_ + <span class="n">1</span>) % slots_ == front_; }
+
+    size_type size() <span class="k">const</span> {
+        <span class="k">return</span> (rear_ &gt;= front_) ? (rear_ - front_) : (slots_ - front_ + rear_);
+    }
+
+    <span class="c">// 入队。队满返回 false——顺序队列的容量是固定的，这是它与链式队列的核心差别。</span>
+    <span class="t">bool</span> enqueue(<span class="k">const</span> T&amp; value) {
+        <span class="k">if</span> (full()) {
+            <span class="k">return</span> <span class="k">false</span>;
+        }
+        data_[rear_] = value;
+        rear_ = (rear_ + <span class="n">1</span>) % slots_;    <span class="c">// 走到末尾就绕回 0，取模不能漏</span>
+        <span class="k">return</span> <span class="k">true</span>;
+    }
+
+    <span class="c">// 出队。空队列返回空 optional，不是错误，也不打印任何东西。</span>
+    std::optional&lt;T&gt; dequeue() {
+        <span class="k">if</span> (empty()) {
+            <span class="k">return</span> std::nullopt;
+        }
+        T value = data_[front_];
+        front_ = (front_ + <span class="n">1</span>) % slots_;
+        <span class="k">return</span> value;
+    }
+
+    <span class="c">// 看队头但不出队。</span>
+    std::optional&lt;T&gt; front() <span class="k">const</span> {
+        <span class="k">if</span> (empty()) {
+            <span class="k">return</span> std::nullopt;
+        }
+        <span class="k">return</span> data_[front_];
+    }
+
+    <span class="t">void</span> clear() { front_ = rear_ = <span class="n">0</span>; }
+
+<span class="k">private</span>:
+    size_type slots_;     <span class="c">// 数组格数 = 容量 + 1（多的那一格用来区分空和满）</span>
+    T* data_;
+    size_type front_;     <span class="c">// 队头元素的下标</span>
+    size_type rear_;      <span class="c">// 下一个入队元素要写的下标</span>
+};
+
+<span class="c">// ---------------------------------------------------------------------------</span>
+<span class="c">// 链式队列</span>
+<span class="c">//</span>
+<span class="c">// 结点分散在堆上，**没有「队满」这回事**。</span>
+<span class="c">// 除了队头指针，还要一个**队尾指针**：没有它，每次入队都得从队头走到尾，O(n)。</span>
+<span class="c">// 有了它，入队和出队都是 O(1)。</span>
+<span class="c">// ---------------------------------------------------------------------------</span>
+<span class="k">template</span> &lt;<span class="k">typename</span> T&gt;
+<span class="k">class</span> LinkedQueue {
+<span class="k">public</span>:
+    <span class="k">using</span> value_type = T;
+    <span class="k">using</span> size_type = std::<span class="t">size_t</span>;
+
+    LinkedQueue() : front_(<span class="k">nullptr</span>), rear_(<span class="k">nullptr</span>), size_(<span class="n">0</span>) {}
+
+    ~LinkedQueue() { clear(); }
+
+    LinkedQueue(<span class="k">const</span> LinkedQueue&amp; other) : front_(<span class="k">nullptr</span>), rear_(<span class="k">nullptr</span>), size_(<span class="n">0</span>) {
+        <span class="k">for</span> (Node* source = other.front_; source != <span class="k">nullptr</span>; source = source-&gt;next) {
+            enqueue(source-&gt;value);
+        }
+    }
+
+    LinkedQueue&amp; <span class="k">operator</span>=(<span class="k">const</span> LinkedQueue&amp; other) {
+        <span class="k">if</span> (<span class="k">this</span> == &amp;other) {
+            <span class="k">return</span> *<span class="k">this</span>;
+        }
+        clear();
+        <span class="k">for</span> (Node* source = other.front_; source != <span class="k">nullptr</span>; source = source-&gt;next) {
+            enqueue(source-&gt;value);
+        }
+        <span class="k">return</span> *<span class="k">this</span>;
+    }
+
+    <span class="c">// 入队：新结点接到队尾。队列原来是空的话，它同时也是队头。</span>
+    <span class="t">void</span> enqueue(<span class="k">const</span> T&amp; value) {
+        Node* fresh = <span class="k">new</span> Node;
+        fresh-&gt;value = value;
+        fresh-&gt;next = <span class="k">nullptr</span>;
+        <span class="k">if</span> (rear_ == <span class="k">nullptr</span>) {
+            front_ = rear_ = fresh;
+        } <span class="k">else</span> {
+            rear_-&gt;next = fresh;
+            rear_ = fresh;
+        }
+        ++size_;
+    }
+
+    <span class="c">// 出队：摘下队头结点。摘完若队列空了，队尾指针也必须置空，</span>
+    <span class="c">// 否则它就成了一根指向已释放内存的野指针。</span>
+    std::optional&lt;T&gt; dequeue() {
+        <span class="k">if</span> (empty()) {
+            <span class="k">return</span> std::nullopt;
+        }
+        Node* dying = front_;
+        T value = dying-&gt;value;
+        front_ = dying-&gt;next;
+        <span class="k">if</span> (front_ == <span class="k">nullptr</span>) {
+            rear_ = <span class="k">nullptr</span>;
+        }
+        <span class="k">delete</span> dying;
+        --size_;
+        <span class="k">return</span> value;
+    }
+
+    std::optional&lt;T&gt; front() <span class="k">const</span> {
+        <span class="k">if</span> (empty()) {
+            <span class="k">return</span> std::nullopt;
+        }
+        <span class="k">return</span> front_-&gt;value;
+    }
+
+    <span class="t">bool</span> empty() <span class="k">const</span> { <span class="k">return</span> front_ == <span class="k">nullptr</span>; }
+    size_type size() <span class="k">const</span> { <span class="k">return</span> size_; }
+
+    <span class="c">// 用循环释放，不要用递归——长队列的递归析构会把运行栈撑爆。</span>
+    <span class="t">void</span> clear() {
+        <span class="k">while</span> (front_ != <span class="k">nullptr</span>) {
+            Node* dying = front_;
+            front_ = dying-&gt;next;
+            <span class="k">delete</span> dying;
+        }
+        rear_ = <span class="k">nullptr</span>;
+        size_ = <span class="n">0</span>;
+    }
+
+<span class="k">private</span>:
+    <span class="k">struct</span> Node {
+        T value;
+        Node* next;
+    };
+
+    Node* front_;
+    Node* rear_;          <span class="c">// 少了它，入队就要每次从头走到尾</span>
+    size_type size_;
+};</code></pre></div>
+<h4 id="323a-进阶选读从教学版到工程版"><a class="anchor" href="#323a-进阶选读从教学版到工程版">#</a>3.2.3a 进阶（选读）：从教学版到工程版</h4>
+<p><strong>这一节可以整节跳过。</strong> 工程版（<code>code/ch03/queue/modern.hpp</code>）与教学版的差别， 和 3.1.2a、3.1.3a 里说过的完全是同一批：补齐移动构造与移动赋值、 拷贝赋值改用 copy-and-swap、查询函数标 <code>[[nodiscard]]</code> 与 <code>noexcept</code>、 读队头改为返回 <code>const T*</code>（零拷贝，但指针会随下一次修改失效）。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/queue/modern.hpp">code/ch03/queue/modern.hpp#array-queue</a></div><pre><code><span class="k">template</span> &lt;<span class="k">typename</span> T&gt;
 <span class="k">class</span> ArrayQueue {
 <span class="k">public</span>:
@@ -1091,28 +1411,7 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
     <span class="t">void</span> clear() <span class="k">noexcept</span> { front_ = rear_ = <span class="n">0</span>; }
 <span class="k">private</span>: std::<span class="t">size_t</span> slots_{<span class="n">0</span>}, front_{<span class="n">0</span>}, rear_{<span class="n">0</span>}; T* data_{<span class="k">nullptr</span>};
 };</code></pre></div>
-<h3 id="323-链式队列"><a class="anchor" href="#323-链式队列">#</a>3.2.3 链式队列</h3>
-<p>链式队列用首尾指针维持 FIFO，入队接在尾、出队摘下头，并具备独立复制所有权。</p>
-<div class="codeblock" data-lang="text"><pre><code>template &lt;typename T&gt;
-class LinkedQueue {
-    struct Node { T value; Node* next{nullptr}; template &lt;typename U&gt; explicit Node(U&amp;&amp; value) : value(std::forward&lt;U&gt;(value)) {} };
-public:
-    LinkedQueue() = default;
-    LinkedQueue(const LinkedQueue&amp; other) { for (Node* n = other.front_; n != nullptr; n = n-&gt;next) enqueue(n-&gt;value); }
-    LinkedQueue&amp; operator=(const LinkedQueue&amp; other) { if (this != &amp;other) { LinkedQueue copy(other); swap(copy); } return *this; }
-    LinkedQueue(LinkedQueue&amp;&amp; other) noexcept { swap(other); }
-    LinkedQueue&amp; operator=(LinkedQueue&amp;&amp; other) noexcept { if (this != &amp;other) { LinkedQueue moved(std::move(other)); swap(moved); } return *this; }
-    ~LinkedQueue() { clear(); }
-    void swap(LinkedQueue&amp; other) noexcept { using std::swap; swap(front_, other.front_); swap(rear_, other.rear_); swap(size_, other.size_); }
-    [[nodiscard]] bool empty() const noexcept { return front_ == nullptr; }
-    [[nodiscard]] std::size_t size() const noexcept { return size_; }
-    void enqueue(const T&amp; value) { append(new Node(value)); }
-    void enqueue(T&amp;&amp; value) { append(new Node(std::move(value))); }
-    [[nodiscard]] std::optional&lt;T&gt; dequeue() { if (front_ == nullptr) return std::nullopt; Node* old = front_; front_ = old-&gt;next; if (front_ == nullptr) rear_ = nullptr; --size_; T value = std::move(old-&gt;value); delete old; return value; }
-    [[nodiscard]] const T* front() const noexcept { return front_ == nullptr ? nullptr : &amp;front_-&gt;value; }
-    void clear() noexcept { while (front_ != nullptr) { Node* old = front_; front_ = old-&gt;next; delete old; } rear_ = nullptr; size_ = 0; }
-private: void append(Node* node) noexcept { if (rear_ == nullptr) front_ = rear_ = node; else { rear_-&gt;next = node; rear_ = node; } ++size_; } Node* front_{nullptr}; Node* rear_{nullptr}; std::size_t size_{0};
-};</code></pre></div>
+<p>工程版为了压缩篇幅把每个函数写成了一行，这也正是 D-012 要分层的理由之一： <strong>一行一个函数省的是纸，费的是读者的眼睛</strong>。教学版一行一句，同样的逻辑读起来 不需要横向找分号。</p>
 <h2 id="33-栈与队列的比较"><a class="anchor" href="#33-栈与队列的比较">#</a>3.3 栈与队列的比较</h2>
 <h3 id="331-顺序栈与链式栈"><a class="anchor" href="#331-顺序栈与链式栈">#</a>3.3.1 顺序栈与链式栈</h3>
 <p>顺序栈预分配连续缓冲区，扩容要搬迁；链式栈按需分配，没有「栈满」，但每个结点多一个指针。两者的 <code>push</code>/<code>pop</code> 都是 O(1)。</p>
