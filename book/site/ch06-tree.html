@@ -365,6 +365,70 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
         post(root_, visitor);
     }
 
+    <span class="c">// &gt;&gt;&gt; dual-tag</span>
+    <span class="c">/// 【算法6.10】带双标记位的先根次序表示 → 「左子/右兄」链式树。</span>
+    <span class="c">///</span>
+    <span class="c">/// 顺序表示里每个结点只带两个标志位：`has_child`（原书 ltag == 0）和</span>
+    <span class="c">/// `has_sibling`（原书 rtag == 0）。光靠先根次序 + 这两位就能把链恢复出来，</span>
+    <span class="c">/// 靠的是先根次序的一条性质：**任何结点的子树都紧跟在它后面**，</span>
+    <span class="c">/// 子树排完才轮到它的下一个兄弟。</span>
+    <span class="c">///</span>
+    <span class="c">/// 于是「谁是某个结点的右兄弟」这件事要等它整棵子树扫完才知道——用栈记着：</span>
+    <span class="c">/// 扫到 `has_sibling` 的结点就压栈；扫到没有孩子的结点（子树到头了）就弹一个出来，</span>
+    <span class="c">/// 把刚建的结点接成它的右兄弟。</span>
+    <span class="k">struct</span> DualTagNode {
+        T value;
+        <span class="t">bool</span> has_child;    <span class="c">///&lt; 原书 ltag == 0</span>
+        <span class="t">bool</span> has_sibling;  <span class="c">///&lt; 原书 rtag == 0</span>
+    };
+
+    [[nodiscard]] <span class="k">static</span> GeneralTree from_dual_tag(<span class="k">const</span> DualTagNode* nodes, std::<span class="t">size_t</span> count) {
+        GeneralTree tree;
+        <span class="k">if</span> (count == <span class="n">0</span>) {
+            <span class="k">return</span> tree;
+        }
+        <span class="k">if</span> (nodes == <span class="k">nullptr</span>) {
+            <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;from_dual_tag: 结点数组是空指针&quot;</span>);
+        }
+
+        <span class="c">// 原书用 `stack&lt;TreeNode&lt;T&gt;*&gt; aStack`，这里用 vector 当栈（见 unit.json 豁免）。</span>
+        std::vector&lt;Node*&gt; waiting;  <span class="c">// 已扫到、还等着接右兄弟的结点</span>
+        Node* current = <span class="k">new</span> Node(nodes[<span class="n">0</span>].value);
+        tree.root_ = current;
+
+        <span class="k">for</span> (std::<span class="t">size_t</span> i = <span class="n">0</span>; i + <span class="n">1</span> &lt; count; ++i) {
+            <span class="k">if</span> (nodes[i].has_sibling) {
+                waiting.push_back(current);
+            }
+            Node* fresh = <span class="k">new</span> Node(nodes[i + <span class="n">1</span>].value);
+            <span class="k">if</span> (nodes[i].has_child) {
+                current-&gt;child = fresh;
+                fresh-&gt;parent = current;
+            } <span class="k">else</span> {
+                <span class="c">// 子树到头了：刚建的结点属于栈顶那个结点的右兄弟。</span>
+                <span class="c">//</span>
+                <span class="c">// 原书这里直接 `aStack.top()`，**没有判空**。标志位不自洽的输入</span>
+                <span class="c">// （例如全是 has_child=false、has_sibling=false）会让它对空栈取顶，</span>
+                <span class="c">// 那是未定义行为（证据见 legacy.md 缺陷 4）。这里判空并抛异常。</span>
+                <span class="k">if</span> (waiting.empty()) {
+                    <span class="k">delete</span> fresh;
+                    <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;from_dual_tag: 标志位不自洽，右兄弟无处安放&quot;</span>);
+                }
+                Node* owner = waiting.back();
+                waiting.pop_back();
+                owner-&gt;sibling = fresh;
+                fresh-&gt;parent = owner-&gt;parent;  <span class="c">// 兄弟与它共享同一个父结点</span>
+            }
+            current = fresh;
+        }
+        <span class="c">// 先根次序里最后一个结点必是叶子，且没有下一个兄弟。</span>
+        <span class="k">if</span> (nodes[count - <span class="n">1</span>].has_child || !waiting.empty()) {
+            <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;from_dual_tag: 标志位不自洽，序列没有正常收尾&quot;</span>);
+        }
+        <span class="k">return</span> tree;
+    }
+    <span class="c">// &lt;&lt;&lt; dual-tag</span>
+
     <span class="k">template</span> &lt;<span class="k">class</span> Visitor&gt;
     <span class="t">void</span> breadth_first(Visitor&amp;&amp; visitor) <span class="k">const</span> {
         std::vector&lt;Node*&gt; queue;
@@ -433,10 +497,23 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
     Node* root_{<span class="k">nullptr</span>};
 };</code></pre></div>
 <h3 id="625-父指针表示法和并查集"><a class="anchor" href="#625-父指针表示法和并查集">#</a>6.2.5 父指针表示法和并查集</h3>
-<p><code>find</code> 在返回根之前把沿途结点的父指针改成根，这就是路径压缩。<code>unite</code> 比较两棵树的秩，把较矮的挂到较高的下面；两棵一样高时，新根的秩加 1。</p>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp">code/ch06/general_tree/modern.hpp#disjoint-set</a></div><pre><code><span class="k">class</span> DisjointSet {
+<p>并查集要防的是树退化成一条链。原书给了两条改进，本书都实现了。</p>
+<p><strong>第一条是【重量权衡合并规则】</strong>(weighted union rule)：合并时看两个集合的<strong>元素个数</strong>， 「令含元素少的子集的树根指向含元素多的子集的根」。原书【代码6.8】的结点里那个 <code>int nCount; //子树元素数目</code> 就是为它准备的。小树挂到大树下，能把整体深度限制在 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>—— 理由是每次合并树高最多加 1，而元素个数至少翻倍，所以任何结点的深度最多增加 <span class="math"><span class="upr">log</span>&thinsp;n</span> 次。</p>
+<blockquote><p><strong>注意别和「按秩合并」混了。</strong> 按秩比的是<strong>树高</strong>，按重量比的是<strong>元素个数</strong>。 两者复杂度同阶，但在同一组等价对上会长出<strong>形状不同</strong>的树。本书按原书口径用重量， 课程第 6 章习题 8 要求「使用重量权衡合并规则与路径压缩」并画出父指针数组， 换成按秩就对不上答案。并列时本书让<strong>值大的根挂到值小的根下</strong>—— 原书没规定这一条，这个口径取自那道习题的原话，好让书里的实现能直接用来核对。</p></blockquote>
+<p><strong>第二条是路径压缩</strong>：<code>find</code> 在返回根之前，把沿途每个结点的父指针都直接改成根。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp">code/ch06/general_tree/modern.hpp#disjoint-set</a></div><pre><code><span class="c">/// 【代码6.8】树的父指针表示与 union/find。</span>
+<span class="c">///</span>
+<span class="c">/// 合并用原书的**重量权衡合并规则**(weighted union rule)：</span>
+<span class="c">/// 「令含元素少的子集的树根指向含元素多的子集的根」。原书结点里那个</span>
+<span class="c">/// `int nCount; //子树元素数目` 就是为它准备的，这里对应 `size_`。</span>
+<span class="c">///</span>
+<span class="c">/// **不要换成「按秩合并」**：按秩比的是树高，按重量比的是元素个数，两者</span>
+<span class="c">/// 在同一组等价对上会长出**不同形状**的树。原书与课程习题都按重量口径出题</span>
+<span class="c">/// （课程第 6 章习题 8 要求「使用重量权衡合并规则与路径压缩」并给出父指针数组），</span>
+<span class="c">/// 换成按秩会让读者对不上答案。</span>
+<span class="k">class</span> DisjointSet {
 <span class="k">public</span>:
-    <span class="k">explicit</span> DisjointSet(std::<span class="t">size_t</span> count) : parent_(count), rank_(count, <span class="n">0</span>) {
+    <span class="k">explicit</span> DisjointSet(std::<span class="t">size_t</span> count) : parent_(count), size_(count, <span class="n">1</span>) {
         <span class="k">for</span> (std::<span class="t">size_t</span> index = <span class="n">0</span>; index &lt; count; ++index) {
             parent_[index] = index;
         }
@@ -447,7 +524,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
             <span class="k">throw</span> std::out_of_range(<span class="s">&quot;disjoint-set index&quot;</span>);
         }
         <span class="k">if</span> (parent_[index] != index) {
-            parent_[index] = find(parent_[index]);
+            parent_[index] = find(parent_[index]);  <span class="c">// 【算法6.9】路径压缩</span>
         }
         <span class="k">return</span> parent_[index];
     }
@@ -456,15 +533,17 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
         left = find(left);
         right = find(right);
         <span class="k">if</span> (left == right) {
-            <span class="k">return</span> <span class="k">false</span>;
+            <span class="k">return</span> <span class="k">false</span>;  <span class="c">// 已经同类：幂等的可预期失败（D-001 §3c）</span>
         }
-        <span class="k">if</span> (rank_[left] &lt; rank_[right]) {
+        <span class="c">// 重量权衡：小树挂到大树下。并列时把**值大的根**挂到值小的根下——</span>
+        <span class="c">// 原书没有规定并列怎么办，这个口径取自课程第 6 章习题 8 的原话</span>
+        <span class="c">// 「当两棵树规模同样大时，使结点值较大的根结点作为值较小的根结点的子结点」，</span>
+        <span class="c">// 这样书里的实现能直接用来核对那道题的答案。</span>
+        <span class="k">if</span> (size_[left] &lt; size_[right] || (size_[left] == size_[right] &amp;&amp; left &gt; right)) {
             std::swap(left, right);
         }
         parent_[right] = left;
-        <span class="k">if</span> (rank_[left] == rank_[right]) {
-            ++rank_[left];
-        }
+        size_[left] += size_[right];
         <span class="k">return</span> <span class="k">true</span>;
     }
 
@@ -472,16 +551,91 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
         <span class="k">return</span> find(left) == find(right);
     }
 
+    <span class="c">/// 某个元素所在集合的大小。原书 `nCount` 的对外读法，也让「重量」这件事可测。</span>
+    [[nodiscard]] std::<span class="t">size_t</span> set_size(std::<span class="t">size_t</span> index) { <span class="k">return</span> size_[find(index)]; }
+
+    <span class="c">/// 当前的父指针数组——课程习题要求画出的正是它。</span>
+    [[nodiscard]] <span class="k">const</span> std::vector&lt;std::<span class="t">size_t</span>&gt;&amp; parents() <span class="k">const</span> <span class="k">noexcept</span> { <span class="k">return</span> parent_; }
+
 <span class="k">private</span>:
     std::vector&lt;std::<span class="t">size_t</span>&gt; parent_;
-    std::vector&lt;std::<span class="t">size_t</span>&gt; rank_;
+    std::vector&lt;std::<span class="t">size_t</span>&gt; size_;  <span class="c">// 原书 nCount：子树元素数目</span>
 };</code></pre></div>
 <h2 id="63-树的顺序存储结构"><a class="anchor" href="#63-树的顺序存储结构">#</a>6.3 树的顺序存储结构</h2>
 <p>链式存储每个结点单独分配，指针占空间，也不利于整块读写。如果把结点按某一种周游次序排进数组，再用很少的附加信息记下「谁是下一个兄弟」或「有几个孩子」，就能在连续空间里还原整棵树。原书给了四种，思路都对；本章不另写一套未验证的实现，只把还原办法说清楚。</p>
 <h3 id="631-带右链的先根次序表示"><a class="anchor" href="#631-带右链的先根次序表示">#</a>6.3.1 带右链的先根次序表示</h3>
 <p>按先根次序把结点排进数组。每个结点另存一个「右链」下标，指向它的下一个兄弟；没有下一个兄弟就存空。因为先根次序里，一个结点的孩子们正好排在它后面、直到右链所指的位置之前，所以顺着数组往下走、再靠右链跳过整棵子树，就能还原所有父子和兄弟关系。</p>
 <h3 id="632-带双标记的先根次序表示"><a class="anchor" href="#632-带双标记的先根次序表示">#</a>6.3.2 带双标记的先根次序表示</h3>
-<p>右链要用一个整型下标。若改成两个布尔标记——「有没有孩子」「有没有下一个兄弟」——每位只占 1 bit，更省。扫描时用栈：遇到「有孩子」就下降；遇到「没有下一个兄弟」就上升到最近那个还没处理完兄弟的祖先。信息量和带右链相同，只是用栈换空间。</p>
+<p>右链要用一个整型下标。若改成两个布尔标记——<code>ltag</code>「有没有孩子」、<code>rtag</code>「有没有下一个兄弟」—— 每位只占 1 bit，更省。信息量和带右链相同，只是用栈换空间。</p>
+<p>以原书图6.5(a) 那片森林为例，它的双标记先根次序表示（图6.15）是：</p>
+<div class="codeblock" data-lang="text"><pre><code>先根次序   A  B  C  E  F  D  G  H  J  I
+ltag       0  0  0  0  1  1  1  0  1  1     0 = 有孩子
+rtag       0  1  0  1  1  1  0  0  1  1     0 = 有下一个兄弟</code></pre></div>
+<p><strong>光靠这三行就能把链恢复出来</strong>，靠的是先根次序的一条性质：任何结点的子树都紧跟在它后面， 子树排完才轮到它的下一个兄弟。于是「谁是某个结点的右兄弟」要等它整棵子树扫完才知道—— 用一把栈记着：扫到 <code>rtag == 0</code> 的结点就压栈，扫到 <code>ltag == 1</code> 的结点（没有孩子，说明子树到头） 就弹一个出来，把刚建的结点接成它的右兄弟。</p>
+<p>【算法6.10】带双标记位先根次序树构造算法。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp">code/ch06/general_tree/modern.hpp#dual-tag</a></div><pre><code><span class="c">/// 【算法6.10】带双标记位的先根次序表示 → 「左子/右兄」链式树。</span>
+<span class="c">///</span>
+<span class="c">/// 顺序表示里每个结点只带两个标志位：`has_child`（原书 ltag == 0）和</span>
+<span class="c">/// `has_sibling`（原书 rtag == 0）。光靠先根次序 + 这两位就能把链恢复出来，</span>
+<span class="c">/// 靠的是先根次序的一条性质：**任何结点的子树都紧跟在它后面**，</span>
+<span class="c">/// 子树排完才轮到它的下一个兄弟。</span>
+<span class="c">///</span>
+<span class="c">/// 于是「谁是某个结点的右兄弟」这件事要等它整棵子树扫完才知道——用栈记着：</span>
+<span class="c">/// 扫到 `has_sibling` 的结点就压栈；扫到没有孩子的结点（子树到头了）就弹一个出来，</span>
+<span class="c">/// 把刚建的结点接成它的右兄弟。</span>
+<span class="k">struct</span> DualTagNode {
+    T value;
+    <span class="t">bool</span> has_child;    <span class="c">///&lt; 原书 ltag == 0</span>
+    <span class="t">bool</span> has_sibling;  <span class="c">///&lt; 原书 rtag == 0</span>
+};
+
+[[nodiscard]] <span class="k">static</span> GeneralTree from_dual_tag(<span class="k">const</span> DualTagNode* nodes, std::<span class="t">size_t</span> count) {
+    GeneralTree tree;
+    <span class="k">if</span> (count == <span class="n">0</span>) {
+        <span class="k">return</span> tree;
+    }
+    <span class="k">if</span> (nodes == <span class="k">nullptr</span>) {
+        <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;from_dual_tag: 结点数组是空指针&quot;</span>);
+    }
+
+    <span class="c">// 原书用 `stack&lt;TreeNode&lt;T&gt;*&gt; aStack`，这里用 vector 当栈（见 unit.json 豁免）。</span>
+    std::vector&lt;Node*&gt; waiting;  <span class="c">// 已扫到、还等着接右兄弟的结点</span>
+    Node* current = <span class="k">new</span> Node(nodes[<span class="n">0</span>].value);
+    tree.root_ = current;
+
+    <span class="k">for</span> (std::<span class="t">size_t</span> i = <span class="n">0</span>; i + <span class="n">1</span> &lt; count; ++i) {
+        <span class="k">if</span> (nodes[i].has_sibling) {
+            waiting.push_back(current);
+        }
+        Node* fresh = <span class="k">new</span> Node(nodes[i + <span class="n">1</span>].value);
+        <span class="k">if</span> (nodes[i].has_child) {
+            current-&gt;child = fresh;
+            fresh-&gt;parent = current;
+        } <span class="k">else</span> {
+            <span class="c">// 子树到头了：刚建的结点属于栈顶那个结点的右兄弟。</span>
+            <span class="c">//</span>
+            <span class="c">// 原书这里直接 `aStack.top()`，**没有判空**。标志位不自洽的输入</span>
+            <span class="c">// （例如全是 has_child=false、has_sibling=false）会让它对空栈取顶，</span>
+            <span class="c">// 那是未定义行为（证据见 legacy.md 缺陷 4）。这里判空并抛异常。</span>
+            <span class="k">if</span> (waiting.empty()) {
+                <span class="k">delete</span> fresh;
+                <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;from_dual_tag: 标志位不自洽，右兄弟无处安放&quot;</span>);
+            }
+            Node* owner = waiting.back();
+            waiting.pop_back();
+            owner-&gt;sibling = fresh;
+            fresh-&gt;parent = owner-&gt;parent;  <span class="c">// 兄弟与它共享同一个父结点</span>
+        }
+        current = fresh;
+    }
+    <span class="c">// 先根次序里最后一个结点必是叶子，且没有下一个兄弟。</span>
+    <span class="k">if</span> (nodes[count - <span class="n">1</span>].has_child || !waiting.empty()) {
+        <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;from_dual_tag: 标志位不自洽，序列没有正常收尾&quot;</span>);
+    }
+    <span class="k">return</span> tree;
+}</code></pre></div>
+<p>【算法6.10结束】</p>
+<p><strong>原书这段代码有一处会崩</strong>：<code>ltag == 1</code> 分支里直接写 <code>pointer = aStack.top();</code>，<strong>没有判空</strong>。 标志位不自洽的输入（比如两个结点都声称「没有孩子、也没有下一个兄弟」）会让它对空栈取顶—— 未定义行为。本书判空并抛 <code>std::invalid_argument</code>，另加一条「最后一个结点若仍声称有孩子， 序列就没有正常收尾」的检查。测试里三种不自洽输入各有一条用例。</p>
 <h3 id="633-带度数的后根次序表示"><a class="anchor" href="#633-带度数的后根次序表示">#</a>6.3.3 带度数的后根次序表示</h3>
 <p>按后根次序存放，每个结点记下自己的度数（孩子个数）。后根的特点是：一个结点出现时，它的全部孩子已经作为连续的一段排在它前面。扫描时用栈，每读到一个度数为 <span class="math">d</span> 的结点，就从栈顶弹出 <span class="math">d</span> 棵子树做它的孩子，再把这棵新树压回去。扫完数组，栈里剩下的就是整棵树（或森林）。</p>
 <h3 id="634-带双标记的层次次序表示"><a class="anchor" href="#634-带双标记的层次次序表示">#</a>6.3.4 带双标记的层次次序表示</h3>

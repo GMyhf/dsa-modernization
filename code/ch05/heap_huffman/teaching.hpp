@@ -16,6 +16,7 @@
 #include <cstddef>
 #include <optional>
 #include <stdexcept>
+#include <string>
 
 // ---------------------------------------------------------------------------
 // 最小堆
@@ -158,13 +159,18 @@ class HuffmanTree {
 public:
     struct Node {
         int weight;
+        char symbol;      // 只有叶子有意义；内部结点是合并出来的，置 '\0'
         Node* left;
         Node* right;
     };
 
     HuffmanTree() : root_(nullptr) {}
 
-    HuffmanTree(const int* weights, std::size_t count) : root_(nullptr) {
+    /// 只关心树形与 WPL 时用这个。
+    HuffmanTree(const int* weights, std::size_t count) : HuffmanTree(nullptr, weights, count) {}
+
+    /// 带上每个权重对应的字符，树就能拿来**编码和译码**了。
+    HuffmanTree(const char* symbols, const int* weights, std::size_t count) : root_(nullptr) {
         if (count == 0) {
             return;
         }
@@ -183,13 +189,14 @@ public:
 
         MinHeap<ByWeight> heap;
         for (std::size_t i = 0; i < count; ++i) {
-            heap.insert(ByWeight{new Node{weights[i], nullptr, nullptr}});   // 每个权重先做成一棵单结点树
+            char symbol = (symbols == nullptr) ? '\0' : symbols[i];
+            heap.insert(ByWeight{new Node{weights[i], symbol, nullptr, nullptr}});  // 每个权重先做成一棵单结点树
         }
 
         while (heap.size() > 1) {
             Node* left = heap.remove_min()->node;      // 最小的
             Node* right = heap.remove_min()->node;     // 次小的
-            Node* parent = new Node{left->weight + right->weight, left, right};
+            Node* parent = new Node{left->weight + right->weight, '\0', left, right};
             heap.insert(ByWeight{parent});
         }
         root_ = heap.remove_min()->node;
@@ -211,6 +218,82 @@ public:
     // Huffman 树的意义就在于它让这个数最小。
     int weighted_path_length() const { return wpl(root_, 0); }
 
+    // ---- Huffman 编码与译码 ------------------------------------------------
+    //
+    // 编码规则：从每个结点引向**左**孩子的边标 0，引向**右**孩子的边标 1；
+    // 从根走到某个叶子，一路上的 0/1 连起来就是那个字符的编码。
+    //
+    // 这样得到的一定是**前缀码**——任何字符的编码都不会是另一个字符编码的前缀。
+    // 理由很直白：字符只住在**叶子**上，而一个叶子不可能在另一个叶子的路径上。
+    // 前缀码是能译码的前提：不然 011 既可以读成 a+bb 也可以读成 c+b，无法分辨。
+
+    /// 查一个字符的编码。不在树里返回空 optional。
+    std::optional<std::string> code_of(char symbol) const {
+        std::string path;
+        if (find_code(root_, symbol, path)) {
+            // 只有一个字符时，从根到叶的路径是空串——那样的编码没法传。
+            // 约定给它一位 "0"。这是个真实的边界，不是抠字眼。
+            return path.empty() ? std::string("0") : path;
+        }
+        return std::nullopt;
+    }
+
+    /// 把一段文字编成比特串。出现了树里没有的字符就返回空 optional。
+    std::optional<std::string> encode(const std::string& text) const {
+        std::string bits;
+        for (char c : text) {
+            auto code = code_of(c);
+            if (!code) {
+                return std::nullopt;
+            }
+            bits += *code;
+        }
+        return bits;
+    }
+
+    /// 把比特串译回文字。**用的是同一棵树**：从根出发，读 0 走左、读 1 走右，
+    /// 走到叶子就吐出一个字符再回到根。比特串不合法（多出半截、出现非 0/1）
+    /// 就返回空 optional。
+    std::optional<std::string> decode(const std::string& bits) const {
+        if (root_ == nullptr) {
+            return bits.empty() ? std::optional<std::string>(std::string()) : std::nullopt;
+        }
+        // 单结点树是特例：整棵树只有一个字符，每一位都译成它。
+        if (root_->left == nullptr && root_->right == nullptr) {
+            std::string text;
+            for (char b : bits) {
+                if (b != '0') {
+                    return std::nullopt;
+                }
+                text.push_back(root_->symbol);
+            }
+            return text;
+        }
+
+        std::string text;
+        const Node* current = root_;
+        for (char b : bits) {
+            if (b == '0') {
+                current = current->left;
+            } else if (b == '1') {
+                current = current->right;
+            } else {
+                return std::nullopt;          // 既不是 0 也不是 1
+            }
+            if (current == nullptr) {
+                return std::nullopt;
+            }
+            if (current->left == nullptr && current->right == nullptr) {
+                text.push_back(current->symbol);
+                current = root_;              // 吐出一个字符，回到根
+            }
+        }
+        if (current != root_) {
+            return std::nullopt;              // 走到一半就没比特了：串不完整
+        }
+        return text;
+    }
+
 private:
     // 放进堆里的是「一棵树的根指针」，比较的是它的权重。
     struct ByWeight {
@@ -225,6 +308,26 @@ private:
         destroy(node->left);
         destroy(node->right);
         delete node;
+    }
+
+    /// 在树里找字符 symbol，把根到它的路径（左 0 右 1）写进 path。
+    static bool find_code(const Node* node, char symbol, std::string& path) {
+        if (node == nullptr) {
+            return false;
+        }
+        if (node->left == nullptr && node->right == nullptr) {
+            return node->symbol == symbol;
+        }
+        path.push_back('0');
+        if (find_code(node->left, symbol, path)) {
+            return true;
+        }
+        path.back() = '1';
+        if (find_code(node->right, symbol, path)) {
+            return true;
+        }
+        path.pop_back();                      // 这条路走不通，回溯
+        return false;
     }
 
     static int wpl(const Node* node, int depth) {

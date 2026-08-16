@@ -845,6 +845,161 @@ LinkedStack&amp; <span class="k">operator</span>=(LinkedStack&amp;&amp; other) <
 <blockquote><p>在实际编写程序时，浮点数是否为0不能直接与0进行相等比较， 而是要通过某个很小的阈值来判断，例如采用 <code>if(abs(operand1) &lt; 1E-7)</code></p></blockquote>
 <p><strong>但印出来的代码仍然是 <code>if (operand1 == 0.0)</code>。</strong> 书知道更好的写法，却没有印它。</p>
 <p>不过原书这条建议本身也值得推敲：<strong>除以 1e-300 是合法的</strong>， 结果是一个极大的有限值或无穷，把它当作错误是另一个决定，不是&quot;更正确&quot;。 本书只拦精确的零，并把这个取舍写在代码注释里；测试中有一条断言专门钉住 &quot;除以 1e-300 得到极大值而非报错&quot;。</p>
+<h4 id="中缀表达式到后缀表达式的转换"><a class="anchor" href="#中缀表达式到后缀表达式的转换">#</a>中缀表达式到后缀表达式的转换</h4>
+<p>上面那个求值器有个前提：<strong>表达式已经是后缀式了</strong>。可人写出来的是中缀式 <code>23 + (34 * 45) / (5 + 6 + 7)</code>，中间隔着一步转换。这一步才是<strong>栈最典型的应用</strong>—— 括号和优先级造成的「先算什么」，全靠一把栈记住。编译器把算术式变成机器指令， 走的就是同一条路。</p>
+<p>原书把规则讲全了，却把代码留成了练习：「上面仅给出了算法的梗概和思路，其程序实现 涉及字符符号读入、语法检查以及语法错误处理等细节，有兴趣的读者可作为练习给出具体的 算法」。<strong>本书补上这个练习</strong>，因为不补的话，第 3.1.4 节就只剩下半个应用。</p>
+<p>原书的五条规则，从左到右扫描中缀式：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">遇到</th>
+<th style="text-align:left">做什么</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">操作数</td>
+<td style="text-align:left">直接输出到后缀序列</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>(</code></td>
+<td style="text-align:left">入栈</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>)</code></td>
+<td style="text-align:left">反复弹出并输出，直到遇到 <code>(</code>；<code>(</code> 弹掉但<strong>不输出</strong>。没遇到 <code>(</code> 就是括号不匹配</td>
+</tr>
+<tr>
+<td style="text-align:left">运算符</td>
+<td style="text-align:left">当「栈非空 且 栈顶不是 <code>(</code> 且 <strong>栈顶优先级不低于</strong>当前」时反复弹出并输出；然后把当前运算符入栈</td>
+</tr>
+<tr>
+<td style="text-align:left">扫描结束</td>
+<td style="text-align:left">栈里剩下的依次弹出输出；若弹出 <code>(</code>，说明括号不匹配</td>
+</tr>
+</tbody></table></div>
+<p><strong>第四条里「不低于」三个字是承重的。</strong> 如果写成「高于」，同优先级时就不先弹， <code>1 - 2 - 3</code> 会转成 <code>1 2 3 - -</code>，求值得 <span class="math"><span class="upr">1</span><span class="bin">−</span>(<span class="upr">2</span><span class="bin">−</span><span class="upr">3</span>)<span class="rel">=</span><span class="upr">2</span></span>；而正确答案是左结合的 <span class="math">(<span class="upr">1</span><span class="bin">−</span><span class="upr">2</span>)<span class="bin">−</span><span class="upr">3</span><span class="rel">=</span><span class="bin">−</span><span class="upr">4</span></span>。测试里有一条专门算这个数，把 <code>&lt;</code> 写成 <code>&lt;=</code> 它立刻变红。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/expression_eval/modern.hpp">code/ch03/expression_eval/modern.hpp#infix-to-postfix</a></div><pre><code><span class="c">/// 把中缀表达式转换成等价的后缀表达式。例如 &quot;23 + (34 * 45) / (5 + 6 + 7)&quot;</span>
+<span class="c">/// → &quot;23 34 45 * 5 6 + 7 + / +&quot;。记号之间用单个空格分隔。</span>
+<span class="c">///</span>
+<span class="c">/// **原书把这个算法留成了练习**（第 2.086 页那段：「上面仅给出了算法的梗概和思路，</span>
+<span class="c">/// 其程序实现涉及字符符号读入、语法检查以及语法错误处理等细节，有兴趣的读者可作为</span>
+<span class="c">/// 练习给出具体的算法」）。本书补上，因为它是**栈最典型的一个应用**：</span>
+<span class="c">/// 括号和优先级造成的「先算什么」全靠一把栈记住。</span>
+<span class="c">///</span>
+<span class="c">/// 算法就是原书那五条，逐条对应下面的分支：</span>
+<span class="c">///</span>
+<span class="c">///   (1) 操作数         → 直接输出到后缀序列</span>
+<span class="c">///   (2) 开括号 `(`      → 入栈</span>
+<span class="c">///   (3) 闭括号 `)`      → 反复弹出并输出，直到遇到开括号；开括号弹掉但不输出。</span>
+<span class="c">///                        没遇到开括号就说明括号不匹配</span>
+<span class="c">///   (4) 运算符          → 当「栈非空 且 栈顶不是开括号 且 栈顶优先级不低于当前」时，</span>
+<span class="c">///                        反复弹出并输出；然后把当前运算符入栈</span>
+<span class="c">///   (5) 扫描结束        → 栈里剩下的依次弹出输出；若弹出的是开括号，说明括号不匹配</span>
+<span class="c">///</span>
+<span class="c">/// 第 (4) 条那个「不低于」是关键：同优先级时也要先弹，这样 `a - b - c` 才会变成</span>
+<span class="c">/// `a b - c -`（左结合），而不是 `a b c - -`。</span>
+<span class="c">///</span>
+<span class="c">/// 与 evaluate_postfix 一样，出错抛 std::invalid_argument，不打印任何东西。</span>
+[[nodiscard]] <span class="k">inline</span> std::string infix_to_postfix(std::string_view expression) {
+    <span class="c">// 只有四则运算：+ - 同级，* / 同级且更高。开括号在栈里的优先级最低，</span>
+    <span class="c">// 这样第 (4) 条的循环碰到它自然会停——但仍要单独判，因为它不参与输出。</span>
+    <span class="k">const</span> <span class="k">auto</span> precedence = [](<span class="t">char</span> op) -&gt; <span class="t">int</span> {
+        <span class="k">return</span> (op == <span class="s">&#x27;*&#x27;</span> || op == <span class="s">&#x27;/&#x27;</span>) ? <span class="n">2</span> : <span class="n">1</span>;
+    };
+
+    std::string output;
+    ArrayStack&lt;<span class="t">char</span>&gt; operators;
+
+    <span class="k">const</span> <span class="k">auto</span> emit = [&amp;output](std::string_view token) {
+        <span class="k">if</span> (!output.empty()) {
+            output.push_back(<span class="s">&#x27; &#x27;</span>);
+        }
+        output.append(token);
+    };
+
+    std::<span class="t">size_t</span> i = <span class="n">0</span>;
+    <span class="t">bool</span> expect_operand = <span class="k">true</span>;  <span class="c">// 用来把 &quot;-3&quot; 的负号和二元减号区分开</span>
+    <span class="k">while</span> (i &lt; expression.size()) {
+        <span class="k">const</span> <span class="t">char</span> c = expression[i];
+        <span class="k">if</span> (c == <span class="s">&#x27; &#x27;</span> || c == <span class="s">&#x27;\t&#x27;</span> || c == <span class="s">&#x27;\n&#x27;</span>) {
+            ++i;
+            <span class="k">continue</span>;
+        }
+
+        <span class="k">if</span> (c == <span class="s">&#x27;(&#x27;</span>) {                                   <span class="c">// (2)</span>
+            operators.push(c);
+            expect_operand = <span class="k">true</span>;
+            ++i;
+            <span class="k">continue</span>;
+        }
+
+        <span class="k">if</span> (c == <span class="s">&#x27;)&#x27;</span>) {                                   <span class="c">// (3)</span>
+            <span class="t">bool</span> matched = <span class="k">false</span>;
+            <span class="k">while</span> (<span class="k">const</span> <span class="t">char</span>* top = operators.peek()) {
+                <span class="k">const</span> <span class="t">char</span> op = *operators.pop();
+                <span class="k">if</span> (op == <span class="s">&#x27;(&#x27;</span>) {
+                    matched = <span class="k">true</span>;
+                    <span class="k">break</span>;
+                }
+                emit(std::string_view(&amp;op, <span class="n">1</span>));
+                (<span class="t">void</span>)top;
+            }
+            <span class="k">if</span> (!matched) {
+                <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;中缀表达式：右括号没有配对的左括号&quot;</span>);
+            }
+            expect_operand = <span class="k">false</span>;
+            ++i;
+            <span class="k">continue</span>;
+        }
+
+        <span class="k">const</span> <span class="t">bool</span> is_sign = (c == <span class="s">&#x27;-&#x27;</span> || c == <span class="s">&#x27;+&#x27;</span>) &amp;&amp; expect_operand;
+        <span class="k">if</span> (!is_sign &amp;&amp; (c == <span class="s">&#x27;+&#x27;</span> || c == <span class="s">&#x27;-&#x27;</span> || c == <span class="s">&#x27;*&#x27;</span> || c == <span class="s">&#x27;/&#x27;</span>)) {   <span class="c">// (4)</span>
+            <span class="k">while</span> (<span class="k">const</span> <span class="t">char</span>* top = operators.peek()) {
+                <span class="k">if</span> (*top == <span class="s">&#x27;(&#x27;</span> || precedence(*top) &lt; precedence(c)) {
+                    <span class="k">break</span>;
+                }
+                <span class="k">const</span> <span class="t">char</span> op = *operators.pop();
+                emit(std::string_view(&amp;op, <span class="n">1</span>));
+            }
+            operators.push(c);
+            expect_operand = <span class="k">true</span>;
+            ++i;
+            <span class="k">continue</span>;
+        }
+
+        <span class="c">// (1) 操作数。用和 evaluate_postfix 同一套解析，两者才好对拍。</span>
+        std::<span class="t">size_t</span> consumed = <span class="n">0</span>;
+        <span class="k">try</span> {
+            (<span class="t">void</span>)std::stod(std::string(expression.substr(i)), &amp;consumed);
+        } <span class="k">catch</span> (<span class="k">const</span> std::exception&amp;) {
+            <span class="k">throw</span> std::invalid_argument(std::string(<span class="s">&quot;中缀表达式：无法识别的记号 &#x27;&quot;</span>) + c + <span class="s">&quot;&#x27;&quot;</span>);
+        }
+        emit(expression.substr(i, consumed));
+        expect_operand = <span class="k">false</span>;
+        i += consumed;
+    }
+
+    <span class="k">while</span> (<span class="k">const</span> <span class="t">char</span>* top = operators.peek()) {                            <span class="c">// (5)</span>
+        <span class="k">if</span> (*top == <span class="s">&#x27;(&#x27;</span>) {
+            <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;中缀表达式：左括号没有配对的右括号&quot;</span>);
+        }
+        <span class="k">const</span> <span class="t">char</span> op = *operators.pop();
+        emit(std::string_view(&amp;op, <span class="n">1</span>));
+    }
+
+    <span class="k">if</span> (output.empty()) {
+        <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;中缀表达式：空表达式&quot;</span>);
+    }
+    <span class="k">return</span> output;
+}
+
+<span class="c">/// 直接对中缀表达式求值：先转成后缀，再用【算法3.5】求值。</span>
+<span class="c">/// 两步都在上面，这里只是把它们接起来——**这正是转换算法存在的理由**。</span>
+[[nodiscard]] <span class="k">inline</span> <span class="t">double</span> evaluate_infix(std::string_view expression) {
+    <span class="k">return</span> evaluate_postfix(infix_to_postfix(expression));
+}</code></pre></div>
+<p>转换和求值接起来就是 <code>evaluate_infix</code>——<strong>这正是转换算法存在的理由</strong>。 测试里有一组 10 个式子做三方对拍：转成后缀再求值、直接对中缀求值、手算的期望值， 三者必须一致。这比记住某个具体输出串硬得多。</p>
+<p>原书那个例子的结果也写进了断言：</p>
+<div class="codeblock" data-lang="text"><pre><code>中缀  23 + (34 * 45) / (5 + 6 + 7)
+后缀  23 34 45 * 5 6 + 7 + / +</code></pre></div>
+<p>括号不匹配的两种情形（右括号多了、左括号多了）分别对应规则表里的第三条和第五条， 各有一条用例；两者都抛 <code>std::invalid_argument</code>，不打印任何东西。</p>
 <h3 id="315-栈与递归"><a class="anchor" href="#315-栈与递归">#</a>3.1.5 栈与递归</h3>
 <blockquote><p><strong>本节开篇先摆一组实测数字。</strong> 原书正文说递归「需要在内存中开辟一个称为 运行栈(runtime stack)的<strong>足够大</strong>的动态区」。多大算足够大？这是可以量的， 而量出来的结果里有一条相当反直觉。</p></blockquote>
 <h3 id="运行栈有多大三个档位三种结果"><a class="anchor" href="#运行栈有多大三个档位三种结果">#</a>运行栈有多大：三个档位，三种结果</h3>

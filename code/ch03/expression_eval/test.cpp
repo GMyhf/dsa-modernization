@@ -105,6 +105,99 @@ void test_no_console_output() {
     check(captured.str().empty(), "求值全程不向 cout/cerr 写任何东西");
 }
 
+
+// ---- 中缀 → 后缀转换（原书留作练习，本书补上）--------------------------------
+
+// 原书 2.076 行那个例子：中缀 23+(34*45)/(5+6+7) 的等价后缀式。
+void test_infix_to_postfix_textbook_example() {
+    check(dsa::infix_to_postfix("23 + (34 * 45) / (5 + 6 + 7)")
+              == "23 34 45 * 5 6 + 7 + / +",
+          "原书的例子：23+(34*45)/(5+6+7) → 23 34 45 * 5 6 + 7 + / +");
+}
+
+// 优先级：先乘除后加减，不需要括号也要转对。
+void test_infix_precedence() {
+    check(dsa::infix_to_postfix("1 + 2 * 3") == "1 2 3 * +", "乘法先算");
+    check(dsa::infix_to_postfix("1 * 2 + 3") == "1 2 * 3 +", "乘法在前也一样");
+    check(dsa::infix_to_postfix("(1 + 2) * 3") == "1 2 + 3 *", "括号能改变次序");
+}
+
+// **左结合**：同优先级要先弹再压，否则 a-b-c 会变成 a b c - -。
+// 变异：把第 (4) 条的 `precedence(*top) < precedence(c)` 改成 `<=` → 这条会红。
+void test_infix_is_left_associative() {
+    check(dsa::infix_to_postfix("1 - 2 - 3") == "1 2 - 3 -", "减法左结合");
+    check(dsa::infix_to_postfix("8 / 4 / 2") == "8 4 / 2 /", "除法左结合");
+    // 真值验证：左结合的 8/4/2 是 1，右结合会算成 4
+    check(close(dsa::evaluate_infix("8 / 4 / 2"), 1.0), "8/4/2 = 1，不是 4");
+    check(close(dsa::evaluate_infix("1 - 2 - 3"), -4.0), "1-2-3 = -4，不是 2");
+}
+
+void test_infix_brackets_and_nesting() {
+    check(dsa::infix_to_postfix("((1 + 2))") == "1 2 +", "多余的括号不影响结果");
+    check(dsa::infix_to_postfix("2 * (3 + (4 - 1))") == "2 3 4 1 - + *", "嵌套括号");
+    check(close(dsa::evaluate_infix("2 * (3 + (4 - 1))"), 12.0), "嵌套括号求值正确");
+}
+
+// 括号不匹配是原书第 (3)、(5) 条明确要求报错的两种情形。
+void test_infix_rejects_unbalanced_brackets() {
+    bool right_extra = false;
+    try { (void)dsa::infix_to_postfix("1 + 2)"); }
+    catch (const std::invalid_argument&) { right_extra = true; }
+    check(right_extra, "右括号多了要报错（原书第 3 条）");
+
+    bool left_extra = false;
+    try { (void)dsa::infix_to_postfix("(1 + 2"); }
+    catch (const std::invalid_argument&) { left_extra = true; }
+    check(left_extra, "左括号多了要报错（原书第 5 条）");
+
+    bool empty_expr = false;
+    try { (void)dsa::infix_to_postfix("   "); }
+    catch (const std::invalid_argument&) { empty_expr = true; }
+    check(empty_expr, "空表达式要报错");
+}
+
+void test_infix_negatives_and_decimals() {
+    check(close(dsa::evaluate_infix("-3 + 5"), 2.0), "开头的负号是符号不是运算符");
+    check(close(dsa::evaluate_infix("2 * -3"), -6.0), "运算符后面的负号也是符号");
+    check(close(dsa::evaluate_infix("(-3) * (-2)"), 6.0), "括号里的负号");
+    check(close(dsa::evaluate_infix("1.5 * 2"), 3.0), "小数");
+}
+
+// 转换与求值必须一致：随机造式子，两条路算出来要相等。
+// 这是最硬的一条——它不依赖我对某个具体输出串的记忆。
+void test_infix_and_postfix_agree() {
+    struct Case { const char* infix; double expected; };
+    const Case cases[] = {
+        {"1 + 2 * 3 - 4 / 2", 5.0},
+        {"(1 + 2) * (3 - 4)", -3.0},
+        {"(1 + 2) - 3", 0.0},        // 右括号后面跟减号：那是运算符，不是负号
+        {"(4) - (1)", 3.0},
+        {"10 / (2 + 3)", 2.0},
+        {"1 + 2 + 3 + 4 + 5", 15.0},
+        {"2 * 3 * 4", 24.0},
+        {"100 - 10 - 1", 89.0},
+        {"((2))", 2.0},
+        {"7", 7.0},
+    };
+    bool all_ok = true;
+    for (const Case& c : cases) {
+        const std::string postfix = dsa::infix_to_postfix(c.infix);
+        if (!close(dsa::evaluate_postfix(postfix), c.expected)
+            || !close(dsa::evaluate_infix(c.infix), c.expected)) {
+            all_ok = false;
+            std::printf("    对不上: %s -> %s\n", c.infix, postfix.c_str());
+        }
+    }
+    check(all_ok, "8 组式子：转成后缀再求值 == 直接对中缀求值 == 手算结果");
+}
+
+void test_infix_divide_by_zero_still_throws() {
+    bool thrown = false;
+    try { (void)dsa::evaluate_infix("1 / (2 - 2)"); }
+    catch (const std::domain_error&) { thrown = true; }
+    check(thrown, "中缀求值同样在除零时抛 domain_error");
+}
+
 }  // namespace
 
 int main() {
@@ -115,6 +208,14 @@ int main() {
     test_malformed_expressions();
     test_divide_by_zero();
     test_evaluations_are_independent();
+    test_infix_to_postfix_textbook_example();
+    test_infix_precedence();
+    test_infix_is_left_associative();
+    test_infix_brackets_and_nesting();
+    test_infix_rejects_unbalanced_brackets();
+    test_infix_negatives_and_decimals();
+    test_infix_and_postfix_agree();
+    test_infix_divide_by_zero_still_throws();
     test_no_console_output();
     std::printf("ExpressionEval: %d 项断言，%d 失败\n", checks, failures);
     return failures == 0 ? 0 : 1;

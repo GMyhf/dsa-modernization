@@ -98,4 +98,127 @@ namespace dsa {
 }
 // <<< evaluate
 
+// >>> infix-to-postfix
+/// 把中缀表达式转换成等价的后缀表达式。例如 "23 + (34 * 45) / (5 + 6 + 7)"
+/// → "23 34 45 * 5 6 + 7 + / +"。记号之间用单个空格分隔。
+///
+/// **原书把这个算法留成了练习**（第 2.086 页那段：「上面仅给出了算法的梗概和思路，
+/// 其程序实现涉及字符符号读入、语法检查以及语法错误处理等细节，有兴趣的读者可作为
+/// 练习给出具体的算法」）。本书补上，因为它是**栈最典型的一个应用**：
+/// 括号和优先级造成的「先算什么」全靠一把栈记住。
+///
+/// 算法就是原书那五条，逐条对应下面的分支：
+///
+///   (1) 操作数         → 直接输出到后缀序列
+///   (2) 开括号 `(`      → 入栈
+///   (3) 闭括号 `)`      → 反复弹出并输出，直到遇到开括号；开括号弹掉但不输出。
+///                        没遇到开括号就说明括号不匹配
+///   (4) 运算符          → 当「栈非空 且 栈顶不是开括号 且 栈顶优先级不低于当前」时，
+///                        反复弹出并输出；然后把当前运算符入栈
+///   (5) 扫描结束        → 栈里剩下的依次弹出输出；若弹出的是开括号，说明括号不匹配
+///
+/// 第 (4) 条那个「不低于」是关键：同优先级时也要先弹，这样 `a - b - c` 才会变成
+/// `a b - c -`（左结合），而不是 `a b c - -`。
+///
+/// 与 evaluate_postfix 一样，出错抛 std::invalid_argument，不打印任何东西。
+[[nodiscard]] inline std::string infix_to_postfix(std::string_view expression) {
+    // 只有四则运算：+ - 同级，* / 同级且更高。开括号在栈里的优先级最低，
+    // 这样第 (4) 条的循环碰到它自然会停——但仍要单独判，因为它不参与输出。
+    const auto precedence = [](char op) -> int {
+        return (op == '*' || op == '/') ? 2 : 1;
+    };
+
+    std::string output;
+    ArrayStack<char> operators;
+
+    const auto emit = [&output](std::string_view token) {
+        if (!output.empty()) {
+            output.push_back(' ');
+        }
+        output.append(token);
+    };
+
+    std::size_t i = 0;
+    bool expect_operand = true;  // 用来把 "-3" 的负号和二元减号区分开
+    while (i < expression.size()) {
+        const char c = expression[i];
+        if (c == ' ' || c == '\t' || c == '\n') {
+            ++i;
+            continue;
+        }
+
+        if (c == '(') {                                   // (2)
+            operators.push(c);
+            expect_operand = true;
+            ++i;
+            continue;
+        }
+
+        if (c == ')') {                                   // (3)
+            bool matched = false;
+            while (const char* top = operators.peek()) {
+                const char op = *operators.pop();
+                if (op == '(') {
+                    matched = true;
+                    break;
+                }
+                emit(std::string_view(&op, 1));
+                (void)top;
+            }
+            if (!matched) {
+                throw std::invalid_argument("中缀表达式：右括号没有配对的左括号");
+            }
+            expect_operand = false;
+            ++i;
+            continue;
+        }
+
+        const bool is_sign = (c == '-' || c == '+') && expect_operand;
+        if (!is_sign && (c == '+' || c == '-' || c == '*' || c == '/')) {   // (4)
+            while (const char* top = operators.peek()) {
+                if (*top == '(' || precedence(*top) < precedence(c)) {
+                    break;
+                }
+                const char op = *operators.pop();
+                emit(std::string_view(&op, 1));
+            }
+            operators.push(c);
+            expect_operand = true;
+            ++i;
+            continue;
+        }
+
+        // (1) 操作数。用和 evaluate_postfix 同一套解析，两者才好对拍。
+        std::size_t consumed = 0;
+        try {
+            (void)std::stod(std::string(expression.substr(i)), &consumed);
+        } catch (const std::exception&) {
+            throw std::invalid_argument(std::string("中缀表达式：无法识别的记号 '") + c + "'");
+        }
+        emit(expression.substr(i, consumed));
+        expect_operand = false;
+        i += consumed;
+    }
+
+    while (const char* top = operators.peek()) {                            // (5)
+        if (*top == '(') {
+            throw std::invalid_argument("中缀表达式：左括号没有配对的右括号");
+        }
+        const char op = *operators.pop();
+        emit(std::string_view(&op, 1));
+    }
+
+    if (output.empty()) {
+        throw std::invalid_argument("中缀表达式：空表达式");
+    }
+    return output;
+}
+
+/// 直接对中缀表达式求值：先转成后缀，再用【算法3.5】求值。
+/// 两步都在上面，这里只是把它们接起来——**这正是转换算法存在的理由**。
+[[nodiscard]] inline double evaluate_infix(std::string_view expression) {
+    return evaluate_postfix(infix_to_postfix(expression));
+}
+// <<< infix-to-postfix
+
 }  // namespace dsa

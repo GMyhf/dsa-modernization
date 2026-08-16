@@ -51,7 +51,34 @@
 
 ### 5.1.3 主要性质
 
-第 $i$ 层至多 $2^i$ 个结点；深度为 $k$ 的二叉树至多 $2^{k+1}-1$ 个结点；叶结点数 $n_0 = n_2 + 1$。$n$ 个结点的完全二叉树高度为 $\lceil\log_2(n+1)\rceil$。按层从 0 编号时，结点 $i$ 的父是 $\lfloor(i-1)/2\rfloor$，左右孩子是 $2i+1$ 与 $2i+2$。这些性质没错，原样保留。
+第 $i$ 层至多 $2^i$ 个结点；深度为 $k$ 的二叉树至多 $2^{k+1}-1$ 个结点。按层从 0 编号时，
+结点 $i$ 的父是 $\lfloor(i-1)/2\rfloor$，左右孩子是 $2i+1$ 与 $2i+2$——第 5.5 节的堆全靠这一条。
+$n$ 个结点的完全二叉树高度为 $\lceil\log_2(n+1)\rceil$。这些性质原书没错，原样保留。
+
+其中三条值得单独写下来，因为后面反复要用。
+
+**性质 3**：非空二叉树的叶结点数 $n_0$ 等于度为 2 的结点数 $n_2$ 加 1，即 $n_0 = n_2 + 1$。
+
+> **证明.** 设结点总数 $n$、度为 1 的结点数 $n_1$，则 $n = n_0 + n_1 + n_2$。
+> 换个角度数边：除根之外每个结点都恰好有一条边进入，所以边数 $e = n - 1$；
+> 而这些边都是从度为 1 或 2 的结点射出的，所以 $e = n_1 + 2n_2$。
+> 两式合起来得 $n_0 + n_1 + n_2 = n_1 + 2n_2 + 1$，即 $n_0 = n_2 + 1$。∎
+
+**性质 4（满二叉树定理）**：非空满二叉树的**树叶数目等于其分支结点数加 1**。
+
+> **证明.** 满二叉树里每个结点的度非 0 即 2，也就是 $n_1 = 0$，
+> 于是分支结点就是 $n_2$，由性质 3 直接得 $n_0 = n_2 + 1$。∎
+
+**性质 5（满二叉树定理推论）**：非空二叉树的**空子树数目等于其结点数加 1**。
+
+> **证明.** 设二叉树为 $T$，把它所有的空子树都换成树叶，得到的扩充二叉树记为 $T'$。
+> $T'$ 是满二叉树，而 $T$ 原来的每个结点在 $T'$ 里都成了分支结点。
+> 由满二叉树定理，$T'$ 的树叶数 = 分支结点数 + 1 = $T$ 的结点数 + 1。
+> 而每片新添的树叶恰好对应 $T$ 的一棵空子树，所以 $T$ 的空子树数目等于它的结点数加 1。∎
+
+性质 5 不是纸面游戏：它说明**一棵 $n$ 个结点的二叉树里有 $n+1$ 个空指针**。
+链式存储时这些空指针占的空间和结点本身同阶——线索二叉树、Trie 的压缩、
+第 12 章 PATRICIA 的动机都从这里来。
 
 ## 5.2 二叉树的周游
 
@@ -542,6 +569,7 @@ c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch05/heap_huffman \
 #include <cstddef>
 #include <optional>
 #include <stdexcept>
+#include <string>
 
 // ---------------------------------------------------------------------------
 // 最小堆
@@ -684,13 +712,18 @@ class HuffmanTree {
 public:
     struct Node {
         int weight;
+        char symbol;      // 只有叶子有意义；内部结点是合并出来的，置 '\0'
         Node* left;
         Node* right;
     };
 
     HuffmanTree() : root_(nullptr) {}
 
-    HuffmanTree(const int* weights, std::size_t count) : root_(nullptr) {
+    /// 只关心树形与 WPL 时用这个。
+    HuffmanTree(const int* weights, std::size_t count) : HuffmanTree(nullptr, weights, count) {}
+
+    /// 带上每个权重对应的字符，树就能拿来**编码和译码**了。
+    HuffmanTree(const char* symbols, const int* weights, std::size_t count) : root_(nullptr) {
         if (count == 0) {
             return;
         }
@@ -709,13 +742,14 @@ public:
 
         MinHeap<ByWeight> heap;
         for (std::size_t i = 0; i < count; ++i) {
-            heap.insert(ByWeight{new Node{weights[i], nullptr, nullptr}});   // 每个权重先做成一棵单结点树
+            char symbol = (symbols == nullptr) ? '\0' : symbols[i];
+            heap.insert(ByWeight{new Node{weights[i], symbol, nullptr, nullptr}});  // 每个权重先做成一棵单结点树
         }
 
         while (heap.size() > 1) {
             Node* left = heap.remove_min()->node;      // 最小的
             Node* right = heap.remove_min()->node;     // 次小的
-            Node* parent = new Node{left->weight + right->weight, left, right};
+            Node* parent = new Node{left->weight + right->weight, '\0', left, right};
             heap.insert(ByWeight{parent});
         }
         root_ = heap.remove_min()->node;
@@ -737,6 +771,82 @@ public:
     // Huffman 树的意义就在于它让这个数最小。
     int weighted_path_length() const { return wpl(root_, 0); }
 
+    // ---- Huffman 编码与译码 ------------------------------------------------
+    //
+    // 编码规则：从每个结点引向**左**孩子的边标 0，引向**右**孩子的边标 1；
+    // 从根走到某个叶子，一路上的 0/1 连起来就是那个字符的编码。
+    //
+    // 这样得到的一定是**前缀码**——任何字符的编码都不会是另一个字符编码的前缀。
+    // 理由很直白：字符只住在**叶子**上，而一个叶子不可能在另一个叶子的路径上。
+    // 前缀码是能译码的前提：不然 011 既可以读成 a+bb 也可以读成 c+b，无法分辨。
+
+    /// 查一个字符的编码。不在树里返回空 optional。
+    std::optional<std::string> code_of(char symbol) const {
+        std::string path;
+        if (find_code(root_, symbol, path)) {
+            // 只有一个字符时，从根到叶的路径是空串——那样的编码没法传。
+            // 约定给它一位 "0"。这是个真实的边界，不是抠字眼。
+            return path.empty() ? std::string("0") : path;
+        }
+        return std::nullopt;
+    }
+
+    /// 把一段文字编成比特串。出现了树里没有的字符就返回空 optional。
+    std::optional<std::string> encode(const std::string& text) const {
+        std::string bits;
+        for (char c : text) {
+            auto code = code_of(c);
+            if (!code) {
+                return std::nullopt;
+            }
+            bits += *code;
+        }
+        return bits;
+    }
+
+    /// 把比特串译回文字。**用的是同一棵树**：从根出发，读 0 走左、读 1 走右，
+    /// 走到叶子就吐出一个字符再回到根。比特串不合法（多出半截、出现非 0/1）
+    /// 就返回空 optional。
+    std::optional<std::string> decode(const std::string& bits) const {
+        if (root_ == nullptr) {
+            return bits.empty() ? std::optional<std::string>(std::string()) : std::nullopt;
+        }
+        // 单结点树是特例：整棵树只有一个字符，每一位都译成它。
+        if (root_->left == nullptr && root_->right == nullptr) {
+            std::string text;
+            for (char b : bits) {
+                if (b != '0') {
+                    return std::nullopt;
+                }
+                text.push_back(root_->symbol);
+            }
+            return text;
+        }
+
+        std::string text;
+        const Node* current = root_;
+        for (char b : bits) {
+            if (b == '0') {
+                current = current->left;
+            } else if (b == '1') {
+                current = current->right;
+            } else {
+                return std::nullopt;          // 既不是 0 也不是 1
+            }
+            if (current == nullptr) {
+                return std::nullopt;
+            }
+            if (current->left == nullptr && current->right == nullptr) {
+                text.push_back(current->symbol);
+                current = root_;              // 吐出一个字符，回到根
+            }
+        }
+        if (current != root_) {
+            return std::nullopt;              // 走到一半就没比特了：串不完整
+        }
+        return text;
+    }
+
 private:
     // 放进堆里的是「一棵树的根指针」，比较的是它的权重。
     struct ByWeight {
@@ -751,6 +861,26 @@ private:
         destroy(node->left);
         destroy(node->right);
         delete node;
+    }
+
+    /// 在树里找字符 symbol，把根到它的路径（左 0 右 1）写进 path。
+    static bool find_code(const Node* node, char symbol, std::string& path) {
+        if (node == nullptr) {
+            return false;
+        }
+        if (node->left == nullptr && node->right == nullptr) {
+            return node->symbol == symbol;
+        }
+        path.push_back('0');
+        if (find_code(node->left, symbol, path)) {
+            return true;
+        }
+        path.back() = '1';
+        if (find_code(node->right, symbol, path)) {
+            return true;
+        }
+        path.pop_back();                      // 这条路走不通，回溯
+        return false;
     }
 
     static int wpl(const Node* node, int depth) {
@@ -768,6 +898,37 @@ private:
 `remove_min` 的手法是固定的：**把最后一个元素搬到根上，长度减一，再让它下沉**。
 为什么是最后一个？因为只有拿掉最后一个位置，剩下的才仍然是一棵完全二叉树。
 下沉时**必须和两个孩子里较小的那个交换**——跟较大的换会破坏「父亲不大于两个孩子」。
+
+### 5.5.1a 建堆为什么是 $O(n)$ 而不是 $O(n\log n)$
+
+把一个无序序列变成堆，做法是**从最后一个非叶结点起，倒着对每个结点做一次下沉**
+（原书图5.17 的筛选法）。
+
+粗看这是 $O(n\log n)$：`sift_down` 一次最多走一条树高那么长的路，是 $O(\log n)$；
+非叶结点大约 $n/2$ 个，乘起来就是 $n/2 \cdot \log n$。**原书特意说这只是一个粗略的上界。**
+
+细算要用到一件事：**下沉的代价不是 $\log n$，而是「这个结点到最底层还有多远」**。
+越靠近底层的结点越多，而它们能下沉的距离越短——两者正好互相抵消。
+
+设二叉树共 $\log n$ 层，第 $i$ 层至多 $2^i$ 个结点，第 $i$ 层的结点最多下沉 $\log n - i$ 层，
+于是建堆的总代价是
+
+$$\sum_{i=0}^{\log n} 2^{i}\,(\log n - i)$$
+
+令 $j = \log n - i$ 代入：
+
+$$\sum_{i=0}^{\log n} 2^{i}(\log n - i) = \sum_{j=0}^{\log n} 2^{\log n - j}\cdot j = \sum_{j=0}^{\log n} n\cdot\frac{j}{2^{j}} < 2n$$
+
+最后一步用的是 $\sum_{j\ge 0} j/2^{j} = 2$。所以**建堆的时间复杂度是 $O(n)$——
+可以在线性时间内把一个无序序列变成堆**。
+
+这个结论有实际后果：第 8.3.2 节的堆排序总代价是 $O(n\log n)$，但那 $\log n$ 全部来自
+**后面 $n$ 次取最小值**，建堆那一步是白送的。反过来，如果一个个 `insert` 建堆——
+每次上浮 $O(\log n)$，$n$ 次就是 $O(n\log n)$——就把这份便宜丢掉了。
+
+堆建好之后，插入、删除最小元、删除任意元素的平均与最差代价都是 $O(\log n)$，
+因为树高就是 $\log n$。但**最小堆只适合查最小值，查任意值的效率不高**——
+要找一个给定的键，除了从头扫没有更好的办法。这正是第 10 章要另起炉灶讲检索的原因。
 
 
 ## 5.6 Huffman 树及其应用
@@ -797,6 +958,54 @@ Huffman 树的意义就是让这个数最小——权大的离根近，编码就
 Direct leak of 24 byte(s) in 1 object(s) allocated from:
     #1 HuffmanTree::HuffmanTree(int const*, unsigned long) teaching.hpp:180
 ```
+
+### 5.6.2 Huffman 编码与译码
+
+建出树只是半程。Huffman 树的**用途**是给字符编码，这一节把它走完。
+
+**问题从哪来。** 要传电文 `abbaaadc`。定长编码给每个字符 2 位（a=00, b=01, c=10, d=11），
+总共 16 位。想更短，就得让**出现次数多的字符用更短的码**。
+比如 a=0, b=1, c=01, d=10，电文变成 10 位——**但这样的电文没法译码**：
+收到 `011`，既可以读成 a b b，也可以读成 c b。
+
+**症结是「前缀」。** `0` 是 `01` 的前缀，所以读到 `0` 时无法判断该停还是该再读一位。
+解决办法是要求任何字符的编码都不是另一个字符编码的前缀——这种编码叫**前缀码**。
+
+**Huffman 树天然给出前缀码。** 规则：从每个结点引向**左**孩子的边标 0、引向**右**孩子的边标 1，
+从根走到某个叶子，一路的 0/1 连起来就是那个字符的编码。
+为什么一定无前缀冲突？因为**字符只住在叶子上**，而一个叶子不可能出现在另一个叶子的路径上。
+
+以 `abbaaadc` 为例，四个字符的频率是 a×4、b×2、c×1、d×1，建出的 Huffman 树给出
+
+| 字符 | 频率 | 编码 | 位数 |
+| --- | --- | --- | --- |
+| a | 4 | `0` | 1 |
+| b | 2 | `10` | 2 |
+| c | 1 | `110` | 3 |
+| d | 1 | `111` | 3 |
+
+电文编成 14 位，比定长的 16 位短。**注意 14 正好等于这棵树的 WPL**——
+这不是巧合：WPL 是 $\sum(\text{权} \times \text{深度})$，而权就是出现次数、深度就是码长，
+两者算的是同一个和。5.6 开头说「Huffman 树让 WPL 最小」，翻译过来就是
+**它让这段电文的编码总长最短**。
+
+**译码用的是同一棵树**：从根出发，读 0 走左、读 1 走右，走到叶子就吐出一个字符，
+然后回到根接着读。前缀码保证这个过程不会有歧义。
+
+教学版实现了 `code_of` / `encode` / `decode` 三个函数，就在 5.5 那份清单里。
+三处边界值得一提，测试各有一条用例守着：
+
+- **比特串走到一半就没了**（比如传丢了最后一位）→ 返回空 `optional`，而不是吐出半个字符；
+- **出现既不是 0 也不是 1 的字符** → 同样返回空 `optional`；
+- **整棵树只有一个字符**：从根到叶的路径是空串，那样的编码根本没法传。
+  本书约定给它一位 `"0"`。这是真实的边界，不是抠字眼。
+
+还有一个反直觉的结论：**如果所有字符频率相同，Huffman 一位都省不下来。**
+8 个等权字符建出的是一棵平衡树，每个字符恰好 3 位——退化成定长编码。
+压缩的收益完全来自频率的不均匀。教学版的测试把这条也写成了断言。
+
+（把这套编码器扩展成能压缩文件，需要再加两步：把码表本身也写进输出，
+以及处理最后不足一字节的那几位。原书的上机题正是这么布置的。）
 
 ### 5.6a 进阶（选读）：从教学版到工程版
 

@@ -7,6 +7,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 
 namespace {
 
@@ -207,6 +208,140 @@ void test_huffman_rejects_bad_input() {
     check(thrown, "负权抛 invalid_argument");
 }
 
+
+// ---- Huffman 编码与译码 ---------------------------------------------------
+
+// 原书 4.567 节那个例子：电文 abbaaadc。
+// 定长编码要 2 位一个字符、共 16 位；Huffman 按频率给短码，应当更短。
+void test_huffman_encode_is_shorter_than_fixed_length() {
+    const char symbols[] = {'a', 'b', 'c', 'd'};
+    const int weights[] = {4, 2, 1, 1};        // abbaaadc 里 a×4 b×2 c×1 d×1
+    HuffmanTree tree(symbols, weights, 4);
+
+    auto bits = tree.encode("abbaaadc");
+    check(bits.has_value(), "8 个字符全在树里，编码成功");
+    check(bits->size() == 14, "Huffman 编码 14 位，比定长的 16 位短");
+    check(tree.weighted_path_length() == 14, "编码总长恰好等于 WPL——这不是巧合");
+}
+
+// **前缀码**：任何字符的编码都不是另一个字符编码的前缀。
+// 这是能译码的前提，也是「字符只住在叶子上」的直接推论。
+void test_huffman_codes_are_prefix_free() {
+    const char symbols[] = {'a', 'b', 'c', 'd'};
+    const int weights[] = {4, 2, 1, 1};
+    HuffmanTree tree(symbols, weights, 4);
+
+    std::string codes[4];
+    bool all_found = true;
+    for (int i = 0; i < 4; ++i) {
+        auto c = tree.code_of(symbols[i]);
+        if (!c) { all_found = false; } else { codes[i] = *c; }
+    }
+    check(all_found, "四个字符都查得到编码");
+
+    bool prefix_free = true;
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j) {
+            if (i != j && codes[j].compare(0, codes[i].size(), codes[i]) == 0) {
+                prefix_free = false;
+            }
+        }
+    }
+    check(prefix_free, "没有任何一个编码是另一个的前缀");
+
+    // 权大的字符编码应当不比权小的长
+    check(tree.code_of('a')->size() <= tree.code_of('c')->size(),
+          "权 4 的 a 编码不比权 1 的 c 长");
+    check(!tree.code_of('z').has_value(), "树里没有的字符返回 nullopt");
+}
+
+// 译码用的是**同一棵树**：读 0 走左、读 1 走右，到叶子就吐一个字符再回根。
+// 变异：把 decode 里到叶子后不 `current = root_` → 第二个字符起全错，这里会红。
+void test_huffman_round_trip() {
+    const char symbols[] = {'a', 'b', 'c', 'd'};
+    const int weights[] = {4, 2, 1, 1};
+    HuffmanTree tree(symbols, weights, 4);
+
+    const std::string text = "abbaaadc";
+    auto bits = tree.encode(text);
+    check(bits.has_value(), "编码成功");
+    auto back = tree.decode(*bits);
+    check(back.has_value(), "译码成功");
+    check(*back == text, "编码再译码，回到原文");
+
+    auto empty_bits = tree.encode("");
+    check(empty_bits.has_value() && empty_bits->empty(), "空文本编成空比特串");
+    auto empty_text = tree.decode("");
+    check(empty_text.has_value() && empty_text->empty(), "空比特串译回空文本");
+}
+
+void test_huffman_decode_rejects_bad_input() {
+    const char symbols[] = {'a', 'b', 'c', 'd'};
+    const int weights[] = {4, 2, 1, 1};
+    HuffmanTree tree(symbols, weights, 4);
+
+    auto bits = tree.encode("abc");
+    check(bits.has_value(), "先编一段出来");
+
+    // 砍掉最后一位：走到一半没比特了，串不完整
+    std::string truncated = bits->substr(0, bits->size() - 1);
+    check(!tree.decode(truncated).has_value(), "半截比特串译码失败，而不是吐出半个字符");
+
+    check(!tree.decode("012").has_value(), "出现非 0/1 字符时译码失败");
+}
+
+// 单字符的树是真实边界：从根到叶的路径是空串，那样的编码没法传。
+void test_huffman_single_symbol() {
+    const char symbols[] = {'x'};
+    const int weights[] = {7};
+    HuffmanTree tree(symbols, weights, 1);
+
+    auto code = tree.code_of('x');
+    check(code.has_value() && *code == "0", "只有一个字符时约定编码为 \"0\"，不是空串");
+    auto bits = tree.encode("xxx");
+    check(bits.has_value() && *bits == "000", "三个 x 编成 000");
+    auto back = tree.decode("000");
+    check(back.has_value() && *back == "xxx", "000 译回 xxx");
+    check(!tree.decode("001").has_value(), "单字符树里出现 1 是非法的");
+}
+
+// 不带字符建的树只能算 WPL，不能编码——接口如实反映这一点。
+void test_huffman_without_symbols_cannot_encode() {
+    const int weights[] = {2, 3, 4, 7};
+    HuffmanTree tree(weights, 4);
+    check(tree.total_weight() == 16, "不带字符也能建树、算总权");
+    check(!tree.code_of('a').has_value(), "没给字符，查不到任何字符的编码");
+}
+
+// 全等权 → 树是平衡的，8 个字符各得 3 位：**频率都一样时 Huffman 退化成定长编码**，
+// 一位都省不下来。压缩的收益完全来自频率的不均匀。
+//
+// 这组输入还有一个用处：它是唯一能分辨「find_code 忘了回溯」的形状。
+// 平衡树的左子树是**内部结点**，找右边的符号时会先在左边整棵失败；
+// 不 pop_back 就把失败路径的残留带进了结果——实测 b 的编码从 111 变成 0011011。
+// 偏斜的树（比如上面 2/3/4/7 那棵）左孩子都是叶子，失败时不入栈，反而看不出来。
+void test_huffman_balanced_tree_gives_fixed_length_codes() {
+    const char symbols[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+    const int weights[] = {1, 1, 1, 1, 1, 1, 1, 1};
+    HuffmanTree tree(symbols, weights, 8);
+
+    bool all_three_bits = true;
+    for (char c : symbols) {
+        auto code = tree.code_of(c);
+        if (!code || code->size() != 3) {
+            all_three_bits = false;
+        }
+    }
+    check(all_three_bits, "8 个等权字符各得 3 位——全等权时 Huffman 就是定长编码");
+    check(tree.weighted_path_length() == 24, "WPL = 8 x 3 = 24");
+
+    const std::string text = "abcdefgh";
+    auto bits = tree.encode(text);
+    check(bits.has_value() && bits->size() == 24, "8 个字符编成 24 位");
+    auto back = tree.decode(*bits);
+    check(back.has_value() && *back == text, "八个字符全部编码再译码，一个不差");
+}
+
 // D-001 第 3 条红线：容器内零 I/O。
 void test_no_console_output() {
     std::ostringstream out, err;
@@ -251,6 +386,13 @@ int main() {
     test_huffman_wpl_is_minimal();
     test_huffman_edge_cases();
     test_huffman_rejects_bad_input();
+    test_huffman_encode_is_shorter_than_fixed_length();
+    test_huffman_codes_are_prefix_free();
+    test_huffman_round_trip();
+    test_huffman_decode_rejects_bad_input();
+    test_huffman_single_symbol();
+    test_huffman_without_symbols_cannot_encode();
+    test_huffman_balanced_tree_gives_fixed_length_codes();
 
     test_no_console_output();
 

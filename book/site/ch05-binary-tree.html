@@ -203,7 +203,15 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h3 id="512-满二叉树完全二叉树扩充二叉树"><a class="anchor" href="#512-满二叉树完全二叉树扩充二叉树">#</a>5.1.2 满二叉树、完全二叉树、扩充二叉树</h3>
 <p>任何结点或者是叶，或者左右子树都非空，叫做满二叉树。叶只出现在最下两层、且最下层靠左对齐，叫做完全二叉树。在空子树位置补上空树叶，得到扩充二叉树；外部路径长度 <span class="math">E</span> 与内部路径长度 <span class="math">I</span> 满足 <span class="math">E<span class="rel">=</span>I<span class="bin">+</span><span class="upr">2</span>n</span>。</p>
 <h3 id="513-主要性质"><a class="anchor" href="#513-主要性质">#</a>5.1.3 主要性质</h3>
-<p>第 <span class="math">i</span> 层至多 <span class="math"><span class="upr">2</span><sup>i</sup></span> 个结点；深度为 <span class="math">k</span> 的二叉树至多 <span class="math"><span class="upr">2</span><sup>k<span class="bin">+</span><span class="upr">1</span></sup><span class="bin">−</span><span class="upr">1</span></span> 个结点；叶结点数 <span class="math">n<sub><span class="upr">0</span></sub><span class="rel">=</span>n<sub><span class="upr">2</span></sub><span class="bin">+</span><span class="upr">1</span></span>。<span class="math">n</span> 个结点的完全二叉树高度为 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>(n<span class="bin">+</span><span class="upr">1</span>)⌉</span>。按层从 0 编号时，结点 <span class="math">i</span> 的父是 <span class="math">⌊(i<span class="bin">−</span><span class="upr">1</span>)/<span class="upr">2</span>⌋</span>，左右孩子是 <span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">1</span></span> 与 <span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">2</span></span>。这些性质没错，原样保留。</p>
+<p>第 <span class="math">i</span> 层至多 <span class="math"><span class="upr">2</span><sup>i</sup></span> 个结点；深度为 <span class="math">k</span> 的二叉树至多 <span class="math"><span class="upr">2</span><sup>k<span class="bin">+</span><span class="upr">1</span></sup><span class="bin">−</span><span class="upr">1</span></span> 个结点。按层从 0 编号时， 结点 <span class="math">i</span> 的父是 <span class="math">⌊(i<span class="bin">−</span><span class="upr">1</span>)/<span class="upr">2</span>⌋</span>，左右孩子是 <span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">1</span></span> 与 <span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">2</span></span>——第 5.5 节的堆全靠这一条。 <span class="math">n</span> 个结点的完全二叉树高度为 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>(n<span class="bin">+</span><span class="upr">1</span>)⌉</span>。这些性质原书没错，原样保留。</p>
+<p>其中三条值得单独写下来，因为后面反复要用。</p>
+<p><strong>性质 3</strong>：非空二叉树的叶结点数 <span class="math">n<sub><span class="upr">0</span></sub></span> 等于度为 2 的结点数 <span class="math">n<sub><span class="upr">2</span></sub></span> 加 1，即 <span class="math">n<sub><span class="upr">0</span></sub><span class="rel">=</span>n<sub><span class="upr">2</span></sub><span class="bin">+</span><span class="upr">1</span></span>。</p>
+<blockquote><p><strong>证明.</strong> 设结点总数 <span class="math">n</span>、度为 1 的结点数 <span class="math">n<sub><span class="upr">1</span></sub></span>，则 <span class="math">n<span class="rel">=</span>n<sub><span class="upr">0</span></sub><span class="bin">+</span>n<sub><span class="upr">1</span></sub><span class="bin">+</span>n<sub><span class="upr">2</span></sub></span>。 换个角度数边：除根之外每个结点都恰好有一条边进入，所以边数 <span class="math">e<span class="rel">=</span>n<span class="bin">−</span><span class="upr">1</span></span>； 而这些边都是从度为 1 或 2 的结点射出的，所以 <span class="math">e<span class="rel">=</span>n<sub><span class="upr">1</span></sub><span class="bin">+</span><span class="upr">2</span>n<sub><span class="upr">2</span></sub></span>。 两式合起来得 <span class="math">n<sub><span class="upr">0</span></sub><span class="bin">+</span>n<sub><span class="upr">1</span></sub><span class="bin">+</span>n<sub><span class="upr">2</span></sub><span class="rel">=</span>n<sub><span class="upr">1</span></sub><span class="bin">+</span><span class="upr">2</span>n<sub><span class="upr">2</span></sub><span class="bin">+</span><span class="upr">1</span></span>，即 <span class="math">n<sub><span class="upr">0</span></sub><span class="rel">=</span>n<sub><span class="upr">2</span></sub><span class="bin">+</span><span class="upr">1</span></span>。∎</p></blockquote>
+<p><strong>性质 4（满二叉树定理）</strong>：非空满二叉树的<strong>树叶数目等于其分支结点数加 1</strong>。</p>
+<blockquote><p><strong>证明.</strong> 满二叉树里每个结点的度非 0 即 2，也就是 <span class="math">n<sub><span class="upr">1</span></sub><span class="rel">=</span><span class="upr">0</span></span>， 于是分支结点就是 <span class="math">n<sub><span class="upr">2</span></sub></span>，由性质 3 直接得 <span class="math">n<sub><span class="upr">0</span></sub><span class="rel">=</span>n<sub><span class="upr">2</span></sub><span class="bin">+</span><span class="upr">1</span></span>。∎</p></blockquote>
+<p><strong>性质 5（满二叉树定理推论）</strong>：非空二叉树的<strong>空子树数目等于其结点数加 1</strong>。</p>
+<blockquote><p><strong>证明.</strong> 设二叉树为 <span class="math">T</span>，把它所有的空子树都换成树叶，得到的扩充二叉树记为 <span class="math">T&#x27;</span>。 <span class="math">T&#x27;</span> 是满二叉树，而 <span class="math">T</span> 原来的每个结点在 <span class="math">T&#x27;</span> 里都成了分支结点。 由满二叉树定理，<span class="math">T&#x27;</span> 的树叶数 = 分支结点数 + 1 = <span class="math">T</span> 的结点数 + 1。 而每片新添的树叶恰好对应 <span class="math">T</span> 的一棵空子树，所以 <span class="math">T</span> 的空子树数目等于它的结点数加 1。∎</p></blockquote>
+<p>性质 5 不是纸面游戏：它说明<strong>一棵 <span class="math">n</span> 个结点的二叉树里有 <span class="math">n<span class="bin">+</span><span class="upr">1</span></span> 个空指针</strong>。 链式存储时这些空指针占的空间和结点本身同阶——线索二叉树、Trie 的压缩、 第 12 章 PATRICIA 的动机都从这里来。</p>
 <h2 id="52-二叉树的周游"><a class="anchor" href="#52-二叉树的周游">#</a>5.2 二叉树的周游</h2>
 <h3 id="521-先跑一遍"><a class="anchor" href="#521-先跑一遍">#</a>5.2.1 先跑一遍</h3>
 <p>先建树并打印四种周游，再插一棵 BST：</p>
@@ -643,6 +651,7 @@ BST 中序: 1 3 4 6 7 8 10 14
 <span class="p">#include &lt;cstddef&gt;</span>
 <span class="p">#include &lt;optional&gt;</span>
 <span class="p">#include &lt;stdexcept&gt;</span>
+<span class="p">#include &lt;string&gt;</span>
 
 <span class="c">// ---------------------------------------------------------------------------</span>
 <span class="c">// 最小堆</span>
@@ -785,13 +794,18 @@ BST 中序: 1 3 4 6 7 8 10 14
 <span class="k">public</span>:
     <span class="k">struct</span> Node {
         <span class="t">int</span> weight;
+        <span class="t">char</span> symbol;      <span class="c">// 只有叶子有意义；内部结点是合并出来的，置 &#x27;\0&#x27;</span>
         Node* left;
         Node* right;
     };
 
     HuffmanTree() : root_(<span class="k">nullptr</span>) {}
 
-    HuffmanTree(<span class="k">const</span> <span class="t">int</span>* weights, std::<span class="t">size_t</span> count) : root_(<span class="k">nullptr</span>) {
+    <span class="c">/// 只关心树形与 WPL 时用这个。</span>
+    HuffmanTree(<span class="k">const</span> <span class="t">int</span>* weights, std::<span class="t">size_t</span> count) : HuffmanTree(<span class="k">nullptr</span>, weights, count) {}
+
+    <span class="c">/// 带上每个权重对应的字符，树就能拿来**编码和译码**了。</span>
+    HuffmanTree(<span class="k">const</span> <span class="t">char</span>* symbols, <span class="k">const</span> <span class="t">int</span>* weights, std::<span class="t">size_t</span> count) : root_(<span class="k">nullptr</span>) {
         <span class="k">if</span> (count == <span class="n">0</span>) {
             <span class="k">return</span>;
         }
@@ -810,13 +824,14 @@ BST 中序: 1 3 4 6 7 8 10 14
 
         MinHeap&lt;ByWeight&gt; heap;
         <span class="k">for</span> (std::<span class="t">size_t</span> i = <span class="n">0</span>; i &lt; count; ++i) {
-            heap.insert(ByWeight{<span class="k">new</span> Node{weights[i], <span class="k">nullptr</span>, <span class="k">nullptr</span>}});   <span class="c">// 每个权重先做成一棵单结点树</span>
+            <span class="t">char</span> symbol = (symbols == <span class="k">nullptr</span>) ? <span class="s">&#x27;\0&#x27;</span> : symbols[i];
+            heap.insert(ByWeight{<span class="k">new</span> Node{weights[i], symbol, <span class="k">nullptr</span>, <span class="k">nullptr</span>}});  <span class="c">// 每个权重先做成一棵单结点树</span>
         }
 
         <span class="k">while</span> (heap.size() &gt; <span class="n">1</span>) {
             Node* left = heap.remove_min()-&gt;node;      <span class="c">// 最小的</span>
             Node* right = heap.remove_min()-&gt;node;     <span class="c">// 次小的</span>
-            Node* parent = <span class="k">new</span> Node{left-&gt;weight + right-&gt;weight, left, right};
+            Node* parent = <span class="k">new</span> Node{left-&gt;weight + right-&gt;weight, <span class="s">&#x27;\0&#x27;</span>, left, right};
             heap.insert(ByWeight{parent});
         }
         root_ = heap.remove_min()-&gt;node;
@@ -838,6 +853,82 @@ BST 中序: 1 3 4 6 7 8 10 14
     <span class="c">// Huffman 树的意义就在于它让这个数最小。</span>
     <span class="t">int</span> weighted_path_length() <span class="k">const</span> { <span class="k">return</span> wpl(root_, <span class="n">0</span>); }
 
+    <span class="c">// ---- Huffman 编码与译码 ------------------------------------------------</span>
+    <span class="c">//</span>
+    <span class="c">// 编码规则：从每个结点引向**左**孩子的边标 0，引向**右**孩子的边标 1；</span>
+    <span class="c">// 从根走到某个叶子，一路上的 0/1 连起来就是那个字符的编码。</span>
+    <span class="c">//</span>
+    <span class="c">// 这样得到的一定是**前缀码**——任何字符的编码都不会是另一个字符编码的前缀。</span>
+    <span class="c">// 理由很直白：字符只住在**叶子**上，而一个叶子不可能在另一个叶子的路径上。</span>
+    <span class="c">// 前缀码是能译码的前提：不然 011 既可以读成 a+bb 也可以读成 c+b，无法分辨。</span>
+
+    <span class="c">/// 查一个字符的编码。不在树里返回空 optional。</span>
+    std::optional&lt;std::string&gt; code_of(<span class="t">char</span> symbol) <span class="k">const</span> {
+        std::string path;
+        <span class="k">if</span> (find_code(root_, symbol, path)) {
+            <span class="c">// 只有一个字符时，从根到叶的路径是空串——那样的编码没法传。</span>
+            <span class="c">// 约定给它一位 &quot;0&quot;。这是个真实的边界，不是抠字眼。</span>
+            <span class="k">return</span> path.empty() ? std::string(<span class="s">&quot;0&quot;</span>) : path;
+        }
+        <span class="k">return</span> std::nullopt;
+    }
+
+    <span class="c">/// 把一段文字编成比特串。出现了树里没有的字符就返回空 optional。</span>
+    std::optional&lt;std::string&gt; encode(<span class="k">const</span> std::string&amp; text) <span class="k">const</span> {
+        std::string bits;
+        <span class="k">for</span> (<span class="t">char</span> c : text) {
+            <span class="k">auto</span> code = code_of(c);
+            <span class="k">if</span> (!code) {
+                <span class="k">return</span> std::nullopt;
+            }
+            bits += *code;
+        }
+        <span class="k">return</span> bits;
+    }
+
+    <span class="c">/// 把比特串译回文字。**用的是同一棵树**：从根出发，读 0 走左、读 1 走右，</span>
+    <span class="c">/// 走到叶子就吐出一个字符再回到根。比特串不合法（多出半截、出现非 0/1）</span>
+    <span class="c">/// 就返回空 optional。</span>
+    std::optional&lt;std::string&gt; decode(<span class="k">const</span> std::string&amp; bits) <span class="k">const</span> {
+        <span class="k">if</span> (root_ == <span class="k">nullptr</span>) {
+            <span class="k">return</span> bits.empty() ? std::optional&lt;std::string&gt;(std::string()) : std::nullopt;
+        }
+        <span class="c">// 单结点树是特例：整棵树只有一个字符，每一位都译成它。</span>
+        <span class="k">if</span> (root_-&gt;left == <span class="k">nullptr</span> &amp;&amp; root_-&gt;right == <span class="k">nullptr</span>) {
+            std::string text;
+            <span class="k">for</span> (<span class="t">char</span> b : bits) {
+                <span class="k">if</span> (b != <span class="s">&#x27;0&#x27;</span>) {
+                    <span class="k">return</span> std::nullopt;
+                }
+                text.push_back(root_-&gt;symbol);
+            }
+            <span class="k">return</span> text;
+        }
+
+        std::string text;
+        <span class="k">const</span> Node* current = root_;
+        <span class="k">for</span> (<span class="t">char</span> b : bits) {
+            <span class="k">if</span> (b == <span class="s">&#x27;0&#x27;</span>) {
+                current = current-&gt;left;
+            } <span class="k">else</span> <span class="k">if</span> (b == <span class="s">&#x27;1&#x27;</span>) {
+                current = current-&gt;right;
+            } <span class="k">else</span> {
+                <span class="k">return</span> std::nullopt;          <span class="c">// 既不是 0 也不是 1</span>
+            }
+            <span class="k">if</span> (current == <span class="k">nullptr</span>) {
+                <span class="k">return</span> std::nullopt;
+            }
+            <span class="k">if</span> (current-&gt;left == <span class="k">nullptr</span> &amp;&amp; current-&gt;right == <span class="k">nullptr</span>) {
+                text.push_back(current-&gt;symbol);
+                current = root_;              <span class="c">// 吐出一个字符，回到根</span>
+            }
+        }
+        <span class="k">if</span> (current != root_) {
+            <span class="k">return</span> std::nullopt;              <span class="c">// 走到一半就没比特了：串不完整</span>
+        }
+        <span class="k">return</span> text;
+    }
+
 <span class="k">private</span>:
     <span class="c">// 放进堆里的是「一棵树的根指针」，比较的是它的权重。</span>
     <span class="k">struct</span> ByWeight {
@@ -854,6 +945,26 @@ BST 中序: 1 3 4 6 7 8 10 14
         <span class="k">delete</span> node;
     }
 
+    <span class="c">/// 在树里找字符 symbol，把根到它的路径（左 0 右 1）写进 path。</span>
+    <span class="k">static</span> <span class="t">bool</span> find_code(<span class="k">const</span> Node* node, <span class="t">char</span> symbol, std::string&amp; path) {
+        <span class="k">if</span> (node == <span class="k">nullptr</span>) {
+            <span class="k">return</span> <span class="k">false</span>;
+        }
+        <span class="k">if</span> (node-&gt;left == <span class="k">nullptr</span> &amp;&amp; node-&gt;right == <span class="k">nullptr</span>) {
+            <span class="k">return</span> node-&gt;symbol == symbol;
+        }
+        path.push_back(<span class="s">&#x27;0&#x27;</span>);
+        <span class="k">if</span> (find_code(node-&gt;left, symbol, path)) {
+            <span class="k">return</span> <span class="k">true</span>;
+        }
+        path.back() = <span class="s">&#x27;1&#x27;</span>;
+        <span class="k">if</span> (find_code(node-&gt;right, symbol, path)) {
+            <span class="k">return</span> <span class="k">true</span>;
+        }
+        path.pop_back();                      <span class="c">// 这条路走不通，回溯</span>
+        <span class="k">return</span> <span class="k">false</span>;
+    }
+
     <span class="k">static</span> <span class="t">int</span> wpl(<span class="k">const</span> Node* node, <span class="t">int</span> depth) {
         <span class="k">if</span> (node == <span class="k">nullptr</span>) <span class="k">return</span> <span class="n">0</span>;
         <span class="k">if</span> (node-&gt;left == <span class="k">nullptr</span> &amp;&amp; node-&gt;right == <span class="k">nullptr</span>) {
@@ -865,6 +976,17 @@ BST 中序: 1 3 4 6 7 8 10 14
     Node* root_;
 };</code></pre></div>
 <p><code>remove_min</code> 的手法是固定的：<strong>把最后一个元素搬到根上，长度减一，再让它下沉</strong>。 为什么是最后一个？因为只有拿掉最后一个位置，剩下的才仍然是一棵完全二叉树。 下沉时<strong>必须和两个孩子里较小的那个交换</strong>——跟较大的换会破坏「父亲不大于两个孩子」。</p>
+<h3 id="551a-建堆为什么是-on-而不是-onlog-n"><a class="anchor" href="#551a-建堆为什么是-on-而不是-onlog-n">#</a>5.5.1a 建堆为什么是 <span class="math">O(n)</span> 而不是 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span></h3>
+<p>把一个无序序列变成堆，做法是<strong>从最后一个非叶结点起，倒着对每个结点做一次下沉</strong> （原书图5.17 的筛选法）。</p>
+<p>粗看这是 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>：<code>sift_down</code> 一次最多走一条树高那么长的路，是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>； 非叶结点大约 <span class="math">n/<span class="upr">2</span></span> 个，乘起来就是 <span class="math">n/<span class="upr">2</span><span class="bin">⋅</span>&thinsp;<span class="upr">log</span>&thinsp;n</span>。<strong>原书特意说这只是一个粗略的上界。</strong></p>
+<p>细算要用到一件事：<strong>下沉的代价不是 <span class="math"><span class="upr">log</span>&thinsp;n</span>，而是「这个结点到最底层还有多远」</strong>。 越靠近底层的结点越多，而它们能下沉的距离越短——两者正好互相抵消。</p>
+<p>设二叉树共 <span class="math"><span class="upr">log</span>&thinsp;n</span> 层，第 <span class="math">i</span> 层至多 <span class="math"><span class="upr">2</span><sup>i</sup></span> 个结点，第 <span class="math">i</span> 层的结点最多下沉 <span class="math"><span class="upr">log</span>&thinsp;n<span class="bin">−</span>i</span> 层， 于是建堆的总代价是</p>
+<div class="math math-display">∑<sub>i<span class="rel">=</span><span class="upr">0</span></sub><sup><span class="upr">log</span>&thinsp;n</sup><span class="upr">2</span><sup>i</sup> (<span class="upr">log</span>&thinsp;n<span class="bin">−</span>i)</div>
+<p>令 <span class="math">j<span class="rel">=</span>&thinsp;<span class="upr">log</span>&thinsp;n<span class="bin">−</span>i</span> 代入：</p>
+<div class="math math-display">∑<sub>i<span class="rel">=</span><span class="upr">0</span></sub><sup><span class="upr">log</span>&thinsp;n</sup><span class="upr">2</span><sup>i</sup>(<span class="upr">log</span>&thinsp;n<span class="bin">−</span>i)<span class="rel">=</span>∑<sub>j<span class="rel">=</span><span class="upr">0</span></sub><sup><span class="upr">log</span>&thinsp;n</sup><span class="upr">2</span><sup><span class="upr">log</span>&thinsp;n<span class="bin">−</span>j</sup><span class="bin">⋅</span>j<span class="rel">=</span>∑<sub>j<span class="rel">=</span><span class="upr">0</span></sub><sup><span class="upr">log</span>&thinsp;n</sup>n<span class="bin">⋅</span><span class="frac"><span class="num">j</span><span class="den"><span class="upr">2</span><sup>j</sup></span></span>&lt;<span class="upr">2</span>n</div>
+<p>最后一步用的是 <span class="math">∑<sub>j<span class="rel">≥</span><span class="upr">0</span></sub>j/<span class="upr">2</span><sup>j</sup><span class="rel">=</span><span class="upr">2</span></span>。所以<strong>建堆的时间复杂度是 <span class="math">O(n)</span>—— 可以在线性时间内把一个无序序列变成堆</strong>。</p>
+<p>这个结论有实际后果：第 8.3.2 节的堆排序总代价是 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，但那 <span class="math"><span class="upr">log</span>&thinsp;n</span> 全部来自 <strong>后面 <span class="math">n</span> 次取最小值</strong>，建堆那一步是白送的。反过来，如果一个个 <code>insert</code> 建堆—— 每次上浮 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>，<span class="math">n</span> 次就是 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>——就把这份便宜丢掉了。</p>
+<p>堆建好之后，插入、删除最小元、删除任意元素的平均与最差代价都是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>， 因为树高就是 <span class="math"><span class="upr">log</span>&thinsp;n</span>。但<strong>最小堆只适合查最小值，查任意值的效率不高</strong>—— 要找一个给定的键，除了从头扫没有更好的办法。这正是第 10 章要另起炉灶讲检索的原因。</p>
 <h2 id="56-huffman-树及其应用"><a class="anchor" href="#56-huffman-树及其应用">#</a>5.6 Huffman 树及其应用</h2>
 <p>Huffman 树反复取出两个最小权，合成它们的和，直到只剩一棵——这就是前缀编码的那棵树。 根权等于全部叶子权之和。实现就在 5.5 那份教学版清单里的 <code>HuffmanTree</code>。</p>
 <p><strong>为什么用堆</strong>：每一轮都要「取当前最小的两棵」。用数组线性扫是 O(n) 一轮、 总共 O(n²)；用最小堆是 O(log n) 一轮、总共 O(n log n)。这是 5.5 节那个数据结构 在这里换来的东西。</p>
@@ -875,6 +997,53 @@ BST 中序: 1 3 4 6 7 8 10 14
 <div class="codeblock" data-lang="text"><pre><code>==2738715==ERROR: LeakSanitizer: detected memory leaks
 Direct leak of 24 byte(s) in 1 object(s) allocated from:
     #1 HuffmanTree::HuffmanTree(int const*, unsigned long) teaching.hpp:180</code></pre></div>
+<h3 id="562-huffman-编码与译码"><a class="anchor" href="#562-huffman-编码与译码">#</a>5.6.2 Huffman 编码与译码</h3>
+<p>建出树只是半程。Huffman 树的<strong>用途</strong>是给字符编码，这一节把它走完。</p>
+<p><strong>问题从哪来。</strong> 要传电文 <code>abbaaadc</code>。定长编码给每个字符 2 位（a=00, b=01, c=10, d=11）， 总共 16 位。想更短，就得让<strong>出现次数多的字符用更短的码</strong>。 比如 a=0, b=1, c=01, d=10，电文变成 10 位——<strong>但这样的电文没法译码</strong>： 收到 <code>011</code>，既可以读成 a b b，也可以读成 c b。</p>
+<p><strong>症结是「前缀」。</strong> <code>0</code> 是 <code>01</code> 的前缀，所以读到 <code>0</code> 时无法判断该停还是该再读一位。 解决办法是要求任何字符的编码都不是另一个字符编码的前缀——这种编码叫<strong>前缀码</strong>。</p>
+<p><strong>Huffman 树天然给出前缀码。</strong> 规则：从每个结点引向<strong>左</strong>孩子的边标 0、引向<strong>右</strong>孩子的边标 1， 从根走到某个叶子，一路的 0/1 连起来就是那个字符的编码。 为什么一定无前缀冲突？因为<strong>字符只住在叶子上</strong>，而一个叶子不可能出现在另一个叶子的路径上。</p>
+<p>以 <code>abbaaadc</code> 为例，四个字符的频率是 a×4、b×2、c×1、d×1，建出的 Huffman 树给出</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">字符</th>
+<th style="text-align:left">频率</th>
+<th style="text-align:left">编码</th>
+<th style="text-align:left">位数</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">a</td>
+<td style="text-align:left">4</td>
+<td style="text-align:left"><code>0</code></td>
+<td style="text-align:left">1</td>
+</tr>
+<tr>
+<td style="text-align:left">b</td>
+<td style="text-align:left">2</td>
+<td style="text-align:left"><code>10</code></td>
+<td style="text-align:left">2</td>
+</tr>
+<tr>
+<td style="text-align:left">c</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left"><code>110</code></td>
+<td style="text-align:left">3</td>
+</tr>
+<tr>
+<td style="text-align:left">d</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left"><code>111</code></td>
+<td style="text-align:left">3</td>
+</tr>
+</tbody></table></div>
+<p>电文编成 14 位，比定长的 16 位短。<strong>注意 14 正好等于这棵树的 WPL</strong>—— 这不是巧合：WPL 是 <span class="math">∑(<span class="upr">权</span><span class="bin">×</span><span class="upr">深度</span>)</span>，而权就是出现次数、深度就是码长， 两者算的是同一个和。5.6 开头说「Huffman 树让 WPL 最小」，翻译过来就是 <strong>它让这段电文的编码总长最短</strong>。</p>
+<p><strong>译码用的是同一棵树</strong>：从根出发，读 0 走左、读 1 走右，走到叶子就吐出一个字符， 然后回到根接着读。前缀码保证这个过程不会有歧义。</p>
+<p>教学版实现了 <code>code_of</code> / <code>encode</code> / <code>decode</code> 三个函数，就在 5.5 那份清单里。 三处边界值得一提，测试各有一条用例守着：</p>
+<ul>
+<li><strong>比特串走到一半就没了</strong>（比如传丢了最后一位）→ 返回空 <code>optional</code>，而不是吐出半个字符；</li>
+<li><strong>出现既不是 0 也不是 1 的字符</strong> → 同样返回空 <code>optional</code>；</li>
+<li><strong>整棵树只有一个字符</strong>：从根到叶的路径是空串，那样的编码根本没法传。 本书约定给它一位 <code>&quot;0&quot;</code>。这是真实的边界，不是抠字眼。</li>
+</ul>
+<p>还有一个反直觉的结论：<strong>如果所有字符频率相同，Huffman 一位都省不下来。</strong> 8 个等权字符建出的是一棵平衡树，每个字符恰好 3 位——退化成定长编码。 压缩的收益完全来自频率的不均匀。教学版的测试把这条也写成了断言。</p>
+<p>（把这套编码器扩展成能压缩文件，需要再加两步：把码表本身也写进输出， 以及处理最后不足一字节的那几位。原书的上机题正是这么布置的。）</p>
 <h3 id="56a-进阶选读从教学版到工程版"><a class="anchor" href="#56a-进阶选读从教学版到工程版">#</a>5.6a 进阶（选读）：从教学版到工程版</h3>
 <p><strong>这一节可以整节跳过。</strong> 工程版在 <code>code/ch05/binary_tree/modern.hpp</code> 与 <code>code/ch05/heap_huffman/modern.hpp</code>，与教学版的差别有四处，第一处是本章特有的。</p>
 <p><strong>一、递归的深度限制，以及怎么绕开。</strong> 教学版的 <code>destroy</code> 与 <code>clone</code> 都是递归的——形状和树的定义一样，好读。 代价是<strong>递归深度等于树高</strong>：一棵退化成链的树（比如按升序往 BST 里插入）会把运行栈压穿。 本机实测（Linux/gcc 13.3/8MB 栈）：纯左链 50 万结点，递归 <code>clone</code> 即段错误； 100 万结点，递归 <code>destroy</code> 段错误。</p>
@@ -930,7 +1099,7 @@ Direct leak of 24 byte(s) in 1 object(s) allocated from:
 </ol>
 <div class="pagenav"><a href="ch04-string.html"><span class="dir">← 上一篇</span>第4章 字符串</a><a href="ch06-tree.html" style="text-align:right"><span class="dir">下一篇 →</span>第6章 树</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#51-二叉树的概念">5.1 二叉树的概念</a><a href="#511-定义和基本术语" class="sub">5.1.1 定义和基本术语</a><a href="#512-满二叉树完全二叉树扩充二叉树" class="sub">5.1.2 满二叉树、完全二叉树、扩充二叉树</a><a href="#513-主要性质" class="sub">5.1.3 主要性质</a><a href="#52-二叉树的周游">5.2 二叉树的周游</a><a href="#521-先跑一遍" class="sub">5.2.1 先跑一遍</a><a href="#522-深度优先周游" class="sub">5.2.2 深度优先周游</a><a href="#523-广度优先周游" class="sub">5.2.3 广度优先周游</a><a href="#53-二叉树的存储结构">5.3 二叉树的存储结构</a><a href="#54-二叉搜索树">5.4 二叉搜索树</a><a href="#55-堆与优先队列">5.5 堆与优先队列</a><a href="#56-huffman-树及其应用">5.6 Huffman 树及其应用</a><a href="#56a-进阶选读从教学版到工程版" class="sub">5.6a 进阶（选读）：从教学版到工程版</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充证明题参考课程第-5-章" class="sub">补充证明题（参考课程第 5 章）</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#51-二叉树的概念">5.1 二叉树的概念</a><a href="#511-定义和基本术语" class="sub">5.1.1 定义和基本术语</a><a href="#512-满二叉树完全二叉树扩充二叉树" class="sub">5.1.2 满二叉树、完全二叉树、扩充二叉树</a><a href="#513-主要性质" class="sub">5.1.3 主要性质</a><a href="#52-二叉树的周游">5.2 二叉树的周游</a><a href="#521-先跑一遍" class="sub">5.2.1 先跑一遍</a><a href="#522-深度优先周游" class="sub">5.2.2 深度优先周游</a><a href="#523-广度优先周游" class="sub">5.2.3 广度优先周游</a><a href="#53-二叉树的存储结构">5.3 二叉树的存储结构</a><a href="#54-二叉搜索树">5.4 二叉搜索树</a><a href="#55-堆与优先队列">5.5 堆与优先队列</a><a href="#551a-建堆为什么是-on-而不是-onlog-n" class="sub">5.5.1a 建堆为什么是 $O(n)$ 而不是 $O(n\log n)$</a><a href="#56-huffman-树及其应用">5.6 Huffman 树及其应用</a><a href="#562-huffman-编码与译码" class="sub">5.6.2 Huffman 编码与译码</a><a href="#56a-进阶选读从教学版到工程版" class="sub">5.6a 进阶（选读）：从教学版到工程版</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充证明题参考课程第-5-章" class="sub">补充证明题（参考课程第 5 章）</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch05-binary-tree.md</code> 生成
