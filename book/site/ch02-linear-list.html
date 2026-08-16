@@ -155,25 +155,34 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <main>
 
 <p>线性表把一串同类型元素排成唯一的先后次序。顺序表把元素连续放在数组里，能 O(1) 按下标访问； 链表用链接保存相邻关系，能在已知结点位置 O(1) 插入或删除。关键是区分「按位置找元素」和 「已知结点后改链接」这两类操作。</p>
-<p>源码：<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/modern.hpp" class="ext">顺序表</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/demo.cpp" class="ext">顺序表示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/modern.hpp" class="ext">链表</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/demo.cpp" class="ext">链表示例</a>。</p>
+<p>源码：<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/teaching.hpp" class="ext">顺序表·教学版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/modern.hpp" class="ext">顺序表·工程版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/demo.cpp" class="ext">顺序表示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/modern.hpp" class="ext">链表</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/demo.cpp" class="ext">链表示例</a>。</p>
 <h2 id="先跑一遍"><a class="anchor" href="#先跑一遍">#</a>先跑一遍</h2>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/demo.cpp">code/ch02/array_list/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/demo.cpp">code/ch02/array_list/demo.cpp</a></div><pre><code><span class="c">// 第 2 章「先跑一遍」：用教学版 ArrayList 走一遍 append / insert / find / remove。</span>
+<span class="c">// 编译运行：</span>
+<span class="c">//   g++ -std=c++17 -I code/ch02/array_list code/ch02/array_list/demo.cpp -o demo &amp;&amp; ./demo</span>
+<span class="p">#include &quot;teaching.hpp&quot;</span>
 
 <span class="p">#include &lt;iostream&gt;</span>
 
 <span class="t">int</span> main() {
-    dsa::ArrayList&lt;<span class="t">int</span>&gt; values;
+    ArrayList&lt;<span class="t">int</span>&gt; values;
     values.append(<span class="n">10</span>);
     values.append(<span class="n">30</span>);
     values.insert(<span class="n">1</span>, <span class="n">20</span>);
+
     std::cout &lt;&lt; <span class="s">&quot;顺序表:&quot;</span>;
-    <span class="k">for</span> (std::<span class="t">size_t</span> index = <span class="n">0</span>; index &lt; values.size(); ++index) {
-        std::cout &lt;&lt; <span class="s">&#x27; &#x27;</span> &lt;&lt; values.at(index);
+    <span class="k">for</span> (<span class="t">int</span> value : values) {   <span class="c">// 有 begin()/end()，range-for 直接可用</span>
+        std::cout &lt;&lt; <span class="s">&#x27; &#x27;</span> &lt;&lt; value;
     }
-    std::cout &lt;&lt; <span class="s">&quot;\n查找 20 的下标: &quot;</span> &lt;&lt; *values.find(<span class="n">20</span>) &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+
+    <span class="c">// find 返回 optional：有值才解引用</span>
+    <span class="k">if</span> (<span class="k">auto</span> pos = values.find(<span class="n">20</span>)) {
+        std::cout &lt;&lt; <span class="s">&quot;\n查找 20 的下标: &quot;</span> &lt;&lt; *pos &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+    }
+
     std::cout &lt;&lt; <span class="s">&quot;删除位置 1 得到 &quot;</span> &lt;&lt; values.remove(<span class="n">1</span>) &lt;&lt; <span class="s">&quot;，剩余:&quot;</span>;
-    <span class="k">for</span> (std::<span class="t">size_t</span> index = <span class="n">0</span>; index &lt; values.size(); ++index) {
-        std::cout &lt;&lt; <span class="s">&#x27; &#x27;</span> &lt;&lt; values.at(index);
+    <span class="k">for</span> (<span class="t">int</span> value : values) {
+        std::cout &lt;&lt; <span class="s">&#x27; &#x27;</span> &lt;&lt; value;
     }
     std::cout &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
 }</code></pre></div>
@@ -220,17 +229,43 @@ append 之后尾元素是 30</code></pre></div>
 <li>它写的是 <code>class List { void clear(); ... };</code>，<strong>通篇没有 <code>public:</code></strong>。 <code>class</code> 的默认访问权限是 private，于是这个抽象数据类型的每一个运算都调不到。 （同一本书第 3 章的代码3.1 是写了 <code>public:</code> 的。）</li>
 </ol>
 <p>第 2 点尤其值得停一下：抽象数据类型的意义就是<strong>对外</strong>给出一组运算。 一个所有运算都私有的 ADT，在语法上成立、在语义上是空的。</p>
-<p>本书把这组运算直接定义在 <code>ArrayList&lt;T&gt;</code> 上，不再另设一个基类—— 理由与第 3 章相同：那样的空基类给不了多态，却会带来非虚析构的未定义行为。 底层 <code>new T[n]</code> 会默认构造整块槽位，所以 <code>T</code> 必须能默认构造。这句话写在正文里即可。</p>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/modern.hpp">code/ch02/array_list/modern.hpp#class-head</a></div><pre><code><span class="c">/// 顺序表（按顺序方式存储的线性表，又称向量）。</span>
-<span class="c">///</span>
-<span class="c">/// 与原书 arrList 的差别：容量不足时自动翻倍，而不是打印 &quot;The list is overflow&quot;</span>
-<span class="c">/// 然后返回 false；位置非法抛 std::out_of_range，而不是打印一行再返回 false；</span>
-<span class="c">/// 查找返回 std::optional&lt;size_type&gt;，而不是「出参 + bool」双通道。</span>
-<span class="k">template</span> &lt;<span class="k">typename</span> T&gt;
-<span class="k">class</span> ArrayList {
-<span class="k">public</span>:
-    <span class="k">using</span> value_type = T;
-    <span class="k">using</span> size_type = std::<span class="t">size_t</span>;</code></pre></div>
+<p>本书把这组运算直接定义在 <code>ArrayList&lt;T&gt;</code> 上，不再另设一个基类—— 理由与第 3 章相同：那样的空基类给不了多态，却会带来非虚析构的未定义行为。 要定下来的是<strong>这张表</strong>：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">运算</th>
+<th style="text-align:left">含义</th>
+<th style="text-align:left">时间代价</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><code>at(i)</code> / <code>set(i, x)</code></td>
+<td style="text-align:left">按下标取值、改值</td>
+<td style="text-align:left">O(1)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>find(x)</code></td>
+<td style="text-align:left">按内容查位置；找不到返回「没有」</td>
+<td style="text-align:left">O(n)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>insert(i, x)</code></td>
+<td style="text-align:left">在位置 i 插入</td>
+<td style="text-align:left">O(n)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>append(x)</code></td>
+<td style="text-align:left">在表尾追加</td>
+<td style="text-align:left">摊还 O(1)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>remove(i)</code></td>
+<td style="text-align:left">删除位置 i 上的元素并把它带回来</td>
+<td style="text-align:left">O(n)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>size()</code> / <code>empty()</code> / <code>clear()</code></td>
+<td style="text-align:left">长度、判空、置空</td>
+<td style="text-align:left">O(1)</td>
+</tr>
+</tbody></table></div>
 <h2 id="22-顺序表"><a class="anchor" href="#22-顺序表">#</a>2.2 顺序表</h2>
 <p>按顺序方式存储的线性表称为顺序表(array-based list)，又称向量(vector)，通过数组建立。</p>
 <p>假设每个元素占用 L 个存储单元，顺序表的开始结点 k₀ 的存储位置记为 b = loc(k₀)，称为首地址；则下标为 i 的元素 kᵢ 的存储位置为</p>
@@ -283,35 +318,174 @@ append 之后尾元素是 30</code></pre></div>
 </tr>
 </tbody></table></div>
 <p>图 2.1 顺序表的示意图</p>
+<h3 id="教学版完整实现"><a class="anchor" href="#教学版完整实现">#</a>教学版：完整实现</h3>
+<p>下面是一份<strong>完整的、能直接编译运行的</strong>顺序表。一个文件、一个类，没有省略号。 它保留原书【代码2.2】【算法2.3】【算法2.4】【算法2.5】要教的全部内容—— 连续存储、按下标 O(1) 随机存取、插入/删除要搬 O(n) 个元素——只把原书那几处 编译不过或会崩的写法换掉。后面 2.2.1–2.2.4 各节就是把它拆开逐段讲。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/teaching.hpp">code/ch02/array_list/teaching.hpp</a></div><pre><code><span class="c">// 顺序表 ArrayList —— 教学版。</span>
+<span class="c">//</span>
+<span class="c">// 一个文件、一个类、能直接编译运行，给「第一次读这一节」的人看。</span>
+<span class="c">// 它保留原书【代码2.1】【代码2.2】【算法2.3】【算法2.4】【算法2.5】要教的全部内容——</span>
+<span class="c">// 连续存储、按下标 O(1) 随机存取、插入/删除要搬 O(n) 个元素——</span>
+<span class="c">// 只把原书那几处编译不过或会崩的写法换掉。</span>
+<span class="c">//</span>
+<span class="c">// 与 modern.hpp（工程版）的分工：</span>
+<span class="c">//   教学版  遵守**三法则**（析构 + 拷贝构造 + 拷贝赋值），正确，但拷贝多一点；</span>
+<span class="c">//   工程版  在此之上补齐移动语义、强异常保证、编译期类型约束。</span>
+<span class="c">// 两份都在闸门里真编译真运行。先读这一份，2.2.5「进阶（选读）」再读那一份。</span>
+<span class="p">#pragma once</span>
+
+<span class="p">#include &lt;cstddef&gt;</span>
+<span class="p">#include &lt;optional&gt;</span>
+<span class="p">#include &lt;stdexcept&gt;</span>
+
+<span class="k">template</span> &lt;<span class="k">typename</span> T&gt;
+<span class="k">class</span> ArrayList {
+<span class="k">public</span>:
+    <span class="k">using</span> value_type = T;
+    <span class="k">using</span> size_type = std::<span class="t">size_t</span>;
+
+    <span class="k">explicit</span> ArrayList(size_type initial_capacity = <span class="n">8</span>)
+        : data_(<span class="k">new</span> T[initial_capacity]), capacity_(initial_capacity), size_(<span class="n">0</span>) {}
+
+    ~ArrayList() { <span class="k">delete</span>[] data_; }
+
+    <span class="c">// 三法则：自己管着 new 出来的数组，就得自己写拷贝构造和拷贝赋值。</span>
+    <span class="c">// 不写的话编译器会照抄指针，两个表指向同一块内存，各析构一次 → 二次释放。</span>
+    ArrayList(<span class="k">const</span> ArrayList&amp; other)
+        : data_(<span class="k">new</span> T[other.capacity_]), capacity_(other.capacity_), size_(other.size_) {
+        <span class="k">for</span> (size_type i = <span class="n">0</span>; i &lt; size_; ++i) {
+            data_[i] = other.data_[i];
+        }
+    }
+
+    ArrayList&amp; <span class="k">operator</span>=(<span class="k">const</span> ArrayList&amp; other) {
+        <span class="k">if</span> (<span class="k">this</span> == &amp;other) {
+            <span class="k">return</span> *<span class="k">this</span>;
+        }
+        T* fresh = <span class="k">new</span> T[other.capacity_];
+        <span class="k">for</span> (size_type i = <span class="n">0</span>; i &lt; other.size_; ++i) {
+            fresh[i] = other.data_[i];
+        }
+        <span class="k">delete</span>[] data_;
+        data_ = fresh;
+        capacity_ = other.capacity_;
+        size_ = other.size_;
+        <span class="k">return</span> *<span class="k">this</span>;
+    }
+
+    <span class="t">bool</span> empty() <span class="k">const</span> { <span class="k">return</span> size_ == <span class="n">0</span>; }
+    size_type size() <span class="k">const</span> { <span class="k">return</span> size_; }
+    size_type capacity() <span class="k">const</span> { <span class="k">return</span> capacity_; }
+
+    <span class="c">// 清空只把长度归零，已经申请的数组留着复用。</span>
+    <span class="t">void</span> clear() { size_ = <span class="n">0</span>; }
+
+    <span class="c">// 按下标读取，O(1)——这是顺序表相对链表的看家本领。</span>
+    <span class="c">// 下标非法是**调用方的错误**，不是可预期状态，所以抛异常而不是返回 optional。</span>
+    <span class="k">const</span> T&amp; at(size_type index) <span class="k">const</span> {
+        <span class="k">if</span> (index &gt;= size_) {
+            <span class="k">throw</span> std::out_of_range(<span class="s">&quot;ArrayList::at: 下标越界&quot;</span>);
+        }
+        <span class="k">return</span> data_[index];
+    }
+
+    T&amp; at(size_type index) {
+        <span class="k">if</span> (index &gt;= size_) {
+            <span class="k">throw</span> std::out_of_range(<span class="s">&quot;ArrayList::at: 下标越界&quot;</span>);
+        }
+        <span class="k">return</span> data_[index];
+    }
+
+    <span class="t">void</span> set(size_type index, <span class="k">const</span> T&amp; value) {
+        <span class="k">if</span> (index &gt;= size_) {
+            <span class="k">throw</span> std::out_of_range(<span class="s">&quot;ArrayList::set: 下标越界&quot;</span>);
+        }
+        data_[index] = value;
+    }
+
+    <span class="c">// 按内容查找，O(n)。找到返回下标，没找到返回空 optional。</span>
+    <span class="c">// 原书【算法2.3】用 `bool getPos(int&amp; p, const T value)`：忘了看返回值，</span>
+    <span class="c">// 就会读到一个从没被写过的 p。这里「找没找到」是返回值类型的一部分。</span>
+    std::optional&lt;size_type&gt; find(<span class="k">const</span> T&amp; value) <span class="k">const</span> {
+        <span class="k">for</span> (size_type i = <span class="n">0</span>; i &lt; size_; ++i) {
+            <span class="k">if</span> (data_[i] == value) {
+                <span class="k">return</span> i;
+            }
+        }
+        <span class="k">return</span> std::nullopt;
+    }
+
+    <span class="c">// 在位置 pos 插入，pos 可以等于 size()（追加到表尾）。</span>
+    <span class="c">// 代价 O(n)：pos 之后的元素都要右移一位。这正是顺序表与链表要对比的地方。</span>
+    <span class="t">void</span> insert(size_type pos, <span class="k">const</span> T&amp; value) {
+        <span class="k">if</span> (pos &gt; size_) {
+            <span class="k">throw</span> std::out_of_range(<span class="s">&quot;ArrayList::insert: 插入位置非法&quot;</span>);
+        }
+        <span class="k">if</span> (size_ == capacity_) {
+            grow();
+        }
+        <span class="k">for</span> (size_type i = size_; i &gt; pos; --i) {
+            data_[i] = data_[i - <span class="n">1</span>];   <span class="c">// 从后往前搬，否则会自己覆盖自己</span>
+        }
+        data_[pos] = value;
+        ++size_;
+    }
+
+    <span class="t">void</span> append(<span class="k">const</span> T&amp; value) { insert(size_, value); }
+
+    <span class="c">// 删除 pos 上的元素并返回它。代价同样是 O(n)：后面的元素都要左移一位。</span>
+    T remove(size_type pos) {
+        <span class="k">if</span> (pos &gt;= size_) {
+            <span class="k">throw</span> std::out_of_range(<span class="s">&quot;ArrayList::remove: 下标越界&quot;</span>);
+        }
+        T removed = data_[pos];
+        <span class="k">for</span> (size_type i = pos; i + <span class="n">1</span> &lt; size_; ++i) {
+            data_[i] = data_[i + <span class="n">1</span>];
+        }
+        --size_;
+        <span class="k">return</span> removed;
+    }
+
+    <span class="c">// 有了 begin/end，range-for 就能用了：for (auto&amp; x : list) { ... }</span>
+    <span class="c">//</span>
+    <span class="c">// 原书是在类里放一个 `int position` 游标，配 setPos/next/prev 来依次处理元素。</span>
+    <span class="c">// 那种设计把「遍历到哪了」这个状态塞进了容器：const 对象没法遍历，</span>
+    <span class="c">// 两处代码不能同时遍历，嵌套遍历直接互相踩。游标挪到容器外面，这些问题一起消失。</span>
+    T* begin() { <span class="k">return</span> data_; }
+    T* end() { <span class="k">return</span> data_ + size_; }
+    <span class="k">const</span> T* begin() <span class="k">const</span> { <span class="k">return</span> data_; }
+    <span class="k">const</span> T* end() <span class="k">const</span> { <span class="k">return</span> data_ + size_; }
+
+<span class="k">private</span>:
+    <span class="c">// 扩容：申请两倍大的新数组，搬过去，再释放旧的。</span>
+    <span class="c">// 翻倍而不是加一，才能让 append 的摊还代价保持 O(1)。</span>
+    <span class="t">void</span> grow() {
+        size_type next = (capacity_ == <span class="n">0</span>) ? <span class="n">1</span> : capacity_ * <span class="n">2</span>;
+        T* fresh = <span class="k">new</span> T[next];
+        <span class="k">for</span> (size_type i = <span class="n">0</span>; i &lt; size_; ++i) {
+            fresh[i] = data_[i];
+        }
+        <span class="k">delete</span>[] data_;       <span class="c">// 先搬完再释放旧的，顺序反了就会读到已释放的内存</span>
+        data_ = fresh;
+        capacity_ = next;
+    }
+
+    T* data_;             <span class="c">// 指向底层数组</span>
+    size_type capacity_;  <span class="c">// 数组能放多少个</span>
+    size_type size_;      <span class="c">// 现在放了几个</span>
+};</code></pre></div>
+<p>编译运行：</p>
+<div class="codeblock" data-lang="bash"><pre><code>g++ -std=c++17 -Wall -Wextra demo.cpp -o demo &amp;&amp; ./demo</code></pre></div>
 <h3 id="221-存储与所有权"><a class="anchor" href="#221-存储与所有权">#</a>2.2.1 存储与所有权</h3>
-<p>原书【代码2.2】用四个成员表示顺序表：<code>T* aList</code>、<code>int maxSize</code>、<code>int curLen</code>、 <code>int position</code>。前三个对应缓冲区、容量、当前长度，现代实现一一对应 （改用 <code>std::size_t</code>，因为「负下标」不该在类型层面存在）。</p>
+<p>原书【代码2.2】用四个成员表示顺序表：<code>T* aList</code>、<code>int maxSize</code>、<code>int curLen</code>、 <code>int position</code>。前三个对应缓冲区、容量、当前长度，教学版一一对应 （改用 <code>std::size_t</code>，因为「负下标」不该在类型层面存在）。</p>
 <p>第四个 <code>position</code> 是个<strong>当前处理位置游标</strong>，配合正文提到的 <code>setPos / setStart / next / prev</code> 用来「依次处理元素」。这个设计今天不能要： 遍历状态一旦住进容器，<code>const</code> 对象就没法遍历（游标要改），两处代码不能同时遍历， 嵌套遍历直接互相踩。本书删掉这个成员，改为提供 <code>begin()/end()</code>， 把遍历状态交回调用方——range-for 因此可以直接用在顺序表上。 （顺带一提：原书那个 <code>position</code>，在书中展示的所有算法里一次都没被用到。）</p>
-<p>与第 3 章一样，缓冲区是<strong>裸指针</strong>加显式五法则。<strong>五法则</strong>指的是：一个类只要自己管着资源， 就必须同时写全<strong>析构函数、拷贝构造、拷贝赋值、移动构造、移动赋值</strong>这五个函数。 少写哪一个，编译器都会替你生成一个「逐成员照抄」的版本；而照抄一个指针成员的结果是 <strong>两个对象指向同一块内存</strong>，各自析构时各释放一次——同一块内存被释放两次，程序行为从此未定义。</p>
+<p>缓冲区是<strong>裸指针</strong>。于是这个类自己管着资源，就必须遵守<strong>三法则</strong>： 一个类只要写了<strong>析构函数、拷贝构造、拷贝赋值</strong>中的任意一个，通常这三个都得写。 理由很直白——你之所以要写析构函数，是因为你在管资源；既然在管资源， 编译器那份「逐成员照抄」的拷贝就一定是错的：照抄一个指针成员的结果是 <strong>两个对象指向同一块内存</strong>，各自析构时各释放一次，同一块内存被释放两次。</p>
 <p>原书 <code>arrList</code> 正是如此：有析构函数，却没有拷贝构造与拷贝赋值。一句普通的 <code>arrList&lt;int&gt; b = a;</code> 就会二次释放——与第 3 章 <code>arrStack</code> 是同一个错误，同一份 ASan 报告可以复现。</p>
-<p>这里用裸指针而不是 <code>std::unique_ptr&lt;T[]&gt;</code>，是因为顺序表的存储管理正是本节的教学内容： 用智能指针时这五个函数编译器生成的就够用，学生看不到它们为什么必须存在。判据见第 2.3.2a 节。</p>
+<p>这里用裸指针而不是 <code>std::unique_ptr&lt;T[]&gt;</code>，是因为顺序表的存储管理正是本节的教学内容： 用智能指针时这几个函数编译器生成的就够用，学生看不到它们为什么必须存在。判据见第 2.3.2a 节。</p>
 <p>另外原书的 <code>clear()</code> 是这样写的：</p>
 <div class="codeblock" data-lang="text"><pre><code>void clear() { delete [] aList; curLen = position = 0; aList = new T[maxSize]; }</code></pre></div>
-<p>释放整块再重新分配。既没必要（把长度归零即可，容量留着复用），也不是异常安全的： 若 <code>new</code> 抛异常，对象就停在「指针已释放、长度已归零」的破碎状态， 之后析构还会再 <code>delete[]</code> 一次。本书的 <code>clear()</code> 是 <code>noexcept</code> 的，只把长度归零。</p>
+<p>释放整块再重新分配。既没必要（把长度归零即可，容量留着复用），也不是异常安全的： 若 <code>new</code> 抛异常，对象就停在「指针已释放、长度已归零」的破碎状态， 之后析构还会再 <code>delete[]</code> 一次。教学版的 <code>clear()</code> 只把长度归零，一行。</p>
 <h3 id="222-顺序表的检索"><a class="anchor" href="#222-顺序表的检索">#</a>2.2.2 顺序表的检索</h3>
-<p>顺序表上的检索分按位置和按内容两类。按位置的检索直接由地址公式算出，O(1)：</p>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/modern.hpp">code/ch02/array_list/modern.hpp#access</a></div><pre><code><span class="c">/// 按下标读取，O(1)。越界抛 std::out_of_range。</span>
-<span class="c">/// 原书 getValue 用「出参 + bool」，越界时打印一行再返回 false。</span>
-[[nodiscard]]
-<span class="k">const</span> T&amp; at(size_type index) <span class="k">const</span> {
-    check_index(index, <span class="s">&quot;ArrayList::at&quot;</span>);
-    <span class="k">return</span> data_[index];
-}
-
-T&amp; at(size_type index) {
-    check_index(index, <span class="s">&quot;ArrayList::at&quot;</span>);
-    <span class="k">return</span> data_[index];
-}
-
-<span class="c">/// 修改指定位置的值。越界抛 std::out_of_range。</span>
-<span class="t">void</span> set(size_type index, <span class="k">const</span> T&amp; value) {
-    check_index(index, <span class="s">&quot;ArrayList::set&quot;</span>);
-    data_[index] = value;
-}</code></pre></div>
+<p>顺序表上的检索分按位置和按内容两类。按位置的检索直接由地址公式算出，O(1)—— 就是上面 <code>at()</code> 和 <code>set()</code> 那几行：先查下标合不合法，然后直接 <code>data_[index]</code>， 没有循环。原书的 <code>getValue</code> 用「出参 + bool」，越界时打印一行再返回 false； 教学版把越界当<strong>错误</strong>处理，抛 <code>std::out_of_range</code>。</p>
 <p>按内容的检索是把待查值与表中元素依次比较，O(n)。这里要专门讲一下<strong>「没找到」怎么告诉调用方</strong>—— 这是全书反复出现的一个问题，第一次遇到值得说透。</p>
 <p>原书【算法2.3】的签名是：</p>
 <div class="codeblock" data-lang="text"><pre><code>bool getPos(int&amp; p, const T value);</code></pre></div>
@@ -326,60 +500,31 @@ if (list.getPos(p, 20)) {    // ← 这一行的判断是必须的
 list.getPos(p, 20);          // 忘了看返回值
 use(p);                      // ← 用的是一个从没被写过的 p</code></pre></div>
 <p><code>p</code> 里是什么？没找到时 <code>getPos</code> 根本没碰它，所以它还是那块内存原来的残留值——可能是 0， 可能是上一次调用留下的旧下标，也可能是任意数字。程序不会崩，只会<strong>默默地按错误的下标继续跑</strong>。 这类 bug 极难查，因为出错的地方和崩溃的地方往往隔着很远。</p>
-<p>现代写法把这两件事合成<strong>一个</strong>返回值：</p>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/modern.hpp">code/ch02/array_list/modern.hpp#find</a></div><pre><code><span class="c">/// 按内容查找，O(n)。找到返回下标，没找到返回 std::nullopt。</span>
-<span class="c">///</span>
-<span class="c">/// 不用原书【算法2.3】的 `bool getPos(int&amp; p, const T value)`：那种写法下</span>
-<span class="c">/// 「没找到」只是一个可以被忽略的 bool，忽略了就会读到从没被写过的 p。</span>
-<span class="c">/// 这里「找没找到」是返回值类型的一部分，取值必须先判断；</span>
-<span class="c">/// 加上 [[nodiscard]]，连丢弃返回值都编译不过。</span>
-[[nodiscard]]
-std::optional&lt;size_type&gt; find(<span class="k">const</span> T&amp; value) <span class="k">const</span> {
-    <span class="k">for</span> (size_type i = <span class="n">0</span>; i &lt; size_; ++i) {
-        <span class="k">if</span> (data_[i] == value) {
-            <span class="k">return</span> i;
-        }
-    }
-    <span class="k">return</span> std::nullopt;
-}</code></pre></div>
+<p>现代写法把这两件事合成<strong>一个</strong>返回值——就是上面 <code>find()</code> 的 <code>std::optional&lt;size_type&gt;</code>：循环体一模一样，差别只在「没找到」怎么表达。</p>
 <p><code>std::optional&lt;size_type&gt;</code> 可以理解成一个「可能装着下标的盒子」：找到了，盒子里是下标； 没找到，盒子是空的（<code>std::nullopt</code>）。关键在于<strong>取值必须先开盒</strong>，而开盒这一步绕不过去：</p>
 <div class="codeblock" data-lang="text"><pre><code>if (auto pos = list.find(20)) {   // 先问盒子空不空
     use(*pos);                     // 确认非空后才取值
 }</code></pre></div>
 <p>对空盒子直接 <code>*</code> 取值是未定义行为，用 <code>.value()</code> 取则会抛 <code>std::bad_optional_access</code>。 两条路都不会像 <code>int p</code> 那样<strong>悄悄给你一个看似正常的垃圾值</strong>。</p>
-<p><code>[[nodiscard]]</code> 再补一道：连返回值都丢掉不用，编译器直接报错。</p>
+<p>工程版还在 <code>find()</code> 上加了一个 <code>[[nodiscard]]</code> 属性，再补一道： 连返回值都丢掉不用，编译器直接报错。</p>
 <div class="codeblock" data-lang="text"><pre><code>$ g++ -std=c++17 -Wall -Wextra -Wpedantic -Werror …
 error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&gt;::find(const T&amp;) const’,
        declared with attribute ‘nodiscard’ [-Werror=unused-result]</code></pre></div>
+<p>教学版没有写这个属性——它是纯粹的工程加固，与顺序表这一节要讲的东西无关。</p>
 <p>一句话概括这个改动：<strong>原来靠调用方自觉，现在靠类型系统和编译器</strong>。「找没找到」这件事 从「一个你可以忽略的 <code>bool</code>」变成了「不处理就取不出数据的盒子」。全书凡是「可能没有结果」 的接口——查找、出栈、取队首——都按这条办。</p>
 <p>（顺带一提，算法2.3 那段按印刷原样是编译不过的：循环写的是 <code>for (i = 0; i &lt; n; i++)</code>， 而 <code>n</code> 从未声明，按上下文应为 <code>curLen</code>。）</p>
 <p>检索的时间代价体现在比较次数上。最好情况是第 1 个元素即为所求，比较 1 次； 最差情况是表中没有该元素，比较 n 次。等概率假设下平均比较次数为</p>
 <div class="math math-display">∑<sub>i<span class="rel">=</span><span class="upr">1</span></sub><sup>n</sup>p<span class="bin">×</span>i<span class="rel">=</span><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den">n</span></span>(<span class="upr">1</span><span class="bin">+</span><span class="upr">2</span><span class="bin">+</span>⋯<span class="bin">+</span>n)<span class="rel">=</span><span class="frac"><span class="num">n<span class="bin">+</span><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span></div>
 <p>即平均需要检查表中一半的元素，时间开销为 O(n)。</p>
 <h3 id="223-顺序表的插入"><a class="anchor" href="#223-顺序表的插入">#</a>2.2.3 顺序表的插入</h3>
-<p>插入要在指定位置腾出一个空位：从表尾起，把 pos 之后的元素逐个右移一位。</p>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/modern.hpp">code/ch02/array_list/modern.hpp#insert</a></div><pre><code><span class="c">/// 在位置 pos 插入元素，pos 可以等于 size()（即追加到表尾）。</span>
-<span class="c">/// 位置非法抛 std::out_of_range；容量不足自动翻倍。</span>
-<span class="c">///</span>
-<span class="c">/// 时间代价仍是 O(n)——pos 之后的元素都要右移一位。这是顺序表的固有代价，</span>
-<span class="c">/// 也是第 2.3 节要拿它和链表对比的地方，没有被&quot;优化&quot;掉。</span>
-<span class="t">void</span> insert(size_type pos, <span class="k">const</span> T&amp; value) {
-    make_gap(pos);
-    data_[pos] = value;
-    ++size_;
-}
-
-<span class="t">void</span> insert(size_type pos, T&amp;&amp; value) {
-    make_gap(pos);
-    data_[pos] = std::move(value);
-    ++size_;
-}
-
-<span class="t">void</span> append(<span class="k">const</span> T&amp; value) { insert(size_, value); }
-<span class="t">void</span> append(T&amp;&amp; value) { insert(size_, std::move(value)); }</code></pre></div>
+<p>插入要在指定位置腾出一个空位：从表尾起，把 pos 之后的元素逐个右移一位。 教学版 <code>insert()</code> 里那个<strong>倒着走</strong>的循环就是在做这件事：</p>
+<div class="codeblock" data-lang="text"><pre><code>for (size_type i = size_; i &gt; pos; --i) {
+    data_[i] = data_[i - 1];
+}</code></pre></div>
+<p>方向不能反。若改成从 pos 起递增地 <code>data_[i + 1] = data_[i]</code>， 第一次搬完就把 <code>data_[pos + 1]</code> 覆盖掉了，后面搬的全是同一个值。</p>
 <p>两处与原书不同：</p>
 <ul>
-<li><strong>容量不足时自动翻倍</strong>，而不是打印 <code>&quot;The list is overflow&quot;</code> 然后返回 false。 扩容策略与第 3 章算法3.3 相同，搬迁判据见 3.1.3 节末（移动赋值是否 <code>noexcept</code>）。</li>
+<li><strong>容量不足时自动翻倍</strong>，而不是打印 <code>&quot;The list is overflow&quot;</code> 然后返回 false。 扩容策略与第 3 章算法3.3 相同。</li>
 <li><strong>位置非法抛 <code>std::out_of_range</code></strong>，而不是打印一行再返回 false。 按公约，可预期的空状态用 <code>optional</code>，真正的错误抛异常——插到表外是错误。</li>
 </ul>
 <p>插入位置 p 处腾空位的过程如下（图 2.2）：p 及其之后的元素整体右移一位， 空出的 p 位置写入新元素。</p>
@@ -415,20 +560,8 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 <p>「摊还」是指：单次操作偶尔很贵，但把总代价分摊到所有操作上之后，每次仍然很便宜。 这里绝大多数插入不触发扩容，偶尔一次翻倍要搬走全部 n 个元素；但两次扩容之间至少发生了 n 次插入，把这一次搬迁分摊下去，每次插入平摊仍是 O(1)。注意它说的是<strong>平均</strong>而不是保证—— 那一次搬迁真的会卡住，对延迟敏感的场合要单独考虑。</p>
 <p>这一点是 2.3 节拿顺序表与链表对比的依据，不能被优化掉。</p>
 <h3 id="224-顺序表的删除"><a class="anchor" href="#224-顺序表的删除">#</a>2.2.4 顺序表的删除</h3>
-<p>删除是插入的镜像：把 pos 之后的元素逐个左移一位。</p>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/modern.hpp">code/ch02/array_list/modern.hpp#remove</a></div><pre><code><span class="c">/// 删除位置 pos 上的元素并返回它。位置非法抛 std::out_of_range。</span>
-<span class="c">///</span>
-<span class="c">/// 空表上删除必然越界，所以不需要原书那句单独的空表检查——</span>
-<span class="c">/// 「表空」在这里不是一种可预期状态，而就是下标非法的一个特例。</span>
-T remove(size_type pos) {
-    check_index(pos, <span class="s">&quot;ArrayList::remove&quot;</span>);
-    T removed = std::move(data_[pos]);
-    <span class="k">for</span> (size_type i = pos; i + <span class="n">1</span> &lt; size_; ++i) {
-        data_[i] = std::move(data_[i + <span class="n">1</span>]);  <span class="c">// 左移一位，O(n)</span>
-    }
-    --size_;
-    <span class="k">return</span> removed;
-}</code></pre></div>
+<p>删除是插入的镜像：把 pos 之后的元素逐个左移一位，这次循环<strong>正着走</strong>。 教学版的 <code>remove()</code> 还多做一件事——先把被删的元素存下来，最后返回给调用方。</p>
+<p>空表上删除必然越界，所以不需要原书那句单独的空表检查： 「表空」在这里不是一种可预期状态，而就是下标非法的一个特例。</p>
 <p>删除位置 p 上的元素后，其后的元素整体左移一位（图 2.3）：</p>
 <p>删除前：</p>
 <div class="table-wrap"><table><thead><tr>
@@ -481,6 +614,92 @@ T remove(size_type pos) {
 <p>图 2.3 顺序表元素删除示意图</p>
 <p>原书【算法2.5】的函数名是 <code>delete</code>——C++ 关键字，编译不过；本书叫 <code>remove</code>。 另外它返回 <code>bool</code>，被删掉的值就此丢失；这里把它返回给调用方， 「删除并取用」不必先 <code>getValue</code> 再 <code>delete</code> 两步走。</p>
 <p>删除的时间代价分析与插入相同，平均为 O(n)。</p>
+<h3 id="225-进阶选读从教学版到工程版"><a class="anchor" href="#225-进阶选读从教学版到工程版">#</a>2.2.5 进阶（选读）：从教学版到工程版</h3>
+<p><strong>这一节可以整节跳过。</strong> 上面那份教学版是<strong>正确</strong>的，跑得起来，也经得起 AddressSanitizer 检查。这一节讲的是把它变成一个<strong>工业级容器</strong>还要补哪些东西。 等你哪天要写自己的容器时再回来读。工程版在 <code>code/ch02/array_list/modern.hpp</code>，与教学版一样进闸门、一样双档编译运行。</p>
+<h4 id="一三法则补成五法则移动语义"><a class="anchor" href="#一三法则补成五法则移动语义">#</a>一、三法则补成五法则：移动语义</h4>
+<p>教学版把一个临时表赋给别人时，会老老实实深拷贝一遍——而那个临时对象下一行就要销毁， 这次拷贝纯属浪费。工程版补上<strong>移动构造</strong>与<strong>移动赋值</strong>：直接把指针「偷」过来， 再把对方置空，O(1) 完事。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/modern.hpp">code/ch02/array_list/modern.hpp#insert</a></div><pre><code><span class="c">/// 在位置 pos 插入元素，pos 可以等于 size()（即追加到表尾）。</span>
+<span class="c">/// 位置非法抛 std::out_of_range；容量不足自动翻倍。</span>
+<span class="c">///</span>
+<span class="c">/// 时间代价仍是 O(n)——pos 之后的元素都要右移一位。这是顺序表的固有代价，</span>
+<span class="c">/// 也是第 2.3 节要拿它和链表对比的地方，没有被&quot;优化&quot;掉。</span>
+<span class="t">void</span> insert(size_type pos, <span class="k">const</span> T&amp; value) {
+    make_gap(pos);
+    data_[pos] = value;
+    ++size_;
+}
+
+<span class="t">void</span> insert(size_type pos, T&amp;&amp; value) {
+    make_gap(pos);
+    data_[pos] = std::move(value);
+    ++size_;
+}
+
+<span class="t">void</span> append(<span class="k">const</span> T&amp; value) { insert(size_, value); }
+<span class="t">void</span> append(T&amp;&amp; value) { insert(size_, std::move(value)); }</code></pre></div>
+<p><code>insert</code> 因此有了两个重载：左值走拷贝，右值走 <code>std::move</code>。 <code>append(std::string(&quot;很长的字符串&quot;))</code> 于是不再复制那串字符，只搬指针。</p>
+<h4 id="二扩容中途抛异常强异常保证"><a class="anchor" href="#二扩容中途抛异常强异常保证">#</a>二、扩容中途抛异常：强异常保证</h4>
+<p>教学版的 <code>grow()</code> 是「申请 → 搬 → 释放旧的」三步。它对 <code>int</code>、<code>std::string</code> 这类元素完全够用，但如果某个元素的拷贝<strong>中途抛了异常</strong>，新申请的 <code>fresh</code> 就漏掉了。 工程版把这一段包进 <code>try/catch</code>，并保证失败时原表<strong>原封不动</strong>——这叫<strong>强异常保证</strong>： 一个操作要么完全成功，要么像没发生过一样。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/modern.hpp">code/ch02/array_list/modern.hpp#grow</a></div><pre><code><span class="t">void</span> ensure_capacity() {
+    <span class="k">if</span> (size_ &lt; capacity_) {
+        <span class="k">return</span>;
+    }
+    <span class="k">constexpr</span> size_type kMax = std::numeric_limits&lt;size_type&gt;::max();
+    <span class="k">if</span> (capacity_ &gt; kMax / <span class="n">2</span>) {
+        <span class="k">throw</span> std::overflow_error(<span class="s">&quot;ArrayList: 容量翻倍会溢出&quot;</span>);
+    }
+    <span class="k">const</span> size_type next = capacity_ == <span class="n">0</span> ? kInitialCapacity : capacity_ * <span class="n">2</span>;
+    T* fresh = <span class="k">new</span> T[next];
+    <span class="k">try</span> {
+        <span class="k">for</span> (size_type i = <span class="n">0</span>; i &lt; size_; ++i) {
+            <span class="c">// 判据同第 3 章（DECISION_LOG D-005）：看的是**移动赋值**抛不抛，</span>
+            <span class="c">// 不是 std::move_if_noexcept 检查的移动构造。两者可以不同，</span>
+            <span class="c">// 用错会让搬到一半的失败把原表掏空。</span>
+            <span class="k">if</span> <span class="k">constexpr</span> (std::is_nothrow_move_assignable&lt;T&gt;::value) {
+                fresh[i] = std::move(data_[i]);
+            } <span class="k">else</span> {
+                fresh[i] = data_[i];
+            }
+        }
+    } <span class="k">catch</span> (...) {
+        <span class="k">delete</span>[] fresh;
+        <span class="k">throw</span>;
+    }
+    <span class="k">delete</span>[] data_;
+    data_ = fresh;
+    capacity_ = next;
+}</code></pre></div>
+<p>搬迁到底用移动还是拷贝，判据必须落在<strong>实际执行的那个操作</strong>（移动赋值）上， 而不是惯用的 <code>std::move_if_noexcept</code>（它看的是移动<strong>构造</strong>）。 这个坑第 3 章 3.1.2a 有完整的复现与解释，此处不重复。</p>
+<h4 id="三编译期的类型约束"><a class="anchor" href="#三编译期的类型约束">#</a>三、编译期的类型约束</h4>
+<p>工程版类头上有四条 <code>static_assert</code>，在编译期检查放进来的 <code>T</code> 合不合格： 必须能默认构造（<code>new T[n]</code> 会构造整块槽位）、必须能移动赋值、 不可拷贝的 <code>T</code> 必须能无异常移动赋值、不能是引用类型。</p>
+<p>写在类里而不是文档里，是因为<strong>编译期报错永远比运行期谜案便宜</strong>。 教学版没有它们：<code>T</code> 不合格时报错发生在模板实例化的深处，信息难看，但同样报错。 这是可读性与报错质量之间的一次交换，教学版选了前者。</p>
+<h4 id="四其它工程细节"><a class="anchor" href="#四其它工程细节">#</a>四、其它工程细节</h4>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">工程版</th>
+<th style="text-align:left">教学版</th>
+<th style="text-align:left">差在哪</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><code>check_index()</code> / <code>make_gap()</code> 抽成私有辅助函数</td>
+<td style="text-align:left">检查写在每个函数里</td>
+<td style="text-align:left">少一层跳转，读者不必来回翻</td>
+</tr>
+<tr>
+<td style="text-align:left">查询函数标 <code>[[nodiscard]]</code> 与 <code>noexcept</code></td>
+<td style="text-align:left">都不标</td>
+<td style="text-align:left">前者拦住「忘了看返回值」，后者让标准库能查询这个承诺</td>
+</tr>
+<tr>
+<td style="text-align:left">放在 <code>namespace dsa</code> 里</td>
+<td style="text-align:left">无命名空间</td>
+<td style="text-align:left">真实项目要防名字冲突</td>
+</tr>
+<tr>
+<td style="text-align:left">自由函数 <code>swap(a, b)</code></td>
+<td style="text-align:left">无</td>
+<td style="text-align:left">ADL 找得到，标准库算法会用</td>
+</tr>
+</tbody></table></div>
 <h2 id="与原书的对照"><a class="anchor" href="#与原书的对照">#</a>与原书的对照</h2>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">原书</th>
@@ -815,7 +1034,7 @@ Node* insert_before(Node* pos, U&amp;&amp; value) {
 </ol>
 <div class="pagenav"><a href="ch01-adt.html"><span class="dir">← 上一篇</span>第1章 概论</a><a href="ch03-stack.html" style="text-align:right"><span class="dir">下一篇 →</span>第3章 栈与队列</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#21-线性表的概念">2.1 线性表的概念</a><a href="#22-顺序表">2.2 顺序表</a><a href="#221-存储与所有权" class="sub">2.2.1 存储与所有权</a><a href="#222-顺序表的检索" class="sub">2.2.2 顺序表的检索</a><a href="#223-顺序表的插入" class="sub">2.2.3 顺序表的插入</a><a href="#224-顺序表的删除" class="sub">2.2.4 顺序表的删除</a><a href="#与原书的对照">与原书的对照</a><a href="#23-链表">2.3 链表</a><a href="#231-单链结点与头结点" class="sub">2.3.1 单链结点与头结点</a><a href="#232-构析与循链定位" class="sub">2.3.2 构析与循链定位</a><a href="#232a-所有权工具怎么选" class="sub">2.3.2a 所有权工具怎么选</a><a href="#233-插入与删除" class="sub">2.3.3 插入与删除</a><a href="#234-双链结点" class="sub">2.3.4 双链结点</a><a href="#24-线性表实现方法的比较">2.4 线性表实现方法的比较</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#21-线性表的概念">2.1 线性表的概念</a><a href="#22-顺序表">2.2 顺序表</a><a href="#教学版完整实现" class="sub">教学版：完整实现</a><a href="#221-存储与所有权" class="sub">2.2.1 存储与所有权</a><a href="#222-顺序表的检索" class="sub">2.2.2 顺序表的检索</a><a href="#223-顺序表的插入" class="sub">2.2.3 顺序表的插入</a><a href="#224-顺序表的删除" class="sub">2.2.4 顺序表的删除</a><a href="#225-进阶选读从教学版到工程版" class="sub">2.2.5 进阶（选读）：从教学版到工程版</a><a href="#与原书的对照">与原书的对照</a><a href="#23-链表">2.3 链表</a><a href="#231-单链结点与头结点" class="sub">2.3.1 单链结点与头结点</a><a href="#232-构析与循链定位" class="sub">2.3.2 构析与循链定位</a><a href="#232a-所有权工具怎么选" class="sub">2.3.2a 所有权工具怎么选</a><a href="#233-插入与删除" class="sub">2.3.3 插入与删除</a><a href="#234-双链结点" class="sub">2.3.4 双链结点</a><a href="#24-线性表实现方法的比较">2.4 线性表实现方法的比较</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch02-linear-list.md</code> 生成

@@ -4,7 +4,8 @@
 链表用链接保存相邻关系，能在已知结点位置 O(1) 插入或删除。关键是区分「按位置找元素」和
 「已知结点后改链接」这两类操作。
 
-源码：[顺序表](../code/ch02/array_list/modern.hpp)、
+源码：[顺序表·教学版](../code/ch02/array_list/teaching.hpp)、
+[顺序表·工程版](../code/ch02/array_list/modern.hpp)、
 [顺序表示例](../code/ch02/array_list/demo.cpp)、
 [链表](../code/ch02/linked_list/modern.hpp)、
 [链表示例](../code/ch02/linked_list/demo.cpp)。
@@ -12,23 +13,32 @@
 ## 先跑一遍
 
 ```cpp file=code/ch02/array_list/demo.cpp
-#include "modern.hpp"
+// 第 2 章「先跑一遍」：用教学版 ArrayList 走一遍 append / insert / find / remove。
+// 编译运行：
+//   g++ -std=c++17 -I code/ch02/array_list code/ch02/array_list/demo.cpp -o demo && ./demo
+#include "teaching.hpp"
 
 #include <iostream>
 
 int main() {
-    dsa::ArrayList<int> values;
+    ArrayList<int> values;
     values.append(10);
     values.append(30);
     values.insert(1, 20);
+
     std::cout << "顺序表:";
-    for (std::size_t index = 0; index < values.size(); ++index) {
-        std::cout << ' ' << values.at(index);
+    for (int value : values) {   // 有 begin()/end()，range-for 直接可用
+        std::cout << ' ' << value;
     }
-    std::cout << "\n查找 20 的下标: " << *values.find(20) << '\n';
+
+    // find 返回 optional：有值才解引用
+    if (auto pos = values.find(20)) {
+        std::cout << "\n查找 20 的下标: " << *pos << '\n';
+    }
+
     std::cout << "删除位置 1 得到 " << values.remove(1) << "，剩余:";
-    for (std::size_t index = 0; index < values.size(); ++index) {
-        std::cout << ' ' << values.at(index);
+    for (int value : values) {
+        std::cout << ' ' << value;
     }
     std::cout << '\n';
 }
@@ -116,20 +126,16 @@ append 之后尾元素是 30
 
 本书把这组运算直接定义在 `ArrayList<T>` 上，不再另设一个基类——
 理由与第 3 章相同：那样的空基类给不了多态，却会带来非虚析构的未定义行为。
-底层 `new T[n]` 会默认构造整块槽位，所以 `T` 必须能默认构造。这句话写在正文里即可。
+要定下来的是**这张表**：
 
-```cpp file=code/ch02/array_list/modern.hpp#class-head
-/// 顺序表（按顺序方式存储的线性表，又称向量）。
-///
-/// 与原书 arrList 的差别：容量不足时自动翻倍，而不是打印 "The list is overflow"
-/// 然后返回 false；位置非法抛 std::out_of_range，而不是打印一行再返回 false；
-/// 查找返回 std::optional<size_type>，而不是「出参 + bool」双通道。
-template <typename T>
-class ArrayList {
-public:
-    using value_type = T;
-    using size_type = std::size_t;
-```
+| 运算 | 含义 | 时间代价 |
+| --- | --- | --- |
+| `at(i)` / `set(i, x)` | 按下标取值、改值 | O(1) |
+| `find(x)` | 按内容查位置；找不到返回「没有」 | O(n) |
+| `insert(i, x)` | 在位置 i 插入 | O(n) |
+| `append(x)` | 在表尾追加 | 摊还 O(1) |
+| `remove(i)` | 删除位置 i 上的元素并把它带回来 | O(n) |
+| `size()` / `empty()` / `clear()` | 长度、判空、置空 | O(1) |
 
 ## 2.2 顺序表
 
@@ -158,10 +164,179 @@ $$\mathrm{loc}(k_i) = b + i \times L$$
 
 图 2.1 顺序表的示意图
 
+### 教学版：完整实现
+
+下面是一份**完整的、能直接编译运行的**顺序表。一个文件、一个类，没有省略号。
+它保留原书【代码2.2】【算法2.3】【算法2.4】【算法2.5】要教的全部内容——
+连续存储、按下标 O(1) 随机存取、插入/删除要搬 O(n) 个元素——只把原书那几处
+编译不过或会崩的写法换掉。后面 2.2.1–2.2.4 各节就是把它拆开逐段讲。
+
+```cpp file=code/ch02/array_list/teaching.hpp
+// 顺序表 ArrayList —— 教学版。
+//
+// 一个文件、一个类、能直接编译运行，给「第一次读这一节」的人看。
+// 它保留原书【代码2.1】【代码2.2】【算法2.3】【算法2.4】【算法2.5】要教的全部内容——
+// 连续存储、按下标 O(1) 随机存取、插入/删除要搬 O(n) 个元素——
+// 只把原书那几处编译不过或会崩的写法换掉。
+//
+// 与 modern.hpp（工程版）的分工：
+//   教学版  遵守**三法则**（析构 + 拷贝构造 + 拷贝赋值），正确，但拷贝多一点；
+//   工程版  在此之上补齐移动语义、强异常保证、编译期类型约束。
+// 两份都在闸门里真编译真运行。先读这一份，2.2.5「进阶（选读）」再读那一份。
+#pragma once
+
+#include <cstddef>
+#include <optional>
+#include <stdexcept>
+
+template <typename T>
+class ArrayList {
+public:
+    using value_type = T;
+    using size_type = std::size_t;
+
+    explicit ArrayList(size_type initial_capacity = 8)
+        : data_(new T[initial_capacity]), capacity_(initial_capacity), size_(0) {}
+
+    ~ArrayList() { delete[] data_; }
+
+    // 三法则：自己管着 new 出来的数组，就得自己写拷贝构造和拷贝赋值。
+    // 不写的话编译器会照抄指针，两个表指向同一块内存，各析构一次 → 二次释放。
+    ArrayList(const ArrayList& other)
+        : data_(new T[other.capacity_]), capacity_(other.capacity_), size_(other.size_) {
+        for (size_type i = 0; i < size_; ++i) {
+            data_[i] = other.data_[i];
+        }
+    }
+
+    ArrayList& operator=(const ArrayList& other) {
+        if (this == &other) {
+            return *this;
+        }
+        T* fresh = new T[other.capacity_];
+        for (size_type i = 0; i < other.size_; ++i) {
+            fresh[i] = other.data_[i];
+        }
+        delete[] data_;
+        data_ = fresh;
+        capacity_ = other.capacity_;
+        size_ = other.size_;
+        return *this;
+    }
+
+    bool empty() const { return size_ == 0; }
+    size_type size() const { return size_; }
+    size_type capacity() const { return capacity_; }
+
+    // 清空只把长度归零，已经申请的数组留着复用。
+    void clear() { size_ = 0; }
+
+    // 按下标读取，O(1)——这是顺序表相对链表的看家本领。
+    // 下标非法是**调用方的错误**，不是可预期状态，所以抛异常而不是返回 optional。
+    const T& at(size_type index) const {
+        if (index >= size_) {
+            throw std::out_of_range("ArrayList::at: 下标越界");
+        }
+        return data_[index];
+    }
+
+    T& at(size_type index) {
+        if (index >= size_) {
+            throw std::out_of_range("ArrayList::at: 下标越界");
+        }
+        return data_[index];
+    }
+
+    void set(size_type index, const T& value) {
+        if (index >= size_) {
+            throw std::out_of_range("ArrayList::set: 下标越界");
+        }
+        data_[index] = value;
+    }
+
+    // 按内容查找，O(n)。找到返回下标，没找到返回空 optional。
+    // 原书【算法2.3】用 `bool getPos(int& p, const T value)`：忘了看返回值，
+    // 就会读到一个从没被写过的 p。这里「找没找到」是返回值类型的一部分。
+    std::optional<size_type> find(const T& value) const {
+        for (size_type i = 0; i < size_; ++i) {
+            if (data_[i] == value) {
+                return i;
+            }
+        }
+        return std::nullopt;
+    }
+
+    // 在位置 pos 插入，pos 可以等于 size()（追加到表尾）。
+    // 代价 O(n)：pos 之后的元素都要右移一位。这正是顺序表与链表要对比的地方。
+    void insert(size_type pos, const T& value) {
+        if (pos > size_) {
+            throw std::out_of_range("ArrayList::insert: 插入位置非法");
+        }
+        if (size_ == capacity_) {
+            grow();
+        }
+        for (size_type i = size_; i > pos; --i) {
+            data_[i] = data_[i - 1];   // 从后往前搬，否则会自己覆盖自己
+        }
+        data_[pos] = value;
+        ++size_;
+    }
+
+    void append(const T& value) { insert(size_, value); }
+
+    // 删除 pos 上的元素并返回它。代价同样是 O(n)：后面的元素都要左移一位。
+    T remove(size_type pos) {
+        if (pos >= size_) {
+            throw std::out_of_range("ArrayList::remove: 下标越界");
+        }
+        T removed = data_[pos];
+        for (size_type i = pos; i + 1 < size_; ++i) {
+            data_[i] = data_[i + 1];
+        }
+        --size_;
+        return removed;
+    }
+
+    // 有了 begin/end，range-for 就能用了：for (auto& x : list) { ... }
+    //
+    // 原书是在类里放一个 `int position` 游标，配 setPos/next/prev 来依次处理元素。
+    // 那种设计把「遍历到哪了」这个状态塞进了容器：const 对象没法遍历，
+    // 两处代码不能同时遍历，嵌套遍历直接互相踩。游标挪到容器外面，这些问题一起消失。
+    T* begin() { return data_; }
+    T* end() { return data_ + size_; }
+    const T* begin() const { return data_; }
+    const T* end() const { return data_ + size_; }
+
+private:
+    // 扩容：申请两倍大的新数组，搬过去，再释放旧的。
+    // 翻倍而不是加一，才能让 append 的摊还代价保持 O(1)。
+    void grow() {
+        size_type next = (capacity_ == 0) ? 1 : capacity_ * 2;
+        T* fresh = new T[next];
+        for (size_type i = 0; i < size_; ++i) {
+            fresh[i] = data_[i];
+        }
+        delete[] data_;       // 先搬完再释放旧的，顺序反了就会读到已释放的内存
+        data_ = fresh;
+        capacity_ = next;
+    }
+
+    T* data_;             // 指向底层数组
+    size_type capacity_;  // 数组能放多少个
+    size_type size_;      // 现在放了几个
+};
+```
+
+编译运行：
+
+```bash
+g++ -std=c++17 -Wall -Wextra demo.cpp -o demo && ./demo
+```
+
 ### 2.2.1 存储与所有权
 
 原书【代码2.2】用四个成员表示顺序表：`T* aList`、`int maxSize`、`int curLen`、
-`int position`。前三个对应缓冲区、容量、当前长度，现代实现一一对应
+`int position`。前三个对应缓冲区、容量、当前长度，教学版一一对应
 （改用 `std::size_t`，因为「负下标」不该在类型层面存在）。
 
 第四个 `position` 是个**当前处理位置游标**，配合正文提到的
@@ -171,16 +346,17 @@ $$\mathrm{loc}(k_i) = b + i \times L$$
 把遍历状态交回调用方——range-for 因此可以直接用在顺序表上。
 （顺带一提：原书那个 `position`，在书中展示的所有算法里一次都没被用到。）
 
-与第 3 章一样，缓冲区是**裸指针**加显式五法则。**五法则**指的是：一个类只要自己管着资源，
-就必须同时写全**析构函数、拷贝构造、拷贝赋值、移动构造、移动赋值**这五个函数。
-少写哪一个，编译器都会替你生成一个「逐成员照抄」的版本；而照抄一个指针成员的结果是
-**两个对象指向同一块内存**，各自析构时各释放一次——同一块内存被释放两次，程序行为从此未定义。
+缓冲区是**裸指针**。于是这个类自己管着资源，就必须遵守**三法则**：
+一个类只要写了**析构函数、拷贝构造、拷贝赋值**中的任意一个，通常这三个都得写。
+理由很直白——你之所以要写析构函数，是因为你在管资源；既然在管资源，
+编译器那份「逐成员照抄」的拷贝就一定是错的：照抄一个指针成员的结果是
+**两个对象指向同一块内存**，各自析构时各释放一次，同一块内存被释放两次。
 
 原书 `arrList` 正是如此：有析构函数，却没有拷贝构造与拷贝赋值。一句普通的
 `arrList<int> b = a;` 就会二次释放——与第 3 章 `arrStack` 是同一个错误，同一份 ASan 报告可以复现。
 
 这里用裸指针而不是 `std::unique_ptr<T[]>`，是因为顺序表的存储管理正是本节的教学内容：
-用智能指针时这五个函数编译器生成的就够用，学生看不到它们为什么必须存在。判据见第 2.3.2a 节。
+用智能指针时这几个函数编译器生成的就够用，学生看不到它们为什么必须存在。判据见第 2.3.2a 节。
 
 另外原书的 `clear()` 是这样写的：
 
@@ -190,32 +366,14 @@ void clear() { delete [] aList; curLen = position = 0; aList = new T[maxSize]; }
 
 释放整块再重新分配。既没必要（把长度归零即可，容量留着复用），也不是异常安全的：
 若 `new` 抛异常，对象就停在「指针已释放、长度已归零」的破碎状态，
-之后析构还会再 `delete[]` 一次。本书的 `clear()` 是 `noexcept` 的，只把长度归零。
+之后析构还会再 `delete[]` 一次。教学版的 `clear()` 只把长度归零，一行。
 
 ### 2.2.2 顺序表的检索
 
-顺序表上的检索分按位置和按内容两类。按位置的检索直接由地址公式算出，O(1)：
-
-```cpp file=code/ch02/array_list/modern.hpp#access
-/// 按下标读取，O(1)。越界抛 std::out_of_range。
-/// 原书 getValue 用「出参 + bool」，越界时打印一行再返回 false。
-[[nodiscard]]
-const T& at(size_type index) const {
-    check_index(index, "ArrayList::at");
-    return data_[index];
-}
-
-T& at(size_type index) {
-    check_index(index, "ArrayList::at");
-    return data_[index];
-}
-
-/// 修改指定位置的值。越界抛 std::out_of_range。
-void set(size_type index, const T& value) {
-    check_index(index, "ArrayList::set");
-    data_[index] = value;
-}
-```
+顺序表上的检索分按位置和按内容两类。按位置的检索直接由地址公式算出，O(1)——
+就是上面 `at()` 和 `set()` 那几行：先查下标合不合法，然后直接 `data_[index]`，
+没有循环。原书的 `getValue` 用「出参 + bool」，越界时打印一行再返回 false；
+教学版把越界当**错误**处理，抛 `std::out_of_range`。
 
 按内容的检索是把待查值与表中元素依次比较，O(n)。这里要专门讲一下**「没找到」怎么告诉调用方**——
 这是全书反复出现的一个问题，第一次遇到值得说透。
@@ -251,25 +409,8 @@ use(p);                      // ← 用的是一个从没被写过的 p
 可能是上一次调用留下的旧下标，也可能是任意数字。程序不会崩，只会**默默地按错误的下标继续跑**。
 这类 bug 极难查，因为出错的地方和崩溃的地方往往隔着很远。
 
-现代写法把这两件事合成**一个**返回值：
-
-```cpp file=code/ch02/array_list/modern.hpp#find
-/// 按内容查找，O(n)。找到返回下标，没找到返回 std::nullopt。
-///
-/// 不用原书【算法2.3】的 `bool getPos(int& p, const T value)`：那种写法下
-/// 「没找到」只是一个可以被忽略的 bool，忽略了就会读到从没被写过的 p。
-/// 这里「找没找到」是返回值类型的一部分，取值必须先判断；
-/// 加上 [[nodiscard]]，连丢弃返回值都编译不过。
-[[nodiscard]]
-std::optional<size_type> find(const T& value) const {
-    for (size_type i = 0; i < size_; ++i) {
-        if (data_[i] == value) {
-            return i;
-        }
-    }
-    return std::nullopt;
-}
-```
+现代写法把这两件事合成**一个**返回值——就是上面 `find()` 的
+`std::optional<size_type>`：循环体一模一样，差别只在「没找到」怎么表达。
 
 `std::optional<size_type>` 可以理解成一个「可能装着下标的盒子」：找到了，盒子里是下标；
 没找到，盒子是空的（`std::nullopt`）。关键在于**取值必须先开盒**，而开盒这一步绕不过去：
@@ -283,13 +424,16 @@ if (auto pos = list.find(20)) {   // 先问盒子空不空
 对空盒子直接 `*` 取值是未定义行为，用 `.value()` 取则会抛 `std::bad_optional_access`。
 两条路都不会像 `int p` 那样**悄悄给你一个看似正常的垃圾值**。
 
-`[[nodiscard]]` 再补一道：连返回值都丢掉不用，编译器直接报错。
+工程版还在 `find()` 上加了一个 `[[nodiscard]]` 属性，再补一道：
+连返回值都丢掉不用，编译器直接报错。
 
 ```text
 $ g++ -std=c++17 -Wall -Wextra -Wpedantic -Werror …
 error: ignoring return value of ‘std::optional<...> dsa::ArrayList<T>::find(const T&) const’,
        declared with attribute ‘nodiscard’ [-Werror=unused-result]
 ```
+
+教学版没有写这个属性——它是纯粹的工程加固，与顺序表这一节要讲的东西无关。
 
 一句话概括这个改动：**原来靠调用方自觉，现在靠类型系统和编译器**。「找没找到」这件事
 从「一个你可以忽略的 `bool`」变成了「不处理就取不出数据的盒子」。全书凡是「可能没有结果」
@@ -308,33 +452,21 @@ $$\sum_{i=1}^{n} p \times i = \frac{1}{n}(1 + 2 + \cdots + n) = \frac{n+1}{2}$$
 ### 2.2.3 顺序表的插入
 
 插入要在指定位置腾出一个空位：从表尾起，把 pos 之后的元素逐个右移一位。
+教学版 `insert()` 里那个**倒着走**的循环就是在做这件事：
 
-```cpp file=code/ch02/array_list/modern.hpp#insert
-/// 在位置 pos 插入元素，pos 可以等于 size()（即追加到表尾）。
-/// 位置非法抛 std::out_of_range；容量不足自动翻倍。
-///
-/// 时间代价仍是 O(n)——pos 之后的元素都要右移一位。这是顺序表的固有代价，
-/// 也是第 2.3 节要拿它和链表对比的地方，没有被"优化"掉。
-void insert(size_type pos, const T& value) {
-    make_gap(pos);
-    data_[pos] = value;
-    ++size_;
+```text
+for (size_type i = size_; i > pos; --i) {
+    data_[i] = data_[i - 1];
 }
-
-void insert(size_type pos, T&& value) {
-    make_gap(pos);
-    data_[pos] = std::move(value);
-    ++size_;
-}
-
-void append(const T& value) { insert(size_, value); }
-void append(T&& value) { insert(size_, std::move(value)); }
 ```
+
+方向不能反。若改成从 pos 起递增地 `data_[i + 1] = data_[i]`，
+第一次搬完就把 `data_[pos + 1]` 覆盖掉了，后面搬的全是同一个值。
 
 两处与原书不同：
 
 - **容量不足时自动翻倍**，而不是打印 `"The list is overflow"` 然后返回 false。
-  扩容策略与第 3 章算法3.3 相同，搬迁判据见 3.1.3 节末（移动赋值是否 `noexcept`）。
+  扩容策略与第 3 章算法3.3 相同。
 - **位置非法抛 `std::out_of_range`**，而不是打印一行再返回 false。
   按公约，可预期的空状态用 `optional`，真正的错误抛异常——插到表外是错误。
 
@@ -364,23 +496,11 @@ n 次插入，把这一次搬迁分摊下去，每次插入平摊仍是 O(1)。�
 
 ### 2.2.4 顺序表的删除
 
-删除是插入的镜像：把 pos 之后的元素逐个左移一位。
+删除是插入的镜像：把 pos 之后的元素逐个左移一位，这次循环**正着走**。
+教学版的 `remove()` 还多做一件事——先把被删的元素存下来，最后返回给调用方。
 
-```cpp file=code/ch02/array_list/modern.hpp#remove
-/// 删除位置 pos 上的元素并返回它。位置非法抛 std::out_of_range。
-///
-/// 空表上删除必然越界，所以不需要原书那句单独的空表检查——
-/// 「表空」在这里不是一种可预期状态，而就是下标非法的一个特例。
-T remove(size_type pos) {
-    check_index(pos, "ArrayList::remove");
-    T removed = std::move(data_[pos]);
-    for (size_type i = pos; i + 1 < size_; ++i) {
-        data_[i] = std::move(data_[i + 1]);  // 左移一位，O(n)
-    }
-    --size_;
-    return removed;
-}
-```
+空表上删除必然越界，所以不需要原书那句单独的空表检查：
+「表空」在这里不是一种可预期状态，而就是下标非法的一个特例。
 
 删除位置 p 上的元素后，其后的元素整体左移一位（图 2.3）：
 
@@ -403,6 +523,106 @@ T remove(size_type pos) {
 「删除并取用」不必先 `getValue` 再 `delete` 两步走。
 
 删除的时间代价分析与插入相同，平均为 O(n)。
+
+### 2.2.5 进阶（选读）：从教学版到工程版
+
+**这一节可以整节跳过。** 上面那份教学版是**正确**的，跑得起来，也经得起
+AddressSanitizer 检查。这一节讲的是把它变成一个**工业级容器**还要补哪些东西。
+等你哪天要写自己的容器时再回来读。工程版在
+`code/ch02/array_list/modern.hpp`，与教学版一样进闸门、一样双档编译运行。
+
+#### 一、三法则补成五法则：移动语义
+
+教学版把一个临时表赋给别人时，会老老实实深拷贝一遍——而那个临时对象下一行就要销毁，
+这次拷贝纯属浪费。工程版补上**移动构造**与**移动赋值**：直接把指针「偷」过来，
+再把对方置空，O(1) 完事。
+
+```cpp file=code/ch02/array_list/modern.hpp#insert
+/// 在位置 pos 插入元素，pos 可以等于 size()（即追加到表尾）。
+/// 位置非法抛 std::out_of_range；容量不足自动翻倍。
+///
+/// 时间代价仍是 O(n)——pos 之后的元素都要右移一位。这是顺序表的固有代价，
+/// 也是第 2.3 节要拿它和链表对比的地方，没有被"优化"掉。
+void insert(size_type pos, const T& value) {
+    make_gap(pos);
+    data_[pos] = value;
+    ++size_;
+}
+
+void insert(size_type pos, T&& value) {
+    make_gap(pos);
+    data_[pos] = std::move(value);
+    ++size_;
+}
+
+void append(const T& value) { insert(size_, value); }
+void append(T&& value) { insert(size_, std::move(value)); }
+```
+
+`insert` 因此有了两个重载：左值走拷贝，右值走 `std::move`。
+`append(std::string("很长的字符串"))` 于是不再复制那串字符，只搬指针。
+
+#### 二、扩容中途抛异常：强异常保证
+
+教学版的 `grow()` 是「申请 → 搬 → 释放旧的」三步。它对 `int`、`std::string`
+这类元素完全够用，但如果某个元素的拷贝**中途抛了异常**，新申请的 `fresh` 就漏掉了。
+工程版把这一段包进 `try/catch`，并保证失败时原表**原封不动**——这叫**强异常保证**：
+一个操作要么完全成功，要么像没发生过一样。
+
+```cpp file=code/ch02/array_list/modern.hpp#grow
+void ensure_capacity() {
+    if (size_ < capacity_) {
+        return;
+    }
+    constexpr size_type kMax = std::numeric_limits<size_type>::max();
+    if (capacity_ > kMax / 2) {
+        throw std::overflow_error("ArrayList: 容量翻倍会溢出");
+    }
+    const size_type next = capacity_ == 0 ? kInitialCapacity : capacity_ * 2;
+    T* fresh = new T[next];
+    try {
+        for (size_type i = 0; i < size_; ++i) {
+            // 判据同第 3 章（DECISION_LOG D-005）：看的是**移动赋值**抛不抛，
+            // 不是 std::move_if_noexcept 检查的移动构造。两者可以不同，
+            // 用错会让搬到一半的失败把原表掏空。
+            if constexpr (std::is_nothrow_move_assignable<T>::value) {
+                fresh[i] = std::move(data_[i]);
+            } else {
+                fresh[i] = data_[i];
+            }
+        }
+    } catch (...) {
+        delete[] fresh;
+        throw;
+    }
+    delete[] data_;
+    data_ = fresh;
+    capacity_ = next;
+}
+```
+
+搬迁到底用移动还是拷贝，判据必须落在**实际执行的那个操作**（移动赋值）上，
+而不是惯用的 `std::move_if_noexcept`（它看的是移动**构造**）。
+这个坑第 3 章 3.1.2a 有完整的复现与解释，此处不重复。
+
+#### 三、编译期的类型约束
+
+工程版类头上有四条 `static_assert`，在编译期检查放进来的 `T` 合不合格：
+必须能默认构造（`new T[n]` 会构造整块槽位）、必须能移动赋值、
+不可拷贝的 `T` 必须能无异常移动赋值、不能是引用类型。
+
+写在类里而不是文档里，是因为**编译期报错永远比运行期谜案便宜**。
+教学版没有它们：`T` 不合格时报错发生在模板实例化的深处，信息难看，但同样报错。
+这是可读性与报错质量之间的一次交换，教学版选了前者。
+
+#### 四、其它工程细节
+
+| 工程版 | 教学版 | 差在哪 |
+| --- | --- | --- |
+| `check_index()` / `make_gap()` 抽成私有辅助函数 | 检查写在每个函数里 | 少一层跳转，读者不必来回翻 |
+| 查询函数标 `[[nodiscard]]` 与 `noexcept` | 都不标 | 前者拦住「忘了看返回值」，后者让标准库能查询这个承诺 |
+| 放在 `namespace dsa` 里 | 无命名空间 | 真实项目要防名字冲突 |
+| 自由函数 `swap(a, b)` | 无 | ADL 找得到，标准库算法会用 |
 
 ## 与原书的对照
 

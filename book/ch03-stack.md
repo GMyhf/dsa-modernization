@@ -3,7 +3,8 @@
 栈是「最后放入、最先取出」，适合递归调用、括号匹配和表达式计算；队列是「先放入、先取出」，
 适合排队服务和广度优先搜索。空栈、空队列是正常状态，现代接口以 `std::optional` 返回。
 
-源码：[顺序栈](../code/ch03/array_stack/modern.hpp)、
+源码：[顺序栈·教学版](../code/ch03/array_stack/teaching.hpp)、
+[顺序栈·工程版](../code/ch03/array_stack/modern.hpp)、
 [栈示例](../code/ch03/array_stack/demo.cpp)、
 [链式栈](../code/ch03/linked_stack/modern.hpp)、
 [表达式求值](../code/ch03/expression_eval/modern.hpp)、
@@ -14,16 +15,24 @@
 ## 先跑一遍
 
 ```cpp file=code/ch03/array_stack/demo.cpp
-#include "modern.hpp"
+// 第 3 章「先跑一遍」：用教学版 ArrayStack 走一遍 push / top / pop。
+// 编译运行：
+//   g++ -std=c++17 -I code/ch03/array_stack code/ch03/array_stack/demo.cpp -o demo && ./demo
+#include "teaching.hpp"
 
 #include <iostream>
 
 int main() {
-    dsa::ArrayStack<int> stack;
+    ArrayStack<int> stack;
     stack.push(1);
     stack.push(2);
     stack.push(3);
-    std::cout << "栈顶是 " << *stack.top() << '\n';
+
+    // top() 返回 optional：有值才解引用，空栈不会崩
+    if (auto value = stack.top()) {
+        std::cout << "栈顶是 " << *value << '\n';
+    }
+
     std::cout << "依次弹出:";
     while (auto value = stack.pop()) {
         std::cout << ' ' << *value;
@@ -110,25 +119,20 @@ c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch03/queue \
 
 **抽象数据类型描述的是「一组运算」，不是「一个基类」。** 在 C++ 里，
 模板本身已经承担了这层抽象——`ArrayStack<T>` 提供哪些运算，由它的接口决定，
-不需要继承任何东西。真正需要写下来的是对元素类型 `T` 的要求：底层 `new T[n]` 会把整块槽位都默认构造出来，
-所以 `T` 必须能默认构造。这句话写在正文里即可，不必把四条工程契约印进类头。
+不需要继承任何东西。我们不关心它是否继承自某个 `Stack<T>`，只关心它有没有
+`push`、`pop`、`top` 这几个运算。所以这一节要定下来的是**这张表**：
 
-```cpp file=code/ch03/array_stack/modern.hpp#class-head
-/// 基于数组的栈（后进先出）。
-///
-/// 与原书 arrStack 的差别：容量耗尽时自动翻倍（原书要么溢出报错，要么靠算法3.3
-/// 手工换成扩容版本）；不打印任何东西；空栈上的 pop/top 返回空 optional，
-/// 而不是靠「出参 + bool」双通道返回。
-template <typename T>
-class ArrayStack {
-public:
-    using value_type = T;
-    using size_type = std::size_t;
-```
+| 运算 | 含义 | 时间代价 |
+| --- | --- | --- |
+| `push(x)` | 把 x 压到栈顶 | 摊还 O(1) |
+| `pop()` | 弹出栈顶并把它带回来；空栈返回「没有」 | O(1) |
+| `top()` | 只看栈顶，不弹出；空栈返回「没有」 | O(1) |
+| `empty()` | 栈里还有没有元素 | O(1) |
+| `size()` | 栈里有几个元素 | O(1) |
+| `clear()` | 清空 | O(1) |
 
-底层的 `new T[n]` 会把整块槽位都默认构造出来，所以 `T` 必须可默认构造——
-这是原书 `new T[mSize]` 就有的限制。真正的容器做法是申请未初始化存储再逐个
-placement new，本书还没有走到那一步。扩容时的异常安全见 3.1.2 节末。
+表里有两处「空栈返回『没有』」。这四个字在 C++17 里有一个精确的表达方式，
+下一节的代码就是这么写的。
 
 ### 3.1.2 顺序栈
 
@@ -139,27 +143,203 @@ placement new，本书还没有走到那一步。扩容时的异常安全见 3.1
 一个位置，时间代价为 O(n)。反之，把最后一个元素的位置作为栈顶，新元素添加在表尾、
 出栈也只删除表尾元素，每次操作的时间代价仅为 O(1)。图3.2 所示为按后一种方案实现的栈。
 
-图3.2 顺序栈：下标 0 是栈底，`top_index_` 是元素个数，也是下一个空位。
+图3.2 顺序栈：下标 0 是栈底，`size_` 是元素个数，也是下一个空位。
 
 ```text
 下标     0     1     2     3     4     …
 内容    [A]   [B]   [C]    ?     ?     …
                ▲
-          top_index_ = 3   （栈顶是 C，下一个 push 写到 3）
+            size_ = 3   （栈顶是 C，下一个 push 写到 3）
 ```
 
-### 存储与所有权
+#### 教学版：完整实现
 
-原书【代码3.2】用三个成员表示一个顺序栈：`int mSize`（容量）、`int top`（栈顶位置）、
-`T * st`（裸指针数组）。这套写法有三处在今天必须改：
+下面是一份**完整的、能直接编译运行的**顺序栈。一个文件、一个类，没有省略号，
+没有「此处略去若干行」。它保留原书【代码3.2】【算法3.3】要教的全部内容——
+连续数组、栈顶在表尾、满了就把容量翻倍——只把原书那几处会崩的写法换掉。
+
+```cpp file=code/ch03/array_stack/teaching.hpp
+// 顺序栈 ArrayStack —— 教学版。
+//
+// 这一份是给「第一次读这一节」的人看的：一个文件、一个类、能直接编译运行。
+// 它保留原书【代码3.2】【算法3.3】要教的全部内容——连续数组、栈顶在表尾、
+// 满了就把容量翻倍——只把原书那几处会崩的写法换掉。
+//
+// 与 modern.hpp（工程版）的分工：
+//   教学版  遵守**三法则**（析构 + 拷贝构造 + 拷贝赋值），正确，但拷贝多一点；
+//   工程版  在此之上补齐移动构造/移动赋值、强异常保证、编译期类型约束。
+// 两份都在闸门里真编译真运行。先读这一份，3.1.2a「进阶（选读）」再读那一份。
+#pragma once
+
+#include <cstddef>
+#include <optional>
+
+template <typename T>
+class ArrayStack {
+public:
+    using value_type = T;
+    using size_type = std::size_t;
+
+    // 构造：先要一小块数组。容量不够时会自动翻倍，所以初值给多少都不影响正确性。
+    explicit ArrayStack(size_type initial_capacity = 8)
+        : data_(new T[initial_capacity]), capacity_(initial_capacity), size_(0) {}
+
+    // 析构：数组是 new[] 来的，就得 delete[] 回去。
+    ~ArrayStack() { delete[] data_; }
+
+    // 拷贝构造：**必须自己写**。
+    // 不写的话编译器生成的版本会把 data_ 这根指针照抄一份，于是两个栈指向同一块
+    // 内存，各析构一次 —— 同一块内存被释放两次。原书 arrStack 正是漏了这个。
+    ArrayStack(const ArrayStack& other)
+        : data_(new T[other.capacity_]), capacity_(other.capacity_), size_(other.size_) {
+        for (size_type i = 0; i < size_; ++i) {
+            data_[i] = other.data_[i];
+        }
+    }
+
+    // 拷贝赋值：同理。注意三件事的顺序——先把新数组备好，再释放旧的，最后接管。
+    ArrayStack& operator=(const ArrayStack& other) {
+        if (this == &other) {   // 自己赋值给自己，什么都不用做
+            return *this;
+        }
+        T* fresh = new T[other.capacity_];
+        for (size_type i = 0; i < other.size_; ++i) {
+            fresh[i] = other.data_[i];
+        }
+        delete[] data_;
+        data_ = fresh;
+        capacity_ = other.capacity_;
+        size_ = other.size_;
+        return *this;
+    }
+
+    // 入栈。满了就翻倍，所以不会有「栈满溢出」这回事。
+    void push(const T& value) {
+        if (size_ == capacity_) {
+            grow();
+        }
+        data_[size_] = value;
+        ++size_;
+    }
+
+    // 出栈并把元素带回来。空栈返回空的 optional，不是错误，也不打印任何东西。
+    std::optional<T> pop() {
+        if (empty()) {
+            return std::nullopt;
+        }
+        --size_;
+        return data_[size_];
+    }
+
+    // 只看栈顶，不弹出。空栈同样返回空 optional。
+    std::optional<T> top() const {
+        if (empty()) {
+            return std::nullopt;
+        }
+        return data_[size_ - 1];
+    }
+
+    bool empty() const { return size_ == 0; }
+    size_type size() const { return size_; }
+    size_type capacity() const { return capacity_; }
+
+    // 清空：把长度归零就行，已经申请的数组留着接着用。
+    void clear() { size_ = 0; }
+
+private:
+    // 扩容：申请一块两倍大的，把老元素搬过去，再把老的还回去。
+    // 每个元素在均摊意义下只被搬运常数次，所以 push 的摊还代价仍是 O(1)。
+    void grow() {
+        size_type next = (capacity_ == 0) ? 1 : capacity_ * 2;
+        T* fresh = new T[next];
+        for (size_type i = 0; i < size_; ++i) {
+            fresh[i] = data_[i];
+        }
+        delete[] data_;       // 先搬完再释放旧的，顺序反了就会读到已释放的内存
+        data_ = fresh;
+        capacity_ = next;
+    }
+
+    T* data_;             // 指向底层数组
+    size_type capacity_;  // 数组能放多少个
+    size_type size_;      // 现在放了几个，同时也是下一个空位的下标
+};
+```
+
+把它存成 `teaching.hpp`，配上本章开头那个 `demo.cpp`，一条命令就能跑：
+
+```bash
+g++ -std=c++17 -Wall -Wextra demo.cpp -o demo && ./demo
+```
+
+#### 关键要点
+
+**1. 空栈上的 `pop`/`top` 返回空 `optional`。**
+原书的写法是 `bool pop(T & item)`——用出参带值、用返回值带成败。调用方一旦忘了检查
+返回值，读到的就是那个从没被修改过的 `item`：程序不崩，只是默默按错误数据继续跑。
+`std::optional<T>` 把「有没有值」搬进了**类型**里，取值之前必须先判断。
+**空栈不是错误，是一种可预期的状态**，所以它返回空盒子而不是抛异常；
+真正的错误（参数非法、容量溢出）才抛异常。
+
+**2. 拷贝构造和拷贝赋值必须自己写——这是原书最硬的一处错。**
+原书的 `arrStack` 有析构函数，却没有拷贝构造，也没有拷贝赋值。于是一句
+`arrStack<int> b = a;` 会走编译器生成的拷贝——**把指针照抄一份**，
+之后 `a` 和 `b` 持有**同一根指针**，各析构一次，**同一块内存被释放两次**。
+这类错误的可怕之处在于它安静：`-Wall -Wextra -Wpedantic` 一句警告都不给，
+小数据量下往往也不当场崩。本书用 AddressSanitizer 把它抓了出来，
+报告抄在 `code/ch03/array_stack/legacy.md` 里。
+
+规则叫**三法则**：一个类只要自己写了析构函数、拷贝构造、拷贝赋值中的**任意一个**，
+通常这三个都得写。原因很直白——你之所以要写析构函数，是因为你在管资源；
+既然在管资源，编译器那份「逐成员照抄」的拷贝就一定是错的。
+
+**3. 翻倍扩容让 `push` 的摊还代价保持 O(1)。**
+`grow()` 每次把容量乘 2，而不是加 1。差别不是常数：加 1 的话，push n 个元素总共要搬
+$1+2+\cdots+n = O(n^2)$ 次；翻倍的话，总搬运次数是 $1+2+4+\cdots+n < 2n$，
+平摊到每次 push 就是常数。这就是原书【算法3.3】的策略，一个字都没改。
+
+顺带一提 `grow()` 里那三行的**顺序**：先申请新数组、再搬元素、最后才 `delete[]` 旧的。
+反过来写（先释放再搬）就是读已经还回去的内存，ASan 当场报 `heap-use-after-free`。
+
+**4. `new T[n]` 有一条限制，值得知道。**
+它会把整块槽位**默认构造**出来。所以 `T` 必须能默认构造——一个只有带参构造函数的类
+放不进这个栈。这是原书 `new T[mSize]` 就有的限制，本书的教学版没有改善它。
+标准库容器的做法是先申请**未初始化**的原始内存，push 时再用 placement new
+在指定位置构造对象；那要手写内存对齐和逐个析构，属于另一个话题。
+
+**5. 容器里一个 `cout` 都没有。**
+原书在空栈出栈时直接 `cout << "栈空"`。那样做把一个数据结构和标准输出焊死了：
+它没法在库里复用，提示无法本地化，失败路径也无从测试。**数据结构负责数据结构，
+报错交给调用方。** 本书的测试里有一条专门重定向 `cout`/`cerr` 并断言它们为空。
+
+### 3.1.2a 进阶（选读）：从教学版到工程版
+
+**这一节可以整节跳过。** 上面那份教学版是**正确**的，跑得起来，也经得起
+AddressSanitizer 检查。这一节讲的是把它变成一个**工业级容器**还要补哪些东西——
+移动语义、异常安全、编译期类型约束。等你哪天要写自己的容器时再回来读。
+
+完整的工程版在 `code/ch03/array_stack/modern.hpp`，与教学版一样进闸门、
+一样双档编译运行。下面按主题一段一段拆开看。
+
+#### 一、存储与所有权：把三法则补成五法则
+
+先把原书【代码3.2】的问题列全。它用三个成员表示一个顺序栈：`int mSize`（容量）、
+`int top`（栈顶位置）、`T * st`（裸指针数组）。这套写法有三处在今天必须改：
 
 1. `int top` 与成员函数 `bool top(T&)` **重名**，导致这个类按印刷原样根本编译不过；
 2. 无参构造只设了 `top = -1`，`mSize` 与 `st` 都没初始化，析构时 `delete[]` 一个不确定指针；
 3. 有析构函数却没有拷贝构造与拷贝赋值，一次 `arrStack<int> b = a;` 就会二次释放。
 
 第 2、3 条是未定义行为，编译器开到 `-Wall -Wextra -Wpedantic` 也**一句警告都不给**。
+教学版已经把这三条都修掉了：`size_` 不与任何成员函数重名，三个成员全部有初值，
+三法则写全。
 
-现代实现保留裸指针 `T* data_`——顺序栈的存储管理正是本节要教的内容，
+工程版在这之上再补两个函数——**移动构造**与**移动赋值**，合称**五法则**。
+它们不修正确性，只修性能：教学版把一个临时栈赋给别人时会老老实实深拷贝一遍，
+而那个临时对象下一行就要销毁了，这次拷贝纯属浪费。移动版直接把指针「偷」过来，
+再把对方置空，O(1) 完事。
+
+这里保留裸指针 `T* data_`——顺序栈的存储管理正是本节要教的内容，
 把它换成 `std::unique_ptr<T[]>` 固然更省事，但五法则也就随之退化成走过场
 （编译器生成的版本就够用了）。留着裸指针，这五个函数才是承重的：
 少写一个，AddressSanitizer 立刻能复现出崩溃。
@@ -205,12 +385,13 @@ ArrayStack& operator=(ArrayStack&& other) noexcept {
 拷贝赋值用的是**拷贝并交换**(copy-and-swap)：先构造一个完整副本，再与自身交换。
 它自然地做到了自赋值安全，也在拷贝失败时保证原对象不受影响。
 
-### 出栈：用 optional 取代双通道返回
+#### 二、读栈顶的第二个接口：`peek()`
 
-原书的 `bool pop(T & item)` 用出参带值、用返回值带成败。调用方一旦忘了检查返回值，
-读到的就是没被修改过的 `item`。现代写法让「有没有值」这件事进入类型系统：
-**空栈不是错误，而是一种可预期的状态**，用 `std::optional` 表达它；
-真正的错误（下标越界、容量溢出）才抛异常。
+`optional` 那部分教学版已经有了，这里补的是它的**代价**：`std::optional<T> top()`
+返回的是一份**副本**。副本要求 `T` 可拷贝，而且确实拷了一次。对
+`std::unique_ptr` 这类只能移动的元素，这个接口根本用不了。
+
+所以工程版另给一个零拷贝的观望接口 `peek()`：
 
 ```cpp file=code/ch03/array_stack/modern.hpp#pop
 /// 出栈。空栈返回 std::nullopt——原书是「返回 false + 往 cout 打一行中文」，
@@ -244,10 +425,6 @@ const T* peek() const noexcept {
 }
 ```
 
-返回值是 `optional`，空栈是可预期状态，不是错误。同样重要的是这里**没有 `std::cout`**：
-原书在空栈出栈时直接打印中文提示，把一个数据结构与标准输出焊死——它没法在库里复用，
-提示无法本地化，失败路径也无从测试。
-
 「读栈顶」有两种正当需求，因此这里给了两个接口，**不要把它们合并成一个**：
 
 - `top()` 返回 `std::optional<T>`，是一份可以带走的**副本**。安全，
@@ -261,13 +438,16 @@ const T* peek() const noexcept {
 
 两种代价都真实存在。把任何一种藏起来，都是替读者做了本该由读者做的选择。
 
-#### 顺序栈的扩容
+#### 三、扩容中途抛异常：强异常保证
 
-栈中元素动态变化，当栈满时继续进栈会产生上溢出(overflow)。原书【算法3.3】给出的
-改进办法是：申请一个扩大一倍的新数组，把原有内容顺序移动过去，再执行进栈。
-这个策略本身是对的——每个元素在均摊意义下只被搬运常数次，push 的**摊还时间代价
-仍是 O(1)**（摊还的含义见 2.2.3 节）——但那段代码有两个问题：循环变量 `i` 从未声明
-（编译不过），以及先 `delete[] st` 再赋新指针，搬运中途若抛出异常，栈就停在半新半旧的状态。
+翻倍扩容的策略教学版已经照原书【算法3.3】实现了。工程版在同一段代码上多做一件事：
+**保证搬到一半失败时，原来的栈仍然完好。**
+
+原书【算法3.3】那段代码本身有两个问题：循环变量 `i` 从未声明（编译不过），
+以及先 `delete[] st` 再赋新指针，搬运中途若抛出异常，栈就停在半新半旧的状态。
+教学版修掉了前者，也把顺序改成「先搬后释放」；但它没有处理「搬到一半抛异常」——
+那时新申请的 `fresh` 会漏掉。教学版接受这个代价（元素类型是 `int`、`std::string`
+这类东西时它根本不会发生），工程版不接受。
 
 下面这段实现里会反复出现两个词，先说清楚：
 
@@ -337,7 +517,7 @@ void ensure_capacity() {
 把「先建后换」改回原书的「先释放旧的」，Debug 构建下 UBSan 当场报空指针引用，
 Release 构建直接段错误。
 
-### 一个容易踩空的地方：`move_if_noexcept` 在这里是错的
+#### 四、一个容易踩空的地方：`move_if_noexcept` 在这里是错的
 
 搬迁元素时，一个几乎条件反射的写法是 `std::move_if_noexcept(data_[i])`——
 「移动可能抛就退回拷贝」，标准库容器扩容正是这么做的。**但在这段代码里它是错的。**
@@ -365,7 +545,9 @@ Release 构建直接段错误。
 算法3.3 摊还 O(1) 的分析就打了折扣。测试里因此有一条用例专门数拷贝次数——
 **这两种写法都能通过其他所有断言，只有这条能把它们分开。**
 
-进栈本身随之简化为「保证容量、写入、长度加一」：
+#### 五、`push` 的两个重载
+
+进栈本身随之简化为「保证容量、写入、长度加一」，但工程版给了**两个**重载：
 
 ```cpp file=code/ch03/array_stack/modern.hpp#push
 /// 入栈。容量不足时按算法3.3 的策略翻倍。
@@ -383,9 +565,21 @@ void push(T&& item) {
 }
 ```
 
-两个重载分别处理左值和右值。原书的 `bool push(const T item)` 按值传参，
-顶层 `const` 对调用方没有意义，却强制了一次拷贝，而且 `std::unique_ptr`
-这类只能移动的类型根本传不进去。
+两个重载分别处理左值和右值。教学版只写了 `push(const T&)`——正确，
+但压入一个临时对象时会多拷贝一次。原书的 `bool push(const T item)` 更糟：
+按值传参，顶层 `const` 对调用方没有意义，却强制了一次拷贝，
+而且 `std::unique_ptr` 这类只能移动的类型根本传不进去。
+
+#### 六、对元素类型的编译期约束
+
+工程版的类头上还有四条 `static_assert`。它们不参与运行，只在编译期检查
+「你放进来的这个 `T` 合不合格」：必须能默认构造（`new T[n]` 会构造整块槽位）、
+必须能移动赋值（搬迁要用）、不可拷贝的 `T` 必须能无异常移动赋值（上一小节的判据）、
+不能是引用类型。
+
+这四条写在类里而不是文档里，是因为**编译期报错永远比运行期谜案便宜**。
+教学版没有它们：`T` 不合格时报错会发生在模板实例化的深处，信息难看，但同样报错。
+这是可读性与报错质量之间的一次交换，教学版选了前者。
 
 ### 3.1.3 链式栈
 

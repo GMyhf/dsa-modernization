@@ -123,9 +123,13 @@ MIN_ASSERTIONS_PER_UNIT = 5
 MIN_DEGRADED_ASSERTIONS = 10
 MIN_LEGACY_LINES = 20
 EVIDENCE_MARKERS = ("error:", "runtime error", "Sanitizer", "$ g++", "$ ./")
+# 教学版是书稿正文整块印出来的那一份，读者最可能照抄。它比工程版少了移动语义与
+# 强异常保证（D-012 的有意取舍），但「少考虑几件事」不等于「少验几条」——
+# 教学版自己承诺的东西（LIFO、翻倍、深拷贝、空状态、零 I/O）必须逐条有断言守着。
+MIN_TEACHING_ASSERTIONS = 10
 
 
-def check_substance(unit_dir: Path, meta, assertions):
+def check_substance(unit_dir: Path, meta, assertions, teaching_assertions=None):
     """单元里到底有没有东西。返回 problems 列表。
 
     判据刻意保守：现有的扎实单元是每条清单 8–18 项断言，
@@ -140,6 +144,13 @@ def check_substance(unit_dir: Path, meta, assertions):
             problems.append(
                 f"  ❌ 断言密度不足：{listings} 条清单只有 {assertions} 项断言"
                 f"（下限 {need}）。清单被认领却几乎没有被验证。"
+            )
+
+    if (unit_dir / "teaching.hpp").is_file() and teaching_assertions is not None:
+        if teaching_assertions < MIN_TEACHING_ASSERTIONS:
+            problems.append(
+                f"  ❌ 教学版只有 {teaching_assertions} 项断言（下限 {MIN_TEACHING_ASSERTIONS}）。"
+                "正文整块印出来的那一份，不能比工程版验得松。"
             )
 
     legacy = unit_dir / "legacy.md"
@@ -168,7 +179,10 @@ def check_d001(unit_dir: Path, meta):
         if isinstance(reason, str) and reason.strip()
     }
     problems = []
-    for name in ("modern.hpp", "modern.cpp"):
+    # teaching.* 同样是「数据结构实现」，D-001 §2/§3 一视同仁：教学版可以少写
+    # noexcept、少写 static_assert（D-012 的豁免只到这里为止），但绝不能在容器里
+    # 打 cout，也不能改用 std::vector 把这一节讲的东西删掉。
+    for name in ("modern.hpp", "modern.cpp", "teaching.hpp", "teaching.cpp"):
         path = unit_dir / name
         if not path.is_file():
             continue
@@ -239,6 +253,38 @@ def discover(paths):
     return sorted(p.parent for p in CODE.rglob("unit.json")) if CODE.is_dir() else []
 
 
+# 一个单元最多有三个可执行产物，每个都在两档 profile 下真编译真运行：
+#
+#   test       modern.hpp（工程版）的断言测试——一直都有。
+#   teaching   teaching.hpp（教学版）的断言测试——D-012 引入。
+#   demo       书稿「先跑一遍」印的那段 main——**在 D-012 之前从来没被编译过**，
+#              R3 只保证它和文件逐字一致，不保证那个文件能编译。教学版正文
+#              最依赖「抄下来就能跑」，这个洞必须堵上。
+#
+# 每个产物一个独立的可执行文件：三份源码各有自己的 main，不能链进同一个二进制。
+def unit_programs(unit_dir: Path, test_sources):
+    """返回 ([(kind, sources), ...], problems)。"""
+    programs = [("test", test_sources)]
+    problems = []
+
+    teaching = unit_dir / "teaching.hpp"
+    teaching_test = unit_dir / "teaching_test.cpp"
+    if teaching.is_file() and not teaching_test.is_file():
+        problems.append(
+            "  ❌ 有 teaching.hpp 却没有 teaching_test.cpp：教学版是书稿正文印出来的那份，"
+            "不能是唯一没人验的代码（D-012）。"
+        )
+    elif teaching_test.is_file() and not teaching.is_file():
+        problems.append("  ❌ 有 teaching_test.cpp 却没有 teaching.hpp。")
+    elif teaching.is_file():
+        programs.append(("teaching", [str(teaching_test)]))
+
+    demo = unit_dir / "demo.cpp"
+    if demo.is_file():
+        programs.append(("demo", [str(demo)]))
+    return programs, problems
+
+
 def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None, degraded=False):
     """返回 (ok, 输出片段列表)。"""
     rel = rel_label(unit_dir)
@@ -257,41 +303,55 @@ def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None, degr
     if d001:
         ok = False
         logs.extend(d001)
+
+    programs, structure = unit_programs(unit_dir, sources)
+    if structure:
+        ok = False
+        logs.extend(structure)
+
     assertions = None
+    teaching_assertions = None
     for name, flags in profiles:
-        binary = workdir / f"{unit_dir.name}-{name}"
-        cmd = [
-            compiler(),
-            f"-std={std}",
-            *BASE_FLAGS,
-            *flags,
-            *extra,
-            f"-I{unit_dir}",
-            f"-I{CODE}",  # 共享的测试探针：#include "support/fault_injection.hpp"
-            *sources,
-            "-o",
-            str(binary),
-        ]
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=TIMEOUT_SEC)
-        if proc.returncode != 0:
-            ok = False
-            logs.append(f"  ❌ [{name}] 编译失败\n{indent(proc.stdout + proc.stderr)}")
-            continue
-        run = subprocess.run(
-            [str(binary)], capture_output=True, text=True, cwd=unit_dir, timeout=TIMEOUT_SEC
-        )
-        if run.returncode != 0:
-            ok = False
-            logs.append(
-                f"  ❌ [{name}] 测试失败（退出码 {run.returncode}）\n{indent(run.stdout + run.stderr)}"
+        for kind, srcs in programs:
+            suffix = "" if kind == "test" else f"-{kind}"
+            binary = workdir / f"{unit_dir.name}{suffix}-{name}"
+            label = name if kind == "test" else f"{name}/{kind}"
+            cmd = [
+                compiler(),
+                f"-std={std}",
+                *BASE_FLAGS,
+                *flags,
+                *extra,
+                f"-I{unit_dir}",
+                f"-I{CODE}",  # 共享的测试探针：#include "support/fault_injection.hpp"
+                *srcs,
+                "-o",
+                str(binary),
+            ]
+            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=TIMEOUT_SEC)
+            if proc.returncode != 0:
+                ok = False
+                logs.append(f"  ❌ [{label}] 编译失败\n{indent(proc.stdout + proc.stderr)}")
+                continue
+            run = subprocess.run(
+                [str(binary)], capture_output=True, text=True, cwd=unit_dir, timeout=TIMEOUT_SEC
             )
-        else:
+            if run.returncode != 0:
+                ok = False
+                what = "demo 运行失败" if kind == "demo" else "测试失败"
+                logs.append(
+                    f"  ❌ [{label}] {what}（退出码 {run.returncode}）"
+                    f"\n{indent(run.stdout + run.stderr)}"
+                )
+                continue
             tail = run.stdout.strip().splitlines()[-1:] or ["(无输出)"]
             hit = re.search(r"(\d+)\s*项断言", run.stdout)
-            if hit:
+            if hit and kind == "test":
                 assertions = int(hit.group(1))
-            logs.append(f"  ✅ [{name}] {tail[0][:80]}")
-    substance = check_substance(unit_dir, meta, assertions)
+            elif hit and kind == "teaching":
+                teaching_assertions = int(hit.group(1))
+            logs.append(f"  ✅ [{label}] {tail[0][:80]}")
+    substance = check_substance(unit_dir, meta, assertions, teaching_assertions)
     if substance:
         ok = False
         logs.extend(substance)

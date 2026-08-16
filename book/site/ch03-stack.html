@@ -155,18 +155,26 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <main>
 
 <p>栈是「最后放入、最先取出」，适合递归调用、括号匹配和表达式计算；队列是「先放入、先取出」， 适合排队服务和广度优先搜索。空栈、空队列是正常状态，现代接口以 <code>std::optional</code> 返回。</p>
-<p>源码：<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/modern.hpp" class="ext">顺序栈</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/demo.cpp" class="ext">栈示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/linked_stack/modern.hpp" class="ext">链式栈</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/expression_eval/modern.hpp" class="ext">表达式求值</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/knapsack/modern.hpp" class="ext">背包</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/queue/modern.hpp" class="ext">队列</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/queue/demo.cpp" class="ext">队列示例</a>。</p>
+<p>源码：<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/teaching.hpp" class="ext">顺序栈·教学版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/modern.hpp" class="ext">顺序栈·工程版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/demo.cpp" class="ext">栈示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/linked_stack/modern.hpp" class="ext">链式栈</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/expression_eval/modern.hpp" class="ext">表达式求值</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/knapsack/modern.hpp" class="ext">背包</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/queue/modern.hpp" class="ext">队列</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/queue/demo.cpp" class="ext">队列示例</a>。</p>
 <h2 id="先跑一遍"><a class="anchor" href="#先跑一遍">#</a>先跑一遍</h2>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/demo.cpp">code/ch03/array_stack/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/demo.cpp">code/ch03/array_stack/demo.cpp</a></div><pre><code><span class="c">// 第 3 章「先跑一遍」：用教学版 ArrayStack 走一遍 push / top / pop。</span>
+<span class="c">// 编译运行：</span>
+<span class="c">//   g++ -std=c++17 -I code/ch03/array_stack code/ch03/array_stack/demo.cpp -o demo &amp;&amp; ./demo</span>
+<span class="p">#include &quot;teaching.hpp&quot;</span>
 
 <span class="p">#include &lt;iostream&gt;</span>
 
 <span class="t">int</span> main() {
-    dsa::ArrayStack&lt;<span class="t">int</span>&gt; stack;
+    ArrayStack&lt;<span class="t">int</span>&gt; stack;
     stack.push(<span class="n">1</span>);
     stack.push(<span class="n">2</span>);
     stack.push(<span class="n">3</span>);
-    std::cout &lt;&lt; <span class="s">&quot;栈顶是 &quot;</span> &lt;&lt; *stack.top() &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+
+    <span class="c">// top() 返回 optional：有值才解引用，空栈不会崩</span>
+    <span class="k">if</span> (<span class="k">auto</span> value = stack.top()) {
+        std::cout &lt;&lt; <span class="s">&quot;栈顶是 &quot;</span> &lt;&lt; *value &lt;&lt; <span class="s">&#x27;\n&#x27;</span>;
+    }
+
     std::cout &lt;&lt; <span class="s">&quot;依次弹出:&quot;</span>;
     <span class="k">while</span> (<span class="k">auto</span> value = stack.pop()) {
         std::cout &lt;&lt; <span class="s">&#x27; &#x27;</span> &lt;&lt; *value;
@@ -209,35 +217,182 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>栈(stack)是限定仅在一端进行插入和删除运算的线性表，该端称为<strong>栈顶</strong>(top)， 另一端称为<strong>栈底</strong>(bottom)。栈的元素按后进先出(LIFO, last in first out)的次序访问： 最后压入的元素最先弹出。</p>
 <p>基于栈的特性，栈的抽象数据类型包含进栈 push、出栈 pop、读栈顶 top 等常用操作， 以及判断栈是否为空的边界操作。根据抽象和封装的原则，只可通过抽象数据类型 定义的运算来操作栈。</p>
 <p>原书【代码3.1】用一个成员函数既非纯虚、析构函数也非 virtual 的空基类 <code>Stack&lt;T&gt;</code> 来表达这层抽象。那样的基类给不了任何多态能力：成员函数既不是纯虚的、也没有定义， 派生类&quot;实现&quot;它们并不构成覆盖；反而埋下了「通过 <code>Stack&lt;T&gt;*</code> 删除派生对象」 这一未定义行为。</p>
-<p><strong>抽象数据类型描述的是「一组运算」，不是「一个基类」。</strong> 在 C++ 里， 模板本身已经承担了这层抽象——<code>ArrayStack&lt;T&gt;</code> 提供哪些运算，由它的接口决定， 不需要继承任何东西。真正需要写下来的是对元素类型 <code>T</code> 的要求：底层 <code>new T[n]</code> 会把整块槽位都默认构造出来， 所以 <code>T</code> 必须能默认构造。这句话写在正文里即可，不必把四条工程契约印进类头。</p>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/modern.hpp">code/ch03/array_stack/modern.hpp#class-head</a></div><pre><code><span class="c">/// 基于数组的栈（后进先出）。</span>
-<span class="c">///</span>
-<span class="c">/// 与原书 arrStack 的差别：容量耗尽时自动翻倍（原书要么溢出报错，要么靠算法3.3</span>
-<span class="c">/// 手工换成扩容版本）；不打印任何东西；空栈上的 pop/top 返回空 optional，</span>
-<span class="c">/// 而不是靠「出参 + bool」双通道返回。</span>
+<p><strong>抽象数据类型描述的是「一组运算」，不是「一个基类」。</strong> 在 C++ 里， 模板本身已经承担了这层抽象——<code>ArrayStack&lt;T&gt;</code> 提供哪些运算，由它的接口决定， 不需要继承任何东西。我们不关心它是否继承自某个 <code>Stack&lt;T&gt;</code>，只关心它有没有 <code>push</code>、<code>pop</code>、<code>top</code> 这几个运算。所以这一节要定下来的是<strong>这张表</strong>：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">运算</th>
+<th style="text-align:left">含义</th>
+<th style="text-align:left">时间代价</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><code>push(x)</code></td>
+<td style="text-align:left">把 x 压到栈顶</td>
+<td style="text-align:left">摊还 O(1)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>pop()</code></td>
+<td style="text-align:left">弹出栈顶并把它带回来；空栈返回「没有」</td>
+<td style="text-align:left">O(1)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>top()</code></td>
+<td style="text-align:left">只看栈顶，不弹出；空栈返回「没有」</td>
+<td style="text-align:left">O(1)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>empty()</code></td>
+<td style="text-align:left">栈里还有没有元素</td>
+<td style="text-align:left">O(1)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>size()</code></td>
+<td style="text-align:left">栈里有几个元素</td>
+<td style="text-align:left">O(1)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>clear()</code></td>
+<td style="text-align:left">清空</td>
+<td style="text-align:left">O(1)</td>
+</tr>
+</tbody></table></div>
+<p>表里有两处「空栈返回『没有』」。这四个字在 C++17 里有一个精确的表达方式， 下一节的代码就是这么写的。</p>
+<h3 id="312-顺序栈"><a class="anchor" href="#312-顺序栈">#</a>3.1.2 顺序栈</h3>
+<p>采用顺序存储结构的栈称为顺序栈(array-based stack)，需要一块连续的区域存储栈中元素。</p>
+<p>对元素数目为 n 的栈，首先要确定数组的哪一端表示栈顶。如果把数组的第 0 个位置作为栈顶， 所有的插入和删除都在第 0 个位置进行，每次 push 或 pop 都要把栈中所有元素后移或前移 一个位置，时间代价为 O(n)。反之，把最后一个元素的位置作为栈顶，新元素添加在表尾、 出栈也只删除表尾元素，每次操作的时间代价仅为 O(1)。图3.2 所示为按后一种方案实现的栈。</p>
+<p>图3.2 顺序栈：下标 0 是栈底，<code>size_</code> 是元素个数，也是下一个空位。</p>
+<div class="codeblock" data-lang="text"><pre><code>下标     0     1     2     3     4     …
+内容    [A]   [B]   [C]    ?     ?     …
+               ▲
+            size_ = 3   （栈顶是 C，下一个 push 写到 3）</code></pre></div>
+<h4 id="教学版完整实现"><a class="anchor" href="#教学版完整实现">#</a>教学版：完整实现</h4>
+<p>下面是一份<strong>完整的、能直接编译运行的</strong>顺序栈。一个文件、一个类，没有省略号， 没有「此处略去若干行」。它保留原书【代码3.2】【算法3.3】要教的全部内容—— 连续数组、栈顶在表尾、满了就把容量翻倍——只把原书那几处会崩的写法换掉。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/teaching.hpp">code/ch03/array_stack/teaching.hpp</a></div><pre><code><span class="c">// 顺序栈 ArrayStack —— 教学版。</span>
+<span class="c">//</span>
+<span class="c">// 这一份是给「第一次读这一节」的人看的：一个文件、一个类、能直接编译运行。</span>
+<span class="c">// 它保留原书【代码3.2】【算法3.3】要教的全部内容——连续数组、栈顶在表尾、</span>
+<span class="c">// 满了就把容量翻倍——只把原书那几处会崩的写法换掉。</span>
+<span class="c">//</span>
+<span class="c">// 与 modern.hpp（工程版）的分工：</span>
+<span class="c">//   教学版  遵守**三法则**（析构 + 拷贝构造 + 拷贝赋值），正确，但拷贝多一点；</span>
+<span class="c">//   工程版  在此之上补齐移动构造/移动赋值、强异常保证、编译期类型约束。</span>
+<span class="c">// 两份都在闸门里真编译真运行。先读这一份，3.1.2a「进阶（选读）」再读那一份。</span>
+<span class="p">#pragma once</span>
+
+<span class="p">#include &lt;cstddef&gt;</span>
+<span class="p">#include &lt;optional&gt;</span>
+
 <span class="k">template</span> &lt;<span class="k">typename</span> T&gt;
 <span class="k">class</span> ArrayStack {
 <span class="k">public</span>:
     <span class="k">using</span> value_type = T;
-    <span class="k">using</span> size_type = std::<span class="t">size_t</span>;</code></pre></div>
-<p>底层的 <code>new T[n]</code> 会把整块槽位都默认构造出来，所以 <code>T</code> 必须可默认构造—— 这是原书 <code>new T[mSize]</code> 就有的限制。真正的容器做法是申请未初始化存储再逐个 placement new，本书还没有走到那一步。扩容时的异常安全见 3.1.2 节末。</p>
-<h3 id="312-顺序栈"><a class="anchor" href="#312-顺序栈">#</a>3.1.2 顺序栈</h3>
-<p>采用顺序存储结构的栈称为顺序栈(array-based stack)，需要一块连续的区域存储栈中元素。</p>
-<p>对元素数目为 n 的栈，首先要确定数组的哪一端表示栈顶。如果把数组的第 0 个位置作为栈顶， 所有的插入和删除都在第 0 个位置进行，每次 push 或 pop 都要把栈中所有元素后移或前移 一个位置，时间代价为 O(n)。反之，把最后一个元素的位置作为栈顶，新元素添加在表尾、 出栈也只删除表尾元素，每次操作的时间代价仅为 O(1)。图3.2 所示为按后一种方案实现的栈。</p>
-<p>图3.2 顺序栈：下标 0 是栈底，<code>top_index_</code> 是元素个数，也是下一个空位。</p>
-<div class="codeblock" data-lang="text"><pre><code>下标     0     1     2     3     4     …
-内容    [A]   [B]   [C]    ?     ?     …
-               ▲
-          top_index_ = 3   （栈顶是 C，下一个 push 写到 3）</code></pre></div>
-<h3 id="存储与所有权"><a class="anchor" href="#存储与所有权">#</a>存储与所有权</h3>
-<p>原书【代码3.2】用三个成员表示一个顺序栈：<code>int mSize</code>（容量）、<code>int top</code>（栈顶位置）、 <code>T * st</code>（裸指针数组）。这套写法有三处在今天必须改：</p>
+    <span class="k">using</span> size_type = std::<span class="t">size_t</span>;
+
+    <span class="c">// 构造：先要一小块数组。容量不够时会自动翻倍，所以初值给多少都不影响正确性。</span>
+    <span class="k">explicit</span> ArrayStack(size_type initial_capacity = <span class="n">8</span>)
+        : data_(<span class="k">new</span> T[initial_capacity]), capacity_(initial_capacity), size_(<span class="n">0</span>) {}
+
+    <span class="c">// 析构：数组是 new[] 来的，就得 delete[] 回去。</span>
+    ~ArrayStack() { <span class="k">delete</span>[] data_; }
+
+    <span class="c">// 拷贝构造：**必须自己写**。</span>
+    <span class="c">// 不写的话编译器生成的版本会把 data_ 这根指针照抄一份，于是两个栈指向同一块</span>
+    <span class="c">// 内存，各析构一次 —— 同一块内存被释放两次。原书 arrStack 正是漏了这个。</span>
+    ArrayStack(<span class="k">const</span> ArrayStack&amp; other)
+        : data_(<span class="k">new</span> T[other.capacity_]), capacity_(other.capacity_), size_(other.size_) {
+        <span class="k">for</span> (size_type i = <span class="n">0</span>; i &lt; size_; ++i) {
+            data_[i] = other.data_[i];
+        }
+    }
+
+    <span class="c">// 拷贝赋值：同理。注意三件事的顺序——先把新数组备好，再释放旧的，最后接管。</span>
+    ArrayStack&amp; <span class="k">operator</span>=(<span class="k">const</span> ArrayStack&amp; other) {
+        <span class="k">if</span> (<span class="k">this</span> == &amp;other) {   <span class="c">// 自己赋值给自己，什么都不用做</span>
+            <span class="k">return</span> *<span class="k">this</span>;
+        }
+        T* fresh = <span class="k">new</span> T[other.capacity_];
+        <span class="k">for</span> (size_type i = <span class="n">0</span>; i &lt; other.size_; ++i) {
+            fresh[i] = other.data_[i];
+        }
+        <span class="k">delete</span>[] data_;
+        data_ = fresh;
+        capacity_ = other.capacity_;
+        size_ = other.size_;
+        <span class="k">return</span> *<span class="k">this</span>;
+    }
+
+    <span class="c">// 入栈。满了就翻倍，所以不会有「栈满溢出」这回事。</span>
+    <span class="t">void</span> push(<span class="k">const</span> T&amp; value) {
+        <span class="k">if</span> (size_ == capacity_) {
+            grow();
+        }
+        data_[size_] = value;
+        ++size_;
+    }
+
+    <span class="c">// 出栈并把元素带回来。空栈返回空的 optional，不是错误，也不打印任何东西。</span>
+    std::optional&lt;T&gt; pop() {
+        <span class="k">if</span> (empty()) {
+            <span class="k">return</span> std::nullopt;
+        }
+        --size_;
+        <span class="k">return</span> data_[size_];
+    }
+
+    <span class="c">// 只看栈顶，不弹出。空栈同样返回空 optional。</span>
+    std::optional&lt;T&gt; top() <span class="k">const</span> {
+        <span class="k">if</span> (empty()) {
+            <span class="k">return</span> std::nullopt;
+        }
+        <span class="k">return</span> data_[size_ - <span class="n">1</span>];
+    }
+
+    <span class="t">bool</span> empty() <span class="k">const</span> { <span class="k">return</span> size_ == <span class="n">0</span>; }
+    size_type size() <span class="k">const</span> { <span class="k">return</span> size_; }
+    size_type capacity() <span class="k">const</span> { <span class="k">return</span> capacity_; }
+
+    <span class="c">// 清空：把长度归零就行，已经申请的数组留着接着用。</span>
+    <span class="t">void</span> clear() { size_ = <span class="n">0</span>; }
+
+<span class="k">private</span>:
+    <span class="c">// 扩容：申请一块两倍大的，把老元素搬过去，再把老的还回去。</span>
+    <span class="c">// 每个元素在均摊意义下只被搬运常数次，所以 push 的摊还代价仍是 O(1)。</span>
+    <span class="t">void</span> grow() {
+        size_type next = (capacity_ == <span class="n">0</span>) ? <span class="n">1</span> : capacity_ * <span class="n">2</span>;
+        T* fresh = <span class="k">new</span> T[next];
+        <span class="k">for</span> (size_type i = <span class="n">0</span>; i &lt; size_; ++i) {
+            fresh[i] = data_[i];
+        }
+        <span class="k">delete</span>[] data_;       <span class="c">// 先搬完再释放旧的，顺序反了就会读到已释放的内存</span>
+        data_ = fresh;
+        capacity_ = next;
+    }
+
+    T* data_;             <span class="c">// 指向底层数组</span>
+    size_type capacity_;  <span class="c">// 数组能放多少个</span>
+    size_type size_;      <span class="c">// 现在放了几个，同时也是下一个空位的下标</span>
+};</code></pre></div>
+<p>把它存成 <code>teaching.hpp</code>，配上本章开头那个 <code>demo.cpp</code>，一条命令就能跑：</p>
+<div class="codeblock" data-lang="bash"><pre><code>g++ -std=c++17 -Wall -Wextra demo.cpp -o demo &amp;&amp; ./demo</code></pre></div>
+<h4 id="关键要点"><a class="anchor" href="#关键要点">#</a>关键要点</h4>
+<p><strong>1. 空栈上的 <code>pop</code>/<code>top</code> 返回空 <code>optional</code>。</strong> 原书的写法是 <code>bool pop(T &amp; item)</code>——用出参带值、用返回值带成败。调用方一旦忘了检查 返回值，读到的就是那个从没被修改过的 <code>item</code>：程序不崩，只是默默按错误数据继续跑。 <code>std::optional&lt;T&gt;</code> 把「有没有值」搬进了<strong>类型</strong>里，取值之前必须先判断。 <strong>空栈不是错误，是一种可预期的状态</strong>，所以它返回空盒子而不是抛异常； 真正的错误（参数非法、容量溢出）才抛异常。</p>
+<p><strong>2. 拷贝构造和拷贝赋值必须自己写——这是原书最硬的一处错。</strong> 原书的 <code>arrStack</code> 有析构函数，却没有拷贝构造，也没有拷贝赋值。于是一句 <code>arrStack&lt;int&gt; b = a;</code> 会走编译器生成的拷贝——<strong>把指针照抄一份</strong>， 之后 <code>a</code> 和 <code>b</code> 持有<strong>同一根指针</strong>，各析构一次，<strong>同一块内存被释放两次</strong>。 这类错误的可怕之处在于它安静：<code>-Wall -Wextra -Wpedantic</code> 一句警告都不给， 小数据量下往往也不当场崩。本书用 AddressSanitizer 把它抓了出来， 报告抄在 <code>code/ch03/array_stack/legacy.md</code> 里。</p>
+<p>规则叫<strong>三法则</strong>：一个类只要自己写了析构函数、拷贝构造、拷贝赋值中的<strong>任意一个</strong>， 通常这三个都得写。原因很直白——你之所以要写析构函数，是因为你在管资源； 既然在管资源，编译器那份「逐成员照抄」的拷贝就一定是错的。</p>
+<p><strong>3. 翻倍扩容让 <code>push</code> 的摊还代价保持 O(1)。</strong> <code>grow()</code> 每次把容量乘 2，而不是加 1。差别不是常数：加 1 的话，push n 个元素总共要搬 <span class="math"><span class="upr">1</span><span class="bin">+</span><span class="upr">2</span><span class="bin">+</span>⋯<span class="bin">+</span>n<span class="rel">=</span>O(n<sup><span class="upr">2</span></sup>)</span> 次；翻倍的话，总搬运次数是 <span class="math"><span class="upr">1</span><span class="bin">+</span><span class="upr">2</span><span class="bin">+</span><span class="upr">4</span><span class="bin">+</span>⋯<span class="bin">+</span>n&lt;<span class="upr">2</span>n</span>， 平摊到每次 push 就是常数。这就是原书【算法3.3】的策略，一个字都没改。</p>
+<p>顺带一提 <code>grow()</code> 里那三行的<strong>顺序</strong>：先申请新数组、再搬元素、最后才 <code>delete[]</code> 旧的。 反过来写（先释放再搬）就是读已经还回去的内存，ASan 当场报 <code>heap-use-after-free</code>。</p>
+<p><strong>4. <code>new T[n]</code> 有一条限制，值得知道。</strong> 它会把整块槽位<strong>默认构造</strong>出来。所以 <code>T</code> 必须能默认构造——一个只有带参构造函数的类 放不进这个栈。这是原书 <code>new T[mSize]</code> 就有的限制，本书的教学版没有改善它。 标准库容器的做法是先申请<strong>未初始化</strong>的原始内存，push 时再用 placement new 在指定位置构造对象；那要手写内存对齐和逐个析构，属于另一个话题。</p>
+<p><strong>5. 容器里一个 <code>cout</code> 都没有。</strong> 原书在空栈出栈时直接 <code>cout &lt;&lt; &quot;栈空&quot;</code>。那样做把一个数据结构和标准输出焊死了： 它没法在库里复用，提示无法本地化，失败路径也无从测试。<strong>数据结构负责数据结构， 报错交给调用方。</strong> 本书的测试里有一条专门重定向 <code>cout</code>/<code>cerr</code> 并断言它们为空。</p>
+<h3 id="312a-进阶选读从教学版到工程版"><a class="anchor" href="#312a-进阶选读从教学版到工程版">#</a>3.1.2a 进阶（选读）：从教学版到工程版</h3>
+<p><strong>这一节可以整节跳过。</strong> 上面那份教学版是<strong>正确</strong>的，跑得起来，也经得起 AddressSanitizer 检查。这一节讲的是把它变成一个<strong>工业级容器</strong>还要补哪些东西—— 移动语义、异常安全、编译期类型约束。等你哪天要写自己的容器时再回来读。</p>
+<p>完整的工程版在 <code>code/ch03/array_stack/modern.hpp</code>，与教学版一样进闸门、 一样双档编译运行。下面按主题一段一段拆开看。</p>
+<h4 id="一存储与所有权把三法则补成五法则"><a class="anchor" href="#一存储与所有权把三法则补成五法则">#</a>一、存储与所有权：把三法则补成五法则</h4>
+<p>先把原书【代码3.2】的问题列全。它用三个成员表示一个顺序栈：<code>int mSize</code>（容量）、 <code>int top</code>（栈顶位置）、<code>T * st</code>（裸指针数组）。这套写法有三处在今天必须改：</p>
 <ol>
 <li><code>int top</code> 与成员函数 <code>bool top(T&amp;)</code> <strong>重名</strong>，导致这个类按印刷原样根本编译不过；</li>
 <li>无参构造只设了 <code>top = -1</code>，<code>mSize</code> 与 <code>st</code> 都没初始化，析构时 <code>delete[]</code> 一个不确定指针；</li>
 <li>有析构函数却没有拷贝构造与拷贝赋值，一次 <code>arrStack&lt;int&gt; b = a;</code> 就会二次释放。</li>
 </ol>
-<p>第 2、3 条是未定义行为，编译器开到 <code>-Wall -Wextra -Wpedantic</code> 也<strong>一句警告都不给</strong>。</p>
-<p>现代实现保留裸指针 <code>T* data_</code>——顺序栈的存储管理正是本节要教的内容， 把它换成 <code>std::unique_ptr&lt;T[]&gt;</code> 固然更省事，但五法则也就随之退化成走过场 （编译器生成的版本就够用了）。留着裸指针，这五个函数才是承重的： 少写一个，AddressSanitizer 立刻能复现出崩溃。</p>
+<p>第 2、3 条是未定义行为，编译器开到 <code>-Wall -Wextra -Wpedantic</code> 也<strong>一句警告都不给</strong>。 教学版已经把这三条都修掉了：<code>size_</code> 不与任何成员函数重名，三个成员全部有初值， 三法则写全。</p>
+<p>工程版在这之上再补两个函数——<strong>移动构造</strong>与<strong>移动赋值</strong>，合称<strong>五法则</strong>。 它们不修正确性，只修性能：教学版把一个临时栈赋给别人时会老老实实深拷贝一遍， 而那个临时对象下一行就要销毁了，这次拷贝纯属浪费。移动版直接把指针「偷」过来， 再把对方置空，O(1) 完事。</p>
+<p>这里保留裸指针 <code>T* data_</code>——顺序栈的存储管理正是本节要教的内容， 把它换成 <code>std::unique_ptr&lt;T[]&gt;</code> 固然更省事，但五法则也就随之退化成走过场 （编译器生成的版本就够用了）。留着裸指针，这五个函数才是承重的： 少写一个，AddressSanitizer 立刻能复现出崩溃。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/modern.hpp">code/ch03/array_stack/modern.hpp#rule-of-five</a></div><pre><code><span class="c">// 三/五法则：原书只写了析构函数，没有拷贝构造与拷贝赋值，</span>
 <span class="c">// 于是 `arrStack&lt;int&gt; b = a;` 之后两个对象持有同一根指针，各析构一次 → 二次释放。</span>
 <span class="c">//</span>
@@ -274,8 +429,9 @@ ArrayStack&amp; <span class="k">operator</span>=(ArrayStack&amp;&amp; other) <sp
 
 ~ArrayStack() { <span class="k">delete</span>[] data_; }</code></pre></div>
 <p>拷贝赋值用的是<strong>拷贝并交换</strong>(copy-and-swap)：先构造一个完整副本，再与自身交换。 它自然地做到了自赋值安全，也在拷贝失败时保证原对象不受影响。</p>
-<h3 id="出栈用-optional-取代双通道返回"><a class="anchor" href="#出栈用-optional-取代双通道返回">#</a>出栈：用 optional 取代双通道返回</h3>
-<p>原书的 <code>bool pop(T &amp; item)</code> 用出参带值、用返回值带成败。调用方一旦忘了检查返回值， 读到的就是没被修改过的 <code>item</code>。现代写法让「有没有值」这件事进入类型系统： <strong>空栈不是错误，而是一种可预期的状态</strong>，用 <code>std::optional</code> 表达它； 真正的错误（下标越界、容量溢出）才抛异常。</p>
+<h4 id="二读栈顶的第二个接口peek"><a class="anchor" href="#二读栈顶的第二个接口peek">#</a>二、读栈顶的第二个接口：<code>peek()</code></h4>
+<p><code>optional</code> 那部分教学版已经有了，这里补的是它的<strong>代价</strong>：<code>std::optional&lt;T&gt; top()</code> 返回的是一份<strong>副本</strong>。副本要求 <code>T</code> 可拷贝，而且确实拷了一次。对 <code>std::unique_ptr</code> 这类只能移动的元素，这个接口根本用不了。</p>
+<p>所以工程版另给一个零拷贝的观望接口 <code>peek()</code>：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/modern.hpp">code/ch03/array_stack/modern.hpp#pop</a></div><pre><code><span class="c">/// 出栈。空栈返回 std::nullopt——原书是「返回 false + 往 cout 打一行中文」，</span>
 <span class="c">/// 调用方既没法在库里复用，也容易忽略返回值。</span>
 [[nodiscard]]
@@ -305,7 +461,6 @@ std::optional&lt;T&gt; top() <span class="k">const</span> {
 <span class="k">const</span> T* peek() <span class="k">const</span> <span class="k">noexcept</span> {
     <span class="k">return</span> empty() ? <span class="k">nullptr</span> : &amp;data_[top_index_ - <span class="n">1</span>];
 }</code></pre></div>
-<p>返回值是 <code>optional</code>，空栈是可预期状态，不是错误。同样重要的是这里<strong>没有 <code>std::cout</code></strong>： 原书在空栈出栈时直接打印中文提示，把一个数据结构与标准输出焊死——它没法在库里复用， 提示无法本地化，失败路径也无从测试。</p>
 <p>「读栈顶」有两种正当需求，因此这里给了两个接口，<strong>不要把它们合并成一个</strong>：</p>
 <ul>
 <li><code>top()</code> 返回 <code>std::optional&lt;T&gt;</code>，是一份可以带走的<strong>副本</strong>。安全， 但要求 <code>T</code> 可拷贝，而且确实拷贝了一次。</li>
@@ -313,8 +468,9 @@ std::optional&lt;T&gt; top() <span class="k">const</span> {
 </ul>
 <p>代价也是一对：<code>optional</code> 的安全靠拷贝换来，<code>peek()</code> 的零拷贝则把生命周期交给了 调用方——<strong>它返回的指针在下一次 <code>push</code> / <code>pop</code> / <code>clear</code> 之后即失效</strong>， 因为扩容会换掉整块缓冲区。这条失效契约必须写在文档里，不能靠使用者猜。</p>
 <p>两种代价都真实存在。把任何一种藏起来，都是替读者做了本该由读者做的选择。</p>
-<h4 id="顺序栈的扩容"><a class="anchor" href="#顺序栈的扩容">#</a>顺序栈的扩容</h4>
-<p>栈中元素动态变化，当栈满时继续进栈会产生上溢出(overflow)。原书【算法3.3】给出的 改进办法是：申请一个扩大一倍的新数组，把原有内容顺序移动过去，再执行进栈。 这个策略本身是对的——每个元素在均摊意义下只被搬运常数次，push 的<strong>摊还时间代价 仍是 O(1)</strong>（摊还的含义见 2.2.3 节）——但那段代码有两个问题：循环变量 <code>i</code> 从未声明 （编译不过），以及先 <code>delete[] st</code> 再赋新指针，搬运中途若抛出异常，栈就停在半新半旧的状态。</p>
+<h4 id="三扩容中途抛异常强异常保证"><a class="anchor" href="#三扩容中途抛异常强异常保证">#</a>三、扩容中途抛异常：强异常保证</h4>
+<p>翻倍扩容的策略教学版已经照原书【算法3.3】实现了。工程版在同一段代码上多做一件事： <strong>保证搬到一半失败时，原来的栈仍然完好。</strong></p>
+<p>原书【算法3.3】那段代码本身有两个问题：循环变量 <code>i</code> 从未声明（编译不过）， 以及先 <code>delete[] st</code> 再赋新指针，搬运中途若抛出异常，栈就停在半新半旧的状态。 教学版修掉了前者，也把顺序改成「先搬后释放」；但它没有处理「搬到一半抛异常」—— 那时新申请的 <code>fresh</code> 会漏掉。教学版接受这个代价（元素类型是 <code>int</code>、<code>std::string</code> 这类东西时它根本不会发生），工程版不接受。</p>
 <p>下面这段实现里会反复出现两个词，先说清楚：</p>
 <ul>
 <li><strong>强异常保证</strong>：一个操作要么完全成功，要么<strong>像没发生过一样</strong>——绝不留下半成品状态。 做法就是「先在新缓冲区上把事情做完，全部成功了再换过去」。原书的写法没有这个保证： 旧缓冲区已经 <code>delete[]</code> 掉了，搬到一半抛异常，栈既回不到旧状态也到不了新状态。</li>
@@ -366,7 +522,7 @@ std::optional&lt;T&gt; top() <span class="k">const</span> {
 <li><strong>容量用 <code>std::size_t</code></strong>。原书用 <code>int</code>，<code>mSize * 2</code> 溢出是未定义行为； 这里在翻倍前先判界并抛 <code>std::overflow_error</code>。</li>
 </ul>
 <p>这不是纸面推理。测试里有一个「第 3 次拷贝赋值必定抛异常」的元素类型， 用它撑满栈再触发扩容，然后逐项断言：长度不变、容量不变、原有元素逐个完好、 栈之后仍能继续使用；另一个类型让 <code>new T[]</code> 本身抛 <code>std::bad_alloc</code>，同样逐项断言。 把「先建后换」改回原书的「先释放旧的」，Debug 构建下 UBSan 当场报空指针引用， Release 构建直接段错误。</p>
-<h3 id="一个容易踩空的地方move_if_noexcept-在这里是错的"><a class="anchor" href="#一个容易踩空的地方move_if_noexcept-在这里是错的">#</a>一个容易踩空的地方：<code>move_if_noexcept</code> 在这里是错的</h3>
+<h4 id="四一个容易踩空的地方move_if_noexcept-在这里是错的"><a class="anchor" href="#四一个容易踩空的地方move_if_noexcept-在这里是错的">#</a>四、一个容易踩空的地方：<code>move_if_noexcept</code> 在这里是错的</h4>
 <p>搬迁元素时，一个几乎条件反射的写法是 <code>std::move_if_noexcept(data_[i])</code>—— 「移动可能抛就退回拷贝」，标准库容器扩容正是这么做的。<strong>但在这段代码里它是错的。</strong></p>
 <p><code>std::move_if_noexcept</code> 的判据是 <code>T</code> 的<strong>移动构造</strong>是否 <code>noexcept</code>。而这里 <code>fresh</code> 已经由 <code>new T[next]</code> 默认构造好了，搬迁执行的是<strong>移动赋值</strong>。 两者是不同的函数，可以有不同的异常规格：一个类完全可以移动构造 <code>noexcept</code>、 移动赋值却会抛。这时 <code>move_if_noexcept</code> 会放行移动，而抛出发生在搬到一半时—— <strong>原栈里已经被移动走的那些元素，已经被掏空了</strong>，强异常保证就此破裂。</p>
 <p>这个洞不是推演出来的：本书的测试里有一个正是这种形状的类型 （移动构造 <code>noexcept</code>，第 3 次移动赋值抛异常），它让原来的实现真的失败了。</p>
@@ -377,7 +533,8 @@ std::optional&lt;T&gt; top() <span class="k">const</span> {
 </ul>
 <p>第二条要求 <code>T</code> 可拷贝赋值，所以类头处那条 <code>static_assert</code> 写明： 不可拷贝的 <code>T</code> 必须满足 <code>is_nothrow_move_assignable</code>。<strong>这是本容器对元素类型的 一条真实约束</strong>，写成编译期断言，好过让它变成运行期某次扩容失败后的谜案。</p>
 <p>反过来也要小心：判据若写成「可拷贝就拷贝」，<code>std::string</code> （移动赋值本就是 <code>noexcept</code>）每次扩容都会退化成深拷贝， 算法3.3 摊还 O(1) 的分析就打了折扣。测试里因此有一条用例专门数拷贝次数—— <strong>这两种写法都能通过其他所有断言，只有这条能把它们分开。</strong></p>
-<p>进栈本身随之简化为「保证容量、写入、长度加一」：</p>
+<h4 id="五push-的两个重载"><a class="anchor" href="#五push-的两个重载">#</a>五、<code>push</code> 的两个重载</h4>
+<p>进栈本身随之简化为「保证容量、写入、长度加一」，但工程版给了<strong>两个</strong>重载：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/modern.hpp">code/ch03/array_stack/modern.hpp#push</a></div><pre><code><span class="c">/// 入栈。容量不足时按算法3.3 的策略翻倍。</span>
 <span class="c">/// 强异常保证：搬迁在新缓冲区上完成，中途抛异常则原栈原封不动。</span>
 <span class="t">void</span> push(<span class="k">const</span> T&amp; item) {
@@ -391,7 +548,10 @@ std::optional&lt;T&gt; top() <span class="k">const</span> {
     data_[top_index_] = std::move(item);
     ++top_index_;
 }</code></pre></div>
-<p>两个重载分别处理左值和右值。原书的 <code>bool push(const T item)</code> 按值传参， 顶层 <code>const</code> 对调用方没有意义，却强制了一次拷贝，而且 <code>std::unique_ptr</code> 这类只能移动的类型根本传不进去。</p>
+<p>两个重载分别处理左值和右值。教学版只写了 <code>push(const T&amp;)</code>——正确， 但压入一个临时对象时会多拷贝一次。原书的 <code>bool push(const T item)</code> 更糟： 按值传参，顶层 <code>const</code> 对调用方没有意义，却强制了一次拷贝， 而且 <code>std::unique_ptr</code> 这类只能移动的类型根本传不进去。</p>
+<h4 id="六对元素类型的编译期约束"><a class="anchor" href="#六对元素类型的编译期约束">#</a>六、对元素类型的编译期约束</h4>
+<p>工程版的类头上还有四条 <code>static_assert</code>。它们不参与运行，只在编译期检查 「你放进来的这个 <code>T</code> 合不合格」：必须能默认构造（<code>new T[n]</code> 会构造整块槽位）、 必须能移动赋值（搬迁要用）、不可拷贝的 <code>T</code> 必须能无异常移动赋值（上一小节的判据）、 不能是引用类型。</p>
+<p>这四条写在类里而不是文档里，是因为<strong>编译期报错永远比运行期谜案便宜</strong>。 教学版没有它们：<code>T</code> 不合格时报错会发生在模板实例化的深处，信息难看，但同样报错。 这是可读性与报错质量之间的一次交换，教学版选了前者。</p>
 <h3 id="313-链式栈"><a class="anchor" href="#313-链式栈">#</a>3.1.3 链式栈</h3>
 <p>采用链式存储结构的栈称为链式栈。结点分散在堆上，压栈只是接一个新结点， <strong>不需要连续空间，也没有&quot;栈满&quot;这回事</strong>——这正是它与顺序栈的核心差别。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/linked_stack/modern.hpp">code/ch03/linked_stack/modern.hpp#class-head</a></div><pre><code><span class="c">/// 链式栈：结点分散在堆上，压栈只是接一个新结点，不需要连续空间、也不需要扩容。</span>
@@ -992,7 +1152,7 @@ private: void append(Node* node) noexcept { if (rear_ == nullptr) front_ = rear_
 </ol>
 <div class="pagenav"><a href="ch02-linear-list.html"><span class="dir">← 上一篇</span>第2章 线性表</a><a href="ch04-string.html" style="text-align:right"><span class="dir">下一篇 →</span>第4章 字符串</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#31-栈">3.1 栈</a><a href="#311-栈的抽象数据类型" class="sub">3.1.1 栈的抽象数据类型</a><a href="#312-顺序栈" class="sub">3.1.2 顺序栈</a><a href="#存储与所有权" class="sub">存储与所有权</a><a href="#出栈用-optional-取代双通道返回" class="sub">出栈：用 optional 取代双通道返回</a><a href="#一个容易踩空的地方move_if_noexcept-在这里是错的" class="sub">一个容易踩空的地方：move_if_noexcept 在这里是错的</a><a href="#313-链式栈" class="sub">3.1.3 链式栈</a><a href="#314-表达式求值" class="sub">3.1.4 表达式求值</a><a href="#315-栈与递归" class="sub">3.1.5 栈与递归</a><a href="#运行栈有多大三个档位三种结果" class="sub">运行栈有多大：三个档位，三种结果</a><a href="#反直觉的那一条-o2-为什么不崩" class="sub">反直觉的那一条：-O2 为什么不崩</a><a href="#递归吃运行栈显式栈吃堆" class="sub">递归吃运行栈，显式栈吃堆</a><a href="#原书这三个版本共同的问题不查溢出" class="sub">原书这三个版本共同的问题：不查溢出</a><a href="#一个更复杂的例子背包问题" class="sub">一个更复杂的例子：背包问题</a><a href="#与原书的对照">与原书的对照</a><a href="#32-队列">3.2 队列</a><a href="#321-队列的抽象数据类型" class="sub">3.2.1 队列的抽象数据类型</a><a href="#322-顺序队列" class="sub">3.2.2 顺序队列</a><a href="#323-链式队列" class="sub">3.2.3 链式队列</a><a href="#33-栈与队列的比较">3.3 栈与队列的比较</a><a href="#331-顺序栈与链式栈" class="sub">3.3.1 顺序栈与链式栈</a><a href="#332-顺序队列与链式队列" class="sub">3.3.2 顺序队列与链式队列</a><a href="#333-限制存取点的表" class="sub">3.3.3 限制存取点的表</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充算法设计题参考课程第-3-章" class="sub">补充算法设计题（参考课程第 3 章）</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#31-栈">3.1 栈</a><a href="#311-栈的抽象数据类型" class="sub">3.1.1 栈的抽象数据类型</a><a href="#312-顺序栈" class="sub">3.1.2 顺序栈</a><a href="#312a-进阶选读从教学版到工程版" class="sub">3.1.2a 进阶（选读）：从教学版到工程版</a><a href="#313-链式栈" class="sub">3.1.3 链式栈</a><a href="#314-表达式求值" class="sub">3.1.4 表达式求值</a><a href="#315-栈与递归" class="sub">3.1.5 栈与递归</a><a href="#运行栈有多大三个档位三种结果" class="sub">运行栈有多大：三个档位，三种结果</a><a href="#反直觉的那一条-o2-为什么不崩" class="sub">反直觉的那一条：-O2 为什么不崩</a><a href="#递归吃运行栈显式栈吃堆" class="sub">递归吃运行栈，显式栈吃堆</a><a href="#原书这三个版本共同的问题不查溢出" class="sub">原书这三个版本共同的问题：不查溢出</a><a href="#一个更复杂的例子背包问题" class="sub">一个更复杂的例子：背包问题</a><a href="#与原书的对照">与原书的对照</a><a href="#32-队列">3.2 队列</a><a href="#321-队列的抽象数据类型" class="sub">3.2.1 队列的抽象数据类型</a><a href="#322-顺序队列" class="sub">3.2.2 顺序队列</a><a href="#323-链式队列" class="sub">3.2.3 链式队列</a><a href="#33-栈与队列的比较">3.3 栈与队列的比较</a><a href="#331-顺序栈与链式栈" class="sub">3.3.1 顺序栈与链式栈</a><a href="#332-顺序队列与链式队列" class="sub">3.3.2 顺序队列与链式队列</a><a href="#333-限制存取点的表" class="sub">3.3.3 限制存取点的表</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充算法设计题参考课程第-3-章" class="sub">补充算法设计题（参考课程第 3 章）</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch03-stack.md</code> 生成

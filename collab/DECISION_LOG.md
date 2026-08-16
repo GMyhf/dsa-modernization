@@ -331,6 +331,95 @@ text 块当场就与新源码对不上，R8 也不会命中。R8 堵的是**源�
 由 `ASSETS_HREF` 一个变量控制，`tests/test_build_site.py` 里有一条断言两种都盯着。
 将来若把站点换到别的托管，改的是这个变量和工作流，不是书稿。
 
+## D-012 · 2026-08-16 · 人已拍板：书稿正文印**教学版**，工程版降为「进阶（选读）」
+
+**这条修改 D-001 §4 与本书的代码呈现方式，是 2026-08-16 人给出的意见。**
+原话：「新书是教学使用，需要『教学版』数据结构代码，而不是『工业级、工程级』的
+数据结构代码。……看不懂『工业级、工程级』的数据结构代码。」
+
+### 问题不是代码写错了，是呈现的对象错了
+
+对着 `book/ch03-stack.md` §3.1 与 `code/ch03/array_stack/modern.hpp` 逐条比对，
+六条症状都指向同一件事——**书稿写的是给容器作者看的工程稿**：
+
+1. **正文从来不完整地印一个类**。§3.1 只印 5 个锚点切片
+   （`#class-head`/`#rule-of-five`/`#pop`/`#grow`/`#push`），读者拼不出一个能编译的文件。
+2. **顺序反了**：3.1.2 的次序是「存储与所有权（五法则 + copy-and-swap）→ pop → 扩容
+   → `move_if_noexcept` 陷阱 → push」。学生读到 `push` 之前已经啃了四页异常安全。
+3. **工程细节印在教学代码块中间**：`#grow` 那 39 行里夹着
+   `if constexpr (std::is_nothrow_move_assignable<T>)`、`try/catch`，
+   以及 8 行解释红队 T-002 的注释。
+4. **注解噪声**：`array_stack` 里 5 条 `static_assert`、13 处 `noexcept`、5 处 `[[nodiscard]]`。
+5. **辅助函数的认知负担**：`top_index_`、`kInitialCapacity`、`check_index(index, who)`、
+   `make_gap(pos)`、独立的 `swap()`。
+6. **`demo.cpp` 从来没被编译过**。R3 只保证它和文件逐字一致，闸门里没有任何一步编译它
+   （`grep demo tools/*.py` 只有一处无关命中）。教学版最依赖「抄下来就能跑」。
+
+### 决定：加一层，不是删一层
+
+每个容器单元增加 `teaching.hpp`——**完整、独立、能编译、书稿整块印出来**的最简实现。
+
+| 维度 | `teaching.hpp`（正文主线） | `modern.hpp`（进阶选读） |
+| --- | --- | --- |
+| 印法 | 整个文件印出来，可直接抄走编译 | 仍按锚点切片印 |
+| 资源管理 | **三法则**：析构 + 拷贝构造 + 拷贝赋值 | 五法则 + copy-and-swap |
+| 扩容 | `new` → 拷贝循环 → `delete[]`，约 10 行 | `try/catch` + `if constexpr(is_nothrow_move_assignable)` |
+| 注解 | 不写 `static_assert` / `[[nodiscard]]` / `noexcept` / `if constexpr` | 全套（D-001 §4 原样有效） |
+| 命名空间 | 无（`ArrayStack<int> s;` 直接用） | `namespace dsa` |
+| 空状态 | `std::optional`（**两版一致**，D-001 §3 红线不打折） | 同 |
+| 容器内 I/O | **禁**（D-001 §3 红线不打折） | 同 |
+| 用 STL 容器替代手写实现 | **禁**（D-001 §2 红线不打折） | 同 |
+
+**「三法则 → 五法则」是这套分层的支点。** 教学版省掉移动构造与移动赋值，代码
+**仍然完全正确**（退化成拷贝，只是慢），却一次砍掉了 copy-and-swap、`std::move`、
+`noexcept` 三个概念。于是教学版没有 bug，工程版的存在理由也变成一句人话：让它变快。
+
+**教学版不许照抄「网上那种教学版」。** 人给的样例里那个 `ArrayStack` 有析构函数却没有
+拷贝构造，`ArrayStack<int> b = a;` 就是二次释放——那正是本书勘误表里原书的头号错误
+（`code/ch03/array_stack/legacy.md` 有 ASan 复现）。**简化的边界是「少讲几件事」，
+不是「少做对几件事」。**
+
+### 书稿三段式
+
+```
+### 3.1.2 顺序栈
+  1「教学版实现」   ← teaching.hpp 全文，一整块，可编译可跑
+  2「关键要点」     ← 散文解读：为什么用 optional / 摊还 O(1) / new T[n] 的限制
+  3「进阶（选读）：从教学版到工程版」  ← 原有内容整体后移，开头标明初学可跳过
+```
+
+现有正文一个字都不删，只是降级为选读。
+
+### 闸门这一半（否则又多一份没人验的代码）
+
+`check_code.py` 的 `unit_programs()`：一个单元最多三个可执行产物，各有自己的 `main`，
+**每个都在两档 profile 下真编译真运行**——
+
+- `test`（`modern.hpp`）、`teaching`（`teaching_test.cpp`）、`demo`（`demo.cpp`）；
+- `teaching.hpp` 在而 `teaching_test.cpp` 不在 → 红（反之亦然）；
+- 教学版断言下限 10 项（`MIN_TEACHING_ASSERTIONS`）；
+- D-001 静态检查扩到 `teaching.*`：可以少写 `noexcept`，但容器里一个 `cout` 都不许有；
+- **`demo.cpp` 从此进闸门**，补掉上面第 6 条那个洞。
+
+自测见 `tests/test_check_code.py::TestTeachingAndDemoAreVerified`（8 条）。
+
+### 豁免范围，只到这里
+
+教学版豁免的是 **D-001 §4 的 `[[nodiscard]]` / `noexcept` 要求**，以及 §2 里
+「显式写全五法则」那一句（改为显式写全三法则）。**D-001 的其余各条一律照旧**：
+C++17、不用 STL 容器替换手写实现、容器内零 I/O、空状态用 `optional`、
+真错误抛标准异常、成员变量不得与成员函数重名。
+
+### 适用范围与批次
+
+只有**重容器单元**需要 `teaching.hpp`；算法类单元（排序、KMP、图算法、背包）
+本身已经是教学版形态，不新增文件。批次见 `collab/PLAN.md` 的 T-021。
+
+### 代价，写明
+
+一份实现变两份，两份都要跟着改。缓解手段是闸门：两份都真编译真运行，
+断层会当场变红，而不是等读者发现。
+
 ## D-002 · 2026-08-12 · Claude 记录：`dsa_raw.md` 永久只读
 
 它是「原书到底怎么写的」唯一凭据，修订一律落在 `book/`。

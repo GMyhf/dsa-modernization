@@ -306,6 +306,97 @@ class TestSanitizerPreflight(unittest.TestCase):
         self.assertIn("不代表内存与 UB 干净", src)
 
 
+class TestTeachingAndDemoAreVerified(unittest.TestCase):
+    """D-012 的教学版分层，闸门这一半有没有牙。
+
+    这层的风险很具体：**教学版是书稿正文整块印出来、读者最可能照抄的那一份**。
+    它一旦成了「书里印着、闸门不管」的代码，就退回了本项目开工时要修的那个问题。
+    `demo.cpp` 在 D-012 之前正是这种状态——R3 保证它和文件逐字一致，
+    但从来没有任何一步编译过它。
+    """
+
+    def test_teaching_header_without_test_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = make_unit(Path(tmp), "int main() { return 0; }\n")
+            (unit / "teaching.hpp").write_text("#pragma once\n", encoding="utf-8")
+            _, problems = check_code.unit_programs(unit, [str(unit / "test.cpp")])
+        self.assertTrue(any("teaching_test.cpp" in p for p in problems), problems)
+
+    def test_teaching_test_without_header_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = make_unit(Path(tmp), "int main() { return 0; }\n")
+            (unit / "teaching_test.cpp").write_text("int main() { return 0; }\n", encoding="utf-8")
+            _, problems = check_code.unit_programs(unit, [str(unit / "test.cpp")])
+        self.assertTrue(any("teaching.hpp" in p for p in problems), problems)
+
+    def test_teaching_and_demo_become_their_own_programs(self):
+        """三份源码各有自己的 main，必须编成三个可执行文件而不是链在一起。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = make_unit(Path(tmp), "int main() { return 0; }\n")
+            (unit / "teaching.hpp").write_text("#pragma once\n", encoding="utf-8")
+            (unit / "teaching_test.cpp").write_text("int main() { return 0; }\n", encoding="utf-8")
+            (unit / "demo.cpp").write_text("int main() { return 0; }\n", encoding="utf-8")
+            programs, problems = check_code.unit_programs(unit, [str(unit / "test.cpp")])
+        self.assertEqual(problems, [])
+        self.assertEqual([kind for kind, _ in programs], ["test", "teaching", "demo"])
+        for _, srcs in programs:
+            self.assertEqual(len(srcs), 1, "每个产物只带自己那一个 main")
+
+    def test_thin_teaching_test_is_rejected(self):
+        """教学版少考虑几件事是 D-012 的取舍；少验几条不是。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = make_unit(Path(tmp), "int main() { return 0; }\n")
+            (unit / "teaching.hpp").write_text("#pragma once\n", encoding="utf-8")
+            meta = json.loads((unit / "unit.json").read_text(encoding="utf-8"))
+            problems = check_code.check_substance(unit, meta, assertions=30, teaching_assertions=3)
+        self.assertTrue(any("教学版只有 3 项断言" in p for p in problems), problems)
+
+    def test_adequate_teaching_test_passes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = make_unit(Path(tmp), "int main() { return 0; }\n")
+            (unit / "teaching.hpp").write_text("#pragma once\n", encoding="utf-8")
+            meta = json.loads((unit / "unit.json").read_text(encoding="utf-8"))
+            problems = check_code.check_substance(unit, meta, assertions=30, teaching_assertions=30)
+        self.assertEqual(problems, [])
+
+    def test_d001_covers_the_teaching_header(self):
+        """教学版可以少写 noexcept，但容器里照样一个 cout 都不许有。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = make_unit(Path(tmp), "int main() { return 0; }\n")
+            (unit / "teaching.hpp").write_text(
+                "#include <iostream>\nvoid f() { std::cout << 1; }\n", encoding="utf-8"
+            )
+            meta = json.loads((unit / "unit.json").read_text(encoding="utf-8"))
+            problems = check_code.check_d001(unit, meta)
+        self.assertTrue(any("teaching.hpp" in p for p in problems), problems)
+
+    @unittest.skipIf(check_code.compiler() is None, "机器上没有 C++ 编译器")
+    def test_broken_demo_turns_the_gate_red(self):
+        """这一条守的就是 D-012 之前那个洞：demo 编不过必须红。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = make_unit(
+                Path(tmp),
+                '#include <cstdio>\nint main() { std::printf("Probe: 5 项断言，0 失败\\n"); return 0; }\n',
+            )
+            (unit / "demo.cpp").write_text("int main() { return nonexistent(); }\n", encoding="utf-8")
+            code, out = run_gate(unit)
+        self.assertEqual(code, 1)
+        self.assertIn("/demo]", out)
+        self.assertIn("编译失败", out)
+
+    @unittest.skipIf(check_code.compiler() is None, "机器上没有 C++ 编译器")
+    def test_demo_that_exits_nonzero_turns_the_gate_red(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = make_unit(
+                Path(tmp),
+                '#include <cstdio>\nint main() { std::printf("Probe: 5 项断言，0 失败\\n"); return 0; }\n',
+            )
+            (unit / "demo.cpp").write_text("int main() { return 3; }\n", encoding="utf-8")
+            code, out = run_gate(unit)
+        self.assertEqual(code, 1)
+        self.assertIn("demo 运行失败", out)
+
+
 class TestOutputTruncation(unittest.TestCase):
     def test_keeps_head_and_tail(self):
         """噪声多的失败输出里，最后那句 FAIL 不能被顶掉。"""

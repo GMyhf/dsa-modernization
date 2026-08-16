@@ -53,6 +53,7 @@
 | T-018 | 新书目录对齐 2008 原书；保留原书没错的内容 | Review | Claude | 第 3 章两个 3.1.3 已拆开；第 5–12 章改回原书编号并补回概念节。第 1 章仍以传言问题开篇（原书 1.1），ADT/算法分析尚未整节补回。 |
 | T-019 | 整节补回原书没错、新书还空着的内容 | Review | Claude | 已补 1.2–1.4、6.1.2–6.4、10.1.x/10.2/10.3.x、12.1–12.4 全部分节。无独立实现的节只写概念、不印示意代码。PDF 已重编。 |
 | T-020 | 新书的浏览器版（静态站点） | Review | Claude | `python3 tools/build_site.py` → `book/site/`，16 个页面，入口 `index.html`（双击即可读，或 `python3 -m http.server -d book`）。纯标准库、零 CDN：公式手写 LaTeX 子集转换、C++ 高亮在构建期完成。**HTML 是产物，Markdown 仍是唯一事实源**——闸门新增一步 `build_site.py --check`，书稿改了不重建就红。21 项自测，变异自检 5/5 全抓（含「高亮吃掉一个字节」与「站内锚点检查失效」）。全书 180 个代码块逐字比对渲染前后，一个字节都没变 — 2026-08-15 已上线 GitHub Pages：<https://gmyhf.github.io/dsa-modernization/>，由 `.github/workflows/pages.yml` 现场重建后发布（D-011），更新方式写进 README「怎么更新这本在线书」 |
+| T-021 | **教学版分层（D-012）**：正文印教学版，工程版降为「进阶（选读）」 | In progress | Claude | 人于 2026-08-16 提出：「新书是教学使用，需要『教学版』数据结构代码……看不懂『工业级、工程级』的」。决策全文见 `DECISION_LOG.md` D-012。**第 1 批已落地**：`code/ch03/array_stack` + `code/ch02/array_list` 各加 `teaching.hpp` + `teaching_test.cpp`（34 / 43 项断言），变异自检 5/5 与 6/6 全抓；书稿 3.1.2 与 2.2 改成「完整实现 → 关键要点 → 进阶（选读）」三段式。闸门新增 `unit_programs()`：教学版与 **`demo.cpp`** 都进双档编译运行——`demo.cpp` 在此之前从来没被编译过（R3 只比对文本），32 个 demo 现已全绿。自测 +8 条（`TestTeachingAndDemoAreVerified`）。**待办批次**：② `ch03/linked_stack`、`ch03/queue`、`ch02/linked_list`、`ch02/doubly_linked_list`；③ `ch04/string_class`、`ch05/binary_tree`、`ch05/heap_huffman`；④ 算法类单元只做注解噪声清理，不新增文件 |
 
 ## Decision Log
 
@@ -71,6 +72,7 @@
 | D-003 | 2026-08-12 | 书稿代码块与源码一致性靠机器保证（R3 + sync_book） | Claude 记录 |
 | D-004 | 2026-08-12 | 闸门跑 Debug+ASan/UBSan 与 Release-O2 两种构建 | Claude 记录 |
 | D-011 | 2026-08-15 | 网页版存 `book/site/`（插图不复制第二份），由 Actions 现场重建后发到 GitHub Pages | Claude 记录 |
+| D-012 | 2026-08-16 | 书稿正文印**教学版**（`teaching.hpp`，三法则、整块印全），工程版降为「进阶（选读）」；`teaching_test.cpp` 与 `demo.cpp` 一并进闸门 | **人** |
 
 **已被取代**：2026-08-12 早些时候 Claude 提议的「C++20 + concept」被 D-001 取代为
 C++17 + `static_assert`。原提议与取代理由都保留在 D-001 里，没有删除。

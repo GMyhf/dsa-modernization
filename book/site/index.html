@@ -155,6 +155,47 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <main>
 <a class="download" href="../pdf/%E7%8E%B0%E4%BB%A3C%2B%2B%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E6%95%99%E7%A8%8B.pdf" download><span class="dl-badge">PDF</span><span class="dl-body"><b>下载完整教程</b><span class="dl-meta">B5 开本，带书签目录 · 364 页 · 7.6 MB · 291 张插图 · 含 12 章正文、习题与参考答案、原书插图与勘误</span></span><span class="dl-arrow">↓</span></a>
 <h2 id="如何使用本教程"><a class="anchor" href="#如何使用本教程">#</a>如何使用本教程</h2>
+<h3 id="两条阅读路径"><a class="anchor" href="#两条阅读路径">#</a>两条阅读路径</h3>
+<p>这本书的每个数据结构都有<strong>两份实现</strong>，写给两种不同的读者：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left"></th>
+<th style="text-align:left">教学版 <code>teaching.hpp</code></th>
+<th style="text-align:left">工程版 <code>modern.hpp</code></th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">给谁看</td>
+<td style="text-align:left">第一次学这个数据结构的人</td>
+<td style="text-align:left">要写自己的容器、自己的库的人</td>
+</tr>
+<tr>
+<td style="text-align:left">在书里</td>
+<td style="text-align:left"><strong>正文主线</strong>，整个文件一次印全，抄下来就能编译</td>
+<td style="text-align:left">标了「进阶（选读）」的小节，按片段印</td>
+</tr>
+<tr>
+<td style="text-align:left">资源管理</td>
+<td style="text-align:left"><strong>三法则</strong>：析构 + 拷贝构造 + 拷贝赋值</td>
+<td style="text-align:left"><strong>五法则</strong>：再加移动构造 + 移动赋值</td>
+</tr>
+<tr>
+<td style="text-align:left">异常安全</td>
+<td style="text-align:left">基本保证</td>
+<td style="text-align:left">强异常保证（失败时容器像没动过）</td>
+</tr>
+<tr>
+<td style="text-align:left">类型约束</td>
+<td style="text-align:left">交给模板实例化时报错</td>
+<td style="text-align:left"><code>static_assert</code> 在编译期先拦一道</td>
+</tr>
+<tr>
+<td style="text-align:left">注解</td>
+<td style="text-align:left">不写 <code>[[nodiscard]]</code> / <code>noexcept</code></td>
+<td style="text-align:left">写全</td>
+</tr>
+</tbody></table></div>
+<p><strong>初学者只读教学版就够了。</strong> 它不是「简化到不对」的版本——它一样进闸门， 一样在 <code>-Werror</code> + AddressSanitizer/UBSan 与 <code>-O2</code> 两档下真编译真运行， 一样有专门的断言测试。它少的是<strong>工程加固</strong>，不是<strong>正确性</strong>。</p>
+<p>标着「进阶（选读）」的小节可以整节跳过，等到你需要写自己的容器时再回来。 这个分层的理由与代价写在 <code>collab/DECISION_LOG.md</code> 的 D-012。</p>
+<h3 id="文件组织"><a class="anchor" href="#文件组织">#</a>文件组织</h3>
 <p>每章正文位于本目录的独立 Markdown 文件。这样做有两个好处：阅读器能快速跳转，且每一段 C++ 都能与 <code>code/</code> 下通过测试的源码逐字同步。代码块中的 <code>file=</code> 标注就是其来源。</p>
 <p>想在浏览器里读，用 <code>python3 tools/build_site.py</code> 生成的网页版：打开 <code>book/site/index.html</code> 即可，左侧是全书目录、右侧是本章小节，代码块可一键复制。网页由这些 Markdown 渲染而来， 不是另一份稿子。离线阅读还有 <code>book/pdf/现代C++数据结构教程.pdf</code>。</p>
 <p>建议的学习顺序是第 1 至第 10 章；第 11 章把索引技术做成可运行的页模拟（线性索引、倒排、B+ 树、位图）；第 12 章收束广义表的共享回收、前缀树与动态规划。 每章先理解抽象模型，再阅读实现，最后运行对应单元的测试。所有提取操作（例如 <code>pop</code>、 <code>dequeue</code>）都用 <code>std::optional</code> 表达正常的空状态；参数、容量或权重不合法则抛标准异常。</p>
@@ -176,42 +217,68 @@ python3 tools/check_doc.py</code></pre></div>
 <th style="text-align:left">能力</th>
 <th style="text-align:left">首次出现</th>
 <th style="text-align:left">本书内的学习入口</th>
+<th style="text-align:left">路径</th>
 </tr></thead><tbody>
 <tr>
-<td style="text-align:left">RAII、析构与五法则</td>
+<td style="text-align:left"><code>std::optional</code> 表达「可能没有」</td>
 <td style="text-align:left">第 2 章顺序表</td>
-<td style="text-align:left">第 2 章“存储与所有权”</td>
+<td style="text-align:left">2.2.2 顺序表的检索</td>
+<td style="text-align:left">正文</td>
 </tr>
 <tr>
-<td style="text-align:left">移动语义与完美转发</td>
-<td style="text-align:left">第 2、5 章</td>
-<td style="text-align:left">第 2 章链表、第 5 章树</td>
+<td style="text-align:left">RAII、析构与<strong>三法则</strong></td>
+<td style="text-align:left">第 2 章顺序表</td>
+<td style="text-align:left">2.2.1 存储与所有权</td>
+<td style="text-align:left">正文</td>
 </tr>
 <tr>
-<td style="text-align:left">异常与异常安全</td>
-<td style="text-align:left">第 2、5、10 章</td>
-<td style="text-align:left">各章“失败处理”小节</td>
+<td style="text-align:left"><strong>五法则</strong>与移动语义</td>
+<td style="text-align:left">第 2、3 章</td>
+<td style="text-align:left">2.2.5、3.1.2a「进阶」</td>
+<td style="text-align:left">选读</td>
 </tr>
 <tr>
-<td style="text-align:left">迭代器与 STL 算法</td>
+<td style="text-align:left">异常与<strong>强异常保证</strong></td>
+<td style="text-align:left">第 2、3、5、10 章</td>
+<td style="text-align:left">2.2.5、3.1.2a「进阶」</td>
+<td style="text-align:left">选读</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>static_assert</code> 与 <code>&lt;type_traits&gt;</code></td>
+<td style="text-align:left">第 2、3 章</td>
+<td style="text-align:left">2.2.5、3.1.2a「进阶」</td>
+<td style="text-align:left">选读</td>
+</tr>
+<tr>
+<td style="text-align:left">迭代器与 range-for</td>
+<td style="text-align:left">第 2 章顺序表</td>
+<td style="text-align:left">2.2.1 末尾的 <code>begin()/end()</code></td>
+<td style="text-align:left">正文</td>
+</tr>
+<tr>
+<td style="text-align:left">STL 算法</td>
 <td style="text-align:left">第 8、10 章</td>
 <td style="text-align:left">第 8 章排序、第 10 章检索</td>
+<td style="text-align:left">正文</td>
 </tr>
 <tr>
 <td style="text-align:left"><code>[[nodiscard]]</code></td>
-<td style="text-align:left">第 1 章起</td>
-<td style="text-align:left">下面的“属性和接口约定”</td>
+<td style="text-align:left">第 2 章起</td>
+<td style="text-align:left">2.2.2 与下面的“属性和接口约定”</td>
+<td style="text-align:left">选读</td>
 </tr>
 <tr>
 <td style="text-align:left">concepts、ranges、views</td>
 <td style="text-align:left">延伸阅读</td>
 <td style="text-align:left">不作为正文前置条件</td>
+<td style="text-align:left">选读</td>
 </tr>
 </tbody></table></div>
 <h3 id="术语速查"><a class="anchor" href="#术语速查">#</a>术语速查</h3>
 <p>正文里反复出现的几个词，第一次撞上时可以回来查。每条只讲两件事：<strong>是什么</strong>，以及 <strong>不这样做会出什么事</strong>——后者才是它们存在的理由。</p>
 <p><strong><code>std::optional&lt;T&gt;</code></strong>：一个「可能装着 T 的盒子」。表示「可能没有结果」的返回值， 取值前必须先判断盒子空不空。它替代的是老写法「返回 <code>bool</code> 表示成败 + 用引用参数带出结果」—— 那种写法下调用方忘了看 <code>bool</code>，就会读到一个从没被写过的变量，程序不崩，只是默默按错误数据继续跑。 第 2.2.2 节有完整对照。</p>
-<p><strong>五法则（Rule of Five）</strong>：一个类只要自己管着资源（这里是 <code>new</code> 出来的缓冲区或结点）， 就得同时写全<strong>析构函数、拷贝构造、拷贝赋值、移动构造、移动赋值</strong>这五个函数。 少写任何一个，编译器都会替你生成一个「逐成员照抄」的版本——照抄指针的结果是两个对象 指向同一块内存，各自析构一次，<strong>同一块内存被释放两次</strong>。原书的 <code>arrStack</code> 和 <code>arrList</code> 都缺了这几个，第 3 章用 ASan 报告复现了这个二次释放。</p>
+<p><strong>三法则（Rule of Three）</strong>：一个类只要自己管着资源（这里是 <code>new</code> 出来的缓冲区或结点）， 就得同时写全<strong>析构函数、拷贝构造、拷贝赋值</strong>这三个函数。少写任何一个， 编译器都会替你生成一个「逐成员照抄」的版本——照抄指针的结果是两个对象指向同一块内存， 各自析构一次，<strong>同一块内存被释放两次</strong>。原书的 <code>arrStack</code> 和 <code>arrList</code> 都缺了这几个， 第 3 章用 ASan 报告复现了这个二次释放。<strong>教学版守到这一条为止，就已经是正确的了。</strong></p>
+<p><strong>五法则（Rule of Five）</strong>：在三法则之上再加<strong>移动构造、移动赋值</strong>。 它们不修正确性，只修性能：把一个马上要销毁的临时对象赋给别人时， 没必要深拷贝一遍，直接把指针「偷」过来即可。工程版写全五个，属于「进阶（选读）」。</p>
 <p><strong>RAII</strong>：把「资源的生命周期」绑在「对象的生命周期」上——构造时拿到，析构时自动还回去。 好处是无论函数怎么退出（正常返回、提前 <code>return</code>、抛异常），析构都一定会跑， 所以不会漏掉释放。<code>std::unique_ptr</code> 就是 RAII 的典型；本书在少数几处刻意不用它， 理由和代价见第 2.3.2a 节。</p>
 <p><strong><code>noexcept</code></strong>：写在函数后面，承诺这个函数不会抛异常。它不只是文档——标准库和本书的容器 都会<strong>查询</strong>这个承诺来决定策略（例如扩容时是「移动元素」还是「拷贝元素」）。 承诺了却真的抛，程序直接 <code>std::terminate</code>，没有补救余地。</p>
 <p><strong>强异常保证</strong>：一个操作要么完全成功，要么<strong>像没发生过一样</strong>，绝不留下半成品状态。 典型做法是「先在新地方做好，全部成功了再换过去」。反例是原书扩容：先 <code>delete[]</code> 旧缓冲区 再搬元素，中途抛异常就停在一个既不是旧状态、也不是新状态的地方，对象从此不可用。 第 3.1.3 节有可运行的对照测试。</p>
@@ -317,7 +384,7 @@ python3 tools/check_doc.py</code></pre></div>
 <p>本教程采用 C++17，侧重数据结构的实现与算法语义。它不提供文件系统、数据库页缓存、并发控制 或跨平台性能承诺；这些属于使用数据结构的系统层设计。</p>
 <div class="pagenav"><span></span><a href="ch01-adt.html" style="text-align:right"><span class="dir">下一篇 →</span>第1章 概论</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#如何使用本教程">如何使用本教程</a><a href="#语言版本与实现状态" class="sub">语言版本与实现状态</a><a href="#现代-c-能力地图" class="sub">现代 C++ 能力地图</a><a href="#术语速查" class="sub">术语速查</a><a href="#属性和接口约定" class="sub">属性和接口约定</a><a href="#各章实现状态" class="sub">各章实现状态</a><a href="#每章验证边界" class="sub">每章验证边界</a><a href="#目录">目录</a><a href="#阅读约定">阅读约定</a><a href="#验证与边界">验证与边界</a></nav>
+<nav class="page"><b>本页</b><a href="#如何使用本教程">如何使用本教程</a><a href="#两条阅读路径" class="sub">两条阅读路径</a><a href="#文件组织" class="sub">文件组织</a><a href="#语言版本与实现状态" class="sub">语言版本与实现状态</a><a href="#现代-c-能力地图" class="sub">现代 C++ 能力地图</a><a href="#术语速查" class="sub">术语速查</a><a href="#属性和接口约定" class="sub">属性和接口约定</a><a href="#各章实现状态" class="sub">各章实现状态</a><a href="#每章验证边界" class="sub">每章验证边界</a><a href="#目录">目录</a><a href="#阅读约定">阅读约定</a><a href="#验证与边界">验证与边界</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/现代C++数据结构教程.md</code> 生成
