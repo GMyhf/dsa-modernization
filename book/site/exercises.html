@@ -287,6 +287,30 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <li><strong>[课程第三章答案第 2 题]</strong> 设最后出栈元素为 <code>k</code>，左右两侧独立产生 <code>C_{k-1}</code> 与 <code>C_{n-k}</code>，所以 <code>C_n=sum(C_{k-1}C_{n-k})</code>，解为 <code>1/(n+1) binom(2n,n)</code>。</li>
 <li><strong>[<code>ref_DSA/homework/3.md</code> 第 3 题]</strong> 新操作入撤销栈并清空恢复栈；撤销执行逆操作并把原操作放入恢复栈；恢复执行原操作并放回撤销栈。</li>
 </ol>
+<h3 id="正文习题答案-2"><a class="anchor" href="#正文习题答案-2">#</a>正文习题答案</h3>
+<ol>
+<li>用数组 <code>data[n]</code>、<code>front</code>（队头）和 <code>count</code> 表示双端队列，队尾下标为 <code>(front+count-1)%n</code>。队尾删除取该下标后 <code>--count</code>；队头插入先令 <code>front=(front+n-1)%n</code>，再写入并 <code>++count</code>。四种操作都先判空/满，时间均为 <span class="math">O(<span class="upr">1</span>)</span>。</li>
+<li>判空即 <code>count==0</code>，队尾位置由 <code>(front+count)%n</code> 算出。入队写该位置后 <code>++count</code>；出队取 <code>data[front]</code>，令 <code>front=(front+1)%n</code>、<code>--count</code>。<code>count</code> 同时消除了 <code>front==rear</code> 无法区分空和满的问题。</li>
+<li>两个额外栈：把 <span class="math">S</span> 依次倒入 <span class="math">A</span>、再倒入 <span class="math">B</span>、最后倒回 <span class="math">S</span>；三次逆置的净效果是逆置。一个队列：把 <span class="math">S</span> 全弹入队列，再依次出队压回 <span class="math">S</span>。一个额外栈加若干标量时，标量必须能暂存全部 <span class="math">n</span> 个元素，否则做不到任意长栈的逆置。</li>
+<li>用输入栈 <code>in</code> 和输出栈 <code>out</code>：<code>enqueue(x)</code> 压入 <code>in</code>；<code>dequeue()</code> 在 <code>out</code> 非空时直接弹，否则把 <code>in</code> 全倒入 <code>out</code> 后弹。每个元素最多转移一次，一串操作的摊还时间为 <span class="math">O(<span class="upr">1</span>)</span>。</li>
+<li>令 <code>rear</code> 指向尾结点，队头是 <code>rear-&gt;next-&gt;next</code>（<code>rear-&gt;next</code> 为头结点）。初始化让头结点自环且 <code>rear=head</code>；入队把新结点插在头结点前并更新 <code>rear</code>；出队删 <code>head-&gt;next</code>，删掉唯一数据结点后恢复 <code>rear=head</code>。均为 <span class="math">O(<span class="upr">1</span>)</span>。</li>
+<li>栈 1 从数组左端向右长，栈 2 从右端向左长，栈顶下标初值分别为 <code>-1</code>、<code>n</code>。仅当 <code>top1+1==top2</code> 才溢出；两边 <code>push</code>/<code>pop</code> 都是 <span class="math">O(<span class="upr">1</span>)</span>，空闲空间由两栈共享。</li>
+<li>合法出栈序列数是 Catalan 数 <span class="math">C<sub><span class="upr">5</span></sub><span class="rel">=</span><span class="upr">10</span>!/(<span class="upr">6</span>!<span class="bin">×</span><span class="upr">5</span>!)<span class="rel">=</span><span class="upr">42</span></span>。</li>
+<li>必要性：若 <span class="math">i&lt;j&lt;k</span> 且 <span class="math">p<sub>j</sub>&lt;p<sub>k</sub>&lt;p<sub>i</sub></span>，输出 <span class="math">p<sub>i</sub></span> 后，较早入栈的 <span class="math">p<sub>j</sub></span> 仍压在 <span class="math">p<sub>k</sub></span> 下面，不可能先于 <span class="math">p<sub>k</sub></span> 输出。充分性：按目标序列依次压到所需元素；若栈顶不是目标，栈内就形成上述禁形。不存在禁形时每一步都能弹出。</li>
+<li>栈变化为 <code>[] -&gt; [12] -&gt; [12,8] -&gt; [12,8,9] -&gt; [12,72] -&gt; [84]</code>，结果为 <strong>84</strong>。</li>
+<li>操作符栈依次经历 <code>[]</code>、<code>[*]</code>、<code>[*,(]</code>、<code>[*,(,*]</code>、<code>[*,(,-]</code>、<code>[]</code>、<code>[+]</code>、<code>[]</code>；输出最终为 <strong><code>abc*d-*e+</code></strong>。</li>
+<li>欧几里得递归为 <code>gcd(n,m) = (m==0 ? abs(n) : gcd(m,n%m))</code>。每次余数严格变小，最坏递归深度 <span class="math">O(<span class="upr">log</span>&thinsp;&thinsp;<span class="upr">min</span>&thinsp;(|n|,|m|))</span>。</li>
+<li>令 <span class="math">a<sub><span class="upr">1</span></sub><span class="rel">=</span><span class="upr">1</span></span>，<span class="math">a<sub>k</sub><span class="rel">=</span>(<span class="bin">−</span><span class="upr">1</span>)<sup>k</sup>/k</span>（<span class="math">k<span class="rel">≥</span><span class="upr">2</span></span>）。递归 <code>sum(n)=sum(n-1)+a_n</code>，边界 <code>sum(1)=1</code>；非递归从 1 开始循环累加。两者时间 <span class="math">O(n)</span>，递归额外栈 <span class="math">O(n)</span>、迭代空间 <span class="math">O(<span class="upr">1</span>)</span>。</li>
+</ol>
+<h3 id="正文上机题参考-2"><a class="anchor" href="#正文上机题参考-2">#</a>正文上机题参考</h3>
+<ol>
+<li>采用上题两个栈方案；若复用本书容器，<code>ArrayStack::push</code>、<code>pop</code>、<code>empty</code> 是实际接口。守门用例要覆盖空队列、交错入出和 <code>out</code> 非空时继续入队。</li>
+<li>用 <code>front</code>、<code>count</code> 和循环数组实现，四端操作均按模取下标。至少测试容量 1、满后拒绝、绕回以及从两端删到空；本书 <code>ArrayQueue</code> 的实际接口是 <code>enqueue</code>、<code>dequeue</code>、<code>empty</code>、<code>full</code>，但它本身不是双端队列。</li>
+<li>一个辅助队列时，每插入 <span class="math">x</span>，先入队，再轮转原有元素，使队头始终为最小值。插入最坏 <span class="math">O(n)</span>，删除最小 <span class="math">O(<span class="upr">1</span>)</span>；两个辅助队列也可做归并式插入。</li>
+<li>一个辅助栈时做 <code>s1 -&gt; aux -&gt; s2</code> 两次转移。若只许有限个标量而元素数无界，则不能保持任意长栈的原顺序；需要递归调用栈或能容纳 <span class="math">n</span> 个值的外部存储。</li>
+<li>递归 <code>fib(n)=fib(n-1)+fib(n-2)</code> 会重复计算，时间指数级。显式栈帧保存 <code>(n,阶段,左结果)</code> 可模拟调用；更实用的非递归只保留前两项，时间 <span class="math">O(n)</span>、空间 <span class="math">O(<span class="upr">1</span>)</span>。</li>
+<li><span class="math">Ack(<span class="upr">2</span>,<span class="upr">1</span>)<span class="rel">=</span>Ack(<span class="upr">1</span>,Ack(<span class="upr">2</span>,<span class="upr">0</span>))<span class="rel">=</span>Ack(<span class="upr">1</span>,Ack(<span class="upr">1</span>,<span class="upr">1</span>))<span class="rel">=</span>Ack(<span class="upr">1</span>,<span class="upr">3</span>)<span class="rel">=</span><span class="upr">5</span></span>。非递归算法用栈保存尚未完成的 <span class="math">m</span>：<code>m==0</code> 时 <code>n++</code>；<code>n==0</code> 时转成 <code>(m-1,1)</code>；否则压入 <code>m-1</code> 并先求 <code>(m,n-1)</code>。数值增长极快，必须设溢出和资源上限。</li>
+</ol>
 <h3 id="课程作业与-ref_dsa-参考答案-2"><a class="anchor" href="#课程作业与-ref_dsa-参考答案-2">#</a>课程作业与 <code>ref_DSA</code> 参考答案</h3>
 <ol>
 <li><strong>[课程第三章答案第 1 题；<code>ref_DSA/homework/3.md</code> 第 4 题]</strong> 两个栈实现队列：入队只压入 <code>in</code>；出队时若 <code>out</code> 为空，把 <code>in</code> 全部弹出压入 <code>out</code>，再从 <code>out</code> 弹出。单次最坏 <code>O(n)</code>，摊还 <code>O(1)</code>。课程答案文字中“<code>S1</code> 满时搬运”不是必要条件，代码实际采用的也是只在出队栈为空时搬运，本书按代码校正。</li>
@@ -297,6 +321,25 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h3 id="课程上机参考-2"><a class="anchor" href="#课程上机参考-2">#</a>课程上机参考</h3>
 <p>分别运行递归、显式栈和优化版背包实现，用穷举结果对拍；再测空物品、容量 0、无解、负容量和非正重量。队列应测试满、空、环回和重复入队出队。</p>
 <h2 id="第-4-章-字符串"><a class="anchor" href="#第-4-章-字符串">#</a>第 4 章 字符串</h2>
+<h3 id="正文习题答案-3"><a class="anchor" href="#正文习题答案-3">#</a>正文习题答案</h3>
+<ol>
+<li>可直接按位置重组：<code>&quot;(&quot; + s.substr(1,1) + &quot;+&quot; + s.substr(3,1) + &quot;)*&quot; + s.substr(2,1)</code>，结果是 <code>(x+z)*y</code>。这里只取用了 <span class="math">s</span> 的 <code>x</code>、<code>z</code>、<code>y</code>，其余字符由连接补入。</li>
+<li>当且仅当存在某个串 <span class="math">u</span> 和非负整数 <span class="math">m,n</span>，使 <span class="math">s<sub><span class="upr">1</span></sub><span class="rel">=</span>u<sup>m</sup></span>、<span class="math">s<sub><span class="upr">2</span></sub><span class="rel">=</span>u<sup>n</sup></span>；空串对应指数 0。取两串的最短公共周期，连接可交换迫使二者都由该周期重复组成。</li>
+<li>建 36 个计数器：<code>A..Z</code> 映到 <code>0..25</code>，<code>0..9</code> 映到 <code>26..35</code>，一次扫描累加；其他字符忽略或按输入契约报错。时间 <span class="math">O(n)</span>、固定额外空间。</li>
+<li>0 起始下标时先按 <code>0,2,4,...</code> 收集偶下标字符，再按最大的奇下标到 1 收集奇下标字符。<code>ABCDEFGHIJKL</code> 得 <strong><code>ACEGIKLJHFDB</code></strong>；一次新缓冲扫描为 <span class="math">O(n)</span> 时间、<span class="math">O(n)</span> 空间。</li>
+<li>双指针从两端向中间比较，任一对不同返回 0，交错后返回 1；时间 <span class="math">O(n)</span>、空间 <span class="math">O(<span class="upr">1</span>)</span>。</li>
+<li>先给 <span class="math">t</span> 的字符建存在表，再扫描 <span class="math">s</span>；字符不在 <span class="math">t</span> 且第一次出现时，追加到新串并记录当前位置。时间 <span class="math">O(|s|<span class="bin">+</span>|t|)</span>，字节字母表下额外空间 <span class="math">O(<span class="upr">1</span>)</span>。</li>
+<li>令 <span class="math">R<span class="rel">=</span>reverse(T&#x27;)</span>，长度相同且能在 <code>R+R</code> 中找到 <span class="math">T</span> 时，<span class="math">T</span> 才是 <span class="math">T&#x27;</span> 的循环反转；可用 <code>kmp_search(R+R,T)</code> 在线性时间完成。</li>
+<li>从左到右找 <span class="math">t</span> 的非重叠出现位置，把未匹配片段写入新缓冲；空 <span class="math">t</span> 必须单独约定为不删除。用 KMP 为 <span class="math">O(|s|<span class="bin">+</span>|t|)</span>，朴素反复查找最坏 <span class="math">O(|s||t|)</span>。</li>
+<li>按本书 <code>build_next</code> 的优化定义，<code>BAAABBBAA</code> 的特征向量是 <strong><code>[-1,0,0,0,-1,1,1,0,0]</code></strong>。在目标串中首个完整匹配从 <strong>下标 19</strong> 开始；失配时文本下标不退，只按向量回退模式下标。</li>
+</ol>
+<h3 id="正文上机题参考-3"><a class="anchor" href="#正文上机题参考-3">#</a>正文上机题参考</h3>
+<ol>
+<li>跳过可选负号后逐位做 <code>value=value*10+digit</code>；拒绝空串、孤立负号和非数字，并在乘 10、加当前位之前检查 <code>int</code> 上下界。时间 <span class="math">O(n)</span>。</li>
+<li>扫描时遇数字开始累积，直到非数字才输出并计数；文件结束时若仍在数字中要补输出一次。若允许负整数，只有紧邻数字的 <code>-</code> 才作符号。</li>
+<li>可把每个后缀排序，再比较相邻后缀的最长公共前缀；<code>abcdacdac</code> 的最长重复子串为 <strong><code>cdac</code></strong>，起点 2 和 5。规模大时应改用后缀数组或后缀自动机。</li>
+<li>行表用 <code>std::vector&lt;String&gt;</code> 或链表保存，当前行是下标/迭代器；插删后统一修正当前行。查找替换必须调用实际接口 <code>build_next</code>、<code>kmp_search</code>，字符串切片可用 <code>String::substr</code>，不能把环境自带 <code>find</code> 冒充 KMP。</li>
+</ol>
 <h3 id="课程作业与-ref_dsa-参考答案-3"><a class="anchor" href="#课程作业与-ref_dsa-参考答案-3">#</a>课程作业与 <code>ref_DSA</code> 参考答案</h3>
 <ol>
 <li><strong>[课程第四章答案第 1 题；<code>ref_DSA/homework/4字符串.md</code> 第 1 题]</strong> KMP 的 <code>next[i]</code> 表示模式前缀与当前位置前缀的最长相等真前后缀长度（本书实现采用 <code>-1</code> 优化风格，具体数值按第 4 章定义计算）。</li>
@@ -312,6 +355,23 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <li><strong>[课程第五章答案第 1 题]</strong> 不成立。先序 <code>ABC</code>、后序 <code>CBA</code> 可由四种不同的单支二叉树产生；若改为先序+中序，则按根切分可唯一重建。</li>
 <li><strong>[课程第五章答案第 3 题]</strong> 对每个下标 <code>i=1..n-1</code> 检查 <code>a[parent(i)] &gt;= a[i]</code>，其中 <code>parent(i)=(i-1)/2</code>；一次扫描 <code>O(n)</code>。</li>
 <li><strong>[<code>ref_DSA/homework/5二叉树.md</code> 第 3 题]</strong> 满二叉树有 <code>L</code> 个叶和 <code>L-1</code> 个内部结点，总数 <code>n=2L-1</code>，所以 <code>L=(n+1)/2</code>。</li>
+</ol>
+<h3 id="正文习题答案-4"><a class="anchor" href="#正文习题答案-4">#</a>正文习题答案</h3>
+<ol>
+<li>不计结点标号时共有 Catalan 数 <span class="math">C<sub><span class="upr">3</span></sub><span class="rel">=</span><span class="upr">5</span></span> 种：左斜链、右斜链、根有左右两叶、根只有左孩子且该孩子只有右孩子、根只有右孩子且该孩子只有左孩子。</li>
+<li>先序首字母 A 为根；中序切成 <code>CBD | A | FEG</code>。递归切分后，B 的左、右孩子分别是 C、D；E 的左、右孩子分别是 F、G。后序为 <strong><code>CDBGFEA</code></strong>。</li>
+<li>每个结点有两个孩子指针，共 <span class="math"><span class="upr">2</span>n</span> 个；树的 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 条父子边恰占 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 个非空指针，因此空指针数 <span class="math"><span class="upr">2</span>n<span class="bin">−</span>(n<span class="bin">−</span><span class="upr">1</span>)<span class="rel">=</span>n<span class="bin">+</span><span class="upr">1</span></span>。</li>
+<li>1 起始编号时，<span class="math">i&gt;<span class="upr">1</span></span> 的父为 <span class="math">⌊i/<span class="upr">2</span>⌋</span>，左孩子 <span class="math"><span class="upr">2</span>i</span>、右孩子 <span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">1</span></span>（编号不超过 <span class="math">n</span> 时存在）。层序编号把下一层按每个父的左右孩子成对展开，公式随之成立。</li>
+<li>根入队；队列非空时出队访问，并依次把非空左、右孩子入队。队列保存“已发现但尚未访问”的结点，先进先出才能保证层序。本书接口为 <code>BinaryTree::level_order</code>。</li>
+<li>插入后为根 50，左子树 <code>30(20,40)</code>，右子树 <code>70(60,80)</code>。删除 50 若取中序前驱 40，则新根 40，左为 <code>30(20,null)</code>，右仍为 <code>70(60,80)</code>；取后继 60 也正确。本书 <code>BinarySearchTree::remove</code> 采用前驱方案。</li>
+<li>合并最小权：<code>2+3=5</code>、<code>4+5=9</code>、<code>7+8=15</code>、<code>9+15=24</code>，所以 WPL 为 <strong><span class="math"><span class="upr">5</span><span class="bin">+</span><span class="upr">9</span><span class="bin">+</span><span class="upr">15</span><span class="bin">+</span><span class="upr">24</span><span class="rel">=</span><span class="upr">53</span></span></strong>。一组编码：4=<code>00</code>，2=<code>010</code>，3=<code>011</code>，7=<code>10</code>，8=<code>11</code>；加权长度确为 53。</li>
+</ol>
+<h3 id="正文上机题参考-4"><a class="anchor" href="#正文上机题参考-4">#</a>正文上机题参考</h3>
+<ol>
+<li>先序首元素定根，在中序中切分左右区间递归构造；重复键会使切分不唯一，应拒绝或另带唯一 ID。构造后用 <code>BinaryTree::postorder</code> 输出。</li>
+<li>使用实际接口 <code>BinarySearchTree::insert</code>、<code>remove</code>、<code>inorder</code>；依次插入递增键会形成高为 <span class="math">n</span> 的右链，使查找和插删退化到 <span class="math">O(n)</span>。</li>
+<li><code>MinHeap::insert</code> 建堆后反复 <code>pop_min</code> 可得到升序；逐个插入建堆 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，全部弹出仍为 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>。计时要排除数据生成和输出并多次重复。</li>
+<li>用 <code>HuffmanTree(symbols,weights,count)</code> 构造，实际查询接口为 <code>code(symbol)</code>、<code>encode</code>、<code>decode</code>、<code>weighted_path_length</code>。同权值编码可能不唯一，守门条件应是前缀无歧义、往返一致和 WPL 最小。</li>
 </ol>
 <h3 id="课程作业与-ref_dsa-参考答案-4"><a class="anchor" href="#课程作业与-ref_dsa-参考答案-4">#</a>课程作业与 <code>ref_DSA</code> 参考答案</h3>
 <ol>
@@ -329,6 +389,21 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <li><strong>[课程第六章答案第 3 题]</strong> 相等方程合并集合，不等式检查两端代表元是否相同；无优化单次 <code>find</code> 最坏 <code>O(n)</code>，按秩合并为 <code>O(log n)</code>，路径压缩的 m 次操作为 <code>O(m alpha(n))</code>。</li>
 <li><strong>[课程第六章答案第 2 题]</strong> 左孩子/右兄弟结构中先根序列沿第一个孩子递归并沿兄弟链前进；带度数后根序列在访问父结点时记录该结点孩子数。</li>
 </ol>
+<h3 id="正文习题答案-5"><a class="anchor" href="#正文习题答案-5">#</a>正文习题答案</h3>
+<ol>
+<li>森林转二叉树时，每个结点的第一个孩子接左指针、下一个兄弟接右指针，各棵树的根也沿右指针相连；逆变换把左链恢复为孩子、右链恢复为兄弟。逐边做两次后，每条父子/兄弟关系回到原处，故互逆。</li>
+<li>这题的唯一序列取决于图 6.7：先根按“根，再从左到右各子树”，后根按“从左到右各子树，再根”，层次序列用队列逐层扫描。核对时可调用 <code>GeneralTree::preorder</code>、<code>postorder</code>、<code>breadth_first</code> 对同一棵题图树输出，不能脱离题图猜字母序列。</li>
+<li>度为 2 的有序树只区分“第一个/第二个孩子”；只有一个孩子时它就是第一个孩子。二叉树还区分左、右，因此根只有右孩子 B、左孩子为空是合法二叉树，却没有对应的度为 2 有序树形态。</li>
+<li>例如根 A 有孩子 B、C，C 有孩子 D；带度数后根序列为 <code>B/0, D/0, C/1, A/2</code>。叶结点直接压栈；读到 <code>C/1</code> 弹 1 棵作其孩子再压回 C，读到 <code>A/2</code> 按逆序弹 C、B，接回原来的 B、C 次序。</li>
+<li>按重量合并后可写成 <code>parent=[0,0,0,3,3,5,6]</code>：0、1、2 一组，3、4 一组。随后 <code>find(0)</code> 时 0 已是根，父指针<strong>不变化</strong>；若想观察压缩应查非根，但本书 <code>DisjointSet::unite</code> 已按重量合并，这个例子不会形成深链。</li>
+<li>1 起始的完全 3 叉树中，父公式为 <span class="math">⌊(i<span class="bin">−</span><span class="upr">2</span>)/<span class="upr">3</span>⌋<span class="bin">+</span><span class="upr">1</span></span>，孩子为 <span class="math"><span class="upr">3</span>(i<span class="bin">−</span><span class="upr">1</span>)<span class="bin">+</span><span class="upr">2</span>,<span class="upr">3</span>(i<span class="bin">−</span><span class="upr">1</span>)<span class="bin">+</span><span class="upr">3</span>,<span class="upr">3</span>(i<span class="bin">−</span><span class="upr">1</span>)<span class="bin">+</span><span class="upr">4</span></span>。所以结点 4 的父是 <strong>1</strong>，孩子是 <strong>11、12、13</strong>（编号未超过结点总数时存在）。</li>
+</ol>
+<h3 id="正文上机题参考-5"><a class="anchor" href="#正文上机题参考-5">#</a>正文上机题参考</h3>
+<ol>
+<li>转换时保存第一个孩子/下一兄弟关系，往返后除比较先根序列，还应比较每个结点的孩子数。本书 <code>GeneralTree</code> 提供 <code>preorder</code>、<code>postorder</code> 和 <code>breadth_first</code>。</li>
+<li>为每条无向边调用 <code>DisjointSet::unite(u,v)</code>；最终把每个顶点的 <code>find(i)</code> 放入集合，集合大小就是连通分量数，等于 1 时连通。实际接口是 <code>find</code>、<code>unite</code>、<code>connected</code>。</li>
+<li>构造父指针链后重复查最深结点；无压缩每次 <span class="math">O(n)</span>，路径压缩第一次仍为 <span class="math">O(n)</span>，之后接近 <span class="math">O(<span class="upr">1</span>)</span>。本书实现同时使用按重量合并和路径压缩，不能靠 <code>unite</code> 造退化链；对照版需单独实现朴素 <code>find</code>。</li>
+</ol>
 <h3 id="课程作业与-ref_dsa-参考答案-5"><a class="anchor" href="#课程作业与-ref_dsa-参考答案-5">#</a>课程作业与 <code>ref_DSA</code> 参考答案</h3>
 <ol>
 <li><strong>[张铭教材；本书自拟]</strong> 左孩子/右兄弟表示中，<code>child</code> 指向第一个孩子，<code>sibling</code> 指向下一个兄弟；先根遍历沿 child 递归、沿 sibling 迭代。</li>
@@ -343,6 +418,23 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <li><strong>[课程第七章答案第 1 题]</strong> 先拓扑排序；按拓扑序计算 <code>earliest[v]=max(earliest[u]+w(u,v))</code>，终点最大值为工期。邻接表下为 <code>O(V+E)</code>。</li>
 <li><strong>[课程第七章答案第 2 题]</strong> 统一加常数会按路径边数增加不同总量，因此可能改变最短路径次序；存在负权边时应使用 Bellman-Ford 等算法。</li>
 <li><strong>[<code>ref_DSA/DSA-HW/Chapter7Graph.md</code> 第 2 题；本书校正]</strong> Dijkstra 的树按源点距离选边，MST 按割上的最小边选边；<code>AB=2,BC=2,AC=3</code> 时两者总权分别为 5 和 4。</li>
+</ol>
+<h3 id="正文习题答案-6"><a class="anchor" href="#正文习题答案-6">#</a>正文习题答案</h3>
+<ol>
+<li>4 个顶点的无向完全图有 <span class="math"><span class="upr">4</span><span class="bin">⋅</span><span class="upr">3</span>/<span class="upr">2</span><span class="rel">=</span><span class="upr">6</span></span> 条边；有向完全图（无自环）有 <span class="math"><span class="upr">4</span><span class="bin">⋅</span><span class="upr">3</span><span class="rel">=</span><span class="upr">12</span></span> 条弧。一般公式分别是 <span class="math">V(V<span class="bin">−</span><span class="upr">1</span>)/<span class="upr">2</span></span> 与 <span class="math">V(V<span class="bin">−</span><span class="upr">1</span>)</span>。</li>
+<li>按本书 <code>Graph</code> 从小下标扫描邻接点，demo 图从 0 出发的 DFS 为 <strong><code>0,1,2,3,4</code></strong>，BFS 也为 <strong><code>0,1,2,3,4</code></strong>；不同但固定的邻接点顺序可能给出另一种合法序列。</li>
+<li>例如 <code>0-&gt;1-&gt;2-&gt;0</code>。Kahn 算法开始时没有入度 0 顶点，队列为空，输出数小于 <span class="math">V<span class="rel">=</span><span class="upr">3</span></span>，因此报告有环；一般环内顶点的入度永远不会降到 0。</li>
+<li>对 demo 图，初始距离 <code>[0,inf,inf,inf,inf]</code>；选 0 后 <code>[0,2,7,inf,inf]</code>；选 1 后 <code>[0,2,3,7,inf]</code>；选 2 后 <code>[0,2,3,4,inf]</code>；选 3 后 <code>[0,2,3,4,7]</code>；最后选 4，结果不变。</li>
+<li>Dijkstra 把当前最小暂定距离顶点定型后不再修改；负边可能从后来访问的顶点把已定型距离降得更小，破坏贪心前提。应使用 Bellman–Ford 等允许重复松弛的算法。</li>
+<li>以无向三角形 AB=2、BC=2、AC=3 为例：Prim 和 Kruskal 都取 AB、BC，总权 4。存在同权边时二者可能选不同边集，但割性质保证总权都等于 MST 最优值。</li>
+<li>邻接矩阵占 <span class="math">Θ(V<sup><span class="upr">2</span></sup>)</span>，判边/删边 <span class="math">O(<span class="upr">1</span>)</span>，适合稠密图；邻接表占 <span class="math">Θ(V<span class="bin">+</span>E)</span>，遍历邻居 <span class="math">O(<span class="upr">deg</span>&thinsp;v)</span>，适合稀疏图。矩阵 DFS/BFS 为 <span class="math">O(V<sup><span class="upr">2</span></sup>)</span>，表版为 <span class="math">O(V<span class="bin">+</span>E)</span>。</li>
+</ol>
+<h3 id="正文上机题参考-6"><a class="anchor" href="#正文上机题参考-6">#</a>正文上机题参考</h3>
+<ol>
+<li>调用 <code>Graph::topological_sort</code> 或 <code>GraphList::topological_sort</code>，返回 <code>std::nullopt</code> 就是有环；读入时用 <code>add_edge</code> 检查顶点范围。</li>
+<li><code>Graph::dijkstra(source)</code> 返回距离；若还要路径，应同步维护 <code>predecessor[v]</code>，松弛成功时记录前驱，再从终点逆推。负权输入必须拒绝。</li>
+<li><code>Graph::prim</code> 与 <code>kruskal</code> 对每张连通无向图都应返回 <span class="math">V<span class="bin">−</span><span class="upr">1</span></span> 条边且总权相等；随机生成时先保证一棵生成树，再补随机边。</li>
+<li>给 <code>GraphList</code> 增加 <code>remove_edge(from,to,directed)</code>：在邻接向量中线性查找删除，故 <span class="math">O(<span class="upr">deg</span>&thinsp;from)</span>；无向边还要删反向项。矩阵只需把一个或两个格恢复为 <code>infinity</code>，故 <span class="math">O(<span class="upr">1</span>)</span>。</li>
 </ol>
 <h3 id="课程作业与-ref_dsa-参考答案-6"><a class="anchor" href="#课程作业与-ref_dsa-参考答案-6">#</a>课程作业与 <code>ref_DSA</code> 参考答案</h3>
 <ol>
@@ -361,6 +453,23 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <li><strong>[课程第八章答案第 1 题]</strong> 先按长度稳定分桶，再从最高位到最低位对仍有该位的字符串做稳定桶排序；每个字符参与常数次处理，总时间 <code>O(sum |s_i|)</code>。</li>
 <li><strong>[课程第八章答案第 3 题]</strong> 索引排序只移动下标，最后按下标访问原数组；索引键比较相等时保留原下标次序即可稳定。</li>
 </ol>
+<h3 id="正文习题答案-7"><a class="anchor" href="#正文习题答案-7">#</a>正文习题答案</h3>
+<ol>
+<li>对 <code>{49,38,65,97,76,13,27}</code>：直接插入第一趟为 <strong><code>{38,49,65,97,76,13,27}</code></strong>；冒泡第一趟为 <strong><code>{38,49,65,76,13,27,97}</code></strong>；简单选择第一趟为 <strong><code>{13,38,65,97,76,49,27}</code></strong>。</li>
+<li>插入排序只在新键严格小于前键时移动，相等键不会越过，故稳定。堆排序的远距离交换会跨过相等键；例如带身份的 <code>[(2,a),(2,b),(1,c)]</code> 建大顶堆后换根与末尾，可能让 <code>(2,b)</code> 排到 <code>(2,a)</code> 前。</li>
+<li>本书 <code>partition</code> 取末元素为枢轴，扫描 <code>[first,last-1)</code>，小于枢轴的交换到 <code>boundary</code> 左边，最后把枢轴换到 <code>boundary</code>。已升序、逆序或全相等输入会每次切出空侧，递归式 <span class="math">T(n)<span class="rel">=</span>T(n<span class="bin">−</span><span class="upr">1</span>)<span class="bin">+</span>Θ(n)<span class="rel">=</span>Θ(n<sup><span class="upr">2</span></sup>)</span>。</li>
+<li>题面未指定 8 个数。以 <code>{49,38,65,97,76,13,27,50}</code> 为可复算例：建大顶堆得 <code>{97,76,65,50,49,13,27,38}</code>；逐趟交换并下沉后为 <code>{76,50,65,38,49,13,27,97}</code>、<code>{65,50,27,38,49,13,76,97}</code>、<code>{50,49,27,38,13,65,76,97}</code>、<code>{49,38,27,13,50,65,76,97}</code>、<code>{38,13,27,49,50,65,76,97}</code>、<code>{27,13,38,49,50,65,76,97}</code>、<code>{13,27,38,49,50,65,76,97}</code>。</li>
+<li>常规二路归并需要 <span class="math">O(n)</span> 辅助数组。可以原地归并，但要靠旋转、块归并等复杂技术，通常增加实现复杂度、常数甚至比较/移动次数；本书 <code>merge_sort</code> 明确分配一个 <code>buffer</code>。</li>
+<li>直接按二补码字节做无符号 LSD 排序会把负数排在正数后。本书 <code>radix_sort</code> 把 <code>int</code> 转为 <code>uint32_t</code> 后异或 <code>0x80000000U</code>，翻转符号位，使无符号次序与有符号数值次序一致。</li>
+<li>数据很小或近乎有序时选插入排序，因常数小、稳定且可接近 <span class="math">O(n)</span>；要求最坏 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 且只能用 <span class="math">O(<span class="upr">1</span>)</span> 额外数组空间时选堆；要求稳定且容得下 <span class="math">O(n)</span> 缓冲时选归并；一般内存随机数据常选优化快排。</li>
+</ol>
+<h3 id="正文上机题参考-7"><a class="anchor" href="#正文上机题参考-7">#</a>正文上机题参考</h3>
+<ol>
+<li>用 <code>random_values</code> 生成同一母本，复制后分别调用 <code>insertion_sort</code>、<code>heap_sort</code>、<code>quick_sort</code>、<code>merge_sort</code>，用 <code>Stopwatch::start/elapsed_seconds</code> 计时。排除生成和复制时间，每个规模重复多次并核对结果相同。</li>
+<li>本书快排取末元素为枢轴，升序、逆序、全相等都可退化；记录 <code>quick_sort_range</code> 的最大递归深度，应随 <span class="math">n</span> 线性增长。<code>quick_sort_optimized</code> 只限制栈深和小分区常数，不改变最坏比较次数。</li>
+<li>监视哨版把待插入值暂存到下标 0，省去内层边界判断；与 <code>insertion_sort</code> 对拍空、单元素、重复、随机和逆序输入。若占用下标 0，接口要明确有效数据区从 1 开始。</li>
+<li>调用 <code>radix_sort</code> 后与 <code>std::sort</code> 对拍，数据必须含 <code>INT_MIN</code>、<code>-1</code>、<code>0</code>、正数、<code>INT_MAX</code> 和重复值；本书现有实现覆盖完整 <code>int</code> 范围。</li>
+</ol>
 <h3 id="课程作业与-ref_dsa-参考答案-7"><a class="anchor" href="#课程作业与-ref_dsa-参考答案-7">#</a>课程作业与 <code>ref_DSA</code> 参考答案</h3>
 <ol>
 <li><strong>[<code>ref_DSA/homework/08内排序.md</code> 复习；本书自拟]</strong> 插入排序稳定，堆排序通常不稳定；稳定性取决于相等键的相对次序是否保持。</li>
@@ -377,6 +486,21 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <li><strong>[课程第九章答案第 3 题]</strong> 每页可放 <code>floor(page_size/record_size)</code> 条记录；内存页数决定最大归并路数，顺串平均长度由扫雪机效应约为 <code>2M</code> 条记录；访外次数按读写页分别累计。</li>
 <li><strong>[课程第九章答案第 2 题]</strong> loser tree 和 winner tree 每次更新为 <code>O(log k)</code>，最小堆也为 <code>O(log k)</code>；树结构通常能减少比较常数。</li>
 </ol>
+<h3 id="正文习题答案-8"><a class="anchor" href="#正文习题答案-8">#</a>正文习题答案</h3>
+<ol>
+<li>外存按页传输是因为一次定位的固定成本远大于连续传一页；逐记录随机读会反复付定位代价。缓冲把一页记录留在内存中批量处理，顺序读写可把 I/O 次数降到页数数量级。</li>
+<li>用本书 <code>replacement_selection</code> 同逻辑实算，<span class="math">M<span class="rel">=</span><span class="upr">7</span></span> 时得到两个顺串：<strong><code>15 25 30 35 45 49 50 60</code></strong> 和 <strong><code>1 16 27</code></strong>。读入 16、27、1 时它们小于当前已输出值，依次冻结到下一顺串；60 可留在本顺串。</li>
+<li>若 <span class="math">M</span> 能装下全部输入，不再有后续记录需要冻结；先建最小堆再连续弹出，得到一个包含全部记录的有序顺串，等价于堆排序的输出阶段。</li>
+<li>赢者树内部结点记两子树的胜者，败者树记本场败者、总冠军另存。替换一个叶后，只有该叶到根路径上的比赛结果可能变化，路径长 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>k⌉</span>，其他子树结果仍有效。</li>
+<li>二路归并每趟把顺串数约减半，需 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>m⌉</span> 趟。置换选择让初始顺串平均长度约为 <span class="math"><span class="upr">2</span>M</span>（依输入分布而异），从源头减少 <span class="math">m</span>，从而减少归并趟数和整文件读写。</li>
+</ol>
+<h3 id="正文上机题参考-8"><a class="anchor" href="#正文上机题参考-8">#</a>正文上机题参考</h3>
+<ol>
+<li>调用实际接口 <code>replacement_selection(input,memory)</code>；守门除了对原书输入固定顺串，还要验证每个顺串有序、所有输入恰出现一次以及 <code>memory==0</code> 被拒绝。</li>
+<li>使用 <code>WinnerTree</code> 的 <code>winner</code>、<code>winner_value</code>、<code>replace</code>；每次随机替换后用 <code>std::min_element</code> 扫描选手数组对拍冠军，并比较 <code>TournamentOps</code> 计数。</li>
+<li>使用 <code>LoserTree</code> 保存各路当前头元素，冠军输出后以该路下一个值调用 <code>replace</code>；耗尽路用正无穷哨兵。最终输出与把所有向量拼接后 <code>std::sort</code> 对拍。</li>
+<li>分别调用 <code>replacement_selection(input,4/8/16)</code>，记录返回向量的数量与各顺串长度；同一输入下容量增大通常使顺串数不增，但守门应核对记录守恒和各顺串有序，而不是把随机趋势当定理。</li>
+</ol>
 <h3 id="课程作业与-ref_dsa-参考答案-8"><a class="anchor" href="#课程作业与-ref_dsa-参考答案-8">#</a>课程作业与 <code>ref_DSA</code> 参考答案</h3>
 <ol>
 <li><strong>[课程第九章答案第 1 题；<code>ref_DSA/DSA-HW/Chapter9.md</code> 第 1 题]</strong> 置换选择使用大小为 M 的最小堆产生有序顺串；输出堆顶后读入新值，若新值不小于当前顺串末值则继续本顺串，否则冻结到下一顺串。</li>
@@ -391,6 +515,23 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <li><strong>[课程第十章答案第 1 题]</strong> 从当前指针出发按关键码方向前后移动；若返回首个匹配，遇到相等立即停，若返回最后匹配则继续沿相同关键码方向扫描。平均长度取起点和目标位置的双重平均。</li>
 <li><strong>[ref_DSA/DSA-HW/Chapter10.md 第 2 题]</strong> 总复杂度是一次堆排序 <code>O(M log M)</code> 加上 <code>|S1|</code> 次二分检索 <code>O(log M)</code>，即 <code>O(M log M + |S1| log M)</code>。</li>
 <li><strong>[张铭教材；本书代码验证]</strong> 拉链法装填因子可大于 1，成功查找期望约 <code>1+alpha/2</code>；线性探测要求 <code>alpha&lt;1</code>，接近 1 时代价急剧上升。</li>
+</ol>
+<h3 id="正文习题答案-9"><a class="anchor" href="#正文习题答案-9">#</a>正文习题答案</h3>
+<ol>
+<li>顺序检索最好比较 1 次，最坏比较 <span class="math">n</span> 次；目标等概率且一定存在时，平均成功检索长度为 <span class="math">(<span class="upr">1</span><span class="bin">+</span><span class="upr">2</span><span class="bin">+</span>⋯<span class="bin">+</span>n)/n<span class="rel">=</span>(n<span class="bin">+</span><span class="upr">1</span>)/<span class="upr">2</span></span>。若把失败也计入，失败一次要比较 <span class="math">n</span> 次，需另给成功概率。</li>
+<li>半开区间初为 <code>[0,8)</code>，<code>mid=4</code>，值 12 小于 18，改为 <code>[5,8)</code>；<code>mid=6</code>，值 18，命中 <strong>下标 6</strong>，共 2 次关键码比较。</li>
+<li>若索引表也顺序检索，分 <span class="math">b</span> 块、每块约 <span class="math">n/b</span> 项，ASL 的主项约为 <span class="math">b/<span class="upr">2</span><span class="bin">+</span>n/(<span class="upr">2</span>b)</span>；令两项平衡得 <span class="math">b<span class="rel">≈</span><span class="sqrt">n</span></span>，每块也约 <span class="math"><span class="sqrt">n</span></span> 项，总 ASL 为 <span class="math">Θ(<span class="sqrt">n</span>)</span>。</li>
+<li>集合插入重复元素是正常、可预期的集合操作，不是异常；返回 <code>bool</code> 可让 <code>true</code> 表示确实新增、<code>false</code> 表示原来已有，调用方无需用异常处理普通分支。本书 <code>IntSet::insert</code> 正是该契约。</li>
+<li>表长 5 时 1 入槽 1，6 碰撞后入槽 2，11 入槽 3。若删除 1 后把槽 1 标成空，从哈希位置 1 查 6 会见空即停，错误地报告不存在；必须留下墓碑。本书 <code>HashTable::erase</code> 使用 <code>SlotState::tombstone</code>。</li>
+<li>开散列删除链结点即可，装填因子可大于 1，但每项多指针/分配开销；闭散列删除要墓碑，装填因子必须小于 1，存储连续、缓存友好但会聚集。</li>
+<li><code>char</code> 是否有符号由实现决定；直接提升负 <code>char</code> 会符号扩展，使同一非 ASCII 字节在不同平台产生不同哈希。按 <code>unsigned char</code> 读取保证每字节都落在 0..255，本书 <code>elf_hash</code> 因而可移植。</li>
+</ol>
+<h3 id="正文上机题参考-9"><a class="anchor" href="#正文上机题参考-9">#</a>正文上机题参考</h3>
+<ol>
+<li><code>sequential_search</code> 直接对原序列测，<code>binary_search</code> 必须先排序；散列用 <code>HashTable::contains</code>。只统计查询阶段，并分别报告成功/失败探测次数和装填因子。</li>
+<li>使用 <code>HashTable::insert</code>、<code>erase</code>、<code>contains</code>：在容量 5 表中插入 1、6、11，删 1 后仍应找到 6、11；<code>slot_at(1)</code> 应显示墓碑而不是空槽。</li>
+<li>当 <code>size/capacity&gt;0.7</code> 时申请更大素数容量，把所有 <code>used</code> 槽重新 <code>insert</code>，墓碑不搬。用平均/最大探测长度比较扩表前后，不能只看运行时间。</li>
+<li><code>IntSet</code> 的公开契约是 <code>insert</code>、<code>erase</code>、<code>contains</code>、<code>intersection</code>、<code>includes</code>。散列表替换内部存储后保持这些签名和返回语义，原测试无需知道实现变化。</li>
 </ol>
 <h3 id="课程作业与-ref_dsa-参考答案-9"><a class="anchor" href="#课程作业与-ref_dsa-参考答案-9">#</a>课程作业与 <code>ref_DSA</code> 参考答案</h3>
 <ol>
@@ -413,6 +554,17 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <li><strong>[课程第十一章答案第 2 题]</strong> 院系和宿舍分别建 <code>属性 -&gt; ID 列表</code>，查询“且”时求两个有序列表交集；复杂度为两列表长度之和的数量级。</li>
 <li><strong>[课程第十一章答案第 3 题]</strong> B+ 树查找逐层读页；插入溢出时分裂并写原页、新页和父页；删除用后继替换并按是否下溢统计读写页。</li>
 </ol>
+<h3 id="正文习题答案-10"><a class="anchor" href="#正文习题答案-10">#</a>正文习题答案</h3>
+<ol>
+<li>稠密索引每条记录一项，主文件可无序（但索引本身按键有序）；稀疏索引每页只取分界键，要求主文件按关键码有序并按该顺序分页，否则无法由分界定位目标页。</li>
+<li>若索引有 <span class="math">h</span> 个不常驻层，再读 1 个数据页，一次点查询约为 <span class="math">h<span class="bin">+</span><span class="upr">1</span></span> 次页 I/O；顶层若常驻内存不计。页访问比页内比较重要，因为一次磁盘/SSD 页访问的代价远大于内存比较。</li>
+<li>静态多分树没有为在线分裂维护的动态结构；叶页溢出通常写入溢出页/溢出链，查询多一次 I/O，积累到阈值后重组主文件和索引。不能把 B+ 树的就地分裂直接套过来。</li>
+<li>分别取倒排表 <code>postings[计算机系]</code> 与 <code>postings[擅长英语]</code>，用双指针求有序交集：相等就输出并都前进，小的一侧前进；时间 <span class="math">O(a<span class="bin">+</span>b)</span>。具体 ID 取决于题给院系表和宿舍表。</li>
+<li>插入 60 后的树为 <code>[50] / [30] [70] / [10,20] [30] [50,60] [70,90]</code>。继续插入 65 后为 <strong><code>[50] / [30] [60,70] / [10,20] [30] [50] [60,65] [70,90]</code></strong>；只发生叶分裂，父结点 <code>[70]</code> 尚有容量，更新为 <code>[60,70]</code>，所以没有继续裂到根。</li>
+<li>位图适合低基数属性、批量布尔查询，内存/外存皆可且擅长集合运算；签名适合先过滤、允许假阳性但不能假阴性；红黑树适合内存点查和动态更新；B+ 树按页组织，适合外存点查与范围扫描。</li>
+</ol>
+<h3 id="正文上机题参考-10"><a class="anchor" href="#正文上机题参考-10">#</a>正文上机题参考</h3>
+<p>本章正文没有独立编号的上机题，而是指向末尾四条“练习路径”。对应做法是：把 <code>MultiLevelIndex</code> 页内定位改成二分并确认 <code>page_reads()</code> 不变；给 <code>InvertedIndex</code> 增加差值编码且能边解码边求交；给 <code>BPlusTree</code> 增加范围删除并在每步后调用 <code>validate()</code>；给 <code>BitmapIndex</code> 增加 WAH 编解码，与现有 <code>run_length_encode/decode</code> 对拍并正确处理尾位。</p>
 <h3 id="课程作业与-ref_dsa-参考答案-10"><a class="anchor" href="#课程作业与-ref_dsa-参考答案-10">#</a>课程作业与 <code>ref_DSA</code> 参考答案</h3>
 <ol>
 <li><strong>[课程第十一章答案第 1 题]</strong> 稠密索引为每条记录建索引项；稀疏索引按数据块建项，空间小但块内还需二次查找。容量题应先算每页记录数、每页索引项数，再乘可驻留页数。</li>
@@ -435,6 +587,24 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <li><strong>[课程第十二章答案第 1 题；本书代码验证]</strong> 共享表释放时可能从多个父表到达同一结点，循环表还会无限递归；可用引用计数，或用访问标记集合保证每个结点只释放一次。<code>code/ch12/gen_list</code> 实现的正是引用计数那条路；把它退化成「不看计数直接 delete」，测试会立刻报 heap-use-after-free。引用计数收不回环，这也是原书 12.2.4 要讲标记-清除的原因。</li>
 <li><strong>[课程第十二章答案第 2 题；<code>ref_DSA/homework/12高级数据结构.md</code> 第 4 题；本书代码验证]</strong> 每个后缀插入 Trie 后，其所有前缀对应主串子串；因此每个不同子串对应一个结点。朴素插入所有后缀最坏 <code>O(N^2)</code>，结点数也为 <code>O(N^2)</code>。可以用 <code>code/ch12/trie</code> 的 <code>node_count()</code> 直接数出来验证。</li>
 <li><strong>[课程第十二章答案第 3 题]</strong> LL/RR 单旋、LR/RL 双旋；旋转只改局部链接，中序遍历序列保持不变。</li>
+</ol>
+<h3 id="正文习题答案-11"><a class="anchor" href="#正文习题答案-11">#</a>正文习题答案</h3>
+<ol>
+<li>按本附录默认的 0 起始下标，行优先偏移为 <span class="math"><span class="upr">2</span><span class="bin">×</span><span class="upr">4</span><span class="bin">+</span><span class="upr">1</span><span class="rel">=</span><span class="bold"><span class="upr">9</span></span></span> 个元素；若题目采用 1 起始下标，则同名 <span class="math">a<sub><span class="upr">2</span>,<span class="upr">1</span></sub></span> 的偏移是 <span class="math">(<span class="upr">2</span><span class="bin">−</span><span class="upr">1</span>)<span class="upr">4</span><span class="bin">+</span>(<span class="upr">1</span><span class="bin">−</span><span class="upr">1</span>)<span class="rel">=</span><span class="upr">4</span></span>，必须先声明约定。</li>
+<li>0 起始下三角按行压缩的下标是 <span class="math">i(i<span class="bin">+</span><span class="upr">1</span>)/<span class="upr">2</span><span class="bin">+</span>j</span>，所以 <span class="math">a<sub><span class="upr">3</span>,<span class="upr">1</span></sub></span> 在 <strong>下标 <span class="math"><span class="upr">3</span><span class="bin">×</span><span class="upr">4</span>/<span class="upr">2</span><span class="bin">+</span><span class="upr">1</span><span class="rel">=</span><span class="upr">7</span></span></strong>。</li>
+<li>纯表每个子表只有一个父，对应树；再入表共享子表，对应 DAG；循环表含回边，对应有向环图。释放时纯树可递归，DAG 要引用计数/访问标记避免重复释放，环还需要标记--清扫等可回收环的方案。</li>
+<li>对<strong>单个请求</strong>这道题没有所说的三种例子：请求 <span class="math"><span class="rel">≤</span><span class="upr">1500</span></span> 时首次/最佳/最坏适应都能从某块满足，请求 <span class="math">&gt;<span class="upr">1500</span></span> 时三者都不能满足。三种策略只决定选哪块，从而影响<strong>后续请求序列</strong>；必须再给请求与释放序列，才可能比较谁后来成功。这是题面条件不足，不应编造答案。</li>
+<li>Trie 为根下共用 <code>c -&gt; a</code>，再分三条边 <code>n</code>、<code>r</code>、<code>t</code>，三端均标记单词结束。查 <code>cab</code> 时走过 <code>c,a</code>，在第三个字符 <code>b</code> 处无边而失败。</li>
+<li>用本书 <code>optimal_bst({1,5,4,3},{5,4,3,2,1})</code> 同口径复算，最优根为 <strong>键 2</strong>，总成本为 <strong>57</strong>。</li>
+<li>插 1 得单根；插 2 得 1 的右孩子；插 3 形成 RR 失衡，对 1 左旋，得到根 2、左右孩子 1 和 3。再插 0 到 1 的左侧，各结点平衡因子仍在 <code>[-1,1]</code>，<strong>不旋转</strong>。</li>
+<li>一字形（zig-zig）与之字形（zig-zag）都用两次旋转把目标从孙辈升到祖父位置，即升两层；区别是旋转方向同向还是反向。半伸展减少每次调整幅度，连续访问热点仍会逐步把它提到高层，同时降低单次重构常数。</li>
+</ol>
+<h3 id="正文上机题参考-11"><a class="anchor" href="#正文上机题参考-11">#</a>正文上机题参考</h3>
+<ol>
+<li>封装长度 <span class="math">n(n<span class="bin">+</span><span class="upr">1</span>)/<span class="upr">2</span></span> 的数组，<code>set/get(i,j)</code> 先检查 <code>0&lt;=j&lt;=i&lt;n</code>，再用 <code>i(i+1)/2+j</code>。对所有合法位置与稠密矩阵对拍，并测试上三角和越界拒绝。</li>
+<li>使用实际类 <code>ReusableNodePool&lt;T&gt;</code> 的 <code>acquire</code>、<code>get</code>、<code>release</code>、<code>available</code>；测试容量耗尽返回空、释放后复用同一槽、越界释放和重复释放返回 <code>false</code>。</li>
+<li>使用 <code>Trie::insert</code>、<code>contains</code>、<code>erase</code>；每轮与 <code>std::set&lt;std::string&gt;</code> 对拍。输入只接受实现支持的字母范围，并覆盖空串、重复词、前缀词以及删除后保留共享前缀。</li>
+<li>调用 <code>optimal_bst(successful,unsuccessful)</code>，核对 <code>cost[0][n]</code> 与 <code>root[0][n]</code>；按根表递归重建区间，最后验证每个键恰出现一次、加权查找成本等于 DP 结果。</li>
 </ol>
 <h3 id="课程作业与-ref_dsa-参考答案-11"><a class="anchor" href="#课程作业与-ref_dsa-参考答案-11">#</a>课程作业与 <code>ref_DSA</code> 参考答案</h3>
 <ol>
@@ -510,7 +680,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p><code>ref_DSA</code> 引用均在题目标记中写出相对路径。追踪状态汇总见 <code>collab/TRACEABILITY-MATRIX.md</code>。课程 PDF/Word 中依赖图片才能确定具体数值的题目，本附录只引用 可由文本独立核验的结论；没有看清题图时不猜最终序列或树形。</p>
 <div class="pagenav"><a href="ch12-advanced.html"><span class="dir">← 上一篇</span>第12章 高级数据结构</a><a href="figures.html" style="text-align:right"><span class="dir">下一篇 →</span>原书插图</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#第-1-章-概论">第 1 章 概论</a><a href="#补充题参考答案" class="sub">补充题参考答案</a><a href="#正文习题答案" class="sub">正文习题答案</a><a href="#正文上机题参考" class="sub">正文上机题参考</a><a href="#课程作业与-ref_dsa-参考答案" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考" class="sub">课程上机参考</a><a href="#第-2-章-线性表">第 2 章 线性表</a><a href="#正文习题答案-1" class="sub">正文习题答案</a><a href="#正文上机题参考-1" class="sub">正文上机题参考</a><a href="#课程作业与-ref_dsa-参考答案-1" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考-1" class="sub">课程上机参考</a><a href="#第-3-章-栈与队列">第 3 章 栈与队列</a><a href="#补充题参考答案-1" class="sub">补充题参考答案</a><a href="#课程作业与-ref_dsa-参考答案-2" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考-2" class="sub">课程上机参考</a><a href="#第-4-章-字符串">第 4 章 字符串</a><a href="#课程作业与-ref_dsa-参考答案-3" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考-3" class="sub">课程上机参考</a><a href="#第-5-章-二叉树">第 5 章 二叉树</a><a href="#补充题参考答案-2" class="sub">补充题参考答案</a><a href="#课程作业与-ref_dsa-参考答案-4" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考-4" class="sub">课程上机参考</a><a href="#第-6-章-树">第 6 章 树</a><a href="#补充题参考答案-3" class="sub">补充题参考答案</a><a href="#课程作业与-ref_dsa-参考答案-5" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考-5" class="sub">课程上机参考</a><a href="#第-7-章-图">第 7 章 图</a><a href="#补充题参考答案-4" class="sub">补充题参考答案</a><a href="#课程作业与-ref_dsa-参考答案-6" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考-6" class="sub">课程上机参考</a><a href="#第-8-章-内部排序">第 8 章 内部排序</a><a href="#补充题参考答案-5" class="sub">补充题参考答案</a><a href="#课程作业与-ref_dsa-参考答案-7" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考-7" class="sub">课程上机参考</a><a href="#第-9-章-外部排序">第 9 章 外部排序</a><a href="#补充题参考答案-6" class="sub">补充题参考答案</a><a href="#课程作业与-ref_dsa-参考答案-8" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考-8" class="sub">课程上机参考</a><a href="#第-10-章-检索">第 10 章 检索</a><a href="#补充题参考答案-7" class="sub">补充题参考答案</a><a href="#课程作业与-ref_dsa-参考答案-9" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考-9" class="sub">课程上机参考</a><a href="#第-11-章-索引技术">第 11 章 索引技术</a><a href="#2021-书面作业补充题" class="sub">2021 书面作业补充题</a><a href="#补充题参考答案-8" class="sub">补充题参考答案</a><a href="#课程作业与-ref_dsa-参考答案-10" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考-10" class="sub">课程上机参考</a><a href="#第-12-章-高级数据结构">第 12 章 高级数据结构</a><a href="#2021-书面作业补充题-1" class="sub">2021 书面作业补充题</a><a href="#补充题参考答案-9" class="sub">补充题参考答案</a><a href="#课程作业与-ref_dsa-参考答案-11" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考-11" class="sub">课程上机参考</a><a href="#参考答案的使用边界与-oj-迁移">参考答案的使用边界与 OJ 迁移</a><a href="#oj-题型迁移与校正" class="sub">OJ 题型迁移与校正</a><a href="#来源文件登记">来源文件登记</a></nav>
+<nav class="page"><b>本页</b><a href="#第-1-章-概论">第 1 章 概论</a><a href="#补充题参考答案" class="sub">补充题参考答案</a><a href="#正文习题答案" class="sub">正文习题答案</a><a href="#正文上机题参考" class="sub">正文上机题参考</a><a href="#课程作业与-ref_dsa-参考答案" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考" class="sub">课程上机参考</a><a href="#第-2-章-线性表">第 2 章 线性表</a><a href="#正文习题答案-1" class="sub">正文习题答案</a><a href="#正文上机题参考-1" class="sub">正文上机题参考</a><a href="#课程作业与-ref_dsa-参考答案-1" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考-1" class="sub">课程上机参考</a><a href="#第-3-章-栈与队列">第 3 章 栈与队列</a><a href="#补充题参考答案-1" class="sub">补充题参考答案</a><a href="#正文习题答案-2" class="sub">正文习题答案</a><a href="#正文上机题参考-2" class="sub">正文上机题参考</a><a href="#课程作业与-ref_dsa-参考答案-2" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考-2" class="sub">课程上机参考</a><a href="#第-4-章-字符串">第 4 章 字符串</a><a href="#正文习题答案-3" class="sub">正文习题答案</a><a href="#正文上机题参考-3" class="sub">正文上机题参考</a><a href="#课程作业与-ref_dsa-参考答案-3" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考-3" class="sub">课程上机参考</a><a href="#第-5-章-二叉树">第 5 章 二叉树</a><a href="#补充题参考答案-2" class="sub">补充题参考答案</a><a href="#正文习题答案-4" class="sub">正文习题答案</a><a href="#正文上机题参考-4" class="sub">正文上机题参考</a><a href="#课程作业与-ref_dsa-参考答案-4" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考-4" class="sub">课程上机参考</a><a href="#第-6-章-树">第 6 章 树</a><a href="#补充题参考答案-3" class="sub">补充题参考答案</a><a href="#正文习题答案-5" class="sub">正文习题答案</a><a href="#正文上机题参考-5" class="sub">正文上机题参考</a><a href="#课程作业与-ref_dsa-参考答案-5" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考-5" class="sub">课程上机参考</a><a href="#第-7-章-图">第 7 章 图</a><a href="#补充题参考答案-4" class="sub">补充题参考答案</a><a href="#正文习题答案-6" class="sub">正文习题答案</a><a href="#正文上机题参考-6" class="sub">正文上机题参考</a><a href="#课程作业与-ref_dsa-参考答案-6" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考-6" class="sub">课程上机参考</a><a href="#第-8-章-内部排序">第 8 章 内部排序</a><a href="#补充题参考答案-5" class="sub">补充题参考答案</a><a href="#正文习题答案-7" class="sub">正文习题答案</a><a href="#正文上机题参考-7" class="sub">正文上机题参考</a><a href="#课程作业与-ref_dsa-参考答案-7" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考-7" class="sub">课程上机参考</a><a href="#第-9-章-外部排序">第 9 章 外部排序</a><a href="#补充题参考答案-6" class="sub">补充题参考答案</a><a href="#正文习题答案-8" class="sub">正文习题答案</a><a href="#正文上机题参考-8" class="sub">正文上机题参考</a><a href="#课程作业与-ref_dsa-参考答案-8" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考-8" class="sub">课程上机参考</a><a href="#第-10-章-检索">第 10 章 检索</a><a href="#补充题参考答案-7" class="sub">补充题参考答案</a><a href="#正文习题答案-9" class="sub">正文习题答案</a><a href="#正文上机题参考-9" class="sub">正文上机题参考</a><a href="#课程作业与-ref_dsa-参考答案-9" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考-9" class="sub">课程上机参考</a><a href="#第-11-章-索引技术">第 11 章 索引技术</a><a href="#2021-书面作业补充题" class="sub">2021 书面作业补充题</a><a href="#补充题参考答案-8" class="sub">补充题参考答案</a><a href="#正文习题答案-10" class="sub">正文习题答案</a><a href="#正文上机题参考-10" class="sub">正文上机题参考</a><a href="#课程作业与-ref_dsa-参考答案-10" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考-10" class="sub">课程上机参考</a><a href="#第-12-章-高级数据结构">第 12 章 高级数据结构</a><a href="#2021-书面作业补充题-1" class="sub">2021 书面作业补充题</a><a href="#补充题参考答案-9" class="sub">补充题参考答案</a><a href="#正文习题答案-11" class="sub">正文习题答案</a><a href="#正文上机题参考-11" class="sub">正文上机题参考</a><a href="#课程作业与-ref_dsa-参考答案-11" class="sub">课程作业与 ref_DSA 参考答案</a><a href="#课程上机参考-11" class="sub">课程上机参考</a><a href="#参考答案的使用边界与-oj-迁移">参考答案的使用边界与 OJ 迁移</a><a href="#oj-题型迁移与校正" class="sub">OJ 题型迁移与校正</a><a href="#来源文件登记">来源文件登记</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/习题与参考答案.md</code> 生成
