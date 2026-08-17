@@ -208,13 +208,13 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>递归周游和递归销毁在极深的退化树上会耗尽调用栈，和第 5 章是同一类风险。</p>
 <h2 id="62-树的链式存储结构"><a class="anchor" href="#62-树的链式存储结构">#</a>6.2 树的链式存储结构</h2>
 <p>一般树的存储比二叉树麻烦，因为度不固定。常见有四种想法，本章主实现是第四种。</p>
-<h3 id="621-子结点表表示方法"><a class="anchor" href="#621-子结点表表示方法">#</a>6.2.1 「子结点表」表示方法</h3>
+<h3 id="621-子结点表表示方法"><a class="anchor" href="#621-子结点表表示方法">#</a>6.2.1 “子结点表”表示方法</h3>
 <p>每个结点保存一块孩子指针数组（或一张表）。取第 <span class="math">k</span> 个孩子是 <span class="math">O(<span class="upr">1</span>)</span>，按编号随机访问方便。度不固定时数组要扩容，在孩子序列中间插入也要搬指针。空间上，度为 <span class="math">d</span> 的结点就要留 <span class="math">d</span> 个指针槽，稀疏时浪费。本章不把它当主实现。</p>
-<h3 id="622-静态左子右兄表示法"><a class="anchor" href="#622-静态左子右兄表示法">#</a>6.2.2 静态「左子/右兄」表示法</h3>
+<h3 id="622-静态左子右兄表示法"><a class="anchor" href="#622-静态左子右兄表示法">#</a>6.2.2 静态“左子/右兄”表示法</h3>
 <p>结点数事先已知时，不必每个结点 <code>new</code> 一次，用数组下标代替指针即可：<code>child</code>、<code>sibling</code> 存的是另一个下标，而不是地址。语义与动态版相同，只是存储从堆变成一块连续数组。适合并查集那种「一开始就知道有 <span class="math">n</span> 个元素」的场合。</p>
 <h3 id="623-动态表示法"><a class="anchor" href="#623-动态表示法">#</a>6.2.3 动态表示法</h3>
 <p>每个结点单独分配，用指针相连。树的大小事先不知道、会频繁长出新结点时，比静态数组合适。后面的 <code>GeneralTree</code> 就是动态分配。</p>
-<h3 id="624-动态左子右兄表示"><a class="anchor" href="#624-动态左子右兄表示">#</a>6.2.4 动态「左子/右兄」表示</h3>
+<h3 id="624-动态左子右兄二叉链表表示法"><a class="anchor" href="#624-动态左子右兄二叉链表表示法">#</a>6.2.4 动态“左子/右兄”二叉链表表示法</h3>
 <p>这是本章的主实现。任意度的树只需两个指针域：<code>child</code> 指向第一个孩子，<code>sibling</code> 指向下一个兄弟。再加一个 <code>parent</code> 便于向上走。代价是取第 <span class="math">k</span> 个孩子必须沿兄弟链走 <span class="math">k</span> 步。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/demo.cpp">code/ch06/general_tree/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
 
@@ -502,7 +502,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 
     Node* root_{<span class="k">nullptr</span>};
 };</code></pre></div>
-<h3 id="625-父指针表示法和并查集"><a class="anchor" href="#625-父指针表示法和并查集">#</a>6.2.5 父指针表示法和并查集</h3>
+<h3 id="625-父指针表示法和在并查集中的应用"><a class="anchor" href="#625-父指针表示法和在并查集中的应用">#</a>6.2.5 父指针表示法和在并查集中的应用</h3>
 <p>并查集要防的是树退化成一条链。原书给了两条改进，本书都实现了。</p>
 <p><strong>第一条是【重量权衡合并规则】</strong>(weighted union rule)：合并时看两个集合的<strong>元素个数</strong>， 「令含元素少的子集的树根指向含元素多的子集的根」。原书【代码6.8】的结点里那个 <code>int nCount; //子树元素数目</code> 就是为它准备的。小树挂到大树下，能把整体深度限制在 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>—— 理由是每次合并树高最多加 1，而元素个数至少翻倍，所以任何结点的深度最多增加 <span class="math"><span class="upr">log</span>&thinsp;n</span> 次。</p>
 <blockquote><p><strong>注意别和「按秩合并」混了。</strong> 按秩比的是<strong>树高</strong>，按重量比的是<strong>元素个数</strong>。 两者复杂度同阶，但在同一组等价对上会长出<strong>形状不同</strong>的树。本书按原书口径用重量， 课程第 6 章习题 8 要求「使用重量权衡合并规则与路径压缩」并画出父指针数组， 换成按秩就对不上答案。并列时本书让<strong>值大的根挂到值小的根下</strong>—— 原书没规定这一条，这个口径取自那道习题的原话，好让书里的实现能直接用来核对。</p></blockquote>
@@ -658,7 +658,7 @@ rtag       0  1  0  1  1  1  0  0  1  1     0 = 有下一个兄弟</code></pre><
 <p>按后根次序存放，每个结点记下自己的度数（孩子个数）。后根的特点是：一个结点出现时，它的全部孩子已经作为连续的一段排在它前面。扫描时用栈，每读到一个度数为 <span class="math">d</span> 的结点，就从栈顶弹出 <span class="math">d</span> 棵子树做它的孩子，再把这棵新树压回去。扫完数组，栈里剩下的就是整棵树（或森林）。</p>
 <h3 id="634-带双标记的层次次序表示"><a class="anchor" href="#634-带双标记的层次次序表示">#</a>6.3.4 带双标记的层次次序表示</h3>
 <p>按层次周游的次序存放，标记含义与 6.3.2 相同：有没有孩子、有没有下一个兄弟。因为同一层的兄弟本来就排在一起，一层扫完再扫下一层，用队列就能还原。适合需要按层处理的外部存储。</p>
-<h2 id="64-k-叉树"><a class="anchor" href="#64-k-叉树">#</a>6.4 K 叉树</h2>
+<h2 id="64-k叉树"><a class="anchor" href="#64-k叉树">#</a>6.4 K叉树</h2>
 <p>有些应用里每个结点的孩子数有固定上限 <span class="math">K</span>，例如三子棋的博弈树、某些 B 树的内存模拟。这时不必走「任意度 + 兄弟链」，可以规定每个结点至多 <span class="math">K</span> 个孩子，叫做 <span class="math">K</span> 叉树。</p>
 <p>满 <span class="math">K</span> 叉树、完全 <span class="math">K</span> 叉树的定义与二叉树平行：满 <span class="math">K</span> 叉树的每个结点要么是叶，要么恰好 <span class="math">K</span> 个孩子；完全 <span class="math">K</span> 叉树只有最下两层的度可以小于 <span class="math">K</span>，且最下层靠左对齐。按层从 0 编号时，结点 <span class="math">i</span> 的孩子们是 <span class="math">Ki<span class="bin">+</span><span class="upr">1</span>,…,Ki<span class="bin">+</span>K</span>，父结点是 <span class="math">⌊(i<span class="bin">−</span><span class="upr">1</span>)/K⌋</span>。<span class="math">K<span class="rel">=</span><span class="upr">2</span></span> 就回到二叉树。</p>
 <p>本章主实现仍是任意度的左子 / 右兄，不单独做一份 <span class="math">K</span> 叉数组。需要固定 <span class="math">K</span>、又想顺序存放时，用上面的编号公式即可。</p>
@@ -685,7 +685,7 @@ rtag       0  1  0  1  1  1  0  0  1  1     0 = 有下一个兄弟</code></pre><
 </ol>
 <div class="pagenav"><a href="ch05-binary-tree.html"><span class="dir">← 上一篇</span>第5章 二叉树</a><a href="ch07-graph.html" style="text-align:right"><span class="dir">下一篇 →</span>第7章 图</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#61-树的定义和基本术语">6.1 树的定义和基本术语</a><a href="#611-树和森林" class="sub">6.1.1 树和森林</a><a href="#612-森林与二叉树的等价转换" class="sub">6.1.2 森林与二叉树的等价转换</a><a href="#613-树的抽象数据类型" class="sub">6.1.3 树的抽象数据类型</a><a href="#614-树的周游" class="sub">6.1.4 树的周游</a><a href="#62-树的链式存储结构">6.2 树的链式存储结构</a><a href="#621-子结点表表示方法" class="sub">6.2.1 「子结点表」表示方法</a><a href="#622-静态左子右兄表示法" class="sub">6.2.2 静态「左子/右兄」表示法</a><a href="#623-动态表示法" class="sub">6.2.3 动态表示法</a><a href="#624-动态左子右兄表示" class="sub">6.2.4 动态「左子/右兄」表示</a><a href="#625-父指针表示法和并查集" class="sub">6.2.5 父指针表示法和并查集</a><a href="#63-树的顺序存储结构">6.3 树的顺序存储结构</a><a href="#631-带右链的先根次序表示" class="sub">6.3.1 带右链的先根次序表示</a><a href="#632-带双标记的先根次序表示" class="sub">6.3.2 带双标记的先根次序表示</a><a href="#633-带度数的后根次序表示" class="sub">6.3.3 带度数的后根次序表示</a><a href="#634-带双标记的层次次序表示" class="sub">6.3.4 带双标记的层次次序表示</a><a href="#64-k-叉树">6.4 K 叉树</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充证明与算法题参考课程第-6-章" class="sub">补充证明与算法题（参考课程第 6 章）</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#61-树的定义和基本术语">6.1 树的定义和基本术语</a><a href="#611-树和森林" class="sub">6.1.1 树和森林</a><a href="#612-森林与二叉树的等价转换" class="sub">6.1.2 森林与二叉树的等价转换</a><a href="#613-树的抽象数据类型" class="sub">6.1.3 树的抽象数据类型</a><a href="#614-树的周游" class="sub">6.1.4 树的周游</a><a href="#62-树的链式存储结构">6.2 树的链式存储结构</a><a href="#621-子结点表表示方法" class="sub">6.2.1 “子结点表”表示方法</a><a href="#622-静态左子右兄表示法" class="sub">6.2.2 静态“左子/右兄”表示法</a><a href="#623-动态表示法" class="sub">6.2.3 动态表示法</a><a href="#624-动态左子右兄二叉链表表示法" class="sub">6.2.4 动态“左子/右兄”二叉链表表示法</a><a href="#625-父指针表示法和在并查集中的应用" class="sub">6.2.5 父指针表示法和在并查集中的应用</a><a href="#63-树的顺序存储结构">6.3 树的顺序存储结构</a><a href="#631-带右链的先根次序表示" class="sub">6.3.1 带右链的先根次序表示</a><a href="#632-带双标记的先根次序表示" class="sub">6.3.2 带双标记的先根次序表示</a><a href="#633-带度数的后根次序表示" class="sub">6.3.3 带度数的后根次序表示</a><a href="#634-带双标记的层次次序表示" class="sub">6.3.4 带双标记的层次次序表示</a><a href="#64-k叉树">6.4 K叉树</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充证明与算法题参考课程第-6-章" class="sub">补充证明与算法题（参考课程第 6 章）</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch06-tree.md</code> 生成

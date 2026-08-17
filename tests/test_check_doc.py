@@ -322,10 +322,23 @@ class TestR10Sections(unittest.TestCase):
         problems = self.check("## 8.3 选择排序\n\n### 8.3.2 堆排序\n", gaps)
         self.assertEqual(problems, [])
 
-    def test_retitled_section_still_counts_as_present(self):
-        """R10 只问编号在不在。标题改没改是人工复核项（D-014），不在这里判。"""
+    def test_same_number_with_different_topic_is_reported(self):
+        """R11 拦住用「先跑一遍」占掉原书 8.3.1 的编号。"""
         text = "## 8.3 选择排序\n\n### 8.3.1 先跑一遍\n\n### 8.3.2 堆排序\n"
-        self.assertEqual(self.check(text), [])
+        problems = self.check(text)
+        self.assertEqual(len(problems), 1, problems)
+        self.assertIn("R11 8.3.1 同号不同题", problems[0])
+        self.assertIn("直接选择排序", problems[0])
+
+    def test_title_typography_does_not_trigger_r11(self):
+        original = {"8.3": {"title": "K叉树(定义)", "chapter": 8, "line": 10}}
+        path = check_doc.BOOK / "ch08-sorting.md"
+        saved = path.read_text(encoding="utf-8")
+        try:
+            path.write_text("## 8.3 K 叉树（定义）\n", encoding="utf-8")
+            self.assertEqual(check_doc.check_sections(path, {}, original), [])
+        finally:
+            path.write_text(saved, encoding="utf-8")
 
     def test_slides_are_not_subject_to_r10(self):
         """课件按讲课节奏组织，逐节对应原书目录只会逼人塞凑数的标题。"""

@@ -23,6 +23,7 @@ import collections
 import re
 import sys
 import textwrap
+import unicodedata
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -83,6 +84,7 @@ RULES = [
     "R8  text 块不得逐字复制 code/ 下的源码——本书自己的代码必须走 cpp file= 由 R3 把关",
     "R9  行间公式 $$…$$ 必须写在一行内，且不得出现渲染器不认识的 LaTeX 命令",
     "R10 原书有的节，新书要么有同号的节，要么在 collab/section_gaps.json 里登记（并入/不写/待补）",
+    "R11 沿用原书编号的节必须沿用原书题名；现代教学步骤不得占用旧编号",
 ]
 
 
@@ -382,8 +384,8 @@ def known_listings():
 # `bubble_sort`、`counting_sort` 都实现了、有测试、还认领着算法8.3/8.5/8.10。
 # 台账说「已覆盖」，书上却没讲；R5–R7 只管交叉引用能不能解析，管不到「这一节在不在」。
 #
-# 判据只问「同号的节在不在」，**不判标题、更不判内容对不对**——
-# 那是人工复核项（D-014 划的同一条边界）。
+# R10 问「同号的节在不在」；T-028 新增的 R11 再问「同号是否同题」。
+# R11 只做规范化后的题名相等，不做模糊语义匹配；内容对不对仍是人工复核项。
 # 合并进父节、有意不写、欠着没写，都合法，但都得在 section_gaps.json 里
 # 带理由、责任人、日期登记，理由要具体到「并进哪一节」。
 CHAPTER_FILE_RE = re.compile(r"^ch(\d+)-")
@@ -422,7 +424,7 @@ def load_section_gaps(path=None):
 
 
 def check_sections(path: Path, gaps, original=None):
-    """R10：原书这一章的节，新书是否都有同号的节（或已登记）。"""
+    """R10/R11：原书的节号必须存在或登记；存在时题名不得漂移。"""
     # 只管书稿正文。课件（book/slides/）按讲课节奏组织，一页一个话题，
     # 本来就不该逐节对应原书目录——拿 R10 去要求它，只会逼人往课件里塞凑数的标题。
     found = CHAPTER_FILE_RE.match(path.name)
@@ -433,14 +435,24 @@ def check_sections(path: Path, gaps, original=None):
     wanted = {num: meta for num, meta in original.items() if meta["chapter"] == chapter}
     if not wanted:
         return []
-    have = set()
+    have = {}
     for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
         hit = ledger.SECTION_RE.match(line)
         if hit:
-            have.add(hit.group(1))
+            have[hit.group(1)] = hit.group(2).strip()
     problems = []
     for number in sorted(wanted, key=lambda n: [int(x) for x in n.rstrip("abcdefghij").split(".")]):
-        if number in have or number in gaps:
+        if number in have:
+            original_title = normalize_section_title(wanted[number]["title"])
+            current_title = normalize_section_title(have[number])
+            if current_title != original_title:
+                problems.append(
+                    f"{rel_label(path)}  R11 {number} 同号不同题：原书是"
+                    f"「{wanted[number]['title']}」（底稿第 {wanted[number]['line']} 行），"
+                    f"新书是「{have[number]}」"
+                )
+            continue
+        if number in gaps:
             continue
         problems.append(
             f"{rel_label(path)}  R10 原书有 {number} {wanted[number]['title']}"
@@ -448,6 +460,13 @@ def check_sections(path: Path, gaps, original=None):
             f"也没在 collab/section_gaps.json 里登记"
         )
     return problems
+
+
+def normalize_section_title(title: str) -> str:
+    """只忽略排版差异，不猜两个不同词组是否语义相近。"""
+    title = unicodedata.normalize("NFKC", title)
+    title = title.translate(str.maketrans({"“": '"', "”": '"', "「": '"', "」": '"'}))
+    return re.sub(r"\s+", "", title)
 
 
 def check_file(path: Path, listings, sources=None):

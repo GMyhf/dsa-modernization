@@ -158,7 +158,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>源码：<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/teaching.hpp" class="ext">二叉树与二叉搜索树·教学版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/modern.hpp" class="ext">二叉树与二叉搜索树·工程版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/heap_huffman/teaching.hpp" class="ext">最小堆与 Huffman 树·教学版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/heap_huffman/modern.hpp" class="ext">最小堆与 Huffman 树·工程版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/demo.cpp" class="ext">树的示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/heap_huffman/demo.cpp" class="ext">堆与 Huffman 的示例</a>。</p>
 <h2 id="51-二叉树的概念"><a class="anchor" href="#51-二叉树的概念">#</a>5.1 二叉树的概念</h2>
 <p>二叉树由结点的有限集合构成：或者为空，或者由一个根和两棵互不相交的左、右子树组成。左右次序不能颠倒。根没有父结点；其余每个结点恰有一个父结点，至多两个孩子。没有孩子的是叶，其余是内部结点。从根到某结点的边数是该结点的层数，根在第 0 层。</p>
-<h3 id="511-定义和基本术语"><a class="anchor" href="#511-定义和基本术语">#</a>5.1.1 定义和基本术语</h3>
+<h3 id="511-二叉树的定义和基本术语"><a class="anchor" href="#511-二叉树的定义和基本术语">#</a>5.1.1 二叉树的定义和基本术语</h3>
 <p>下面这棵树：</p>
 <div class="codeblock" data-lang="text"><pre><code>      A
      / \
@@ -202,7 +202,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>析构用的是「右旋到没有左孩子，再沿右链逐个删」的经典办法：额外空间 O(1)，不分配内存，所以能保持 <code>noexcept</code>。深拷贝用堆上的显式栈代替调用栈。改完之后，纯左链 500 万结点的析构与深拷贝都不再崩（原先分别在 100 万、50 万段错误）；测试里有一个百万深链的用例专门守着这条，改回递归它就会报 <code>stack-overflow</code>。</p>
 <h3 id="512-满二叉树完全二叉树扩充二叉树"><a class="anchor" href="#512-满二叉树完全二叉树扩充二叉树">#</a>5.1.2 满二叉树、完全二叉树、扩充二叉树</h3>
 <p>任何结点或者是叶，或者左右子树都非空，叫做满二叉树。叶只出现在最下两层、且最下层靠左对齐，叫做完全二叉树。在空子树位置补上空树叶，得到扩充二叉树；外部路径长度 <span class="math">E</span> 与内部路径长度 <span class="math">I</span> 满足 <span class="math">E<span class="rel">=</span>I<span class="bin">+</span><span class="upr">2</span>n</span>。</p>
-<h3 id="513-主要性质"><a class="anchor" href="#513-主要性质">#</a>5.1.3 主要性质</h3>
+<h3 id="513-二叉树的主要性质"><a class="anchor" href="#513-二叉树的主要性质">#</a>5.1.3 二叉树的主要性质</h3>
 <p>第 <span class="math">i</span> 层至多 <span class="math"><span class="upr">2</span><sup>i</sup></span> 个结点；深度为 <span class="math">k</span> 的二叉树至多 <span class="math"><span class="upr">2</span><sup>k<span class="bin">+</span><span class="upr">1</span></sup><span class="bin">−</span><span class="upr">1</span></span> 个结点。按层从 0 编号时， 结点 <span class="math">i</span> 的父是 <span class="math">⌊(i<span class="bin">−</span><span class="upr">1</span>)/<span class="upr">2</span>⌋</span>，左右孩子是 <span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">1</span></span> 与 <span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">2</span></span>——第 5.5 节的堆全靠这一条。 <span class="math">n</span> 个结点的完全二叉树高度为 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>(n<span class="bin">+</span><span class="upr">1</span>)⌉</span>。这些性质原书没错，原样保留。</p>
 <p>其中三条值得单独写下来，因为后面反复要用。</p>
 <p><strong>性质 3</strong>：非空二叉树的叶结点数 <span class="math">n<sub><span class="upr">0</span></sub></span> 等于度为 2 的结点数 <span class="math">n<sub><span class="upr">2</span></sub></span> 加 1，即 <span class="math">n<sub><span class="upr">0</span></sub><span class="rel">=</span>n<sub><span class="upr">2</span></sub><span class="bin">+</span><span class="upr">1</span></span>。</p>
@@ -213,7 +213,9 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <blockquote><p><strong>证明.</strong> 设二叉树为 <span class="math">T</span>，把它所有的空子树都换成树叶，得到的扩充二叉树记为 <span class="math">T&#x27;</span>。 <span class="math">T&#x27;</span> 是满二叉树，而 <span class="math">T</span> 原来的每个结点在 <span class="math">T&#x27;</span> 里都成了分支结点。 由满二叉树定理，<span class="math">T&#x27;</span> 的树叶数 = 分支结点数 + 1 = <span class="math">T</span> 的结点数 + 1。 而每片新添的树叶恰好对应 <span class="math">T</span> 的一棵空子树，所以 <span class="math">T</span> 的空子树数目等于它的结点数加 1。∎</p></blockquote>
 <p>性质 5 不是纸面游戏：它说明<strong>一棵 <span class="math">n</span> 个结点的二叉树里有 <span class="math">n<span class="bin">+</span><span class="upr">1</span></span> 个空指针</strong>。 链式存储时这些空指针占的空间和结点本身同阶——线索二叉树、Trie 的压缩、 第 12 章 PATRICIA 的动机都从这里来。</p>
 <h2 id="52-二叉树的周游"><a class="anchor" href="#52-二叉树的周游">#</a>5.2 二叉树的周游</h2>
-<h3 id="521-先跑一遍"><a class="anchor" href="#521-先跑一遍">#</a>5.2.1 先跑一遍</h3>
+<h3 id="521-二叉树的抽象数据类型"><a class="anchor" href="#521-二叉树的抽象数据类型">#</a>5.2.1 二叉树的抽象数据类型</h3>
+<p>二叉树 ADT 的基本操作包括建树、判空、取得根和左右子树，以及先序、中序、后序和层次周游。 具体存储结构留到 5.3；本节先从调用方观察这些操作。</p>
+<h4 id="先跑一遍"><a class="anchor" href="#先跑一遍">#</a>先跑一遍</h4>
 <p>先建树并打印四种周游，再插一棵 BST：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/demo.cpp">code/ch05/binary_tree/demo.cpp</a></div><pre><code><span class="c">// 第 5 章「先跑一遍」：用教学版 BinaryTree 与 BinarySearchTree 走一遍四种周游与增删查。</span>
 <span class="c">// 编译运行：</span>
@@ -262,9 +264,9 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 BST 中序: 1 3 4 6 7 8 10 14
 含 6? 是  删 3 后含 3? 否</code></pre></div>
 <p><code>create_tree(value, left, right)</code> 接管两棵子树。参数是右值，表示所有权被移走；<code>left_leaf</code> 在 <code>std::move</code> 之后变空，不会和 <code>left</code> 抢着析构同一结点。</p>
-<h3 id="522-深度优先周游"><a class="anchor" href="#522-深度优先周游">#</a>5.2.2 深度优先周游</h3>
+<h3 id="522-深度优先周游二叉树"><a class="anchor" href="#522-深度优先周游二叉树">#</a>5.2.2 深度优先周游二叉树</h3>
 <p>先序 / 中序 / 后序的递归版就是三行：访问自己与走进左右孩子的次序不同。迭代版用一棵手写链式栈模拟调用栈，按 D-001 §3d 只作补充，不替换递归主实现。</p>
-<h3 id="523-广度优先周游"><a class="anchor" href="#523-广度优先周游">#</a>5.2.3 广度优先周游</h3>
+<h3 id="523-广度优先周游二叉树"><a class="anchor" href="#523-广度优先周游二叉树">#</a>5.2.3 广度优先周游二叉树</h3>
 <p>层次周游用手写链式 FIFO，不用 <code>std::queue</code> 替代本节要教的队列用法。</p>
 <h2 id="53-二叉树的存储结构"><a class="anchor" href="#53-二叉树的存储结构">#</a>5.3 二叉树的存储结构</h2>
 <p><code>create_tree</code> 先 <code>new</code> 出新根，再把两棵子树的根指针挪过来，最后才清空自己原来的树。这样即使 <code>new</code> 抛异常，调用方的两棵子树也不动。链式存储是本节主实现；完全二叉树还可以按 5.1.3 的编号放进数组，堆就是这种用法。</p>
@@ -1000,7 +1002,8 @@ BST 中序: 1 3 4 6 7 8 10 14
 <div class="codeblock" data-lang="text"><pre><code>==2738715==ERROR: LeakSanitizer: detected memory leaks
 Direct leak of 24 byte(s) in 1 object(s) allocated from:
     #1 HuffmanTree::HuffmanTree(int const*, unsigned long) teaching.hpp:180</code></pre></div>
-<h3 id="562-huffman-编码与译码"><a class="anchor" href="#562-huffman-编码与译码">#</a>5.6.2 Huffman 编码与译码</h3>
+<h3 id="562-huffman-编码"><a class="anchor" href="#562-huffman-编码">#</a>5.6.2 Huffman 编码</h3>
+<h4 id="编码与译码"><a class="anchor" href="#编码与译码">#</a>编码与译码</h4>
 <p>建出树只是半程。Huffman 树的<strong>用途</strong>是给字符编码，这一节把它走完。</p>
 <p><strong>问题从哪来。</strong> 要传电文 <code>abbaaadc</code>。定长编码给每个字符 2 位（a=00, b=01, c=10, d=11）， 总共 16 位。想更短，就得让<strong>出现次数多的字符用更短的码</strong>。 比如 a=0, b=1, c=01, d=10，电文变成 10 位——<strong>但这样的电文没法译码</strong>： 收到 <code>011</code>，既可以读成 a b b，也可以读成 c b。</p>
 <p><strong>症结是「前缀」。</strong> <code>0</code> 是 <code>01</code> 的前缀，所以读到 <code>0</code> 时无法判断该停还是该再读一位。 解决办法是要求任何字符的编码都不是另一个字符编码的前缀——这种编码叫<strong>前缀码</strong>。</p>
@@ -1102,7 +1105,7 @@ Direct leak of 24 byte(s) in 1 object(s) allocated from:
 </ol>
 <div class="pagenav"><a href="ch04-string.html"><span class="dir">← 上一篇</span>第4章 字符串</a><a href="ch06-tree.html" style="text-align:right"><span class="dir">下一篇 →</span>第6章 树</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#51-二叉树的概念">5.1 二叉树的概念</a><a href="#511-定义和基本术语" class="sub">5.1.1 定义和基本术语</a><a href="#512-满二叉树完全二叉树扩充二叉树" class="sub">5.1.2 满二叉树、完全二叉树、扩充二叉树</a><a href="#513-主要性质" class="sub">5.1.3 主要性质</a><a href="#52-二叉树的周游">5.2 二叉树的周游</a><a href="#521-先跑一遍" class="sub">5.2.1 先跑一遍</a><a href="#522-深度优先周游" class="sub">5.2.2 深度优先周游</a><a href="#523-广度优先周游" class="sub">5.2.3 广度优先周游</a><a href="#53-二叉树的存储结构">5.3 二叉树的存储结构</a><a href="#54-二叉搜索树">5.4 二叉搜索树</a><a href="#55-堆与优先队列">5.5 堆与优先队列</a><a href="#551a-建堆为什么是-on-而不是-onlog-n" class="sub">5.5.1a 建堆为什么是 $O(n)$ 而不是 $O(n\log n)$</a><a href="#56-huffman-树及其应用">5.6 Huffman 树及其应用</a><a href="#562-huffman-编码与译码" class="sub">5.6.2 Huffman 编码与译码</a><a href="#56a-进阶选读从教学版到工程版" class="sub">5.6a 进阶（选读）：从教学版到工程版</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充证明题参考课程第-5-章" class="sub">补充证明题（参考课程第 5 章）</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#51-二叉树的概念">5.1 二叉树的概念</a><a href="#511-二叉树的定义和基本术语" class="sub">5.1.1 二叉树的定义和基本术语</a><a href="#512-满二叉树完全二叉树扩充二叉树" class="sub">5.1.2 满二叉树、完全二叉树、扩充二叉树</a><a href="#513-二叉树的主要性质" class="sub">5.1.3 二叉树的主要性质</a><a href="#52-二叉树的周游">5.2 二叉树的周游</a><a href="#521-二叉树的抽象数据类型" class="sub">5.2.1 二叉树的抽象数据类型</a><a href="#522-深度优先周游二叉树" class="sub">5.2.2 深度优先周游二叉树</a><a href="#523-广度优先周游二叉树" class="sub">5.2.3 广度优先周游二叉树</a><a href="#53-二叉树的存储结构">5.3 二叉树的存储结构</a><a href="#54-二叉搜索树">5.4 二叉搜索树</a><a href="#55-堆与优先队列">5.5 堆与优先队列</a><a href="#551a-建堆为什么是-on-而不是-onlog-n" class="sub">5.5.1a 建堆为什么是 $O(n)$ 而不是 $O(n\log n)$</a><a href="#56-huffman-树及其应用">5.6 Huffman 树及其应用</a><a href="#562-huffman-编码" class="sub">5.6.2 Huffman 编码</a><a href="#56a-进阶选读从教学版到工程版" class="sub">5.6a 进阶（选读）：从教学版到工程版</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充证明题参考课程第-5-章" class="sub">补充证明题（参考课程第 5 章）</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch05-binary-tree.md</code> 生成
