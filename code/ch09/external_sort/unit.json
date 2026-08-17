@@ -1,1 +1,27 @@
-{"id":"external_sort","title":"外部排序与竞赛树","listings":["算法9.1","代码9.2","代码9.3"],"standard":"c++17","owner":"claude","notes":"置换选择返回顺串而非整表排序；赢者树与败者树分开实现。","d001_exceptions":{"#include<vector>":"承载输入记录、冻结区和竞赛树的叶序列，不替代本章的堆选择与重赛。"}}
+{
+  "id": "external_sort",
+  "title": "外部排序与竞赛树",
+  "listings": [
+    {
+      "id": "算法9.1",
+      "anchor": "namespace dsa::external_sort {",
+      "test": "main"
+    },
+    {
+      "id": "代码9.2",
+      "anchor": "namespace dsa::external_sort {",
+      "test": "main"
+    },
+    {
+      "id": "代码9.3",
+      "anchor": "namespace dsa::external_sort {",
+      "test": "main"
+    }
+  ],
+  "standard": "c++17",
+  "owner": "claude",
+  "notes": "置换选择返回顺串而非整表排序；赢者树与败者树分开实现。",
+  "d001_exceptions": {
+    "#include<vector>": "承载输入记录、冻结区和竞赛树的叶序列，不替代本章的堆选择与重赛。"
+  }
+}

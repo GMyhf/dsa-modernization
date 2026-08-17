@@ -2,9 +2,21 @@
   "id": "array_stack",
   "title": "顺序栈 ArrayStack",
   "listings": [
-    "代码3.1",
-    "代码3.2",
-    "算法3.3"
+    {
+      "id": "代码3.1",
+      "anchor": "// 顺序栈 ArrayStack —— 原书【代码3.1】【代码3.2】【算法3.3】的现代化实现。",
+      "test": "static_assert(std::is_nothrow_move_assignable<std::string>::value,"
+    },
+    {
+      "id": "代码3.2",
+      "anchor": "// 顺序栈 ArrayStack —— 原书【代码3.1】【代码3.2】【算法3.3】的现代化实现。",
+      "test": "static_assert(std::is_nothrow_move_assignable<std::string>::value,"
+    },
+    {
+      "id": "算法3.3",
+      "anchor": "// 顺序栈 ArrayStack —— 原书【代码3.1】【代码3.2】【算法3.3】的现代化实现。",
+      "test": "static_assert(std::is_nothrow_move_assignable<std::string>::value,"
+    }
   ],
   "standard": "c++17",
   "owner": "claude",

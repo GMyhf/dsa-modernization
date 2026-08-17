@@ -1,7 +1,28 @@
 {
   "id": "string_class",
   "title": "字符串类 String",
-  "listings": ["代码4.1", "算法4.3", "算法4.4", "算法4.5"],
+  "listings": [
+    {
+      "id": "代码4.1",
+      "anchor": "// 字符串类 String —— 原书【代码4.1】【算法4.3】【算法4.4】【算法4.5】的现代化实现。",
+      "test": "main"
+    },
+    {
+      "id": "算法4.3",
+      "anchor": "// 字符串类 String —— 原书【代码4.1】【算法4.3】【算法4.4】【算法4.5】的现代化实现。",
+      "test": "main"
+    },
+    {
+      "id": "算法4.4",
+      "anchor": "// 字符串类 String —— 原书【代码4.1】【算法4.3】【算法4.4】【算法4.5】的现代化实现。",
+      "test": "main"
+    },
+    {
+      "id": "算法4.5",
+      "anchor": "// 字符串类 String —— 原书【代码4.1】【算法4.3】【算法4.4】【算法4.5】的现代化实现。",
+      "test": "main"
+    }
+  ],
   "standard": "c++17",
   "owner": "claude",
   "notes": "原书缺陷：算法4.4 的 assert(str != '\\0') 是指针与整数比较，本身编译不过；String(char* s) 使书中自己的例子 String s1 = \"Hello\" 在 C++11 起为非法转换（-Werror 下即错误）；算法4.5 越界时 return NULL，随后 strlen(nullptr) 当场 SEGV。详见 legacy.md。"

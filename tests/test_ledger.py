@@ -116,6 +116,13 @@ class TestUnitsAndExclusions(unittest.TestCase):
         claimed = [listing for unit in units for listing in unit["listings"]]
         self.assertEqual(claimed, [])
 
+    def test_object_listing_id_is_preserved(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.make_unit(Path(tmp), "u", listings=[{"id": "算法3.3", "anchor": "a", "test": "t"}])
+            units, problems = ledger.load_units(Path(tmp))
+        self.assertEqual(problems, [])
+        self.assertEqual(units[0]["listings"][0]["id"], "算法3.3")
+
     def test_exclusion_without_reason_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "exclusions.json"

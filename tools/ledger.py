@@ -144,7 +144,11 @@ def analyze():
 
     claimed = {}
     for unit in units:
-        for listing in unit.get("listings", []):
+        for entry in unit.get("listings", []):
+            listing = entry.get("id") if isinstance(entry, dict) else entry
+            if not isinstance(listing, str):
+                problems.append(f"{unit['rel']}: listings 条目必须是编号或对象")
+                continue
             if listing not in known:
                 problems.append(
                     f"{unit['rel']}: 认领的 {listing} 在 dsa_raw.md 里不存在（编号写错了？）"
@@ -199,7 +203,10 @@ def format_report(state):
     beyond = [u for u in state["units"] if not u.get("listings")]
     lines += ["", f"code/ 单元 {len(state['units'])} 个（其中 {len(beyond)} 个不对应原书清单）:"]
     for unit in state["units"]:
-        claims = ", ".join(unit.get("listings", [])) or "原书无对应清单"
+        claims = ", ".join(
+            e.get("id", "?") if isinstance(e, dict) else e
+            for e in unit.get("listings", [])
+        ) or "原书无对应清单"
         lines.append(f"  - {unit['rel']}  ←  {claims}  [{unit.get('title', '')}]")
     broken = [i["id"] for i in inv if not i["has_end"]]
     if broken:

@@ -171,6 +171,32 @@ def check_substance(unit_dir: Path, meta, assertions, teaching_assertions=None):
     return problems
 
 
+def check_listing_bindings(unit_dir: Path, meta):
+    """每条清单必须绑定存在于实现与测试中的稳定文本锚点。"""
+    problems = []
+    listings = meta.get("listings", [])
+    sources = "\n".join(
+        (unit_dir / name).read_text(encoding="utf-8")
+        for name in ("modern.hpp", "modern.cpp", "teaching.hpp", "teaching.cpp")
+        if (unit_dir / name).is_file()
+    )
+    tests = (unit_dir / "test.cpp").read_text(encoding="utf-8") if (unit_dir / "test.cpp").is_file() else ""
+    for entry in listings:
+        if not isinstance(entry, dict):
+            # Legacy synthetic probes may still use the pre-T-025 shape; the
+            # repository manifests are migrated and are checked strictly.
+            continue
+        listing, anchor, test = entry.get("id"), entry.get("anchor"), entry.get("test")
+        if not all(isinstance(x, str) and x.strip() for x in (listing, anchor, test)):
+            problems.append(f"  ❌ 清单绑定字段不完整：{entry!r}")
+            continue
+        if anchor not in sources:
+            problems.append(f"  ❌ {listing} 的实现锚点不存在：{anchor}")
+        if test not in tests:
+            problems.append(f"  ❌ {listing} 的测试锚点不存在：{test}")
+    return problems
+
+
 def check_d001(unit_dir: Path, meta):
     """返回违反 D-001 的问题列表。unit.json 的 d001_exceptions 可豁免，但必须写理由。"""
     exceptions = {
@@ -303,6 +329,10 @@ def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None, degr
     if d001:
         ok = False
         logs.extend(d001)
+    bindings = check_listing_bindings(unit_dir, meta)
+    if bindings:
+        ok = False
+        logs.extend(bindings)
 
     programs, structure = unit_programs(unit_dir, sources)
     if structure:
