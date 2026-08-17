@@ -87,6 +87,7 @@ RULES = [
     "R11 沿用原书编号的节必须沿用原书题名；现代教学步骤不得占用旧编号",
     "R12 正文里「第 X.Y 节」这类引用必须指向真实存在的节；带「原书」标记的按底稿解析",
     "R13 正文不得用 LaTeX 式的 `--` 当破折号/区间号——Markdown 原样印出两个减号",
+    "R14 正文每道习题/上机题要么在附录里有同号答案，要么在 collab/answer_gaps.json 里登记",
 ]
 
 
@@ -648,6 +649,125 @@ def check_double_dash(path: Path):
     return problems
 
 
+# R14：出了题，就得说清楚答案在哪。
+#
+# 缘由（2026-08-17）：书稿 12 章一共出了 **96 道习题 + 40 道上机题**，
+# 而附录 `book/习题与参考答案.md` 里的 47 条「习题答案」答的是**课程作业与 ref_DSA 的题**，
+# 与正文题号毫无对应——ch01 正文第 1 题问「从大到小输出三个整数」，
+# 附录第 1 条答的却是「数据结构的四个层次」。学生翻到附录只会更糊涂。
+# （31 道**补充题**是另一回事：它们与 `### 补充题参考答案` 一一对应，本来就是配套的。）
+#
+# 判据：正文每道题要么在附录里有**同号**答案，要么在 `collab/answer_gaps.json` 里
+# 带理由、责任人、日期登记为 `pending`（欠着）或 `exercise-only`（有意留作练习）。
+# **只验存在与同号，不验答案对不对**——那是人工复核项（与 D-014 同一条边界）。
+ANSWER_GAPS = ROOT / "collab" / "answer_gaps.json"
+ANSWER_GAP_KINDS = ("pending", "exercise-only")
+EXERCISE_GROUPS = {"习题": "正文习题答案", "上机题": "正文上机题参考"}
+
+
+def numbered_groups(text):
+    """一段 Markdown 里的编号列表，按「遇到 1. 就是新一组」切开。"""
+    groups, current = [], []
+    for found in re.finditer(r"^(\d+)\. ", text, re.M):
+        number = int(found.group(1))
+        if number == 1 and current:
+            groups.append(current)
+            current = []
+        current.append(number)
+    if current:
+        groups.append(current)
+    return groups
+
+
+def chapter_exercises(path: Path):
+    """返回 {('习题'|'上机题'): 题数}。
+
+    `## 习题` 下面可能有两组编号：先是 `### 补充…（参考课程第 N 章）` 那一组，
+    然后才是正文自己的题。**补充题不算在内**——它们与附录的「补充题参考答案」
+    早已一一对应，不是这条规则要管的缺口。
+    """
+    text = path.read_text(encoding="utf-8", errors="replace")
+    counts = {}
+    for name in EXERCISE_GROUPS:
+        found = re.search(rf"^## {name}.*?(?=^## |\Z)", text, re.S | re.M)
+        if not found:
+            counts[name] = 0
+            continue
+        groups = numbered_groups(found.group(0))
+        counts[name] = len(groups[-1]) if groups else 0
+    return counts
+
+
+def answered_exercises(path=None):
+    """附录里已经按正文题号给出的答案：{(章, 组): 题数}。"""
+    path = path or (BOOK / "习题与参考答案.md")
+    covered = {}
+    if not path.is_file():
+        return covered
+    text = path.read_text(encoding="utf-8", errors="replace")
+    for chapter_block in re.finditer(r"^## 第 (\d+) 章.*?(?=^## 第 |\Z)", text, re.S | re.M):
+        chapter = int(chapter_block.group(1))
+        for group, heading in EXERCISE_GROUPS.items():
+            section = re.search(rf"^### {heading}.*?(?=^### |^## |\Z)",
+                                chapter_block.group(0), re.S | re.M)
+            if not section:
+                continue
+            groups = numbered_groups(section.group(0))
+            covered[(chapter, group)] = len(groups[0]) if groups else 0
+    return covered
+
+
+def load_answer_gaps(path=None):
+    """读 collab/answer_gaps.json。返回 (set[(章, 组, 题号)], problems)。"""
+    path = path or ANSWER_GAPS
+    entries, problems = set(), []
+    if not path.is_file():
+        return entries, problems
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return entries, [f"collab/answer_gaps.json 不是合法 JSON: {exc}"]
+    for entry in raw.get("gaps", []):
+        key = (entry.get("chapter"), entry.get("group"), entry.get("number"))
+        if not isinstance(key[0], int) or key[1] not in EXERCISE_GROUPS or not isinstance(key[2], int):
+            problems.append(f"answer_gaps.json: 条目 {entry!r} 的 chapter/group/number 不合法")
+            continue
+        if entry.get("kind") not in ANSWER_GAP_KINDS:
+            problems.append(
+                f"answer_gaps.json[第{key[0]}章 {key[1]}{key[2]}]: kind 必须是 {ANSWER_GAP_KINDS} 之一"
+            )
+        for field in ("reason", "by", "date"):
+            if not entry.get(field):
+                problems.append(
+                    f"answer_gaps.json[第{key[0]}章 {key[1]}{key[2]}]: 缺少 {field}——登记必须留下出处"
+                )
+        if key in entries:
+            problems.append(f"answer_gaps.json[第{key[0]}章 {key[1]}{key[2]}]: 重复登记")
+        entries.add(key)
+    return entries, problems
+
+
+def check_exercise_answers(chapter_files, gaps, covered=None):
+    """R14：逐题核对「有同号答案」或「已登记」。"""
+    covered = answered_exercises() if covered is None else covered
+    problems = []
+    for path in chapter_files:
+        found = CHAPTER_FILE_RE.match(path.name)
+        if not found or path.parent.resolve() != BOOK.resolve():
+            continue
+        chapter = int(found.group(1))
+        for group, count in chapter_exercises(path).items():
+            answered = covered.get((chapter, group), 0)
+            for number in range(answered + 1, count + 1):
+                if (chapter, group, number) in gaps:
+                    continue
+                problems.append(
+                    f"{rel_label(path)}  R14 第{chapter}章{group}第 {number} 题没有答案，"
+                    f"也没在 collab/answer_gaps.json 里登记"
+                )
+    return problems
+
+
 def check_file(path: Path, listings, sources=None):
     """返回 problems 列表，每条形如 'book/x.md:12  说明'。"""
     problems = []
@@ -794,11 +914,15 @@ def main():
     original = ledger.parse_sections()
     book_numbers = book_section_numbers()
     original_numbers = set(original)
+    answer_gaps, answer_problems = load_answer_gaps()
+    problems += answer_problems
     for target in targets:
         problems += check_file(target, listings)
         problems += check_sections(target, gaps, original)
         problems += check_section_refs(target, book_numbers, original_numbers)
         problems += check_double_dash(target)
+
+    problems += check_exercise_answers(targets, answer_gaps)
 
     # legacy.md 是原书缺陷证据，也大量使用 text 引文；只对它运行 R8，
     # 不把书稿专属的章节、图片和清单配对规则强加给证据文件。
@@ -812,6 +936,9 @@ def main():
         sys.exit(1)
     kinds = collections.Counter(entry.get("kind") for entry in gaps.values())
     print(f"✅ 书稿体检通过：{len(targets)} 个文件，{len(RULES)} 条规则")
+    answered = sum(answered_exercises().values())
+    print(f"   题目覆盖：正文 {answered + len(answer_gaps)} 道，已作答 {answered} 道，"
+          f"登记未作答 {len(answer_gaps)} 道")
     if gaps:
         print(f"   节覆盖：原书 {len(original)} 节，已登记 {len(gaps)} 节"
               f"（并入父节 {kinds['merged']}，有意不写 {kinds['declined']}，待补 {kinds['pending']}）")

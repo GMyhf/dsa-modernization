@@ -637,6 +637,102 @@ class TestR13DoubleDash(unittest.TestCase):
         self.assertEqual(found, [])
 
 
+class TestR14ExerciseAnswers(unittest.TestCase):
+    """R14：出了题，就得说清楚答案在哪。
+
+    **缘由**：书稿 12 章出了 96 道习题 + 40 道上机题，而附录里 47 条「习题答案」
+    答的是课程作业与 `ref_DSA` 的题——ch01 正文第 1 题问「从大到小输出三个整数」，
+    附录第 1 条答的却是「数据结构的四个层次」。**编号撞在一起，学生翻到附录只会更糊涂。**
+    """
+
+    BOOK_CH = ("# 第9章\n\n## 习题\n\n### 补充题（参考课程第 9 章）\n\n"
+               "1. 补充第一题\n2. 补充第二题\n\n"
+               "1. 正文第一题\n2. 正文第二题\n3. 正文第三题\n\n"
+               "## 上机题\n\n1. 上机第一题\n")
+
+    def chapter(self, tmp, text=None):
+        path = check_doc.BOOK / "ch09-probe.md"
+        path.write_text(text or self.BOOK_CH, encoding="utf-8")
+        return path
+
+    def test_supplementary_group_is_not_counted(self):
+        """补充题与「补充题参考答案」本来就配套，不该被这条规则算成缺口。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self.chapter(tmp)
+            try:
+                counts = check_doc.chapter_exercises(path)
+            finally:
+                path.unlink()
+        self.assertEqual(counts, {"习题": 3, "上机题": 1})
+
+    def test_unanswered_exercise_is_reported(self):
+        path = self.chapter(None)
+        try:
+            problems = check_doc.check_exercise_answers([path], set(), covered={})
+        finally:
+            path.unlink()
+        self.assertEqual(len(problems), 4, problems)
+        self.assertTrue(any("习题第 1 题" in p for p in problems), problems)
+        self.assertTrue(any("上机题第 1 题" in p for p in problems), problems)
+
+    def test_same_numbered_answer_covers_it(self):
+        path = self.chapter(None)
+        try:
+            problems = check_doc.check_exercise_answers(
+                [path], set(), covered={(9, "习题"): 3, (9, "上机题"): 1})
+        finally:
+            path.unlink()
+        self.assertEqual(problems, [])
+
+    def test_partial_answers_report_only_the_tail(self):
+        """答到第 2 题就只欠第 3 题——同号是逐题的，不是「这一章有答案」。"""
+        path = self.chapter(None)
+        try:
+            problems = check_doc.check_exercise_answers(
+                [path], set(), covered={(9, "习题"): 2, (9, "上机题"): 1})
+        finally:
+            path.unlink()
+        self.assertEqual(len(problems), 1, problems)
+        self.assertIn("习题第 3 题", problems[0])
+
+    def test_registered_gap_passes(self):
+        path = self.chapter(None)
+        gaps = {(9, "习题", 1), (9, "习题", 2), (9, "习题", 3), (9, "上机题", 1)}
+        try:
+            problems = check_doc.check_exercise_answers([path], gaps, covered={})
+        finally:
+            path.unlink()
+        self.assertEqual(problems, [])
+
+    def test_gap_without_reason_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "answer_gaps.json"
+            path.write_text(json.dumps({"gaps": [
+                {"chapter": 9, "group": "习题", "number": 1, "kind": "pending",
+                 "by": "x", "date": "2026-08-17"}]}), encoding="utf-8")
+            _, problems = check_doc.load_answer_gaps(path)
+        self.assertTrue(any("reason" in p for p in problems), problems)
+
+    def test_unknown_kind_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "answer_gaps.json"
+            path.write_text(json.dumps({"gaps": [
+                {"chapter": 9, "group": "习题", "number": 1, "kind": "whatever",
+                 "reason": "r", "by": "x", "date": "2026-08-17"}]}), encoding="utf-8")
+            _, problems = check_doc.load_answer_gaps(path)
+        self.assertTrue(any("kind" in p for p in problems), problems)
+
+    def test_committed_book_has_every_exercise_accounted_for(self):
+        """入库当锚：136 道正文题，要么有同号答案，要么登记在案。"""
+        gaps, problems = check_doc.load_answer_gaps()
+        self.assertEqual(problems, [])
+        found = check_doc.check_exercise_answers(
+            sorted(check_doc.BOOK.glob("ch*.md")), gaps)
+        self.assertEqual(found, [])
+        answered = sum(check_doc.answered_exercises().values())
+        self.assertEqual(answered + len(gaps), 136, "正文题总数变了就要重新盘一遍")
+
+
 class TestR9Formulas(unittest.TestCase):
     """R9：公式得真能渲染出来。
 
