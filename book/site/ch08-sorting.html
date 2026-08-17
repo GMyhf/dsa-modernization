@@ -213,6 +213,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h2 id="82-插入排序"><a class="anchor" href="#82-插入排序">#</a>8.2 插入排序</h2>
 <p>先把四种排序跑一遍，看看它们交出什么。</p>
 <h3 id="821-直接插入排序"><a class="anchor" href="#821-直接插入排序">#</a>8.2.1 直接插入排序</h3>
+<figure><img loading="lazy" src="../assets/5493e0dcc0da4096.jpg" alt="图 8.1 插入排序"><figcaption>图 8.1 插入排序</figcaption></figure>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/demo.cpp">code/ch08/sorting/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
 
 <span class="p">#include &lt;iostream&gt;</span>
@@ -375,6 +376,7 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 <p>平均交换次数约为最坏的一半，仍是 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>。空间 <span class="math">Θ(<span class="upr">1</span>)</span>。</p>
 <p>需要提醒的是：<span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span> 相同不代表快慢相同。8.7.2 节的实测里，同样 5 万个随机数， 冒泡 5822 毫秒、插入 214 毫秒，<strong>差 27 倍</strong>——都是 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>，差在常数上： 冒泡每次逆序都要做一次三步交换，插入排序只做一次赋值搬移。</p>
 <h3 id="842-快速排序"><a class="anchor" href="#842-快速排序">#</a>8.4.2 快速排序</h3>
+<figure><img loading="lazy" src="../assets/8585d3b42b280664.jpg" alt="图 8.6 快速排序图示"><figcaption>图 8.6 快速排序图示</figcaption></figure>
 <p>选区间末元素为枢轴，把更小的元素换到左侧，再递归两边。全相等的输入必须也能结束。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#quick</a></div><pre><code><span class="k">inline</span> std::<span class="t">size_t</span> partition(std::vector&lt;<span class="t">int</span>&gt;&amp; values, std::<span class="t">size_t</span> first, std::<span class="t">size_t</span> last) {
     <span class="k">const</span> <span class="t">int</span> pivot = values[last - <span class="n">1</span>];
@@ -660,6 +662,7 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 随机                58.5     675.1       0.7</code></pre></div>
 <p><strong>优化快排在已排好序的输入上比插入排序慢了不止 100 倍</strong>。原因在 8.4.2 讲过： 枢轴取末元素，有序输入每次划分都最坏，<span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>；那两处优化管的是栈深和常数， 救不了最坏时间。这也是为什么实务中的快排一定要配三数取中或随机枢轴。</p>
 <h3 id="873-排序问题的下限"><a class="anchor" href="#873-排序问题的下限">#</a>8.7.3 排序问题的下限</h3>
+<figure><img loading="lazy" src="../assets/2f6a20c1eb3f2d13.jpg" alt="图 8.14 用判定树模拟基于比较的排序"><figcaption>图 8.14 用判定树模拟基于比较的排序</figcaption></figure>
 <p>上面所有比较排序，最坏时间没有一个低于 <span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>。这不是巧合： <strong>任何基于比较的排序，最坏情况下至少需要 <span class="math">Ω(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 次比较。</strong></p>
 <p>证明用判定树。把一次排序的执行过程画成一棵二叉树：每个内部结点是一次比较 「<span class="math">a<sub>i</sub>&lt;a<sub>j</sub></span>?」，两条边是两种结果，每片叶子是一种最终的输出排列。 算法在某个输入上做了多少次比较，就等于从根走到对应叶子的路径长度。</p>
 <p><span class="math">n</span> 个互不相同的元素有 <span class="math">n!</span> 种排列，每一种都必须能被这棵树区分出来， 否则算法会对两个不同的输入给出同一个答案——所以<strong>叶子至少有 <span class="math">n!</span> 片</strong>。 高度为 <span class="math">h</span> 的二叉树最多有 <span class="math"><span class="upr">2</span><sup>h</sup></span> 片叶子，于是 <span class="math"><span class="upr">2</span><sup>h</sup><span class="rel">≥</span>n!</span>，</p>
