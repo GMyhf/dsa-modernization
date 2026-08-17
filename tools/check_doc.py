@@ -18,6 +18,8 @@
   python3 tools/check_doc.py --list-rules
 """
 import argparse
+import json
+import collections
 import re
 import sys
 import textwrap
@@ -25,6 +27,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import ledger  # noqa: E402  底稿的 parser of record
 from repo import ROOT, rel_label  # noqa: E402  同目录工具
 
 BOOK = ROOT / "book"
@@ -79,6 +82,7 @@ RULES = [
     "R7  正文引用的「第N章」不得超过原书的 12 章",
     "R8  text 块不得逐字复制 code/ 下的源码——本书自己的代码必须走 cpp file= 由 R3 把关",
     "R9  行间公式 $$…$$ 必须写在一行内，且不得出现渲染器不认识的 LaTeX 命令",
+    "R10 原书有的节，新书要么有同号的节，要么在 collab/section_gaps.json 里登记（并入/不写/待补）",
 ]
 
 
@@ -371,6 +375,81 @@ def known_listings():
     return {item["id"] for item in parse_inventory()}
 
 
+# R10：原书分了哪些节，是 dsa_raw.md 说了算。
+#
+# 缘由（2026-08-17）：第 8 章的 8.3.1 直接选择排序、8.4.1 冒泡排序、8.6.1 桶式排序、
+# 8.6.3 索引排序**整节没写**——而 `code/ch08/sorting` 里 `selection_sort`、
+# `bubble_sort`、`counting_sort` 都实现了、有测试、还认领着算法8.3/8.5/8.10。
+# 台账说「已覆盖」，书上却没讲；R5–R7 只管交叉引用能不能解析，管不到「这一节在不在」。
+#
+# 判据只问「同号的节在不在」，**不判标题、更不判内容对不对**——
+# 那是人工复核项（D-014 划的同一条边界）。
+# 合并进父节、有意不写、欠着没写，都合法，但都得在 section_gaps.json 里
+# 带理由、责任人、日期登记，理由要具体到「并进哪一节」。
+CHAPTER_FILE_RE = re.compile(r"^ch(\d+)-")
+GAP_KINDS = ("merged", "declined", "pending")
+
+
+def load_section_gaps(path=None):
+    """读 collab/section_gaps.json。返回 (dict[节号] -> entry, problems)。"""
+    path = path or (ROOT / "collab" / "section_gaps.json")
+    entries, problems = {}, []
+    if not path.is_file():
+        return entries, problems
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return entries, [f"collab/section_gaps.json 不是合法 JSON: {exc}"]
+    for entry in raw.get("gaps", []):
+        number = entry.get("section")
+        if not number:
+            problems.append("section_gaps.json: 有一条记录没写 section")
+            continue
+        if entry.get("kind") not in GAP_KINDS:
+            problems.append(
+                f"section_gaps.json[{number}]: kind 必须是 {GAP_KINDS} 之一，"
+                f"现在是 {entry.get('kind')!r}"
+            )
+        for field in ("reason", "by", "date"):
+            if not entry.get(field):
+                problems.append(f"section_gaps.json[{number}]: 缺少 {field}——登记必须留下出处")
+        if entry.get("kind") == "merged" and not entry.get("into"):
+            problems.append(f"section_gaps.json[{number}]: merged 必须写 into，说明并进了哪一节")
+        if number in entries:
+            problems.append(f"section_gaps.json[{number}]: 重复记录")
+        entries[number] = entry
+    return entries, problems
+
+
+def check_sections(path: Path, gaps, original=None):
+    """R10：原书这一章的节，新书是否都有同号的节（或已登记）。"""
+    # 只管书稿正文。课件（book/slides/）按讲课节奏组织，一页一个话题，
+    # 本来就不该逐节对应原书目录——拿 R10 去要求它，只会逼人往课件里塞凑数的标题。
+    found = CHAPTER_FILE_RE.match(path.name)
+    if not found or path.parent.resolve() != BOOK.resolve():
+        return []
+    chapter = int(found.group(1))
+    original = ledger.parse_sections() if original is None else original
+    wanted = {num: meta for num, meta in original.items() if meta["chapter"] == chapter}
+    if not wanted:
+        return []
+    have = set()
+    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        hit = ledger.SECTION_RE.match(line)
+        if hit:
+            have.add(hit.group(1))
+    problems = []
+    for number in sorted(wanted, key=lambda n: [int(x) for x in n.rstrip("abcdefghij").split(".")]):
+        if number in have or number in gaps:
+            continue
+        problems.append(
+            f"{rel_label(path)}  R10 原书有 {number} {wanted[number]['title']}"
+            f"（底稿第 {wanted[number]['line']} 行），新书没有这一节，"
+            f"也没在 collab/section_gaps.json 里登记"
+        )
+    return problems
+
+
 def check_file(path: Path, listings, sources=None):
     """返回 problems 列表，每条形如 'book/x.md:12  说明'。"""
     problems = []
@@ -523,15 +602,21 @@ def main():
         return
 
     listings = known_listings()
-    problems = []
+    gaps, problems = load_section_gaps()
+    original = ledger.parse_sections()
     for target in targets:
         problems += check_file(target, listings)
+        problems += check_sections(target, gaps, original)
 
     if problems:
         print("\n".join(f"❌ {p}" for p in problems))
         print(f"\n{len(problems)} 个问题。规则说明见 `python3 tools/check_doc.py --list-rules`")
         sys.exit(1)
+    kinds = collections.Counter(entry.get("kind") for entry in gaps.values())
     print(f"✅ 书稿体检通过：{len(targets)} 个文件，{len(RULES)} 条规则")
+    if gaps:
+        print(f"   节覆盖：原书 {len(original)} 节，已登记 {len(gaps)} 节"
+              f"（并入父节 {kinds['merged']}，有意不写 {kinds['declined']}，待补 {kinds['pending']}）")
 
 
 if __name__ == "__main__":

@@ -219,6 +219,7 @@ inline void counting_sort(std::vector<int>& values) {
     }
 }
 
+// >>> static-queue
 // 代码8.12：固定容量 FIFO，是基数排序的桶而非通用 STL queue 替身。
 template <typename T>
 class StaticQueue {
@@ -243,6 +244,7 @@ private:
     std::size_t front_{0};
     std::size_t size_{0};
 };
+// <<< static-queue
 
 // >>> radix
 // 算法8.11：LSD 基数排序。翻转符号位使二补码有符号 int 按无符号序排序。
@@ -321,6 +323,7 @@ inline std::vector<int> random_values(std::size_t count, int upper_bound, unsign
     return values;
 }
 
+// >>> stopwatch
 class Stopwatch {
 public:
     void start() noexcept { started_ = std::chrono::steady_clock::now(); }
@@ -330,6 +333,7 @@ public:
 private:
     std::chrono::steady_clock::time_point started_{};
 };
+// <<< stopwatch
 
 // <<< sorting
 

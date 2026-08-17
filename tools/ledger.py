@@ -36,6 +36,8 @@ EXCLUSIONS = ROOT / "collab" / "exclusions.json"
 OPEN_RE = re.compile(r"【\s*(算法|代码)\s*([0-9]+\.[0-9]+[a-zA-Z]?)\s*】")
 # 结束标记经常被 OCR 吃掉前缀（见 dsa_raw.md 的「法3.3结束】」），所以只认数字
 END_RE = re.compile(r"([0-9]+\.[0-9]+[a-zA-Z]?)\s*结束")
+# 节标题：`## 8.3 选择排序` / `### 8.3.1 直接选择排序`（新书还会有 `5.5.1a` 这种追加节）
+SECTION_RE = re.compile(r"^#{2,3}\s*([0-9]+\.[0-9]+(?:\.[0-9]+)?[a-z]?)\s+(.*)$")
 
 REQUIRED_UNIT_FILES = ("unit.json", "legacy.md", "test.cpp")
 # D-001 定的默认是 c++17；偏离要在 legacy.md 写明理由
@@ -67,6 +69,33 @@ def parse_inventory(raw_path=RAW):
             }
         )
     return items
+
+
+def parse_sections(raw_path=RAW):
+    """返回 {'8.3.1': {'title': '直接选择排序', 'chapter': 8, 'line': 6903}}。
+
+    `dsa_raw.md` 是「原书到底分了哪些节」的唯一凭据，所以这个解析器和
+    `parse_inventory` 一样放在这里——**台账工具是底稿的 parser of record**，
+    别处再写一个正则迟早会和它分叉（见 D-014 关于「两份词表」的那段）。
+
+    编号带字母后缀（`5.5.1a`）的是**新书自己加的节**，原书没有；
+    这里一并按编号收，由调用方去判断谁多谁少。
+    """
+    if not raw_path.is_file():
+        return {}
+    sections = {}
+    for lineno, line in enumerate(raw_path.read_text(encoding="utf-8").splitlines(), 1):
+        found = SECTION_RE.match(line)
+        if not found:
+            continue
+        number = found.group(1)
+        # 目录里也有「1.1 …」这样的行，但它们不是 `##` 开头，正则已经挡掉；
+        # 同一编号重复出现时以**第一次**为准（后面多半是交叉引用里的重排）。
+        sections.setdefault(
+            number,
+            {"title": found.group(2).strip(), "chapter": int(number.split(".")[0]), "line": lineno},
+        )
+    return sections
 
 
 def load_units(code_root=CODE):

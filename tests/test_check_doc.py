@@ -4,6 +4,7 @@
 """
 import contextlib
 import io
+import json
 import sys
 import tempfile
 import unittest
@@ -278,6 +279,109 @@ class TestR8CopiedTextBlocks(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestR10Sections(unittest.TestCase):
+    """R10：原书有的节，新书要么有，要么登记。
+
+    **缘由**：第 8 章的 8.3.1 直接选择排序、8.4.1 冒泡排序、8.6.1 桶式排序、8.6.3 索引排序
+    整节没写，而 `code/ch08/sorting` 里三种实现都在、有测试、还认领着算法8.3/8.5/8.10。
+    台账说「已覆盖」，书上却没讲，R5–R7 一条都碰不到它——它们只管交叉引用能不能解析。
+    """
+
+    ORIGINAL = {
+        "8.3": {"title": "选择排序", "chapter": 8, "line": 10},
+        "8.3.1": {"title": "直接选择排序", "chapter": 8, "line": 20},
+        "8.3.2": {"title": "堆排序", "chapter": 8, "line": 30},
+    }
+
+    def check(self, text, gaps=None, name="ch08-sorting.md"):
+        path = check_doc.BOOK / name
+        original = path.read_text(encoding="utf-8") if path.exists() else None
+        try:
+            path.write_text(text, encoding="utf-8")
+            return check_doc.check_sections(path, gaps or {}, self.ORIGINAL)
+        finally:
+            if original is None:
+                path.unlink()
+            else:
+                path.write_text(original, encoding="utf-8")
+
+    def test_missing_section_is_reported(self):
+        problems = self.check("## 8.3 选择排序\n\n### 8.3.2 堆排序\n")
+        self.assertEqual(len(problems), 1, problems)
+        self.assertIn("8.3.1", problems[0])
+        self.assertIn("直接选择排序", problems[0])
+
+    def test_present_section_passes(self):
+        text = "## 8.3 选择排序\n\n### 8.3.1 直接选择排序\n\n### 8.3.2 堆排序\n"
+        self.assertEqual(self.check(text), [])
+
+    def test_registered_gap_passes(self):
+        gaps = {"8.3.1": {"kind": "merged", "into": "8.3"}}
+        problems = self.check("## 8.3 选择排序\n\n### 8.3.2 堆排序\n", gaps)
+        self.assertEqual(problems, [])
+
+    def test_retitled_section_still_counts_as_present(self):
+        """R10 只问编号在不在。标题改没改是人工复核项（D-014），不在这里判。"""
+        text = "## 8.3 选择排序\n\n### 8.3.1 先跑一遍\n\n### 8.3.2 堆排序\n"
+        self.assertEqual(self.check(text), [])
+
+    def test_slides_are_not_subject_to_r10(self):
+        """课件按讲课节奏组织，逐节对应原书目录只会逼人塞凑数的标题。"""
+        slides = check_doc.BOOK / "slides"
+        path = slides / "ch08-sorting.md"
+        saved = path.read_text(encoding="utf-8")
+        try:
+            path.write_text("# 第8章\n\n## 8.3 选择排序\n", encoding="utf-8")
+            self.assertEqual(check_doc.check_sections(path, {}, self.ORIGINAL), [])
+        finally:
+            path.write_text(saved, encoding="utf-8")
+
+    def test_committed_book_has_no_unregistered_gap(self):
+        """入库书稿当锚：以后谁删掉一节又忘了登记，这里就红。"""
+        gaps, problems = check_doc.load_section_gaps()
+        self.assertEqual(problems, [])
+        original = check_doc.ledger.parse_sections()
+        found = []
+        for path in sorted(check_doc.BOOK.glob("ch*.md")):
+            found += check_doc.check_sections(path, gaps, original)
+        self.assertEqual(found, [])
+
+
+class TestSectionGapRegistry(unittest.TestCase):
+    """登记表本身也要有门槛——否则 R10 就退化成『写一行就放行』。"""
+
+    def load(self, payload):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "section_gaps.json"
+            path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+            return check_doc.load_section_gaps(path)
+
+    def test_merged_without_into_is_rejected(self):
+        _, problems = self.load({"gaps": [
+            {"section": "2.1.1", "kind": "merged", "reason": "并进去了", "by": "x", "date": "2026-08-17"}]})
+        self.assertTrue(any("into" in p for p in problems), problems)
+
+    def test_missing_reason_is_rejected(self):
+        _, problems = self.load({"gaps": [
+            {"section": "2.1.1", "kind": "pending", "by": "x", "date": "2026-08-17"}]})
+        self.assertTrue(any("reason" in p for p in problems), problems)
+
+    def test_unknown_kind_is_rejected(self):
+        _, problems = self.load({"gaps": [
+            {"section": "2.1.1", "kind": "whatever", "reason": "r", "by": "x", "date": "2026-08-17"}]})
+        self.assertTrue(any("kind" in p for p in problems), problems)
+
+    def test_duplicate_section_is_rejected(self):
+        entry = {"section": "2.1.1", "kind": "declined", "reason": "r", "by": "x", "date": "2026-08-17"}
+        _, problems = self.load({"gaps": [entry, dict(entry)]})
+        self.assertTrue(any("重复" in p for p in problems), problems)
+
+    def test_committed_registry_is_clean(self):
+        gaps, problems = check_doc.load_section_gaps()
+        self.assertEqual(problems, [])
+        self.assertTrue(gaps)
 
 
 class TestR9Formulas(unittest.TestCase):

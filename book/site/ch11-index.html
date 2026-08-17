@@ -542,7 +542,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 }</code></pre></div>
 <p>注意 <code>mask_tail</code>：记录数不是 64 的整数倍时，最后一个字里超出记录数的那些位取反后会变成 1，于是冒出根本不存在的记录号。这是位图实现最常见的一个洞。</p>
 <p>压缩不是万能的。上面稀疏位图 16 个字压到 4 个，但对 0 和 1 交替的稠密位图，游程压缩后<strong>反而更大</strong>——<code>code/ch11/bitmap_index/test.cpp</code> 直接断言了这一点，不粉饰。</p>
-<h2 id="116-练习路径"><a class="anchor" href="#116-练习路径">#</a>11.6 练习路径</h2>
+<h2 id="练习路径"><a class="anchor" href="#练习路径">#</a>练习路径</h2>
 <p>本章四个方向都已有可运行实现，练习因此从「照着写一遍」改成「在已有实现上再往前走一步」：</p>
 <ol>
 <li>给 <code>MultiLevelIndex</code> 的页内定位换成二分查找，测量比较次数的变化，并确认<strong>页访问次数一次都没变</strong>——本章的关键指标不在这里。</li>
@@ -570,7 +570,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>见 11.6 的四条练习路径。</p>
 <div class="pagenav"><a href="ch10-search.html"><span class="dir">← 上一篇</span>第10章 检索</a><a href="ch12-advanced.html" style="text-align:right"><span class="dir">下一篇 →</span>第12章 高级数据结构</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#111-线性索引">11.1 线性索引</a><a href="#112-静态多分树">11.2 静态多分树</a><a href="#113-倒排索引">11.3 倒排索引</a><a href="#114-b-树与-b-树">11.4 B 树与 B+ 树</a><a href="#115-位图签名和红黑树">11.5 位图、签名和红黑树</a><a href="#116-练习路径">11.6 练习路径</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充索引题参考课程第-11-章" class="sub">补充索引题（参考课程第 11 章）</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#111-线性索引">11.1 线性索引</a><a href="#112-静态多分树">11.2 静态多分树</a><a href="#113-倒排索引">11.3 倒排索引</a><a href="#114-b-树与-b-树">11.4 B 树与 B+ 树</a><a href="#115-位图签名和红黑树">11.5 位图、签名和红黑树</a><a href="#练习路径">练习路径</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充索引题参考课程第-11-章" class="sub">补充索引题（参考课程第 11 章）</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch11-index.md</code> 生成

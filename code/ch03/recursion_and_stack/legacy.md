@@ -14,6 +14,13 @@ long factorial(long n) {              // 算法3.6：递归
     return n * factorial(n - 1);
 }
 
+// 算法3.7：计算阶乘的主程序（底稿 2285 行，原样，只修 OCR 拆开的空格）
+#include <iostream>
+void main( ) {
+long x;
+cin >> x;
+cout << factorial(4) << endl;
+
 long factorial(long n) {              // 算法3.8：迭代
     long m = 1;
     long i;
@@ -59,6 +66,35 @@ fact.cpp:5:74: runtime error: signed integer overflow: 21 * 2432902008176640000
 ```
 
 现代实现改用 `std::uint64_t` 并在入口显式判界，超过 20 抛 `std::overflow_error`。
+
+### 缺陷 1b（编译期硬伤）：算法3.7 的主程序三处编不过
+
+原书这段只有五行，三处都是编译级问题——`void main`、无 `std::` 限定、以及缺右花括号
+（最后一处从底稿看是印刷/扫描时就丢了，与前两处性质不同）。原样喂给编译器：
+
+```text
+$ g++ -std=c++17 -c a37.cpp
+a37.cpp:3:1: error: '::main' must return 'int'
+    3 | void main( ) {
+      | ^~~~
+a37.cpp: In function 'int main()':
+a37.cpp:5:1: error: 'cin' was not declared in this scope; did you mean 'std::cin'?
+    5 | cin >> x;
+      | ^~~
+      | std::cin
+```
+
+`void main()` 在 C++ 里从来都不合法（ISO C++ 规定 `main` 返回 `int`），
+这一点连 2008 年的编译器也该拒绝；它能在教材里活下来，多半是当年在
+某些只做警告的编译器上「跑通了」。
+
+还有一处不是编译错误、但更值得讲：**`cin >> x` 读了 `x`，接着调用的却是
+`factorial(4)`**——读进来的值从头到尾没用上。原书正文解释这段时说的是
+「主程序通过 factorial(4) 这个语句向阶乘函数的形参 n 提供了实参 4」，
+可见 4 是有意写死的，那 `cin >> x` 就是一句不该留在清单里的残留。
+现代实现把它改成 `factorial_driver(long long n)`，**参数从哪来由调用方决定**，
+主程序不再自己读输入——这样它既可测（`test.cpp` 里直接断言
+`factorial_driver(4) == 24`），也不会有「读了不用」这种自相矛盾。
 
 ### 缺陷 2：负数静默返回 1
 
