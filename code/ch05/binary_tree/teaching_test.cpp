@@ -125,7 +125,12 @@ void test_copy_assignment_is_deep() {
 void test_self_assignment_is_safe() {
     BinaryTree<char> tree;
     build_sample(tree);
-    tree = tree;
+    // 自赋值写成「先取引用别名再赋值」，而不是 `tree = tree;`：
+    // clang 的 -Wself-assign-overloaded 会拒绝后者，而闸门开着 -Werror，
+    // 于是整套教学版测试在 clang 上根本编不过（2026-08-17 Codex 在 macOS 上撞到）。
+    // 运行时语义没变：还是同一个对象赋给它自己。
+    auto& same = tree;
+    tree = same;
     check(tree.size() == 6, "自赋值后结点数不变");
     std::string out;
     tree.inorder([&out](char c) { out.push_back(c); });
@@ -277,7 +282,12 @@ void test_bst_self_assignment_is_safe() {
     for (int x : {5, 3, 8}) {
         (void)bst.insert(x);
     }
-    bst = bst;
+    // 自赋值写成「先取引用别名再赋值」，而不是 `bst = bst;`：
+    // clang 的 -Wself-assign-overloaded 会拒绝后者，而闸门开着 -Werror，
+    // 于是整套教学版测试在 clang 上根本编不过（2026-08-17 Codex 在 macOS 上撞到）。
+    // 运行时语义没变：还是同一个对象赋给它自己。
+    auto& same = bst;
+    bst = same;
     check(bst.contains(3) && bst.contains(5) && bst.contains(8), "自赋值后内容不变");
 }
 

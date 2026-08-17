@@ -19,7 +19,7 @@
     },
     {
       "id": "代码10.4",
-      "anchor": "bool erase(int value)",
+      "anchor": "class IntSet {",
       "test": "代码10.4 keyed deletion status"
     },
     {

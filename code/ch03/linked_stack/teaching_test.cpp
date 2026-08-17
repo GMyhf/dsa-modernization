@@ -93,7 +93,12 @@ void test_self_assignment_is_safe() {
     LinkedStack<int> s;
     s.push(7);
     s.push(8);
-    s = s;
+    // 自赋值写成「先取引用别名再赋值」，而不是 `s = s;`：
+    // clang 的 -Wself-assign-overloaded 会拒绝后者，而闸门开着 -Werror，
+    // 于是整套教学版测试在 clang 上根本编不过（2026-08-17 Codex 在 macOS 上撞到）。
+    // 运行时语义没变：还是同一个对象赋给它自己。
+    auto& same = s;
+    s = same;
     check(s.size() == 2, "自赋值后长度不变");
     check(s.pop() == 8, "自赋值后栈顶不变");
     check(s.pop() == 7, "自赋值后栈底不变");
