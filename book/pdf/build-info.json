@@ -1,5 +1,7 @@
 {
   "chapters": 17,
+  "main_chapters": 12,
   "figures": 292,
-  "pages": 400
+  "pages": 450,
+  "source_sha256": "e71d69983858acbf6b5bfa200ed9038f307a1817f912487517eb9d67e52a0712"
 }

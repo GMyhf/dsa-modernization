@@ -196,6 +196,7 @@ class TestDownloadCard(unittest.TestCase):
         self.assertIn("下载完整教程", card)
         self.assertRegex(card, r"\d+ 页")           # 页数来自 build-info.json
         self.assertRegex(card, r"\d+\.\d+ MB")      # 体积来自 PDF 文件本身
+        self.assertIn("12 章正文", card)              # 正文章数也来自 build-info.json
 
     def test_card_href_follows_publish_layout(self):
         original = build_site.PDF_HREF

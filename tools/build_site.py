@@ -705,6 +705,7 @@ def download_card():
         return ""
     megabytes = PDF_FILE.stat().st_size / 1024 / 1024
     facts = [f"{megabytes:.1f} MB"]
+    main_chapters = 12
     if PDF_INFO.is_file():
         try:
             info = json.loads(PDF_INFO.read_text(encoding="utf-8"))
@@ -712,6 +713,8 @@ def download_card():
                 facts.insert(0, f"{info['pages']} 页")
             if info.get("figures"):
                 facts.append(f"{info['figures']} 张插图")
+            if info.get("main_chapters"):
+                main_chapters = info["main_chapters"]
         except (ValueError, OSError):
             pass                                  # sidecar 坏了就少显示两个数字，不挡构建
     href = quote(PDF_HREF, safe="/:.-_~")
@@ -719,7 +722,7 @@ def download_card():
             f'<span class="dl-badge">PDF</span>'
             f'<span class="dl-body"><b>下载完整教程</b>'
             f'<span class="dl-meta">B5 开本，带书签目录 · {" · ".join(facts)} · '
-            f'含 12 章正文、习题与参考答案、原书插图与勘误</span></span>'
+            f'含 {main_chapters} 章正文、习题与参考答案、原书插图与勘误</span></span>'
             f'<span class="dl-arrow">↓</span></a>')
 
 

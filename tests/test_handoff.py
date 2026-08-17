@@ -70,6 +70,9 @@ class TestChecklist(unittest.TestCase):
             with self.subTest(keyword=keyword):
                 self.assertIn(keyword, handoff.CHECKLIST)
 
+    def test_checklist_requires_pdf_freshness(self):
+        self.assertIn("build_book_pdf.py --check", handoff.CHECKLIST)
+
 
 if __name__ == "__main__":
     unittest.main()

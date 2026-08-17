@@ -53,6 +53,8 @@ CHECKLIST = """## Review 检查清单（本项目红线）
       某个 `code/**/unit.json` 认领？**决定不做的清单，是否在 `collab/exclusions.json`
       里留下了理由、署名和日期**——而不是悄悄消失？
 - [ ] **插图**：新引的图是否已 vendored 到 `book/assets/` 且写了真图注（R4）？
+- [ ] **发布产物**：网页版、课件和 PDF 是否都由当前源文件构建？
+      `build_site.py --check`、`build_slides.py --check`、`build_book_pdf.py --check` 都应通过。
 - [ ] **可回归**：`python3 tools/handoff.py --verify` 是否真的跑过并全绿？
       交接记录里有没有贴出闸门尾部的计数，而不是「我觉得没问题」？"""
 
@@ -157,6 +159,8 @@ def run_verify():
         ["python3", "tools/build_site.py", "--check"],
         # 3c. 课件：同理，book/slides/site/ 是 book/slides/*.md 的产物。
         ["python3", "tools/build_slides.py", "--check"],
+        # 3d. PDF：sidecar 记录全部构建输入的内容哈希，书稿改了而 PDF 没重排就报红。
+        ["python3", "tools/build_book_pdf.py", "--check"],
         # 4. 代码：真编译、真跑、Werror + ASan/UBSan。本项目最硬的一条。
         ["python3", "tools/check_code.py"],
     ]

@@ -108,7 +108,11 @@ class TestBuildInfoSidecar(unittest.TestCase):
                 info = json.loads(written.read_text(encoding="utf-8"))
             finally:
                 build_book_pdf.PDF_DIR = original
-        self.assertEqual(info, {"chapters": 3, "figures": 2, "pages": 364})
+        self.assertEqual(info["chapters"], 3)
+        self.assertEqual(info["main_chapters"], 12)
+        self.assertEqual(info["figures"], 2)
+        self.assertEqual(info["pages"], 364)
+        self.assertRegex(info["source_sha256"], r"^[0-9a-f]{64}$")
 
     def test_rebuilding_the_same_book_gives_the_same_bytes(self):
         """不写时间戳：同一份书稿重排两次，sidecar 不该在 git 里制造 diff。"""
@@ -124,6 +128,77 @@ class TestBuildInfoSidecar(unittest.TestCase):
             finally:
                 build_book_pdf.PDF_DIR = original
         self.assertEqual(first, second)
+
+
+class TestPdfFreshness(unittest.TestCase):
+    def run_check(self, root: Path, source: Path):
+        original = (
+            build_book_pdf.CHAPTERS,
+            build_book_pdf.PREAMBLE,
+            build_book_pdf.PDF_DIR,
+            build_book_pdf.OUTPUT,
+        )
+        pdf_dir = root / "pdf"
+        pdf_dir.mkdir()
+        preamble = root / "preamble.tex"
+        preamble.write_text("% test\n", encoding="utf-8")
+        output = pdf_dir / "book.pdf"
+        output.write_bytes(b"%PDF-test")
+        try:
+            build_book_pdf.CHAPTERS = [source]
+            build_book_pdf.PREAMBLE = preamble
+            build_book_pdf.PDF_DIR = pdf_dir
+            build_book_pdf.OUTPUT = output
+            info = {"chapters": 1, "main_chapters": 1, "figures": 1, "pages": 2,
+                    "source_sha256": build_book_pdf.source_sha256()}
+            (pdf_dir / "build-info.json").write_text(json.dumps(info), encoding="utf-8")
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                result = build_book_pdf.check_current()
+            return result, out.getvalue()
+        finally:
+            (build_book_pdf.CHAPTERS, build_book_pdf.PREAMBLE,
+             build_book_pdf.PDF_DIR, build_book_pdf.OUTPUT) = original
+
+    def test_matching_source_hash_passes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "chapter.md"
+            source.write_text("第一版\n", encoding="utf-8")
+            result, out = self.run_check(Path(tmp), source)
+        self.assertEqual(result, 0)
+        self.assertIn("PDF 与源文件一致", out)
+
+    def test_one_character_source_change_is_caught(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "chapter.md"
+            source.write_text("第一版\n", encoding="utf-8")
+
+            original = (build_book_pdf.CHAPTERS, build_book_pdf.PREAMBLE,
+                        build_book_pdf.PDF_DIR, build_book_pdf.OUTPUT)
+            pdf_dir = root / "pdf"
+            pdf_dir.mkdir()
+            preamble = root / "preamble.tex"
+            preamble.write_text("% test\n", encoding="utf-8")
+            output = pdf_dir / "book.pdf"
+            output.write_bytes(b"%PDF-test")
+            try:
+                build_book_pdf.CHAPTERS = [source]
+                build_book_pdf.PREAMBLE = preamble
+                build_book_pdf.PDF_DIR = pdf_dir
+                build_book_pdf.OUTPUT = output
+                info = {"chapters": 1, "main_chapters": 1, "figures": 1, "pages": 2,
+                        "source_sha256": build_book_pdf.source_sha256()}
+                (pdf_dir / "build-info.json").write_text(json.dumps(info), encoding="utf-8")
+                source.write_text("第二版\n", encoding="utf-8")
+                out = io.StringIO()
+                with contextlib.redirect_stdout(out):
+                    result = build_book_pdf.check_current()
+            finally:
+                (build_book_pdf.CHAPTERS, build_book_pdf.PREAMBLE,
+                 build_book_pdf.PDF_DIR, build_book_pdf.OUTPUT) = original
+        self.assertEqual(result, 1)
+        self.assertIn("PDF 已过期", out.getvalue())
 
 
 class TestRegexes(unittest.TestCase):

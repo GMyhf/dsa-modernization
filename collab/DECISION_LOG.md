@@ -9,6 +9,21 @@
 
 ---
 
+## D-019 · 2026-08-17 · 人已拍板：PDF 必须能证明来自当前书稿
+
+`book/pdf/build-info.json` 不再只记页数、章数和图数，还要记录所有 Markdown 装配源、
+`preamble.tex` 与 `build_book_pdf.py` 本身的确定性 SHA-256 摘要。摘要包含相对路径和文件
+内容，不写时间戳；同一组输入重排两次，sidecar 字节应完全一致。
+
+`python3 tools/build_book_pdf.py --check` 只读比较当前摘要与 sidecar：PDF 缺失、sidecar
+损坏、字段不全或任一输入变化都报红，并提示重建命令。该检查同时进入
+`handoff.py --verify` 与 Pages 工作流；后者不得继续发布一本已知落后于书稿的 PDF。
+
+页数由 xelatex 日志与 PDF 自身页树交叉核对；`chapters` 记录全部 LaTeX 章级条目，
+`main_chapters` 单独记录第 1–12 章正文，首页下载卡片读取后者，不再硬编码“12 章”。
+
+---
+
 ## D-001 · 2026-08-12 · 人已拍板：DSA 教材 C++ 现代化风格公约（T-006）
 
 改造数据结构教材的核心矛盾：**全用 STL（如 `std::stack`）就失去了手写数据结构的

@@ -45,6 +45,9 @@ jobs:
           python3 tools/build_site.py --check || \
             echo "::warning::book/site/ 与书稿不一致。本次发布用的是现场构建的版本；请在本地跑 python3 tools/build_site.py 并提交，否则仓库里那份会越漂越远。"
 
+      - name: PDF 必须由当前书稿构建
+        run: python3 tools/build_book_pdf.py --check
+
       - name: 从 Markdown 构建发布目录
         run: |
           # PDF 摆到站点根上，首页的下载卡片指向它（卡片上的页数来自 build-info.json）

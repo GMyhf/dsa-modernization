@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import shutil
@@ -73,6 +74,74 @@ CHAPTER_RE = re.compile(r"\\chapter\{")
 TOC_CHAPTER_RE = re.compile(r"\\contentsline \{chapter\}")
 GRAPHIC_RE = re.compile(r"\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}")
 PAGES_RE = re.compile(r"Output written on \S+ \((\d+) pages?")
+
+
+def build_inputs() -> list[Path]:
+    """会改变 PDF 内容的全部入参，顺序本身也是摘要的一部分。"""
+    return [*CHAPTERS, PREAMBLE, Path(__file__).resolve()]
+
+
+def source_sha256() -> str:
+    """对相对路径与文件内容一起取摘要，避免同内容文件换位而不报旧。"""
+    digest = hashlib.sha256()
+    for path in build_inputs():
+        if not path.is_file():
+            raise FileNotFoundError(path)
+        try:
+            label = path.resolve().relative_to(ROOT.resolve()).as_posix()
+        except ValueError:
+            label = path.name
+        digest.update(label.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
+
+
+def check_current() -> int:
+    """只读检查发布 PDF 是否由当前书稿构建，接口与 build_site --check 同形。"""
+    info_path = PDF_DIR / "build-info.json"
+    problems = []
+    if not OUTPUT.is_file():
+        problems.append(f"缺少 {rel_label(OUTPUT)}")
+    if not info_path.is_file():
+        problems.append(f"缺少 {rel_label(info_path)}")
+        info = {}
+    else:
+        try:
+            info = json.loads(info_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            problems.append(f"{rel_label(info_path)} 不是有效 JSON：{exc}")
+            info = {}
+
+    try:
+        current = source_sha256()
+    except (OSError, FileNotFoundError) as exc:
+        problems.append(f"无法读取 PDF 构建输入：{exc}")
+        current = ""
+    recorded = info.get("source_sha256")
+    if current and recorded != current:
+        if recorded:
+            problems.append(
+                f"PDF 已过期：源文件摘要应为 {current[:12]}，sidecar 仍是 {recorded[:12]}"
+            )
+        else:
+            problems.append("PDF 已过期：sidecar 没有 source_sha256")
+
+    for field in ("pages", "chapters", "main_chapters", "figures"):
+        if not isinstance(info.get(field), int) or info[field] <= 0:
+            problems.append(f"sidecar 的 {field} 不是正整数")
+
+    if problems:
+        for problem in problems:
+            print(f"❌ {problem}")
+        print("   修法：python3 tools/build_book_pdf.py")
+        return 1
+    print(
+        f"✅ PDF 与源文件一致：{info['pages']} 页、{info['chapters']} 章、"
+        f"{info['figures']} 张图，sha256 {current[:12]}"
+    )
+    return 0
 
 
 def strip_file_attr(info: str) -> str:
@@ -296,8 +365,10 @@ def write_build_info(tex_path: Path, log_text: str, pages: int) -> Path:
     tex = tex_path.read_text(encoding="utf-8", errors="replace")
     info = {
         "chapters": len(CHAPTER_RE.findall(tex)),
+        "main_chapters": sum(1 for path in CHAPTERS if re.fullmatch(r"ch\d\d-.+\.md", path.name)),
         "figures": len({Path(src).name for src in GRAPHIC_RE.findall(tex)}),
         "pages": pages,
+        "source_sha256": source_sha256(),
     }
     path = PDF_DIR / "build-info.json"
     path.write_text(json.dumps(info, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -356,10 +427,14 @@ def run_pandoc(md_path: Path, pdf_path: Path) -> None:
     print("xelatex ok")
 
 
-def main() -> None:
+def main() -> int:
     parser = argparse.ArgumentParser(description="组装并编译学生用 PDF")
     parser.add_argument("--assemble-only", action="store_true")
+    parser.add_argument("--check", action="store_true",
+                        help="只检查已发布 PDF 是否由当前源文件构建")
     opts = parser.parse_args()
+    if opts.check:
+        return check_current()
     PDF_DIR.mkdir(parents=True, exist_ok=True)
     WORK.mkdir(parents=True, exist_ok=True)
     shutil.copy2(PREAMBLE, WORK / "preamble.tex")
@@ -367,10 +442,11 @@ def main() -> None:
     ASSEMBLED.write_text(text, encoding="utf-8")
     print(f"assembled {ASSEMBLED.relative_to(ROOT)} ({len(text.splitlines())} lines)")
     if opts.assemble_only:
-        return
+        return 0
     run_pandoc(ASSEMBLED, OUTPUT)
     print(f"wrote {OUTPUT.relative_to(ROOT)} ({OUTPUT.stat().st_size // 1024} KB)")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
