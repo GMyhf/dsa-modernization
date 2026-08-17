@@ -590,6 +590,53 @@ class TestR12SectionRefs(unittest.TestCase):
         self.assertEqual(found, [])
 
 
+class TestR13DoubleDash(unittest.TestCase):
+    """R13：`0--127` 印出来就是 `0--127`。
+
+    LaTeX 里 `--` 是短破折号，Markdown 不认。三次撞见同一个习惯
+    （ch04 的 `0--127`、ch09 表里的 `5--8`、习题答案里的「第 7--12 章」），
+    所以把它变成判据，而不是每次靠人眼。
+    """
+
+    def check(self, text):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "x.md"
+            path.write_text(text, encoding="utf-8")
+            return check_doc.check_double_dash(path)
+
+    def test_range_with_double_dash_is_reported(self):
+        problems = self.check("ASCII 为 0--127 的单字节编码。\n")
+        self.assertEqual(len(problems), 1, problems)
+        self.assertIn("R13", problems[0])
+
+    def test_range_inside_chinese_prose_is_reported(self):
+        """真实撞见的第三处：习题答案里的「第 7--12 章」。"""
+        self.assertTrue(self.check("见第 7--12 章。\n"))
+
+    def test_real_en_dash_passes(self):
+        self.assertEqual(self.check("ASCII 为 0–127 的单字节编码。\n"), [])
+
+    def test_command_line_flags_are_not_dashes(self):
+        """`--check` 这类开关合法：`--` 前面是空格，不在判据里。"""
+        self.assertEqual(self.check("跑 `python3 tools/handoff.py --verify` 就行。\n"), [])
+
+    def test_inline_code_and_links_are_skipped(self):
+        """行内代码与链接目标里的 `--` 不算——仓库名和 URL 本来就可能带它。"""
+        self.assertEqual(self.check("见 [`a--b`](https://example.com/a--b) 那份。\n"), [])
+
+    def test_code_fences_are_skipped(self):
+        self.assertEqual(self.check("```text\n5--8 输出耗尽\n```\n"), [])
+
+    def test_committed_book_is_clean(self):
+        """入库书稿当锚：以后谁再写 LaTeX 式破折号，这里就红。"""
+        found = []
+        for path in sorted(check_doc.BOOK.rglob("*.md")):
+            if "pdf" in path.relative_to(check_doc.BOOK).parts:
+                continue
+            found += check_doc.check_double_dash(path)
+        self.assertEqual(found, [])
+
+
 class TestR9Formulas(unittest.TestCase):
     """R9：公式得真能渲染出来。
 

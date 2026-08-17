@@ -86,6 +86,7 @@ RULES = [
     "R10 原书有的节，新书要么有同号的节，要么在 collab/section_gaps.json 里登记（并入/不写/待补）",
     "R11 沿用原书编号的节必须沿用原书题名；现代教学步骤不得占用旧编号",
     "R12 正文里「第 X.Y 节」这类引用必须指向真实存在的节；带「原书」标记的按底稿解析",
+    "R13 正文不得用 LaTeX 式的 `--` 当破折号/区间号——Markdown 原样印出两个减号",
 ]
 
 
@@ -610,6 +611,43 @@ def check_section_refs(path: Path, book_numbers, original_numbers):
     return problems
 
 
+# R13：`0--127` 印出来就是 `0--127`。
+#
+# 缘由（2026-08-17）：LaTeX 里 `--` 是短破折号，Markdown 不认这个约定，
+# 于是「ASCII 为 0--127」在网页上原样显示两个减号。三次撞见同一个习惯——
+# ch04 的 `0--127`/`1--4`/`0`--`9`、ch09 表格里的 `5--8`、
+# 习题答案里的「第 7--12 章」——所以把它变成判据，而不是每次靠人眼。
+#
+# 判据只看**围栏之外**的正文，并且先去掉行内代码与链接目标：
+# `--check` 这类命令行开关、URL 里的 `--` 都是合法的。
+# 两侧都要求是字母数字：真实撞见的三处都是数字区间（`0--127`、`5--8`、`7--12`）。
+# 一度把中日韩字符也放进字符类，但没有一条自测能证明它有用——**没有测试撑着的
+# 能力就是负担**，砍掉。哪天真出现「北京--上海」这种写法，连同用例一起加回来。
+DOUBLE_DASH_RE = re.compile(r"[0-9A-Za-z]--[0-9A-Za-z]")
+INLINE_CODE_RE = re.compile(r"`[^`]*`")
+LINK_TARGET_RE = re.compile(r"\]\([^)]*\)")
+
+
+def check_double_dash(path: Path):
+    """R13：正文里的 `--` 要写成真的破折号（–）或波浪号（～）。"""
+    problems = []
+    in_fence = False
+    for lineno, line in enumerate(path.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
+        if line.strip().startswith("```"):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        plain = LINK_TARGET_RE.sub("]()", INLINE_CODE_RE.sub("``", line))
+        found = DOUBLE_DASH_RE.search(plain)
+        if found:
+            problems.append(
+                f"{rel_label(path)}:{lineno}  R13 `{found.group(0)}` 里的 `--` 是 LaTeX 写法，"
+                "Markdown 会原样印出两个减号；区间用 `–`（短破折号）或 `～`"
+            )
+    return problems
+
+
 def check_file(path: Path, listings, sources=None):
     """返回 problems 列表，每条形如 'book/x.md:12  说明'。"""
     problems = []
@@ -760,6 +798,7 @@ def main():
         problems += check_file(target, listings)
         problems += check_sections(target, gaps, original)
         problems += check_section_refs(target, book_numbers, original_numbers)
+        problems += check_double_dash(target)
 
     # legacy.md 是原书缺陷证据，也大量使用 text 引文；只对它运行 R8，
     # 不把书稿专属的章节、图片和清单配对规则强加给证据文件。
