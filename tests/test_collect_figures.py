@@ -5,6 +5,7 @@
 之后题注常常被顶到图后面好几行——跨行去找它，就有认错的风险，所以判据要被钉住。
 """
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -119,6 +120,114 @@ class TestAgainstTheRealManuscript(unittest.TestCase):
         untitled = [f for f in self.figures if "原书无独立题注" in f["alt"]]
         self.assertEqual(len(untitled), 26)
 
+
+class TestOfflineCheck(unittest.TestCase):
+    """`--check`：不联网也要能证明「图册还是底稿那批图」。
+
+    **缘由**（2026-08-17 派生产物新鲜度盘点）：`collect_figures.py` 原来只有写入和
+    `--dry-run`，重新生成还依赖网络，于是底稿题注变了、图册漏了一张、或者某个 jpg 被换掉，
+    闸门都不会响——网站、课件、PDF 三条线都有 `--check`，唯独插图集没有。
+    判据全部落在本地：底稿现在抽出的顺序与题注、sidecar 记的对应关系、图册的引用顺序，
+    以及**文件名是不是等于文件内容的 SHA-256 前 16 位**。
+    """
+
+    def sandbox(self, tmp, alt="图 1.1 示意", body=b"\xff\xd8jpeg"):
+        import hashlib
+        import json
+
+        root = Path(tmp)
+        assets = root / "assets"
+        assets.mkdir()
+        name = hashlib.sha256(body).hexdigest()[:16] + ".jpg"
+        (assets / name).write_bytes(body)
+        raw = root / "raw.md"
+        raw.write_text(
+            "# 第1章 概论\n\n![](https://raw.githubusercontent.com/GMyhf/img/main/img/a.jpg)  \n"
+            f"{alt}\n",
+            encoding="utf-8",
+        )
+        atlas = root / "atlas.md"
+        atlas.write_text(f"# 原书插图\n\n![{alt}](assets/{name})\n\n{alt}\n", encoding="utf-8")
+        sidecar = assets / "figures.json"
+        sidecar.write_text(json.dumps({"figures": [
+            {"chapter": 1, "raw_line": 3,
+             "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/a.jpg",
+             "file": f"assets/{name}", "alt": alt}]}, ensure_ascii=False), encoding="utf-8")
+        return root, assets / name, atlas, sidecar, raw
+
+    def run_check(self, root, raw, atlas, assets, sidecar):
+        import contextlib
+        import io
+
+        saved = (collect_figures.RAW, collect_figures.OUT,
+                 collect_figures.ASSETS, collect_figures.SIDECAR, collect_figures.ROOT)
+        try:
+            collect_figures.RAW = raw
+            collect_figures.OUT = atlas
+            collect_figures.ASSETS = assets
+            collect_figures.SIDECAR = sidecar
+            collect_figures.ROOT = root
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                result = collect_figures.check_current()
+            return result, out.getvalue()
+        finally:
+            (collect_figures.RAW, collect_figures.OUT, collect_figures.ASSETS,
+             collect_figures.SIDECAR, collect_figures.ROOT) = saved
+
+    def test_consistent_atlas_passes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, figure, atlas, sidecar, raw = self.sandbox(tmp)
+            result, out = self.run_check(root, raw, atlas, figure.parent, sidecar)
+        self.assertEqual(result, 0, out)
+        self.assertIn("逐项相符", out)
+
+    def test_replaced_image_bytes_are_caught(self):
+        """图被换掉：文件名还在，内容变了——这是 vendor 重下一张图的典型后果。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            root, figure, atlas, sidecar, raw = self.sandbox(tmp)
+            figure.write_bytes(b"\xff\xd8different")
+            result, out = self.run_check(root, raw, atlas, figure.parent, sidecar)
+        self.assertEqual(result, 1)
+        self.assertIn("内容与文件名对不上", out)
+
+    def test_caption_change_in_the_manuscript_is_caught(self):
+        """底稿题注改了而图册没跟上——图册的 alt 正是原书题注。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            root, figure, atlas, sidecar, raw = self.sandbox(tmp)
+            raw.write_text(raw.read_text(encoding="utf-8").replace("示意", "改过的题注"),
+                           encoding="utf-8")
+            result, out = self.run_check(root, raw, atlas, figure.parent, sidecar)
+        self.assertEqual(result, 1)
+        self.assertIn("题注变了", out)
+
+    def test_missing_file_is_caught(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, figure, atlas, sidecar, raw = self.sandbox(tmp)
+            figure.unlink()
+            result, out = self.run_check(root, raw, atlas, figure.parent, sidecar)
+        self.assertEqual(result, 1)
+        self.assertIn("不存在", out)
+
+    def test_orphan_asset_is_caught(self):
+        """没人引用的图片也要报——它多半是上一版留下的，白占仓库。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            root, figure, atlas, sidecar, raw = self.sandbox(tmp)
+            (figure.parent / "0123456789abcdef.jpg").write_bytes(b"orphan")
+            result, out = self.run_check(root, raw, atlas, figure.parent, sidecar)
+        self.assertEqual(result, 1)
+        self.assertIn("没人引用", out)
+
+    def test_committed_atlas_passes(self):
+        """入库的 292 张当锚：以后谁换掉一张图或改了底稿题注，这里就红。"""
+        import contextlib
+        import io
+
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            result = collect_figures.check_current()
+        self.assertEqual(result, 0, out.getvalue())
+        self.assertIn("292 张图", out.getvalue())
 
 if __name__ == "__main__":
     unittest.main()

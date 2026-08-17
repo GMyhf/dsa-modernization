@@ -1,0 +1,2049 @@
+{
+  "note": "由 collect_figures.py 生成：底稿顺序、题注与本地文件的对应关系。文件名是内容 SHA-256 的前 16 位，改一个字节文件名就该变。",
+  "figures": [
+    {
+      "chapter": 0,
+      "raw_line": 115,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/925431cd9310cd4d346a9b29ee5e7c663e36afbe50ccafd4b7a30b1efe8dbe3b.jpg",
+      "file": "assets/3174ab73bf5582ac.jpg",
+      "alt": "前言插图（底稿第 115 行，原书无独立题注）"
+    },
+    {
+      "chapter": 1,
+      "raw_line": 491,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/88baa725a742b0ce24d6385214570a98ec2e9d1a59d96f15de3c2d1e9f33caf4.jpg",
+      "file": "assets/4d3c879e7409ef1c.jpg",
+      "alt": "图1.1 经纪人间的消息传递图"
+    },
+    {
+      "chapter": 1,
+      "raw_line": 572,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/c398712d59893f80067f2e1a79c1772fabb389d0f8a00e40ff168c70b65204cc.jpg",
+      "file": "assets/9c92f7de8d2fab34.jpg",
+      "alt": "图1.3 经纪人间消息传递的相邻矩阵"
+    },
+    {
+      "chapter": 1,
+      "raw_line": 659,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/af06d2c9a1bcbcf50acf02f6b053aa25fb5899da2973679f8a998c05670c0a06.jpg",
+      "file": "assets/40916b3631d4d819.jpg",
+      "alt": "图 1.4 索引示例"
+    },
+    {
+      "chapter": 1,
+      "raw_line": 877,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/3a1b4388c3d409569c7017c26e88742358efd64c92a59f740b32702c82508b1a.jpg",
+      "file": "assets/c33523f30da594f0.jpg",
+      "alt": "图 1.5 常用函数的增长趋势"
+    },
+    {
+      "chapter": 2,
+      "raw_line": 1445,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/55a77f77b2bc0dccc9a53e99fc2ca82cd3ce68bd9ee1a9b0bae57f1ae4e95970.jpg",
+      "file": "assets/6e2bc11926f0ec96.jpg",
+      "alt": "图 2.4 单链表示例"
+    },
+    {
+      "chapter": 2,
+      "raw_line": 1473,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/974ae104883251baef2cdc5480e346354126279ac2ce29bb62b92a00a7da249c.jpg",
+      "file": "assets/6c7f366bed4583ff.jpg",
+      "alt": "图2.5具有头、尾两指针的单链表"
+    },
+    {
+      "chapter": 2,
+      "raw_line": 1502,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/8024dcf0c9a7bd03440adf36ad0c84ed82df5972e876d072707f6bd3683bccfa.jpg",
+      "file": "assets/605c79846035cdf0.jpg",
+      "alt": "(a) 带有头结点的空表"
+    },
+    {
+      "chapter": 2,
+      "raw_line": 1505,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/9c81cb13967d4da89797e0c55d0a97bfe4840c5558ea4c871dd970ff4718fe30.jpg",
+      "file": "assets/3c36698567f5e7c2.jpg",
+      "alt": "(b) 典型的带有头结点的单链表；图 2.6 引人头结点的单链表"
+    },
+    {
+      "chapter": 2,
+      "raw_line": 1590,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/c77ffe57ee3508e14e8d3897732d84ebe937090e89f4dfe6f5049bfd1402908c.jpg",
+      "file": "assets/995a8257623869d1.jpg",
+      "alt": "图 2.7 插入算法示意图"
+    },
+    {
+      "chapter": 2,
+      "raw_line": 1621,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/e5a3a30aef9684e5ddec0ab5b69c30586ef6ed22cd85cd522f5761968a2f7b60.jpg",
+      "file": "assets/8a7435561d286746.jpg",
+      "alt": "(a) 删除前指针情况；(b) 删除后指针情况；图 2.8 删除示意图"
+    },
+    {
+      "chapter": 2,
+      "raw_line": 1630,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/c36bc5f6bc10e99f87f5d9e08d688f85cfffbcb8e0410a19c12a38dcc4a5c5f1.jpg",
+      "file": "assets/40ab93045c34a1bf.jpg",
+      "alt": "图2.9 加入表头结点的双链表；图2.9中变量head用于指向表首结点，变量tail用于指向表尾结点。图2.10给出了相应的"
+    },
+    {
+      "chapter": 2,
+      "raw_line": 1637,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/41e001dd62fa933a29ac08db84a7a5f98f364eb29b451bbf6697f59f36bd6977.jpg",
+      "file": "assets/ebdcb0d7054cf3a9.jpg",
+      "alt": "图 2.10 双链表的结点"
+    },
+    {
+      "chapter": 2,
+      "raw_line": 1695,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/cdb1453471111ac384cb422f1d6e569c3e37d04663908bf60041df0818b8b861.jpg",
+      "file": "assets/f3aa5f7a9ea65ef6.jpg",
+      "alt": "图2.11 双链表的删除操作示意"
+    },
+    {
+      "chapter": 2,
+      "raw_line": 1707,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/bf759f1e0b14483977ec221a4daa0309e07791589de5042e2817221fb8a2eb44.jpg",
+      "file": "assets/1f4184cafed5ae83.jpg",
+      "alt": "图2.12 双链表插入操作示意"
+    },
+    {
+      "chapter": 2,
+      "raw_line": 1710,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/a171b5c4dfff60f87508a684525985a7b2f573e8454c6ea371c0747ad1c999de.jpg",
+      "file": "assets/89f9ff700933f475.jpg",
+      "alt": "图2.13 循环链表示意图"
+    },
+    {
+      "chapter": 2,
+      "raw_line": 1713,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/d5425b76cade3f3e7864d368a4eb0bfcc58bed386e5d89f3aab24a8f47837406.jpg",
+      "file": "assets/a24d59d2527028cc.jpg",
+      "alt": "图2.14 带头结点的循环链表示意图"
+    },
+    {
+      "chapter": 2,
+      "raw_line": 1716,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/fce9d8259073330043db282abbb64688e6daa0457cc480674d8efbedb7d72b43.jpg",
+      "file": "assets/b8866e40fb846a83.jpg",
+      "alt": "图 2.15 循环双链表示意图"
+    },
+    {
+      "chapter": 3,
+      "raw_line": 1793,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/d0ec447a3185a728b5ef9a54c41acd6c20ed7f245cfd3a7756547280063d906d.jpg",
+      "file": "assets/c8966e2bf43b41fc.jpg",
+      "alt": "图 3.1 栈的示意图"
+    },
+    {
+      "chapter": 3,
+      "raw_line": 1829,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/4734d4009a8495ecefae58326cb2c647418e6c9201d78040036b59cff24c4fc0.jpg",
+      "file": "assets/68ddbf0cd26a38ce.jpg",
+      "alt": "图3.2 栈的顺序存储结构示意"
+    },
+    {
+      "chapter": 3,
+      "raw_line": 1898,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/02fcc6fe8976c313f8a22bf3a1e6579aa684b6f7c9d3a8aa0100f04de0269404.jpg",
+      "file": "assets/beaf7f838024b368.jpg",
+      "alt": "第3章插图（底稿第 1898 行，原书无独立题注）"
+    },
+    {
+      "chapter": 3,
+      "raw_line": 1900,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/4e51f1eb612a19fba4b203ae5448b2c595309dc36550a8f53c654877281e09df.jpg",
+      "file": "assets/8ca1faecb428db01.jpg",
+      "alt": "图 3.3 顺序栈的存储结构"
+    },
+    {
+      "chapter": 3,
+      "raw_line": 1932,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/fe3a89c052bbc704420a3af274a1afc250c52b1ab3a06b1bd8ae5366d0186947.jpg",
+      "file": "assets/cc2722b736c01067.jpg",
+      "alt": "图3.4 链式栈示意"
+    },
+    {
+      "chapter": 3,
+      "raw_line": 2255,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/c2230f1f48617bf21bbc6de6f70108864fbeb13eba4f68cdcd8bde7034af95b7.jpg",
+      "file": "assets/9c7bc109efa7f350.jpg",
+      "alt": "图3.6 运行时存储器的组织形式"
+    },
+    {
+      "chapter": 3,
+      "raw_line": 2258,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/8aed43717a2f54da68718a39c0e9d210e7bda2a3097c9844af6a3a69d97f16fc.jpg",
+      "file": "assets/d573f60f354acc38.jpg",
+      "alt": "图 3.7 活动记录的内容"
+    },
+    {
+      "chapter": 3,
+      "raw_line": 2305,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/6fbc857f8c1b32b291673016eeca64f74c7e49db8cb8bc08a1a94f8adc9182ad.jpg",
+      "file": "assets/b94046e379d40a44.jpg",
+      "alt": "图3.8 递归计算factorial(4)时，内部栈的变化情况示意"
+    },
+    {
+      "chapter": 3,
+      "raw_line": 2569,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/f70254824a9b29db98c1ec78480041607ccf232619e203d6a51be0f8b2774579.jpg",
+      "file": "assets/6a2814bcd8135888.jpg",
+      "alt": "图3.9 队列的示例"
+    },
+    {
+      "chapter": 3,
+      "raw_line": 2601,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/1a6ca7ee65f99adec71bf130db8048c2aa1f294971e9604cd2a3173a86b4c28e.jpg",
+      "file": "assets/d552466644ef240e.jpg",
+      "alt": "图 3.10 顺序队列的实现示意"
+    },
+    {
+      "chapter": 3,
+      "raw_line": 2606,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/fdb253bf918d0da1d5d48f7eeb92e3f4322d021f38b18319e79376dab09bcf81.jpg",
+      "file": "assets/1bd12475cc238a23.jpg",
+      "alt": "(a) 初始队列"
+    },
+    {
+      "chapter": 3,
+      "raw_line": 2609,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/ef6efa09c4942ae918484674e645b1048258b503c489090d94b06b091aa4f5cd.jpg",
+      "file": "assets/883f8220da76fa43.jpg",
+      "alt": "(b) 新队列；图 3.11 顺序队列的一种实现方式"
+    },
+    {
+      "chapter": 3,
+      "raw_line": 2621,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/91e757dc810cb2416eba116267c953d6e12c7f13fd0140e14c426c095863b350.jpg",
+      "file": "assets/c2b6f1bd82ce997a.jpg",
+      "alt": "第3章插图（底稿第 2621 行，原书无独立题注）"
+    },
+    {
+      "chapter": 3,
+      "raw_line": 2623,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/6eeb15a0915f7e6d3e4ee2d3bd69c592f74334d472317607e20ccd84ae26b788.jpg",
+      "file": "assets/35171d357a8442b0.jpg",
+      "alt": "第3章插图（底稿第 2623 行，原书无独立题注）"
+    },
+    {
+      "chapter": 3,
+      "raw_line": 2625,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/fbf324c627c6997c8ba9d7d1ab2d90951a65679c1245c1a003088d27941cc2ec.jpg",
+      "file": "assets/b5473971d7d3f3e4.jpg",
+      "alt": "图 3.12 循环队列的实现示例"
+    },
+    {
+      "chapter": 3,
+      "raw_line": 2764,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/7913d3975ceb18e0fedd2185011c623687e494ff5ae1d0d6b168c4c32e3b9fd7.jpg",
+      "file": "assets/c305cf854cc50a63.jpg",
+      "alt": "图3.13 存储在同一个数组中的两个迎面增长的栈"
+    },
+    {
+      "chapter": 4,
+      "raw_line": 3031,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/32268fe8ec0e22517c66c8259b97084287484f70dff93e84a4f898059c1e4ef5.jpg",
+      "file": "assets/ac445f2352c5273d.jpg",
+      "alt": "图 4.1 C + + 标准字符串的变量说明示意图"
+    },
+    {
+      "chapter": 4,
+      "raw_line": 3045,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/3e5b0fc8bb57387ddf82c559692c4d350689a4d5131534bfb14528c2d86a7667.jpg",
+      "file": "assets/3fd8da33af3abe6c.jpg",
+      "alt": "图4.2 在字符串 s1 中寻找并定位给定字符o'的位置"
+    },
+    {
+      "chapter": 4,
+      "raw_line": 3127,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/86a3a40ed26c115f2c564c443f1dc33d53113c5c7f96153951658cf92fb71591.jpg",
+      "file": "assets/17558c608a970971.jpg",
+      "alt": "图4.3 创建字符串的示意图"
+    },
+    {
+      "chapter": 4,
+      "raw_line": 3136,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/48604eff29036a7cfe822861c1c0405712248353a2844557eb83c88704aceb62.jpg",
+      "file": "assets/6c085626573ab8c6.jpg",
+      "alt": "图4.4 赋值运算示意图"
+    },
+    {
+      "chapter": 4,
+      "raw_line": 3308,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/595ca7fb3d3c881484e0133890ec377889bdbe65659afea8563549036a5cd469.jpg",
+      "file": "assets/a01806ddff22b2f2.jpg",
+      "alt": "图 4.6 朴素匹配的示例"
+    },
+    {
+      "chapter": 4,
+      "raw_line": 3311,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/19b0a1e0a8af55e17f7c80844ce94c1490601df9841bbdac422b2e70ae7e42cb.jpg",
+      "file": "assets/142c03839eb935b2.jpg",
+      "alt": "图4.7 朴素匹配的最佳情况示例"
+    },
+    {
+      "chapter": 4,
+      "raw_line": 3316,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/b91e07071c92934d034fb7713aa6f21f11ea2fd7a488f02dbbfb30bed0f8f294.jpg",
+      "file": "assets/5c96f8b81e576c27.jpg",
+      "alt": "图4.8 匹配失败的最佳情况示例"
+    },
+    {
+      "chapter": 4,
+      "raw_line": 3323,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/b4c241f5f82b7c435e2536adc4988ac6e95ad0fb882d7a7acf9b006747917060.jpg",
+      "file": "assets/888fd277565dca5e.jpg",
+      "alt": "图4.9 朴素匹配最差情况示例"
+    },
+    {
+      "chapter": 4,
+      "raw_line": 3449,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/34c7eee6aec371485e25c44dea1378412b45aa8e14686c9e1f4304683dee9f25.jpg",
+      "file": "assets/4f9aa9617b2ddc56.jpg",
+      "alt": "图 4.12 KMP 匹配示例"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 3546,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/37d66fa8ff701ab7b529300e7767dc57d15661e0d401b0ba02be92fec5432009.jpg",
+      "file": "assets/b15c4b53d75f0514.jpg",
+      "alt": "(c) 右子树为空 的二叉树"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 3549,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/2532c439e78b4c75f3c62bad8e732f504dee1aa8687ca3c6580168004e6d3ad4.jpg",
+      "file": "assets/36035100052aa951.jpg",
+      "alt": "(d) 左子树为空 的二叉树"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 3552,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/17d4724d350af3ce81a0f3e4dd82338b6c0a97a258e87bb08728982142c7557a.jpg",
+      "file": "assets/e09b495998554e01.jpg",
+      "alt": "(e) 左、右子树均非空的二叉树；图 5.1 二叉树的 5 种基本形态"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 3574,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/f3bbb9c57e5c510c339b0aa1d5b52b2c7c73bf803d0499146be0b718aac736b7.jpg",
+      "file": "assets/18b96e9f11087ee8.jpg",
+      "alt": "(a) 满二叉树"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 3577,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/e6e03ca19f592d99f311e18fb1651b524d6e7254ea2c08391deb6eb51ee1eb5d.jpg",
+      "file": "assets/ea5eff3e545173dc.jpg",
+      "alt": "(b) 完全二叉树；图5.2 满二叉树和完全二叉树示例"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 3597,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/55ec3f629cfe92b15f4c625dfed72d3b299c739874bc4a4d49dc0cf164e260ee.jpg",
+      "file": "assets/44cbdbcfda5553a1.jpg",
+      "alt": "图 5.3 扩充二叉树"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 3780,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/24f1ca34c28ed3b0767abe30d09c7bd397e4b41befb8395a40f1bb647e2bcd06.jpg",
+      "file": "assets/2e8ea2a5a1df00a7.jpg",
+      "alt": "图 5.4 二叉树的基本结构"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 3815,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/46fee08fc97456c2810314a2dea87ec9b256f5e080a20768719f92d896585bdb.jpg",
+      "file": "assets/7c6579b015042738.jpg",
+      "alt": "图 5.5 二叉树示例"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 3818,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/d1afd70b2289dea013d1950c6e748bb53f54d985a396735e36d2bc0f2151c0d8.jpg",
+      "file": "assets/b3d4ed61cc80d7d7.jpg",
+      "alt": "图 5.6 表达式树"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4037,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/4c69a1ea80653662053f6688603687b766f571c0ce20810a7b33330c3eefd237.jpg",
+      "file": "assets/12374c97891a830a.jpg",
+      "alt": "图 5.7 二叉树结点的存储结构"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4052,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/db42b1bb29731a7d77f799342e1b7c8405ba0d7d75b3b7b9ac8dc0381729adad.jpg",
+      "file": "assets/3b20bce2ee34a2d6.jpg",
+      "alt": "图 5.8 图 5.5 中二叉树的二叉链表存储结构"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4103,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/429ff34d7247798b33ef60bb0f4ad9e6f2319a9fa54ec8d812852ce46a0d9414.jpg",
+      "file": "assets/c9511e778b95abc9.jpg",
+      "alt": "第5章插图（底稿第 4103 行，原书无独立题注）"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4118,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/5ddbe8e4fb80cb0ec31603408ef31223c8357ea5d2f0062be413cf01fe222f0b.jpg",
+      "file": "assets/80797628fa510b2c.jpg",
+      "alt": "图 5.9 完全二叉树的结点编号"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4147,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/71e01bf00a89433bdee861360e6d4a897cc19388098e5dc0270c05404cc36834.jpg",
+      "file": "assets/c399e3356dac937f.jpg",
+      "alt": "图 5.11 二叉搜索树"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4199,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/aafee907440a9e869f0016f8cd6de055841cc552e1f9fdc8cb61c9f08564729a.jpg",
+      "file": "assets/0a48313219c39d1a.jpg",
+      "alt": "(a) 没有左子树的情况"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4202,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/9ecd8b074776a89202dd564590af377eea9e82e38be554f883a707f09e91e23e.jpg",
+      "file": "assets/7ef2452420903be5.jpg",
+      "alt": "图 5.12 二叉搜索树的删除示例；(b) 有左子树的情况"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4206,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/b8b03fe9c85fefcf9c2ddeb6c0dc5fa36a9c105ac2d5203f2defc945d60affbc.jpg",
+      "file": "assets/6656b628984f36ef.jpg",
+      "alt": "图 5.13 改进的二叉搜索树的删除"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4270,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/8d03e36f414caf4d8f021f2be5012522e5590bd687a9fef214060811f87849ef.jpg",
+      "file": "assets/28d7f967e0c2ebfa.jpg",
+      "alt": "图 5.14 最小堆对应的完全二叉树"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4283,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/2d53c18c23ec53a513c5680458c27733921295b026408f2504f43333675e100a.jpg",
+      "file": "assets/7f6bb0c3af53cc2a.jpg",
+      "alt": "图 5.15 在最小堆 5.14 中插入元素 13"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4290,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/73e243abc0a67de985dd38d37c18850525087fc237dc03f8e92a9b8e1fd2f801.jpg",
+      "file": "assets/ba38e1004230ab69.jpg",
+      "alt": "图 5.16 在最小堆 5.14 中删除元素 14"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4301,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/5697a849d8e8a9b6880d44de494e4aa3c55b03e773ad65c6ca0e01c89ddfba87.jpg",
+      "file": "assets/d7354d550a2f5d79.jpg",
+      "alt": "图 5.17 建堆过程示例"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4473,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/95bb78170d54023eb2ebaa550769e8467ce629a95c1ade98007263326fc5c5c0.jpg",
+      "file": "assets/926b59674f2459f3.jpg",
+      "alt": "(a) 外部路径为30"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4476,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/446e167dccfd053513b689eb6cc34e16561be2cba9e548f7556de784e51f24bf.jpg",
+      "file": "assets/5bf340fd02509f5d.jpg",
+      "alt": "(b) 外部路径为31"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4479,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/6aee9d8bc1be194badc4045a9f95e362c5ef20c9a4ae5e5998d85a1ea9c5103c.jpg",
+      "file": "assets/c06131477d8191a4.jpg",
+      "alt": "(c) 外部路径为29；图 5.18 具有不同带权外部路径长度的二叉树"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4507,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/f55a7b7c94596cc632e12252e8b4876366b0058d4ff23ed2d90e3e3b36053391.jpg",
+      "file": "assets/d91fc440e0e90baa.jpg",
+      "alt": "(a) 过程 1"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4510,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/841e2f08ac072e61df9dacbebc9f56cd40fee87980c901b4d8674edc66ce25dd.jpg",
+      "file": "assets/8e540597e5d17326.jpg",
+      "alt": "(b) 过程2"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4513,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/80231a154141bbe6aabb43922fa7c14f057a3c67ed1f52d354d627e9a6531d65.jpg",
+      "file": "assets/78acf6259a843351.jpg",
+      "alt": "(c) 过程3；(d) 过程4"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4517,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/758f1390ef3cd380c64d30a96a921c6b0a2ce416b25af40ba9304e50cf31e5b9.jpg",
+      "file": "assets/153c0d1c976af606.jpg",
+      "alt": "图 5.19 Huffman 树的构造过程"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4587,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/17842f4d364595e5d6741752bc64d663ac08bd6ce2e91337140afe1c0edd4980.jpg",
+      "file": "assets/0142058fd3aa6e04.jpg",
+      "alt": "图 5.20 Huffman 编码示例"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4628,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/501f96279571d88c5bbf5cbce70a1524284a4626f736d6f7c21d4a21f72c5032.jpg",
+      "file": "assets/18f1bb0045ce3424.jpg",
+      "alt": "图 5.21 习题 2 的图例"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4641,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/cd87344bef245abc786659d004428df388634baa9ced9adf371e3c86f90637ed.jpg",
+      "file": "assets/19e3667447e93b2e.jpg",
+      "alt": "(a) 原二叉树"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4644,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/cc25ab8719522870c52f96bc6b9ffbb27d6c39f52c877f2ab1d49bf7fc1f1275.jpg",
+      "file": "assets/5f654ff0405757c9.jpg",
+      "alt": "(b) 镜面映射后的新二叉树；图 5.22 习题 7 的图例"
+    },
+    {
+      "chapter": 5,
+      "raw_line": 4680,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/c91d177c5af1ce636140cdc599600f5b2c24ebeb6d6493add1f7a5aa1caacb31.jpg",
+      "file": "assets/a8d8c140383fe73e.jpg",
+      "alt": "图 5.23 中序穿线二叉树"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 4763,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/8b830f4c5f1fc3a1d162694d5073367de42d0a35153032c2ebddff6598064f65.jpg",
+      "file": "assets/42cd7ad7ac4d0fbe.jpg",
+      "alt": "图 6.1 树形表示法"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 4808,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/d3a35c4d4a39520de2db10fa6c91fee877a77313e6044518304f99afec23bfd1.jpg",
+      "file": "assets/cbe226f029817187.jpg",
+      "alt": "第6章插图（底稿第 4808 行，原书无独立题注）"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 4810,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/9e101ef8dabf293eaa4e3ae219a78e8b2d83404bcde82598ceb64088ad6313d6.jpg",
+      "file": "assets/96dfe5b8e80b4e18.jpg",
+      "alt": "图 6.2 树形结构的各种表示法"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 4837,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/90edc5ab8842890990d123f801ef1346f23fea970d16f23dd7127387beba2fd8.jpg",
+      "file": "assets/a399c4ed41272dcb.jpg",
+      "alt": "(a) 由 $\\textstyle { T _ { 1 } }$ $T _ { 2 }$ 构成的森林"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 4840,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/17f49545ad202f4c49b5e74250d623c8a9f4ffe2809598ac659ba57fbb4b166d.jpg",
+      "file": "assets/5447a64d9a32c872.jpg",
+      "alt": "(b)经连线、切线处理后的二叉树"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 4843,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/3d279ab7606b8b73c580e12fdbcd5fd15c1e6afafae8cfe2725f1e8121d0b03c.jpg",
+      "file": "assets/d6b8aba5bba23c9b.jpg",
+      "alt": "(c) 进行旋转后的二叉树；图6.3 森林转换为二叉树"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 4874,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/cc48e369e98b0d30538f21beb7e3d1ebee449817b7548032aa6e6d7af5b58d39.jpg",
+      "file": "assets/4a505daebf834546.jpg",
+      "alt": "第6章插图（底稿第 4874 行，原书无独立题注）"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 4876,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/927ff6100248061a9a7d6b8a4bfe766a11cbcfc8063c9380171d6dd2fe535f17.jpg",
+      "file": "assets/902ea7ccf98f52a2.jpg",
+      "alt": "图 6.4 二叉树转换为森林"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 4956,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/c04e44ed4d7f6b0a0ed7ddd6f235b403872ccbe35fdee93d7c97835041eec39b.jpg",
+      "file": "assets/903587cc33dc1265.jpg",
+      "alt": "(a) 森林"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 4959,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/7e939132d795a1d7e927ce12f98a2044e9b6fe5d88997fc388ae722164c07141.jpg",
+      "file": "assets/b114031f667ed22a.jpg",
+      "alt": "第6章插图（底稿第 4959 行，原书无独立题注）"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 4961,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/7a065104b1a8bcd98dc1a18e92d087d69b4b7a5ebd5384475a0832c27acbfcb3.jpg",
+      "file": "assets/14db48b94fcee155.jpg",
+      "alt": "(b) 森林对应的二叉树；图 6.5 森林和对应的二叉树"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 5055,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/5a1d36c2d22bc7351eac2d270034e4238f788133f481e0695ccc3ebfe42c1d4c.jpg",
+      "file": "assets/503a0fd264bb9231.jpg",
+      "alt": "图6.6 以“子结点表”表示法实现图6.1中的树"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 5072,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/def5592e4c3d45d28e38bbaa0b4c2c3da88b9caf1a3c58ebdc3ac5a78048d333.jpg",
+      "file": "assets/8bf52bea5e1deae9.jpg",
+      "alt": "图6.7“左子/右兄”表示两棵树"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 5075,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/d70d2e6d2da0a0906f692e039611cd80ee3de5e998eb0f8abbbdd91bcd6c2647.jpg",
+      "file": "assets/d4fafa1c3b802b3f.jpg",
+      "alt": "图6.8 使用静态“左子/右兄”实现对树的归并"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 5082,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/c34f14c735e808cd5e68bb9b627be8d89e03575fcccf305a4af4da4aca94a658.jpg",
+      "file": "assets/2a4100d926809182.jpg",
+      "alt": "(a) 树"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 5085,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/5f830bf752adc12921ef3de4c850de9cbfdde381018001ad0f1e6401c4743c58.jpg",
+      "file": "assets/4fa7d442aa8cc526.jpg",
+      "alt": "(b) 树的实现；图6.9 树的动态表示法"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 5207,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/9fc680decbbc35c04bd5cec9262d5e3cd31c46b29b076cb290d43b1549caad8b.jpg",
+      "file": "assets/444a429faef0f9ad.jpg",
+      "alt": "图 6.10 父指针表示法"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 5256,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/fb5ad7454d2a2d1547244c436e928950e20947c7ca0e49a5751c86b873748baa.jpg",
+      "file": "assets/0eb44c9da6f987ca.jpg",
+      "alt": "(a) 子集 $s _ { \\mathrm { 1 } }$"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 5259,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/16dc44471d1b4ed1d6dfd2a62bfb34e643375448c310948c861424e95642e622.jpg",
+      "file": "assets/465d256552667e43.jpg",
+      "alt": "(b) 子集 $s _ { 2 }$"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 5262,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/4ee29d04e7762ea2aeaeb132ac1830bae311c9b9afa56d53f74416a9884a6a55.jpg",
+      "file": "assets/99d1200487f038c2.jpg",
+      "alt": "(c) 并集 S3；图 6.11 集合的表示方法"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 5266,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/ae81cb89e57f12cfc5c1625ad285d8442d6e608b6db903cac96ff236d53513ce.jpg",
+      "file": "assets/ed46ae90acc3311f.jpg",
+      "alt": "(a) n 个集合"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 5269,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/a85999c9f798c5c5ffb40ed3650f39e5f1011ed46279ea6acfc81b74e323a167.jpg",
+      "file": "assets/63aeef5dd1c932ae.jpg",
+      "alt": "(b) 合并操作；图 6.12 合并操作的一个极端情况"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 5345,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/5d6d801d988d488d31c390a615e707f50e3a2a6e7bcf1db41f94dd1fec522e54.jpg",
+      "file": "assets/1e0ac0ff58415c62.jpg",
+      "alt": "第6章插图（底稿第 5345 行，原书无独立题注）"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 5347,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/1aaa559306a46e77b05011fa2a20c3fb1b0d78ce46012d37250a42ecc51ffb02.jpg",
+      "file": "assets/79da0aca1750084c.jpg",
+      "alt": "图 6.13 路径压缩示例"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 5388,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/c60c00cfe0a7533022adb8ba3dd418ab4c11db5ce81f15e9f6eaf4fd34ccf480.jpg",
+      "file": "assets/ddf4082b075a6a12.jpg",
+      "alt": "图6.14 带右链的先根次序表示法"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 5477,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/c066c32823cb9db22ca7fc0b7d840b4af498c581941d2be08bdd2beecdd610c9.jpg",
+      "file": "assets/59700ca6ca89690d.jpg",
+      "alt": "图 6.16 带度数的后根次序表示法"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 5498,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/949c48e5d1c62a614afa8c0f75397ec3baefce784132f1cd16e3fed21e0c18b9.jpg",
+      "file": "assets/c02b2adffb31959d.jpg",
+      "alt": "图6.17 带双标记的层次次序表示法"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 5521,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/c1b019c72bf9146b4b527bcd3c4d0066877e90b623ac5ff2fc0755fb522de661.jpg",
+      "file": "assets/da4645ec17539b4a.jpg",
+      "alt": "(a) 满 3 叉树"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 5524,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/bb9b494f4d91ea883d9d11439b1dd2c900b92b6b16eb2f928e4eafaecb938f6a.jpg",
+      "file": "assets/70c77f3dc176052a.jpg",
+      "alt": "(b) 完全 3 叉树；图 6.18 满 3 叉树与完全 3 叉树"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 5584,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/6c09e386b472cf692e8bfb9d42c40066cbb9bd5e96c4d313d2ebf0fdd07ad8c2.jpg",
+      "file": "assets/1a3547a5024e47af.jpg",
+      "alt": "图 6.19 习题 3 的图示"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 5604,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/16f45eac43b4bbbcabb2379e31e98dde7595327a97d858b5cab9172f70a69082.jpg",
+      "file": "assets/9f48eae15f40278b.jpg",
+      "alt": "图 6.20 习题 10 的图示"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 5620,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/366d69fcc1dd6bd0ab4a59396832ec7b02a50ec6f12fcf0256b0c636a1607fec.jpg",
+      "file": "assets/a8ceb875fc9f472c.jpg",
+      "alt": "图 6.21 上机题3 的图示"
+    },
+    {
+      "chapter": 6,
+      "raw_line": 5633,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/a9dea04be97a4fe285d2bbfc8d278507e5f5fbc521d9dd21d915e9ace196e974.jpg",
+      "file": "assets/5472b0276e934225.jpg",
+      "alt": "图 6.22 上机题4的图示"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 5661,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/50b0bf8bcacd075d8f69f4d93215ef470844cfd447830a8744474fc51594f1e6.jpg",
+      "file": "assets/bc292a79ef3d4901.jpg",
+      "alt": "图 7.1 用图描述通信网络"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 5687,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/13cce42e9ed41c3fbc5f6dd13221f888c6309cddcc96e2d2c8979c97c574777d.jpg",
+      "file": "assets/10b534d497692bb7.jpg",
+      "alt": "(a) 无向图 $G _ { 1 }$"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 5690,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/b74b865bc1dacff364bb92b7499cd1e489089ff3218f7be9070d15596c2acfc0.jpg",
+      "file": "assets/25d6dac564f61138.jpg",
+      "alt": "(b) 有向图 $G _ { 2 }$；图 7.2 图的示例"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 5704,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/480f594fce91257c98a881583b5ce5793a3aed185fcf0625bd073a06e587b888.jpg",
+      "file": "assets/52611bcb58654135.jpg",
+      "alt": "第7章插图（底稿第 5704 行，原书无独立题注）"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 5706,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/01f532bdf4c5fa1692bae98461599257f3a7510d5e0c85571390cc3ed8cfddc8.jpg",
+      "file": "assets/34180d6d8500d9ba.jpg",
+      "alt": "(a) 无向完全图"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 5709,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/719bca52ccf0203e408973ee44b73fdfcb2ac4598778f98f3e7f027db3c3fbde.jpg",
+      "file": "assets/d10d9832051a110f.jpg",
+      "alt": "第7章插图（底稿第 5709 行，原书无独立题注）"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 5711,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/3146901dd747b9d42d7ecf482de7efd63740f9f2e7e9b356c793c62fe83a6ad1.jpg",
+      "file": "assets/db2df0ddd6922dd6.jpg",
+      "alt": "(b) 有向完全图；图 7.3 完全图"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 5715,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/6836324fc4b2149e0d512a5e644a9728cfabe6291a7df4be4d61c275496007c7.jpg",
+      "file": "assets/a358b30d8573ba80.jpg",
+      "alt": "(a)无向图 $G _ { 1 }$ 的若干子图"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 5718,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/73e125149a4e912e61fac2afcda0b7d9bd8dd4cd8bf83b09c5ea16080f814c05.jpg",
+      "file": "assets/a05f9afc9df5ddac.jpg",
+      "alt": "(b)有向图 $\\pmb { G } _ { 2 }$ 的若干子图；图 7.4 图 7.2 的若干子图"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 5728,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/b79d6cedd5b74c0dc6e9ec7ca48709a8c32b458696fdd6044ca15e1fe689bc07.jpg",
+      "file": "assets/8b4c061a2606e235.jpg",
+      "alt": "第7章插图（底稿第 5728 行，原书无独立题注）"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 5732,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/607000ca86a02c2b0fc531d5b37bd2706d3e5975fd3dc8edfbb6a98dbb591935.jpg",
+      "file": "assets/b8a3ba8c05f04723.jpg",
+      "alt": "(a) 非连通的无向图 $G _ { 3 }$"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 5735,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/81202b5c660a92b869363703d48cca9237f538500a58a09b76f6efdf2318fec2.jpg",
+      "file": "assets/9aeb77db24a803d1.jpg",
+      "alt": "(b) 非连通无向图 $G _ { 3 }$ 的连通分量；图7.5 非连通无向图的连通分量示意图"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 5743,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/bc5444bc15dc3b4e91c60843c948a76b335d2086679dae3bc4c55ba962710ef4.jpg",
+      "file": "assets/68c8cdd24e9e933e.jpg",
+      "alt": "图 7.6 有向图 $G _ { \\imath }$ 的两个强连通分量"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 5751,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/4d2ed633c4ce7c20fb0602b56388ecf7eb9fbfb743b3373c3c457557c6ce1d8f.jpg",
+      "file": "assets/34ee57b88e5f0ecd.jpg",
+      "alt": "(a) 无向图 $G _ { 1 }$ 的生成树"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 5754,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/3bf47a4c9d467cd7158547219e93e602e9343f5b1b6b7cdc0406ae4c76184db8.jpg",
+      "file": "assets/82e5407f9d315acf.jpg",
+      "alt": "(b) 有向图 $G _ { 2 }$ 的生成树；图7.7 图 7.2 中无向图和有向图的生成树示例"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 5764,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/e3dab4effb64c37358d46eb64f48b5b7abe7c99cf9db6d5e25e389252818fb96.jpg",
+      "file": "assets/5271d0e099d91472.jpg",
+      "alt": "图 7.8 网络实例 $G _ { \\mathfrak { a } }$"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 5767,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/b8d5a196437a6c50247104606ba0f211a84608527ba470717d743d16299cdc2d.jpg",
+      "file": "assets/f8441cb3aada79a2.jpg",
+      "alt": "(a) 有向图"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 5770,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/277626c64e68827895f6df94563a49b39c93efe546e0698b50f88e2c94a2d6cc.jpg",
+      "file": "assets/2b763cb1499997b4.jpg",
+      "alt": "图7.9 有向图及其生成森林；(b)有向图的生成森林"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 5978,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/867ffed370afa8835dae7541a54784ab5b60ca45320b3d87eff64936b0b8792f.jpg",
+      "file": "assets/2566484f65ef1b82.jpg",
+      "alt": "第7章插图（底稿第 5978 行，原书无独立题注）"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 5982,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/52d431540ab723c4331a8a16d52b83c140e02130ebd85387f354934ec69cfd6c.jpg",
+      "file": "assets/f0f154bdefe0c6b7.jpg",
+      "alt": "图 7.12 无向图 $G _ { \\mathfrak { t } }$ 的邻接表表示；图 7.13(a)所示为有向图 $G _ { 2 }$ 的邻接表表示。对于有向图，一条弧在邻接表中只出现一次。顶点 $v _ { i }$ 的边表的表目个数是该顶点的出度，因此邻接表也称为出边表；要知道顶点 $\\pmb { v } _ { i }$ 的入度，必须遍历整个邻接表，查看有多少个边表目中的顶点(即弧头顶点)为 $\\pmb { v } _ { i \\circ }$ 为了便于确定顶点结点的入度，可以建立有向图的逆邻接表，如图7.13(b)所示。在有向图的逆邻接表中，顶点 $v _ { i }$ 的边表中表示的是以该顶点为终点的边，因此逆邻接表也称为人边表。逆邻接表中顶点 $v _ { i }$ 的边表的表目个数是该顶点的入度。"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 5987,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/63032c712d1a687c17ab3182b3744de6169e56c3b239a382f8b07eb0d1dfa336.jpg",
+      "file": "assets/4f6ccd84a6ce200f.jpg",
+      "alt": "图 7.13 有向图 $G _ { \\imath }$ 的邻接表和逆邻接表表示"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 5996,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/dae6eb5ba598b1a61ef038c022095d50f633a752bffe7d001ebfab79e882563b.jpg",
+      "file": "assets/2d350b61ff4f49e8.jpg",
+      "alt": "图 7.14 带权图 $G _ { 4 }$ 的邻接表表示"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6116,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/712fe0d972c012a0e8dad13095a87815096e05f48297cb32cad5775113a8e2a7.jpg",
+      "file": "assets/462d5cf907d0b5d5.jpg",
+      "alt": "图 7.15 有向图的十字链表示例"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6139,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/85b7b431d739f5f135324f2c5cd6f8ab6b0cb07cf62ea594493189decae6761b.jpg",
+      "file": "assets/a693901aec12e8f2.jpg",
+      "alt": "图 7.16 有向图 G"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6191,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/63ba016a53489816eb460d2d2680990982169748f21d28498aed30f6b14fec36.jpg",
+      "file": "assets/62263a82a80da2a6.jpg",
+      "alt": "第7章插图（底稿第 6191 行，原书无独立题注）"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6214,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/9477753c773b68cd3f9ef81f8260b8cdd0109b7edabab3bb98a83b84d65845e9.jpg",
+      "file": "assets/6db281e4c4929271.jpg",
+      "alt": "图 7.17 表示课程优先关系的有向无环图"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6270,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/3f0ff12923f4668275aab76f6624fe4f53e122b90ec634f5271bfd7b3b0e4d22.jpg",
+      "file": "assets/cf80cbf19e5853bc.jpg",
+      "alt": "图 7.18 最短路径的示例"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6283,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/552afb08d48ce1668af6b970b8ed5f8a4f0535e74e98088ad32a4279209a1c11.jpg",
+      "file": "assets/0cf0a196d127ad6b.jpg",
+      "alt": "图7.19 单源最短路径的示例"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6378,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/f1d17003e91abbad6a30fef4b10098915228960cd16f964343517c16b6133d21.jpg",
+      "file": "assets/bf74b7d9c75cd16a.jpg",
+      "alt": "图7.20 每对顶点间的最短路径的示例"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6452,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/158ba6ca5168baace0cc4aa30bfeefca4da00e4973f8e76fb90f6651d211873d.jpg",
+      "file": "assets/bd68da3780041faa.jpg",
+      "alt": "图 7.22 含(u,v)的回路"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6463,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/ef826cd5d09bd52c7de23d04c487a87dca405dede0c63ae7428d887e4ef3e25c.jpg",
+      "file": "assets/c45bf26c0fafb163.jpg",
+      "alt": "第7章插图（底稿第 6463 行，原书无独立题注）"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6472,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/f025ae0d703c13e83b9014a195b900afa1c310a3e1b8dd5e98742991e1b76029.jpg",
+      "file": "assets/b35faad2ee3e712f.jpg",
+      "alt": "(a) 步骤1"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6475,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/62abaab7913b8b8ec022b001974f1bc87c19aeeaaceed3a9d2045d1a05c94067.jpg",
+      "file": "assets/a2798e7b4c9cd10d.jpg",
+      "alt": "(b) 步骤2"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6478,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/d49598c2ad04acb0c745f70de8805a7d9a1e2a5720320392715a58ff6c905de0.jpg",
+      "file": "assets/8451178705cfc0b7.jpg",
+      "alt": "(c) 步骤3"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6481,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/8bd3d6351786560bb5d752ca79e22110c333aef71f196638c11ff39b4b89f877.jpg",
+      "file": "assets/b2eeff805e1e1387.jpg",
+      "alt": "第7章插图（底稿第 6481 行，原书无独立题注）"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6483,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/fa14e698931f44884e0d32fe33c5923f83a2deafd3cfdf0173f783887b1e17c0.jpg",
+      "file": "assets/8caee68f13031c7a.jpg",
+      "alt": "第7章插图（底稿第 6483 行，原书无独立题注）"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6485,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/54f81924fa20e0fe4a3d9bf6f061d5cbd28e64582b76e678aa80683f52087b8a.jpg",
+      "file": "assets/3dbbbb84a8848992.jpg",
+      "alt": "图7.24 Prim算法构造图 7.23中带权图的最小生成树的步骤"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6545,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/27f7b5dc241aa8d807d0f26dd90a24b5c0aa5890b65052250598df4351c19a08.jpg",
+      "file": "assets/9c2bcea1c6538a88.jpg",
+      "alt": "第7章插图（底稿第 6545 行，原书无独立题注）"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6547,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/38038ea606a487badee9c713dcc83e88342e65d7b2756d7ca7b6a0ef36c56259.jpg",
+      "file": "assets/2e6f338835f1b52d.jpg",
+      "alt": "第7章插图（底稿第 6547 行，原书无独立题注）"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6549,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/e2835d5d4cc2f3383323a6f873ab4d030a787460168e631b7c1852e9fc1a1771.jpg",
+      "file": "assets/728992fe49beb484.jpg",
+      "alt": "第7章插图（底稿第 6549 行，原书无独立题注）"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6551,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/f32880e7b08cf94188f231137031d882730e89d8bc13ffdfb3aba88640f8292f.jpg",
+      "file": "assets/294ac6d8a70f9dd4.jpg",
+      "alt": "第7章插图（底稿第 6551 行，原书无独立题注）"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6553,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/8ca6fdfbae6df67d2a9a2e4ddcd8668ab968327b591d7fb39c4c4f1e4dc01046.jpg",
+      "file": "assets/110907ecb5bdd075.jpg",
+      "alt": "第7章插图（底稿第 6553 行，原书无独立题注）"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6555,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/6f5b69c36b3f409ef60c03ac2b5fac70f058e08079e3c95fab2e4617ff8d4854.jpg",
+      "file": "assets/183641faa960c187.jpg",
+      "alt": "图 7.25 Kruskal 算法构造图 7.23 中带权图的最小生成树的步骤"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6623,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/3cc0a806c458a48d5acdf3a55722a54e9bb491383d0b84930197dd352a7c07ea.jpg",
+      "file": "assets/7299bd548c370323.jpg",
+      "alt": "图 7.26 习题 1 的图例"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6638,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/703fd5cb0fd175e6b9f251ae143a4aa76d69ed5a77c66d45bb3383cd21f6f4da.jpg",
+      "file": "assets/879eedb7798f917d.jpg",
+      "alt": "图 7.27 习题2 的图例"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6641,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/4730783089688da7870a14c5cf10cd1ee6b27565a6e3fa810569d86fe7b976e5.jpg",
+      "file": "assets/e978726cc226f0d0.jpg",
+      "alt": "图 7.28 习题 3 的图例"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6646,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/8f422c99cc628d4b4fcb59e1e35fb714bbdc8de93b37b3d5d3332cab6b4b5c63.jpg",
+      "file": "assets/a37ce8f107d70626.jpg",
+      "alt": "图 7.29 习题 4 的图例"
+    },
+    {
+      "chapter": 7,
+      "raw_line": 6737,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/834c13a084295191561c95ccac9688de16dc7b6b6f3398d035c28d52b274c88a.jpg",
+      "file": "assets/55239c73555ac22c.jpg",
+      "alt": "图 7.30 上机题 2 的图例"
+    },
+    {
+      "chapter": 8,
+      "raw_line": 6811,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/1f1cd7754abff65401fafac07b5b744b532fe4b43800a329851b9abe7053f3ca.jpg",
+      "file": "assets/5493e0dcc0da4096.jpg",
+      "alt": "图 8.1 插入排序"
+    },
+    {
+      "chapter": 8,
+      "raw_line": 6850,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/2b4d54c24d028776f4647c6656a1ba8978dac8c11c67340cc45ba44cba8eb2f0.jpg",
+      "file": "assets/9d5229db93db8c45.jpg",
+      "alt": "图 8.2 Shell 排序"
+    },
+    {
+      "chapter": 8,
+      "raw_line": 6971,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/84122075cbba676d758bbd05249a5014c6464b6cb91255932f9835ca1980a5be.jpg",
+      "file": "assets/20e8330096baff50.jpg",
+      "alt": "第8章插图（底稿第 6971 行，原书无独立题注）"
+    },
+    {
+      "chapter": 8,
+      "raw_line": 6973,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/00c04b98373e61b78d6013ca64641014e2730dba26bbce52f0e25de41b89ffde.jpg",
+      "file": "assets/02aa74dc87e226d4.jpg",
+      "alt": "第8章插图（底稿第 6973 行，原书无独立题注）"
+    },
+    {
+      "chapter": 8,
+      "raw_line": 6975,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/0a069baa3546f6440e67c47b2b6a9b0aa94fe9e7d8a2ccc8a24b9b3d4d25af6e.jpg",
+      "file": "assets/2153135dade44a2c.jpg",
+      "alt": "(b)删除最大值78，用32替代；(c) 重新建堆后得到的序列"
+    },
+    {
+      "chapter": 8,
+      "raw_line": 6980,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/6f0379563d26535ed74ede4c77be1b113a58c6a96611a284f44ba4a8d2101eae.jpg",
+      "file": "assets/7f0370f58c7602be.jpg",
+      "alt": "(d) 得到新的序列；图 8.4 堆排序"
+    },
+    {
+      "chapter": 8,
+      "raw_line": 7020,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/c5374dc2dd682bb14db944bf578319a3202cda80e42f44262e2e388a25c86fcc.jpg",
+      "file": "assets/7409006cccb82bee.jpg",
+      "alt": "图 8.5 冒泡排序"
+    },
+    {
+      "chapter": 8,
+      "raw_line": 7076,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/5b92a9d251c7f5916e01c6d78ec1a1c39a13481e55ce061aefc25b25e41414de.jpg",
+      "file": "assets/8585d3b42b280664.jpg",
+      "alt": "图 8.6 快速排序图示"
+    },
+    {
+      "chapter": 8,
+      "raw_line": 7088,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/834cf45e3c82cd56ec43fe1642a5b9c81b0e991e0e6b769a15c94978d64ccfeb.jpg",
+      "file": "assets/05b1ac3a282e906b.jpg",
+      "alt": "图 8.7 分割过程"
+    },
+    {
+      "chapter": 8,
+      "raw_line": 7300,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/e0ca880b7a8607fe785786630cfe2c94dde46915125ecd49ac2ec1f1d871cfc1.jpg",
+      "file": "assets/3599737381e2502e.jpg",
+      "alt": "图 8.8 归并排序"
+    },
+    {
+      "chapter": 8,
+      "raw_line": 7408,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/d740cd006132498cbc04bf595a46c355ad3521110b508331d08103f10bb6cdca.jpg",
+      "file": "assets/bd0ba2ed5f871998.jpg",
+      "alt": "图8.9 桶式排序示意图"
+    },
+    {
+      "chapter": 8,
+      "raw_line": 7492,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/005bf945079326e7cda6349e32344e37e6d3e6b0a3924ccec70859507469dc08.jpg",
+      "file": "assets/916c1027b215b0e1.jpg",
+      "alt": "(b) 低位优先；图 8.10 基数排序"
+    },
+    {
+      "chapter": 8,
+      "raw_line": 7543,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/3ca45d3028cc8064a86c067796b45cf8dbd367136a0574077a7fc25ad289ab3c.jpg",
+      "file": "assets/949a5a9d80c71e8a.jpg",
+      "alt": "图 8.11 基于顺序存储和桶排序的基数排序"
+    },
+    {
+      "chapter": 8,
+      "raw_line": 7658,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/0559c850b21cdee2faae1c03d86e867c3a2a54f1b5f209941f5fe37736a6eb67.jpg",
+      "file": "assets/05b9395e55bd7fd9.jpg",
+      "alt": "(b) 第一趟分配结果"
+    },
+    {
+      "chapter": 8,
+      "raw_line": 7665,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/312825f2f0203fdb4cb2e9710749a2cdac21b1f35cd50b0cca4683293c184a62.jpg",
+      "file": "assets/d386f8348dc243d1.jpg",
+      "alt": "(d) 第二趟分配结果"
+    },
+    {
+      "chapter": 8,
+      "raw_line": 7708,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/83ead1c1f646f9370d97925f4e0fe5619dc7069bb4322251775dbe75a860babf.jpg",
+      "file": "assets/843ddedec33e2496.jpg",
+      "alt": "(a) 待排序记录及索引"
+    },
+    {
+      "chapter": 8,
+      "raw_line": 7711,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/a350b6036f93dd493d0c63771ac032ba085ebe6cf395db5712ae5b3227dd2f25.jpg",
+      "file": "assets/f016f3c1910fedfe.jpg",
+      "alt": "(b) 排序后的记录；图8.13 索引排序示意图"
+    },
+    {
+      "chapter": 8,
+      "raw_line": 7861,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/dcae07df59204b4e418ddd477ebca7cbc974b237258b1bac1801d1fa0ce9b9b1.jpg",
+      "file": "assets/2f6a20c1eb3f2d13.jpg",
+      "alt": "图8.14 用判定树来模拟基于比较的排序"
+    },
+    {
+      "chapter": 9,
+      "raw_line": 8269,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/c53ba3c3fc1a9df950b63db70383141c9ce417b5bf94668c1c895025f890568a.jpg",
+      "file": "assets/f23f55c21cffd0b7.jpg",
+      "alt": "图9.1 置换选择算法流程"
+    },
+    {
+      "chapter": 9,
+      "raw_line": 8357,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/9468f2498a9cf02416ca92a2724d9e08b24b61f45a1d425f46332e0c9d33f85a.jpg",
+      "file": "assets/7486004c6161789b.jpg",
+      "alt": "图 9.3 二路归并过程"
+    },
+    {
+      "chapter": 9,
+      "raw_line": 8396,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/73a5f3c47a3671a4d997f8c7bc65f8b5356b482430c536395b4ed4375d657742.jpg",
+      "file": "assets/dffb7316183b2881.jpg",
+      "alt": "图9.4 含有5 个选手的赢者树"
+    },
+    {
+      "chapter": 9,
+      "raw_line": 8444,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/9301ab572d9e130e72a4fe7b60ae0d0b652a00fb5989dbf0078e3227c104ed29.jpg",
+      "file": "assets/5472dfdf856d168f.jpg",
+      "alt": "图 9.5 8 路归并的赢者树"
+    },
+    {
+      "chapter": 9,
+      "raw_line": 8453,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/c0a54f2c3b97e466ed40af454dbb8f2c936a44c848966d3061cd4a1b4a992ec4.jpg",
+      "file": "assets/bb27070d9ac01f78.jpg",
+      "alt": "图 9.6 图 9.5 重构后的 8 路归并赢者树"
+    },
+    {
+      "chapter": 9,
+      "raw_line": 8456,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/f2a5ed7dc13703d2ff96bd3a7f7ca0646b74da5ef8738e26fb87286208459ae7.jpg",
+      "file": "assets/93f3de38d2a0ccc4.jpg",
+      "alt": "图9.7 8路归并的败者树示例"
+    },
+    {
+      "chapter": 9,
+      "raw_line": 8467,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/7c8fe1e872608a058e2b445aa05f7412c36dc8e67ffd5d7d7f0471cfc1fa69d0.jpg",
+      "file": "assets/732bc1737a8dec83.jpg",
+      "alt": "图 9.8 图 9.7 重构后的 8 路归并败者树"
+    },
+    {
+      "chapter": 10,
+      "raw_line": 8800,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/96c74417bca2e27afbb0838e30f02b70dc73e5f834701180aaf015bd162849c7.jpg",
+      "file": "assets/0792c8837fab4a44.jpg",
+      "alt": "图 10.1 二分检索 K = 18 的过程"
+    },
+    {
+      "chapter": 10,
+      "raw_line": 8807,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/0821b9b357b8995551a77eec879cd0b9225a7345f841846c7ef20dfcf44758a1.jpg",
+      "file": "assets/5f0f882d1e9ec27f.jpg",
+      "alt": "图10.2 二分检索的决策树"
+    },
+    {
+      "chapter": 10,
+      "raw_line": 8842,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/e4a462e6cd53f5e0f3cf49032a816c56f54522168befc2ca1793862067f04395.jpg",
+      "file": "assets/980c030f1f50d7f9.jpg",
+      "alt": "图 10.3 分块检索的存储表示"
+    },
+    {
+      "chapter": 10,
+      "raw_line": 9088,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/8beb84802ed2d129481988013f6005b9dac0df5ea2d927d978070a770a10782d.jpg",
+      "file": "assets/55bc014a79d6a905.jpg",
+      "alt": "图 10.5 例 10.2 中关键码对应的散列表"
+    },
+    {
+      "chapter": 10,
+      "raw_line": 9219,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/af3109606b9ed6f84e465dd56aafe0159f46a52dc59df45f27df53b9402b824d.jpg",
+      "file": "assets/fe1490af9bcca8c0.jpg",
+      "alt": "(a) 移位叠加；(b) 分界叠加；图 10.6 移位叠加和分界叠加"
+    },
+    {
+      "chapter": 10,
+      "raw_line": 9266,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/2c0ff9ee8e52200c2b7efa36ee21f94e87e59eaa16ca9374a1115fd51c08df8a.jpg",
+      "file": "assets/70ba08a893dc9d64.jpg",
+      "alt": "图 10.7 开散列方法的图示"
+    },
+    {
+      "chapter": 10,
+      "raw_line": 9283,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/28f92930d3d7657459fc75e9f3b5ca8cf6355f2f361736a12eb79f6765bfdfcc.jpg",
+      "file": "assets/7b7cd5373daa5ca9.jpg",
+      "alt": "图10.8 散列文件组织"
+    },
+    {
+      "chapter": 10,
+      "raw_line": 9586,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/d6036805cb7ef1059c42f321b9eac0c7f50cf85c3e7fb056055311190e15cd2e.jpg",
+      "file": "assets/df08b72b2ef34643.jpg",
+      "alt": "图10.11 用几种不同方法解决碰撞时散列表的平均检索长度"
+    },
+    {
+      "chapter": 10,
+      "raw_line": 9667,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/5bd08cca11bf129c6323e7996199e12e4a01fc2422df41bb90290969a6fdaab2.jpg",
+      "file": "assets/d31f80e5e4b41fa2.jpg",
+      "alt": "图 10.12 双向有序表"
+    },
+    {
+      "chapter": 10,
+      "raw_line": 9710,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/48ff6ad90f5d9797cfba7d0c7fb18765449824130c5ebfb03c8e39ae387d497a.jpg",
+      "file": "assets/e8d69df1bb8bad04.jpg",
+      "alt": "图10.13 液晶七段数码管示意图"
+    },
+    {
+      "chapter": 10,
+      "raw_line": 9825,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/80f952252cb99e51d9f57c7156ebfdfd823131a63e318026a392f1f012af9441.jpg",
+      "file": "assets/65b2b830d1a83b38.jpg",
+      "alt": "第10章插图（底稿第 9825 行，原书无独立题注）"
+    },
+    {
+      "chapter": 10,
+      "raw_line": 9857,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/e3174d25635835836c4d32f5fed408ac9d633e651a1e697a0f4b128bfc531994.jpg",
+      "file": "assets/6b8ed3d88fe489c1.jpg",
+      "alt": "图10.14 封锁方式的相容矩阵；图10.15 封锁管理子系统示意图"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 9897,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/c9d90bc7d33c7dcb94a4a91d22412e9830a8618b73cabc92879e38ba854a0ce3.jpg",
+      "file": "assets/6e8a0ef3ed26c107.jpg",
+      "alt": "图11.1 线性索引，图中的数据库记录不等长"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 9908,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/73682b49cda12a1e6bdc301f252d9c17c8b7e0f8556752a5afd25898b1012dcd.jpg",
+      "file": "assets/0c75a3db9929b61e.jpg",
+      "alt": "图 11.2 二级索引文件"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 9921,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/1461b979eaf448aa848dde4ae9652d548d77945edb6cdb40d2656bb9df6ba6d1.jpg",
+      "file": "assets/879fc43030b02cb8.jpg",
+      "alt": "图 11.3 多分树"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10034,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/60815a8cdd88e9ed59932b1454eb9d4b1e7472ca1aa5f07b23be49cfbda88dac.jpg",
+      "file": "assets/97a7189d3ea9584c.jpg",
+      "alt": "图 11.4 B 树结点的一般形式"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10061,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/cb5633b8199dde7b201754c5ad67d221a36b40eef99f529709f707886f5c7752.jpg",
+      "file": "assets/c931b6ab6b5af388.jpg",
+      "alt": "(a) 3阶B树"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10064,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/fadaae559cb5733ed46866f16105333f36857a3647223eee17463e743c3f2e17.jpg",
+      "file": "assets/abd683e694687f5d.jpg",
+      "alt": "(b) 画出外部空结点的 3阶 B 树"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10067,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/0762422fda4b304ba2f2c485e59c6d3c503f7f61fb6202d5b1788e44e961eb9a.jpg",
+      "file": "assets/0cfe8b261f05015b.jpg",
+      "alt": "(c) B 树的隐含指针，其中 $a _ { 1 } \\sim a _ { 1 6 }$ 代表关键码所在主文件中具体磁盘块的索引地址；图 11.5 3 阶 B 树"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10081,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/f019b7b5cec6e5fb1a59efc111396551f6a1434d07493e8c7c857844a19512f4.jpg",
+      "file": "assets/3032fa408668c89e.jpg",
+      "alt": "图11.6 在图 11.5的3阶 B 树中插入关键码14、55后的结果"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10088,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/ada71129326a5bc928f9d6bf3fef1353f616a5bbfd6a003db7f7dba9cc1f4953.jpg",
+      "file": "assets/ea9001b8f902803b.jpg",
+      "alt": "图11.7 在图11.5的 3阶 B 树中插入关键码19后导致根分裂"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10113,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/97d96ea09719fcfc0aed050e094fa68d412101d647c5b484dea1e88308656cbb.jpg",
+      "file": "assets/c71eb251fab8ea53.jpg",
+      "alt": "(a) 5阶B 树"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10116,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/ed56b97a93358d7721b0fb58558a8ad6cfd833fdd2b6df2244d6a3552b83e673.jpg",
+      "file": "assets/7393cd50941cc10e.jpg",
+      "alt": "(b)删除120,先与后继交换，删后下溢出，向左邻借关键码"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10119,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/27542224c252abd9840f23719795fd57657658527063462d8a49350816d312fc.jpg",
+      "file": "assets/5bc0a43a72bcaeb3.jpg",
+      "alt": "(c)继续删150,先交换，删后下溢出，合并操作传递到根；图11.8 5阶 B树，连续删除关键码120、150示意图6"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10157,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/17ae4357150a38c613d433b725d4fdc0ebafd79a9a6139a0c05250eac9174720.jpg",
+      "file": "assets/8573da94ca956749.jpg",
+      "alt": "图 11.9 3 阶 B +树"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10176,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/519e8e5f157a1f538b29786b6ae85a1a2fc45e601f058370f2ca5f77561c0a27.jpg",
+      "file": "assets/bcafc0a9de581967.jpg",
+      "alt": "图 11.10 在图 11.9的 3阶 B +树中插入15后，树增高一层"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10187,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/ea41e6f000ed1c54e710a90a79009482e2282457919f0db7a6c8c86ec4487c82.jpg",
+      "file": "assets/ffef69f4b64e2e43.jpg",
+      "alt": "图 11.11 从图 11.9的 3 阶 B + 树中删除 75 后"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10194,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/5308599223f12ff19261d4e803f3892cf9049e7fde0c7a042c76a8d05b7e04c9.jpg",
+      "file": "assets/3de9f1e64abee567.jpg",
+      "alt": "图11.12 混合型 B+树，内部结点阶为4,叶结点阶5"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10203,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/200ab941befa6c61afb5995440d2d3228acd9ba9c0fd7533da54ac4ebf98ead3.jpg",
+      "file": "assets/c2cacd7eba558abe.jpg",
+      "alt": "图 11.13 在图11.12混合型 B +树(内部结点阶为4,叶结点阶5)中，插入22后的结果"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10210,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/e872852cb3f00429365af9e0038d3b4149d4a5e810ee4a787b16e5f0369627ba.jpg",
+      "file": "assets/fe716221bc3bfed5.jpg",
+      "alt": "图11.14 在图11.13混合型 B +树(内部结点阶为4,叶结点阶5)中，删除40后的结果"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10287,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/84557f48ae8684ae0008010dff93b5b1c12b6633902a1afe796adfbc869ab437.jpg",
+      "file": "assets/9638eba45a5abef8.jpg",
+      "alt": "(a)百货销售数据库记录以及 State=NY(纽约州)的位向量"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10294,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/441b96ec6b54422c775a0b0242e196e28a5bd9cfa70c5414c6c82b32301b3210.jpg",
+      "file": "assets/012aa9549249f6c8.jpg",
+      "alt": "(c) 数据域 Class的位向量集合；图11.15 百货销售数据库记录的位图索引示意"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10349,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/cc363c07e0b2e20bc02df9173a73196365cbcd7dc54180eafcb05a327ed661e2.jpg",
+      "file": "assets/32c09de96383c4de.jpg",
+      "alt": "图 11.16 红黑树示意图"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10384,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/677fbdac149ba1726c26e40188d93537c03c3307dd5bec41e4afd620d775dbfe.jpg",
+      "file": "assets/4cd9c419025ff11a.jpg",
+      "alt": "图11.17 父结点是红色，叔父结点是黑色的情况，旋转解决红红冲突"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10393,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/fb014a54f0d26249a84d998d18425337757a27a53f2cc512a6a784ed152a242b.jpg",
+      "file": "assets/a333f195118c2445.jpg",
+      "alt": "图11.18 叔父结点为黑色，进行重构调整每个结点的阶都保持原值，调整完成"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10398,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/b3511a0c1096edca9c327db6fcd55feb926002da2ef4a227d9d801c6cf46519d.jpg",
+      "file": "assets/74d9765c86b0459e.jpg",
+      "alt": "图11.19 父结点、叔父结点均为红色，则父和祖换色，然后递归处理方法"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10405,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/7accdb7a93283b29a34366d74b6084c1d56646b93c8962fdd80bc929356657b0.jpg",
+      "file": "assets/1a24097d7b698644.jpg",
+      "alt": "图 11.20 红黑树插入示例"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10426,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/3ce10a4c3cc4e5deb5e5dda3922b53146baf64ca7de14e14fc7bb4c7e164d187.jpg",
+      "file": "assets/dc4aa499811e6130.jpg",
+      "alt": "图 11.21 情况 1(a):"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10432,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/07bf865fe9836bc17390fc483eb1142138f28cddd3aec9b4200ab64772bf6f92.jpg",
+      "file": "assets/d8199ab1b4f48019.jpg",
+      "alt": "图11.22 情况1(b):双黑结点与红色侄子同边顺"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10439,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/60f3fc3f3a76b92a8afd31b9cf2e8a95bc510ed0209d8205b91b880ea6d814e4.jpg",
+      "file": "assets/0314fc9126687660.jpg",
+      "alt": "图11.23 情况2双黑的兄弟结点为黑色，且兄弟结点有两个黑色子结点"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10446,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/491518f8eead6e8d18c4950f4b02d3fcf7a4a4e54e7afb1bdb984d20a57ed360.jpg",
+      "file": "assets/ea0f0114893b0d4b.jpg",
+      "alt": "图 11.24 情况3双黑的兄弟结点为红色"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10463,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/1673aa091fcfd132b35ab2c37a4d64819193f40a92ce6afc3904a20de526c022.jpg",
+      "file": "assets/96123ad82e555db6.jpg",
+      "alt": "图11.25红黑树连续删除90、70、80,引起的双黑调整示例"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10545,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/eedcd4fd3cf69970a615c5add5d05fce79216482e60fa714b12ed07e066775af.jpg",
+      "file": "assets/f5d4fa1ba1a664f6.jpg",
+      "alt": "图 11.26 习题 8. 的 3 阶 B 树图示"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10550,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/21f3d86718a3cb3c2d1c039d93fbbd57aacfce6a3505c01556b53ff4dc4bc802.jpg",
+      "file": "assets/c2dac0e37e1b2851.jpg",
+      "alt": "图 11.27 习题9. 的4阶 B树"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10561,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/bcb3be2baef5553a415debc0c33c15dca714dd26c79ba5b53dafd39c2f8197d2.jpg",
+      "file": "assets/722c1d1d7948e14a.jpg",
+      "alt": "图 11.28 习题 10. 的 3 阶 B 树"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10616,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/fe028caf0dc2ea3ccbafe48cd38f148e7d206e4316dda4a234c269530bb0b35c.jpg",
+      "file": "assets/ed2d545e00b57235.jpg",
+      "alt": "图 11.29 2 阶 $B ^ { \\star }$ 树图示"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10625,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/27c8a6d60cdc7df0133173664cd22c6c884f8afdd81887542b83dc42cfa9ee2d.jpg",
+      "file": "assets/b03c1f52b7542c5b.jpg",
+      "alt": "图 11.30 混合型 $B ^ { + }$ 树，内部结点阶为4、叶结点阶为3"
+    },
+    {
+      "chapter": 11,
+      "raw_line": 10650,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/a80a74a99b10bd6bea332b1417e938172abfef9f9d9d0604792442828c15a848.jpg",
+      "file": "assets/1a187b1fcf4e3da2.jpg",
+      "alt": "图 11.31 红黑树"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 10739,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/ef6ca7012f5f76fd106bbe39f416caec95a168a741280dd5bd71a9ee4835f05c.jpg",
+      "file": "assets/ff4a0e68418ad4b3.jpg",
+      "alt": "图 12.1 上三角矩阵和下三角矩阵，其中 c为常数"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 10768,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/d123e1f9318289f7d365326843dfc574aabe7a3eb81dc8ce8901bc2a084f823a.jpg",
+      "file": "assets/7243968f87b4e75b.jpg",
+      "alt": "图 12.2 稀疏矩阵的十字链表"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 10827,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/596d987c2213cb5f5c7f9b83193be0f1fb0f30d2b77b7d6f91c44b3cd064b99b.jpg",
+      "file": "assets/a6db78e33812566d.jpg",
+      "alt": "图 12.3 纯线性结构表"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 10830,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/abcbb934f8980738bfc919025cb3413cace6d9a92f73711ac50075aa66834284.jpg",
+      "file": "assets/bb0f924bd1bdec90.jpg",
+      "alt": "图 12.4 纯表的树表示"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 10837,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/97b672d686e1d8c4243aed184a8d044cfb5a737c6fdd8c70b5b67ae9c6b2611f.jpg",
+      "file": "assets/77d1f64d0f2aad44.jpg",
+      "alt": "图12.5一个再入表的例子，其中没有标志箭头的边都是指向下方的"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 10842,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/01790d3b52f1469d64f146d3181a3755191ba9a761a97cb4a9250315995729ed.jpg",
+      "file": "assets/9056eec6ba40c942.jpg",
+      "alt": "图12.6 循环表可以看到这是一个有环图；图12.6中.因为 $L _ { 1 }$ 和 $L _ { 4 }$ 调用自身，导致了回路。其他没有箭头的边，方向都是从上至下的。循环表也可以算作一种存在回路的特殊再入表。"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 10872,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/4d51a6f85069dcf81075a6c4452e2755d80bbc5bf355ba7e33269efd8504dda2.jpg",
+      "file": "assets/08b834108b1ffee9.jpg",
+      "alt": "图 12.7 没有头结点的广义表"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 10877,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/a80d2bc3248709789e079fdc7b8b828892f800ee6a01688d03fd848e60ed84cd.jpg",
+      "file": "assets/a997a7dd44ffc121.jpg",
+      "alt": "图 12.8 带头结点的广义表"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 10883,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/d4206ca1412210f00df57c640d130fda672c7ffafc7332d15e60618d1eb27b99.jpg",
+      "file": "assets/496aef5541eea022.jpg",
+      "alt": "图12.9 带表头结点的循环广义表"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 10920,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/d4745c696b8d01f1c087d54f20e0cd0f02f7d4753e9a599d4a8093a1f54c7f6b.jpg",
+      "file": "assets/286284e4e113c3db.jpg",
+      "alt": "(a) 初始状态的可利用空间表"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 10923,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/7f229287dc9546ab41fcd7979780cb4100b2eb2a79dd348e9bb9d5794fed53e7.jpg",
+      "file": "assets/13aa14b9eaf0d7ed.jpg",
+      "alt": "(b) 系统运行一段时间后的可利用空间表；图12.10 结点等长的可利用空间表"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 10961,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/1977fe5c6b0e161aa14847c9692ece3764c92b7efe8be023e761a47550c603bb.jpg",
+      "file": "assets/da5cde034842c482.jpg",
+      "alt": "(a) 空闲块的结构"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 10964,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/e93fa4646645f3c08624bb5fa764efe4fe91a20ab6b6ebcc9c3d184dc4e6b480.jpg",
+      "file": "assets/176675b89214b438.jpg",
+      "alt": "(b) 已分配块的结构；图12.11 存储器看到的块结构"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 10970,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/778009316e46675366ed2c2092b097e1d2bc21c164c4f24ef807b29fabd100b6.jpg",
+      "file": "assets/42591c39779d3b6f.jpg",
+      "alt": "图 12.12 外部碎片和内部碎片"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 10999,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/a078d7d81fe153fe05a65ffaf1b8533c7a4ec86999ea33e12b61280fa576f5c9.jpg",
+      "file": "assets/330b8aba58c19e68.jpg",
+      "alt": "图 12.13 把块 M释放回可利用空间表"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11024,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/ac6d4b2fe7a3026ead6ab8f0cba72dcc01fc0015ea2207bda15f2faf31e2094f.jpg",
+      "file": "assets/7fecd7778cd2b26e.jpg",
+      "alt": "图 12.14 无用单元循环引用"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11043,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/b58175d1098d29a9952d06d2b4b6d4f3388440ec4ad8d3de797c33849b747aa3.jpg",
+      "file": "assets/a71971eeeedd60de.jpg",
+      "alt": "图 12.15 BST 的平衡性示意图"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11060,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/6388676d28a53b6965fdc40e7638062e44529a3f957057d4b4b59ec2a1e37764.jpg",
+      "file": "assets/2f63d4427c7ba023.jpg",
+      "alt": "图 12.16 一棵二叉 Trie 树"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11067,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/2616d726935554d2b1b36bdf70c29eaf63123ce6edf11c0bd5a615fde61971e4.jpg",
+      "file": "assets/31bf5d17531c99f5.jpg",
+      "alt": "图 12.17 存储单词的 Trie 结构"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11086,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/0a61d7f64c4809de0c301478ce536884937584a471b69939be33c684059acd6c.jpg",
+      "file": "assets/a08c66eba1f27251.jpg",
+      "alt": "图 12.18 对 Trie 树的改进"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11100,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/c2a4ec3e58507a69010f5bee6decc270aaea84a19362f1c0d76a181af40eefe4.jpg",
+      "file": "assets/5fa442714c931b76.jpg",
+      "alt": "图 12.19 x表示那个位可以为 1 或者 0"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11103,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/52e8e4b57265928dc8be340df971d73dc52cc360d06817e44e01dc45533e480f.jpg",
+      "file": "assets/27144b83e26fc2eb.jpg",
+      "alt": "图 12.20 最后得到的 PATRICIA Trie 结构"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11130,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/b7eb34732e27b8e3d6bc5d221a6a16cb1e9edc55a84a6158173a51a45c188688.jpg",
+      "file": "assets/69b4e6e2e509b6c1.jpg",
+      "alt": "图 12.21 二叉搜索树"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11135,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/a36d6848c4e1cdfc2861704f3476f226f1a770c050dd34702e89c2671c88f900.jpg",
+      "file": "assets/1f30890a5d9e01a8.jpg",
+      "alt": "图 12.22 关键码与图 12.21 相同的是一棵 BST"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11151,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/357d9a6178609fc2e7b63eeb7ed52a93fec22593f8e4b4ec7ee0dc9dc3c51419.jpg",
+      "file": "assets/75fcc4e3389b6567.jpg",
+      "alt": "图 12.23 扩充二叉树"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11224,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/ce4d08f2578d14205f659ac8f5ffb2f510566a3f803c83ad2ae105b7feca17bc.jpg",
+      "file": "assets/1826934df94f553c.jpg",
+      "alt": "图 12.24 最佳二叉搜索树"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11229,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/7db2d922681aaca3ffced81b99a52ef29845268a4d6b7874ee195852253009a2.jpg",
+      "file": "assets/f1b118a907a2784a.jpg",
+      "alt": "图12.25 退化为线性的二叉搜索树"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11240,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/ebfcc10b6ae9d31ce63939b49d24d33cda771fbfd48e90a3a669e48711434ca3.jpg",
+      "file": "assets/6b92b3ac99984b30.jpg",
+      "alt": "图12.26 具有不等权结点的二叉搜索树"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11331,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/e9235a00e597fec9c76c842e4e8caddd30eae4fad88063cabb78134ec0bbd3bf.jpg",
+      "file": "assets/e543a817bd675673.jpg",
+      "alt": "图 12.27 构造最佳二叉搜索树的过程"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11354,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/9b96c14e91893191413b85205624c7e3b7c80dac17fa06b7cc36591cc4827387.jpg",
+      "file": "assets/ab04fde707fc0b65.jpg",
+      "alt": "(a) 一棵 AVL 树"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11357,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/25feacc31b059176e51eb44abd0861c4e9548fa5dddbd0129401bb642cc6942a.jpg",
+      "file": "assets/2a466745af469534.jpg",
+      "alt": "(b) 非 AVL 树的 BST；图 12.28 AVL 树与非 AVL 树"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11361,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/2151ef00527ecc3d47e82ca94bc26e5fc59d8104f5fba7d4c1dbdba090fe280b.jpg",
+      "file": "assets/3cd3a1d82f9fca27.jpg",
+      "alt": "图 12.29 带平衡因子的 AVL 树"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11378,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/770363926889740e12e0794838134eb0cdb6dd7e6721cbe79711311a2f9cb67d.jpg",
+      "file": "assets/f806d05fae1d193e.jpg",
+      "alt": "(a) 被破坏的AVL树"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11381,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/fd07ac8875cfbe724f69f0be3c538edda70e0c38cba453adfb1dc5c84c9b9140.jpg",
+      "file": "assets/2a8101ef137dbe8c.jpg",
+      "alt": "(b) 重新调整为AVL树；图 12.30 AVL 树的调整示意图"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11387,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/c541199fbcf078f009ad6c6d1ba5bbac6235522c03c969f3674d37a4137472b3.jpg",
+      "file": "assets/919794a24a6d0752.jpg",
+      "alt": "(a) LL不平衡"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11390,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/fc00ed4815941e4112c03d912c122d68839344b35c99892727ae86e9ed8e097f.jpg",
+      "file": "assets/c2ddb113697e442b.jpg",
+      "alt": "(b) LR不平衡"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11393,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/e7e0f358f4878c82ca51410ea09256de9d2b52f2c7d7241fef1ed19c3fd0a270.jpg",
+      "file": "assets/776ff7cb34bbd95d.jpg",
+      "alt": "(c) RR不平衡"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11396,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/8c2cc1fb95b7350fe746b2aa9890f3fc6779852647e66d83cf3b166aa1852ec5.jpg",
+      "file": "assets/177187ec2696e070.jpg",
+      "alt": "(d) RL不平衡；图12.31 AVL树的不平衡类型。圆圈表示结点；椭圆表示子树，内部符号表示其高度"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11418,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/f066d27e819269a293f906e328b764383db4e23b1e7f2d894297b0eb749ac666.jpg",
+      "file": "assets/15e78aea8f0613c7.jpg",
+      "alt": "图12.32 LL型不平衡经过单旋转后重新变成平衡结构，RR型单旋转类似"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11431,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/5bfd26b4344481a852bb0cd3eb52b400d06cf77a14094f4a7f9e1958931620fe.jpg",
+      "file": "assets/ad9ee439aedaf3a3.jpg",
+      "alt": "(b) 中间状态平衡因子无意义"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11434,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/be8c919853c84d1f3deeb583ea38128a4879ee6c1835ee23c1bc868441af7e39.jpg",
+      "file": "assets/83e3cdd3592325c1.jpg",
+      "alt": "(c) a的平衡因子为-1或0,b的平衡因子为0或+1；图 12.33 RL 型双旋转示意图，LR 型双旋转类似；图 12. 34 是从空 AVL 树开始，顺序插入单词 {cup, cop, copy, hit, hi, his, hia}后得到的 AVL树，单词之间按照字典顺序比较。"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11440,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/4a192698bf1240da60c8574f8b4b799f021e53b2ade017f1182c45e166bed070.jpg",
+      "file": "assets/38fc6390b74cb59c.jpg",
+      "alt": "图 12.34 AVL 树的插入过程"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11449,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/be2a954b7797e682144379759c9d6eb9b45673b9f4b928160966ba3b81ff5faa.jpg",
+      "file": "assets/8da27f446e82cc95.jpg",
+      "alt": "图 12.35 AVL 树删除之后的平衡操作"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11474,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/29b71a50f4945276bd2d7ce0032849597698b0399dd853d83165851fc23cebf7.jpg",
+      "file": "assets/c9d3653538f773ad.jpg",
+      "alt": "(a)删除结点c,则需要使用其中序前驱m"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11477,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/c509e0c8c7b1014312f026bca5b32d7aca00f4c0e7aa80b8a1409af900f85aea.jpg",
+      "file": "assets/583a306938e9a07d.jpg",
+      "alt": "(b) 删除结点g"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11480,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/342913bb7677ad445dc14c6258474d034cad436026708c61df0246f44b6bacff.jpg",
+      "file": "assets/c8bfd8ef7b82b925.jpg",
+      "alt": "图 12.36 AVL 树的删除过程"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11495,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/adb7138df4a227936e75aaee6bcff5a214976d62e582e038cdaa29897b3af546.jpg",
+      "file": "assets/b559c4b072af21ab.jpg",
+      "alt": "图 12.37 最接近于不平衡的 AVL 树"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11540,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/e3f3f09b36cabfa688c36b61afd4f8dcb3bfa8b51d8f7313db6b9fe82d3ae1eb.jpg",
+      "file": "assets/9886016a74483c6a.jpg",
+      "alt": "第12章插图（底稿第 11540 行，原书无独立题注）"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11563,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/c707a64c0dee1d51a2754a00ccd715dd0368677bd37d638b2b0bfcaa7459f5bb.jpg",
+      "file": "assets/edfc6e588d573c57.jpg",
+      "alt": "(b) 旋转发生以后的树；图12.38 当被展开的结点是根结点的子结点时，才会发生伸展树的单旋转"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11577,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/457913cb25a74493d39f3f4fc06dc8dd4490d2af41c60bfdb294e728d7f28a85.jpg",
+      "file": "assets/d547f2b7c0b6510b.jpg",
+      "alt": "(a)结点x、结点y、结点z为一字形的树结构"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11580,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/b37c24507b497cb2581625a278a4701ffb1665c226b3a48b0af6a6e31a0bb2c4.jpg",
+      "file": "assets/4de16efb6c7a8e8d.jpg",
+      "alt": "(b) 旋转发生之后的树结构；图12.39 伸展树的一字形旋转"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11592,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/5d6e6fc2f814f017f677740edd11e563f496fe034ab6fcbda6371be8808715eb.jpg",
+      "file": "assets/391e13f1809c09bf.jpg",
+      "alt": "(a)结点x、结点y、结点z为之字形的树结构(b)旋转发生之后的树结构；图 12.40 伸展树的之字形旋转"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11604,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/fef8cefc7628580881a670797d23a3465533e84501a99bf7f56e33c286297845.jpg",
+      "file": "assets/f536a99730156c47.jpg",
+      "alt": "(d)f、a、g之字形旋转后；(e) a、h单旋转后，a最后成为根结点；图12.41 在伸展树中完成一次检索以后再展开的例子"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11615,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/038b5c2a96c491aab9d521235414551f79a5f18f0355c588e55c9d4d36d34fa9.jpg",
+      "file": "assets/851f2f30b09fa8d8.jpg",
+      "alt": "图12.42 半伸展和全伸展的区别"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11618,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/ba403f0267169fd0348f44219189b4496fd81f9a223a5e54135aee2e142e5a7c.jpg",
+      "file": "assets/33419334fcc58ef5.jpg",
+      "alt": "图12.43 连续两次访问结点T，半伸展树的变化示例"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11625,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/bac90be4cef60fdbd323ac9d7500695fb2ccc897c6c9cf2cbf49452a276818c5.jpg",
+      "file": "assets/907d63faff8d37a9.jpg",
+      "alt": "图12.44 外部结点存储记录信息的半伸展树"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11628,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/48b92cbe4b3063c060b41ab2e4f3721e17baccf8d9cb7fcbb1cf2ecb7c270260.jpg",
+      "file": "assets/2103775a9dd6abc2.jpg",
+      "alt": "图 12.45 对图 12.44 连续读 aabg 后，半伸展树的变化过程"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11733,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/2c2de7b1187720079d4a8960c35ffd1307f0f672a941ff480ded5afa8afb951c.jpg",
+      "file": "assets/b79642f077ce5f4c.jpg",
+      "alt": "图 12.46 习题 17 的 AVL 树"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11781,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/0489ed786ca75e6e694df61d3ab88df46fbcd74e8a1aaa792166906ebd10936a.jpg",
+      "file": "assets/2aebcb9372fe2cbf.jpg",
+      "alt": "图 12.47 带路径压缩的后缀树"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11816,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/21d55448f0927754b9fc0b764fd9f9376f715bb3e2ffc3e086dbab15ba0216f6.jpg",
+      "file": "assets/167befa8eb99152f.jpg",
+      "alt": "图 12.48 存储词频信息的半伸展树"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11913,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/a5bab5cf5bc38140de8a106f76f23aa330f03f5b3685c3bcc54c0e8641bfc46e.jpg",
+      "file": "assets/218b97554b914895.jpg",
+      "alt": "图12.49 搜索引擎基本架构"
+    },
+    {
+      "chapter": 12,
+      "raw_line": 11924,
+      "url": "https://raw.githubusercontent.com/GMyhf/img/main/img/8f4339254c37c71ea0729547edfb2ddea6a791f0af711028f067f12a57ff3996.jpg",
+      "file": "assets/9bd20c464a6a63e9.jpg",
+      "alt": "图 12.50 Google的 Ajax 输入提示框"
+    }
+  ]
+}

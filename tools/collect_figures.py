@@ -6,6 +6,7 @@ vendor_figures.py 只处理书稿里已经写出的热链。原书 292 张图几
 """
 import argparse
 import hashlib
+import json
 import re
 import sys
 import urllib.request
@@ -16,6 +17,7 @@ ROOT = Path(__file__).resolve().parent.parent
 RAW = ROOT / "dsa_raw.md"
 ASSETS = ROOT / "book" / "assets"
 OUT = ROOT / "book" / "插图.md"
+SIDECAR = ROOT / "book" / "assets" / "figures.json"
 TIMEOUT = 30
 
 CHAPTER_RE = re.compile(r"^# 第(\d+)章")
@@ -121,11 +123,110 @@ def collect():
     return figures
 
 
+
+def atlas_entries(text=None):
+    """图册里按出现顺序排列的 (alt, 相对路径)。"""
+    text = OUT.read_text(encoding="utf-8") if text is None else text
+    return re.findall(r"!\[([^\]]*)\]\((assets/[^)]+)\)", text)
+
+
+def write_sidecar(figures):
+    """把「底稿第几张图 → 哪个本地文件」记下来，让 --check 能离线重放。"""
+    payload = {
+        "note": "由 collect_figures.py 生成：底稿顺序、题注与本地文件的对应关系。"
+                "文件名是内容 SHA-256 的前 16 位，改一个字节文件名就该变。",
+        "figures": [
+            {
+                "chapter": item["chapter"],
+                "raw_line": item["line"],
+                "url": item["url"],
+                "file": item.get("local"),
+                "alt": item["alt"],
+            }
+            for item in figures
+        ],
+    }
+    SIDECAR.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return payload
+
+
+def check_current() -> int:
+    """离线核对：底稿 → sidecar → 图册 → 文件字节，四者是否还对得上。
+
+    **不联网**。判据全部来自本地：底稿现在抽出多少张图、题注是什么，
+    sidecar 记的是不是同一批，图册引用的是不是同一批、顺序一致，
+    以及每个文件的内容是否仍与它的名字（内容 SHA-256 前 16 位）相符。
+    """
+    problems = []
+    figures = collect()
+    if not SIDECAR.is_file():
+        print(f"❌ 缺少 {SIDECAR.relative_to(ROOT)}；修法：python3 tools/collect_figures.py")
+        return 1
+    recorded = json.loads(SIDECAR.read_text(encoding="utf-8"))["figures"]
+
+    if len(recorded) != len(figures):
+        problems.append(f"底稿现在有 {len(figures)} 张图，sidecar 记着 {len(recorded)} 张")
+    for index, (item, note) in enumerate(zip(figures, recorded), 1):
+        if item["url"] != note.get("url"):
+            problems.append(f"第 {index} 张：底稿的 URL 与 sidecar 不一致")
+        elif item["alt"] != note.get("alt"):
+            problems.append(
+                f"第 {index} 张（底稿第 {item['line']} 行）题注变了："
+                f"底稿是「{item['alt'][:28]}」，sidecar 是「{str(note.get('alt'))[:28]}」"
+            )
+
+    seen = set()
+    for note in recorded:
+        name = note.get("file")
+        if not name:
+            problems.append(f"底稿第 {note.get('raw_line')} 行那张图没有本地文件")
+            continue
+        if name in seen:
+            problems.append(f"{name} 被登记了两次")
+        seen.add(name)
+        # 相对图册所在目录解析，和 Markdown 里 `assets/…` 的含义一致
+        path = OUT.parent / name
+        if not path.is_file():
+            problems.append(f"{name} 不存在")
+            continue
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()[:16]
+        if path.stem != digest:
+            problems.append(f"{name} 的内容与文件名对不上（现在是 {digest}）——图被换过")
+
+    atlas = atlas_entries()
+    if [note.get("file") for note in recorded] != [target for _, target in atlas]:
+        problems.append("图册引用的图与 sidecar 的顺序/内容不一致")
+    for (alt, target), note in zip(atlas, recorded):
+        if alt != note.get("alt"):
+            problems.append(f"图册里 {target} 的 alt 与 sidecar 不一致")
+
+    orphans = sorted(
+        path.name for path in ASSETS.glob("*.jpg") if f"assets/{path.name}" not in seen
+    )
+    if orphans:
+        problems.append(f"{len(orphans)} 个没人引用的图片文件：{orphans[:3]}…")
+
+    if problems:
+        for problem in problems[:20]:
+            print(f"❌ {problem}")
+        if len(problems) > 20:
+            print(f"❌ …另有 {len(problems) - 20} 条")
+        print("   修法：python3 tools/collect_figures.py（需要网络）")
+        return 1
+    print(f"✅ 插图集与底稿一致：{len(recorded)} 张图，题注与顺序逐项相符，文件内容哈希全部匹配")
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(description="把原书插图收到 book/assets/ 并生成图册")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--check", action="store_true",
+                        help="离线核对底稿、sidecar、图册与文件字节是否一致")
     parser.add_argument("--limit", type=int, default=0, help="只处理前 N 张，便于试跑")
     opts = parser.parse_args()
+
+    if opts.check:
+        sys.exit(check_current())
 
     figures = collect()
     if opts.limit:
@@ -186,6 +287,7 @@ def main():
             parts.append(f"{item['alt']}")
             parts.append("")
     OUT.write_text("\n".join(parts), encoding="utf-8")
+    write_sidecar(figures)
     print(f"新落盘 {new_files} 个文件，图册 {OUT.relative_to(ROOT)}")
     if failed:
         print(f"失败 {len(failed)} 张：")
