@@ -161,6 +161,32 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>主存（RAM、cache、显存）在主板上，按单元连续编址，CPU 直接访问，一次存取时间可以看成很小的常数，单位是纳秒。它快、贵、容量相对小，断电就丢。外存（硬盘、磁带、U 盘）便宜、容量大，信息断电不丢，有的还能随身带走。但一次存取以毫秒甚至秒计，比内存慢几个数量级。</p>
 <p>外存慢，一个原因是每次访问都要先定位再读写。磁盘要把磁头移到目标磁道，再等扇区转到磁头下，定位往往就要几毫秒到几十毫秒，远慢于真正把数据读出来。所以外存按固定大小的页块存取：一次定位读写一整页，减少定位次数。顺序扫描时再配合缓冲：一次读入一页或几页到内存，后面的访问尽量打在缓冲区里。</p>
 <p>对外排序来说，目标首先是减少读写次数，而不是减少内存里的比较。一次磁盘 I/O 往往比一次比较贵几个数量级。</p>
+<h3 id="先建立成本模型"><a class="anchor" href="#先建立成本模型">#</a>先建立成本模型</h3>
+<p>分析外排序时，不能再只数比较次数。设文件有 <span class="math">N</span> 个记录，每页可放 <span class="math">B</span> 个记录，顺序扫描一遍至少要读 <span class="math">⌈N/B⌉</span> 页。若这一遍还要把结果写回外存，I/O 量就是大约 <span class="math"><span class="upr">2</span>⌈N/B⌉</span> 页；内存中多做几次比较，通常远比多一次整文件读写便宜。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">层次</th>
+<th style="text-align:left">访问单位</th>
+<th style="text-align:left">本章关心的性质</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">CPU cache / 主存</td>
+<td style="text-align:left">字或 cache line</td>
+<td style="text-align:left">可随机访问，比较和交换在这里完成</td>
+</tr>
+<tr>
+<td style="text-align:left">SSD / 磁盘</td>
+<td style="text-align:left">页块</td>
+<td style="text-align:left">定位与传输有固定成本，应顺序、批量读写</td>
+</tr>
+<tr>
+<td style="text-align:left">磁带等顺序介质</td>
+<td style="text-align:left">连续块</td>
+<td style="text-align:left">随机定位尤其昂贵，归并比原地交换合适</td>
+</tr>
+</tbody></table></div>
+<p>例如 1 亿条 16 字节记录约占 1.6 GB。若内存工作区只有 64 MB，任何“把全部记录放进数组再排序”的内部排序都不成立；外排序必须让大部分记录始终留在外存，只在内存里保存少量缓冲页和当前候选。</p>
+<figure><img loading="lazy" src="../assets/f23f55c21cffd0b7.jpg" alt="图9.1 置换选择算法流程"><figcaption>图9.1 置换选择算法流程</figcaption></figure>
+<p>图9.1把输入缓冲、内存工作区和输出缓冲分开。输入缓冲空了才整页补入，输出缓冲满了才整页写回；工作区处理的是记录，真正与设备交换的是页。</p>
 <h2 id="92-文件的组织和管理"><a class="anchor" href="#92-文件的组织和管理">#</a>9.2 文件的组织和管理</h2>
 <p>文件是外存上的数据结构，由大量性质相同的记录组成。记录是有独立逻辑意义的一块数据，简单可以是一串字符，复杂则由若干字段组成。操作系统文件常常是连续字符流，结构不明显；数据库文件是有结构的记录集合，每条记录由若干不可再分的数据项组成。学生登记表——姓名、学号、性别、出生年月——就是后一种。</p>
 <p>按记录长度，文件分定长和不定长：定长更好处理。按关键码个数，分单关键码和多关键码：多关键码文件除了主码还可以有若干次码。操作通常以记录为单位：顺序读、追加、按条件修改或删除。处理方式有实时（要求很快应答）和批量（允许较长反馈）。</p>
@@ -171,12 +197,90 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <li><strong>散列文件</strong>：用散列函数把关键码映射到桶或块。第 10 章的闭散列思想可以搬到外存，但冲突处理要按块设计。</li>
 </ol>
 <p>本章不实现页缓存和文件句柄，只抽出外排序里两件与文件组织无关、却决定 I/O 次数的事：如何生成更长的初始顺串，以及如何在 <span class="math">k</span> 路归并里选出当前最小。</p>
+<h3 id="记录怎样装进页"><a class="anchor" href="#记录怎样装进页">#</a>记录怎样装进页</h3>
+<p>定长记录最容易计算：页大小为 <span class="math">P</span> 字节、记录长 <span class="math">R</span> 字节时，一页最多装 <span class="math">⌊P/R⌋</span> 条，剩余空间是内部碎片。不定长记录通常在页尾保存槽目录，槽里记录每条记录的偏移和长度；记录在页内移动时，外部引用仍可通过“页号 + 槽号”找到它。</p>
+<p>删除记录也有两种代价模型。立即压紧能保持扫描紧凑，却可能搬动大量记录；留下墓碑写入便宜，但查询必须跳过空洞，积累到一定程度仍要重组。第 10 章闭散列里的墓碑解决的是同一种矛盾，只是这里的搬动单位从数组槽变成了页块。</p>
+<p>把逻辑顺序与物理位置分开，是后面索引章节的入口：索引保存“关键码到页/槽”的映射，主文件不必为了每次插入都整体移动。外排序则反过来，趁批处理窗口一次性重写主文件，用顺序 I/O 换取之后更快的扫描。</p>
 <h2 id="93-外排序"><a class="anchor" href="#93-外排序">#</a>9.3 外排序</h2>
+<p>外排序分成两个阶段：</p>
+<ol>
+<li><strong>顺串生成</strong>：把输入切成若干内部有序的段；</li>
+<li><strong>归并</strong>：反复合并这些段，直到只剩一条覆盖全文件的顺串。</li>
+</ol>
+<p>若内存能放 <span class="math">M</span> 条记录，普通分批排序只能产生长度至多 <span class="math">M</span> 的初始顺串，顺串数约为 <span class="math">r<span class="rel">=</span>⌈N/M⌉</span>。做 <span class="math">k</span> 路归并需要 <span class="math">⌈<span class="upr">log</span><sub>k</sub>r⌉</span> 趟；每一趟都要读完整文件再写完整文件，所以减少一趟，省下的是约 <span class="math"><span class="upr">2</span>N/B</span> 次页 I/O，而不是几个比较。</p>
 <h3 id="931-置换选择排序"><a class="anchor" href="#931-置换选择排序">#</a>9.3.1 置换选择排序</h3>
 <p>顺串是磁盘上已经有序的一段记录。内存一次只能装 M 条时，朴素做法是每批排成一条长为 M 的顺串。置换选择可以做得更好：输出堆顶之后，若下一条记录<strong>不小于</strong>刚输出的值，它还可以进入当前顺串；否则冻结到下一趟。平均情况下第一趟长度约为 2M。</p>
 <p>原书图 9.2 的输入是 <code>50 49 35 45 30 25 15 60 16 27 1</code>，工作区 <code>M = 7</code>。前 7 个建成最小堆后，堆顶是 15。接着读到 60——它比 15 大，可以进当前堆；再读到 16、27、1，它们都比当时的输出值小，被冻结。第一顺串因此是</p>
 <div class="codeblock" data-lang="text"><pre><code>15 25 30 35 45 49 50 60</code></pre></div>
 <p>长度 8，已经超过 M。剩下的 <code>1 16 27</code> 构成第二顺串。</p>
+<p>下面把图 9.2 的过程逐步摊开。<code>活跃堆</code>只容纳仍可能进入当前顺串的记录；<code>冻结</code>中的记录必须等下一条顺串。表中“输出后读入”表示先弹出最小值，再从输入缓冲补一条：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:right">步</th>
+<th style="text-align:right">输出</th>
+<th style="text-align:right">输出后读入</th>
+<th style="text-align:left">去向</th>
+<th style="text-align:left">当前顺串</th>
+<th style="text-align:left">冻结</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:right">初始</td>
+<td style="text-align:right">-</td>
+<td style="text-align:right">前 7 条</td>
+<td style="text-align:left">建堆</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">-</td>
+</tr>
+<tr>
+<td style="text-align:right">1</td>
+<td style="text-align:right">15</td>
+<td style="text-align:right">60</td>
+<td style="text-align:left"><span class="math"><span class="upr">60</span><span class="rel">≥</span><span class="upr">15</span></span>，活跃</td>
+<td style="text-align:left">15</td>
+<td style="text-align:left">-</td>
+</tr>
+<tr>
+<td style="text-align:right">2</td>
+<td style="text-align:right">25</td>
+<td style="text-align:right">16</td>
+<td style="text-align:left"><span class="math"><span class="upr">16</span>&lt;<span class="upr">25</span></span>，冻结</td>
+<td style="text-align:left">15 25</td>
+<td style="text-align:left">16</td>
+</tr>
+<tr>
+<td style="text-align:right">3</td>
+<td style="text-align:right">30</td>
+<td style="text-align:right">27</td>
+<td style="text-align:left"><span class="math"><span class="upr">27</span>&lt;<span class="upr">30</span></span>，冻结</td>
+<td style="text-align:left">15 25 30</td>
+<td style="text-align:left">16 27</td>
+</tr>
+<tr>
+<td style="text-align:right">4</td>
+<td style="text-align:right">35</td>
+<td style="text-align:right">1</td>
+<td style="text-align:left"><span class="math"><span class="upr">1</span>&lt;<span class="upr">35</span></span>，冻结</td>
+<td style="text-align:left">15 25 30 35</td>
+<td style="text-align:left">16 27 1</td>
+</tr>
+<tr>
+<td style="text-align:right">5--8</td>
+<td style="text-align:right">45,49,50,60</td>
+<td style="text-align:right">输入耗尽</td>
+<td style="text-align:left">排空活跃堆</td>
+<td style="text-align:left">15 25 30 35 45 49 50 60</td>
+<td style="text-align:left">16 27 1</td>
+</tr>
+<tr>
+<td style="text-align:right">新顺串</td>
+<td style="text-align:right">1,16,27</td>
+<td style="text-align:right">-</td>
+<td style="text-align:left">冻结区重新建堆</td>
+<td style="text-align:left">1 16 27</td>
+<td style="text-align:left">-</td>
+</tr>
+</tbody></table></div>
+<p>这个表给出两个守门不变量：每条顺串内部非递减；全部顺串拼在一起包含输入的每条记录且恰好一次。第一条保证归并可以工作，第二条防止冻结时丢记录或重复输出。</p>
+<p>输入次序决定顺串长度。单调递增输入会一直补进活跃堆，得到一条长顺串；单调递减输入几乎每次都冻结，顺串接近长度 <span class="math">M</span>。随机排列在常见独立分布假设下平均约为 <span class="math"><span class="upr">2</span>M</span>，但这是平均结论，不是最坏保证。</p>
 <p>图9.1 置换选择：工作区是最小堆。弹出堆顶后，下一条记录若不小于刚输出的值就入堆，否则冻结到下一趟。</p>
 <p>若把整份输入推进一个堆再依次弹出，得到的是一条完全有序序列——那是堆排序，不是置换选择。旧实现曾经这样做，测试只断言 <code>{3,1,2} → {1,2,3}</code>，堆排序也能过。现在的接口返回<strong>若干顺串</strong>，并用原书这组数据守门。</p>
 <p>多路归并时，每次要在 k 路的队首里选出最小者。赢者树的内部结点保存胜者下标；败者树的内部结点保存败者，另用一个冠军槽记录全局最小。替换一名选手后，两者都只需沿叶到根重赛。</p>
@@ -274,8 +378,175 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 }</code></pre></div>
 <h3 id="932-二路外排序"><a class="anchor" href="#932-二路外排序">#</a>9.3.2 二路外排序</h3>
 <p>对 m 个顺串两两归并，趟数是 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>m⌉</span>。置换选择把初始顺串变长，就是为了减小 m。</p>
+<p>归并两条顺串至少需要三个缓冲页：两页分别保存两路尚未消费的记录，一页收集输出。比较两个输入缓冲的队首，把较小者移入输出缓冲；某个输入页耗尽就读该顺串下一页，输出页满则整页写回。这样每个输入页恰好读一次，每个输出页恰好写一次。</p>
+<figure><img loading="lazy" src="../assets/7486004c6161789b.jpg" alt="图 9.3 二路归并过程"><figcaption>图 9.3 二路归并过程</figcaption></figure>
+<p>原书图 9.3 的例子有 3000 条记录，初始得到 10 条、每条 300 条的顺串：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:right">趟次</th>
+<th style="text-align:right">输入顺串数</th>
+<th style="text-align:left">合并方式</th>
+<th style="text-align:right">输出顺串数</th>
+<th style="text-align:right">每条典型长度</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:right">0</td>
+<td style="text-align:right">10</td>
+<td style="text-align:left">初始顺串</td>
+<td style="text-align:right">10</td>
+<td style="text-align:right">300</td>
+</tr>
+<tr>
+<td style="text-align:right">1</td>
+<td style="text-align:right">10</td>
+<td style="text-align:left">两两归并</td>
+<td style="text-align:right">5</td>
+<td style="text-align:right">600</td>
+</tr>
+<tr>
+<td style="text-align:right">2</td>
+<td style="text-align:right">5</td>
+<td style="text-align:left">两对归并，1 条轮空</td>
+<td style="text-align:right">3</td>
+<td style="text-align:right">1200,1200,600</td>
+</tr>
+<tr>
+<td style="text-align:right">3</td>
+<td style="text-align:right">3</td>
+<td style="text-align:left">一对归并，1 条轮空</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">2400,600</td>
+</tr>
+<tr>
+<td style="text-align:right">4</td>
+<td style="text-align:right">2</td>
+<td style="text-align:left">最后归并</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">3000</td>
+</tr>
+</tbody></table></div>
+<p>因此确实需要 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub><span class="upr">10</span>⌉<span class="rel">=</span><span class="upr">4</span></span> 趟。若每趟都另写一个文件，归并阶段传输约 <span class="math"><span class="upr">4</span><span class="bin">×</span><span class="upr">2</span>N<span class="rel">=</span><span class="upr">8</span>N</span> 条记录。置换选择若把初始顺串数从 10 降到 5，就只需 3 趟，直接省掉一次完整读写。</p>
+<p>“增加归并路数总会更快”也不成立。<span class="math">k</span> 越大，趟数越少，但至少要为每一路留一个输入缓冲，还要有输出缓冲；内存固定时，每路缓冲变小，补页更频繁。选择 <span class="math">k</span> 是“少趟数”和“每路有足够缓冲”之间的折中。</p>
 <h3 id="933-多路归并选择树"><a class="anchor" href="#933-多路归并选择树">#</a>9.3.3 多路归并——选择树</h3>
 <p>赢者树用完全二叉数组：叶存放选手下标，内部结点写 <code>better(左, 右)</code>。败者树在内部结点写败者，另用 <code>champion_</code> 记全局胜者。替换后只沿叶到根重赛。</p>
+<figure><img loading="lazy" src="../assets/dffb7316183b2881.jpg" alt="图9.4 含有5个选手的赢者树"><figcaption>图9.4 含有5个选手的赢者树</figcaption></figure>
+<p>每个“选手”代表一条顺串的当前记录。直接扫描 <span class="math">k</span> 个队首，每输出一条记录要比较 <span class="math">k<span class="bin">−</span><span class="upr">1</span></span> 次；选择树第一次建树同样要 <span class="math">k<span class="bin">−</span><span class="upr">1</span></span> 次比较，但之后只替换获胜顺串的队首，沿高度 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>k⌉</span> 的路径重赛。输出 <span class="math">N</span> 条记录时，选择代价由 <span class="math">O(Nk)</span> 降为 <span class="math">O(N&thinsp;<span class="upr">log</span>&thinsp;k)</span>。</p>
+<p>以当前值 <code>[20, 6, 8, 9, 11]</code> 为例，第一轮比赛的冠军是下标 1、值 6。输出 6 后，该路补入 15，只需重算“选手 1 到根”的比赛；8 成为新冠军。其余三路的内部比较结果没有变化，不应整棵树重建。</p>
+<figure><img loading="lazy" src="../assets/5472dfdf856d168f.jpg" alt="图 9.5 8 路归并的赢者树"><figcaption>图 9.5 8 路归并的赢者树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/bb27070d9ac01f78.jpg" alt="图 9.6 替换一路记录后重构赢者树"><figcaption>图 9.6 替换一路记录后重构赢者树</figcaption></figure>
+<p>赢者树的父结点记胜者，所以更新时要找到沿途的对手；败者树把沿途败者直接留在父结点，新选手一路与这些败者比较即可。两者渐近复杂度相同，区别在重赛时保存了什么信息。相同关键码还要规定稳定的决胜规则；本书实现让下标较小的路获胜，测试用两个值为 1 的选手固定这条规则。</p>
+<h4 id="四路归并手工演算"><a class="anchor" href="#四路归并手工演算">#</a>四路归并手工演算</h4>
+<p>设四条输入顺串为：</p>
+<div class="codeblock" data-lang="text"><pre><code>R0:  2 12 20
+R1:  4  9 25
+R2:  1 11 18
+R3:  6  8 30</code></pre></div>
+<p>初始选手是各路队首 <code>[2,4,1,6]</code>。冠军来自 R2；输出 1 后，只有 R2 前进到 11，选手变成 <code>[2,4,11,6]</code>。之后每一步都只替换刚获胜的那一路：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:right">输出步</th>
+<th style="text-align:left">比赛中的 4 个当前值</th>
+<th style="text-align:right">冠军路</th>
+<th style="text-align:right">输出</th>
+<th style="text-align:right">该路补入</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:right">1</td>
+<td style="text-align:left">2,4,1,6</td>
+<td style="text-align:right">R2</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">11</td>
+</tr>
+<tr>
+<td style="text-align:right">2</td>
+<td style="text-align:left">2,4,11,6</td>
+<td style="text-align:right">R0</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">12</td>
+</tr>
+<tr>
+<td style="text-align:right">3</td>
+<td style="text-align:left">12,4,11,6</td>
+<td style="text-align:right">R1</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">9</td>
+</tr>
+<tr>
+<td style="text-align:right">4</td>
+<td style="text-align:left">12,9,11,6</td>
+<td style="text-align:right">R3</td>
+<td style="text-align:right">6</td>
+<td style="text-align:right">8</td>
+</tr>
+<tr>
+<td style="text-align:right">5</td>
+<td style="text-align:left">12,9,11,8</td>
+<td style="text-align:right">R3</td>
+<td style="text-align:right">8</td>
+<td style="text-align:right">30</td>
+</tr>
+<tr>
+<td style="text-align:right">6</td>
+<td style="text-align:left">12,9,11,30</td>
+<td style="text-align:right">R1</td>
+<td style="text-align:right">9</td>
+<td style="text-align:right">25</td>
+</tr>
+<tr>
+<td style="text-align:right">7</td>
+<td style="text-align:left">12,25,11,30</td>
+<td style="text-align:right">R2</td>
+<td style="text-align:right">11</td>
+<td style="text-align:right">18</td>
+</tr>
+<tr>
+<td style="text-align:right">8</td>
+<td style="text-align:left">12,25,18,30</td>
+<td style="text-align:right">R0</td>
+<td style="text-align:right">12</td>
+<td style="text-align:right">20</td>
+</tr>
+<tr>
+<td style="text-align:right">9</td>
+<td style="text-align:left">20,25,18,30</td>
+<td style="text-align:right">R2</td>
+<td style="text-align:right">18</td>
+<td style="text-align:right">耗尽</td>
+</tr>
+<tr>
+<td style="text-align:right">10</td>
+<td style="text-align:left">20,25,+∞,30</td>
+<td style="text-align:right">R0</td>
+<td style="text-align:right">20</td>
+<td style="text-align:right">耗尽</td>
+</tr>
+<tr>
+<td style="text-align:right">11</td>
+<td style="text-align:left">+∞,25,+∞,30</td>
+<td style="text-align:right">R1</td>
+<td style="text-align:right">25</td>
+<td style="text-align:right">耗尽</td>
+</tr>
+<tr>
+<td style="text-align:right">12</td>
+<td style="text-align:left">+∞,+∞,+∞,30</td>
+<td style="text-align:right">R3</td>
+<td style="text-align:right">30</td>
+<td style="text-align:right">耗尽</td>
+</tr>
+</tbody></table></div>
+<p>最终得到 <code>1 2 4 6 8 9 11 12 18 20 25 30</code>。某一路耗尽后，用“正无穷”参加余下比赛，它就不会再次获胜。工程实现不一定真的存 <code>INT_MAX</code>：若关键码本身允许取最大整数，哨兵会与合法数据冲突；更稳妥的做法是额外保存“该路是否耗尽”的状态。</p>
+<figure><img loading="lazy" src="../assets/93f3de38d2a0ccc4.jpg" alt="图9.7 8路归并的败者树示例"><figcaption>图9.7 8路归并的败者树示例</figcaption></figure>
+<p>图9.7中内部结点保存败者，冠军另放在根外的槽位。替换冠军之后，新值只与路径上留下的败者依次比较。</p>
+<figure><img loading="lazy" src="../assets/732bc1737a8dec83.jpg" alt="图 9.8 替换一路记录后重构败者树"><figcaption>图 9.8 替换一路记录后重构败者树</figcaption></figure>
+<h4 id="稳定性和重复关键码"><a class="anchor" href="#稳定性和重复关键码">#</a>稳定性和重复关键码</h4>
+<p>外排序处理的通常是完整记录，关键码相等不代表记录相同。若要求稳定排序，比较器必须把“原始先后次序”作为第二关键码：同一顺串内先出现的先输出；不同顺串之间，可用初始顺串号和顺串内位置决胜。只比较整数值虽然仍能得到非递减关键码，却可能打乱同关键码记录的先后。</p>
+<p>本章 <code>WinnerTree</code> 和 <code>LoserTree</code> 在值相等时让下标较小的选手获胜，这保证比赛结果可重复，但它只等价于“路号优先”，并不自动等价于全文件稳定。若初始顺串本身由稳定排序生成，还要证明路号顺序与原始文件顺序一致；否则应把原始序号随记录一起参与比较。</p>
+<h4 id="三个常见错误"><a class="anchor" href="#三个常见错误">#</a>三个常见错误</h4>
+<ol>
+<li><strong>把所有输入一次放进堆。</strong> 这要求内存容纳整个文件，已经退回内部堆排序。</li>
+<li><strong>冻结后仍与当前堆比赛。</strong> 小于刚输出值的记录会让当前顺串倒序，破坏归并前提。</li>
+<li><strong>一路耗尽就停止。</strong> 正确做法是让该路退出比赛，继续归并其余顺串，直到所有路都耗尽。</li>
+</ol>
+<p>检查外排序程序不能只看“最后输出是否有序”。还要分别检查记录守恒、每条初始顺串有序、内存工作区不超过 <span class="math">M</span>、耗尽一路后仍能继续，以及相等关键码的决胜规则。否则一个偷偷做整表排序的实现也会交出正确终值，却完全没有实现外排序。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch09/external_sort/modern.hpp">code/ch09/external_sort/modern.hpp#winner-tree</a></div><pre><code><span class="c">// 代码9.2：赢者树。内部结点保存两名选手比较后的胜者下标，根是全局最小。</span>
 <span class="k">class</span> WinnerTree {
 <span class="k">public</span>:
@@ -414,7 +685,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 </ol>
 <div class="pagenav"><a href="ch08-sorting.html"><span class="dir">← 上一篇</span>第8章 内部排序</a><a href="ch10-search.html" style="text-align:right"><span class="dir">下一篇 →</span>第10章 检索</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#91-主存储器和外存储器">9.1 主存储器和外存储器</a><a href="#92-文件的组织和管理">9.2 文件的组织和管理</a><a href="#93-外排序">9.3 外排序</a><a href="#931-置换选择排序" class="sub">9.3.1 置换选择排序</a><a href="#932-二路外排序" class="sub">9.3.2 二路外排序</a><a href="#933-多路归并选择树" class="sub">9.3.3 多路归并——选择树</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充外排序题参考课程第-9-章" class="sub">补充外排序题（参考课程第 9 章）</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#91-主存储器和外存储器">9.1 主存储器和外存储器</a><a href="#先建立成本模型" class="sub">先建立成本模型</a><a href="#92-文件的组织和管理">9.2 文件的组织和管理</a><a href="#记录怎样装进页" class="sub">记录怎样装进页</a><a href="#93-外排序">9.3 外排序</a><a href="#931-置换选择排序" class="sub">9.3.1 置换选择排序</a><a href="#932-二路外排序" class="sub">9.3.2 二路外排序</a><a href="#933-多路归并选择树" class="sub">9.3.3 多路归并——选择树</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充外排序题参考课程第-9-章" class="sub">补充外排序题（参考课程第 9 章）</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch09-external-sort.md</code> 生成
