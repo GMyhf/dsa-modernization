@@ -72,7 +72,7 @@ fact.cpp:5:74: runtime error: signed integer overflow: 21 * 2432902008176640000
 原书这段只有五行，三处都是编译级问题——`void main`、无 `std::` 限定、以及缺右花括号
 （最后一处从底稿看是印刷/扫描时就丢了，与前两处性质不同）。原样喂给编译器：
 
-```text
+```console
 $ g++ -std=c++17 -c a37.cpp
 a37.cpp:3:1: error: '::main' must return 'int'
     3 | void main( ) {

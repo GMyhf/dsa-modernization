@@ -81,7 +81,7 @@ RULES = [
     "R5  【算法X.Y】必须配对【算法X.Y结束】",
     "R6  正文引用的 算法X.Y/代码X.Y 必须在 dsa_raw.md 的清单目录里存在",
     "R7  正文引用的「第N章」不得超过原书的 12 章",
-    "R8  text 块不得逐字复制 code/ 下的源码——本书自己的代码必须走 cpp file= 由 R3 把关",
+    "R8  长的、形似 C++ 函数的 text 块必须走 R3；原书引文须用 original-listing= 写明豁免理由",
     "R9  行间公式 $$…$$ 必须写在一行内，且不得出现渲染器不认识的 LaTeX 命令",
     "R10 原书有的节，新书要么有同号的节，要么在 collab/section_gaps.json 里登记（并入/不写/待补）",
     "R11 沿用原书编号的节必须沿用原书题名；现代教学步骤不得占用旧编号",
@@ -101,6 +101,11 @@ RULES = [
 # 它们本来就该是片段。所以要求同时满足：规范化后 ≥ 60 字符、且含成对花括号
 # （也就是至少是一个带函数体的定义）。当前书稿在这个判据下 0 误报。
 MIN_COPIED_CHARS = 60
+ORIGINAL_LISTING_RE = re.compile(r'\boriginal-listing\s*=\s*"([^"]*)"')
+CALL_LIKE_KEYWORDS = {
+    "if", "for", "while", "switch", "catch", "sizeof", "alignof", "decltype",
+    "static_cast", "dynamic_cast", "const_cast", "reinterpret_cast", "return",
+}
 
 
 def _normalize_code(text):
@@ -130,6 +135,63 @@ def copied_from_source(body, sources):
         if normalized in content:
             return name
     return None
+
+
+def function_like_text(body):
+    """长 text 块里是否有 C++ 函数定义形态；不要求它仍与当前源码相似。"""
+    normalized = _normalize_code(body)
+    if len(normalized) < MIN_COPIED_CHARS:
+        return False
+    if re.search(r"\{\s*\.\.\.\s*\}", normalized):
+        return False
+    lines, in_block = body.splitlines(), False
+    stripped = []
+    for line in lines:
+        code, in_block = strip_comments_and_strings(line, in_block)
+        stripped.append(code)
+    name_re = re.compile(r"(?<![A-Za-z0-9_~])([~A-Za-z_][A-Za-z0-9_]*)\s*\(")
+    for row, line in enumerate(stripped):
+        for found in name_re.finditer(line):
+            if found.group(1) in CALL_LIKE_KEYWORDS:
+                continue
+            opening = line.find("(", found.start())
+            closed = _match_paren(stripped, row, opening)
+            if closed and _is_definition(stripped, closed[0], closed[1]):
+                return True
+    return False
+
+
+def original_listing_reason(info):
+    match = ORIGINAL_LISTING_RE.search(info)
+    return match.group(1).strip() if match else None
+
+
+def check_r8(path: Path, sources=None):
+    """只检查 text 围栏；书稿与 legacy 证据文件共用。"""
+    if sources is None:
+        sources = source_texts()
+    problems = []
+    text = path.read_text(encoding="utf-8", errors="replace")
+    for block in iter_blocks(text):
+        lang, _, _ = parse_info(block["info"])
+        if lang != "text":
+            continue
+        body = "\n".join(block["body"])
+        origin = copied_from_source(body, sources)
+        function_like = function_like_text(body)
+        reason = original_listing_reason(block["info"])
+        has_marker = "original-listing" in block["info"]
+        prefix = f"{rel_label(path)}:{block['start']}  "
+        if has_marker and not reason:
+            problems.append(prefix + "R8 original-listing= 豁免必须写明引用原书且不能走 R3 的具体理由")
+        elif function_like and not reason:
+            detail = f"；它还逐字抄自 {origin}" if origin is not None else ""
+            problems.append(
+                prefix + f"R8 这段长 text 块形似 C++ 函数定义{detail}；本书自己的代码要写成 "
+                "```cpp file=<路径>#<锚点>，交给 R3 逐字核对。"
+                "若确为无法编译的原书引文，须在围栏上写 original-listing=\"具体理由\"。"
+            )
+    return problems
 
 
 def unknown_math_commands(text):
@@ -559,17 +621,6 @@ def check_file(path: Path, listings, sources=None):
         elif lang not in ALLOWED_LANGS:
             add(block["start"], f"R1 未知语言标签 `{lang}`，白名单：{sorted(ALLOWED_LANGS - {''})}")
 
-        # R8 本书自己的代码不许以 text 块手抄进来
-        if lang == "text":
-            origin = copied_from_source(body, sources)
-            if origin is not None:
-                add(
-                    block["start"],
-                    f"R8 这段 text 块逐字抄自 {origin}；本书自己的代码要写成 "
-                    "```cpp file=<路径>#<锚点>，交给 R3 逐字核对。"
-                    "text 块是留给引用原书用的。",
-                )
-
         # R2 OCR 坏味道
         if lang in ("cpp", "c"):
             in_block_comment = False
@@ -660,6 +711,7 @@ def check_file(path: Path, listings, sources=None):
             if not 1 <= int(number) <= MAX_CHAPTER:
                 add(idx, f"R7 引用了第{number}章，原书只有 {MAX_CHAPTER} 章")
 
+    problems += check_r8(path, sources)
     return problems
 
 
@@ -695,6 +747,12 @@ def main():
         problems += check_file(target, listings)
         problems += check_sections(target, gaps, original)
         problems += check_section_refs(target, book_numbers, original_numbers)
+
+    # legacy.md 是原书缺陷证据，也大量使用 text 引文；只对它运行 R8，
+    # 不把书稿专属的章节、图片和清单配对规则强加给证据文件。
+    sources = source_texts()
+    for legacy in sorted((ROOT / "code").rglob("legacy.md")):
+        problems += check_r8(legacy, sources)
 
     if problems:
         print("\n".join(f"❌ {p}" for p in problems))

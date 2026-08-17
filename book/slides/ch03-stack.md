@@ -224,7 +224,7 @@ legacy.cpp:65:5: error: ‘bool arrStack<T>::top(T&)’
 
 原书 `arrStack` 有析构函数，**却没有拷贝构造**。
 
-```text
+```console
 $ cat drv2.cpp
 int main(){ arrStack<int> a(4); a.push(7); arrStack<int> b = a; }
 $ g++ -std=c++17 -fsanitize=address -g drv2.cpp -o drv2 && ./drv2

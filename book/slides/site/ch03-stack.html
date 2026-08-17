@@ -212,7 +212,7 @@ std::optional&lt;T&gt; pop() {
 两个对象持有同一根指针，各析构一次 → 同一块内存释放两次。
 小数据量下往往还不当场崩，所以它能一路活到生产环境。&lt;/p&gt;"><h1 id="更安静的一个错三法则"><a class="anchor" href="#更安静的一个错三法则">#</a>更安静的一个错：三法则</h1>
 <p>原书 <code>arrStack</code> 有析构函数，<strong>却没有拷贝构造</strong>。</p>
-<div class="codeblock" data-lang="text"><pre><code>$ cat drv2.cpp
+<div class="codeblock" data-lang="console"><pre><code>$ cat drv2.cpp
 int main(){ arrStack&lt;int&gt; a(4); a.push(7); arrStack&lt;int&gt; b = a; }
 $ g++ -std=c++17 -fsanitize=address -g drv2.cpp -o drv2 &amp;&amp; ./drv2
 ==2331703==ERROR: AddressSanitizer: attempting double-free

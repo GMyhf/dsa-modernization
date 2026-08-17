@@ -367,7 +367,7 @@ g++ -std=c++17 -Wall -Wextra demo.cpp -o demo && ./demo
 
 另外原书的 `clear()` 是这样写的：
 
-```text
+```text original-listing="原书 clear 清单缺少三法则与异常安全，作为缺陷原样引用"
 void clear() { delete [] aList; curLen = position = 0; aList = new T[maxSize]; }
 ```
 

@@ -247,8 +247,8 @@ class TestR8CopiedTextBlocks(unittest.TestCase):
             problems = check_doc.check_file(path, {"算法3.3"}, sources=srcs)
         self.assertFalse(any("R8" in p for p in problems), problems)
 
-    def test_quoting_the_original_book_is_allowed(self):
-        """引用原书那些编不过的清单，本来就只能用 text——它们不在 code/ 里，不会命中。"""
+    def test_original_book_quote_needs_visible_exemption(self):
+        """不再因“不像当前源码”静默放行；原书引文也要留下可审查的理由。"""
         original = (
             "```text\n"
             "void clear() { delete [] aList; curLen = position = 0; aList = new T[maxSize]; }\n"
@@ -258,7 +258,51 @@ class TestR8CopiedTextBlocks(unittest.TestCase):
             path = Path(tmp) / "chapter.md"
             path.write_text(original, encoding="utf-8")
             problems = check_doc.check_file(path, {"算法3.3"}, sources=self.sources())
+        self.assertTrue(any("R8" in p for p in problems), problems)
+
+    def test_original_book_quote_with_reason_is_allowed(self):
+        original = (
+            '```text original-listing="原书清单含 void main，按印刷无法通过 C++ 编译"\n'
+            "void clear() { delete [] aList; curLen = position = 0; aList = new T[maxSize]; }\n"
+            "```\n"
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "chapter.md"
+            path.write_text(original, encoding="utf-8")
+            problems = check_doc.check_file(path, {"算法3.3"}, sources=self.sources())
         self.assertFalse(any("R8" in p for p in problems), problems)
+
+    def test_blank_original_listing_reason_is_rejected(self):
+        block = '```text original-listing=""\n' + self.FUNC + "```\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "chapter.md"
+            path.write_text(block, encoding="utf-8")
+            problems = check_doc.check_file(path, {"算法3.3"}, sources={})
+        self.assertTrue(any("必须写明" in p for p in problems), problems)
+
+    def test_drifted_function_is_flagged_without_source_match(self):
+        block = "```text\n" + self.FUNC.replace("delete node;", "node = nullptr;") + "```\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "chapter.md"
+            path.write_text(block, encoding="utf-8")
+            problems = check_doc.check_file(path, {"算法3.3"}, sources={})
+        self.assertTrue(any("形似 C++ 函数定义" in p for p in problems), problems)
+
+    def test_long_trace_with_control_blocks_is_allowed(self):
+        trace = "```text\n" + ("while (queue not empty) { take next item }\n" * 4) + "```\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "chapter.md"
+            path.write_text(trace, encoding="utf-8")
+            problems = check_doc.check_file(path, {"算法3.3"}, sources={})
+        self.assertFalse(any("R8" in p for p in problems), problems)
+
+    def test_legacy_evidence_file_is_subject_to_r8(self):
+        """legacy.md 不能成为书稿之外的第二个静默逃生口。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "legacy.md"
+            path.write_text("```text\n" + self.FUNC + "```\n", encoding="utf-8")
+            problems = check_doc.check_r8(path, sources={})
+        self.assertTrue(any("形似 C++ 函数定义" in p for p in problems), problems)
 
     def test_indentation_does_not_matter(self):
         """书稿里顶格、源码里在类内缩进四格——同一段代码，仍要判为抄的。"""

@@ -578,7 +578,7 @@ do {
 
 5. 指出算法 A 的功能和时间复杂度。$h$、$g$ 是同一个单循环链表上的两个结点指针。
 
-```text
+```text original-listing="原书习题给出的 A/B 函数待学生分析，不属于本书可运行实现"
 void B(Node* s, Node* q) {
     Node* p = s;
     while (p->next != q) p = p->next;
