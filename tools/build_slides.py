@@ -327,17 +327,17 @@ body{overflow:auto;font-family:-apple-system,"Segoe UI","Noto Sans CJK SC",sans-
 max-width:760px;margin:0 auto;padding:48px 24px;line-height:1.7}
 h1{font-size:30px;margin:0 0 6px}
 p.sub{color:var(--muted);margin:0 0 32px}
-a.deck{display:block;padding:14px 18px;margin:8px 0;border:1px solid var(--line);
+a.deck-card{display:block;padding:14px 18px;margin:8px 0;border:1px solid var(--line);
 border-radius:8px;text-decoration:none;color:var(--fg)}
-a.deck:hover{border-color:var(--accent)}
-a.deck b{display:block;font-size:18px}
-a.deck span{color:var(--muted);font-size:14px}
+a.deck-card:hover{border-color:var(--accent)}
+a.deck-card b{display:block;font-size:18px}
+a.deck-card span{color:var(--muted);font-size:14px}
 """
 
 
 def index_html(decks):
     rows = "".join(
-        f'<a class="deck" href="{html.escape(name, quote=True)}"><b>{html.escape(title)}</b>'
+        f'<a class="deck-card" href="{html.escape(name, quote=True)}"><b>{html.escape(title)}</b>'
         f"<span>{count} 页</span></a>"
         for name, title, count in decks
     )

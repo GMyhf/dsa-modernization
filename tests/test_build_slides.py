@@ -251,6 +251,12 @@ class TestRenderedDeck(unittest.TestCase):
 
     SITE = ROOT / "book" / "slides" / "site"
 
+    def test_index_cards_do_not_reuse_fullscreen_deck_class(self):
+        """索引卡片不能继承放映容器的 `.deck { height: 100vh }`。"""
+        text = build_slides.index_html([("ch01.html", "第一章", 17)])
+        self.assertIn('class="deck-card"', text)
+        self.assertNotIn('<a class="deck"', text)
+
     @unittest.skipUnless(SITE.is_dir(), "课件还没构建")
     def test_deck_is_self_contained(self):
         """零 CDN：投影的机器不一定有网。
