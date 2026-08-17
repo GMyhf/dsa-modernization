@@ -385,7 +385,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p><strong>4. <code>new T[n]</code> 有一条限制，值得知道。</strong> 它会把整块槽位<strong>默认构造</strong>出来。所以 <code>T</code> 必须能默认构造——一个只有带参构造函数的类 放不进这个栈。这是原书 <code>new T[mSize]</code> 就有的限制，本书的教学版没有改善它。 标准库容器的做法是先申请<strong>未初始化</strong>的原始内存，push 时再用 placement new 在指定位置构造对象；那要手写内存对齐和逐个析构，属于另一个话题。</p>
 <p><strong>5. 容器里一个 <code>cout</code> 都没有。</strong> 原书在空栈出栈时直接 <code>cout &lt;&lt; &quot;栈空&quot;</code>。那样做把一个数据结构和标准输出焊死了： 它没法在库里复用，提示无法本地化，失败路径也无从测试。<strong>数据结构负责数据结构， 报错交给调用方。</strong> 本书的测试里有一条专门重定向 <code>cout</code>/<code>cerr</code> 并断言它们为空。</p>
 <h3 id="312a-进阶选读从教学版到工程版"><a class="anchor" href="#312a-进阶选读从教学版到工程版">#</a>3.1.2a 进阶（选读）：从教学版到工程版</h3>
-<p><strong>这一节可以整节跳过。</strong> 上面那份教学版是<strong>正确</strong>的，跑得起来，也经得起 AddressSanitizer 检查。这一节讲的是把它变成一个<strong>工业级容器</strong>还要补哪些东西—— 移动语义、异常安全、编译期类型约束。等你哪天要写自己的容器时再回来读。</p>
+<p><strong>这一节可以整节跳过。</strong> 上面那份教学版在<strong>分配和 <code>T</code> 的拷贝都不抛异常</strong>时是正确的 （元素是 <code>int</code>、<code>std::string</code> 这类东西时就是如此），跑得起来，日常用例下 ASan 也干净。 这一节讲的是把它变成一个<strong>工业级容器</strong>还要补哪些东西—— 移动语义、异常安全、编译期类型约束。等你哪天要写自己的容器时再回来读。</p>
 <p>完整的工程版在 <code>code/ch03/array_stack/modern.hpp</code>，与教学版一样进闸门、 一样双档编译运行。下面按主题一段一段拆开看。</p>
 <h4 id="一存储与所有权把三法则补成五法则"><a class="anchor" href="#一存储与所有权把三法则补成五法则">#</a>一、存储与所有权：把三法则补成五法则</h4>
 <p>先把原书【代码3.2】的问题列全。它用三个成员表示一个顺序栈：<code>int mSize</code>（容量）、 <code>int top</code>（栈顶位置）、<code>T * st</code>（裸指针数组）。这套写法有三处在今天必须改：</p>

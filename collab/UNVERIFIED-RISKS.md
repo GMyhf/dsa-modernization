@@ -176,6 +176,59 @@ Trie 的树高等于最长关键码长度，实际不会深；Patricia 的树高
 
 ---
 
+## 二a、教学版在异常路径上会漏内存（2026-08-17 Codex 复查发现）
+
+**闸门是绿的，但它只证明了正常路径。** D-012 的教学版（`teaching.hpp`）为了讲清
+三法则而砍掉了 `try/catch`，于是**元素类型 `T` 的拷贝一旦抛异常，已经申请的内存就漏了**。
+
+三处，都用裸指针：
+
+| 位置 | 漏什么 |
+| --- | --- |
+| `code/ch03/array_stack/teaching.hpp` 的 `grow()` | 搬到一半抛 → 新缓冲区 `fresh` |
+| `code/ch03/linked_stack/teaching.hpp` 的 `copy_from()` | 拷到一半抛 → 已建好但尚未挂接的结点 + 半截链 |
+| `code/ch05/binary_tree/teaching.hpp` 的 `clone()` | 递归到一半抛 → 已经建好的那半棵子树 |
+
+**复现**（探针在 `collab/probe-teaching-leak.cpp`，用一个「第 N 次拷贝必抛」的元素类型）：
+
+```console
+$ g++ -std=c++17 -I code -O1 -g -fsanitize=address -fno-sanitize-recover=all \
+      collab/probe-teaching-leak.cpp -o /tmp/probe && /tmp/probe
+==...==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 32 byte(s):
+    #? in LinkedStack<Throwing>::copy_from(LinkedStack<Throwing> const&)
+       code/ch03/linked_stack/teaching.hpp:99
+
+Direct leak of 24 byte(s):
+    #? in BinaryTree<Throwing>::clone(BinaryTree<Throwing>::Node const*)
+       code/ch05/binary_tree/teaching.hpp:146
+
+Direct leak of 16 byte(s):
+    #? in ArrayStack<Throwing>::grow()
+       code/ch03/array_stack/teaching.hpp:93
+
+SUMMARY: AddressSanitizer: 88 byte(s) leaked in 5 allocation(s).
+```
+
+（三条 leak 的 `#1` 帧正好指到上表那三个位置。探针里的 `printf` 是缓冲的，
+所以「抛出: copy assign」那几行会排在 LSan 报告之后——不影响结论。）
+
+**为什么不修**：补失败清理就要在教学代码里加 `try/catch`，而那恰恰是各章
+「进阶（选读）」要讲的强异常保证——提前塞进来就把 D-012 的分层抵消了。
+**决定是改口径不改代码**（D-012 已追加更正）：书稿前言与各章进阶节开头现在写的是
+「在分配和 `T` 的拷贝都不抛异常时是正确的」，并写明抛出时会漏在哪。
+
+**这一条对读者的实际影响接近于零**——教材里的元素类型是 `int`、`std::string`、
+指针，它们的拷贝不抛。但**「教学版经得起 ASan」这句话本身是错的**，
+所以它必须记在这份清单里，而不是留在 commit message 里。
+
+**如果你接手要修**：正确的做法不是给教学版加 `try/catch`，
+而是在各章进阶节里把工程版的对应实现**并排印出来**，让读者自己看见差别。
+`ch03/array_stack` 的 3.1.2a 已经是这个形状，另外两处还没有。
+
+---
+
 ## 三、按环境划分：哪些代码在作者机器上从没跑过 sanitizer
 
 Codex 所在的 macOS 环境，ASan 连**空探针程序**都起不来

@@ -58,6 +58,17 @@ CHAPTER_REF_RE = re.compile(r"第\s*([0-9]+)\s*章")
 
 MAX_CHAPTER = 12
 
+# R9：公式得真能渲染出来。
+#
+# 缘由（2026-08-17 Codex 复查）：`book/ch12-advanced.md` 里那个多维数组偏移公式
+# 从写下来那天起就是**坏的**——它跨了三行，而 `build_site.py` 的行间公式只认
+# 「同一行 $$ 开头、同一行 $$ 结尾」，于是整段以原始 LaTeX 文本印在页面上，
+# 一直没人发现。这正是「公式错了没有任何东西会红」的那一类问题。
+#
+# 两条判据都只覆盖**能机器判定**的部分：公式是否渲染得出来、命令是否认识。
+# **数学本身对不对，机器判不了**，仍然要人复核（见 UNVERIFIED-RISKS）。
+DISPLAY_MATH_RE = re.compile(r"^\s*\$\$")
+
 RULES = [
     "R1  代码块语言标签只能用白名单里的；原书的 hcl/csv/javascript 等假标签一律红",
     "R2  代码块里不得残留 OCR 坏味道（拆开的运算符、全角标点、被认成 1 的右花括号）",
@@ -67,6 +78,7 @@ RULES = [
     "R6  正文引用的 算法X.Y/代码X.Y 必须在 dsa_raw.md 的清单目录里存在",
     "R7  正文引用的「第N章」不得超过原书的 12 章",
     "R8  text 块不得逐字复制 code/ 下的源码——本书自己的代码必须走 cpp file= 由 R3 把关",
+    "R9  行间公式 $$…$$ 必须写在一行内，且不得出现渲染器不认识的 LaTeX 命令",
 ]
 
 
@@ -111,6 +123,27 @@ def copied_from_source(body, sources):
         if normalized in content:
             return name
     return None
+
+
+def unknown_math_commands(text):
+    """这份书稿里用到、而渲染器不认识的 LaTeX 命令。
+
+    直接调 `build_site.render_math`——判据就是渲染器自己，不另立一套会漂的清单。
+    渲染器不可用时（例如只想跑 check_doc）静默跳过，不把体检卡住。
+    """
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import build_site
+    except Exception:
+        return []
+    unknown = set()
+    body = re.sub(r"^```.*?^```", "", text, flags=re.S | re.M)   # 代码块里的 $ 不是公式
+    for m in re.finditer(r"\$\$(.+?)\$\$|\$([^$\n]+)\$", body):
+        try:
+            build_site.render_math(m.group(1) or m.group(2), unknown)
+        except Exception:
+            continue
+    return sorted(unknown)
 
 
 def iter_blocks(text):
@@ -425,6 +458,22 @@ def check_file(path: Path, listings, sources=None):
             add(line, f"R4 图片还热链在上游 `{src[:60]}…`，请用 tools/vendor_figures.py 落到本地")
         elif not (path.parent / src).is_file() and not (ROOT / src).is_file():
             add(line, f"R4 图片文件不存在: {src}")
+
+    # R9 公式：跨行的 $$ 渲染不出来；不认识的命令会以原始 LaTeX 印在页面上
+    in_fence = False
+    for idx, line in enumerate(text.splitlines(), 1):
+        if line.strip().startswith("```"):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        stripped = line.strip()
+        if DISPLAY_MATH_RE.match(line) and not (stripped.endswith("$$") and len(stripped) > 4):
+            add(idx, "R9 行间公式跨行了——渲染器只认「同一行 $$ 开头、同一行 $$ 结尾」，"
+                     "跨行会把原始 LaTeX 印在页面上")
+    for name in unknown_math_commands(text):
+        add(1, f"R9 渲染器不认识的 LaTeX 命令 `{name}`——它会以原始文本印在页面上；"
+               f"请在 tools/build_site.py 的 MATH_SYMBOLS 里补上，或换一种写法")
 
     # R5 清单标记配对
     prose_lines = [

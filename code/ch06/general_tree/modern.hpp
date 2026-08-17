@@ -173,8 +173,13 @@ public:
             }
             current = fresh;
         }
-        // 先根次序里最后一个结点必是叶子，且没有下一个兄弟。
-        if (nodes[count - 1].has_child || !waiting.empty()) {
+        // 先根次序里最后一个结点必是叶子，**而且没有下一个兄弟**——
+        // 它的右兄弟只能排在它后面，而它已经是最后一个了。
+        // 循环只走到 count-2，所以末结点的两个标志位都得在这里单独查。
+        //
+        // 2026-08-17 Codex 复查发现：这里原本漏了 has_sibling，
+        // 于是 `{X, 无孩子, 有兄弟}` 这类序列被**静默接受**。
+        if (nodes[count - 1].has_child || nodes[count - 1].has_sibling || !waiting.empty()) {
             throw std::invalid_argument("from_dual_tag: 标志位不自洽，序列没有正常收尾");
         }
         return tree;

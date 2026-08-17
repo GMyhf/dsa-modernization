@@ -205,8 +205,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>把数组按某种周游次序排成线性序列，就可以顺序存放。C++ 和 Pascal 按<strong>行优先</strong>：先排最右的下标，从右往左排。二维数组排出来是</p>
 <div class="math math-display">a<sub><span class="upr">0</span>,<span class="upr">0</span></sub>,a<sub><span class="upr">0</span>,<span class="upr">1</span></sub>,…,a<sub><span class="upr">0</span>,n<span class="bin">−</span><span class="upr">1</span></sub>,a<sub><span class="upr">1</span>,<span class="upr">0</span></sub>,…,a<sub>m<span class="bin">−</span><span class="upr">1</span>,n<span class="bin">−</span><span class="upr">1</span></sub></div>
 <p><span class="math">d<sub><span class="upr">0</span></sub><span class="bin">×</span>d<sub><span class="upr">1</span></sub><span class="bin">×</span>⋯<span class="bin">×</span>d<sub>n<span class="bin">−</span><span class="upr">1</span></sub></span> 数组中，元素 <span class="math">A[j<sub><span class="upr">0</span></sub>,…,j<sub>n<span class="bin">−</span><span class="upr">1</span></sub>]</span> 相对首地址的偏移是</p>
-<p>$$ d\cdot\Bigl(\sum_{i=0}^{n-2} j_i\prod_{k=i+1}^{n-1}d_k + j_{n-1}\Bigr)</p>
-<p>$$</p>
+<div class="math math-display">d<span class="bin">⋅</span>(∑<sub>i<span class="rel">=</span><span class="upr">0</span></sub><sup>n<span class="bin">−</span><span class="upr">2</span></sup>j<sub>i</sub>∏<sub>k<span class="rel">=</span>i<span class="bin">+</span><span class="upr">1</span></sub><sup>n<span class="bin">−</span><span class="upr">1</span></sup>d<sub>k</sub><span class="bin">+</span>j<sub>n<span class="bin">−</span><span class="upr">1</span></sub>)</div>
 <p>其中 <span class="math">d</span> 是一个元素所占单元数。每个元素的定位时间相同，所以这是随机存储结构。FORTRAN 按<strong>列优先</strong>，先排最左下标，公式左右对调。</p>
 <h3 id="1212-特殊矩阵"><a class="anchor" href="#1212-特殊矩阵">#</a>12.1.2 特殊矩阵</h3>
 <p>矩阵常用二维数组表示，但有些矩阵里大量元素是 0 或同一个常数，不必存整块。</p>

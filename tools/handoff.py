@@ -22,6 +22,7 @@
 """
 import argparse
 import subprocess
+import time
 import sys
 from pathlib import Path
 
@@ -160,9 +161,19 @@ def run_verify():
         ["python3", "tools/check_code.py"],
     ]
     outputs, ok = [], True
-    for step in steps:
-        proc = subprocess.run(step, cwd=ROOT, capture_output=True, text=True)
+    # 每一步开跑前先喊一声。**这不是装饰**：整个闸门要跑好几分钟，
+    # 其中 check_code 一步就占大半（32 个单元 × 2 档 × 最多 3 个可执行文件）。
+    # 2026-08-17 Codex 复查时因为「12 分钟没有任何阶段输出」而中止了闸门——
+    # 看不到进度的人只能猜它是死了还是在跑。
+    total = len(steps)
+    for index, step in enumerate(steps, 1):
         label = " ".join(step if len(step) < 6 else [*step[:3], f"<{len(py_files)} files>"])
+        print(f"[{index}/{total}] ▶ {label}", file=sys.stderr, flush=True)
+        started = time.monotonic()
+        proc = subprocess.run(step, cwd=ROOT, capture_output=True, text=True)
+        elapsed = time.monotonic() - started
+        print(f"[{index}/{total}] {'✅' if proc.returncode == 0 else '❌'} {label}"
+              f"  ({elapsed:.0f}s)", file=sys.stderr, flush=True)
         body = (proc.stdout + proc.stderr).strip()
         if proc.returncode == 0:
             # 保留尾部计数：交接记录要贴的就是这几行，不能只写「通过」

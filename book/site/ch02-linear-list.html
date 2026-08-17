@@ -619,7 +619,7 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 <p>原书【算法2.5】的函数名是 <code>delete</code>——C++ 关键字，编译不过；本书叫 <code>remove</code>。 另外它返回 <code>bool</code>，被删掉的值就此丢失；这里把它返回给调用方， 「删除并取用」不必先 <code>getValue</code> 再 <code>delete</code> 两步走。</p>
 <p>删除的时间代价分析与插入相同，平均为 O(n)。</p>
 <h3 id="225-进阶选读从教学版到工程版"><a class="anchor" href="#225-进阶选读从教学版到工程版">#</a>2.2.5 进阶（选读）：从教学版到工程版</h3>
-<p><strong>这一节可以整节跳过。</strong> 上面那份教学版是<strong>正确</strong>的，跑得起来，也经得起 AddressSanitizer 检查。这一节讲的是把它变成一个<strong>工业级容器</strong>还要补哪些东西。 等你哪天要写自己的容器时再回来读。工程版在 <code>code/ch02/array_list/modern.hpp</code>，与教学版一样进闸门、一样双档编译运行。</p>
+<p><strong>这一节可以整节跳过。</strong> 上面那份教学版在<strong>分配和 <code>T</code> 的拷贝都不抛异常</strong>时是正确的 （元素是 <code>int</code>、<code>std::string</code> 这类东西时就是如此），跑得起来，日常用例下 ASan 也干净。 这一节讲的是把它变成一个<strong>工业级容器</strong>还要补哪些东西。 等你哪天要写自己的容器时再回来读。工程版在 <code>code/ch02/array_list/modern.hpp</code>，与教学版一样进闸门、一样双档编译运行。</p>
 <h4 id="一三法则补成五法则移动语义"><a class="anchor" href="#一三法则补成五法则移动语义">#</a>一、三法则补成五法则：移动语义</h4>
 <p>教学版把一个临时表赋给别人时，会老老实实深拷贝一遍——而那个临时对象下一行就要销毁， 这次拷贝纯属浪费。工程版补上<strong>移动构造</strong>与<strong>移动赋值</strong>：直接把指针「偷」过来， 再把对方置空，O(1) 完事。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/modern.hpp">code/ch02/array_list/modern.hpp#insert</a></div><pre><code><span class="c">/// 在位置 pos 插入元素，pos 可以等于 size()（即追加到表尾）。</span>

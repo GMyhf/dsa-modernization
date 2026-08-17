@@ -227,6 +227,26 @@ void test_dual_tag_edge_cases() {
         unfinished_rejected = true;
     }
     check(unfinished_rejected, "算法6.10 末结点仍声称有孩子时抛异常");
+
+    // 末结点若声称还有**兄弟**，同样不自洽：它的右兄弟只能排在它后面，
+    // 而它已经是最后一个了。2026-08-17 Codex 复查前，这两种序列都被静默接受。
+    const Node dangling_single[] = {{'X', false, true}};
+    bool single_rejected = false;
+    try {
+        (void)dsa::GeneralTree<char>::from_dual_tag(dangling_single, 1);
+    } catch (const std::invalid_argument&) {
+        single_rejected = true;
+    }
+    check(single_rejected, "算法6.10 单结点却声称有兄弟时抛异常");
+
+    const Node dangling_last[] = {{'A', true, false}, {'B', false, true}};
+    bool last_rejected = false;
+    try {
+        (void)dsa::GeneralTree<char>::from_dual_tag(dangling_last, 2);
+    } catch (const std::invalid_argument&) {
+        last_rejected = true;
+    }
+    check(last_rejected, "算法6.10 末结点声称有兄弟时抛异常");
 }
 
 // 代码6.8 的**重量权衡合并规则**：小树挂到大树下，比的是元素个数不是树高。

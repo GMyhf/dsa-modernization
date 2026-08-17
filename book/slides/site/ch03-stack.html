@@ -223,7 +223,8 @@ $ g++ -std=c++17 -fsanitize=address -g drv2.cpp -o drv2 &amp;&amp; ./drv2
 既然在管资源，编译器那份「逐成员照抄」的拷贝就一定是错的。
 
 工程版还会补移动构造和移动赋值，那叫五法则——它们不修正确性，只修性能。
-初学阶段守住三法则就已经是&lt;strong&gt;正确&lt;/strong&gt;的了。&lt;/p&gt;"><h1 id="三法则rule-of-three"><a class="anchor" href="#三法则rule-of-three">#</a>三法则（Rule of Three）</h1>
+初学阶段守住三法则就够了：在分配和 T 的拷贝都不抛异常的前提下它是对的。
+（T 的拷贝真抛出时，扩容中的新缓冲区会漏——那是进阶节讲的强异常保证。）&lt;/p&gt;"><h1 id="三法则rule-of-three"><a class="anchor" href="#三法则rule-of-three">#</a>三法则（Rule of Three）</h1>
 <p>一个类只要自己写了<strong>析构、拷贝构造、拷贝赋值</strong>中的任意一个， 通常这三个都得写。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/teaching.hpp">code/ch03/array_stack/teaching.hpp#fn:ArrayStack</a></div><pre><code><span class="c">// 构造：先要一小块数组。容量不够时会自动翻倍，所以初值给多少都不影响正确性。</span>
 <span class="k">explicit</span> ArrayStack(size_type initial_capacity = <span class="n">8</span>)

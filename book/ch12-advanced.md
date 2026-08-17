@@ -30,9 +30,7 @@ $$a_{0,0},a_{0,1},\ldots,a_{0,n-1},a_{1,0},\ldots,a_{m-1,n-1}$$
 
 $d_0\times d_1\times\cdots\times d_{n-1}$ 数组中，元素 $A[j_0,\ldots,j_{n-1}]$ 相对首地址的偏移是
 
-$$
-d\cdot\Bigl(\sum_{i=0}^{n-2} j_i\prod_{k=i+1}^{n-1}d_k + j_{n-1}\Bigr)
-$$
+$$d\cdot\Bigl(\sum_{i=0}^{n-2} j_i\prod_{k=i+1}^{n-1}d_k + j_{n-1}\Bigr)$$
 
 其中 $d$ 是一个元素所占单元数。每个元素的定位时间相同，所以这是随机存储结构。FORTRAN 按**列优先**，先排最左下标，公式左右对调。
 

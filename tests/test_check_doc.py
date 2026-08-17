@@ -278,3 +278,48 @@ class TestR8CopiedTextBlocks(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestR9Formulas(unittest.TestCase):
+    """R9：公式得真能渲染出来。
+
+    **缘由**：`book/ch12-advanced.md` 里那个多维数组偏移公式从写下来那天起就是坏的——
+    它跨了三行，而渲染器只认「同一行 $$ 开头、同一行 $$ 结尾」，于是整段以原始 LaTeX
+    印在页面上，一直没人发现。2026-08-17 Codex 复查公式严谨性时才顺带暴露。
+
+    判据只覆盖**能机器判定**的部分：渲染得出来吗、命令认识吗。
+    **数学本身对不对机器判不了**，仍然要人复核。
+    """
+
+    def check(self, text):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "x.md"
+            path.write_text(text, encoding="utf-8")
+            return check_doc.check_file(path, set())
+
+    def test_multiline_display_math_is_rejected(self):
+        problems = self.check("# 标题\n\n$$\na + b\n$$\n")
+        self.assertTrue(any("R9" in p and "跨行" in p for p in problems), problems)
+
+    def test_single_line_display_math_passes(self):
+        self.assertEqual(self.check("# 标题\n\n$$a + b$$\n"), [])
+
+    def test_unknown_latex_command_is_rejected(self):
+        problems = self.check("# 标题\n\n$$a \\nosuchcmd b$$\n")
+        self.assertTrue(any("R9" in p and "nosuchcmd" in p for p in problems), problems)
+
+    def test_known_commands_pass(self):
+        """常用命令必须都认识，否则会以原始文本印在页面上。"""
+        text = ("# 标题\n\n"
+                r"$$\sum_{i=0}^{h} 2^{i}\cdot\lfloor\log_2 n\rfloor "
+                r"\le \Bigl( \frac{j}{2^{j}} \Bigr)$$" + "\n")
+        self.assertEqual(self.check(text), [])
+
+    def test_dollars_inside_code_blocks_are_not_formulas(self):
+        """```text 里的 `$$` 是命令行提示或伪代码，不是公式。"""
+        self.assertEqual(self.check("# 标题\n\n```text\n$$\nnot math\n$$\n```\n"), [])
+
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -193,7 +193,9 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <td style="text-align:left">写全</td>
 </tr>
 </tbody></table></div>
-<p><strong>初学者只读教学版就够了。</strong> 它不是「简化到不对」的版本——它一样进闸门， 一样在 <code>-Werror</code> + AddressSanitizer/UBSan 与 <code>-O2</code> 两档下真编译真运行， 一样有专门的断言测试。它少的是<strong>工程加固</strong>，不是<strong>正确性</strong>。</p>
+<p><strong>初学者只读教学版就够了。</strong> 它不是「简化到不对」的版本——它一样进闸门， 一样在 <code>-Werror</code> + AddressSanitizer/UBSan 与 <code>-O2</code> 两档下真编译真运行， 一样有专门的断言测试。</p>
+<p><strong>但它的正确性有一条明确的边界，这里说清楚</strong>：教学版在 <strong>内存分配和元素类型 <code>T</code> 的拷贝都不抛异常</strong>时是正确的——元素是 <code>int</code>、 <code>std::string</code>、指针这类东西时就是如此，也就是教材里的全部场景。 一旦 <code>T</code> 的拷贝真的抛出，几个手写裸指针的实现会<strong>漏掉已经申请的内存</strong> （顺序栈扩容中的新缓冲区、链式栈拷贝到一半的结点、二叉树递归克隆的半棵树）。 工程版用 <code>try/catch</code> 补上了这一段，那正是各章「进阶（选读）」要讲的<strong>强异常保证</strong>。</p>
+<p>换句话说：教学版少的是<strong>工程加固</strong>，而工程加固里有一项是<strong>异常路径上的正确性</strong>。 不写成「教学版完全正确」，是因为那句话在 <code>T</code> 会抛的前提下不成立。</p>
 <p>标着「进阶（选读）」的小节可以整节跳过，等到你需要写自己的容器时再回来。 这个分层的理由与代价写在 <code>collab/DECISION_LOG.md</code> 的 D-012。</p>
 <p><strong>哪些结构有教学版</strong>：凡是「自己管着内存」的手写数据结构都有。</p>
 <div class="table-wrap"><table><thead><tr>
@@ -346,7 +348,7 @@ python3 tools/check_doc.py</code></pre></div>
 <h3 id="术语速查"><a class="anchor" href="#术语速查">#</a>术语速查</h3>
 <p>正文里反复出现的几个词，第一次撞上时可以回来查。每条只讲两件事：<strong>是什么</strong>，以及 <strong>不这样做会出什么事</strong>——后者才是它们存在的理由。</p>
 <p><strong><code>std::optional&lt;T&gt;</code></strong>：一个「可能装着 T 的盒子」。表示「可能没有结果」的返回值， 取值前必须先判断盒子空不空。它替代的是老写法「返回 <code>bool</code> 表示成败 + 用引用参数带出结果」—— 那种写法下调用方忘了看 <code>bool</code>，就会读到一个从没被写过的变量，程序不崩，只是默默按错误数据继续跑。 第 2.2.2 节有完整对照。</p>
-<p><strong>三法则（Rule of Three）</strong>：一个类只要自己管着资源（这里是 <code>new</code> 出来的缓冲区或结点）， 就得同时写全<strong>析构函数、拷贝构造、拷贝赋值</strong>这三个函数。少写任何一个， 编译器都会替你生成一个「逐成员照抄」的版本——照抄指针的结果是两个对象指向同一块内存， 各自析构一次，<strong>同一块内存被释放两次</strong>。原书的 <code>arrStack</code> 和 <code>arrList</code> 都缺了这几个， 第 3 章用 ASan 报告复现了这个二次释放。<strong>教学版守到这一条为止，就已经是正确的了。</strong></p>
+<p><strong>三法则（Rule of Three）</strong>：一个类只要自己管着资源（这里是 <code>new</code> 出来的缓冲区或结点）， 就得同时写全<strong>析构函数、拷贝构造、拷贝赋值</strong>这三个函数。少写任何一个， 编译器都会替你生成一个「逐成员照抄」的版本——照抄指针的结果是两个对象指向同一块内存， 各自析构一次，<strong>同一块内存被释放两次</strong>。原书的 <code>arrStack</code> 和 <code>arrList</code> 都缺了这几个， 第 3 章用 ASan 报告复现了这个二次释放。<strong>教学版守到这一条为止</strong>—— 在分配与 <code>T</code> 的拷贝都不抛异常的前提下，这已经够了（见上面「两条阅读路径」里的边界）。</p>
 <p><strong>五法则（Rule of Five）</strong>：在三法则之上再加<strong>移动构造、移动赋值</strong>。 它们不修正确性，只修性能：把一个马上要销毁的临时对象赋给别人时， 没必要深拷贝一遍，直接把指针「偷」过来即可。工程版写全五个，属于「进阶（选读）」。</p>
 <p><strong>RAII</strong>：把「资源的生命周期」绑在「对象的生命周期」上——构造时拿到，析构时自动还回去。 好处是无论函数怎么退出（正常返回、提前 <code>return</code>、抛异常），析构都一定会跑， 所以不会漏掉释放。<code>std::unique_ptr</code> 就是 RAII 的典型；本书在少数几处刻意不用它， 理由和代价见第 2.3.2a 节。</p>
 <p><strong><code>noexcept</code></strong>：写在函数后面，承诺这个函数不会抛异常。它不只是文档——标准库和本书的容器 都会<strong>查询</strong>这个承诺来决定策略（例如扩容时是「移动元素」还是「拷贝元素」）。 承诺了却真的抛，程序直接 <code>std::terminate</code>，没有补救余地。</p>

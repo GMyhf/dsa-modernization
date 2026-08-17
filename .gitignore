@@ -6,3 +6,8 @@ collab/review-input.md
 .build/
 build/
 # PDF 中间产物在 .build/book-pdf/；成品入库发给学生
+
+# macOS Finder 的目录元数据。参考目录是从别人机器拷来的，里面本来就带着几个；
+# 2026-08-17 Codex 复查时它们仍以未跟踪状态挂在 git status 里，每次交接都要解释一遍。
+# 它们不影响题目、勘误和源码的可复查性（`参考资料说明.md` 的「收录边界」已写明）。
+.DS_Store
