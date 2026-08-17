@@ -4,18 +4,18 @@
   "listings": [
     {
       "id": "算法4.6",
-      "anchor": "// 字符串模式匹配 —— 原书【算法4.6】【算法4.7】【算法4.8】的现代化实现。",
-      "test": "// 约定与 std::string::find(\"\") 一致：返回 0。原书用 assert(m>0) 挡，"
+      "anchor": "naive_search(std::string_view text,",
+      "test": "算法4.6：朴素匹配的下标与标准库一致"
     },
     {
       "id": "算法4.7",
-      "anchor": "// 字符串模式匹配 —— 原书【算法4.6】【算法4.7】【算法4.8】的现代化实现。",
-      "test": "// 约定与 std::string::find(\"\") 一致：返回 0。原书用 assert(m>0) 挡，"
+      "anchor": "build_next(std::string_view pattern)",
+      "test": "算法4.7：next 数组与书中图4.11"
     },
     {
       "id": "算法4.8",
-      "anchor": "// 字符串模式匹配 —— 原书【算法4.6】【算法4.7】【算法4.8】的现代化实现。",
-      "test": "// 约定与 std::string::find(\"\") 一致：返回 0。原书用 assert(m>0) 挡，"
+      "anchor": "kmp_search(std::string_view text,",
+      "test": "算法4.8：KMP 的下标与标准库一致"
     }
   ],
   "standard": "c++17",

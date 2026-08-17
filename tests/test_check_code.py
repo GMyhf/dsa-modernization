@@ -24,7 +24,9 @@ def make_unit(root: Path, test_src, standard="c++20"):
     d = root / "probe"
     d.mkdir(parents=True)
     (d / "unit.json").write_text(
-        json.dumps({"id": "probe", "title": "闸门探针", "listings": ["算法3.3"], "standard": standard}),
+        json.dumps({"id": "probe", "title": "闸门探针", "listings": [
+            {"id": "算法3.3", "anchor": "#pragma once", "test": "int main"}
+        ], "standard": standard}),
         encoding="utf-8",
     )
     # 探针也必须长得像个真单元：D-007 的实质性检查对所有单元一视同仁，
@@ -395,6 +397,55 @@ class TestTeachingAndDemoAreVerified(unittest.TestCase):
             code, out = run_gate(unit)
         self.assertEqual(code, 1)
         self.assertIn("demo 运行失败", out)
+
+
+class TestListingBindings(unittest.TestCase):
+    def test_rejects_bare_string_comment_and_duplicates(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = Path(tmp)
+            (unit / "modern.hpp").write_text("// comment-only\nvoid real_anchor() {}\n", encoding="utf-8")
+            (unit / "test.cpp").write_text("test_one test_two\n", encoding="utf-8")
+            meta = {"listings": [
+                "算法1.1",
+                {"id": "算法1.2", "anchor": "comment-only", "test": "test_one"},
+                {"id": "算法1.3", "anchor": "void real_anchor()", "test": "test_two"},
+                {"id": "算法1.4", "anchor": "void real_anchor()", "test": "test_two"},
+            ]}
+            problems = check_code.check_listing_bindings(unit, meta)
+        joined = "\n".join(problems)
+        self.assertIn("清单绑定格式错误", joined)
+        self.assertIn("只存在于注释行", joined)
+        self.assertIn("实现锚点与同单元其他清单重复", joined)
+        self.assertIn("测试锚点与同单元其他清单重复", joined)
+
+    def test_removing_algorithm_6_10_implementation_names_missing_anchor(self):
+        """重放 2026-08-16 的冒领：删完整实现，必须先由 T-025 具名报红。"""
+        source_dir = ROOT / "code" / "ch06" / "general_tree"
+        meta = json.loads((source_dir / "unit.json").read_text(encoding="utf-8"))
+        anchor = next(e["anchor"] for e in meta["listings"] if e["id"] == "算法6.10")
+        source = (source_dir / "modern.hpp").read_text(encoding="utf-8")
+        start = source.index(anchor)
+        start = source.rfind("\n", 0, start) + 1
+        brace = source.index("{", start)
+        depth, end = 0, brace
+        while end < len(source):
+            if source[end] == "{": depth += 1
+            elif source[end] == "}":
+                depth -= 1
+                if depth == 0:
+                    end += 1
+                    break
+            end += 1
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = Path(tmp)
+            (unit / "modern.hpp").write_text(source[:start] + source[end:], encoding="utf-8")
+            (unit / "test.cpp").write_text(
+                (source_dir / "test.cpp").read_text(encoding="utf-8"), encoding="utf-8")
+            problems = check_code.check_listing_bindings(unit, meta)
+        self.assertIn(
+            f"  ❌ 算法6.10 的实现锚点不存在：{anchor}", problems,
+            "必须由绑定闸门具名定位，不能等编译失败",
+        )
 
 
 class TestOutputTruncation(unittest.TestCase):

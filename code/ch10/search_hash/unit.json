@@ -4,68 +4,68 @@
   "listings": [
     {
       "id": "代码10.1",
-      "anchor": "// 原书【代码10.1】【算法10.2】至【算法10.13】的检索、集合和散列实现。",
-      "test": "main"
+      "anchor": "class Item {",
+      "test": "代码10.1 Item getter and setter"
     },
     {
       "id": "算法10.2",
-      "anchor": "// 原书【代码10.1】【算法10.2】至【算法10.13】的检索、集合和散列实现。",
-      "test": "main"
+      "anchor": "sequential_search(const std::vector<int>& values",
+      "test": "算法10.2 missing key optional"
     },
     {
       "id": "算法10.3",
-      "anchor": "// 原书【代码10.1】【算法10.2】至【算法10.13】的检索、集合和散列实现。",
-      "test": "main"
+      "anchor": "binary_search(const std::vector<int>& sorted_values",
+      "test": "算法10.3 left boundary"
     },
     {
       "id": "代码10.4",
-      "anchor": "// 原书【代码10.1】【算法10.2】至【算法10.13】的检索、集合和散列实现。",
-      "test": "main"
+      "anchor": "bool erase(int value)",
+      "test": "代码10.4 keyed deletion status"
     },
     {
       "id": "算法10.5",
-      "anchor": "// 原书【代码10.1】【算法10.2】至【算法10.13】的检索、集合和散列实现。",
-      "test": "main"
+      "anchor": "bool insert(int value)",
+      "test": "算法10.5 unique insertion"
     },
     {
       "id": "算法10.6",
-      "anchor": "// 原书【代码10.1】【算法10.2】至【算法10.13】的检索、集合和散列实现。",
-      "test": "main"
+      "anchor": "IntSet intersection(const IntSet& other) const",
+      "test": "算法10.6 intersection commutative size"
     },
     {
       "id": "算法10.7",
-      "anchor": "// 原书【代码10.1】【算法10.2】至【算法10.13】的检索、集合和散列实现。",
-      "test": "main"
+      "anchor": "bool includes(const IntSet& other) const",
+      "test": "算法10.7 containment"
     },
     {
       "id": "算法10.8",
-      "anchor": "// 原书【代码10.1】【算法10.2】至【算法10.13】的检索、集合和散列实现。",
-      "test": "main"
+      "anchor": "std::size_t elf_hash(const std::string& text) noexcept",
+      "test": "算法10.8 ELFhash distinguishes nearby strings"
     },
     {
       "id": "算法10.9",
-      "anchor": "// 原书【代码10.1】【算法10.2】至【算法10.13】的检索、集合和散列实现。",
-      "test": "main"
+      "anchor": "class HashTable {",
+      "test": "算法10.9 table accounting"
     },
     {
       "id": "算法10.10",
-      "anchor": "// 原书【代码10.1】【算法10.2】至【算法10.13】的检索、集合和散列实现。",
-      "test": "main"
+      "anchor": "bool insert(int key)",
+      "test": "算法10.10 linear collision insertion"
     },
     {
       "id": "算法10.11",
-      "anchor": "// 原书【代码10.1】【算法10.2】至【算法10.13】的检索、集合和散列实现。",
-      "test": "main"
+      "anchor": "std::optional<std::size_t> find_slot(int key) const",
+      "test": "算法10.11 probes through tombstone"
     },
     {
       "id": "算法10.12",
-      "anchor": "// 原书【代码10.1】【算法10.2】至【算法10.13】的检索、集合和散列实现。",
-      "test": "main"
+      "anchor": "bool erase(int key)",
+      "test": "算法10.12 deletion creates tombstone"
     },
     {
       "id": "算法10.13",
-      "anchor": "// 原书【代码10.1】【算法10.2】至【算法10.13】的检索、集合和散列实现。",
-      "test": "main"
+      "anchor": "std::optional<std::size_t> insertion_slot(int key) const",
+      "test": "算法10.13 first tombstone reused"
     }
   ],
   "standard": "c++17",

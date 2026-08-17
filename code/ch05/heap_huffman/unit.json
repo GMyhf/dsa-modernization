@@ -4,13 +4,13 @@
   "listings": [
     {
       "id": "代码5.11",
-      "anchor": "// 原书【代码5.11】【代码5.12】：手写最小堆与 Huffman 合并树。",
-      "test": "main"
+      "anchor": "class MinHeap {",
+      "test": "最小元素按序弹出"
     },
     {
       "id": "代码5.12",
-      "anchor": "// 原书【代码5.11】【代码5.12】：手写最小堆与 Huffman 合并树。",
-      "test": "main"
+      "anchor": "class HuffmanTree {",
+      "test": "Huffman 树总权重"
     }
   ],
   "standard": "c++17",

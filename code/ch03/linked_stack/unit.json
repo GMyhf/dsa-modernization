@@ -4,8 +4,8 @@
   "listings": [
     {
       "id": "代码3.4",
-      "anchor": "// 链式栈 LinkedStack —— 原书【代码3.4】的现代化实现。",
-      "test": "main"
+      "anchor": "class LinkedStack {",
+      "test": "压三个后栈顶是最后压入的"
     }
   ],
   "standard": "c++17",

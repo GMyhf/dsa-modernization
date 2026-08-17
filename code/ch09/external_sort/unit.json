@@ -4,18 +4,18 @@
   "listings": [
     {
       "id": "算法9.1",
-      "anchor": "namespace dsa::external_sort {",
-      "test": "main"
+      "anchor": "replacement_selection(const std::vector<int>& input",
+      "test": "算法9.1 textbook input makes two runs"
     },
     {
       "id": "代码9.2",
-      "anchor": "namespace dsa::external_sort {",
-      "test": "main"
+      "anchor": "class WinnerTree {",
+      "test": "代码9.2 initial winner"
     },
     {
       "id": "代码9.3",
-      "anchor": "namespace dsa::external_sort {",
-      "test": "main"
+      "anchor": "class LoserTree {",
+      "test": "代码9.3 initial winner"
     }
   ],
   "standard": "c++17",

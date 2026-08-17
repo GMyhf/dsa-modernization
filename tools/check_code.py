@@ -177,21 +177,31 @@ def check_listing_bindings(unit_dir: Path, meta):
     listings = meta.get("listings", [])
     sources = "\n".join(
         (unit_dir / name).read_text(encoding="utf-8")
-        for name in ("modern.hpp", "modern.cpp", "teaching.hpp", "teaching.cpp")
+        for name in ("modern.hpp", "modern.cpp", "teaching.hpp", "teaching.cpp", "demo.cpp")
         if (unit_dir / name).is_file()
     )
     tests = (unit_dir / "test.cpp").read_text(encoding="utf-8") if (unit_dir / "test.cpp").is_file() else ""
+    anchors, tests_seen = set(), set()
+    source_lines = sources.splitlines()
     for entry in listings:
         if not isinstance(entry, dict):
-            # Legacy synthetic probes may still use the pre-T-025 shape; the
-            # repository manifests are migrated and are checked strictly.
+            problems.append(f"  ❌ 清单绑定格式错误：{entry!r}（必须为 {{id, anchor, test}} 对象）")
             continue
         listing, anchor, test = entry.get("id"), entry.get("anchor"), entry.get("test")
         if not all(isinstance(x, str) and x.strip() for x in (listing, anchor, test)):
             problems.append(f"  ❌ 清单绑定字段不完整：{entry!r}")
             continue
-        if anchor not in sources:
+        if anchor in anchors:
+            problems.append(f"  ❌ {listing} 的实现锚点与同单元其他清单重复：{anchor}")
+        if test in tests_seen:
+            problems.append(f"  ❌ {listing} 的测试锚点与同单元其他清单重复：{test}")
+        anchors.add(anchor)
+        tests_seen.add(test)
+        matching_lines = [line for line in source_lines if anchor in line]
+        if not matching_lines:
             problems.append(f"  ❌ {listing} 的实现锚点不存在：{anchor}")
+        elif all(line.lstrip().startswith(("//", "/*", "*")) for line in matching_lines):
+            problems.append(f"  ❌ {listing} 的实现锚点只存在于注释行：{anchor}")
         if test not in tests:
             problems.append(f"  ❌ {listing} 的测试锚点不存在：{test}")
     return problems

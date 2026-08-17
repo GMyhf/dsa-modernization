@@ -10,6 +10,10 @@
 #include <stdexcept>
 #include <string>
 
+namespace dsa {
+factorial_type factorial_driver(long long n);
+}
+
 namespace {
 
 int checks = 0, failures = 0;
@@ -40,6 +44,7 @@ void test_three_implementations_agree() {
     }
     check(agree_high, "11! 到 20!：三种实现互相一致");
     check(dsa::factorial_iterative(20) == 2432902008176640000ULL, "20! 的值精确正确");
+    check(dsa::factorial_driver(4) == 24, "算法3.7 主程序驱动 factorial(4) 得到 24");
     // 边界：递归出口本身
     check(dsa::factorial_recursive(0) == 1 && dsa::factorial_iterative(0) == 1
           && dsa::factorial_with_explicit_stack(0) == 1, "0! = 1（递归出口）");

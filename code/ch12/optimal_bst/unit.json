@@ -4,13 +4,13 @@
   "listings": [
     {
       "id": "算法12.1",
-      "anchor": "namespace dsa::advanced {",
-      "test": "main"
+      "anchor": "class ReusableNodePool {",
+      "test": "算法12.1 reuses released slot"
     },
     {
       "id": "算法12.2",
-      "anchor": "namespace dsa::advanced {",
-      "test": "main"
+      "anchor": "OptimalBstResult optimal_bst(",
+      "test": "算法12.2 textbook total cost"
     }
   ],
   "standard": "c++17",

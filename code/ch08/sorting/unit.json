@@ -4,88 +4,88 @@
   "listings": [
     {
       "id": "算法8.1",
-      "anchor": "// 第 8 章内部排序：原书【算法8.1】至【代码8.17】的可读、可运行实现。",
-      "test": "main"
+      "anchor": "void insertion_sort(std::vector<int>& values)",
+      "test": "算法8.1 insertion"
     },
     {
       "id": "算法8.2",
-      "anchor": "// 第 8 章内部排序：原书【算法8.1】至【代码8.17】的可读、可运行实现。",
-      "test": "main"
+      "anchor": "void shell_sort(std::vector<int>& values)",
+      "test": "算法8.2 shell"
     },
     {
       "id": "算法8.3",
-      "anchor": "// 第 8 章内部排序：原书【算法8.1】至【代码8.17】的可读、可运行实现。",
-      "test": "main"
+      "anchor": "void selection_sort(std::vector<int>& values)",
+      "test": "算法8.3 selection"
     },
     {
       "id": "算法8.4",
-      "anchor": "// 第 8 章内部排序：原书【算法8.1】至【代码8.17】的可读、可运行实现。",
-      "test": "main"
+      "anchor": "void heap_sort(std::vector<int>& values)",
+      "test": "算法8.4 heap"
     },
     {
       "id": "算法8.5",
-      "anchor": "// 第 8 章内部排序：原书【算法8.1】至【代码8.17】的可读、可运行实现。",
-      "test": "main"
+      "anchor": "void bubble_sort(std::vector<int>& values)",
+      "test": "算法8.5 bubble"
     },
     {
       "id": "算法8.6",
-      "anchor": "// 第 8 章内部排序：原书【算法8.1】至【代码8.17】的可读、可运行实现。",
-      "test": "main"
+      "anchor": "void quick_sort(std::vector<int>& values)",
+      "test": "算法8.6 quick"
     },
     {
       "id": "算法8.7",
-      "anchor": "// 第 8 章内部排序：原书【算法8.1】至【代码8.17】的可读、可运行实现。",
-      "test": "main"
+      "anchor": "void quick_sort_optimized(std::vector<int>& values)",
+      "test": "算法8.7 quick optimized"
     },
     {
       "id": "算法8.8",
-      "anchor": "// 第 8 章内部排序：原书【算法8.1】至【代码8.17】的可读、可运行实现。",
-      "test": "main"
+      "anchor": "void merge_sort(std::vector<int>& values)",
+      "test": "算法8.8 merge"
     },
     {
       "id": "算法8.9",
-      "anchor": "// 第 8 章内部排序：原书【算法8.1】至【代码8.17】的可读、可运行实现。",
-      "test": "main"
+      "anchor": "void merge_sort_optimized(std::vector<int>& values)",
+      "test": "算法8.9 merge optimized"
     },
     {
       "id": "算法8.10",
-      "anchor": "// 第 8 章内部排序：原书【算法8.1】至【代码8.17】的可读、可运行实现。",
-      "test": "main"
+      "anchor": "void counting_sort(std::vector<int>& values)",
+      "test": "算法8.10 counting"
     },
     {
       "id": "算法8.11",
-      "anchor": "// 第 8 章内部排序：原书【算法8.1】至【代码8.17】的可读、可运行实现。",
-      "test": "main"
+      "anchor": "void radix_sort(std::vector<int>& values)",
+      "test": "算法8.11 radix"
     },
     {
       "id": "代码8.12",
-      "anchor": "// 第 8 章内部排序：原书【算法8.1】至【代码8.17】的可读、可运行实现。",
-      "test": "main"
+      "anchor": "class StaticQueue {",
+      "test": "代码8.12 FIFO and empty optional"
     },
     {
       "id": "算法8.13",
-      "anchor": "// 第 8 章内部排序：原书【算法8.1】至【代码8.17】的可读、可运行实现。",
-      "test": "main"
+      "anchor": "void radix_sort_linked_style(std::vector<int>& values)",
+      "test": "算法8.13 linked radix"
     },
     {
       "id": "算法8.14",
-      "anchor": "// 第 8 章内部排序：原书【算法8.1】至【代码8.17】的可读、可运行实现。",
-      "test": "main"
+      "anchor": "insertion_index_sort(const std::vector<int>& values)",
+      "test": "算法8.14 returns sorted indexes"
     },
     {
       "id": "算法8.15",
-      "anchor": "// 第 8 章内部排序：原书【算法8.1】至【代码8.17】的可读、可运行实现。",
-      "test": "main"
+      "anchor": "void adjust_by_index(std::vector<int>& values",
+      "test": "算法8.15 adjusts records by cycles"
     },
     {
       "id": "代码8.16",
-      "anchor": "// 第 8 章内部排序：原书【算法8.1】至【代码8.17】的可读、可运行实现。",
-      "test": "main"
+      "anchor": "random_values(std::size_t count",
+      "test": "代码8.16 deterministic seed"
     },
     {
       "id": "代码8.17",
-      "anchor": "// 第 8 章内部排序：原书【算法8.1】至【代码8.17】的可读、可运行实现。",
-      "test": "main"
+      "anchor": "class Stopwatch {",
+      "test": "代码8.17 monotonic elapsed time"
     }
   ],
   "standard": "c++17",

@@ -4,8 +4,8 @@
   "listings": [
     {
       "id": "算法3.5",
-      "anchor": "// 后缀表达式求值 —— 原书【算法3.5】的现代化实现。",
-      "test": "main"
+      "anchor": "double evaluate_postfix(std::string_view expression)",
+      "test": "3 4 - = -1"
     }
   ],
   "standard": "c++17",

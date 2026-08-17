@@ -4,18 +4,18 @@
   "listings": [
     {
       "id": "代码3.13",
-      "anchor": "// 原书【代码3.13】【代码3.14】【代码3.15】的现代化队列实现（工程版）。",
-      "test": "main"
+      "anchor": "class ArrayQueue {",
+      "test": "代码3.13 FIFO across wrap"
     },
     {
       "id": "代码3.14",
-      "anchor": "// 原书【代码3.13】【代码3.14】【代码3.15】的现代化队列实现（工程版）。",
-      "test": "main"
+      "anchor": "bool full() const noexcept",
+      "test": "代码3.14 sacrificed slot detects full"
     },
     {
       "id": "代码3.15",
-      "anchor": "// 原书【代码3.13】【代码3.14】【代码3.15】的现代化队列实现（工程版）。",
-      "test": "main"
+      "anchor": "class LinkedQueue {",
+      "test": "代码3.15 copied queue is independent"
     }
   ],
   "standard": "c++17",

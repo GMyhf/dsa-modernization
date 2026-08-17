@@ -4,23 +4,23 @@
   "listings": [
     {
       "id": "算法3.6",
-      "anchor": "// 递归与栈空间 —— 原书【算法3.6】【算法3.7】【算法3.8】【算法3.9】的现代化实现。",
-      "test": "main"
+      "anchor": "factorial_recursive(long long n)",
+      "test": "算法3.6：负数一律抛 invalid_argument"
     },
     {
       "id": "算法3.7",
-      "anchor": "// 递归与栈空间 —— 原书【算法3.6】【算法3.7】【算法3.8】【算法3.9】的现代化实现。",
-      "test": "main"
+      "anchor": "factorial_type factorial_driver(long long n)",
+      "test": "算法3.7 主程序驱动 factorial(4) 得到 24"
     },
     {
       "id": "算法3.8",
-      "anchor": "// 递归与栈空间 —— 原书【算法3.6】【算法3.7】【算法3.8】【算法3.9】的现代化实现。",
-      "test": "main"
+      "anchor": "factorial_iterative(long long n)",
+      "test": "三种实现在溢出边界上行为一致"
     },
     {
       "id": "算法3.9",
-      "anchor": "// 递归与栈空间 —— 原书【算法3.6】【算法3.7】【算法3.8】【算法3.9】的现代化实现。",
-      "test": "main"
+      "anchor": "factorial_with_explicit_stack(long long n)",
+      "test": "三种实现互相一致"
     }
   ],
   "standard": "c++17",

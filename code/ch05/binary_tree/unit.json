@@ -4,53 +4,53 @@
   "listings": [
     {
       "id": "代码5.1",
-      "anchor": "// 二叉树与二叉搜索树 —— 原书【代码5.1】【代码5.2】【算法5.3】至【算法5.10】的现代化实现。",
-      "test": "main"
+      "anchor": "class BinaryTree {",
+      "test": "深拷贝不共享子树"
     },
     {
       "id": "代码5.2",
-      "anchor": "// 二叉树与二叉搜索树 —— 原书【代码5.1】【代码5.2】【算法5.3】至【算法5.10】的现代化实现。",
-      "test": "main"
+      "anchor": "void create_tree(U&& value",
+      "test": "make_empty 后为空树"
     },
     {
       "id": "算法5.3",
-      "anchor": "// 二叉树与二叉搜索树 —— 原书【代码5.1】【代码5.2】【算法5.3】至【算法5.10】的现代化实现。",
-      "test": "main"
+      "anchor": "void preorder(Visitor&& visit) const",
+      "test": "算法5.3 前序递归周游"
     },
     {
       "id": "算法5.4",
-      "anchor": "// 二叉树与二叉搜索树 —— 原书【代码5.1】【代码5.2】【算法5.3】至【算法5.10】的现代化实现。",
-      "test": "main"
+      "anchor": "void preorder_iterative(Visitor&& visit) const",
+      "test": "算法5.4 非递归前序周游"
     },
     {
       "id": "算法5.5",
-      "anchor": "// 二叉树与二叉搜索树 —— 原书【代码5.1】【代码5.2】【算法5.3】至【算法5.10】的现代化实现。",
-      "test": "main"
+      "anchor": "void inorder_iterative(Visitor&& visit) const",
+      "test": "算法5.5 非递归中序周游"
     },
     {
       "id": "算法5.6",
-      "anchor": "// 二叉树与二叉搜索树 —— 原书【代码5.1】【代码5.2】【算法5.3】至【算法5.10】的现代化实现。",
-      "test": "main"
+      "anchor": "void postorder_iterative(Visitor&& visit) const",
+      "test": "算法5.6 非递归后序周游"
     },
     {
       "id": "算法5.7",
-      "anchor": "// 二叉树与二叉搜索树 —— 原书【代码5.1】【代码5.2】【算法5.3】至【算法5.10】的现代化实现。",
-      "test": "main"
+      "anchor": "void level_order(Visitor&& visit) const",
+      "test": "算法5.7 层次周游"
     },
     {
       "id": "代码5.8",
-      "anchor": "// 二叉树与二叉搜索树 —— 原书【代码5.1】【代码5.2】【算法5.3】至【算法5.10】的现代化实现。",
-      "test": "main"
+      "anchor": "const Node* parent_of(const Node* wanted) const noexcept",
+      "test": "代码5.8 能找到父结点"
     },
     {
       "id": "算法5.9",
-      "anchor": "// 二叉树与二叉搜索树 —— 原书【代码5.1】【代码5.2】【算法5.3】至【算法5.10】的现代化实现。",
-      "test": "main"
+      "anchor": "bool insert(const T& value)",
+      "test": "算法5.9 插入唯一键"
     },
     {
       "id": "算法5.10",
-      "anchor": "// 二叉树与二叉搜索树 —— 原书【代码5.1】【代码5.2】【算法5.3】至【算法5.10】的现代化实现。",
-      "test": "main"
+      "anchor": "bool remove(const T& value)",
+      "test": "算法5.10 删除有左子树结点"
     }
   ],
   "standard": "c++17",

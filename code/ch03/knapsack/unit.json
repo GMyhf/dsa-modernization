@@ -4,18 +4,18 @@
   "listings": [
     {
       "id": "算法3.10",
-      "anchor": "// 背包问题 —— 原书【算法3.10】【算法3.11】【算法3.12】的现代化实现。",
-      "test": "main"
+      "anchor": "knapsack_recursive(",
+      "test": "递归版与暴力枚举结论一致"
     },
     {
       "id": "算法3.11",
-      "anchor": "// 背包问题 —— 原书【算法3.10】【算法3.11】【算法3.12】的现代化实现。",
-      "test": "main"
+      "anchor": "knapsack_with_explicit_stack(",
+      "test": "显式栈版与暴力枚举结论一致"
     },
     {
       "id": "算法3.12",
-      "anchor": "// 背包问题 —— 原书【算法3.10】【算法3.11】【算法3.12】的现代化实现。",
-      "test": "main"
+      "anchor": "knapsack_optimized(",
+      "test": "优化版与暴力枚举结论一致"
     }
   ],
   "standard": "c++17",

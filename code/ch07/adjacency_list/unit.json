@@ -4,8 +4,8 @@
   "listings": [
     {
       "id": "代码7.4",
-      "anchor": "namespace dsa {",
-      "test": "main"
+      "anchor": "class GraphList {",
+      "test": "7.4 邻接表存储量随 V+E 走"
     }
   ],
   "standard": "c++17",

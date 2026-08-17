@@ -64,7 +64,9 @@ class TestUnitsAndExclusions(unittest.TestCase):
     def make_unit(self, root: Path, name, **overrides):
         d = root / name
         d.mkdir(parents=True)
-        meta = {"id": name, "title": "t", "listings": ["算法3.3"], "standard": "c++20"}
+        meta = {"id": name, "title": "t", "listings": [
+            {"id": "算法3.3", "anchor": "anchor", "test": "test"}
+        ], "standard": "c++20"}
         meta.update(overrides)
         (d / "unit.json").write_text(json.dumps(meta), encoding="utf-8")
         for f in ("legacy.md", "test.cpp", "modern.hpp"):
@@ -122,6 +124,12 @@ class TestUnitsAndExclusions(unittest.TestCase):
             units, problems = ledger.load_units(Path(tmp))
         self.assertEqual(problems, [])
         self.assertEqual(units[0]["listings"][0]["id"], "算法3.3")
+
+    def test_bare_string_listing_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.make_unit(Path(tmp), "u", listings=["算法3.3"])
+            _, problems = ledger.load_units(Path(tmp))
+        self.assertTrue(any("必须使用 {id, anchor, test} 对象" in p for p in problems), problems)
 
     def test_exclusion_without_reason_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -4,28 +4,28 @@
   "listings": [
     {
       "id": "代码2.1",
-      "anchor": "// 顺序表 ArrayList —— 原书【代码2.1】【代码2.2】【算法2.3】【算法2.4】【算法2.5】的现代化实现。",
-      "test": "main"
+      "anchor": "class ArrayList {",
+      "test": "被移动方是有效的空表"
     },
     {
       "id": "代码2.2",
-      "anchor": "// 顺序表 ArrayList —— 原书【代码2.1】【代码2.2】【算法2.3】【算法2.4】【算法2.5】的现代化实现。",
-      "test": "main"
+      "anchor": "ArrayList(const ArrayList& other)",
+      "test": "副本独立增长"
     },
     {
       "id": "算法2.3",
-      "anchor": "// 顺序表 ArrayList —— 原书【代码2.1】【代码2.2】【算法2.3】【算法2.4】【算法2.5】的现代化实现。",
-      "test": "main"
+      "anchor": "const T& at(size_type index) const",
+      "test": "at/set 越界一律抛 out_of_range"
     },
     {
       "id": "算法2.4",
-      "anchor": "// 顺序表 ArrayList —— 原书【代码2.1】【代码2.2】【算法2.3】【算法2.4】【算法2.5】的现代化实现。",
-      "test": "main"
+      "anchor": "std::optional<size_type> find(const T& value) const",
+      "test": "find 返回第一次出现的下标"
     },
     {
       "id": "算法2.5",
-      "anchor": "// 顺序表 ArrayList —— 原书【代码2.1】【代码2.2】【算法2.3】【算法2.4】【算法2.5】的现代化实现。",
-      "test": "main"
+      "anchor": "T remove(size_type pos)",
+      "test": "删除后剩余元素左移就位"
     }
   ],
   "standard": "c++17",

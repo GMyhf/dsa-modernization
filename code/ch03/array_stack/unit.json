@@ -4,18 +4,18 @@
   "listings": [
     {
       "id": "代码3.1",
-      "anchor": "// 顺序栈 ArrayStack —— 原书【代码3.1】【代码3.2】【算法3.3】的现代化实现。",
-      "test": "static_assert(std::is_nothrow_move_assignable<std::string>::value,"
+      "anchor": "class ArrayStack {",
+      "test": "默认构造是空栈"
     },
     {
       "id": "代码3.2",
-      "anchor": "// 顺序栈 ArrayStack —— 原书【代码3.1】【代码3.2】【算法3.3】的现代化实现。",
-      "test": "static_assert(std::is_nothrow_move_assignable<std::string>::value,"
+      "anchor": "std::optional<T> pop()",
+      "test": "pop 出 3"
     },
     {
       "id": "算法3.3",
-      "anchor": "// 顺序栈 ArrayStack —— 原书【代码3.1】【代码3.2】【算法3.3】的现代化实现。",
-      "test": "static_assert(std::is_nothrow_move_assignable<std::string>::value,"
+      "anchor": "void ensure_capacity()",
+      "test": "扩容次数是对数级（翻倍策略生效）"
     }
   ],
   "standard": "c++17",

@@ -99,6 +99,16 @@ def load_units(code_root=CODE):
             problems.append(
                 f"{rel}: listings 为空时必须写 beyond_book，说明原书没有对应清单"
             )
+        elif listings:
+            for entry in listings:
+                if not isinstance(entry, dict):
+                    problems.append(
+                        f"{rel}: listings 条目 {entry!r} 必须使用 {{id, anchor, test}} 对象"
+                    )
+                    continue
+                if not all(isinstance(entry.get(key), str) and entry[key].strip()
+                           for key in ("id", "anchor", "test")):
+                    problems.append(f"{rel}: listings 对象缺少非空的 id/anchor/test：{entry!r}")
         std = data.get("standard", DEFAULT_STANDARD)
         if std not in KNOWN_STANDARDS:
             problems.append(f"{rel}: standard={std!r} 不在 {KNOWN_STANDARDS}")
