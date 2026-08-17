@@ -247,6 +247,96 @@ class TestR8CopiedTextBlocks(unittest.TestCase):
             problems = check_doc.check_file(path, {"算法3.3"}, sources=srcs)
         self.assertFalse(any("R8" in p for p in problems), problems)
 
+    def test_exemption_does_not_excuse_verbatim_copies(self):
+        """**豁免只赦免「像函数」，绝不赦免「逐字来自 code/」。**
+
+        2026-08-17 实测：T-026 第一版里，给一段逐字抄自 `code/` 的 `push()`
+        加一句 `original-listing="就想这么写"`，R8 就从报红变成放行——
+        等于把 D-010 堵的那个口子换了个名字重新打开。
+        original-listing 的语义是「这是原书引文」，而逐字来自 `code/` 的字节
+        按定义就不是引文，是本书自己的代码。
+        """
+        block = ('```text original-listing="就想这么写"\n' + self.FUNC + "```\n")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "chapter.md"
+            path.write_text(block, encoding="utf-8")
+            problems = check_doc.check_file(path, {"算法3.3"}, sources=self.sources())
+        self.assertTrue(any("R8" in p and "逐字抄自" in p for p in problems), problems)
+
+    def test_operator_definition_counts_as_function_like(self):
+        """`operator=` 也要认。
+
+        本书讲的正是三法则/五法则，最可能被抄成 text 块的就是拷贝赋值运算符；
+        而第一版的名字正则只认 `名字(`，`operator=(` 的名字后面是 `=`，整段漏网。
+        """
+        op = (
+            "Probe& operator=(const Probe& other) {\n"
+            "    if (this != &other) {\n"
+            "        delete[] data_;\n"
+            "        data_ = new int[other.size_];\n"
+            "    }\n"
+            "    return *this;\n"
+            "}\n"
+        )
+        self.assertTrue(check_doc.function_like_text(op), "operator= 应当算函数定义形态")
+        block = "```text\n" + op + "```\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "chapter.md"
+            path.write_text(block, encoding="utf-8")
+            problems = check_doc.check_file(path, {"算法3.3"}, sources={})
+        self.assertTrue(any("R8" in p for p in problems), problems)
+
+    def test_exempted_original_quote_passes(self):
+        """原书那种编不过的清单，写明理由后放行——否则这条规则没法用。"""
+        block = ('```text original-listing="原书主程序按印刷编不过，只能原样引用"\n'
+                 "void main( ) {\n"
+                 "long x;\n"
+                 "cin >> x;\n"
+                 "cout << factorial(4) << endl;\n"
+                 "```\n")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "chapter.md"
+            path.write_text(block, encoding="utf-8")
+            problems = check_doc.check_file(path, {"算法3.3"}, sources=self.sources())
+        self.assertFalse(any("R8" in p for p in problems), problems)
+
+    def test_committed_tree_passes_r8(self):
+        """入库的书稿 + 全部 legacy.md 当锚：以后谁手抄源码进 text 块，这里就红。"""
+        sources = check_doc.source_texts()
+        problems = []
+        for path in sorted(check_doc.BOOK.rglob("*.md")):
+            if "pdf" in path.relative_to(check_doc.BOOK).parts:
+                continue
+            problems += check_doc.check_r8(path, sources)
+        for legacy in sorted((check_doc.ROOT / "code").rglob("legacy.md")):
+            problems += check_doc.check_r8(legacy, sources)
+        self.assertEqual(problems, [])
+
+    def test_legacy_files_are_in_scope(self):
+        """`legacy.md` 也要查——那里正是原书引文最密集的地方。
+
+        这条走 subprocess，因为「扫哪些文件」这件事只在 `main()` 里定；
+        单测直接调 `check_r8` 是证明不了扫描范围的（把 legacy 那圈循环删掉，
+        直接调用的测试依然全绿）。
+        """
+        import subprocess
+
+        unit = check_doc.ROOT / "code" / "_probe_r8_unit"
+        unit.mkdir(parents=True, exist_ok=True)
+        legacy = unit / "legacy.md"
+        try:
+            legacy.write_text("# 探针\n\n```text\n" + self.FUNC + "```\n", encoding="utf-8")
+            done = subprocess.run(
+                ["python3", "tools/check_doc.py"],
+                cwd=check_doc.ROOT, capture_output=True, text=True,
+            )
+        finally:
+            legacy.unlink(missing_ok=True)
+            unit.rmdir()
+        self.assertEqual(done.returncode, 1, done.stdout)
+        self.assertIn("R8", done.stdout)
+        self.assertIn("_probe_r8_unit", done.stdout)
+
     def test_original_book_quote_needs_visible_exemption(self):
         """不再因“不像当前源码”静默放行；原书引文也要留下可审查的理由。"""
         original = (

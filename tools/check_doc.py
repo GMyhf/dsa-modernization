@@ -149,7 +149,11 @@ def function_like_text(body):
     for line in lines:
         code, in_block = strip_comments_and_strings(line, in_block)
         stripped.append(code)
-    name_re = re.compile(r"(?<![A-Za-z0-9_~])([~A-Za-z_][A-Za-z0-9_]*)\s*\(")
+    # `operator=` / `operator[]` / `operator()` 也要认——本书讲的是三法则/五法则，
+    # 最可能被抄成 text 块的恰恰是拷贝赋值运算符（2026-08-17 实测漏网）。
+    name_re = re.compile(
+        r"(?<![A-Za-z0-9_~])(operator\s*(?:\[\s*\]|\(\s*\)|->\*?|[-+*/%^&|~!=<>,]+)|[~A-Za-z_][A-Za-z0-9_]*)\s*\("
+    )
     for row, line in enumerate(stripped):
         for found in name_re.finditer(line):
             if found.group(1) in CALL_LIKE_KEYWORDS:
@@ -184,10 +188,19 @@ def check_r8(path: Path, sources=None):
         prefix = f"{rel_label(path)}:{block['start']}  "
         if has_marker and not reason:
             problems.append(prefix + "R8 original-listing= 豁免必须写明引用原书且不能走 R3 的具体理由")
-        elif function_like and not reason:
-            detail = f"；它还逐字抄自 {origin}" if origin is not None else ""
+        elif origin is not None:
+            # **豁免管不到这一条**：original-listing 说的是「这是原书引文」，
+            # 而这段字节逐字来自 `code/`——它就是本书自己的代码，不是引文。
+            # 2026-08-17 实测：加一句 original-listing="就想这么写" 就能让逐字抄的
+            # `push()` 从报红变成放行，等于把 D-010 堵的那个口子重新打开。
             problems.append(
-                prefix + f"R8 这段长 text 块形似 C++ 函数定义{detail}；本书自己的代码要写成 "
+                prefix + f"R8 这段 text 块逐字抄自 {origin}；那是本书自己的代码，"
+                "不是原书引文，original-listing= 豁免对它不适用。"
+                "改写成 ```cpp file=<路径>#<锚点>，交给 R3 逐字核对。"
+            )
+        elif function_like and not reason:
+            problems.append(
+                prefix + "R8 这段长 text 块形似 C++ 函数定义；本书自己的代码要写成 "
                 "```cpp file=<路径>#<锚点>，交给 R3 逐字核对。"
                 "若确为无法编译的原书引文，须在围栏上写 original-listing=\"具体理由\"。"
             )
