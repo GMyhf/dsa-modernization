@@ -220,9 +220,18 @@ KMP:  10
 </ol>
 <p>本书的 <code>String</code> 把这三处分别改为：类名大写、<code>bool empty()</code>、 <code>std::optional&lt;size_type&gt; find(...)</code>、修改器返回 <code>String&amp;</code>。</p>
 <h3 id="411-字符编码"><a class="anchor" href="#411-字符编码">#</a>4.1.1 字符编码</h3>
-<p>字符串的逻辑元素是字符，内存中却保存编码单元。ASCII 为 0--127 的单字节编码，UTF-8 则以 1--4 个字节编码一个 Unicode 码点；因此 C++ 的 <code>char</code> 是一个字节，不等于一个“人眼看到的字符”。<code>std::string::size()</code> 返回字节数，不能用来数 Unicode 字符；需要按 UTF-8 解码或使用明确的 Unicode 库。字面量 <code>u8&quot;...&quot;</code> 表示 UTF-8 字节序列，编码本身不会改变字符串查找和拼接的接口语义。</p>
+<p>字符串的逻辑元素是字符，内存中却保存编码单元。ASCII 为 0–127 的单字节编码，UTF-8 则以 1～4 个字节编码一个 Unicode 码点；因此 C++ 的 <code>char</code> 是一个字节，不等于一个“人眼看到的字符”。<code>std::string::size()</code> 返回字节数，不能用来数 Unicode 字符；需要按 UTF-8 解码或使用明确的 Unicode 库。字面量 <code>u8&quot;...&quot;</code> 表示 UTF-8 字节序列，编码本身不会改变字符串查找和拼接的接口语义。</p>
 <h3 id="412-字符的编码顺序"><a class="anchor" href="#412-字符的编码顺序">#</a>4.1.2 字符的编码顺序</h3>
-<p>ASCII 保留了数字 <code>0</code>--<code>9</code>、大写字母和小写字母各自连续递增的区间，所以同一区间内可用编码值比较。但这不是通用的语言学排序规则：字符的编码值比较是按码元的字典序，大小写、重音、中文排序都可能需要额外的 locale 或排序键。字符串比较先比较第一个不同的编码单元；若一个是另一个的前缀，较短者更小。因此 <code>&quot;123&quot; &lt; &quot;1234&quot; &lt; &quot;23&quot;</code>，但这不是整数大小比较。比较前必须先约定编码和规范化方式，不能把“字节序”误当成“自然语言顺序”。</p>
+<p>ASCII 保留了数字 <code>0</code>–<code>9</code>、大写字母和小写字母各自连续递增的区间，所以同一区间内可用编码值比较。但这不是通用的语言学排序规则：字符的编码值比较是按码元的字典序，大小写、重音、中文排序都可能需要额外的 locale 或排序键。字符串比较先比较第一个不同的编码单元；若一个是另一个的前缀，较短者更小。因此对 <code>std::string</code> 而言 <code>&quot;123&quot; &lt; &quot;1234&quot; &lt; &quot;23&quot;</code>，但这不是整数大小比较。比较前必须先约定编码和规范化方式，不能把“字节序”误当成“自然语言顺序”。</p>
+<p><strong>这里有个 C++ 特有的坑，必须点破</strong>：上面那条结论只对 <code>std::string</code> 成立。两个<strong>字符串字面量</strong>之间写 <code>&lt;</code>，比的是两个数组的<strong>地址</strong>，不是内容：</p>
+<div class="codeblock" data-lang="text"><pre><code>$ g++ -std=c++17 -Wall -Wextra litcmp.cpp
+litcmp.cpp:7:25: warning: comparison between two arrays [-Warray-compare]
+    7 |     std::cout &lt;&lt; (&quot;123&quot; &lt; &quot;1234&quot;) &lt;&lt; &#x27; &#x27; &lt;&lt; (&quot;1234&quot; &lt; &quot;23&quot;) &lt;&lt; &#x27;\n&#x27;;
+      |                   ~~~~~~^~~~~~~~
+$ ./litcmp
+true true      # (&quot;123&quot; &lt; std::string(&quot;1234&quot;))、(std::string(&quot;1234&quot;) &lt; &quot;23&quot;)
+false true     # (&quot;123&quot; &lt; &quot;1234&quot;)、(&quot;1234&quot; &lt; &quot;23&quot;)——第一个的答案反了</code></pre></div>
+<p>同一行代码，两边只要有一边是 <code>std::string</code>，比的就是内容；两边都是裸字面量，比的就是地址，而地址由编译器摆放决定。所以本书凡是比较字符串，一律先落到 <code>String</code>/<code>std::string</code> 上，再谈编码顺序。</p>
 <h2 id="42-字符串的存储结构和实现"><a class="anchor" href="#42-字符串的存储结构和实现">#</a>4.2 字符串的存储结构和实现</h2>
 <p><code>String</code> 采用动态变长的存储结构：内部持有一块以 <code>&#x27;\0&#x27;</code> 结尾的字符数组和当前长度， 构造时按初值长度分配，赋值时按新长度重新分配。这正是本节要教的内容， 所以缓冲区是<strong>裸 <code>char*</code></strong>——换成 <code>std::string</code> 这一节就没了。</p>
 <h3 id="421-字符串的顺序存储"><a class="anchor" href="#421-字符串的顺序存储">#</a>4.2.1 字符串的顺序存储</h3>
