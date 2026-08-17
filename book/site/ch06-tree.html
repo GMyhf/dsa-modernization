@@ -422,11 +422,12 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
             current = fresh;
         }
         <span class="c">// 先根次序里最后一个结点必是叶子，**而且没有下一个兄弟**——</span>
-        <span class="c">// 它的右兄弟只能排在它后面，而它已经是最后一个了。</span>
+        <span class="c">// 它的孩子和它的右兄弟都只能排在它后面，而它已经是最后一个了。</span>
+        <span class="c">// 按标记的定义，末结点必然 `ltag == 1 且 rtag == 1`。</span>
         <span class="c">// 循环只走到 count-2，所以末结点的两个标志位都得在这里单独查。</span>
         <span class="c">//</span>
-        <span class="c">// 2026-08-17 Codex 复查发现：这里原本漏了 has_sibling，</span>
-        <span class="c">// 于是 `{X, 无孩子, 有兄弟}` 这类序列被**静默接受**。</span>
+        <span class="c">// **不自洽就拒绝，不做「尽量还原」**：压栈（有兄弟）与出栈（子树到头）</span>
+        <span class="c">// 必须一一配对，配不上的序列不对应任何森林的编码。见 legacy.md 缺陷 4。</span>
         <span class="k">if</span> (nodes[count - <span class="n">1</span>].has_child || nodes[count - <span class="n">1</span>].has_sibling || !waiting.empty()) {
             <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;from_dual_tag: 标志位不自洽，序列没有正常收尾&quot;</span>);
         }
@@ -634,18 +635,25 @@ rtag       0  1  0  1  1  1  0  0  1  1     0 = 有下一个兄弟</code></pre><
         current = fresh;
     }
     <span class="c">// 先根次序里最后一个结点必是叶子，**而且没有下一个兄弟**——</span>
-    <span class="c">// 它的右兄弟只能排在它后面，而它已经是最后一个了。</span>
+    <span class="c">// 它的孩子和它的右兄弟都只能排在它后面，而它已经是最后一个了。</span>
+    <span class="c">// 按标记的定义，末结点必然 `ltag == 1 且 rtag == 1`。</span>
     <span class="c">// 循环只走到 count-2，所以末结点的两个标志位都得在这里单独查。</span>
     <span class="c">//</span>
-    <span class="c">// 2026-08-17 Codex 复查发现：这里原本漏了 has_sibling，</span>
-    <span class="c">// 于是 `{X, 无孩子, 有兄弟}` 这类序列被**静默接受**。</span>
+    <span class="c">// **不自洽就拒绝，不做「尽量还原」**：压栈（有兄弟）与出栈（子树到头）</span>
+    <span class="c">// 必须一一配对，配不上的序列不对应任何森林的编码。见 legacy.md 缺陷 4。</span>
     <span class="k">if</span> (nodes[count - <span class="n">1</span>].has_child || nodes[count - <span class="n">1</span>].has_sibling || !waiting.empty()) {
         <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;from_dual_tag: 标志位不自洽，序列没有正常收尾&quot;</span>);
     }
     <span class="k">return</span> tree;
 }</code></pre></div>
 <p>【算法6.10结束】</p>
-<p><strong>原书这段代码有一处会崩</strong>：<code>ltag == 1</code> 分支里直接写 <code>pointer = aStack.top();</code>，<strong>没有判空</strong>。 标志位不自洽的输入（比如两个结点都声称「没有孩子、也没有下一个兄弟」）会让它对空栈取顶—— 未定义行为。本书判空并抛 <code>std::invalid_argument</code>，另加一条「最后一个结点若仍声称有孩子， 序列就没有正常收尾」的检查。测试里三种不自洽输入各有一条用例。</p>
+<p><strong>原书这段代码有一处会崩</strong>：<code>ltag == 1</code> 分支里直接写 <code>pointer = aStack.top();</code>，<strong>没有判空</strong>。 标志位不自洽的输入（比如两个结点都声称「没有孩子、也没有下一个兄弟」）会让它对空栈取顶—— 未定义行为。本书判空并抛 <code>std::invalid_argument</code>，另加一条收尾检查：<strong>最后一个结点的两个标记 都必须是 1</strong>。测试里三种不自洽输入各有一条用例。</p>
+<p><strong>为什么是「拒绝」而不是「尽量还原」</strong>，值得单独说一句，因为初学者常想「能修就修」：</p>
+<ul>
+<li>标记的定义就是 <code>ltag == 1</code> 表示无孩子、<code>rtag == 1</code> 表示无兄弟。先根序列的最后一个结点 后面已经没有结点了，孩子和右兄弟都无处安放，所以它<strong>必然</strong>是 <code>1, 1</code>。</li>
+<li>扫描过程里，「有兄弟」入栈与「子树到头」出栈是一一配对的。对空栈出栈， 说明这个序列违反了这种配对关系。</li>
+</ul>
+<p>也就是说，这三类输入不是合法的边界情况，而是<strong>不对应任何森林的编码</strong>—— 多半是标记抄错了一位，或者序列被截断了。这时抛异常是在替使用者指出输入有问题; 默默「还原」出一棵树，只会把错误往后传。</p>
 <h3 id="633-带度数的后根次序表示"><a class="anchor" href="#633-带度数的后根次序表示">#</a>6.3.3 带度数的后根次序表示</h3>
 <p>按后根次序存放，每个结点记下自己的度数（孩子个数）。后根的特点是：一个结点出现时，它的全部孩子已经作为连续的一段排在它前面。扫描时用栈，每读到一个度数为 <span class="math">d</span> 的结点，就从栈顶弹出 <span class="math">d</span> 棵子树做它的孩子，再把这棵新树压回去。扫完数组，栈里剩下的就是整棵树（或森林）。</p>
 <h3 id="634-带双标记的层次次序表示"><a class="anchor" href="#634-带双标记的层次次序表示">#</a>6.3.4 带双标记的层次次序表示</h3>
@@ -655,7 +663,7 @@ rtag       0  1  0  1  1  1  0  0  1  1     0 = 有下一个兄弟</code></pre><
 <p>满 <span class="math">K</span> 叉树、完全 <span class="math">K</span> 叉树的定义与二叉树平行：满 <span class="math">K</span> 叉树的每个结点要么是叶，要么恰好 <span class="math">K</span> 个孩子；完全 <span class="math">K</span> 叉树只有最下两层的度可以小于 <span class="math">K</span>，且最下层靠左对齐。按层从 0 编号时，结点 <span class="math">i</span> 的孩子们是 <span class="math">Ki<span class="bin">+</span><span class="upr">1</span>,…,Ki<span class="bin">+</span>K</span>，父结点是 <span class="math">⌊(i<span class="bin">−</span><span class="upr">1</span>)/K⌋</span>。<span class="math">K<span class="rel">=</span><span class="upr">2</span></span> 就回到二叉树。</p>
 <p>本章主实现仍是任意度的左子 / 右兄，不单独做一份 <span class="math">K</span> 叉数组。需要固定 <span class="math">K</span>、又想顺序存放时，用上面的编号公式即可。</p>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
-<p>一般树允许任意多个孩子。森林是若干互不相交的树。树和森林与二叉树可以按「长子—左、兄弟—右」一一转换。链式存储里，左子/右兄用两个指针表示任意度；顺序存储则按某种周游次序排进数组，再靠右链、双标记或度数还原树形。并查集用父指针表示集合，路径压缩和按秩合并让大量操作接近常数。<span class="math">K</span> 叉树是度有上限的特例。</p>
+<p>一般树允许任意多个孩子。森林是若干互不相交的树。树和森林与二叉树可以按「长子—左、兄弟—右」一一转换。链式存储里，左子/右兄用两个指针表示任意度；顺序存储则按某种周游次序排进数组，再靠右链、双标记或度数还原树形。并查集用父指针表示集合，路径压缩和重量权衡合并让大量操作接近常数。<span class="math">K</span> 叉树是度有上限的特例。</p>
 <h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
 <h3 id="补充证明与算法题参考课程第-6-章"><a class="anchor" href="#补充证明与算法题参考课程第-6-章">#</a>补充证明与算法题（参考课程第 6 章）</h3>
 <ol>
