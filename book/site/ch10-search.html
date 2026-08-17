@@ -163,12 +163,48 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>数据放在数组或链表里，按给定值 <span class="math">K</span> 与表中元素比较，直到命中或能确定不在表中。这一节不要求散列函数，也不建树，只靠线性结构本身。</p>
 <h3 id="1011-顺序检索"><a class="anchor" href="#1011-顺序检索">#</a>10.1.1 顺序检索</h3>
 <p>从表头逐个比到表尾。表可以无序，实现最简单，链表和数组都能用。最好情况目标在第一个位置，比较 1 次；最坏情况目标不在表里，比较 <span class="math">n</span> 次；等概率时平均检索长度 <span class="math"><span class="upr">ASL</span><span class="rel">=</span>(n<span class="bin">+</span><span class="upr">1</span>)/<span class="upr">2</span></span>。有时在表尾放一个与 <span class="math">K</span> 相等的「监视哨」，循环里就不必每次都判断下标有没有出界，比较次数的常数会小一点，阶不变。</p>
+<p>对 <code>{8,3,8,1}</code> 查 8，第一次比较就命中下标 0；查 7 则依次比较 8、3、8、1，走完整张表才知道失败。重复关键码存在时，本书接口返回<strong>第一个</strong>匹配位置，这不是顺序检索自动保证的抽象性质，而是“从左向右、命中即停”这份实现的明确约定。</p>
+<p>监视哨适合能临时修改的数组：先把目标值写到末尾的额外槽，再只问“当前元素是否等于目标”。循环一定会停，停在原表范围内就是成功，停在哨兵槽就是失败。但只读输入、并发共享数组或没有额外槽时，不应为省一个边界判断去改数据。</p>
 <h3 id="1012-二分检索"><a class="anchor" href="#1012-二分检索">#</a>10.1.2 二分检索</h3>
 <p>表必须按关键码有序，并且能按下标随机访问，所以适合数组，不适合链表。每次取当前区间的中点：相等则停；目标更大则丢掉左半，否则丢掉右半。区间长度每次至少减半，比较次数是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>。</p>
 <p>实现时用半开区间 <code>[first, last)</code>：中点是 <code>first + (last - first) / 2</code>，走左半时 <code>last = middle</code>，走右半时 <code>first = middle + 1</code>。这样不必写 <code>middle - 1</code>，无符号下标不会在 <code>middle == 0</code> 时下溢。循环条件是 <code>first &lt; last</code>；区间空了还没找到，就返回空。</p>
+<p>原书用有序表 <code>{1,3,7,8,12,15,18,21}</code> 查 18。按本书的半开区间写法：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:right">轮次</th>
+<th style="text-align:left">候选区间 <code>[first,last)</code></th>
+<th style="text-align:right"><code>middle</code></th>
+<th style="text-align:right">中值</th>
+<th style="text-align:left">判断</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:right">1</td>
+<td style="text-align:left"><code>[0,8)</code></td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">12</td>
+<td style="text-align:left"><span class="math"><span class="upr">12</span>&lt;<span class="upr">18</span></span>，令 <code>first=5</code></td>
+</tr>
+<tr>
+<td style="text-align:right">2</td>
+<td style="text-align:left"><code>[5,8)</code></td>
+<td style="text-align:right">6</td>
+<td style="text-align:right">18</td>
+<td style="text-align:left">命中下标 6</td>
+</tr>
+</tbody></table></div>
+<p>若改查 14，过程会是 <code>[0,8) → [5,8) → [5,6) → [5,5)</code>，区间为空后失败。每轮都维持同一个不变量：若目标存在，它一定还在 <code>[first,last)</code> 里；更新边界时必须把已经比较过且不可能命中的中点排除。</p>
+<figure><img loading="lazy" src="../assets/0792c8837fab4a44.jpg" alt="图 10.1 二分检索 K=18 的过程"><figcaption>图 10.1 二分检索 K=18 的过程</figcaption></figure>
+<p>图10.1把一次查找画成区间逐步缩小；图10.2则把所有可能的比较路径同时展开。树高决定最坏比较次数，<span class="math">n</span> 个元素对应高度 <span class="math">⌊<span class="upr">log</span><sub><span class="upr">2</span></sub>n⌋<span class="bin">+</span><span class="upr">1</span></span> 的判定路径。</p>
+<figure><img loading="lazy" src="../assets/5f0f882d1e9ec27f.jpg" alt="图10.2 二分检索的决策树"><figcaption>图10.2 二分检索的决策树</figcaption></figure>
 <h3 id="1013-分块检索"><a class="anchor" href="#1013-分块检索">#</a>10.1.3 分块检索</h3>
 <p>把 <span class="math">n</span> 个元素分成 <span class="math">b</span> 块。块与块之间有序（后一块的最小关键码不小于前一块的最大关键码），块内部可以无序。另造一张块索引，每项记下该块的最大（或最小）关键码和块的起始位置。检索时先在索引上顺序或二分，确定目标可能在哪一块，再在那一块里顺序查。</p>
 <p>块数选 <span class="math"><span class="sqrt">n</span></span> 量级时，索引和块内的平均比较次数比较均衡，ASL 大约是 <span class="math">O(<span class="sqrt">n</span>)</span>，介于顺序的 <span class="math">O(n)</span> 和二分的 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span> 之间。它适合「主表很大、不能整表排序，但可以按块组织」的场合。本章不另写未验证的分块实现。</p>
+<figure><img loading="lazy" src="../assets/980c030f1f50d7f9.jpg" alt="图 10.3 分块检索的存储表示"><figcaption>图 10.3 分块检索的存储表示</figcaption></figure>
+<p>原书图10.3把主表分成三块：</p>
+<div class="codeblock" data-lang="text"><pre><code>块 0: 22 12 13  9  8       索引项 (max=22, start=0)
+块 1: 33 42 44 24 48       索引项 (max=48, start=5)
+块 2: 60 80 74 49 86 53    索引项 (max=86, start=10)</code></pre></div>
+<p>查 44 时，先在索引中比较 22、48，确定只能在块 1；再顺序比较 33、42、44。查 23 时同样落到块 1，但扫完整块失败；不能因为 23 小于块最大值 48 就断言存在。块间有序只负责排除别的块，块内仍然无序。</p>
+<p>若索引顺序查且每块等长，粗略代价是“查索引约 <span class="math">b/<span class="upr">2</span></span> 次 + 查块内约 <span class="math">n/(<span class="upr">2</span>b)</span> 次”。令两项平衡得到 <span class="math">b<span class="rel">≈</span><span class="sqrt">n</span></span>。索引改用二分后最优块数会变化，因此“固定分成根号 n 块”不是定义，只是特定成本模型下的选择。</p>
 <h3 id="教学版完整实现"><a class="anchor" href="#教学版完整实现">#</a>教学版：完整实现</h3>
 <p>本章的四件东西——两种检索、集合、散列函数、闭散列表——放在同一个文件里。 后面 10.2、10.3 各节就是把它拆开逐段讲。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch10/search_hash/teaching.hpp">code/ch10/search_hash/teaching.hpp</a></div><pre><code><span class="c">// 检索、集合与散列 —— 教学版。</span>
@@ -435,19 +471,36 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h2 id="102-集合的检索"><a class="anchor" href="#102-集合的检索">#</a>10.2 集合的检索</h2>
 <p>检索也可以用来实现集合。集合只关心一个元素在不在里面，不保留重复，也不保证顺序。交、并、差、包含都可以建立在「是否属于」之上。</p>
 <h3 id="1021-集合的数学特性"><a class="anchor" href="#1021-集合的数学特性">#</a>10.2.1 集合的数学特性</h3>
-<p>集合的元素互异：同一个值不能出现两次。「<span class="math">x</span> 属于 <span class="math">S</span>」是一个命题，不是一个位置。所以插入一个已经在里面的键、删除一个不在里面的键，都是正常、可预期的失败，应当返回「没做成」，而不是抛异常或打印一行。空集上的任何包含询问都是假。</p>
+<p>集合的元素互异：同一个值不能出现两次。「<span class="math">x</span> 属于 <span class="math">S</span>」是一个命题，不是一个位置。所以插入一个已经在里面的键、删除一个不在里面的键，都是正常、可预期的失败，应当返回「没做成」，而不是抛异常或打印一行。对任意元素都有 <span class="math">x<span class="rel">∉</span>∅</span>；但子集关系方向不同，任何集合都包含空集，空集也包含自身。</p>
+<p>集合运算应满足可拿来测试的代数性质：<span class="math">A<span class="bin">∩</span>B<span class="rel">=</span>B<span class="bin">∩</span>A</span>，<span class="math">A<span class="bin">∩</span>A<span class="rel">=</span>A</span>，<span class="math">A<span class="bin">∩</span>∅<span class="rel">=</span>∅</span>；包含关系满足 <span class="math">A⊇A</span>，且空集被任何集合包含。示例测试不只核对一次结果，还要用这些性质防止实现“碰巧对一组输入”。</p>
 <h3 id="1022-计算机中的集合"><a class="anchor" href="#1022-计算机中的集合">#</a>10.2.2 计算机中的集合</h3>
 <p>同一组集合运算，底下可以用不同结构：线性表加顺序检索（实现简单，适合很小的集合）、有序表加二分、二叉搜索树、散列表。规模上去以后，线性表的 <span class="math">O(n)</span> 检索会拖垮交和并。本章的 <code>IntSet</code> 故意用线性表，把接口先钉死：<code>insert</code> / <code>erase</code> 返回 <code>bool</code>，<code>contains</code> 只回答在不在，<code>intersection</code> 和 <code>includes</code> 用检索组合出来。换成散列表时，调用方不用改。</p>
 <p><code>IntSet</code> 的实现见上面那份清单。注意它的每一个运算最后都落到 <code>contains</code>， 而 <code>contains</code> 是顺序检索 O(n)——所以交集是 O(n·m)。<strong>10.3 节的散列就是来把这个 O(n) 压成 O(1) 的</strong>，接口一个字都不用改。</p>
+<h4 id="有限全集上的位表示"><a class="anchor" href="#有限全集上的位表示">#</a>有限全集上的位表示</h4>
+<p>若全集固定而且不大，集合可以直接表示成位向量。设全集为 <code>{a,b,c,d,e,f,g,h}</code>，从低位到高位依次对应这 8 个元素：</p>
+<div class="codeblock" data-lang="text"><pre><code>A = {a,c,f}     -&gt; 00100101
+B = {b,c,f,g}   -&gt; 01100110
+A ∩ B           -&gt; 00100100 = {c,f}
+A ∪ B           -&gt; 01100111 = {a,b,c,f,g}
+A \ B           -&gt; 00000001 = {a}</code></pre></div>
+<p>交、并、差分别变成按位与、按位或、<code>A &amp; ~B</code>，一次机器指令能并行处理 32 或 64 个元素。代价是空间与全集大小成正比：学号全集若可能有十亿个值、实际只出现几十个，位向量就很浪费；这时散列表或树更合适。</p>
+<p>位表示还要求先固定“元素到位号”的映射。若映射随运行改变，两个看起来同为 <code>00100101</code> 的位串可能代表不同集合，按位运算就没有意义。第 11 章位图索引会把同一思想扩展到数据库记录列。</p>
 <h2 id="103-散列方法"><a class="anchor" href="#103-散列方法">#</a>10.3 散列方法</h2>
 <p>前面的检索都要和表里的元素比较，至少看 <span class="math"><span class="upr">log</span>&thinsp;n</span> 或 <span class="math"><span class="sqrt">n</span></span> 个。散列换一条路：用函数从关键码直接算出槽位下标，期望一次就能到。它不保持键的次序，不能按范围遍历；装载因子过高或散列不均匀时，冲突变多，会退化成接近线性。</p>
 <h3 id="1031-散列函数"><a class="anchor" href="#1031-散列函数">#</a>10.3.1 散列函数</h3>
 <p>散列函数 <span class="math">h</span> 把关键码映到 <span class="math">{<span class="upr">0</span>,<span class="upr">1</span>,…,m<span class="bin">−</span><span class="upr">1</span>}</span>。它应当算得快，并且尽量把地址铺匀，否则很多键挤在同一段，再好的冲突处理也救不了。常见做法有：除留余数（<span class="math">h(k)<span class="rel">=</span>k&thinsp;<span class="upr">bmod</span>&thinsp;m</span>，<span class="math">m</span> 最好是素数）、折叠、平方取中、以及按字节处理的字符串散列。</p>
 <p>本章实现了 ELFHash：每个字节先左移 4 位再加进去，高 4 位若非零就折回到低位并清掉。字节按 <code>unsigned char</code> 读，避免 <code>char</code> 在有的平台上是有符号的、高位 1 被当成负数。它不是密码学哈希，只求快和够匀。</p>
+<p>散列函数不能只拿一两个键试。若关键码本身有规律，例如学号末两位大量重复，直接取末位会把数据挤进少数槽。除留余数法常把表长选成与数据规律无公因子的素数；平方取中和折叠则试图把关键码不同位置的信息混在一起。</p>
+<figure><img loading="lazy" src="../assets/fe1490af9bcca8c0.jpg" alt="移位叠加和分界叠加"><figcaption>移位叠加和分界叠加</figcaption></figure>
+<p>图10.6展示两种折叠法：把长关键码分段后相加。移位叠加直接求和，分界叠加把相邻段反向后再加，目的都是让关键码每一部分参与地址计算。无论用哪一种，最终仍要对表长取模，保证结果落在合法槽位范围。</p>
+<p>评价散列函数至少看三件事：同一键必须稳定得到同一地址；计算成本不能比检索本身还贵；在实际键分布上应尽量均匀。密码学散列还要求抗碰撞、抗逆向，本章散列表不承担这些安全目标，不能拿 ELFHash 保存密码。</p>
 <p><code>elf_hash</code> 的实现见上面那份清单。它逐字节读的是 <code>unsigned char</code>—— 教学版的测试里有一条拿 UTF-8 的「中」（E4 B8 AD）做输入：按无符号读得到 <code>0xF02D</code>，按有符号读会被符号扩展成 <code>0xFFFFFF000FFF00DD</code>。两者天差地别， 所以这一条能把两种写法分开。</p>
 <h3 id="1032-开散列方法拉链法"><a class="anchor" href="#1032-开散列方法拉链法">#</a>10.3.2 开散列方法(拉链法)</h3>
 <p>开散列不在表内挤位置：每个槽挂一条链表（或动态数组），散列到同一地址的关键码都串在这条链上。插入是算地址再接到链头或链尾；查找、删除只在那一条链上走。删掉一个结点不会影响别的链，也不存在「探测序列被截断」的问题。</p>
 <p>装载因子 <span class="math">α<span class="rel">=</span>n/m</span> 可以大于 1，链只是变长。成功查找的期望比较次数大约是 <span class="math"><span class="upr">1</span><span class="bin">+</span>α/<span class="upr">2</span></span>。实现简单，空间上每个结点多一个指针。本章主实现是闭散列，开散列不另写一份。</p>
+<figure><img loading="lazy" src="../assets/70ba08a893dc9d64.jpg" alt="图 10.7 开散列方法"><figcaption>图 10.7 开散列方法</figcaption></figure>
+<p>图10.7中每个表槽只是链头，同址键挂在同一条链上。查找失败只需走完对应链，不看其他桶；删除也只摘掉链中结点。若每条链内部无序，成功查询平均看半条链，失败查询看整条链，这正是上面 ASL 公式中 <span class="math">α/<span class="upr">2</span></span> 与 <span class="math">α</span> 的来源。</p>
+<p>拉链法的风险从“表满”变成“某条链过长”。散列函数分布不均或攻击者能构造同址键时，单个桶可能退化成长度 <span class="math">n</span> 的链，查找回到 <span class="math">O(n)</span>。工程库会随机化散列种子，或在链过长时改用平衡树；平均 <span class="math">O(<span class="upr">1</span>)</span> 从来不是无条件保证。</p>
 <h3 id="1033-闭散列方法开地址法"><a class="anchor" href="#1033-闭散列方法开地址法">#</a>10.3.3 闭散列方法(开地址法)</h3>
 <p>闭散列把冲突消化在表内：回家地址被占了，就按某种规则探测下一个空槽。线性探测是最简单的一种——第 <span class="math">i</span> 次看 <span class="math">(h(k)<span class="bin">+</span>i)&thinsp;<span class="upr">bmod</span>&thinsp;m</span>。二次探测、双重散列是为了减轻「挤成一团」的一次聚集。</p>
 <p>表满了就插不进去，所以 <span class="math">α</span> 必须小于 1，实务上常在 0.5 到 0.7 之间扩表。删除是闭散列的难点：不能把槽直接标成空。否则沿这条探测链查找后面的键时，会在空槽处误判「从来没插入过」而提前停止。解决办法是给槽加第三种状态——除了「空」和「有元素」，再加一个<strong>墓碑</strong>（tombstone），意思是「这里曾经有元素，被删掉了，但探测链还要继续往下走」。</p>
@@ -456,6 +509,82 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
      空   1    6    11   空</code></pre></div>
 <p>删除键 1 后，若把槽 1 直接标为空，查找键 6 从槽 1 开始会误以为「从未插入过 6」并提前停止。墓碑表示「这里曾有元素，但探测链还要继续」。插入新键时可以复用第一个墓碑，但查重必须继续走到真正的空槽或找到同键为止。</p>
 <p>图 10.5 就是上面这张槽位表。</p>
+<figure><img loading="lazy" src="../assets/55bc014a79d6a905.jpg" alt="图 10.5 关键码对应的散列表"><figcaption>图 10.5 关键码对应的散列表</figcaption></figure>
+<p>把完整状态变化写出来，更容易看清“空”和“墓碑”的不同：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">操作</th>
+<th style="text-align:left">槽 0</th>
+<th style="text-align:left">槽 1</th>
+<th style="text-align:left">槽 2</th>
+<th style="text-align:left">槽 3</th>
+<th style="text-align:left">槽 4</th>
+<th style="text-align:left">说明</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">初始</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">-</td>
+</tr>
+<tr>
+<td style="text-align:left">插入 1</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left"><code>home(1)=1</code></td>
+</tr>
+<tr>
+<td style="text-align:left">插入 6</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">6</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">1 冲突，探测到 2</td>
+</tr>
+<tr>
+<td style="text-align:left">插入 11</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">6</td>
+<td style="text-align:left">11</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">连续冲突，探测到 3</td>
+</tr>
+<tr>
+<td style="text-align:left">删除 1</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">墓碑</td>
+<td style="text-align:left">6</td>
+<td style="text-align:left">11</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">探测链不能截断</td>
+</tr>
+<tr>
+<td style="text-align:left">查找 11</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">墓碑</td>
+<td style="text-align:left">6</td>
+<td style="text-align:left">11</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">越过墓碑，在 3 命中</td>
+</tr>
+<tr>
+<td style="text-align:left">插入 16</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">16</td>
+<td style="text-align:left">6</td>
+<td style="text-align:left">11</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">记住首个墓碑，确认无重复后复用</td>
+</tr>
+</tbody></table></div>
+<p>最后一步不能一看到墓碑就立刻插入。假设同一个 16 已经在更后面的槽，提前写入会制造重复键。正确插入先记住第一个墓碑，继续探测到真正的空槽或同键；只有确认键不存在后才回头复用墓碑。</p>
 <p>散列表追求平均 O(1) 查找，前提是装载因子不过高且散列分布均匀；它不保持键的有序关系，不适合按范围遍历。</p>
 <h3 id="1034-闭散列表的算法"><a class="anchor" href="#1034-闭散列表的算法">#</a>10.3.4 闭散列表的算法</h3>
 <p>先跑一遍：</p>
@@ -522,8 +651,80 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>工程版在 <code>code/ch10/search_hash/modern.hpp</code>。这一章没有手写存储管理， 所以没有三法则/五法则之分，差别只有标注与排版：查询函数标了 <code>[[nodiscard]]</code> （防止「查了却忘了看结果」）与 <code>noexcept</code>，若干 <code>if</code> 分支压成一行。逻辑完全一致。</p>
 <h3 id="1035-散列方法的效率分析"><a class="anchor" href="#1035-散列方法的效率分析">#</a>10.3.5 散列方法的效率分析</h3>
 <p>成功检索的期望探测次数随装载因子 α 上升。线性探测大约是 <span class="math">(<span class="upr">1</span><span class="bin">+</span><span class="upr">1</span>/(<span class="upr">1</span><span class="bin">−</span>α))/<span class="upr">2</span></span>；拉链法是 <span class="math"><span class="upr">1</span><span class="bin">+</span>α/<span class="upr">2</span></span>。α 接近 1 时闭散列急剧变差，应扩表或改开散列。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:right">装载因子 <span class="math">α</span></th>
+<th style="text-align:right">线性探测成功查询近似 ASL</th>
+<th style="text-align:left">直观状态</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:right">0.25</td>
+<td style="text-align:right">1.17</td>
+<td style="text-align:left">大部分键在回家地址</td>
+</tr>
+<tr>
+<td style="text-align:right">0.50</td>
+<td style="text-align:right">1.50</td>
+<td style="text-align:left">冲突可控</td>
+</tr>
+<tr>
+<td style="text-align:right">0.70</td>
+<td style="text-align:right">2.17</td>
+<td style="text-align:left">聚集开始明显</td>
+</tr>
+<tr>
+<td style="text-align:right">0.80</td>
+<td style="text-align:right">3.00</td>
+<td style="text-align:left">应考虑扩表</td>
+</tr>
+<tr>
+<td style="text-align:right">0.90</td>
+<td style="text-align:right">5.50</td>
+<td style="text-align:left">少量空槽被长探测链隔开</td>
+</tr>
+<tr>
+<td style="text-align:right">0.95</td>
+<td style="text-align:right">10.50</td>
+<td style="text-align:left">已接近线性退化</td>
+</tr>
+</tbody></table></div>
+<figure><img loading="lazy" src="../assets/df08b72b2ef34643.jpg" alt="不同碰撞处理方法的平均检索长度"><figcaption>不同碰撞处理方法的平均检索长度</figcaption></figure>
+<p>图10.11把不同冲突处理方法的曲线放在一起。横轴接近 1 时，开放地址法的曲线快速上扬；拉链法可以让 <span class="math">α&gt;<span class="upr">1</span></span>，但链长仍随元素数增长。扩表不是只把数组变大：所有键的地址都依赖表长，必须按新表长重新散列，不能原封不动复制槽位。</p>
+<p>墓碑也会抬高实际探测成本，却不计入 <code>size()/capacity()</code>。一张“有效装载因子只有 0.4”的表，如果另有 0.4 的槽是墓碑，失败查询仍可能走过 0.8 张表。工程实现通常同时跟踪有效元素数和已占用槽数，墓碑过多时即使容量未满也要重建。</p>
 <h3 id="1036-散列方法的应用"><a class="anchor" href="#1036-散列方法的应用">#</a>10.3.6 散列方法的应用</h3>
 <p>编译器符号表、缓存、去重都常用散列。需要范围查询或有序遍历时，应改用树或有序表。</p>
+<p>选择结构时先问操作，不要先问哪个复杂度符号更小：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">需求</th>
+<th style="text-align:left">适合的结构</th>
+<th style="text-align:left">不选散列的原因</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">精确查一个键</td>
+<td style="text-align:left">散列表</td>
+<td style="text-align:left">正是它的长项</td>
+</tr>
+<tr>
+<td style="text-align:left">按键从小到大遍历</td>
+<td style="text-align:left">有序表 / 搜索树</td>
+<td style="text-align:left">散列槽位没有关键码顺序</td>
+</tr>
+<tr>
+<td style="text-align:left">查 <code>[low,high]</code> 范围</td>
+<td style="text-align:left">B+ 树 / 有序数组</td>
+<td style="text-align:left">散列不能定位相邻键</td>
+</tr>
+<tr>
+<td style="text-align:left">数据很少且更新不频繁</td>
+<td style="text-align:left">线性表</td>
+<td style="text-align:left">实现和内存开销更小</td>
+</tr>
+<tr>
+<td style="text-align:left">需要最坏 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span></td>
+<td style="text-align:left">平衡搜索树</td>
+<td style="text-align:left">普通散列只保证期望代价</td>
+</tr>
+</tbody></table></div>
+<p>缓存还要处理容量淘汰，去重还要保存原始键以确认“散列值相同但键不同”的碰撞。散列值只是候选地址或摘要，不能代替关键码相等判断。</p>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
 <p>检索是按关键码或属性定位记录。线性表上有顺序、二分和分块：分别要求无序、有序可随机访问、块间有序。集合只关心「在不在」，插入已存在或删除不存在都是正常失败。散列用函数直接定位槽位，期望 <span class="math">O(<span class="upr">1</span>)</span>；开散列把冲突挂到链上，闭散列在表内探测。闭散列删除必须留墓碑，否则会截断探测链。装载因子过高时要扩表。</p>
 <h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
