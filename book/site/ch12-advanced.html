@@ -154,7 +154,8 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <nav class="book"><b>导读</b><a href="index.html">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html" class="here">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a></nav>
 <main>
 
-<p>本章包含两个主题。可利用空间表复用固定数量的槽位：申请取得一个空闲槽，释放把它归还。最优二叉搜索树则把访问频率写成权重，用动态规划比较每个区间可能的根，得到总查找代价最小的树。</p>
+<p>本章把前面学过的「存储、查找、回收」推到更复杂的对象上：多维数组把多个下标换算成一个线性地址；稀疏矩阵让结点同时进入行链和列链；广义表允许共享甚至成环；Trie 按关键码的字符或位分支；最优 BST、AVL 和伸展树则分别用访问权重、严格高度平衡和访问局部性改进查找。可利用空间表与标记–清除穿插其间，回答这些结点不用以后由谁回收。</p>
+<p>读这一章不要只记结构名称。每一节都追问三个问题：<strong>一个逻辑对象落在哪些物理位置；一次更新要同时维护哪些不变量；结构失效或空间不足时怎样收尾。</strong> 后面的演算都围绕这三问展开。</p>
 <p>本章各节的实现状态：</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">小节</th>
@@ -207,10 +208,48 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p><span class="math">d<sub><span class="upr">0</span></sub><span class="bin">×</span>d<sub><span class="upr">1</span></sub><span class="bin">×</span>⋯<span class="bin">×</span>d<sub>n<span class="bin">−</span><span class="upr">1</span></sub></span> 数组中，元素 <span class="math">A[j<sub><span class="upr">0</span></sub>,…,j<sub>n<span class="bin">−</span><span class="upr">1</span></sub>]</span> 相对首地址的偏移是</p>
 <div class="math math-display">d<span class="bin">⋅</span>(∑<sub>i<span class="rel">=</span><span class="upr">0</span></sub><sup>n<span class="bin">−</span><span class="upr">2</span></sup>j<sub>i</sub>∏<sub>k<span class="rel">=</span>i<span class="bin">+</span><span class="upr">1</span></sub><sup>n<span class="bin">−</span><span class="upr">1</span></sup>d<sub>k</sub><span class="bin">+</span>j<sub>n<span class="bin">−</span><span class="upr">1</span></sub>)</div>
 <p>其中 <span class="math">d</span> 是一个元素所占单元数。每个元素的定位时间相同，所以这是随机存储结构。FORTRAN 按<strong>列优先</strong>，先排最左下标，公式左右对调。</p>
+<p>以 <code>int A[2][3][4]</code> 为例，找 <code>A[1][2][3]</code> 时，不必真的把 24 个元素列出来。最右一维每跨一步跳 1 个元素，中间一维每跨一步跳 4 个，最左一维每跨一步跳 <span class="math"><span class="upr">3</span><span class="bin">×</span><span class="upr">4</span><span class="rel">=</span><span class="upr">12</span></span> 个：</p>
+<div class="math math-display">offset<span class="rel">=</span><span class="upr">1</span><span class="bin">×</span><span class="upr">12</span><span class="bin">+</span><span class="upr">2</span><span class="bin">×</span><span class="upr">4</span><span class="bin">+</span><span class="upr">3</span><span class="rel">=</span><span class="upr">23</span></div>
+<p>若 <code>int</code> 占 4 字节，字节偏移就是 92。也可以从左往右用霍纳法算：<code>((1 * 3 + 2) * 4 + 3) * 4 = 92</code>。这种写法只需一边读下标一边累乘，不必预存每一维的跨度。定位前仍要逐维检查 <code>0 &lt;= j_i &lt; d_i</code>；公式本身不会替程序发现越界。</p>
+<p>把每一步展开，可以同时核对跨度与边界：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">维</th>
+<th style="text-align:right">下标</th>
+<th style="text-align:right">后续维大小的乘积</th>
+<th style="text-align:right">贡献</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right"><span class="math"><span class="upr">3</span><span class="bin">×</span><span class="upr">4</span><span class="rel">=</span><span class="upr">12</span></span></td>
+<td style="text-align:right">12</td>
+</tr>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">8</td>
+</tr>
+<tr>
+<td style="text-align:left">2</td>
+<td style="text-align:right">3</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">3</td>
+</tr>
+<tr>
+<td style="text-align:left">合计</td>
+<td style="text-align:right"></td>
+<td style="text-align:right"></td>
+<td style="text-align:right">23 个元素</td>
+</tr>
+</tbody></table></div>
+<p>列优先不是把最终答案随意反过来，而是把最左下标当作变化最快的一维。同一个 <code>2 x 3 x 4</code> 形状若按列优先存，<code>[1,2,3]</code> 的元素偏移为 <span class="math"><span class="upr">1</span><span class="bin">+</span><span class="upr">2</span><span class="bin">×</span><span class="upr">2</span><span class="bin">+</span><span class="upr">3</span><span class="bin">×</span>(<span class="upr">2</span><span class="bin">×</span><span class="upr">3</span>)<span class="rel">=</span><span class="upr">23</span></span>；这个角落碰巧仍是 23，换成 <code>[1,0,0]</code> 就能分辨：行优先为 12，列优先为 1。测试布局时应选这种能区分规则的下标。</p>
 <h3 id="1212-特殊矩阵"><a class="anchor" href="#1212-特殊矩阵">#</a>12.1.2 特殊矩阵</h3>
 <p>矩阵常用二维数组表示，但有些矩阵里大量元素是 0 或同一个常数，不必存整块。</p>
 <p><strong>三角矩阵。</strong> <span class="math">n</span> 阶上三角（或下三角）里，对角线一侧全是 0 或常数 <span class="math">c</span>。只需存另一侧加上那个常数，一共 <span class="math">(n<sup><span class="upr">2</span></sup><span class="bin">+</span>n)/<span class="upr">2</span></span> 个单元。若用一维数组 <code>list[0 .. (n²+n)/2-1]</code> 存下三角，元素 <span class="math">a<sub>i,j</sub></span>（<span class="math">i<span class="rel">≥</span>j</span>）前面有 <span class="math">i</span> 行、共 <span class="math">(i<sup><span class="upr">2</span></sup><span class="bin">+</span>i)/<span class="upr">2</span></span> 个非零元，再加本行的 <span class="math">j</span>，下标就是 <span class="math">(i<sup><span class="upr">2</span></sup><span class="bin">+</span>i)/<span class="upr">2</span><span class="bin">+</span>j</span>。</p>
 <p><strong>对称矩阵。</strong> <span class="math">a<sub>i,j</sub><span class="rel">=</span>a<sub>j,i</sub></span>。只存下三角（含对角线），另一半用对称关系映射。<code>list</code> 与 <span class="math">a<sub>i,j</sub></span> 的对应是：<span class="math">i<span class="rel">≥</span>j</span> 时下标 <span class="math">(i<sup><span class="upr">2</span></sup><span class="bin">+</span>i)/<span class="upr">2</span><span class="bin">+</span>j</span>，否则 <span class="math">(j<sup><span class="upr">2</span></sup><span class="bin">+</span>j)/<span class="upr">2</span><span class="bin">+</span>i</span>。</p>
+<figure><img loading="lazy" src="../assets/ff4a0e68418ad4b3.jpg" alt="图 12.1 上三角矩阵和下三角矩阵"><figcaption>图 12.1 上三角矩阵和下三角矩阵</figcaption></figure>
+<p>4 阶下三角按行压缩后的区间是 <code>[0]</code>、<code>[1..2]</code>、<code>[3..5]</code>、<code>[6..9]</code>。因此 <span class="math">a<sub><span class="upr">3</span>,<span class="upr">1</span></sub></span> 落在 <code>6 + 1 = 7</code>；上三角位置 <span class="math">a<sub><span class="upr">1</span>,<span class="upr">3</span></sub></span> 若矩阵对称，则先换成 <span class="math">a<sub><span class="upr">3</span>,<span class="upr">1</span></sub></span>，仍读下标 7。先判断三角区域、再套公式，比背两套容易核对。</p>
 <h3 id="1213-稀疏矩阵"><a class="anchor" href="#1213-稀疏矩阵">#</a>12.1.3 稀疏矩阵</h3>
 <p>非零元很少、分布又不规则时，叫稀疏矩阵。<span class="math">m<span class="bin">×</span>n</span> 的矩阵里有 <span class="math">t</span> 个非零元，稀疏因子 <span class="math">δ<span class="rel">=</span>t/(mn)</span>；通常 <span class="math">δ&lt;<span class="upr">0.05</span></span> 就按稀疏处理。这时不应再分配整块二维数组，而改存三元组 <code>(行, 列, 值)</code> 的线性表，或用十字链表：<strong>每个非零元同时挂在一条行链和一条列链上</strong>，便于按行、按列遍历。</p>
 <p>三种存法的代价：</p>
@@ -245,12 +284,45 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <td style="text-align:left"><span class="math">O(行内<span class="bin">+</span>列内定位)</span></td>
 </tr>
 </tbody></table></div>
+<figure><img loading="lazy" src="../assets/7243968f87b4e75b.jpg" alt="图 12.2 稀疏矩阵的十字链表"><figcaption>图 12.2 稀疏矩阵的十字链表</figcaption></figure>
+<p>看一个 <span class="math"><span class="upr">4</span><span class="bin">×</span><span class="upr">5</span></span> 的小矩阵，只列非零元：<code>(0,1,8)</code>、<code>(0,4,2)</code>、<code>(2,1,5)</code>、<code>(3,3,7)</code>。结点 <code>(2,1,5)</code> 在第 2 行链里可能是唯一结点，在第 1 列链里却接在 <code>(0,1,8)</code> 后面。把它删掉必须做两次摘链：第 2 行头改为空，第 1 列中让 8 的下继越过 5。只改一条链，按行和按列看到的就不再是同一个矩阵。</p>
+<p>插入 <code>(0,1,9)</code> 也不能再造一个同坐标结点；应找到旧结点并覆盖 8。测试十字链表时因此至少要查四件事：新坐标同时出现在两条链、覆盖不增加非零元数、赋值为 0 等价于删除、删除后两条链都找不到它。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">操作后</th>
+<th style="text-align:left">第 0 行链</th>
+<th style="text-align:left">第 2 行链</th>
+<th style="text-align:left">第 1 列链</th>
+<th style="text-align:right"><span class="math">t</span></th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">初始</td>
+<td style="text-align:left"><code>(0,1,8) -&gt; (0,4,2)</code></td>
+<td style="text-align:left"><code>(2,1,5)</code></td>
+<td style="text-align:left"><code>(0,1,8) -&gt; (2,1,5)</code></td>
+<td style="text-align:right">4</td>
+</tr>
+<tr>
+<td style="text-align:left">覆盖 <code>(0,1,9)</code></td>
+<td style="text-align:left"><code>(0,1,9) -&gt; (0,4,2)</code></td>
+<td style="text-align:left"><code>(2,1,5)</code></td>
+<td style="text-align:left"><code>(0,1,9) -&gt; (2,1,5)</code></td>
+<td style="text-align:right">4</td>
+</tr>
+<tr>
+<td style="text-align:left">删除 <code>(2,1)</code></td>
+<td style="text-align:left"><code>(0,1,9) -&gt; (0,4,2)</code></td>
+<td style="text-align:left">空</td>
+<td style="text-align:left"><code>(0,1,9)</code></td>
+<td style="text-align:right">3</td>
+</tr>
+</tbody></table></div>
 <p>第二行是十字链表<strong>吃亏</strong>的地方，第三行才是它存在的理由。<code>code/ch12/sparse_matrix</code> 的实现里，插入时在两条链上各定位一次并同时接上，删除时同样从两条链上各摘一次——都是<strong>局部</strong>操作，不碰其他行列。测试用一个 200×200 的对角线矩阵量过：扫第 7 列只走过 3 个结点，而不是全表的 202 个。</p>
 <p>结点所有权归容器，两条链都是裸指针，析构沿行链<strong>迭代</strong>释放。这里不能用 <code>unique_ptr</code> 串链——一行里非零元一多，递归析构就会压穿栈（判据见 2.3.1 节的「所有权工具怎么选」；实测数字在该单元的 <code>legacy.md</code> 里）。</p>
 <h2 id="122-广义表和存储管理"><a class="anchor" href="#122-广义表和存储管理">#</a>12.2 广义表和存储管理</h2>
 <p>线性表的元素是不可再分的原子。广义表放宽这条：元素可以是原子，也可以是另一个广义表。按是否共享、是否有环，分成三种：纯表对应树（每个子表只出现一次）；再入表对应有向无环图（子表可以被共享）；循环表对应有环图。存储上常用带头尾指针的结点；表一旦共享，释放时就必须处理别名，不能只按树来递归 <code>delete</code>。</p>
 <h3 id="1221-广义表的定义和存储结构"><a class="anchor" href="#1221-广义表的定义和存储结构">#</a>12.2.1 广义表的定义和存储结构</h3>
 <p>表头是第一个元素，表尾是去掉表头后剩下的那个表。空表既没有头也没有尾。任何一个非空广义表都可以唯一地拆成「头 + 尾」，所以递归算法写成「先处理头、再处理尾」就和定义对上了。</p>
+<p>对 <span class="math">L<span class="rel">=</span>(a,(b,c),d)</span> 连续拆解：<code>head(L)=a</code>，<code>tail(L)=((b,c),d)</code>；对子表 <code>(b,c)</code>，头是 <code>b</code>、尾是 <code>(c)</code>。长度只数最外层的三个元素，得到 3；深度要进入子表，得到 2；原子数则遍历所有层，得到 4。三个指标回答不同问题，不能从括号或逗号数机械推出。</p>
 <p>结点通常有一个标记位，区分原子和子表：原子结点存值，子表结点存指向另一个表的指针。再加表头结点，可以把空表和共享关系表示得更干净。原书图 12.7–12.9 画的就是无头结点、带头结点、以及带循环的几种。</p>
 <p>先跑一遍：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/gen_list/demo.cpp">code/ch12/gen_list/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
@@ -278,6 +350,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 长度 3，深度 2，原子 4 个
 共享后  : ((b,c),(b,c))，被引用 3 次</code></pre></div>
 <p>最后一行是本节的难点：<code>(b,c)</code> 只有一份，挂在两处，引用计数是 3（自己一份，两个宿主各一份）。共享一旦发生，回收就<strong>不能再按树递归 <code>delete</code></strong>——那会把同一个结点删两次。所以结点上带计数，句柄负责加减：</p>
+<figure><img loading="lazy" src="../assets/77d1f64d0f2aad44.jpg" alt="图 12.5 再入表：同一子表被多处引用"><figcaption>图 12.5 再入表：同一子表被多处引用</figcaption></figure>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/gen_list/modern.hpp">code/ch12/gen_list/modern.hpp#genlist-refcount</a></div><pre><code><span class="k">static</span> <span class="t">void</span> retain(GenNode* node) <span class="k">noexcept</span> {
     <span class="k">if</span> (node != <span class="k">nullptr</span>) {
         ++node-&gt;refs;
@@ -297,6 +370,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 }</code></pre></div>
 <p><code>release</code> 沿表尾迭代、只对表头递归，因此三万个元素的长表析构不会压穿栈，栈深度只跟嵌套层数走。这里不用 <code>shared_ptr</code>：12.2 要教的就是「谁来回收共享结点」，交给标准库这一节就没了。</p>
 <p>引用计数收不回<strong>环</strong>。构造函数自底向上建表，本书的接口造不出循环表；<code>code/ch12/storage_recovery</code> 用<strong>根集</strong>和真正的对象图（每个对象可以有多条出边）演示标记–清除如何回收无根环，见 12.2.4。它不冒充真实运行时垃圾回收器。</p>
+<figure><img loading="lazy" src="../assets/9056eec6ba40c942.jpg" alt="图 12.6 循环表：从结点出发会再次回到自身"><figcaption>图 12.6 循环表：从结点出发会再次回到自身</figcaption></figure>
 <h3 id="1222-可利用空间表"><a class="anchor" href="#1222-可利用空间表">#</a>12.2.2 可利用空间表</h3>
 <p>原书用重载 <code>operator new/delete</code> 和一条全局 <code>avail</code> 链实现结点复用。所有对象共享隐式全局状态，生命周期结束时还要 <code>::delete</code> 整条链。现代实现改成显式的索引句柄池：<code>acquire</code> 从空闲栈弹出一个下标，<code>release</code> 把它推回去；耗尽返回 <code>nullopt</code>，重复/越界归还返回 <code>false</code>。释放后的下标失效，<code>get</code> 得到空指针。</p>
 <p>普通二叉搜索树只要求中序遍历有序，树形可能很多。若键的查找频率不同，应把常查的键放得更靠近根。最优 BST 的输入包括成功查找权 <code>p[1..n]</code> 与失败查找权 <code>q[0..n]</code>；动态规划对每个区间尝试每一个键作根，选择「左子树代价 + 右子树代价 + 本区间总权」最小的方案。</p>
@@ -329,6 +403,52 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 最优 BST 总成本 57，根为键 2</code></pre></div>
 <p>把 <code>optimal_bst({1,2}, {3,4})</code> 这种长度对不上的输入送进去，会抛 <code>std::invalid_argument</code>。空树对应 <code>p = {}</code>、<code>q = {某个失败权}</code>，代价为 0。</p>
 <p>池用 <code>vector&lt;optional&lt;T&gt;&gt;</code> 表示槽位占用，<code>vector&lt;size_t&gt;</code> 当空闲栈。构造时下标从大到小入栈，所以第一次 <code>acquire</code> 拿到 0。<code>release</code> 先确认该槽确实被占用，再 <code>reset</code> 并归还。</p>
+<figure><img loading="lazy" src="../assets/13aa14b9eaf0d7ed.jpg" alt="图 12.10 等长结点的可利用空间表"><figcaption>图 12.10 等长结点的可利用空间表</figcaption></figure>
+<p>容量为 3 时，状态可以直接写成一张账：初始空闲栈顶依次是 <code>0,1,2</code>；申请 A、B 后，句柄分别是 0、1，只剩 2；归还 0 后，空闲栈是 <code>0,2</code>；再申请 C 会复用 0。旧句柄 0 在归还那一刻已经失效，数值虽然后来又出现，却代表新的占用期。真实系统若要识别「拿旧句柄误访问新对象」，还会在句柄中加入代数（generation）；本节的简化池只保证空闲槽不可读和重复释放会失败。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">动作</th>
+<th style="text-align:left">槽 0</th>
+<th style="text-align:left">槽 1</th>
+<th style="text-align:left">槽 2</th>
+<th style="text-align:left">下一可用</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">初始</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">0</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>acquire(A)</code></td>
+<td style="text-align:left">A</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">1</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>acquire(B)</code></td>
+<td style="text-align:left">A</td>
+<td style="text-align:left">B</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">2</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>release(0)</code></td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">B</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">0</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>acquire(C)</code></td>
+<td style="text-align:left">C</td>
+<td style="text-align:left">B</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">2</td>
+</tr>
+</tbody></table></div>
+<p>这个表也解释了为什么 <code>release</code> 不能只把下标推回空闲栈：若不先确认槽位处于占用状态，重复归还 0 会让空闲栈出现两个 0，之后 A、B 两次申请可能拿到同一个槽。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/optimal_bst/modern.hpp">code/ch12/optimal_bst/modern.hpp#reusable-node-pool</a></div><pre><code><span class="k">template</span> &lt;<span class="k">typename</span> T&gt;
 <span class="k">class</span> ReusableNodePool {
 <span class="k">public</span>:
@@ -373,6 +493,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h3 id="1223-存储的动态分配和回收"><a class="anchor" href="#1223-存储的动态分配和回收">#</a>12.2.3 存储的动态分配和回收</h3>
 <p>程序运行中向系统要一块、用完还回去。空闲块和已分配块穿插之后，会出现两种碎片：外部碎片是空闲区被切得太碎，哪一块都装不下新请求；内部碎片是分出去的块比实际需要大，多出来的字节浪费在块内。</p>
 <p>选哪一块空闲区，有三种经典策略。首次适应从低地址扫到第一块够大的；最佳适应找刚好够用的最小块；最坏适应找当前最大的块。三者只在「挑哪一块」这一步不同，分裂与合并完全一样。</p>
+<figure><img loading="lazy" src="../assets/176675b89214b438.jpg" alt="图 12.11 已分配块与空闲块的边界信息"><figcaption>图 12.11 已分配块与空闲块的边界信息</figcaption></figure>
 <p>差别用一个例子最清楚。设空闲区依次是 500、200、300、600 字节（中间被已分配块隔开，所以不会合并），现在要 212 字节：</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">策略</th>
@@ -401,10 +522,47 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 </tbody></table></div>
 <p><code>code/ch12/memory_allocator</code> 实现了这三种，测试用的正是上面这组数字。<strong>只在一块空闲区上测是分辨不出三种策略的</strong>——那种布局下三者必然挑中同一块，把最佳适应和最坏适应的判据对调，测试照样全绿。</p>
 <p>无论哪种策略，相邻的空闲块都应当合并，否则外部碎片只会越来越多。「外部碎片」是可以直接量出来的：释放出两个不相邻的 30 字节空洞后，空闲总量有 60 字节，但最大的一块只有 30——45 字节的请求就会失败；把中间那块也释放掉、三块并成一整块之后，同样的请求立刻能满足。</p>
+<figure><img loading="lazy" src="../assets/42591c39779d3b6f.jpg" alt="图 12.12 外部碎片与内部碎片"><figcaption>图 12.12 外部碎片与内部碎片</figcaption></figure>
+<p>合并要分四种位置关系。设释放块为 M：左右都忙，M 单独入空闲表；只有左边空闲，扩大左块；只有右边空闲，把右块的起点移到 M；左右都空闲，把三块合成一块。顺序表实现可以检查前后项，边界标记则从 M 的块头、块尾直接找到物理邻居。</p>
+<figure><img loading="lazy" src="../assets/330b8aba58c19e68.jpg" alt="图 12.13 释放 M 时与相邻空闲块合并"><figcaption>图 12.13 释放 M 时与相邻空闲块合并</figcaption></figure>
 <p>原书提到的<strong>边界标记</strong>（块头块尾各记一份大小与忙闲）解决的是「怎么在 <span class="math">O(<span class="upr">1</span>)</span> 内找到物理相邻的邻居」。本书的实现把块表按偏移升序排列，相邻块就是表里相邻的项，表达的是同一个想法；代价是定位要扫表而不是 <span class="math">O(<span class="upr">1</span>)</span>，这一点写在实现的注释里，不冒充。</p>
 <h3 id="1224-失败处理策略和无用单元回收"><a class="anchor" href="#1224-失败处理策略和无用单元回收">#</a>12.2.4 失败处理策略和无用单元回收</h3>
 <p>分配失败时可以：直接拒绝；压缩（把已分配块搬到一起，挤出一整块空闲）；或者做垃圾回收，把程序已经够不着、却还占着的块收回来。</p>
 <p>引用计数给每个对象记有多少指针指着它，减到零就释放。实现简单，但对象互相指形成环时，计数永远掉不到零，这块内存就漏了。标记–清除从一组根（栈上的指针、全局变量）出发走遍所有还能碰到的对象并打上标记，然后扫一遍堆，没标记的统统回收。它能处理环，但要求能从根集走到每一个活对象，并且要能区分「这是指针」和「这只是一个看起来像地址的整数」。</p>
+<figure><img loading="lazy" src="../assets/7fecd7778cd2b26e.jpg" alt="图 12.14 无根循环引用不会自行消失"><figcaption>图 12.14 无根循环引用不会自行消失</figcaption></figure>
+<p>例如根集只有 <code>R -&gt; A -&gt; B</code>，另有 <code>C -&gt; D -&gt; C</code>。标记栈先压 A，继而标 A、B；C、D 虽然各有一个入边，却从任何根都走不到。清除阶段保留 A、B，回收 C、D。这里判生死的是<strong>可达性</strong>，不是入度或引用数；这正是循环引用能被整组收回的原因。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">阶段</th>
+<th style="text-align:left">待处理栈</th>
+<th style="text-align:left">已标记</th>
+<th style="text-align:left">动作</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">放入根</td>
+<td style="text-align:left"><code>A</code></td>
+<td style="text-align:left">A</td>
+<td style="text-align:left">根先标记再入栈</td>
+</tr>
+<tr>
+<td style="text-align:left">弹出 A</td>
+<td style="text-align:left"><code>B</code></td>
+<td style="text-align:left">A、B</td>
+<td style="text-align:left">沿 <code>A -&gt; B</code> 发现 B</td>
+</tr>
+<tr>
+<td style="text-align:left">弹出 B</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">A、B</td>
+<td style="text-align:left">标记阶段结束</td>
+</tr>
+<tr>
+<td style="text-align:left">清扫</td>
+<td style="text-align:left">空</td>
+<td style="text-align:left">A、B</td>
+<td style="text-align:left">保留 A、B；回收 C、D</td>
+</tr>
+</tbody></table></div>
+<p>一定要「先标记、再入栈」。若等到弹出时才标，环或菱形共享会把同一结点反复压栈；结果也许仍对，空间和时间却可能失控。</p>
 <p>本章的句柄池把「失败」做成返回 <code>nullopt</code>，不劫持全局 <code>new</code>，也不假装自己是通用垃圾回收器。</p>
 <p><code>code/ch12/storage_recovery</code> 把标记–清除做成可运行的：出边是一张表（一个对象可以指向多个对象），<code>collect()</code> 接受<strong>一组</strong>根。它演示的核心是「可达性是从根走出来的，与有多少人指着我无关」——一个被三处引用、却谁都够不着根的对象，引用计数收不回，标记–清除照收。</p>
 <p>标记阶段用<strong>显式栈</strong>而不是递归：垃圾回收恰恰是在内存吃紧时跑的，那时最不该再去吃调用栈（同 2.3.1 节「所有权工具怎么选」的判据）。测试里有 20 万个对象的深链，递归标记必然压穿栈。</p>
@@ -412,6 +570,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h2 id="123-trie-结构和-patricia-树"><a class="anchor" href="#123-trie-结构和-patricia-树">#</a>12.3 Trie 结构和 Patricia 树</h2>
 <p>二叉搜索树按整个关键码比较，树的形状依赖插入次序。Trie 换一种切法：按关键码的字符（或二进制位）一层一层分支，第 <span class="math">i</span> 层对应第 <span class="math">i</span> 个字符。公共前缀在树里只存一次，所以它特别适合字典、IP 路由这种「按前缀分类」的问题。查找沿着字符走，时间与关键码长度成正比，与表里有多少个词关系不大。</p>
 <p>把 <code>can</code>、<code>car</code>、<code>cat</code>、<code>do</code> 插进一棵字母 Trie，公共前缀 <code>ca</code> 只出现一次：</p>
+<figure><img loading="lazy" src="../assets/31bf5d17531c99f5.jpg" alt="图 12.17 按字符分支存放单词的 Trie"><figcaption>图 12.17 按字符分支存放单词的 Trie</figcaption></figure>
 <div class="codeblock" data-lang="text"><pre><code>        ·
        / \
       c   d
@@ -490,8 +649,11 @@ Patricia : 4 个词，3 个内部结点
     <span class="k">return</span> {};
 }</code></pre></div>
 <p>越过关键码长度的位一律读作 0，这样「一个关键码是另一个的前缀」（<code>a</code> 与 <code>ab</code>）也能分开，代价是关键码里不能出现 <code>&#x27;\0&#x27;</code>。还有一处不能省：沿位下降到叶之后，<strong>必须和叶上的完整关键码再比一次</strong>——路上只看了少数几位，不比就会把 <code>ca</code>、<code>cars</code> 这种根本不在表里的串判成命中。</p>
+<figure><img loading="lazy" src="../assets/27144b83e26fc2eb.jpg" alt="图 12.20 压缩后的 Patricia Trie"><figcaption>图 12.20 压缩后的 Patricia Trie</figcaption></figure>
+<p>以单字节 <code>&#x27;a&#x27;</code> 与 <code>&#x27;c&#x27;</code> 为例，ASCII 分别是 <code>01100001</code> 和 <code>01100011</code>，第一次不同在从 0 起算的第 6 位。Patricia 内部结点只记这个分歧位：该位为 0 走一边，为 1 走另一边；前面六个相同位不再各占一层。再插入键时，先走到叶并找出首个不同位，再把新分支插到位号仍保持递增的位置，否则查找路径会跳过应比较的位。</p>
 <h2 id="124-改进的二叉搜索树"><a class="anchor" href="#124-改进的二叉搜索树">#</a>12.4 改进的二叉搜索树</h2>
 <h3 id="1241-最佳二叉搜索树"><a class="anchor" href="#1241-最佳二叉搜索树">#</a>12.4.1 最佳二叉搜索树</h3>
+<figure><img loading="lazy" src="../assets/e543a817bd675673.jpg" alt="图 12.27 按区间由短到长构造最佳二叉搜索树"><figcaption>图 12.27 按区间由短到长构造最佳二叉搜索树</figcaption></figure>
 <p>最优 BST 先校验 <code>q.size() == p.size() + 1</code>。空区间的 <code>cost[i][i] = 0</code>，<code>weight[i][i] = q[i]</code>。长度从 1 扩到 n，对每个区间 <code>[first, last]</code> 枚举根 <code>r</code>，候选代价是 <code>cost[first][r-1] + cost[r][last] + weight[first][last]</code>。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/optimal_bst/modern.hpp">code/ch12/optimal_bst/modern.hpp#optimal-bst</a></div><pre><code><span class="k">struct</span> OptimalBstResult {
     std::vector&lt;std::vector&lt;<span class="t">long</span> <span class="t">long</span>&gt;&gt; cost;
@@ -536,9 +698,80 @@ Patricia : 4 个词，3 个内部结点
     }
     <span class="k">return</span> result;
 }</code></pre></div>
+<p>动态规划为什么要按区间长度递增，可以在长度 2 的区间上看清。算 <code>[i,j]</code> 时，若选 <code>r</code> 为根，必须已经知道 <code>[i,r-1]</code> 和 <code>[r,j]</code> 的最优代价；它们都比当前区间短。每试一个根，本区间总权 <code>weight[i][j]</code> 都要再加一次，因为挂到新根下面后，区间内每种成功或失败查找的深度都增加 1。<code>root[i][j]</code> 不是附带输出，而是重建树时的路线图：先取整段根，再递归查左右两个子区间。</p>
+<p>教材样例的关键格可以逐层核算：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">区间</th>
+<th style="text-align:right">总权 <span class="math">w</span></th>
+<th style="text-align:right">最优代价 <span class="math">c</span></th>
+<th style="text-align:right">根</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><code>[0,1]</code></td>
+<td style="text-align:right">10</td>
+<td style="text-align:right">10</td>
+<td style="text-align:right">1</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>[1,2]</code></td>
+<td style="text-align:right">12</td>
+<td style="text-align:right">12</td>
+<td style="text-align:right">2</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>[2,3]</code></td>
+<td style="text-align:right">9</td>
+<td style="text-align:right">9</td>
+<td style="text-align:right">3</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>[3,4]</code></td>
+<td style="text-align:right">6</td>
+<td style="text-align:right">6</td>
+<td style="text-align:right">4</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>[0,2]</code></td>
+<td style="text-align:right">18</td>
+<td style="text-align:right">28</td>
+<td style="text-align:right">2</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>[1,3]</code></td>
+<td style="text-align:right">18</td>
+<td style="text-align:right">27</td>
+<td style="text-align:right">2</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>[2,4]</code></td>
+<td style="text-align:right">13</td>
+<td style="text-align:right">19</td>
+<td style="text-align:right">3</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>[0,3]</code></td>
+<td style="text-align:right">24</td>
+<td style="text-align:right">43</td>
+<td style="text-align:right">2</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>[1,4]</code></td>
+<td style="text-align:right">22</td>
+<td style="text-align:right">40</td>
+<td style="text-align:right">3</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>[0,4]</code></td>
+<td style="text-align:right">28</td>
+<td style="text-align:right"><strong>57</strong></td>
+<td style="text-align:right"><strong>2</strong></td>
+</tr>
+</tbody></table></div>
+<p>最后一格选根 2 时，候选值是 <code>c[0][1] + c[2][4] + w[0][4] = 10 + 19 + 28 = 57</code>。这既复算了演示程序的输出，也能抓住把 <code>weight</code> 漏加或多加一次的实现错误。</p>
 <h3 id="1242-平衡的二叉搜索树"><a class="anchor" href="#1242-平衡的二叉搜索树">#</a>12.4.2 平衡的二叉搜索树</h3>
 <p>普通 BST 按插入次序生长，若键已经有序，会退化成一条链，查找变成 <span class="math">O(n)</span>。平衡二叉搜索树在每次插入、删除之后做少量旋转，把左右子树的高度差限制住，从而保证树高 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>。</p>
 <p>AVL 树给每个结点记一个平衡因子：右子树高度减左子树高度，只允许 <span class="math"><span class="bin">−</span><span class="upr">1</span></span>、<span class="math"><span class="upr">0</span></span>、<span class="math"><span class="upr">1</span></span>。插入或删除使某个祖先的因子变成 <span class="math"><span class="bin">±</span><span class="upr">2</span></span> 时，按「哪边沉、沉在内侧还是外侧」分成四种情形。外侧失衡一次单旋转就能拉平；内侧失衡要先把孙子转到孩子、再把孩子转到祖先，即双旋转。旋转是局部的，不改变中序次序。查找、插入、删除最坏都是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>。</p>
+<figure><img loading="lazy" src="../assets/177187ec2696e070.jpg" alt="图 12.31 AVL 树的 LL、LR、RR、RL 四种失衡"><figcaption>图 12.31 AVL 树的 LL、LR、RR、RL 四种失衡</figcaption></figure>
 <p>四种情形用中序仍保持 <span class="math">A&lt;B&lt;C</span> 来记（圆括号里是子树）：</p>
 <div class="codeblock" data-lang="text"><pre><code>LL（左左，一次右旋）          RR（右右，一次左旋）
       C                           A
@@ -554,10 +787,15 @@ LR（左右，先左旋再右旋）      RL（右左，先右旋再左旋）
      \                             / \
       B                           A   C</code></pre></div>
 <p>插入 1、2、3 会走出 RR：先得到右链 <code>1-2-3</code>，在 1 上左旋变成以 2 为根的平衡树。插入 3、2、1 是对称的 LL。插入 1、3、2 是 RL：先在 3 上右旋，再在 1 上左旋。删除一个结点后，从被删处向上检查，哪一层变成 <span class="math"><span class="bin">±</span><span class="upr">2</span></span> 就在那一层做同样的旋转；有时旋转一次还不够，要继续向上走。</p>
+<p>四组最小输入正好能当旋转单元测试：<code>3,2,1 -&gt; LL</code>，<code>1,2,3 -&gt; RR</code>，<code>3,1,2 -&gt; LR</code>，<code>1,3,2 -&gt; RL</code>，结果都应以 2 为根，中序都为 <code>1,2,3</code>。只测中序不够，因为一棵退化链的中序也正确；还要查根、高度和平衡因子，才能证明旋转真的发生。</p>
 <p>红黑树是另一种近似平衡，用颜色规则保证最长路径不超过最短路径的两倍，旋转次数有常数上限，见第 11.5 节。 可运行的 AVL 四旋转实现见 <code>code/ch12/balanced_trees/modern.hpp</code>，测试检查中序有序、查找、删除和高度边界。</p>
 <h3 id="1243-伸展树"><a class="anchor" href="#1243-伸展树">#</a>12.4.3 伸展树</h3>
 <p>伸展树不在结点上存平衡因子。每次访问（查找、插入、删除）一个结点之后，用旋转把它搬到根附近：最近被用到的键下次更容易先碰到。这是一种自调整，均摊 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>。</p>
-<p>从被访问结点走到根，每次看最近两步的形状。之字形（先左后右，或先右后左）走两步只升一层；一字形（连续两次同向）走两步升两层。搬到根的孩子时，再做一次单旋转即可。半伸展比全伸展少转最后一轮，连续访问同一个结点时更省。</p>
+<p>从被访问结点走到根，每次看它、父结点和祖父结点的形状。一字形（连续两次同向）先转祖父、再转父；之字形（先左后右，或先右后左）先转父、再转祖父。两种双旋都把目标提升两层，但对其余结点的重排不同。目标只差一层到根时，再做一次单旋转即可。半伸展不会每次都把目标送到根，旋转更少，但保证也与全伸展不同。</p>
+<figure><img loading="lazy" src="../assets/4de16efb6c7a8e8d.jpg" alt="图 12.39 伸展树的一字形旋转"><figcaption>图 12.39 伸展树的一字形旋转</figcaption></figure>
+<figure><img loading="lazy" src="../assets/391e13f1809c09bf.jpg" alt="图 12.40 伸展树的之字形旋转"><figcaption>图 12.40 伸展树的之字形旋转</figcaption></figure>
+<p>例如链 <code>10 -&gt; 20 -&gt; 30</code> 中访问 30，是右–右一字形：先围绕 10 左旋，再围绕 20 左旋，30 到根。若 10 的右孩子是 30、30 的左孩子是 20，则访问 20 是右–左之字形，两次旋转方向相反。两种情况都把目标提两层，但一字形还把整条同向长链明显压短，这是不能把它替换成连续「父子单旋」的原因。</p>
+<p>“均摊 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>”不等于每一次都快。访问深链末端的单次代价仍可达 <span class="math">O(n)</span>；保证的是从任意初始树开始，一串 <span class="math">m</span> 次操作的总成本为 <span class="math">O(m&thinsp;<span class="upr">log</span>&thinsp;n)</span>（另加初始势能）。因此伸展树适合热点键反复出现、又不要求单次延迟上界的场景；实时系统若要求每次查找都在确定高度内结束，更适合 AVL 或红黑树。</p>
 <p>伸展树实现简单，不必维护额外的平衡域；代价是单次操作可能仍是 <span class="math">O(n)</span>，只是摊还之后是对数。 同一实现中的 <code>SplayTree</code> 使用 <code>unique_ptr</code> 维护子树所有权，访问后按一字形/之字形规则旋至根。</p>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
 <p>多维数组按行优先或列优先顺序存放，按下标随机访问；三角、对称、稀疏矩阵可以压缩。广义表的元素可以是原子或子表，头尾分解对应递归。动态存储要处理碎片和回收：首次/最佳/最坏适应，引用计数与标记清除。Trie 按字符分支并共享前缀，Patricia 压缩单孩子路径。最优 BST 用动态规划选根；AVL 用平衡因子和四种旋转保证 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>；伸展树用访问后上移做均摊平衡。可利用空间表是定长结点的显式空闲栈，不劫持全局 <code>new</code>。</p>
