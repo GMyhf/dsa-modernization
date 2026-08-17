@@ -224,8 +224,9 @@ KMP:  10
 <h3 id="421-字符串的顺序存储"><a class="anchor" href="#421-字符串的顺序存储">#</a>4.2.1 字符串的顺序存储</h3>
 <p>字符串用一段连续字符数组存储，末尾保留 <code>\0</code>，并单独记录不含终止符的长度。 下标访问是 O(1)，插入、拼接和抽取需要复制字符。</p>
 <h3 id="422-字符串类-class-string-的存储结构"><a class="anchor" href="#422-字符串类-class-string-的存储结构">#</a>4.2.2 字符串类 class String 的存储结构</h3>
-<h3 id="教学版完整实现"><a class="anchor" href="#教学版完整实现">#</a>教学版：完整实现</h3>
-<p>下面是一份<strong>完整的、能直接编译运行的</strong>字符串类。一个文件、一个类。 后面 4.2.1–4.2.4 各节就是把它拆开逐段讲。</p>
+<p>顺序存储只说了「字符放在哪」，还没说「这块内存归谁、什么时候还」。 把它包成一个类之后，这两件事才有着落：类里存一个指向字符数组的指针和一个长度， 构造时申请、析构时释放、拷贝时另开一份——本节的教学内容就是这套<strong>变长存储管理</strong>。</p>
+<h4 id="教学版完整实现"><a class="anchor" href="#教学版完整实现">#</a>教学版：完整实现</h4>
+<p>下面是一份<strong>完整的、能直接编译运行的</strong>字符串类。一个文件、一个类。 后面 4.2.2、4.2.3 两节就是把它拆开逐段讲。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/teaching.hpp">code/ch04/string_class/teaching.hpp</a></div><pre><code><span class="c">// 字符串类 String —— 教学版。原书【代码4.1】【算法4.3】【算法4.4】【算法4.5】。</span>
 <span class="c">//</span>
 <span class="c">// 一个文件、一个类、能直接编译运行，给「第一次读这一节」的人看。</span>
@@ -237,7 +238,7 @@ KMP:  10
 <span class="c">//   教学版  三法则（析构 + 拷贝构造 + 拷贝赋值）；</span>
 <span class="c">//   工程版  补齐移动语义（移动之后 data_ 为空，读取路径要多一层 raw() 兜底）、</span>
 <span class="c">//           比较运算符全家、copy-and-swap。</span>
-<span class="c">// 两份都在闸门里真编译真运行。先读这一份，4.2.5「进阶（选读）」再读那一份。</span>
+<span class="c">// 两份都在闸门里真编译真运行。先读这一份，4.2a「进阶（选读）」再读那一份。</span>
 <span class="p">#pragma once</span>
 
 <span class="p">#include &lt;cstddef&gt;</span>
@@ -403,7 +404,7 @@ KMP:  10
 <p>还有一处原书没有做的检查：构造函数对 <code>s == nullptr</code> 毫无防备—— 而 4.2.3 节的 <code>Substr</code> 恰好会喂给它一个空指针（见 4.2.3 节）。</p>
 <p>原书的类里有 <code>~string()</code>，却从未把拷贝构造与拷贝赋值作为清单给出 （正文描述过赋值时&quot;必须释放 s1 的原有空间&quot;，但没有代码）。 只要有析构而没有这两个，一次 <code>String b = a;</code> 就是二次释放—— 与第 2、3 章是同一个错误。</p>
 <p>教学版按<strong>三法则</strong>补齐了这两个（析构 + 拷贝构造 + 拷贝赋值）， 拷贝赋值走的是「先备好新缓冲区，再释放旧的，最后接管」——顺序反过来， 一旦 <code>new</code> 抛异常，对象就停在「指针已释放」的破碎状态。</p>
-<p>工程版还多两个<strong>移动</strong>操作，见 4.2.5。</p>
+<p>工程版还多两个<strong>移动</strong>操作，见 4.2a。</p>
 <h3 id="423-字符串运算的实现"><a class="anchor" href="#423-字符串运算的实现">#</a>4.2.3 字符串运算的实现</h3>
 <h4 id="追加与拼接"><a class="anchor" href="#追加与拼接">#</a>追加与拼接</h4>
 <p><code>append(char)</code> 与 <code>concatenate(const char*)</code> 的形状是一样的三步： <strong>重新申请一块、把老内容拷过去、释放旧块</strong>。所以追加一个字符是 O(n)，不是 O(1)—— 这就是变长串管理的代价，也是后面章节讨论&quot;预留容量&quot;的动机。</p>
@@ -713,7 +714,7 @@ std::string::find 对照         = 2</code></pre></div>
 </ol>
 <div class="pagenav"><a href="ch03-stack.html"><span class="dir">← 上一篇</span>第3章 栈与队列</a><a href="ch05-binary-tree.html" style="text-align:right"><span class="dir">下一篇 →</span>第5章 二叉树</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#41-字符串的基本概念">4.1 字符串的基本概念</a><a href="#42-字符串的存储结构和实现">4.2 字符串的存储结构和实现</a><a href="#421-字符串的顺序存储" class="sub">4.2.1 字符串的顺序存储</a><a href="#422-字符串类-class-string-的存储结构" class="sub">4.2.2 字符串类 class String 的存储结构</a><a href="#教学版完整实现" class="sub">教学版：完整实现</a><a href="#423-字符串运算的实现" class="sub">4.2.3 字符串运算的实现</a><a href="#42a-进阶选读从教学版到工程版" class="sub">4.2a 进阶（选读）：从教学版到工程版</a><a href="#43-字符串的模式匹配">4.3 字符串的模式匹配</a><a href="#431-朴素的模式匹配算法" class="sub">4.3.1 朴素的模式匹配算法</a><a href="#432-字符串的特征向量" class="sub">4.3.2 字符串的特征向量</a><a href="#433-kmp-模式匹配算法" class="sub">4.3.3 KMP 模式匹配算法</a><a href="#与原书的对照">与原书的对照</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#41-字符串的基本概念">4.1 字符串的基本概念</a><a href="#42-字符串的存储结构和实现">4.2 字符串的存储结构和实现</a><a href="#421-字符串的顺序存储" class="sub">4.2.1 字符串的顺序存储</a><a href="#422-字符串类-class-string-的存储结构" class="sub">4.2.2 字符串类 class String 的存储结构</a><a href="#423-字符串运算的实现" class="sub">4.2.3 字符串运算的实现</a><a href="#42a-进阶选读从教学版到工程版" class="sub">4.2a 进阶（选读）：从教学版到工程版</a><a href="#43-字符串的模式匹配">4.3 字符串的模式匹配</a><a href="#431-朴素的模式匹配算法" class="sub">4.3.1 朴素的模式匹配算法</a><a href="#432-字符串的特征向量" class="sub">4.3.2 字符串的特征向量</a><a href="#433-kmp-模式匹配算法" class="sub">4.3.3 KMP 模式匹配算法</a><a href="#与原书的对照">与原书的对照</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch04-string.md</code> 生成

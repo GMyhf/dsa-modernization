@@ -20,7 +20,7 @@ namespace dsa::advanced {
 /// | RL | A 的右孩子的左子树 | 先在右孩子上右旋，再在 A 上左旋 |
 ///
 /// 子树用 `unique_ptr` 表示所有权：孩子唯一属于父结点，树高是 $O(\log n)$，
-/// 递归释放不构成栈风险（判据见第 2.3.2a 节）。
+/// 递归释放不构成栈风险（判据见 2.3.1 节的「所有权工具怎么选」）。
 class AvlTree {
 public:
     void insert(int key) { root_ = insert(std::move(root_), key); }
@@ -180,7 +180,7 @@ private:
 /// 伸展树：不存平衡因子，每次访问之后把被访问的键旋到根附近。
 ///
 /// 「最近用过的下次更容易先碰到」，代价是**均摊** $O(\log n)$——单次操作可能很慢，
-/// 但一串操作平摊下来不会差（摊还的含义见 2.2.3 节）。
+/// 但一串操作平摊下来不会差（摊还的含义见 2.2.2 节）。
 class SplayTree {
 public:
     void insert(int key) { insert_node(root_, key); }

@@ -323,7 +323,7 @@ append 之后尾元素是 30</code></pre></div>
 </tbody></table></div>
 <p>图 2.1 顺序表的示意图</p>
 <h3 id="教学版完整实现"><a class="anchor" href="#教学版完整实现">#</a>教学版：完整实现</h3>
-<p>下面是一份<strong>完整的、能直接编译运行的</strong>顺序表。一个文件、一个类，没有省略号。 它保留原书【代码2.2】【算法2.3】【算法2.4】【算法2.5】要教的全部内容—— 连续存储、按下标 O(1) 随机存取、插入/删除要搬 O(n) 个元素——只把原书那几处 编译不过或会崩的写法换掉。后面 2.2.1–2.2.4 各节就是把它拆开逐段讲。</p>
+<p>下面是一份<strong>完整的、能直接编译运行的</strong>顺序表。一个文件、一个类，没有省略号。 它保留原书【代码2.2】【算法2.3】【算法2.4】【算法2.5】要教的全部内容—— 连续存储、按下标 O(1) 随机存取、插入/删除要搬 O(n) 个元素——只把原书那几处 编译不过或会崩的写法换掉。后面 2.2.1、2.2.2 两节就是把它拆开逐段讲——检索、插入、删除都在 2.2.2 里。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/teaching.hpp">code/ch02/array_list/teaching.hpp</a></div><pre><code><span class="c">// 顺序表 ArrayList —— 教学版。</span>
 <span class="c">//</span>
 <span class="c">// 一个文件、一个类、能直接编译运行，给「第一次读这一节」的人看。</span>
@@ -334,7 +334,7 @@ append 之后尾元素是 30</code></pre></div>
 <span class="c">// 与 modern.hpp（工程版）的分工：</span>
 <span class="c">//   教学版  遵守**三法则**（析构 + 拷贝构造 + 拷贝赋值），正确，但拷贝多一点；</span>
 <span class="c">//   工程版  在此之上补齐移动语义、强异常保证、编译期类型约束。</span>
-<span class="c">// 两份都在闸门里真编译真运行。先读这一份，2.2.5「进阶（选读）」再读那一份。</span>
+<span class="c">// 两份都在闸门里真编译真运行。先读这一份，2.2a「进阶（选读）」再读那一份。</span>
 <span class="p">#pragma once</span>
 
 <span class="p">#include &lt;cstddef&gt;</span>
@@ -484,7 +484,7 @@ append 之后尾元素是 30</code></pre></div>
 <p>第四个 <code>position</code> 是个<strong>当前处理位置游标</strong>，配合正文提到的 <code>setPos / setStart / next / prev</code> 用来「依次处理元素」。这个设计今天不能要： 遍历状态一旦住进容器，<code>const</code> 对象就没法遍历（游标要改），两处代码不能同时遍历， 嵌套遍历直接互相踩。本书删掉这个成员，改为提供 <code>begin()/end()</code>， 把遍历状态交回调用方——range-for 因此可以直接用在顺序表上。 （顺带一提：原书那个 <code>position</code>，在书中展示的所有算法里一次都没被用到。）</p>
 <p>缓冲区是<strong>裸指针</strong>。于是这个类自己管着资源，就必须遵守<strong>三法则</strong>： 一个类只要写了<strong>析构函数、拷贝构造、拷贝赋值</strong>中的任意一个，通常这三个都得写。 理由很直白——你之所以要写析构函数，是因为你在管资源；既然在管资源， 编译器那份「逐成员照抄」的拷贝就一定是错的：照抄一个指针成员的结果是 <strong>两个对象指向同一块内存</strong>，各自析构时各释放一次，同一块内存被释放两次。</p>
 <p>原书 <code>arrList</code> 正是如此：有析构函数，却没有拷贝构造与拷贝赋值。一句普通的 <code>arrList&lt;int&gt; b = a;</code> 就会二次释放——与第 3 章 <code>arrStack</code> 是同一个错误，同一份 ASan 报告可以复现。</p>
-<p>这里用裸指针而不是 <code>std::unique_ptr&lt;T[]&gt;</code>，是因为顺序表的存储管理正是本节的教学内容： 用智能指针时这几个函数编译器生成的就够用，学生看不到它们为什么必须存在。判据见第 2.3.2a 节。</p>
+<p>这里用裸指针而不是 <code>std::unique_ptr&lt;T[]&gt;</code>，是因为顺序表的存储管理正是本节的教学内容： 用智能指针时这几个函数编译器生成的就够用，学生看不到它们为什么必须存在。判据见 2.3.1 节的「所有权工具怎么选」。</p>
 <p>另外原书的 <code>clear()</code> 是这样写的：</p>
 <div class="codeblock" data-lang="text"><pre><code>void clear() { delete [] aList; curLen = position = 0; aList = new T[maxSize]; }</code></pre></div>
 <p>释放整块再重新分配。既没必要（把长度归零即可，容量留着复用），也不是异常安全的： 若 <code>new</code> 抛异常，对象就停在「指针已释放、长度已归零」的破碎状态， 之后析构还会再 <code>delete[]</code> 一次。教学版的 <code>clear()</code> 只把长度归零，一行。</p>
@@ -762,7 +762,7 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 <h2 id="23-链表"><a class="anchor" href="#23-链表">#</a>2.3 链表</h2>
 <p>顺序表用物理相邻表示逻辑相邻，所以按下标读取是 O(1)，但中间插入和删除需要搬动 后续元素。链表把逻辑相邻写进结点的链接域：结点可以散落在内存中；给定一个前驱结点后， 插入或删除只改常数条指针。代价也必须如实保留：要按位置找到那个前驱，仍须从表头循链， 所以按位置访问、查找、插入和删除的总时间仍是 O(n)。</p>
 <h3 id="教学版完整实现-1"><a class="anchor" href="#教学版完整实现-1">#</a>教学版：完整实现</h3>
-<p>下面是一份<strong>完整的、能直接编译运行的</strong>单链表。一个文件、一个类。 后面 2.3.1–2.3.3 各节就是把它拆开逐段讲。</p>
+<p>下面是一份<strong>完整的、能直接编译运行的</strong>单链表。一个文件、一个类。 后面 2.3.1、2.3.2 两节就是把它拆开逐段讲。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/teaching.hpp">code/ch02/linked_list/teaching.hpp</a></div><pre><code><span class="c">// 单链表 LinkedList —— 教学版。原书【代码2.6】【代码2.7】【算法2.8】–【算法2.11】。</span>
 <span class="c">//</span>
 <span class="c">// 一个文件、一个类、能直接编译运行，给「第一次读这一节」的人看。</span>
@@ -773,7 +773,7 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 <span class="c">//   教学版  三法则（析构 + 拷贝构造 + 拷贝赋值），头结点里放一个不用的 T；</span>
 <span class="c">//   工程版  补齐移动语义，并把头结点做成不含 T 的哨兵基类，</span>
 <span class="c">//           这样 T 就不必可默认构造——代价是多一层继承和一堆 static_cast。</span>
-<span class="c">// 两份都在闸门里真编译真运行。先读这一份，2.3.5「进阶（选读）」再读那一份。</span>
+<span class="c">// 两份都在闸门里真编译真运行。先读这一份，2.3a「进阶（选读）」再读那一份。</span>
 <span class="p">#pragma once</span>
 
 <span class="p">#include &lt;cstddef&gt;</span>
@@ -1107,7 +1107,7 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 <span class="c">//   教学版  三法则，插入/删除各写成一段直白的改链；</span>
 <span class="c">//   工程版  补齐移动语义，并把「表头 / 表中 / 表尾」三种情形合并进一个</span>
 <span class="c">//           insert_before(pos)——省代码，但初读时那几个 nullptr 分支很绕。</span>
-<span class="c">// 两份都在闸门里真编译真运行。先读这一份，2.3.5「进阶（选读）」再读那一份。</span>
+<span class="c">// 两份都在闸门里真编译真运行。先读这一份，2.3a「进阶（选读）」再读那一份。</span>
 <span class="p">#pragma once</span>
 
 <span class="p">#include &lt;cstddef&gt;</span>
@@ -1342,7 +1342,7 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 }</code></pre></div>
 <p><strong>这是一次实打实的交换</strong>：多一层继承和一堆强制转换，换 <code>T</code> 少一条约束。 教学版选了前者，工程版选了后者。</p>
 <p><strong>二、拷贝到一半失败时要自己收拾。</strong> 构造函数抛出时，这个对象的析构函数<strong>不会运行</strong>—— 它还没构造完，语言不认为它存在。所以工程版的拷贝构造把循环包进 <code>try/catch</code>， 失败时先 <code>clear()</code> 掉已经接上的半截链再重新抛出。教学版没有这一段。</p>
-<p><strong>三、移动语义、<code>[[nodiscard]]</code>、<code>noexcept</code>。</strong> 与 2.2.5 说过的完全一样，不再重复。</p>
+<p><strong>三、移动语义、<code>[[nodiscard]]</code>、<code>noexcept</code>。</strong> 与 2.2a 说过的完全一样，不再重复。</p>
 <p>双链表这边，工程版还把「表头 / 表中 / 表尾」三种插入情形合并进一个 <code>insert_before(pos)</code>——省代码，但初读时那几个 <code>nullptr</code> 分支很绕：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/doubly_linked_list/modern.hpp">code/ch02/doubly_linked_list/modern.hpp#dll-insert-before</a></div><pre><code><span class="k">template</span> &lt;<span class="k">typename</span> U&gt;
 Node* insert_before(Node* pos, U&amp;&amp; value) {

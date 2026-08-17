@@ -397,6 +397,65 @@ class TestSectionGapRegistry(unittest.TestCase):
         self.assertTrue(gaps)
 
 
+class TestR12SectionRefs(unittest.TestCase):
+    """R12：写着「见第 X.Y 节」，那一节就得真的存在。
+
+    **缘由**：T-028 把被占用的编号还给原书之后，正文里 9 处引用当场悬空——
+    「后面 2.2.1–2.2.4 各节」「判据见第 2.3.2a 节」「见 4.2.5」指向的小节，
+    要么改成了不带编号的 `####`，要么换了号。**改编号是对的，漏改引用是自动的**：
+    R6 管【算法X.Y】、R7 管「第 N 章」，中间这一层一直空着。
+    """
+
+    BOOK = {"2.2.1", "2.2.2", "2.2a", "4.2a"}
+    ORIGINAL = {"2.2.1", "2.2.2", "2.2.3", "4.2.5"}
+
+    def check(self, text, name="probe.md"):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / name
+            path.write_text(text, encoding="utf-8")
+            return check_doc.check_section_refs(path, self.BOOK, self.ORIGINAL)
+
+    def test_dangling_reference_is_reported(self):
+        problems = self.check("判据见第 2.3.2a 节。\n")
+        self.assertEqual(len(problems), 1, problems)
+        self.assertIn("2.3.2a", problems[0])
+
+    def test_live_reference_passes(self):
+        self.assertEqual(self.check("完整对照见第 2.2.2 节。\n"), [])
+
+    def test_letter_suffix_section_resolves(self):
+        self.assertEqual(self.check("工程版还多两个移动操作，见 4.2a。\n"), [])
+
+    def test_range_reference_checks_both_ends(self):
+        problems = self.check("后面 2.2.1–2.2.4 各节就是把它拆开逐段讲。\n")
+        self.assertTrue(any("2.2.4" in p for p in problems), problems)
+
+    def test_original_book_reference_uses_the_manuscript(self):
+        """「原书 2.2.3 节」说的是 2008 年那本书，不该按新书的目录判。"""
+        self.assertEqual(self.check("原书 2.2.3 节自己写下这句话。\n"), [])
+        problems = self.check("本书 2.2.3 节写下这句话。\n")
+        self.assertTrue(problems, "没有原书标记时应按新书解析")
+
+    def test_errata_file_is_original_scope(self):
+        """勘误表整篇都在说原书，按底稿解析。"""
+        self.assertEqual(self.check("| 第 2.2.3 节 | 排印错误 |\n", name="勘误.md"), [])
+
+    def test_plain_decimals_are_not_section_refs(self):
+        """8.7.2 的实测表里全是 213.5 这样的数字，不能当成节号。"""
+        self.assertEqual(self.check("  50000    213.5    482.1   5821.9\n"), [])
+
+    def test_committed_book_has_no_dangling_reference(self):
+        """入库书稿当锚：以后再改编号忘了改引用，这里就红。"""
+        book = check_doc.book_section_numbers()
+        original = set(check_doc.ledger.parse_sections())
+        found = []
+        for path in sorted(check_doc.BOOK.rglob("*.md")):
+            if "pdf" in path.relative_to(check_doc.BOOK).parts:
+                continue
+            found += check_doc.check_section_refs(path, book, original)
+        self.assertEqual(found, [])
+
+
 class TestR9Formulas(unittest.TestCase):
     """R9：公式得真能渲染出来。
 

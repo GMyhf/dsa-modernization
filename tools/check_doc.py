@@ -85,6 +85,7 @@ RULES = [
     "R9  行间公式 $$…$$ 必须写在一行内，且不得出现渲染器不认识的 LaTeX 命令",
     "R10 原书有的节，新书要么有同号的节，要么在 collab/section_gaps.json 里登记（并入/不写/待补）",
     "R11 沿用原书编号的节必须沿用原书题名；现代教学步骤不得占用旧编号",
+    "R12 正文里「第 X.Y 节」这类引用必须指向真实存在的节；带「原书」标记的按底稿解析",
 ]
 
 
@@ -469,6 +470,71 @@ def normalize_section_title(title: str) -> str:
     return re.sub(r"\s+", "", title)
 
 
+# R12：写着「见第 X.Y 节」，那一节就得真的存在。
+#
+# 缘由（2026-08-17）：T-028 把被占用的编号还给原书之后，正文里 9 处
+# 「后面 2.2.1–2.2.4 各节」「判据见第 2.3.2a 节」「见 4.2.5」当场悬空——
+# 它们指向的小节要么改成了不带编号的 `####`，要么换了号。
+# **改编号是对的，漏改引用是自动的**：没有任何一条规则在看这些引用。
+# R6 管的是【算法X.Y】清单号，R7 管的是「第 N 章」，中间这一层一直空着。
+#
+# 判据分两个池子：默认按**新书**的节号解析；引用前面十几个字里出现
+# 「原书 / 底稿 / 课程」时按**底稿**解析（正文里大量「原书 4.2.2 节自己写下」这种句子）。
+# `勘误.md` 整篇都在说原书，按底稿解析。
+SECTION_NUMBER = r"\d+\.\d+(?:\.\d+)?[a-z]?"
+SECTION_REF_RES = [
+    re.compile(r"第\s*(" + SECTION_NUMBER + r")\s*节"),
+    re.compile(r"(?:见|参见|详见|同)\s*(" + SECTION_NUMBER + r")(?:\s*节)?"),
+    re.compile(r"(" + SECTION_NUMBER + r")\s*节"),
+    re.compile(r"(" + SECTION_NUMBER + r")[–—-](" + SECTION_NUMBER + r")\s*各?节"),
+]
+ORIGINAL_MARKERS = ("原书", "底稿", "课程")
+ORIGINAL_SCOPE_FILES = ("勘误.md",)
+
+
+def book_section_numbers(book_root=None):
+    """新书（正文 + 课件）里实际存在的节号。"""
+    root = book_root or BOOK
+    numbers = set()
+    if not root.is_dir():
+        return numbers
+    for path in sorted(root.rglob("*.md")):
+        if "pdf" in path.relative_to(root).parts:
+            continue
+        for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+            hit = ledger.SECTION_RE.match(line)
+            if hit:
+                numbers.add(hit.group(1))
+    return numbers
+
+
+def check_section_refs(path: Path, book_numbers, original_numbers):
+    """R12：正文里的节引用必须解析得到。"""
+    problems = []
+    original_scope = path.name in ORIGINAL_SCOPE_FILES
+    for lineno, line in enumerate(path.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
+        if line.startswith("#"):
+            continue
+        seen = set()
+        for pattern in SECTION_REF_RES:
+            for found in pattern.finditer(line):
+                context = line[max(0, found.start() - 16):found.start()]
+                to_original = original_scope or any(w in context for w in ORIGINAL_MARKERS)
+                pool = original_numbers if to_original else book_numbers
+                where = "底稿" if to_original else "新书"
+                for number in found.groups():
+                    if not number or number in seen:
+                        continue
+                    seen.add(number)
+                    if number in pool:
+                        continue
+                    problems.append(
+                        f"{rel_label(path)}:{lineno}  R12 引用了 {number} 节，"
+                        f"但{where}里没有这一节"
+                    )
+    return problems
+
+
 def check_file(path: Path, listings, sources=None):
     """返回 problems 列表，每条形如 'book/x.md:12  说明'。"""
     problems = []
@@ -623,9 +689,12 @@ def main():
     listings = known_listings()
     gaps, problems = load_section_gaps()
     original = ledger.parse_sections()
+    book_numbers = book_section_numbers()
+    original_numbers = set(original)
     for target in targets:
         problems += check_file(target, listings)
         problems += check_sections(target, gaps, original)
+        problems += check_section_refs(target, book_numbers, original_numbers)
 
     if problems:
         print("\n".join(f"❌ {p}" for p in problems))

@@ -208,19 +208,19 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <td style="text-align:left">2.2 顺序表</td>
 <td style="text-align:left"><code>ch02/array_list</code></td>
 <td style="text-align:left">2.2 开头</td>
-<td style="text-align:left">2.2.5</td>
+<td style="text-align:left">2.2a</td>
 </tr>
 <tr>
 <td style="text-align:left">2.3 单链表</td>
 <td style="text-align:left"><code>ch02/linked_list</code></td>
 <td style="text-align:left">2.3 开头</td>
-<td style="text-align:left">2.3.5</td>
+<td style="text-align:left">2.3a</td>
 </tr>
 <tr>
-<td style="text-align:left">2.3.4 双链表</td>
+<td style="text-align:left">2.3.2 双链表</td>
 <td style="text-align:left"><code>ch02/doubly_linked_list</code></td>
-<td style="text-align:left">2.3.4</td>
-<td style="text-align:left">2.3.5</td>
+<td style="text-align:left">2.3.2</td>
+<td style="text-align:left">2.3a</td>
 </tr>
 <tr>
 <td style="text-align:left">3.1.2 顺序栈</td>
@@ -244,7 +244,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <td style="text-align:left">4.2 字符串类</td>
 <td style="text-align:left"><code>ch04/string_class</code></td>
 <td style="text-align:left">4.2 开头</td>
-<td style="text-align:left">4.2.5</td>
+<td style="text-align:left">4.2a</td>
 </tr>
 <tr>
 <td style="text-align:left">5.3–5.4 二叉树与 BST</td>
@@ -305,19 +305,19 @@ python3 tools/check_doc.py</code></pre></div>
 <tr>
 <td style="text-align:left"><strong>五法则</strong>与移动语义</td>
 <td style="text-align:left">第 2、3 章</td>
-<td style="text-align:left">2.2.5、3.1.2a「进阶」</td>
+<td style="text-align:left">2.2a、3.1.2a「进阶」</td>
 <td style="text-align:left">选读</td>
 </tr>
 <tr>
 <td style="text-align:left">异常与<strong>强异常保证</strong></td>
 <td style="text-align:left">第 2、3、5、10 章</td>
-<td style="text-align:left">2.2.5、3.1.2a「进阶」</td>
+<td style="text-align:left">2.2a、3.1.2a「进阶」</td>
 <td style="text-align:left">选读</td>
 </tr>
 <tr>
 <td style="text-align:left"><code>static_assert</code> 与 <code>&lt;type_traits&gt;</code></td>
 <td style="text-align:left">第 2、3 章</td>
-<td style="text-align:left">2.2.5、3.1.2a「进阶」</td>
+<td style="text-align:left">2.2a、3.1.2a「进阶」</td>
 <td style="text-align:left">选读</td>
 </tr>
 <tr>
@@ -350,7 +350,7 @@ python3 tools/check_doc.py</code></pre></div>
 <p><strong><code>std::optional&lt;T&gt;</code></strong>：一个「可能装着 T 的盒子」。表示「可能没有结果」的返回值， 取值前必须先判断盒子空不空。它替代的是老写法「返回 <code>bool</code> 表示成败 + 用引用参数带出结果」—— 那种写法下调用方忘了看 <code>bool</code>，就会读到一个从没被写过的变量，程序不崩，只是默默按错误数据继续跑。 第 2.2.2 节有完整对照。</p>
 <p><strong>三法则（Rule of Three）</strong>：一个类只要自己管着资源（这里是 <code>new</code> 出来的缓冲区或结点）， 就得同时写全<strong>析构函数、拷贝构造、拷贝赋值</strong>这三个函数。少写任何一个， 编译器都会替你生成一个「逐成员照抄」的版本——照抄指针的结果是两个对象指向同一块内存， 各自析构一次，<strong>同一块内存被释放两次</strong>。原书的 <code>arrStack</code> 和 <code>arrList</code> 都缺了这几个， 第 3 章用 ASan 报告复现了这个二次释放。<strong>教学版守到这一条为止</strong>—— 在分配与 <code>T</code> 的拷贝都不抛异常的前提下，这已经够了（见上面「两条阅读路径」里的边界）。</p>
 <p><strong>五法则（Rule of Five）</strong>：在三法则之上再加<strong>移动构造、移动赋值</strong>。 它们不修正确性，只修性能：把一个马上要销毁的临时对象赋给别人时， 没必要深拷贝一遍，直接把指针「偷」过来即可。工程版写全五个，属于「进阶（选读）」。</p>
-<p><strong>RAII</strong>：把「资源的生命周期」绑在「对象的生命周期」上——构造时拿到，析构时自动还回去。 好处是无论函数怎么退出（正常返回、提前 <code>return</code>、抛异常），析构都一定会跑， 所以不会漏掉释放。<code>std::unique_ptr</code> 就是 RAII 的典型；本书在少数几处刻意不用它， 理由和代价见第 2.3.2a 节。</p>
+<p><strong>RAII</strong>：把「资源的生命周期」绑在「对象的生命周期」上——构造时拿到，析构时自动还回去。 好处是无论函数怎么退出（正常返回、提前 <code>return</code>、抛异常），析构都一定会跑， 所以不会漏掉释放。<code>std::unique_ptr</code> 就是 RAII 的典型；本书在少数几处刻意不用它， 理由和代价见 2.3.1 节的「所有权工具怎么选」。</p>
 <p><strong><code>noexcept</code></strong>：写在函数后面，承诺这个函数不会抛异常。它不只是文档——标准库和本书的容器 都会<strong>查询</strong>这个承诺来决定策略（例如扩容时是「移动元素」还是「拷贝元素」）。 承诺了却真的抛，程序直接 <code>std::terminate</code>，没有补救余地。</p>
 <p><strong>强异常保证</strong>：一个操作要么完全成功，要么<strong>像没发生过一样</strong>，绝不留下半成品状态。 典型做法是「先在新地方做好，全部成功了再换过去」。反例是原书扩容：先 <code>delete[]</code> 旧缓冲区 再搬元素，中途抛异常就停在一个既不是旧状态、也不是新状态的地方，对象从此不可用。 第 3.1.3 节有可运行的对照测试。</p>
 <p><strong>摊还代价（amortized cost）</strong>：单次操作偶尔很贵，但把总代价分摊到所有操作上后每次很便宜。 顺序表扩容是标准例子：绝大多数插入是 O(1)，偶尔一次翻倍要搬走全部 n 个元素； 但两次扩容之间至少发生了 n 次插入，把这次搬迁分摊下去，每次插入仍是 O(1)。 注意它说的是<strong>平均</strong>，不是保证——对延迟敏感的场合，那一次搬迁仍然会实打实地卡住。</p>

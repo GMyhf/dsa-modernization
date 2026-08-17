@@ -322,7 +322,7 @@ T remove(size_type pos) {
 <ol>
 <li><strong>被删结点必须 <code>delete</code></strong>，只摘链不释放就是内存泄漏</li>
 <li><strong>删的若是尾结点，<code>tail_</code> 必须回退</strong>——不回退，下一次 <code>append</code> 就写进已释放的内存</li>
-</ol></section><section class="slide" data-notes=""><h1 id="234-双链表多一根指针买什么"><a class="anchor" href="#234-双链表多一根指针买什么">#</a>2.3.4 双链表：多一根指针买什么</h1>
+</ol></section><section class="slide" data-notes=""><h1 id="232-双链表多一根指针买什么"><a class="anchor" href="#232-双链表多一根指针买什么">#</a>2.3.2 双链表：多一根指针买什么</h1>
 <figure><img loading="lazy" src="../../assets/ebdcb0d7054cf3a9.jpg" alt="图 2.10 双链表的结点"><figcaption>图 2.10 双链表的结点</figcaption></figure>
 <p>多出来的 <code>prev</code>（64 位机上 8 字节）只买到一件事，但很值：</p>
 <p><strong>已知一个结点时，删除它是 O(1)。</strong></p>
@@ -346,7 +346,7 @@ T erase_node(Node* node) {
     <span class="k">delete</span> node;
     --size_;
     <span class="k">return</span> value;
-}</code></pre></div></section><section class="slide" data-notes=""><h1 id="232a-所有权工具怎么选"><a class="anchor" href="#232a-所有权工具怎么选">#</a>2.3.2a 所有权工具怎么选</h1>
+}</code></pre></div></section><section class="slide" data-notes=""><h1 id="所有权工具怎么选231"><a class="anchor" href="#所有权工具怎么选231">#</a>所有权工具怎么选（2.3.1）</h1>
 <p>「为什么不全用 <code>unique_ptr</code>？」——判据是<strong>结构形态</strong>，不是偏好。</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">形态</th>
@@ -449,7 +449,7 @@ python3 tools/check_code.py code/ch02/linked_list</code></pre></div>
 <blockquote><p><strong>写不出「会红」的用例，说明还没想清楚那条性质是什么。</strong></p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第2章 线性表</div><div class="thumb"><div class="no">2</div>2.1 线性表的抽象数据类型</div><div class="thumb"><div class="no">3</div>原书这里编译不过</div><div class="thumb"><div class="no">4</div>2.2 顺序表：地址公式</div><div class="thumb"><div class="no">5</div>教学版：三个成员</div><div class="thumb"><div class="no">6</div>按下标取值与改值</div><div class="thumb"><div class="no">7</div>按内容查找：「没找到」怎么说</div><div class="thumb"><div class="no">8</div>现代写法：把两件事合成一个</div><div class="thumb"><div class="no">9</div>插入：搬 O(n) 个元素</div><div class="thumb"><div class="no">10</div>扩容：翻倍，不是加一</div><div class="thumb"><div class="no">11</div>删除：插入的镜像</div><div class="thumb"><div class="no">12</div>三法则：原书最硬的一处错</div><div class="thumb"><div class="no">13</div>一个被删掉的设计：游标</div><div class="thumb"><div class="no">14</div>2.3 链表：换一种存储</div><div class="thumb"><div class="no">15</div>头结点：让表头不再是特例</div><div class="thumb"><div class="no">16</div>尾指针：让 append 变成 O(1)</div><div class="thumb"><div class="no">17</div>循链定位：返回「前驱」</div><div class="thumb"><div class="no">18</div>删除：两件事不能漏</div><div class="thumb"><div class="no">19</div>2.3.4 双链表：多一根指针买什么</div><div class="thumb"><div class="no">20</div>双链表的删除：两侧都要改</div><div class="thumb"><div class="no">21</div>2.3.2a 所有权工具怎么选</div><div class="thumb"><div class="no">22</div>「链那一行」有实测支撑</div><div class="thumb"><div class="no">23</div>2.4 顺序表与链表的比较</div><div class="thumb"><div class="no">24</div>本章小结</div><div class="thumb"><div class="no">25</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第2章 线性表</div><div class="thumb"><div class="no">2</div>2.1 线性表的抽象数据类型</div><div class="thumb"><div class="no">3</div>原书这里编译不过</div><div class="thumb"><div class="no">4</div>2.2 顺序表：地址公式</div><div class="thumb"><div class="no">5</div>教学版：三个成员</div><div class="thumb"><div class="no">6</div>按下标取值与改值</div><div class="thumb"><div class="no">7</div>按内容查找：「没找到」怎么说</div><div class="thumb"><div class="no">8</div>现代写法：把两件事合成一个</div><div class="thumb"><div class="no">9</div>插入：搬 O(n) 个元素</div><div class="thumb"><div class="no">10</div>扩容：翻倍，不是加一</div><div class="thumb"><div class="no">11</div>删除：插入的镜像</div><div class="thumb"><div class="no">12</div>三法则：原书最硬的一处错</div><div class="thumb"><div class="no">13</div>一个被删掉的设计：游标</div><div class="thumb"><div class="no">14</div>2.3 链表：换一种存储</div><div class="thumb"><div class="no">15</div>头结点：让表头不再是特例</div><div class="thumb"><div class="no">16</div>尾指针：让 append 变成 O(1)</div><div class="thumb"><div class="no">17</div>循链定位：返回「前驱」</div><div class="thumb"><div class="no">18</div>删除：两件事不能漏</div><div class="thumb"><div class="no">19</div>2.3.2 双链表：多一根指针买什么</div><div class="thumb"><div class="no">20</div>双链表的删除：两侧都要改</div><div class="thumb"><div class="no">21</div>所有权工具怎么选（2.3.1）</div><div class="thumb"><div class="no">22</div>「链那一行」有实测支撑</div><div class="thumb"><div class="no">23</div>2.4 顺序表与链表的比较</div><div class="thumb"><div class="no">24</div>本章小结</div><div class="thumb"><div class="no">25</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
