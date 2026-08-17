@@ -129,7 +129,18 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <figure><img loading="lazy" src="../../assets/9d5229db93db8c45.jpg" alt="图 8.2 Shell 排序"><figcaption>图 8.2 Shell 排序</figcaption></figure>
 <p>先按<strong>大增量</strong>分组做插入排序，再逐步缩小增量，最后增量为 1。</p>
 <p><strong>为什么快</strong>：大增量时每组元素少、几乎有序； 小增量时整体已经接近有序，而插入排序恰好对这种输入极快。</p>
-<p>代价与增量序列有关，「每次除以 2」约 <span class="math">O(n<sup><span class="upr">1.5</span></sup>)</span>。<strong>不稳定</strong>。</p></section><section class="slide" data-notes="&lt;p&gt;两步：先把整个数组建成&lt;strong&gt;最大&lt;/strong&gt;堆，再反复「把根和末尾交换、堆长度减一、下沉」。
+<p>代价与增量序列有关，「每次除以 2」约 <span class="math">O(n<sup><span class="upr">1.5</span></sup>)</span>。<strong>不稳定</strong>。</p></section><section class="slide" data-notes=""><h1 id="831-直接选择排序"><a class="anchor" href="#831-直接选择排序">#</a>8.3.1 直接选择排序</h1>
+<p>第 <span class="math">i</span> 轮从 <code>[i,n)</code> 扫出最小值，与位置 <span class="math">i</span> 交换。</p>
+<div class="codeblock" data-lang="text"><pre><code>初始   45 34 78 12 34&#x27; 32 29 64
+i=0    12 34 78 45 34&#x27; 32 29 64
+i=1    12 29 78 45 34&#x27; 32 34 64
+i=2    12 29 32 45 34&#x27; 78 34 64</code></pre></div>
+<ul>
+<li>无论输入是否有序，比较次数都是 <span class="math">n(n<span class="bin">−</span><span class="upr">1</span>)/<span class="upr">2</span></span></li>
+<li>只做至多 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 次交换，额外空间 <span class="math">O(<span class="upr">1</span>)</span></li>
+<li><strong>不稳定</strong>：远距离交换可能让相等记录越过彼此</li>
+</ul>
+<p>它省的是交换，不是比较。</p></section><section class="slide" data-notes="&lt;p&gt;两步：先把整个数组建成&lt;strong&gt;最大&lt;/strong&gt;堆，再反复「把根和末尾交换、堆长度减一、下沉」。
 
 关键点：&lt;strong&gt;建堆是 O(n)&lt;/strong&gt;（第 5 章证过），所以总代价 O(n log n) 里那个 log n
 全部来自后面 n 次取最大值。
@@ -158,7 +169,17 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
         swap(values[<span class="n">0</span>], values[end - <span class="n">1</span>]);
         sift_down(values, <span class="n">0</span>, end - <span class="n">1</span>);
     }
-}</code></pre></div></section><section class="slide" data-notes=""><h1 id="842-快速排序"><a class="anchor" href="#842-快速排序">#</a>8.4.2 快速排序</h1>
+}</code></pre></div></section><section class="slide" data-notes=""><h1 id="841-冒泡排序"><a class="anchor" href="#841-冒泡排序">#</a>8.4.1 冒泡排序</h1>
+<p>每一趟比较相邻元素，把当前最大值“冒”到未排序区末尾。</p>
+<div class="codeblock" data-lang="text"><pre><code>5 1 4 2 8
+1 4 2 5 8   第一趟，8 已就位
+1 2 4 5 8   第二趟</code></pre></div>
+<ul>
+<li>相等元素不交换，所以稳定</li>
+<li>一趟没有交换即可提前结束：已有序时 <span class="math">O(n)</span></li>
+<li>逆序时仍需 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span> 次比较和交换</li>
+</ul>
+<p>优化只改变最好情况，不改变最坏时间。</p></section><section class="slide" data-notes=""><h1 id="842-快速排序"><a class="anchor" href="#842-快速排序">#</a>8.4.2 快速排序</h1>
 <figure><img loading="lazy" src="../../assets/8585d3b42b280664.jpg" alt="图 8.6 快速排序图示"><figcaption>图 8.6 快速排序图示</figcaption></figure>
 <p>选一个<strong>轴值</strong>，把序列分成「小于它的」和「大于它的」两段，再各自递归。</p></section><section class="slide" data-notes="&lt;p&gt;分割（partition）是全部难点。这里用的是最直白的写法：
 boundary 左边全是小于轴值的，扫一遍把小的换过去，最后把轴值换到分界点。
@@ -249,14 +270,20 @@ boundary 左边全是小于轴值的，扫一遍把小的换过去，最后把�
 }</code></pre></div></section><section class="slide" data-notes=""><h1 id="86-分配排序跳出比较模型"><a class="anchor" href="#86-分配排序跳出比较模型">#</a>8.6 分配排序：跳出比较模型</h1>
 <p><strong>比较排序的下界是 <span class="math">Ω(n&thinsp;<span class="upr">log</span>&thinsp;n)</span></strong>——</p>
 <blockquote><p>n 个元素有 <span class="math">n!</span> 种排列，每次比较至多把可能性减半， 所以至少要 <span class="math"><span class="upr">log</span><sub><span class="upr">2</span></sub>(n!)<span class="rel">=</span>Ω(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 次比较。</p></blockquote>
-<p>想更快，就只能<strong>不靠比较</strong>：直接用关键码的值去算位置。</p></section><section class="slide" data-notes="&lt;p&gt;桶式排序：关键码范围有限时，开一排桶，直接扔进去，O(n + r)。
+<p>想更快，就只能<strong>不靠比较</strong>：直接用关键码的值去算位置。</p></section><section class="slide" data-notes=""><h1 id="861-桶式排序"><a class="anchor" href="#861-桶式排序">#</a>8.6.1 桶式排序</h1>
+<p>关键码落在有限值域 <code>[0,r)</code> 时，为每个值准备一个桶：</p>
+<div class="codeblock" data-lang="text"><pre><code>输入: 3 1 3 0 2
+计数: [1,1,1,2]
+输出: 0 1 2 3 3</code></pre></div>
+<p>时间 <span class="math">O(n<span class="bin">+</span>r)</span>，空间 <span class="math">O(r)</span>；它绕过比较排序下界， 因为直接用关键码算桶号。</p>
+<p>值域很大而数据很少时，桶数组会浪费空间； 要保持稳定，每个桶必须按进入顺序输出。</p></section><section class="slide" data-notes="&lt;p&gt;桶式排序：关键码范围有限时，开一排桶，直接扔进去，O(n + r)。
 
 基数排序：把关键码按位拆开，&lt;strong&gt;从低位到高位&lt;/strong&gt;依次做桶式排序。
 d 位、每位 r 个值时是 O(d(n + r))。
 
 为什么必须从低位开始？因为每一轮的桶式排序必须是&lt;strong&gt;稳定&lt;/strong&gt;的，
 低位的结果才能被高位的排序保留下来。反过来做会把低位的功夫全废掉。
-这一点值得当场问学生。&lt;/p&gt;"><h1 id="桶式排序与基数排序"><a class="anchor" href="#桶式排序与基数排序">#</a>桶式排序与基数排序</h1>
+这一点值得当场问学生。&lt;/p&gt;"><h1 id="862-基数排序"><a class="anchor" href="#862-基数排序">#</a>8.6.2 基数排序</h1>
 <figure><img loading="lazy" src="../../assets/916c1027b215b0e1.jpg" alt="图 8.10 基数排序"><figcaption>图 8.10 基数排序</figcaption></figure>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#radix</a></div><pre><code><span class="c">// 算法8.11：LSD 基数排序。翻转符号位使二补码有符号 int 按无符号序排序。</span>
 <span class="k">inline</span> <span class="t">void</span> radix_sort(std::vector&lt;<span class="t">int</span>&gt;&amp; values) {
@@ -275,7 +302,17 @@ d 位、每位 r 个值时是 O(d(n + r))。
         }
         values.swap(buffer);
     }
-}</code></pre></div></section><section class="slide" data-notes=""><h1 id="87-各算法对照"><a class="anchor" href="#87-各算法对照">#</a>8.7 各算法对照</h1>
+}</code></pre></div></section><section class="slide" data-notes=""><h1 id="863-索引排序"><a class="anchor" href="#863-索引排序">#</a>8.6.3 索引排序</h1>
+<p>不移动大记录，只排序一张下标表 <code>IndexArray</code>。</p>
+<div class="codeblock" data-lang="text"><pre><code>记录下标:   0  1  2  3  4  5  6  7
+关键码:    29 12 34 47 34 10 31 42
+有序下标:   5  1  0  6  2  4  7  3</code></pre></div>
+<p>按索引访问已经有序；必须原地重排时，再沿置换环搬记录。</p>
+<ul>
+<li>大记录、小关键码时，移动下标更便宜</li>
+<li>相等键 34 的下标仍为 2、4，稳定性可明确控制</li>
+<li>代价是按索引访问的局部性可能变差</li>
+</ul></section><section class="slide" data-notes=""><h1 id="871-简单排序的时间代价"><a class="anchor" href="#871-简单排序的时间代价">#</a>8.7.1 简单排序的时间代价</h1>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">算法</th>
 <th style="text-align:left">平均</th>
@@ -332,7 +369,41 @@ d 位、每位 r 个值时是 O(d(n + r))。
 <td style="text-align:left"><span class="math">O(n<span class="bin">+</span>r)</span></td>
 <td style="text-align:left"><strong>是</strong></td>
 </tr>
-</tbody></table></div></section><section class="slide" data-notes=""><h1 id="怎么选"><a class="anchor" href="#怎么选">#</a>怎么选</h1>
+</tbody></table></div></section><section class="slide" data-notes=""><h1 id="872-理论时间与实测时间"><a class="anchor" href="#872-理论时间与实测时间">#</a>8.7.2 理论时间与实测时间</h1>
+<p>本机 <code>g++ 13.3 -O2</code> 的两组结果：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">输入</th>
+<th style="text-align:left">算法</th>
+<th style="text-align:right">时间</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">5 万随机数</td>
+<td style="text-align:left">冒泡</td>
+<td style="text-align:right">5821.9 ms</td>
+</tr>
+<tr>
+<td style="text-align:left">5 万随机数</td>
+<td style="text-align:left">插入</td>
+<td style="text-align:right">213.5 ms</td>
+</tr>
+<tr>
+<td style="text-align:left">2 万已有序</td>
+<td style="text-align:left">优化快排</td>
+<td style="text-align:right">105.9 ms</td>
+</tr>
+<tr>
+<td style="text-align:left">2 万已有序</td>
+<td style="text-align:left">插入</td>
+<td style="text-align:right">约 0.0 ms</td>
+</tr>
+</tbody></table></div>
+<p>同为 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span> 可以差 27 倍；近乎有序时，插入甚至胜过退化快排。</p>
+<p>渐进阶先排除不合格算法，实测再决定常数与工作负载。</p></section><section class="slide" data-notes=""><h1 id="873-比较排序的下限"><a class="anchor" href="#873-比较排序的下限">#</a>8.7.3 比较排序的下限</h1>
+<figure><img loading="lazy" src="../../assets/2f6a20c1eb3f2d13.jpg" alt="图 8.14 用判定树模拟基于比较的排序"><figcaption>图 8.14 用判定树模拟基于比较的排序</figcaption></figure>
+<p><span class="math">n</span> 个互异元素有 <span class="math">n!</span> 种排列；一次二元比较最多把候选情况分成两半。</p>
+<p>判定树至少有 <span class="math">n!</span> 个叶子，因此高度至少：</p>
+<div class="math math-display">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>(n!)⌉<span class="rel">=</span>Ω(n&thinsp;<span class="upr">log</span>&thinsp;n)</div>
+<p>这限制的是<strong>只靠比较</strong>的排序。桶式与基数利用关键码结构， 不在这个模型里，所以能达到 <span class="math">O(n<span class="bin">+</span>r)</span> 或 <span class="math">O(d(n<span class="bin">+</span>r))</span>。</p></section><section class="slide" data-notes=""><h1 id="怎么选"><a class="anchor" href="#怎么选">#</a>怎么选</h1>
 <ul>
 <li><strong>一般情况</strong>：快排（三者取中 + 小区间插入排序）</li>
 <li><strong>要稳定</strong>：归并</li>
@@ -360,7 +431,7 @@ d 位、每位 r 个值时是 O(d(n + r))。
 <blockquote><p>测试里所有排序算法<strong>互相对拍</strong>：同一组输入必须给出同样的结果， 稳定的那几个还要额外验证稳定性。</p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第8章 内排序</div><div class="thumb"><div class="no">2</div>8.1 基本概念</div><div class="thumb"><div class="no">3</div>8.2 插入排序</div><div class="thumb"><div class="no">4</div>插入排序的两个优点</div><div class="thumb"><div class="no">5</div>8.2.2 Shell 排序</div><div class="thumb"><div class="no">6</div>8.3.2 堆排序</div><div class="thumb"><div class="no">7</div>8.4.2 快速排序</div><div class="thumb"><div class="no">8</div>快排的实现</div><div class="thumb"><div class="no">9</div>快排最坏情况怎么办</div><div class="thumb"><div class="no">10</div>8.5 归并排序</div><div class="thumb"><div class="no">11</div>8.6 分配排序：跳出比较模型</div><div class="thumb"><div class="no">12</div>桶式排序与基数排序</div><div class="thumb"><div class="no">13</div>8.7 各算法对照</div><div class="thumb"><div class="no">14</div>怎么选</div><div class="thumb"><div class="no">15</div>本章小结</div><div class="thumb"><div class="no">16</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第8章 内排序</div><div class="thumb"><div class="no">2</div>8.1 基本概念</div><div class="thumb"><div class="no">3</div>8.2 插入排序</div><div class="thumb"><div class="no">4</div>插入排序的两个优点</div><div class="thumb"><div class="no">5</div>8.2.2 Shell 排序</div><div class="thumb"><div class="no">6</div>8.3.1 直接选择排序</div><div class="thumb"><div class="no">7</div>8.3.2 堆排序</div><div class="thumb"><div class="no">8</div>8.4.1 冒泡排序</div><div class="thumb"><div class="no">9</div>8.4.2 快速排序</div><div class="thumb"><div class="no">10</div>快排的实现</div><div class="thumb"><div class="no">11</div>快排最坏情况怎么办</div><div class="thumb"><div class="no">12</div>8.5 归并排序</div><div class="thumb"><div class="no">13</div>8.6 分配排序：跳出比较模型</div><div class="thumb"><div class="no">14</div>8.6.1 桶式排序</div><div class="thumb"><div class="no">15</div>8.6.2 基数排序</div><div class="thumb"><div class="no">16</div>8.6.3 索引排序</div><div class="thumb"><div class="no">17</div>8.7.1 简单排序的时间代价</div><div class="thumb"><div class="no">18</div>8.7.2 理论时间与实测时间</div><div class="thumb"><div class="no">19</div>8.7.3 比较排序的下限</div><div class="thumb"><div class="no">20</div>怎么选</div><div class="thumb"><div class="no">21</div>本章小结</div><div class="thumb"><div class="no">22</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -373,7 +444,7 @@ d 位、每位 r 个值时是 O(d(n + r))。
 <b>第8章 内排序</b><span>现代 C++ 数据结构教程</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 16</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 22</b>
 </div>
 <script>
 (function(){

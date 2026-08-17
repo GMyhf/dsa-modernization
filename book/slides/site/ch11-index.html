@@ -107,7 +107,40 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <div class="codeblock" data-lang="text"><pre><code>稠密 2 层索引:
     查不到 -&gt; 读 1 页  (只读了索引页)
     命中   -&gt; 读 2 页  (索引页 + 数据页)</code></pre></div>
-<p><strong>多出来的那一页就是数据页——索引里没有就不必去读。</strong></p></section><section class="slide" data-notes=""><h1 id="113-倒排索引"><a class="anchor" href="#113-倒排索引">#</a>11.3 倒排索引</h1>
+<p><strong>多出来的那一页就是数据页——索引里没有就不必去读。</strong></p></section><section class="slide" data-notes=""><h1 id="1000-条记录索引为什么有四层"><a class="anchor" href="#1000-条记录索引为什么有四层">#</a>1000 条记录：索引为什么有四层</h1>
+<p>每个数据页 4 条记录、每个索引页 4 项：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">层</th>
+<th style="text-align:right">项数/页数</th>
+<th style="text-align:left">算法</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">数据页</td>
+<td style="text-align:right">250 页</td>
+<td style="text-align:left"><span class="math">⌈<span class="upr">1000</span>/<span class="upr">4</span>⌉</span></td>
+</tr>
+<tr>
+<td style="text-align:left">一级索引</td>
+<td style="text-align:right">63 页</td>
+<td style="text-align:left"><span class="math">⌈<span class="upr">250</span>/<span class="upr">4</span>⌉</span></td>
+</tr>
+<tr>
+<td style="text-align:left">二级索引</td>
+<td style="text-align:right">16 页</td>
+<td style="text-align:left"><span class="math">⌈<span class="upr">63</span>/<span class="upr">4</span>⌉</span></td>
+</tr>
+<tr>
+<td style="text-align:left">三级索引</td>
+<td style="text-align:right">4 页</td>
+<td style="text-align:left"><span class="math">⌈<span class="upr">16</span>/<span class="upr">4</span>⌉</span></td>
+</tr>
+<tr>
+<td style="text-align:left">顶层</td>
+<td style="text-align:right">1 页</td>
+<td style="text-align:left"><span class="math">⌈<span class="upr">4</span>/<span class="upr">4</span>⌉</span></td>
+</tr>
+</tbody></table></div>
+<p>一次查询沿“顶层 → 三级 → 二级 → 一级 → 数据页”下降。 层数由<strong>页扇出</strong>决定，不是由二叉树高度决定。</p></section><section class="slide" data-notes=""><h1 id="113-倒排索引"><a class="anchor" href="#113-倒排索引">#</a>11.3 倒排索引</h1>
 <p>从「文档 → 它含哪些词」翻转成「词 → 它出现在哪些文档」。</p>
 <div class="codeblock" data-lang="text"><pre><code>文档 1: the quick brown fox
 文档 2: the lazy dog
@@ -143,7 +176,41 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
         }
         <span class="k">return</span> out;
     }</code></pre></div>
-<p>倒排表<strong>保持有序</strong>，所以求交是「双指针并行走一遍」，<span class="math">O(n<span class="bin">+</span>m)</span>—— 不是 <span class="math">O(n<span class="bin">×</span>m)</span>。</p></section><section class="slide" data-notes="&lt;p&gt;所以倒排表里每一项还要记这个词在文档里的&lt;strong&gt;位置列表&lt;/strong&gt;。
+<p>倒排表<strong>保持有序</strong>，所以求交是「双指针并行走一遍」，<span class="math">O(n<span class="bin">+</span>m)</span>—— 不是 <span class="math">O(n<span class="bin">×</span>m)</span>。</p></section><section class="slide" data-notes=""><h1 id="倒排表求交双指针只走一遍"><a class="anchor" href="#倒排表求交双指针只走一遍">#</a>倒排表求交：双指针只走一遍</h1>
+<div class="codeblock" data-lang="text"><pre><code>数据: [1, 3, 8, 10]
+结构: [2, 3, 8, 11]</code></pre></div>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">比较</th>
+<th style="text-align:left">动作</th>
+<th style="text-align:left">输出</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">1 vs 2</td>
+<td style="text-align:left">左指针前进</td>
+<td style="text-align:left">空</td>
+</tr>
+<tr>
+<td style="text-align:left">3 vs 2</td>
+<td style="text-align:left">右指针前进</td>
+<td style="text-align:left">空</td>
+</tr>
+<tr>
+<td style="text-align:left">3 vs 3</td>
+<td style="text-align:left">两边前进</td>
+<td style="text-align:left">3</td>
+</tr>
+<tr>
+<td style="text-align:left">8 vs 8</td>
+<td style="text-align:left">两边前进</td>
+<td style="text-align:left">3,8</td>
+</tr>
+<tr>
+<td style="text-align:left">10 vs 11</td>
+<td style="text-align:left">左指针前进并结束</td>
+<td style="text-align:left">3,8</td>
+</tr>
+</tbody></table></div>
+<p>代价 <span class="math">O(m<span class="bin">+</span>n)</span>，不会为每个文档从头重找另一张表。</p></section><section class="slide" data-notes="&lt;p&gt;所以倒排表里每一项还要记这个词在文档里的&lt;strong&gt;位置列表&lt;/strong&gt;。
 短语查询 = 先求交拿到候选文档，再在候选里检查位置是否连续。
 
 代价：位置信息让索引大好几倍。这又是一次空间换时间。&lt;/p&gt;"><h1 id="短语查询要位置信息"><a class="anchor" href="#短语查询要位置信息">#</a>短语查询要位置信息</h1>
@@ -194,7 +261,15 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <ul>
 <li>内部结点更小 → 一页能装更多路标 → 树更矮</li>
 <li><strong>范围查询</strong>只需定位一次，然后顺着叶子链扫</li>
-</ul></section><section class="slide" data-notes="&lt;p&gt;定位到起点 O(log n)，之后每个结果只花 O(1)。
+</ul></section><section class="slide" data-notes=""><h1 id="b-树插入-60分裂传播到根"><a class="anchor" href="#b-树插入-60分裂传播到根">#</a>B+ 树插入 60：分裂传播到根</h1>
+<p>以 3 阶树为例，叶子装满后插入 60：</p>
+<div class="codeblock" data-lang="text"><pre><code>1. 沿分隔键下降到目标叶
+2. 叶中插入 60，发生溢出
+3. 叶分成左右两页，复制右页首键到父页
+4. 父页若也溢出，再分裂并把中间分隔键上推
+5. 根溢出时新建根，树高增加 1</code></pre></div>
+<p>叶分裂保留全部记录并维护横向链； 内部页分裂搬的是导航键与孩子指针。</p>
+<p>一次更新只沿根到叶的一条路径传播，不重建整棵树。</p></section><section class="slide" data-notes="&lt;p&gt;定位到起点 O(log n)，之后每个结果只花 O(1)。
 B 树做同样的事要反复中序周游，跨结点时得回到父亲——这就是数据库
 几乎一律用 B+ 树而不是 B 树的原因。
 
@@ -231,7 +306,38 @@ B 树做同样的事要反复中序周游，跨结点时得回到父亲——这
 内部分裂:   中间那个关键码**移动**上去
             (内部结点只是路标, 不必留)</code></pre></div>
 <p><strong>这一处最容易写错</strong>，而且写错的表现很隐蔽： 范围查询会漏掉边界上的键，单点查询却全对。</p>
-<p>实现见 <code>code/ch11/bplus_tree/modern.hpp</code> 的 <code>split_leaf</code> 与 <code>split_internal</code>。</p></section><section class="slide" data-notes=""><h1 id="115-位图索引"><a class="anchor" href="#115-位图索引">#</a>11.5 位图索引</h1>
+<p>实现见 <code>code/ch11/bplus_tree/modern.hpp</code> 的 <code>split_leaf</code> 与 <code>split_internal</code>。</p></section><section class="slide" data-notes=""><h1 id="1144-静态索引还是动态索引"><a class="anchor" href="#1144-静态索引还是动态索引">#</a>11.4.4 静态索引还是动态索引</h1>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">工作负载</th>
+<th style="text-align:left">更合适</th>
+<th style="text-align:left">原因</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">几乎只读、可批量重建</td>
+<td style="text-align:left">静态索引</td>
+<td style="text-align:left">紧凑、读路径短</td>
+</tr>
+<tr>
+<td style="text-align:left">持续插入删除</td>
+<td style="text-align:left">B/B+ 树</td>
+<td style="text-align:left">局部调整保持平衡</td>
+</tr>
+<tr>
+<td style="text-align:left">范围扫描多</td>
+<td style="text-align:left">B+ 树</td>
+<td style="text-align:left">叶链顺序读取</td>
+</tr>
+<tr>
+<td style="text-align:left">物理地址必须稳定</td>
+<td style="text-align:left">静态索引</td>
+<td style="text-align:left">不因分裂搬动旧记录</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li>静态索引把更新成本推迟到一次昂贵重组</li>
+<li>动态索引把成本摊到每次分裂、借位与合并</li>
+</ul>
+<p>选择的是<strong>由谁、在什么时候支付更新成本</strong>。</p></section><section class="slide" data-notes=""><h1 id="115-位图索引"><a class="anchor" href="#115-位图索引">#</a>11.5 位图索引</h1>
 <figure><img loading="lazy" src="../../assets/012aa9549249f6c8.jpg" alt="图11.15 百货销售数据库记录的位图索引示意"><figcaption>图11.15 百货销售数据库记录的位图索引示意</figcaption></figure>
 <p>对<strong>取值很少</strong>的字段（性别、州、类别）， 给每个取值造一个位向量：第 i 位表示「第 i 条记录是不是这个值」。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/bitmap_index/modern.hpp">code/ch11/bitmap_index/modern.hpp#fn:select_and</a></div><pre><code><span class="c">// &gt;&gt;&gt; bitmap-ops</span>
@@ -264,7 +370,13 @@ B 树做同样的事要反复中序周游，跨结点时得回到父亲——这
         i += run;
     }
     <span class="k">return</span> out;
-}</code></pre></div></section><section class="slide" data-notes=""><h1 id="各种索引怎么选"><a class="anchor" href="#各种索引怎么选">#</a>各种索引怎么选</h1>
+}</code></pre></div></section><section class="slide" data-notes=""><h1 id="位图逐位查询与尾部掩码"><a class="anchor" href="#位图逐位查询与尾部掩码">#</a>位图逐位查询与尾部掩码</h1>
+<div class="codeblock" data-lang="text"><pre><code>State=NY : 1 0 1 0 1 0
+Class=A  : 1 1 0 1 1 0
+AND      : 1 0 0 0 1 0</code></pre></div>
+<p>结果是第 1、5 条记录（程序下标 0、4）。</p>
+<p>机器实际按 64 位字做 AND/OR/NOT，一次处理 64 条记录。 记录数不是 64 的倍数时，NOT 会把末尾不存在的位也翻成 1， 所以最后一个字必须用 <code>mask_tail</code> 清掉越界位。</p>
+<p>位图适合低基数属性；学号这类高基数列会生成大量稀疏位图。</p></section><section class="slide" data-notes=""><h1 id="各种索引怎么选"><a class="anchor" href="#各种索引怎么选">#</a>各种索引怎么选</h1>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">场景</th>
 <th style="text-align:left">用什么</th>
@@ -312,7 +424,7 @@ python3 tools/check_code.py code/ch11/inverted_index</code></pre></div>
 <blockquote><p>B+ 树的测试里有一条 <code>validate()</code>：每次插入删除后都检查 「所有叶子同层、每个结点半满、叶子链有序」这三条不变量。</p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第11章 索引技术</div><div class="thumb"><div class="no">2</div>11.1 线性索引</div><div class="thumb"><div class="no">3</div>二级索引：索引本身也放不下怎么办</div><div class="thumb"><div class="no">4</div>11.3 倒排索引</div><div class="thumb"><div class="no">5</div>倒排表的交并</div><div class="thumb"><div class="no">6</div>短语查询要位置信息</div><div class="thumb"><div class="no">7</div>11.4 B 树：为磁盘设计的树</div><div class="thumb"><div class="no">8</div>B 树的结构</div><div class="thumb"><div class="no">9</div>插入导致分裂</div><div class="thumb"><div class="no">10</div>B+ 树：数据全在叶子</div><div class="thumb"><div class="no">11</div>范围查询：B+ 树的看家本领</div><div class="thumb"><div class="no">12</div>叶子分裂与内部分裂不一样</div><div class="thumb"><div class="no">13</div>11.5 位图索引</div><div class="thumb"><div class="no">14</div>位图的代价与压缩</div><div class="thumb"><div class="no">15</div>各种索引怎么选</div><div class="thumb"><div class="no">16</div>本章小结</div><div class="thumb"><div class="no">17</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第11章 索引技术</div><div class="thumb"><div class="no">2</div>11.1 线性索引</div><div class="thumb"><div class="no">3</div>二级索引：索引本身也放不下怎么办</div><div class="thumb"><div class="no">4</div>1000 条记录：索引为什么有四层</div><div class="thumb"><div class="no">5</div>11.3 倒排索引</div><div class="thumb"><div class="no">6</div>倒排表的交并</div><div class="thumb"><div class="no">7</div>倒排表求交：双指针只走一遍</div><div class="thumb"><div class="no">8</div>短语查询要位置信息</div><div class="thumb"><div class="no">9</div>11.4 B 树：为磁盘设计的树</div><div class="thumb"><div class="no">10</div>B 树的结构</div><div class="thumb"><div class="no">11</div>插入导致分裂</div><div class="thumb"><div class="no">12</div>B+ 树：数据全在叶子</div><div class="thumb"><div class="no">13</div>B+ 树插入 60：分裂传播到根</div><div class="thumb"><div class="no">14</div>范围查询：B+ 树的看家本领</div><div class="thumb"><div class="no">15</div>叶子分裂与内部分裂不一样</div><div class="thumb"><div class="no">16</div>11.4.4 静态索引还是动态索引</div><div class="thumb"><div class="no">17</div>11.5 位图索引</div><div class="thumb"><div class="no">18</div>位图的代价与压缩</div><div class="thumb"><div class="no">19</div>位图逐位查询与尾部掩码</div><div class="thumb"><div class="no">20</div>各种索引怎么选</div><div class="thumb"><div class="no">21</div>本章小结</div><div class="thumb"><div class="no">22</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -325,7 +437,7 @@ python3 tools/check_code.py code/ch11/inverted_index</code></pre></div>
 <b>第11章 索引技术</b><span>现代 C++ 数据结构教程</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 17</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 22</b>
 </div>
 <script>
 (function(){

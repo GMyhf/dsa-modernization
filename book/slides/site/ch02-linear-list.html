@@ -394,7 +394,17 @@ T erase_node(Node* node) {
 </tr>
 </tbody></table></div>
 <p>同规模下<strong>迭代释放</strong>的版本在 <code>-O0</code> 跑到 500 万结点无恙。</p>
-<p><strong>两档差九倍</strong>是最关键的一点：debug 崩、release 过。</p></section><section class="slide" data-notes="&lt;p&gt;补一句现实：现代机器上缓存局部性的影响常常压过渐进复杂度，
+<p><strong>两档差九倍</strong>是最关键的一点：debug 崩、release 过。</p></section><section class="slide" data-notes="&lt;p&gt;测试至少覆盖空表、单结点、多结点，并验证从任一结点出发恰好走一整圈。&lt;/p&gt;"><h1 id="233-循环链表"><a class="anchor" href="#233-循环链表">#</a>2.3.3 循环链表</h1>
+<p>循环链表把尾结点的 <code>next</code> 接回首结点：</p>
+<div class="codeblock" data-lang="text"><pre><code>空表: tail = nullptr
+非空: first = tail-&gt;next
+停止: 再次遇到起点，而不是遇到 nullptr</code></pre></div>
+<ul>
+<li>只保存 <code>tail</code>，取首结点和尾插都是 <span class="math">O(<span class="upr">1</span>)</span></li>
+<li>删除首结点：让 <code>tail-&gt;next</code> 跳过旧首结点</li>
+<li>删除最后一个结点：必须把 <code>tail</code> 清空</li>
+</ul>
+<p>适合轮转调度等“最后一个之后回到第一个”的场景。</p></section><section class="slide" data-notes="&lt;p&gt;补一句现实：现代机器上缓存局部性的影响常常压过渐进复杂度，
 n 不大时 vector 往往比 list 快，哪怕理论上后者插删更优。
 这也是「渐进分析不是全部」的一个好例子。&lt;/p&gt;"><h1 id="24-顺序表与链表的比较"><a class="anchor" href="#24-顺序表与链表的比较">#</a>2.4 顺序表与链表的比较</h1>
 <div class="table-wrap"><table><thead><tr>
@@ -449,7 +459,7 @@ python3 tools/check_code.py code/ch02/linked_list</code></pre></div>
 <blockquote><p><strong>写不出「会红」的用例，说明还没想清楚那条性质是什么。</strong></p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第2章 线性表</div><div class="thumb"><div class="no">2</div>2.1 线性表的抽象数据类型</div><div class="thumb"><div class="no">3</div>原书这里编译不过</div><div class="thumb"><div class="no">4</div>2.2 顺序表：地址公式</div><div class="thumb"><div class="no">5</div>教学版：三个成员</div><div class="thumb"><div class="no">6</div>按下标取值与改值</div><div class="thumb"><div class="no">7</div>按内容查找：「没找到」怎么说</div><div class="thumb"><div class="no">8</div>现代写法：把两件事合成一个</div><div class="thumb"><div class="no">9</div>插入：搬 O(n) 个元素</div><div class="thumb"><div class="no">10</div>扩容：翻倍，不是加一</div><div class="thumb"><div class="no">11</div>删除：插入的镜像</div><div class="thumb"><div class="no">12</div>三法则：原书最硬的一处错</div><div class="thumb"><div class="no">13</div>一个被删掉的设计：游标</div><div class="thumb"><div class="no">14</div>2.3 链表：换一种存储</div><div class="thumb"><div class="no">15</div>头结点：让表头不再是特例</div><div class="thumb"><div class="no">16</div>尾指针：让 append 变成 O(1)</div><div class="thumb"><div class="no">17</div>循链定位：返回「前驱」</div><div class="thumb"><div class="no">18</div>删除：两件事不能漏</div><div class="thumb"><div class="no">19</div>2.3.2 双链表：多一根指针买什么</div><div class="thumb"><div class="no">20</div>双链表的删除：两侧都要改</div><div class="thumb"><div class="no">21</div>所有权工具怎么选（2.3.1）</div><div class="thumb"><div class="no">22</div>「链那一行」有实测支撑</div><div class="thumb"><div class="no">23</div>2.4 顺序表与链表的比较</div><div class="thumb"><div class="no">24</div>本章小结</div><div class="thumb"><div class="no">25</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第2章 线性表</div><div class="thumb"><div class="no">2</div>2.1 线性表的抽象数据类型</div><div class="thumb"><div class="no">3</div>原书这里编译不过</div><div class="thumb"><div class="no">4</div>2.2 顺序表：地址公式</div><div class="thumb"><div class="no">5</div>教学版：三个成员</div><div class="thumb"><div class="no">6</div>按下标取值与改值</div><div class="thumb"><div class="no">7</div>按内容查找：「没找到」怎么说</div><div class="thumb"><div class="no">8</div>现代写法：把两件事合成一个</div><div class="thumb"><div class="no">9</div>插入：搬 O(n) 个元素</div><div class="thumb"><div class="no">10</div>扩容：翻倍，不是加一</div><div class="thumb"><div class="no">11</div>删除：插入的镜像</div><div class="thumb"><div class="no">12</div>三法则：原书最硬的一处错</div><div class="thumb"><div class="no">13</div>一个被删掉的设计：游标</div><div class="thumb"><div class="no">14</div>2.3 链表：换一种存储</div><div class="thumb"><div class="no">15</div>头结点：让表头不再是特例</div><div class="thumb"><div class="no">16</div>尾指针：让 append 变成 O(1)</div><div class="thumb"><div class="no">17</div>循链定位：返回「前驱」</div><div class="thumb"><div class="no">18</div>删除：两件事不能漏</div><div class="thumb"><div class="no">19</div>2.3.2 双链表：多一根指针买什么</div><div class="thumb"><div class="no">20</div>双链表的删除：两侧都要改</div><div class="thumb"><div class="no">21</div>所有权工具怎么选（2.3.1）</div><div class="thumb"><div class="no">22</div>「链那一行」有实测支撑</div><div class="thumb"><div class="no">23</div>2.3.3 循环链表</div><div class="thumb"><div class="no">24</div>2.4 顺序表与链表的比较</div><div class="thumb"><div class="no">25</div>本章小结</div><div class="thumb"><div class="no">26</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -462,7 +472,7 @@ python3 tools/check_code.py code/ch02/linked_list</code></pre></div>
 <b>第2章 线性表</b><span>现代 C++ 数据结构教程</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 25</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 26</b>
 </div>
 <script>
 (function(){

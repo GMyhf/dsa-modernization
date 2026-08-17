@@ -102,6 +102,22 @@ infinity 取 INT_MAX/4 而不是 INT_MAX——Floyd 里两个 infinity 会相加
 
 ---
 
+# 7.3.3 十字链表：一条弧进两条链
+
+邻接表只方便沿出边走；十字链表让同一弧结点同时进入：
+
+- 尾点的出边链：`tailnextarc`
+- 头点的入边链：`headnextarc`
+- 顶点保存：`firstoutarc` 与 `firstinarc`
+
+因此遍历顶点 $v$ 的出边是 $O(\deg^+(v))$，
+遍历入边是 $O(\deg^-(v))$，总空间仍是 $O(V+E)$。
+
+**更新不变量**：删除弧必须从出链、入链各摘一次；
+只改一边，另一方向会留下指向已释放结点的悬空链接。
+
+---
+
 # 7.4 深度优先周游
 
 ```cpp file=code/ch07/graph/modern.hpp#dfs

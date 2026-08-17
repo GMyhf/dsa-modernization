@@ -100,7 +100,35 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <li><strong>长度</strong>：串中字符的数目；长度为 0 的是<strong>空串</strong></li>
 <li><strong>子串</strong>：串中任意个连续字符组成的序列</li>
 </ul>
-<p>比较两个串的大小：<strong>从左到右逐字符比</strong>， 第一个不同的字符谁大串就谁大；都相同则短的小。</p></section><section class="slide" data-notes=""><h1 id="42-变长存储这一节的正题"><a class="anchor" href="#42-变长存储这一节的正题">#</a>4.2 变长存储：这一节的正题</h1>
+<p>比较两个串的大小：<strong>从左到右逐字符比</strong>， 第一个不同的字符谁大串就谁大；都相同则短的小。</p></section><section class="slide" data-notes=""><h1 id="411-字符编码"><a class="anchor" href="#411-字符编码">#</a>4.1.1 字符编码</h1>
+<p>字符串的逻辑元素是“字符”，内存中保存的是<strong>编码单元</strong>。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">编码</th>
+<th style="text-align:left">一个码点占用</th>
+<th style="text-align:left">关键事实</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">ASCII</td>
+<td style="text-align:left">1 字节</td>
+<td style="text-align:left">只覆盖 0–127</td>
+</tr>
+<tr>
+<td style="text-align:left">UTF-8</td>
+<td style="text-align:left">1–4 字节</td>
+<td style="text-align:left">与 ASCII 兼容，长度可变</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li>C++ 的 <code>char</code> 是一个字节，不等于一个人眼字符</li>
+<li><code>std::string::size()</code> 返回<strong>字节数</strong></li>
+<li>数 Unicode 字符必须解码，不能按字节下标猜</li>
+</ul>
+<p><code>u8&quot;...&quot;</code> 表示 UTF-8 字节序列；接口仍是字符串的查找与拼接。</p></section><section class="slide" data-notes=""><h1 id="412-编码顺序不等于语言顺序"><a class="anchor" href="#412-编码顺序不等于语言顺序">#</a>4.1.2 编码顺序不等于语言顺序</h1>
+<p>ASCII 中数字、大写字母、小写字母各自连续递增， 但码元顺序不是中文拼音、重音或大小写折叠后的自然语言顺序。</p>
+<p>对 <code>std::string</code>，比较的是编码单元字典序：</p>
+<div class="codeblock" data-lang="text"><pre><code>&quot;123&quot; &lt; &quot;1234&quot; &lt; &quot;23&quot;</code></pre></div>
+<p>前缀相同时，较短者更小。比较前必须约定编码与规范化方式。</p>
+<p><strong>C++ 陷阱</strong>：两边都是字符串字面量时，<code>&lt;</code> 比的是数组地址； 至少一边先转成 <code>std::string</code>，才是内容比较。</p></section><section class="slide" data-notes=""><h1 id="42-变长存储这一节的正题"><a class="anchor" href="#42-变长存储这一节的正题">#</a>4.2 变长存储：这一节的正题</h1>
 <p>字符串长度会变。所以要<strong>动态分配、按新长度重新开辟、拷贝、释放</strong>。</p>
 <figure><img loading="lazy" src="../../assets/17558c608a970971.jpg" alt="图4.3 创建字符串的示意图"><figcaption>图4.3 创建字符串的示意图</figcaption></figure>
 <p>所以这里是手写的 <code>char*</code> 缓冲区，<strong>不是</strong> <code>std::string</code>—— 换成 <code>std::string</code>，这一节就没了。</p></section><section class="slide" data-notes="&lt;p&gt;两处要讲：
@@ -314,7 +342,7 @@ KMP    j = next[j]  文本指针 i 一步都不退</code></pre></div>
 <blockquote><p>测试里有 3000 组随机对拍：朴素和 KMP 必须给出同样的答案。</p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第4章 字符串</div><div class="thumb"><div class="no">2</div>4.1 基本概念</div><div class="thumb"><div class="no">3</div>4.2 变长存储：这一节的正题</div><div class="thumb"><div class="no">4</div>空串也要占一个字节</div><div class="thumb"><div class="no">5</div>追加：为什么是 O(n)</div><div class="thumb"><div class="no">6</div>抽取子串：原书这里会崩</div><div class="thumb"><div class="no">7</div>现代写法：越界就抛</div><div class="thumb"><div class="no">8</div>查找与比较</div><div class="thumb"><div class="no">9</div>4.3 模式匹配</div><div class="thumb"><div class="no">10</div>朴素匹配：手动走一遍</div><div class="thumb"><div class="no">11</div>原书这里算错了</div><div class="thumb"><div class="no">12</div>有没有更好的办法</div><div class="thumb"><div class="no">13</div>特征向量 next</div><div class="thumb"><div class="no">14</div>计算 next：用模式串跟自己匹配</div><div class="thumb"><div class="no">15</div>KMP：失配时模式退，文本不退</div><div class="thumb"><div class="no">16</div>朴素与 KMP：代价对照</div><div class="thumb"><div class="no">17</div>本章小结</div><div class="thumb"><div class="no">18</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第4章 字符串</div><div class="thumb"><div class="no">2</div>4.1 基本概念</div><div class="thumb"><div class="no">3</div>4.1.1 字符编码</div><div class="thumb"><div class="no">4</div>4.1.2 编码顺序不等于语言顺序</div><div class="thumb"><div class="no">5</div>4.2 变长存储：这一节的正题</div><div class="thumb"><div class="no">6</div>空串也要占一个字节</div><div class="thumb"><div class="no">7</div>追加：为什么是 O(n)</div><div class="thumb"><div class="no">8</div>抽取子串：原书这里会崩</div><div class="thumb"><div class="no">9</div>现代写法：越界就抛</div><div class="thumb"><div class="no">10</div>查找与比较</div><div class="thumb"><div class="no">11</div>4.3 模式匹配</div><div class="thumb"><div class="no">12</div>朴素匹配：手动走一遍</div><div class="thumb"><div class="no">13</div>原书这里算错了</div><div class="thumb"><div class="no">14</div>有没有更好的办法</div><div class="thumb"><div class="no">15</div>特征向量 next</div><div class="thumb"><div class="no">16</div>计算 next：用模式串跟自己匹配</div><div class="thumb"><div class="no">17</div>KMP：失配时模式退，文本不退</div><div class="thumb"><div class="no">18</div>朴素与 KMP：代价对照</div><div class="thumb"><div class="no">19</div>本章小结</div><div class="thumb"><div class="no">20</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -327,7 +355,7 @@ KMP    j = next[j]  文本指针 i 一步都不退</code></pre></div>
 <b>第4章 字符串</b><span>现代 C++ 数据结构教程</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 18</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 20</b>
 </div>
 <script>
 (function(){

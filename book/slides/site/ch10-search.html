@@ -113,7 +113,33 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 </tr>
 </tbody></table></div></section><section class="slide" data-notes=""><h1 id="1012-二分检索"><a class="anchor" href="#1012-二分检索">#</a>10.1.2 二分检索</h1>
 <figure><img loading="lazy" src="../../assets/0792c8837fab4a44.jpg" alt="图 10.1 二分检索 K = 18 的过程"><figcaption>图 10.1 二分检索 K = 18 的过程</figcaption></figure>
-<p><strong>要求已排好序</strong>，每比较一次砍掉一半，<span class="math">O(<span class="upr">log</span>&thinsp;n)</span>。</p></section><section class="slide" data-notes="&lt;p&gt;两处值得讲：
+<p><strong>要求已排好序</strong>，每比较一次砍掉一半，<span class="math">O(<span class="upr">log</span>&thinsp;n)</span>。</p></section><section class="slide" data-notes=""><h1 id="二分检索半开区间-trace"><a class="anchor" href="#二分检索半开区间-trace">#</a>二分检索：半开区间 trace</h1>
+<p>有序表 <code>{1,3,7,8,12,15,18,21}</code> 查 18：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:right">轮次</th>
+<th style="text-align:left"><code>[first,last)</code></th>
+<th style="text-align:right"><code>middle</code></th>
+<th style="text-align:right">中值</th>
+<th style="text-align:left">更新</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:right">1</td>
+<td style="text-align:left"><code>[0,8)</code></td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">12</td>
+<td style="text-align:left"><code>first=5</code></td>
+</tr>
+<tr>
+<td style="text-align:right">2</td>
+<td style="text-align:left"><code>[5,8)</code></td>
+<td style="text-align:right">6</td>
+<td style="text-align:right">18</td>
+<td style="text-align:left">命中</td>
+</tr>
+</tbody></table></div>
+<p>查 14 时：</p>
+<div class="codeblock" data-lang="text"><pre><code>[0,8) → [5,8) → [5,6) → [5,5) → 失败</code></pre></div>
+<p>不变量：目标若存在，始终还在 <code>[first,last)</code> 中；区间为空才失败。</p></section><section class="slide" data-notes="&lt;p&gt;两处值得讲：
 
 1. &lt;strong&gt;半开区间 [first, last)&lt;/strong&gt;。书上常见的闭区间写法在没找到时要写
    &lt;code&gt;high = mid - 1&lt;/code&gt;，而下标是无符号的，mid == 0 时这一句会下溢成天文数字。
@@ -153,7 +179,13 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 第 11 章的索引技术就是这个思路的推广。&lt;/p&gt;"><h1 id="1013-分块检索"><a class="anchor" href="#1013-分块检索">#</a>10.1.3 分块检索</h1>
 <figure><img loading="lazy" src="../../assets/980c030f1f50d7f9.jpg" alt="图 10.3 分块检索的存储表示"><figcaption>图 10.3 分块检索的存储表示</figcaption></figure>
 <p>把 n 个元素分成 b 块：<strong>块间有序，块内可以无序</strong>。 另造一张块索引记下每块的最大关键码。</p>
-<p>先在索引里找到块，再在块内顺序查。块数取 <span class="math"><span class="sqrt">n</span></span> 量级时 ASL 约 <span class="math">O(<span class="sqrt">n</span>)</span>—— <strong>介于顺序的 <span class="math">O(n)</span> 和二分的 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span> 之间</strong>。</p></section><section class="slide" data-notes=""><h1 id="102-集合"><a class="anchor" href="#102-集合">#</a>10.2 集合</h1>
+<p>先在索引里找到块，再在块内顺序查。块数取 <span class="math"><span class="sqrt">n</span></span> 量级时 ASL 约 <span class="math">O(<span class="sqrt">n</span>)</span>—— <strong>介于顺序的 <span class="math">O(n)</span> 和二分的 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span> 之间</strong>。</p></section><section class="slide" data-notes=""><h1 id="分块检索先找块再扫块"><a class="anchor" href="#分块检索先找块再扫块">#</a>分块检索：先找块，再扫块</h1>
+<div class="codeblock" data-lang="text"><pre><code>块 0: 22 12 13  9  8       max=22
+块 1: 33 42 44 24 48       max=48
+块 2: 60 80 74 49 86 53    max=86</code></pre></div>
+<p>查 44：索引比较 22、48，落到块 1；块内比较 33、42、44。</p>
+<p>查 23：也落到块 1，但扫完整块仍失败。 “小于块最大值”只说明<strong>可能在这块</strong>，不说明一定存在。</p>
+<p>若索引顺序查、各块等长，代价约为 <span class="math">b/<span class="upr">2</span><span class="bin">+</span>n/(<span class="upr">2</span>b)</span>； 两项平衡得到 <span class="math">b<span class="rel">≈</span><span class="sqrt">n</span></span>。</p></section><section class="slide" data-notes=""><h1 id="102-集合"><a class="anchor" href="#102-集合">#</a>10.2 集合</h1>
 <p>集合只关心「在不在」，不保留重复，也不保证顺序。</p>
 <p>所有运算都建立在<strong>「是否属于」</strong>之上：</p>
 <div class="codeblock" data-lang="text"><pre><code>交集   本集合里凡是对方也有的
@@ -188,7 +220,40 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
         hash &amp;= ~high_bits;                     <span class="c">// 再把高 4 位清掉</span>
     }
     <span class="k">return</span> hash;
-}</code></pre></div></section><section class="slide" data-notes=""><h1 id="1032-开散列拉链法"><a class="anchor" href="#1032-开散列拉链法">#</a>10.3.2 开散列（拉链法）</h1>
+}</code></pre></div></section><section class="slide" data-notes=""><h1 id="散列函数怎么选"><a class="anchor" href="#散列函数怎么选">#</a>散列函数怎么选</h1>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">方法</th>
+<th style="text-align:left">适合</th>
+<th style="text-align:left">风险</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">除留余数</td>
+<td style="text-align:left">整数键</td>
+<td style="text-align:left">模数与数据周期共振</td>
+</tr>
+<tr>
+<td style="text-align:left">平方取中</td>
+<td style="text-align:left">数值键</td>
+<td style="text-align:left">仍依赖中间位分布</td>
+</tr>
+<tr>
+<td style="text-align:left">分段叠加</td>
+<td style="text-align:left">长数字/字符串</td>
+<td style="text-align:left">分段规律会聚集</td>
+</tr>
+<tr>
+<td style="text-align:left">ELF 等移位散列</td>
+<td style="text-align:left">字符串</td>
+<td style="text-align:left">仍需处理冲突</td>
+</tr>
+</tbody></table></div>
+<p>好散列函数追求：</p>
+<ul>
+<li>同一关键码结果稳定</li>
+<li>计算便宜</li>
+<li>把实际输入均匀铺到槽位</li>
+</ul>
+<p>“看起来随机”不等于无冲突；冲突处理始终是散列表的一部分。</p></section><section class="slide" data-notes=""><h1 id="1032-开散列拉链法"><a class="anchor" href="#1032-开散列拉链法">#</a>10.3.2 开散列（拉链法）</h1>
 <figure><img loading="lazy" src="../../assets/70ba08a893dc9d64.jpg" alt="图 10.7 开散列方法的图示"><figcaption>图 10.7 开散列方法的图示</figcaption></figure>
 <p>冲突的元素挂成一条链。</p>
 <ul>
@@ -233,7 +298,15 @@ A 占了槽 3,  B 探测一格住进槽 4
 <ul>
 <li><strong>查找</strong>路过墓碑要<strong>继续走</strong></li>
 <li><strong>插入</strong>可以<strong>覆盖</strong>墓碑</li>
-</ul></section><section class="slide" data-notes="&lt;p&gt;这一条最隐蔽，教学版单列了一个用例：
+</ul></section><section class="slide" data-notes=""><h1 id="墓碑探测删除后为什么不能停"><a class="anchor" href="#墓碑探测删除后为什么不能停">#</a>墓碑探测：删除后为什么不能停</h1>
+<p>设容量 7，<code>h(k)=k mod 7</code>，插入 10、17、24：</p>
+<div class="codeblock" data-lang="text"><pre><code>槽位: 0 1 2 3  4  5  6
+状态: . . . 10 17 24 .</code></pre></div>
+<p>删除 17 后若把槽 4 改成“从未使用”，查 24 会在槽 4 提前失败。</p>
+<p>正确做法是留下墓碑：</p>
+<div class="codeblock" data-lang="text"><pre><code>状态: . . . 10  † 24 .
+查 24: 3 不等 → 4 是墓碑，继续 → 5 命中</code></pre></div>
+<p>插入可记住遇到的第一个墓碑，但仍要继续探测，先确认键并未已存在。</p></section><section class="slide" data-notes="&lt;p&gt;这一条最隐蔽，教学版单列了一个用例：
 表里已有 10（在槽 4），槽 3 是墓碑，此时再插 10 必须返回 false。
 碰到墓碑就返回的实现会插出两个 10 来。&lt;/p&gt;"><h1 id="插入回收墓碑但不能提前停"><a class="anchor" href="#插入回收墓碑但不能提前停">#</a>插入：回收墓碑，但不能提前停</h1>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch10/search_hash/teaching.hpp">code/ch10/search_hash/teaching.hpp#fn:insertion_slot</a></div><pre><code><span class="c">// 找插入位置。比查找多做一件事：**记住路上第一个墓碑**。</span>
@@ -297,7 +370,7 @@ std::optional&lt;std::<span class="t">size_t</span>&gt; insertion_slot(<span cla
 <blockquote><p>最后一条只有拿非 ASCII 字节做输入才看得出来——测试里那条用例就是为它写的。</p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第10章 检索</div><div class="thumb"><div class="no">2</div>10.1.1 顺序检索</div><div class="thumb"><div class="no">3</div>10.1.2 二分检索</div><div class="thumb"><div class="no">4</div>二分的一个坑：无符号下溢</div><div class="thumb"><div class="no">5</div>决策树：二分为什么是 $\log n$</div><div class="thumb"><div class="no">6</div>10.1.3 分块检索</div><div class="thumb"><div class="no">7</div>10.2 集合</div><div class="thumb"><div class="no">8</div>10.3 散列：换一条路</div><div class="thumb"><div class="no">9</div>10.3.1 散列函数</div><div class="thumb"><div class="no">10</div>10.3.2 开散列（拉链法）</div><div class="thumb"><div class="no">11</div>10.3.3 闭散列（开地址法）</div><div class="thumb"><div class="no">12</div>删除：这一节的核心难点</div><div class="thumb"><div class="no">13</div>解法：墓碑</div><div class="thumb"><div class="no">14</div>插入：回收墓碑，但不能提前停</div><div class="thumb"><div class="no">15</div>10.3.5 效率分析</div><div class="thumb"><div class="no">16</div>本章小结</div><div class="thumb"><div class="no">17</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第10章 检索</div><div class="thumb"><div class="no">2</div>10.1.1 顺序检索</div><div class="thumb"><div class="no">3</div>10.1.2 二分检索</div><div class="thumb"><div class="no">4</div>二分检索：半开区间 trace</div><div class="thumb"><div class="no">5</div>二分的一个坑：无符号下溢</div><div class="thumb"><div class="no">6</div>决策树：二分为什么是 $\log n$</div><div class="thumb"><div class="no">7</div>10.1.3 分块检索</div><div class="thumb"><div class="no">8</div>分块检索：先找块，再扫块</div><div class="thumb"><div class="no">9</div>10.2 集合</div><div class="thumb"><div class="no">10</div>10.3 散列：换一条路</div><div class="thumb"><div class="no">11</div>10.3.1 散列函数</div><div class="thumb"><div class="no">12</div>散列函数怎么选</div><div class="thumb"><div class="no">13</div>10.3.2 开散列（拉链法）</div><div class="thumb"><div class="no">14</div>10.3.3 闭散列（开地址法）</div><div class="thumb"><div class="no">15</div>删除：这一节的核心难点</div><div class="thumb"><div class="no">16</div>解法：墓碑</div><div class="thumb"><div class="no">17</div>墓碑探测：删除后为什么不能停</div><div class="thumb"><div class="no">18</div>插入：回收墓碑，但不能提前停</div><div class="thumb"><div class="no">19</div>10.3.5 效率分析</div><div class="thumb"><div class="no">20</div>本章小结</div><div class="thumb"><div class="no">21</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -310,7 +383,7 @@ std::optional&lt;std::<span class="t">size_t</span>&gt; insertion_slot(<span cla
 <b>第10章 检索</b><span>现代 C++ 数据结构教程</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 17</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 21</b>
 </div>
 <script>
 (function(){

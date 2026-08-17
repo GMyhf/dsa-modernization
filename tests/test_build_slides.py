@@ -257,6 +257,27 @@ class TestRenderedDeck(unittest.TestCase):
         self.assertIn('class="deck-card"', text)
         self.assertNotIn('<a class="deck"', text)
 
+    def test_slides_cover_sections_added_to_the_book(self):
+        """书稿补回的小节和后半本演算不能只留在书里。"""
+        required = {
+            "ch02-linear-list.md": ["2.3.3 循环链表"],
+            "ch04-string.md": ["4.1.1 字符编码", "4.1.2 编码顺序"],
+            "ch05-binary-tree.md": ["5.5.2 优先队列"],
+            "ch07-graph.md": ["7.3.3 十字链表"],
+            "ch08-sorting.md": [
+                "8.3.1 直接选择排序", "8.4.1 冒泡排序", "8.6.1 桶式排序",
+                "8.6.3 索引排序", "8.7.1", "8.7.2", "8.7.3",
+            ],
+            "ch09-external-sort.md": ["页 I/O 成本模型", "3000 条记录"],
+            "ch10-search.md": ["半开区间 trace", "墓碑探测"],
+            "ch11-index.md": ["1000 条记录", "11.4.4 静态索引"],
+            "ch12-advanced.md": ["三维数组地址", "最佳 BST", "AVL 四种旋转"],
+        }
+        for name, needles in required.items():
+            text = (ROOT / "book" / "slides" / name).read_text(encoding="utf-8")
+            for needle in needles:
+                self.assertIn(needle, text, f"{name}: {needle}")
+
     @unittest.skipUnless(SITE.is_dir(), "课件还没构建")
     def test_deck_is_self_contained(self):
         """零 CDN：投影的机器不一定有网。

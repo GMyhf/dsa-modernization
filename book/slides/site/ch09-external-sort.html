@@ -112,7 +112,37 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 </tr>
 </tbody></table></div>
 <p><strong>所以外排序的代价不数比较次数，数「读写了多少次外存」。</strong></p>
-<p>一个直接推论：<strong>顺序读写远比随机读写划算</strong>—— 寻道一次之后连续读一大块，摊到每个字节上几乎免费。</p></section><section class="slide" data-notes=""><h1 id="外排序的基本套路"><a class="anchor" href="#外排序的基本套路">#</a>外排序的基本套路</h1>
+<p>一个直接推论：<strong>顺序读写远比随机读写划算</strong>—— 寻道一次之后连续读一大块，摊到每个字节上几乎免费。</p></section><section class="slide" data-notes=""><h1 id="页-io-成本模型"><a class="anchor" href="#页-io-成本模型">#</a>页 I/O 成本模型</h1>
+<p>设文件有 <span class="math">N</span> 条记录，一页装 <span class="math">B</span> 条：</p>
+<ul>
+<li>顺序扫描一遍：<span class="math">⌈N/B⌉</span> 次读页</li>
+<li>读一遍并写回：约 <span class="math"><span class="upr">2</span>⌈N/B⌉</span> 次页 I/O</li>
+<li>一趟归并：完整读写文件一次，约 <span class="math"><span class="upr">2</span>N/B</span></li>
+</ul>
+<p>例：3000 条记录、每页 100 条，一趟至少读 30 页、写 30 页。</p>
+<p><strong>多一趟归并的代价是多读写整个文件</strong>， 远比内存里多做几次比较昂贵。</p></section><section class="slide" data-notes=""><h1 id="92-记录怎样装进页"><a class="anchor" href="#92-记录怎样装进页">#</a>9.2 记录怎样装进页</h1>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">记录类型</th>
+<th style="text-align:left">页内组织</th>
+<th style="text-align:left">更新代价</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">定长</td>
+<td style="text-align:left">直接按槽排列</td>
+<td style="text-align:left">位置容易计算</td>
+</tr>
+<tr>
+<td style="text-align:left">变长</td>
+<td style="text-align:left">页尾槽目录记偏移与长度</td>
+<td style="text-align:left">记录可移动，槽号不变</td>
+</tr>
+</tbody></table></div>
+<p>删除也有两种选择：</p>
+<ul>
+<li>立即压紧：扫描紧凑，但要搬动后续记录</li>
+<li>留墓碑：写入便宜，但查询要跳过空洞，最终仍需重组</li>
+</ul>
+<p>索引保存“关键码 → 页号/槽号”，把逻辑顺序与物理位置分开。</p></section><section class="slide" data-notes=""><h1 id="外排序的基本套路"><a class="anchor" href="#外排序的基本套路">#</a>外排序的基本套路</h1>
 <div class="codeblock" data-lang="text"><pre><code>第一阶段: 分段读进内存, 排好, 写回磁盘   -&gt;  若干个「顺串」(run)
 第二阶段: 把这些顺串归并成一个有序文件</code></pre></div>
 <p>两个阶段各有优化空间：</p>
@@ -134,11 +164,64 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
             是 -&gt; 放进堆, 还能进当前顺串
             否 -&gt; 冻结它, 等下一个顺串再用
     堆空了 -&gt; 当前顺串结束, 解冻全部冻结的记录</code></pre></div>
-<p><strong>关键在「冻结」</strong>：比刚写出的值小的记录进不了当前顺串， 但它仍然占着内存，参与下一轮。</p></section><section class="slide" data-notes=""><h1 id="932-二路外排序"><a class="anchor" href="#932-二路外排序">#</a>9.3.2 二路外排序</h1>
+<p><strong>关键在「冻结」</strong>：比刚写出的值小的记录进不了当前顺串， 但它仍然占着内存，参与下一轮。</p></section><section class="slide" data-notes=""><h1 id="置换选择原书序列逐步走"><a class="anchor" href="#置换选择原书序列逐步走">#</a>置换选择：原书序列逐步走</h1>
+<p>工作区 <span class="math">M<span class="rel">=</span><span class="upr">7</span></span>，输入：<code>50 49 35 45 30 25 15 60 16 27 1</code></p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:right">步</th>
+<th style="text-align:right">输出</th>
+<th style="text-align:right">新输入</th>
+<th style="text-align:left">去向</th>
+<th style="text-align:left">冻结</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:right">1</td>
+<td style="text-align:right">15</td>
+<td style="text-align:right">60</td>
+<td style="text-align:left">活跃</td>
+<td style="text-align:left">空</td>
+</tr>
+<tr>
+<td style="text-align:right">2</td>
+<td style="text-align:right">25</td>
+<td style="text-align:right">16</td>
+<td style="text-align:left">冻结</td>
+<td style="text-align:left">16</td>
+</tr>
+<tr>
+<td style="text-align:right">3</td>
+<td style="text-align:right">30</td>
+<td style="text-align:right">27</td>
+<td style="text-align:left">冻结</td>
+<td style="text-align:left">16,27</td>
+</tr>
+<tr>
+<td style="text-align:right">4</td>
+<td style="text-align:right">35</td>
+<td style="text-align:right">1</td>
+<td style="text-align:left">冻结</td>
+<td style="text-align:left">16,27,1</td>
+</tr>
+<tr>
+<td style="text-align:right">5–8</td>
+<td style="text-align:right">45,49,50,60</td>
+<td style="text-align:right">耗尽</td>
+<td style="text-align:left">排空活跃堆</td>
+<td style="text-align:left">16,27,1</td>
+</tr>
+</tbody></table></div>
+<p>顺串 1：<code>15 25 30 35 45 49 50 60</code>，长度 8，已经超过 <span class="math">M</span>； 顺串 2：<code>1 16 27</code>。</p></section><section class="slide" data-notes=""><h1 id="932-二路外排序"><a class="anchor" href="#932-二路外排序">#</a>9.3.2 二路外排序</h1>
 <figure><img loading="lazy" src="../../assets/7486004c6161789b.jpg" alt="图 9.3 二路归并过程"><figcaption>图 9.3 二路归并过程</figcaption></figure>
 <p>每轮把顺串两两归并，顺串数减半。m 个顺串要 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>m⌉</span> 轮。</p>
 <p><strong>每一轮都要把整个文件读一遍写一遍</strong>—— 所以总的外存访问量是 <span class="math"><span class="upr">2</span>N⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>m⌉</span>。</p>
-<p><strong>要减少轮数，就得提高归并路数。</strong></p></section><section class="slide" data-notes=""><h1 id="933-多路归并瓶颈在哪"><a class="anchor" href="#933-多路归并瓶颈在哪">#</a>9.3.3 多路归并：瓶颈在哪</h1>
+<p><strong>要减少轮数，就得提高归并路数。</strong></p></section><section class="slide" data-notes=""><h1 id="3000-条记录二路归并要几趟"><a class="anchor" href="#3000-条记录二路归并要几趟">#</a>3000 条记录：二路归并要几趟</h1>
+<p>若初始顺串每条 200 条：<span class="math"><span class="upr">3000</span>/<span class="upr">200</span><span class="rel">=</span><span class="upr">15</span></span> 条顺串。</p>
+<div class="codeblock" data-lang="text"><pre><code>第 0 层: 15 条 × 200
+第 1 趟:  8 条，长度约 400
+第 2 趟:  4 条，长度约 800
+第 3 趟:  2 条，长度约 1600
+第 4 趟:  1 条，长度 3000</code></pre></div>
+<p>需要 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub><span class="upr">15</span>⌉<span class="rel">=</span><span class="upr">4</span></span> 趟。 每趟读写 3000 条，总传输约 <span class="math"><span class="upr">2</span><span class="bin">×</span><span class="upr">3000</span><span class="bin">×</span><span class="upr">4</span><span class="rel">=</span><span class="upr">24000</span></span> 条记录。</p>
+<p>若置换选择把平均顺串延长到 400，初始只有约 8 条，可省一趟。</p></section><section class="slide" data-notes=""><h1 id="933-多路归并瓶颈在哪"><a class="anchor" href="#933-多路归并瓶颈在哪">#</a>9.3.3 多路归并：瓶颈在哪</h1>
 <p>k 路归并时，每输出一个记录都要在 k 个候选里挑最小的。</p>
 <ul>
 <li>线性扫：<span class="math">k<span class="bin">−</span><span class="upr">1</span></span> 次比较</li>
@@ -181,7 +264,15 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
         replay_node(node);
     }
     champion_ = subtree_winner_[<span class="n">1</span>];
-}</code></pre></div></section><section class="slide" data-notes="&lt;p&gt;两种树的信息量是等价的，只是把「谁输了」记在哪里不同。
+}</code></pre></div></section><section class="slide" data-notes=""><h1 id="四路归并赢家路径怎样更新"><a class="anchor" href="#四路归并赢家路径怎样更新">#</a>四路归并：赢家路径怎样更新</h1>
+<p>四路当前值为 <code>[4, 7, 2, 9]</code>：</p>
+<div class="codeblock" data-lang="text"><pre><code>首轮: min(4,7)=4, min(2,9)=2, min(4,2)=2
+输出: 第 2 路的 2
+补入: 第 2 路变成 8，候选 [4,7,8,9]
+重赛: 只重算“第 2 路叶子 → 根”的两场
+结果: 新冠军为 4</code></pre></div>
+<p>建树 <span class="math">O(k)</span>；每输出一条只更新一条高为 <span class="math"><span class="upr">log</span>&thinsp;k</span> 的路径。</p>
+<p>线性扫描要每次检查全部 <span class="math">k</span> 路，选择树只做 <span class="math">O(<span class="upr">log</span>&thinsp;k)</span> 次比较。</p></section><section class="slide" data-notes="&lt;p&gt;两种树的信息量是等价的，只是把「谁输了」记在哪里不同。
 败者树多一个「冠军」槽（下标 0）存全局赢家。
 
 这是本章最容易讲糊的地方，建议对着图 9.7 和图 9.8 走一遍完整的重构过程。
@@ -233,7 +324,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <blockquote><p>测试里赢者树和败者树<strong>逐项对拍</strong>：同一组输入，输出序列必须完全相同。</p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第9章 文件管理和外排序</div><div class="thumb"><div class="no">2</div>9.1 一次磁盘访问有多贵</div><div class="thumb"><div class="no">3</div>外排序的基本套路</div><div class="thumb"><div class="no">4</div>9.3.1 置换选择：让顺串更长</div><div class="thumb"><div class="no">5</div>置换选择：怎么做到的</div><div class="thumb"><div class="no">6</div>9.3.2 二路外排序</div><div class="thumb"><div class="no">7</div>9.3.3 多路归并：瓶颈在哪</div><div class="thumb"><div class="no">8</div>赢者树</div><div class="thumb"><div class="no">9</div>赢者树的重构</div><div class="thumb"><div class="no">10</div>败者树：省掉「看兄弟」</div><div class="thumb"><div class="no">11</div>代价小结</div><div class="thumb"><div class="no">12</div>本章小结</div><div class="thumb"><div class="no">13</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第9章 文件管理和外排序</div><div class="thumb"><div class="no">2</div>9.1 一次磁盘访问有多贵</div><div class="thumb"><div class="no">3</div>页 I/O 成本模型</div><div class="thumb"><div class="no">4</div>9.2 记录怎样装进页</div><div class="thumb"><div class="no">5</div>外排序的基本套路</div><div class="thumb"><div class="no">6</div>9.3.1 置换选择：让顺串更长</div><div class="thumb"><div class="no">7</div>置换选择：怎么做到的</div><div class="thumb"><div class="no">8</div>置换选择：原书序列逐步走</div><div class="thumb"><div class="no">9</div>9.3.2 二路外排序</div><div class="thumb"><div class="no">10</div>3000 条记录：二路归并要几趟</div><div class="thumb"><div class="no">11</div>9.3.3 多路归并：瓶颈在哪</div><div class="thumb"><div class="no">12</div>赢者树</div><div class="thumb"><div class="no">13</div>赢者树的重构</div><div class="thumb"><div class="no">14</div>四路归并：赢家路径怎样更新</div><div class="thumb"><div class="no">15</div>败者树：省掉「看兄弟」</div><div class="thumb"><div class="no">16</div>代价小结</div><div class="thumb"><div class="no">17</div>本章小结</div><div class="thumb"><div class="no">18</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -246,7 +337,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <b>第9章 文件管理和外排序</b><span>现代 C++ 数据结构教程</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 13</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 18</b>
 </div>
 <script>
 (function(){
