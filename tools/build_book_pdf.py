@@ -76,9 +76,35 @@ GRAPHIC_RE = re.compile(r"\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}")
 PAGES_RE = re.compile(r"Output written on \S+ \((\d+) pages?")
 
 
+FIGURE_REF_RE = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
+
+
+def referenced_assets() -> list[Path]:
+    """各章正文引用到、并且会被嵌进 PDF 的本地图片。
+
+    **2026-08-17 复查补上**：第一版的摘要只覆盖 `.md` 与 preamble，
+    于是「换掉一张插图」这件事不会让 `--check` 变红——而那 292 张图是**嵌在 PDF 里**的，
+    `vendor_figures.py` 重新下载一张就足以让已发布的 PDF 与书稿分家。
+    实测：给一张 jpg 尾部追加两个字节，`--check` 照样报「与源文件一致」。
+    """
+    seen, assets = set(), []
+    for chapter in CHAPTERS:
+        if not chapter.is_file():
+            continue
+        for target in FIGURE_REF_RE.findall(chapter.read_text(encoding="utf-8", errors="replace")):
+            target = target.split()[0].strip()
+            if target.startswith(("http://", "https://", "data:")):
+                continue  # 远程热链进不了离线 PDF，R4 也不许它存在
+            path = (chapter.parent / target).resolve()
+            if path.is_file() and path not in seen:
+                seen.add(path)
+                assets.append(path)
+    return sorted(assets)
+
+
 def build_inputs() -> list[Path]:
     """会改变 PDF 内容的全部入参，顺序本身也是摘要的一部分。"""
-    return [*CHAPTERS, PREAMBLE, Path(__file__).resolve()]
+    return [*CHAPTERS, PREAMBLE, Path(__file__).resolve(), *referenced_assets()]
 
 
 def source_sha256() -> str:

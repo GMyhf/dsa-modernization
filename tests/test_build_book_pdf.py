@@ -168,6 +168,68 @@ class TestPdfFreshness(unittest.TestCase):
         self.assertEqual(result, 0)
         self.assertIn("PDF 与源文件一致", out)
 
+    def test_changing_a_referenced_figure_is_caught(self):
+        """**换一张插图也算书稿变了。**
+
+        292 张图是**嵌在 PDF 里**的，`vendor_figures.py` 重新下载一张就够让已发布的
+        PDF 与书稿分家。第一版的摘要只覆盖 `.md` 与 preamble——实测给一张 jpg 尾部
+        追加两个字节，`--check` 照样报「与源文件一致」（2026-08-17 复查发现）。
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            assets = root / "assets"
+            assets.mkdir()
+            figure = assets / "fig.jpg"
+            figure.write_bytes(b"\xff\xd8first")
+            source = root / "chapter.md"
+            source.write_text("![图1 示意](assets/fig.jpg)\n", encoding="utf-8")
+
+            original = (build_book_pdf.CHAPTERS, build_book_pdf.PREAMBLE,
+                        build_book_pdf.PDF_DIR, build_book_pdf.OUTPUT)
+            pdf_dir = root / "pdf"
+            pdf_dir.mkdir()
+            preamble = root / "preamble.tex"
+            preamble.write_text("% test\n", encoding="utf-8")
+            output = pdf_dir / "book.pdf"
+            output.write_bytes(b"%PDF-test")
+            try:
+                build_book_pdf.CHAPTERS = [source]
+                build_book_pdf.PREAMBLE = preamble
+                build_book_pdf.PDF_DIR = pdf_dir
+                build_book_pdf.OUTPUT = output
+                self.assertEqual([p.name for p in build_book_pdf.referenced_assets()], ["fig.jpg"])
+                info = {"chapters": 1, "main_chapters": 1, "figures": 1, "pages": 2,
+                        "source_sha256": build_book_pdf.source_sha256()}
+                (pdf_dir / "build-info.json").write_text(json.dumps(info), encoding="utf-8")
+                figure.write_bytes(b"\xff\xd8second")          # 只动图片，正文一字未改
+                out = io.StringIO()
+                with contextlib.redirect_stdout(out):
+                    result = build_book_pdf.check_current()
+            finally:
+                (build_book_pdf.CHAPTERS, build_book_pdf.PREAMBLE,
+                 build_book_pdf.PDF_DIR, build_book_pdf.OUTPUT) = original
+        self.assertEqual(result, 1)
+        self.assertIn("PDF 已过期", out.getvalue())
+
+    def test_remote_hotlinks_are_not_hashed(self):
+        """远程热链进不了离线 PDF（R4 也不许它存在），不该算进摘要。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "chapter.md"
+            source.write_text("![图1](https://example.com/a.jpg)\n", encoding="utf-8")
+            original = build_book_pdf.CHAPTERS
+            try:
+                build_book_pdf.CHAPTERS = [source]
+                self.assertEqual(build_book_pdf.referenced_assets(), [])
+            finally:
+                build_book_pdf.CHAPTERS = original
+
+    def test_committed_pdf_hash_covers_every_referenced_figure(self):
+        """入库书稿当锚：292 张图一张不落地进摘要。"""
+        assets = build_book_pdf.referenced_assets()
+        self.assertGreater(len(assets), 200, "正文引用的插图数不该突然掉下来")
+        self.assertTrue(all(path.is_file() for path in assets))
+        self.assertTrue(all("assets" in path.parts for path in assets))
+
     def test_one_character_source_change_is_caught(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
