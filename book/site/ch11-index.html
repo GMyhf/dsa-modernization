@@ -196,6 +196,8 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h2 id="111-线性索引"><a class="anchor" href="#111-线性索引">#</a>11.1 线性索引</h2>
 <p>第 1 章和第 9 章已经说过：外存上逐条扫描主文件太贵，应该先查一张较小的表，再按位置读记录。线性索引就是这张表：项是 <code>(key, location)</code>，按 key 排序，可以在内存里二分。</p>
 <p>稠密索引为每条记录建一项，主文件可以无序，查到索引项就直接得到记录位置。稀疏索引只为每个有序数据块建一项，通常记下该块的最小 key；查到块之后还要在块内再找一次。稀疏索引更省空间，但要求主文件按 key 分块有序。</p>
+<figure><img loading="lazy" src="../assets/6e8a0ef3ed26c107.jpg" alt="图11.1 线性索引与不等长记录"><figcaption>图11.1 线性索引与不等长记录</figcaption></figure>
+<p>图11.1中记录长度不同，不能用“基地址 + 下标 × 固定长度”直接计算位置。索引项保存关键码和记录地址，把逻辑顺序与物理布局分开；主文件移动后要更新地址，索引本身不保存完整记录。</p>
 <p>第一层索引太大、内存放不下时，再为它建一层，成为多级索引。一次查询的路径是：内存里的顶层 → 读一个索引页 → 读数据页。这时的关键指标不是 CPU 比较次数，而是磁盘页访问次数。变长记录尤其适合「索引 + 位置」，因为主文件无法按下标直接算出地址。</p>
 <p>先跑一遍：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/linear_index/demo.cpp">code/ch11/linear_index/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
@@ -242,6 +244,48 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 稀疏 · 每页 64 项: 2 层，查一次读 2 页
 稠密 · 2 层      : 查不到读 1 页，命中读 2 页——多出来的那一页就是数据页，索引里没有就不必去读</code></pre></div>
 <p>三行输出对应三个结论。第一行：索引项一页放不下就逐层上建，查一次的代价等于层数。第二行：<strong>索引页装得多，层数就少，访外次数随之下降</strong>——这正是下一节要做多分树的理由。第三行是稠密与稀疏最实用的差别：稠密索引在索引里查不到就是真没有，一个数据页都不用读；稀疏索引只能定位到页，<strong>查不到也得先把那一页读上来</strong>才知道。</p>
+<h4 id="从-1000-条记录算出四层索引"><a class="anchor" href="#从-1000-条记录算出四层索引">#</a>从 1000 条记录算出四层索引</h4>
+<p>示例中每个数据页放 4 条记录，因此主文件有 <span class="math">⌈<span class="upr">1000</span>/<span class="upr">4</span>⌉<span class="rel">=</span><span class="upr">250</span></span> 个数据页。稀疏索引每页一项，第一层恰有 250 项；索引页也只放 4 项时，自底向上各层页数为：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:right">层</th>
+<th style="text-align:right">项数</th>
+<th style="text-align:right">占用页数</th>
+<th style="text-align:right">上一层要为它建多少项</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:right">数据页</td>
+<td style="text-align:right">1000 条记录</td>
+<td style="text-align:right">250</td>
+<td style="text-align:right">250</td>
+</tr>
+<tr>
+<td style="text-align:right">一级索引</td>
+<td style="text-align:right">250</td>
+<td style="text-align:right">63</td>
+<td style="text-align:right">63</td>
+</tr>
+<tr>
+<td style="text-align:right">二级索引</td>
+<td style="text-align:right">63</td>
+<td style="text-align:right">16</td>
+<td style="text-align:right">16</td>
+</tr>
+<tr>
+<td style="text-align:right">三级索引</td>
+<td style="text-align:right">16</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">4</td>
+</tr>
+<tr>
+<td style="text-align:right">顶层索引</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">常驻内存</td>
+</tr>
+</tbody></table></div>
+<p>一次命中从顶层定位后，要读三级、二级、一级索引中的各一页，再读数据页，共 4 页。把每个索引页容量从 4 提高到 64 后，250 项只占 4 页，再用 1 个顶层页索引它们；查询因此只读 1 个下层索引页和 1 个数据页。</p>
+<figure><img loading="lazy" src="../assets/0c75a3db9929b61e.jpg" alt="图 11.2 二级索引文件"><figcaption>图 11.2 二级索引文件</figcaption></figure>
+<p>页内用顺序查还是二分查，只改变 CPU 比较次数，不改变“这一页已经读进来”这个事实。优化存储索引时先降树高和随机 I/O，再讨论页内比较，顺序不能倒过来。</p>
 <p>查找过程写出来就是「逐层读索引页，最后读一个数据页」：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/linear_index/modern.hpp">code/ch11/linear_index/modern.hpp#index-find</a></div><pre><code>[[nodiscard]] std::optional&lt;std::string&gt; find(<span class="t">int</span> key) <span class="k">const</span> {
     <span class="k">if</span> (levels_.empty()) {
@@ -283,7 +327,11 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h2 id="112-静态索引多分树"><a class="anchor" href="#112-静态索引多分树">#</a>11.2 静态索引——多分树</h2>
 <p>磁盘按页读写，一个索引结点通常设计成恰好装满一页。二叉树每个结点只有两个孩子，同样多的 key 会把树撑得很高，查询就要读很多页。多分树每个结点有许多孩子，树高低，页访问少。</p>
 <p>静态多分树在批量装入时按页填满，之后结构不再变。查找从根走到叶，每层读一页。插入、删除会破坏「一页正好满」的约定：多出来的记录只能进溢出区，少了的页会变稀，最终往往要重组整棵树。所以它适合「一次建好、很少改」的文件，不适合频繁更新的目录。</p>
+<figure><img loading="lazy" src="../assets/879fc43030b02cb8.jpg" alt="图 11.3 多分树"><figcaption>图 11.3 多分树</figcaption></figure>
+<p>多分树降低的是高度。若每个结点最多有 <span class="math">m</span> 个孩子、树高为 <span class="math">h</span>，理想满树可导航约 <span class="math">m<sup>h</sup></span> 个叶页；同样覆盖一百万个叶页，二叉树约需 20 层，100 路树只需 3 层。页内要比较更多分界 key，但整页已经在内存里，代价通常远小于多读一次外存页。</p>
+<p>扇出不是随意选的。页大小 4096 字节，若每个“关键码 + 孩子页号”占 16 字节，扣除页头后大约能放 250 项，扇出约 251；关键码变长或页头元数据增加，扇出就会下降。数据库索引喜欢短关键码，不只为省总空间，也为让一页容纳更多分支、压低树高。</p>
 <p>批量装入本身就是「按页填满、自底向上建层」，<code>code/ch11/bplus_tree</code> 的 <code>bulk_load</code> 实现的正是这件事——把下一节那棵 3 阶 B+ 树按这个办法装出来，得到的就是 11.4 图里的形状。区别只在后续：静态多分树靠重组，B+ 树靠分裂与合并就地维护。</p>
+<p>批量装入前必须按 key 排好记录，然后连续填叶页，再用每个孩子的最小 key 建上一层。这样叶页天然相邻，范围扫描接近顺序 I/O。若一条条随机插入再指望得到相同布局，结点会因分裂留下空隙，树形和页利用率都不同。</p>
 <h2 id="113-倒排索引"><a class="anchor" href="#113-倒排索引">#</a>11.3 倒排索引</h2>
 <p>前面的索引都是从记录走到属性：先找到学号 0310，再看他是不是计算机系。倒排反过来：从属性值走到记录集合。例如</p>
 <div class="codeblock" data-lang="text"><pre><code>计算机系 -&gt; [0310, 0330, 0341]
@@ -330,6 +378,47 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 含 quick 与 brown : 0001 0002
 短语 quick brown  : 0001</code></pre></div>
 <p>最后两行是短语查询存在的理由：2 号文档两个词都有，但不相邻，只有位置信息能把它排除掉。</p>
+<h4 id="两个指针怎样求交"><a class="anchor" href="#两个指针怎样求交">#</a>两个指针怎样求交</h4>
+<p>对倒排表 <code>A=[310,330,341]</code> 与 <code>B=[310,421]</code> 求交：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:right">步</th>
+<th style="text-align:right"><code>A[i]</code></th>
+<th style="text-align:right"><code>B[j]</code></th>
+<th style="text-align:left">动作</th>
+<th style="text-align:left">输出</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:right">1</td>
+<td style="text-align:right">310</td>
+<td style="text-align:right">310</td>
+<td style="text-align:left">相等，两边都前进</td>
+<td style="text-align:left">310</td>
+</tr>
+<tr>
+<td style="text-align:right">2</td>
+<td style="text-align:right">330</td>
+<td style="text-align:right">421</td>
+<td style="text-align:left">左边小，只移动 <code>i</code></td>
+<td style="text-align:left">310</td>
+</tr>
+<tr>
+<td style="text-align:right">3</td>
+<td style="text-align:right">341</td>
+<td style="text-align:right">421</td>
+<td style="text-align:left">左边小，只移动 <code>i</code></td>
+<td style="text-align:left">310</td>
+</tr>
+<tr>
+<td style="text-align:right">4</td>
+<td style="text-align:right">耗尽</td>
+<td style="text-align:right">421</td>
+<td style="text-align:left">停止</td>
+<td style="text-align:left">310</td>
+</tr>
+</tbody></table></div>
+<p>每次至少有一个指针前进，所以总步数不超过两张表长度之和。不能对 A 的每个文档号都从头扫描 B，那会把 <span class="math">O(n<span class="bin">+</span>m)</span> 退化成 <span class="math">O(nm)</span>。</p>
+<p>多词 AND 查询还要决定合并顺序。先交最短的倒排表，往往能尽早把候选集缩小；例如三张表长度分别为 10、1000、100000，先合并后两张会制造一个很大的中间结果。OR 查询则要在归并时去重，NOT 查询必须相对于“全部文档集合”求差，单独一张倒排表无法知道哪些文档不存在该词。</p>
+<p>短语查询的倒排项不能只存文档号，还要存词在文档中的位置。查询 <code>quick brown</code> 时，文档 1 中位置可以是 <code>(1,2)</code>，相差 1，保留；文档 2 中若为 <code>(2,1)</code>，两个词都出现却次序相反，应排除。先按文档号求交，再在候选文档内检查位置，可避免读取无关位置表。</p>
 <p>倒排表按文档号升序，所以求交就是一次归并，两个指针各走一趟，代价 <span class="math">O(n<span class="bin">+</span>m)</span>：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/inverted_index/modern.hpp">code/ch11/inverted_index/modern.hpp#inverted-intersect</a></div><pre><code><span class="c">/// 有序表求交。归并一遍，两个指针各走一趟，代价 O(n+m)。</span>
 [[nodiscard]] <span class="k">static</span> std::vector&lt;<span class="t">int</span>&gt; intersect(<span class="k">const</span> std::vector&lt;<span class="t">int</span>&gt;&amp; left,
@@ -354,8 +443,12 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h2 id="114-动态索引"><a class="anchor" href="#114-动态索引">#</a>11.4 动态索引</h2>
 <h3 id="b-树与-b-树"><a class="anchor" href="#b-树与-b-树">#</a>B 树与 B+ 树</h3>
 <p>B 树是保持平衡的多路搜索树，专门为磁盘页设计。一个结点里有多个有序 key，key 之间是指向孩子的指针。查找从根开始，在页内确定下一条分支，再读孩子页。树高随阶数增大而降低，一次查找的页数大约是 <span class="math"><span class="upr">log</span><sub>m</sub>n</span>。</p>
+<figure><img loading="lazy" src="../assets/97a7189d3ea9584c.jpg" alt="图 11.4 B 树结点的一般形式"><figcaption>图 11.4 B 树结点的一般形式</figcaption></figure>
+<p>一个含 <span class="math">r</span> 个关键码的内部结点有 <span class="math">r<span class="bin">+</span><span class="upr">1</span></span> 个孩子：最左孩子的键都小于第一个关键码，相邻两个关键码之间各管一个区间，最右孩子的键都大于最后一个关键码。页内先定位区间，再沿对应页号下降；若孩子数与关键码数不满足“多一个”，结点结构已经损坏。</p>
 <p>插入使结点超过上限（溢出）时，把它分裂成两个，并把分界 key 上推到父结点；父结点也可能接着分裂，最坏会一直裂到根，树增高一层。删除使结点低于下限（下溢）时，先向左右兄弟借 key；借不到就把两个结点合并，分界 key 从父结点拿下来。借和合并都可能向上传播。这些局部调整保证所有叶在同一层，所以 B 树始终平衡。</p>
 <p>B+ 树把记录（或记录位置）全部放在叶上，内部结点只作路标，不存完整记录。叶按 key 从小到大串成一条链。点查询仍然从根走到叶；范围查询找到下限所在的叶之后，沿叶链顺序扫到上限即可，不必再回到内部结点。关系数据库的磁盘索引多用 B+ 树，正是因为范围扫描是常见操作。</p>
+<figure><img loading="lazy" src="../assets/8573da94ca956749.jpg" alt="图 11.9 3 阶 B+ 树"><figcaption>图 11.9 3 阶 B+ 树</figcaption></figure>
+<p>B 树命中内部关键码时就可能拿到记录；B+ 树内部关键码只是叶键的复写，点查询仍要走到叶。看似多走一步，换来的是内部页只放短 key 和孩子指针，扇出更大、树更矮，而且所有记录都在同一叶层，范围访问路径统一。</p>
 <p>一棵 3 阶 B+ 树可以这样看（内部结点只导航，数据全在最下一层，叶之间有横链）：</p>
 <div class="codeblock" data-lang="text"><pre><code>                [  30  |  70  ]
                /       |       \
@@ -365,6 +458,38 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>本章的约定：3 阶指一个结点最多 3 个孩子，因此叶和内部结点都最多 2 个 key；内部结点的分界 key 取右子树最小 key 的复写。原书 11.4.2 用的是另一套约定——最大关键码复写，并把 m 阶 B+ 叶的容量定为 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 到 <span class="math">m</span> 个 key（3 阶叶因此存 2 到 3 个 key）。两套约定都成立，对照原书读时注意这处差别。</p>
 <p>查找 50：根上 <span class="math"><span class="upr">30</span>&lt;<span class="upr">50</span>&lt;<span class="upr">70</span></span>，走中间孩子；叶上直接取到 50。查找 35 到 80：先落到含 35 的叶，再沿 <code>↔</code> 扫过 50、70，直到超过 80。</p>
 <p>插入 60：中间叶暂成 <code>[30|50|60]</code>，超过 2 个 key 的上限。按原书 11.4.1 的分裂规则取中位数 50 作分界，叶裂成 <code>[30]</code> 和 <code>[50|60]</code>，50 复写一份上推（B+ 的分界 key 在叶上仍保留）。上推之后根成了 <code>[30|50|70]</code>、要挂 4 个孩子，同样超限，于是根也分裂：中位数 50 上移，成为新根，树增高一层。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">阶段</th>
+<th style="text-align:left">发生溢出的页</th>
+<th style="text-align:left">局部结果</th>
+<th style="text-align:left">向父层传什么</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">插入前</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">叶 <code>[30,50]</code></td>
+<td style="text-align:left">-</td>
+</tr>
+<tr>
+<td style="text-align:left">插入 60</td>
+<td style="text-align:left">叶页</td>
+<td style="text-align:left"><code>[30]</code> 与 <code>[50,60]</code></td>
+<td style="text-align:left">复写 50</td>
+</tr>
+<tr>
+<td style="text-align:left">父层接收 50</td>
+<td style="text-align:left">原根</td>
+<td style="text-align:left">key 变为 <code>[30,50,70]</code>，4 个孩子</td>
+<td style="text-align:left">上移 50</td>
+</tr>
+<tr>
+<td style="text-align:left">建新根</td>
+<td style="text-align:left">根</td>
+<td style="text-align:left">新根 <code>[50]</code>，树高加 1</td>
+<td style="text-align:left">结束</td>
+</tr>
+</tbody></table></div>
+<figure><img loading="lazy" src="../assets/bcafc0a9de581967.jpg" alt="图 11.10 插入后 B+ 树增高一层"><figcaption>图 11.10 插入后 B+ 树增高一层</figcaption></figure>
 <div class="codeblock" data-lang="text"><pre><code>                    [  50  ]
                  /            \
           [  30  ]            [  70  ]
@@ -477,6 +602,15 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
     <span class="k">return</span> out;
 }</code></pre></div>
 <p>删除 70：先在叶上删，若叶下溢就向兄弟借或合并，再改内部结点的路标。这里有一处容易漏：借位和合并都会把父结点的分界 key 搬进孩子里，而那个 key 可能正是刚被删掉的——搬完必须按「分界 key = 右子树最小 key」重算一遍，否则树里会留下一个指向已删关键码的路标。这个错误不影响点查询，只有结构不变量检查才看得出来（<code>code/ch11/bplus_tree/legacy.md</code> 记了实测过程）。</p>
+<p>删除后的处理顺序固定：</p>
+<ol>
+<li>页仍达到最小占用，更新必要的父分界后结束；</li>
+<li>页下溢且相邻兄弟有富余，借一个键并重算父分界；</li>
+<li>兄弟也在下限，合并两页，父结点少一个 key 和一个孩子；</li>
+<li>父结点因此下溢，向上重复；若根只剩一个孩子，让该孩子成为新根，树高减 1。</li>
+</ol>
+<figure><img loading="lazy" src="../assets/ffef69f4b64e2e43.jpg" alt="图 11.11 从 3 阶 B+ 树删除 75 后"><figcaption>图 11.11 从 3 阶 B+ 树删除 75 后</figcaption></figure>
+<p>分裂与合并要同时维护叶链。只修父子指针而漏掉 <code>next</code>，点查询仍可能全绿，范围查询却会跨不过断链；所以测试既要逐键 <code>find</code>，也要把全范围扫描结果与排序后的记录全集对拍。</p>
 <p>B 树与 B+ 树可以记成三句话：记录在不在内部结点；叶有没有横向链接；范围扫描要不要反复爬树。</p>
 <h3 id="1144-动态索引和静态索引性能的比较"><a class="anchor" href="#1144-动态索引和静态索引性能的比较">#</a>11.4.4 动态索引和静态索引性能的比较</h3>
 <p>静态索引在建立后不主动重排主文件；新增记录通常进入溢出区并挂链。它的结点紧凑、层数少，记录地址稳定，辅助索引也容易维护；但插删积累后溢出链变长、空洞增多，查询与空间利用率都会下降，最终必须停下来重组文件。</p>
@@ -511,8 +645,17 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h2 id="115-位索引技术"><a class="anchor" href="#115-位索引技术">#</a>11.5 位索引技术</h2>
 <h3 id="位图签名和红黑树"><a class="anchor" href="#位图签名和红黑树">#</a>位图、签名和红黑树</h3>
 <p>位图索引适合取值很少的属性，例如性别、省份、是否及格。每个属性值对应一个位串，第 <span class="math">i</span> 位表示第 <span class="math">i</span> 条记录有没有这个值。AND、OR、NOT 查询变成机器字上的按位运算，一次可以处理几十上百条记录。属性取值一多，位图会变得很宽，需要压缩（游程、字对齐混合等）。</p>
+<figure><img loading="lazy" src="../assets/012aa9549249f6c8.jpg" alt="图11.15 百货销售数据库的位图索引"><figcaption>图11.15 百货销售数据库的位图索引</figcaption></figure>
+<p>设 6 条记录的州属性和等级属性形成两条位图：</p>
+<div class="codeblock" data-lang="text"><pre><code>State=NY : 1 0 1 0 1 0
+Class=A  : 1 1 0 1 1 0
+AND      : 1 0 0 0 1 0</code></pre></div>
+<p>结果位 0 和 4 为 1，所以查询返回第 1、5 条记录（若程序下标从 0 开始则是 0、4）。OR 返回满足任一条件的记录，NOT 必须把超出实际记录数的尾部位清零；否则一个 64 位机器字只用了前 6 位，取反后其余 58 位都会被误认成记录。</p>
+<p>位图总空间约为“记录数 × 属性不同取值数”位。低基数列很合算：一百万条记录的“是否及格”只有两张约 122 KiB 的位图；若把几乎每人不同的学号做位图，就会生成近一百万张位图，完全失去意义。</p>
 <p>签名文件把一篇文档的特征散列成较短的位串。查询时先用签名快速丢掉不可能匹配的文档，再回到原文确认。签名可能产生假阳性（签名说可能有、原文里没有），不能有假阴性。它适合「先粗筛、再精查」的全文检索，不替代倒排。</p>
 <p>红黑树是内存里的近似平衡二叉搜索树：每个结点带一种颜色，通过几条局部规则保证从根到叶的黑结点数相同，最长路径不超过最短路径的两倍。查找、插入、删除都是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>，旋转次数有常数上限。它适合进程地址空间里的有序映射，不替代按页组织的 B+ 树。本书不另写红黑树实现，只作对照讨论。</p>
+<figure><img loading="lazy" src="../assets/32c09de96383c4de.jpg" alt="图 11.16 红黑树示意图"><figcaption>图 11.16 红黑树示意图</figcaption></figure>
+<p>红黑树的“平衡”不是要求左右子树等高，而是用颜色约束控制最长路径：根为黑、红结点不能有红孩子、从任一结点到其后代空叶的黑结点数相同。插入先按普通二叉搜索树放入红结点，再通过换色和旋转修复红红冲突。这里不展开全部修复算法，因为本章的外存主线是 B+ 树；图11.16只用来比较“二叉、内存结点”与“多路、页结点”的不同成本模型。</p>
 <p>先跑一遍：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/bitmap_index/demo.cpp">code/ch11/bitmap_index/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
 
@@ -574,6 +717,38 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 }</code></pre></div>
 <p>注意 <code>mask_tail</code>：记录数不是 64 的整数倍时，最后一个字里超出记录数的那些位取反后会变成 1，于是冒出根本不存在的记录号。这是位图实现最常见的一个洞。</p>
 <p>压缩不是万能的。上面稀疏位图 16 个字压到 4 个，但对 0 和 1 交替的稠密位图，游程压缩后<strong>反而更大</strong>——<code>code/ch11/bitmap_index/test.cpp</code> 直接断言了这一点，不粉饰。</p>
+<p>签名文件也需要一个反例才能看清边界。若“数据”和“结构”经散列后碰巧设置了与“算法”相同的几位，查询“算法”时这篇文档会进入候选集，即假阳性；但只要构造签名时把每个真实词的位都置上，真正含“算法”的文档不可能被漏掉。粗筛之后必须回原文确认，不能把候选集直接当查询答案。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">结构</th>
+<th style="text-align:left">保存什么</th>
+<th style="text-align:left">可能的额外工作</th>
+<th style="text-align:left">适合场景</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">倒排表</td>
+<td style="text-align:left">词到文档号/位置的列表</td>
+<td style="text-align:left">合并有序列表</td>
+<td style="text-align:left">精确全文检索、短语查询</td>
+</tr>
+<tr>
+<td style="text-align:left">位图</td>
+<td style="text-align:left">属性值到记录位向量</td>
+<td style="text-align:left">按位布尔运算</td>
+<td style="text-align:left">低基数列组合过滤</td>
+</tr>
+<tr>
+<td style="text-align:left">签名</td>
+<td style="text-align:left">文档特征的短位串</td>
+<td style="text-align:left">假阳性后回原文确认</td>
+<td style="text-align:left">空间受限的粗筛</td>
+</tr>
+<tr>
+<td style="text-align:left">B+ 树</td>
+<td style="text-align:left">有序 key 到记录位置</td>
+<td style="text-align:left">沿页树下降、沿叶链扫描</td>
+<td style="text-align:left">点查询与范围查询</td>
+</tr>
+</tbody></table></div>
 <h2 id="练习路径"><a class="anchor" href="#练习路径">#</a>练习路径</h2>
 <p>本章四个方向都已有可运行实现，练习因此从「照着写一遍」改成「在已有实现上再往前走一步」：</p>
 <ol>
