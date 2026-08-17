@@ -478,6 +478,36 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 }</code></pre></div>
 <p>删除 70：先在叶上删，若叶下溢就向兄弟借或合并，再改内部结点的路标。这里有一处容易漏：借位和合并都会把父结点的分界 key 搬进孩子里，而那个 key 可能正是刚被删掉的——搬完必须按「分界 key = 右子树最小 key」重算一遍，否则树里会留下一个指向已删关键码的路标。这个错误不影响点查询，只有结构不变量检查才看得出来（<code>code/ch11/bplus_tree/legacy.md</code> 记了实测过程）。</p>
 <p>B 树与 B+ 树可以记成三句话：记录在不在内部结点；叶有没有横向链接；范围扫描要不要反复爬树。</p>
+<h3 id="1144-动态索引和静态索引性能的比较"><a class="anchor" href="#1144-动态索引和静态索引性能的比较">#</a>11.4.4 动态索引和静态索引性能的比较</h3>
+<p>静态索引在建立后不主动重排主文件；新增记录通常进入溢出区并挂链。它的结点紧凑、层数少，记录地址稳定，辅助索引也容易维护；但插删积累后溢出链变长、空洞增多，查询与空间利用率都会下降，最终必须停下来重组文件。</p>
+<p>动态索引用 B 树或 B+ 树的分裂、借位和合并保持平衡。新旧记录具有相同的渐近查询代价，空间按需分配，也不需要周期性的全文件重组；代价是每个结点要保留孩子指针，树可能更高，更新还要处理并发锁与辅助索引中的地址变化。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">工作负载</th>
+<th style="text-align:left">更合适的选择</th>
+<th style="text-align:left">原因</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">数据几乎只读、可批量重建</td>
+<td style="text-align:left">静态索引</td>
+<td style="text-align:left">结构紧凑，读路径短</td>
+</tr>
+<tr>
+<td style="text-align:left">持续插入和删除</td>
+<td style="text-align:left">B/B+ 树动态索引</td>
+<td style="text-align:left">局部调整即可保持查询性能</td>
+</tr>
+<tr>
+<td style="text-align:left">范围扫描很多</td>
+<td style="text-align:left">B+ 树</td>
+<td style="text-align:left">数据集中在叶层，叶链可顺序读</td>
+</tr>
+<tr>
+<td style="text-align:left">记录物理地址必须长期稳定</td>
+<td style="text-align:left">静态索引</td>
+<td style="text-align:left">不因结点分裂搬动既有记录</td>
+</tr>
+</tbody></table></div>
+<p>选择的关键不是“哪一种总是更快”，而是更新成本由谁承担：静态索引把成本推迟到昂贵的批量重组，动态索引把成本摊到每次更新。读多写少且有维护窗口时静态结构仍有价值；在线系统无法停机重组时，动态索引通常更合适。</p>
 <h2 id="115-位索引技术"><a class="anchor" href="#115-位索引技术">#</a>11.5 位索引技术</h2>
 <h3 id="位图签名和红黑树"><a class="anchor" href="#位图签名和红黑树">#</a>位图、签名和红黑树</h3>
 <p>位图索引适合取值很少的属性，例如性别、省份、是否及格。每个属性值对应一个位串，第 <span class="math">i</span> 位表示第 <span class="math">i</span> 条记录有没有这个值。AND、OR、NOT 查询变成机器字上的按位运算，一次可以处理几十上百条记录。属性取值一多，位图会变得很宽，需要压缩（游程、字对齐混合等）。</p>
@@ -572,7 +602,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>见本章末「练习路径」的四条。</p>
 <div class="pagenav"><a href="ch10-search.html"><span class="dir">← 上一篇</span>第10章 检索</a><a href="ch12-advanced.html" style="text-align:right"><span class="dir">下一篇 →</span>第12章 高级数据结构</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#111-线性索引">11.1 线性索引</a><a href="#112-静态索引多分树">11.2 静态索引——多分树</a><a href="#113-倒排索引">11.3 倒排索引</a><a href="#114-动态索引">11.4 动态索引</a><a href="#b-树与-b-树" class="sub">B 树与 B+ 树</a><a href="#115-位索引技术">11.5 位索引技术</a><a href="#位图签名和红黑树" class="sub">位图、签名和红黑树</a><a href="#练习路径">练习路径</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充索引题参考课程第-11-章" class="sub">补充索引题（参考课程第 11 章）</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#111-线性索引">11.1 线性索引</a><a href="#112-静态索引多分树">11.2 静态索引——多分树</a><a href="#113-倒排索引">11.3 倒排索引</a><a href="#114-动态索引">11.4 动态索引</a><a href="#b-树与-b-树" class="sub">B 树与 B+ 树</a><a href="#1144-动态索引和静态索引性能的比较" class="sub">11.4.4 动态索引和静态索引性能的比较</a><a href="#115-位索引技术">11.5 位索引技术</a><a href="#位图签名和红黑树" class="sub">位图、签名和红黑树</a><a href="#练习路径">练习路径</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充索引题参考课程第-11-章" class="sub">补充索引题（参考课程第 11 章）</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch11-index.md</code> 生成

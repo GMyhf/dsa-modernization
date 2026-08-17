@@ -1302,6 +1302,10 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 <li><strong>迭代器可以 <code>--</code></strong>。单链表的不行。这也是那根 <code>prev</code> 买到的东西。</li>
 </ul>
 <p>【本书补充实现结束】</p>
+<h3 id="233-循环链表"><a class="anchor" href="#233-循环链表">#</a>2.3.3 循环链表</h3>
+<p>循环链表把尾结点的 <code>next</code> 接回首结点，因而没有 <code>nullptr</code> 作为终点。它适合轮转调度、循环缓冲区等“处理完最后一个又回到第一个”的场景。空表仍用 <code>tail == nullptr</code> 表示；非空时首结点是 <code>tail-&gt;next</code>。</p>
+<p>只保存 <code>tail</code> 就够了：取首结点是 <code>tail-&gt;next</code>，尾插只需改两根链接，均为 <span class="math">O(<span class="upr">1</span>)</span>。从任意结点开始遍历时必须保存起点，并在再次遇到起点时停止，不能写成“走到 <code>nullptr</code> 为止”。删除最后一个结点后要把 <code>tail</code> 清空；删除首结点则把 <code>tail-&gt;next</code> 跳过被删结点。循环双链表再把首结点的 <code>prev</code> 接到尾结点，反向遍历同样闭合。</p>
+<p>循环链表的代价是边界更容易写错：空表、单结点表和多结点表的链接规则不同。测试至少应覆盖三种长度，并验证从每个结点出发恰好走一整圈；否则漏接或误接都可能表现为无限循环。</p>
 <h3 id="23a-进阶选读从教学版到工程版"><a class="anchor" href="#23a-进阶选读从教学版到工程版">#</a>2.3a 进阶（选读）：从教学版到工程版</h3>
 <p><strong>这一节可以整节跳过。</strong> 工程版（<code>code/ch02/linked_list/modern.hpp</code> 与 <code>code/ch02/doubly_linked_list/modern.hpp</code>）在教学版之上补三件事。</p>
 <p><strong>一、头结点不再存 <code>T</code>。</strong> 教学版的头结点是一个完整的 <code>Node</code>，里面那个 <code>value</code> 从头到尾没人用——代价是 <code>T</code> 必须可默认构造。工程版把结点拆成两层：</p>
@@ -1399,7 +1403,7 @@ Node* insert_before(Node* pos, U&amp;&amp; value) {
 </ol>
 <div class="pagenav"><a href="ch01-adt.html"><span class="dir">← 上一篇</span>第1章 概论</a><a href="ch03-stack.html" style="text-align:right"><span class="dir">下一篇 →</span>第3章 栈与队列</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#21-线性表的概念">2.1 线性表的概念</a><a href="#22-顺序表">2.2 顺序表</a><a href="#教学版完整实现" class="sub">教学版：完整实现</a><a href="#221-顺序表的类定义" class="sub">2.2.1 顺序表的类定义</a><a href="#222-顺序表的运算实现" class="sub">2.2.2 顺序表的运算实现</a><a href="#22a-进阶选读从教学版到工程版" class="sub">2.2a 进阶（选读）：从教学版到工程版</a><a href="#与原书的对照">与原书的对照</a><a href="#23-链表">2.3 链表</a><a href="#教学版完整实现-1" class="sub">教学版：完整实现</a><a href="#231-单链表" class="sub">2.3.1 单链表</a><a href="#232-双链表" class="sub">2.3.2 双链表</a><a href="#23a-进阶选读从教学版到工程版" class="sub">2.3a 进阶（选读）：从教学版到工程版</a><a href="#24-线性表实现方法的比较">2.4 线性表实现方法的比较</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#21-线性表的概念">2.1 线性表的概念</a><a href="#22-顺序表">2.2 顺序表</a><a href="#教学版完整实现" class="sub">教学版：完整实现</a><a href="#221-顺序表的类定义" class="sub">2.2.1 顺序表的类定义</a><a href="#222-顺序表的运算实现" class="sub">2.2.2 顺序表的运算实现</a><a href="#22a-进阶选读从教学版到工程版" class="sub">2.2a 进阶（选读）：从教学版到工程版</a><a href="#与原书的对照">与原书的对照</a><a href="#23-链表">2.3 链表</a><a href="#教学版完整实现-1" class="sub">教学版：完整实现</a><a href="#231-单链表" class="sub">2.3.1 单链表</a><a href="#232-双链表" class="sub">2.3.2 双链表</a><a href="#233-循环链表" class="sub">2.3.3 循环链表</a><a href="#23a-进阶选读从教学版到工程版" class="sub">2.3a 进阶（选读）：从教学版到工程版</a><a href="#24-线性表实现方法的比较">2.4 线性表实现方法的比较</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch02-linear-list.md</code> 生成
