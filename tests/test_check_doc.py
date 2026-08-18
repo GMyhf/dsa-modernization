@@ -613,6 +613,16 @@ class TestR13DoubleDash(unittest.TestCase):
         """真实撞见的第三处：习题答案里的「第 7--12 章」。"""
         self.assertTrue(self.check("见第 7--12 章。\n"))
 
+    def test_chinese_compound_with_double_dash_is_reported(self):
+        """第四处，2026-08-18：习题答案 ch12 第 3 题写的「标记--清扫」。
+
+        判据一开始只收字母数字两侧，理由是没有真实用例撑着汉字那一半；
+        代码里留了一句「哪天真出现，连同用例一起加回来」。这就是那一天。
+        """
+        problems = self.check("环还需要标记--清扫等方案。\n")
+        self.assertEqual(len(problems), 1, problems)
+        self.assertIn("R13", problems[0])
+
     def test_real_en_dash_passes(self):
         self.assertEqual(self.check("ASCII 为 0–127 的单字节编码。\n"), [])
 

@@ -329,7 +329,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <li>0 起始下标时先按 <code>0,2,4,...</code> 收集偶下标字符，再按最大的奇下标到 1 收集奇下标字符。<code>ABCDEFGHIJKL</code> 得 <strong><code>ACEGIKLJHFDB</code></strong>；一次新缓冲扫描为 <span class="math">O(n)</span> 时间、<span class="math">O(n)</span> 空间。</li>
 <li>双指针从两端向中间比较，任一对不同返回 0，交错后返回 1；时间 <span class="math">O(n)</span>、空间 <span class="math">O(<span class="upr">1</span>)</span>。</li>
 <li>先给 <span class="math">t</span> 的字符建存在表，再扫描 <span class="math">s</span>；字符不在 <span class="math">t</span> 且第一次出现时，追加到新串并记录当前位置。时间 <span class="math">O(|s|<span class="bin">+</span>|t|)</span>，字节字母表下额外空间 <span class="math">O(<span class="upr">1</span>)</span>。</li>
-<li>令 <span class="math">R<span class="rel">=</span>reverse(T&#x27;)</span>，长度相同且能在 <code>R+R</code> 中找到 <span class="math">T</span> 时，<span class="math">T</span> 才是 <span class="math">T&#x27;</span> 的循环反转；可用 <code>kmp_search(R+R,T)</code> 在线性时间完成。</li>
+<li>判据是 <span class="math">|T|<span class="rel">=</span>|T&#x27;|</span> 且 <span class="math">T</span> 是 <span class="math">T&#x27;<span class="bin">+</span>T&#x27;</span> 的子串，用 <code>kmp_search(T&#x27;+T&#x27;, T)</code> 在 <span class="math">O(|T|)</span> 时间完成。原书用的例子 <code>arc</code> 与 <code>car</code> 正是这样：<code>arc</code> 的循环移位是 <code>arc</code>、<code>rca</code>、<code>car</code>。<strong>不要先反转再找</strong>——<code>reverse(&quot;arc&quot;)=&quot;cra&quot;</code>，<code>&quot;cracra&quot;</code> 里根本没有 <code>car</code>，那个判据会把原书自己的例子判否。</li>
 <li>从左到右找 <span class="math">t</span> 的非重叠出现位置，把未匹配片段写入新缓冲；空 <span class="math">t</span> 必须单独约定为不删除。用 KMP 为 <span class="math">O(|s|<span class="bin">+</span>|t|)</span>，朴素反复查找最坏 <span class="math">O(|s||t|)</span>。</li>
 <li>按本书 <code>build_next</code> 的优化定义，<code>BAAABBBAA</code> 的特征向量是 <strong><code>[-1,0,0,0,-1,1,1,0,0]</code></strong>。在目标串中首个完整匹配从 <strong>下标 19</strong> 开始；失配时文本下标不退，只按向量回退模式下标。</li>
 </ol>
@@ -359,7 +359,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h3 id="正文习题答案-4"><a class="anchor" href="#正文习题答案-4">#</a>正文习题答案</h3>
 <ol>
 <li>不计结点标号时共有 Catalan 数 <span class="math">C<sub><span class="upr">3</span></sub><span class="rel">=</span><span class="upr">5</span></span> 种：左斜链、右斜链、根有左右两叶、根只有左孩子且该孩子只有右孩子、根只有右孩子且该孩子只有左孩子。</li>
-<li>先序首字母 A 为根；中序切成 <code>CBD | A | FEG</code>。递归切分后，B 的左、右孩子分别是 C、D；E 的左、右孩子分别是 F、G。后序为 <strong><code>CDBGFEA</code></strong>。</li>
+<li>先序首字母 A 为根；中序切成 <code>CBD | A | FEG</code>。递归切分后，B 的左、右孩子分别是 C、D；E 的左、右孩子分别是 F、G。后序为 <strong><code>CDBFGEA</code></strong>（左子树 <code>CDB</code>，右子树 <code>FGE</code>，最后是根 A）。</li>
 <li>每个结点有两个孩子指针，共 <span class="math"><span class="upr">2</span>n</span> 个；树的 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 条父子边恰占 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 个非空指针，因此空指针数 <span class="math"><span class="upr">2</span>n<span class="bin">−</span>(n<span class="bin">−</span><span class="upr">1</span>)<span class="rel">=</span>n<span class="bin">+</span><span class="upr">1</span></span>。</li>
 <li>1 起始编号时，<span class="math">i&gt;<span class="upr">1</span></span> 的父为 <span class="math">⌊i/<span class="upr">2</span>⌋</span>，左孩子 <span class="math"><span class="upr">2</span>i</span>、右孩子 <span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">1</span></span>（编号不超过 <span class="math">n</span> 时存在）。层序编号把下一层按每个父的左右孩子成对展开，公式随之成立。</li>
 <li>根入队；队列非空时出队访问，并依次把非空左、右孩子入队。队列保存“已发现但尚未访问”的结点，先进先出才能保证层序。本书接口为 <code>BinaryTree::level_order</code>。</li>
@@ -370,8 +370,8 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <ol>
 <li>先序首元素定根，在中序中切分左右区间递归构造；重复键会使切分不唯一，应拒绝或另带唯一 ID。构造后用 <code>BinaryTree::postorder</code> 输出。</li>
 <li>使用实际接口 <code>BinarySearchTree::insert</code>、<code>remove</code>、<code>inorder</code>；依次插入递增键会形成高为 <span class="math">n</span> 的右链，使查找和插删退化到 <span class="math">O(n)</span>。</li>
-<li><code>MinHeap::insert</code> 建堆后反复 <code>pop_min</code> 可得到升序；逐个插入建堆 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，全部弹出仍为 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>。计时要排除数据生成和输出并多次重复。</li>
-<li>用 <code>HuffmanTree(symbols,weights,count)</code> 构造，实际查询接口为 <code>code(symbol)</code>、<code>encode</code>、<code>decode</code>、<code>weighted_path_length</code>。同权值编码可能不唯一，守门条件应是前缀无歧义、往返一致和 WPL 最小。</li>
+<li><code>MinHeap::insert</code> 建堆后反复 <code>remove_min()</code>（返回 <code>std::optional&lt;T&gt;</code>，堆空时是 <code>std::nullopt</code>）可得到升序；逐个插入建堆 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，全部弹出仍为 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>。计时要排除数据生成和输出并多次重复。</li>
+<li>教学版 <code>code/ch05/heap_huffman/teaching.hpp</code> 里 <code>HuffmanTree(symbols,weights,count)</code> 才带字符表，查询接口是 <code>code_of(symbol)</code>、<code>encode</code>、<code>decode</code>、<code>weighted_path_length</code>；工程版 <code>modern.hpp</code> 的 <code>HuffmanTree(weights,count)</code> 只建树、只对外给 <code>total_weight()</code>，做这道题要用教学版。同权值编码可能不唯一，守门条件应是前缀无歧义、往返一致和 WPL 最小。</li>
 </ol>
 <h3 id="课程作业与-ref_dsa-参考答案-4"><a class="anchor" href="#课程作业与-ref_dsa-参考答案-4">#</a>课程作业与 <code>ref_DSA</code> 参考答案</h3>
 <ol>
@@ -392,7 +392,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h3 id="正文习题答案-5"><a class="anchor" href="#正文习题答案-5">#</a>正文习题答案</h3>
 <ol>
 <li>森林转二叉树时，每个结点的第一个孩子接左指针、下一个兄弟接右指针，各棵树的根也沿右指针相连；逆变换把左链恢复为孩子、右链恢复为兄弟。逐边做两次后，每条父子/兄弟关系回到原处，故互逆。</li>
-<li>这题的唯一序列取决于图 6.7：先根按“根，再从左到右各子树”，后根按“从左到右各子树，再根”，层次序列用队列逐层扫描。核对时可调用 <code>GeneralTree::preorder</code>、<code>postorder</code>、<code>breadth_first</code> 对同一棵题图树输出，不能脱离题图猜字母序列。</li>
+<li>对题面给的 <code>A(B(E,F),C(G),D(H,I,J))</code>：先根 <strong><code>ABEFCGDHIJ</code></strong>，后根 <strong><code>EFBGCHIJDA</code></strong>，层次 <strong><code>ABCDEFGHIJ</code></strong>。先根是「根，再从左到右各子树」，后根是「从左到右各子树，再根」，层次用队列逐层扫描。核对时用 <code>GeneralTree::preorder</code>、<code>postorder</code>、<code>breadth_first</code>——注意层次序列与另两个的差别只在同层结点何时被访问。</li>
 <li>度为 2 的有序树只区分“第一个/第二个孩子”；只有一个孩子时它就是第一个孩子。二叉树还区分左、右，因此根只有右孩子 B、左孩子为空是合法二叉树，却没有对应的度为 2 有序树形态。</li>
 <li>例如根 A 有孩子 B、C，C 有孩子 D；带度数后根序列为 <code>B/0, D/0, C/1, A/2</code>。叶结点直接压栈；读到 <code>C/1</code> 弹 1 棵作其孩子再压回 C，读到 <code>A/2</code> 按逆序弹 C、B，接回原来的 B、C 次序。</li>
 <li>按重量合并后可写成 <code>parent=[0,0,0,3,3,5,6]</code>：0、1、2 一组，3、4 一组。随后 <code>find(0)</code> 时 0 已是根，父指针<strong>不变化</strong>；若想观察压缩应查非根，但本书 <code>DisjointSet::unite</code> 已按重量合并，这个例子不会形成深链。</li>
@@ -401,7 +401,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h3 id="正文上机题参考-5"><a class="anchor" href="#正文上机题参考-5">#</a>正文上机题参考</h3>
 <ol>
 <li>转换时保存第一个孩子/下一兄弟关系，往返后除比较先根序列，还应比较每个结点的孩子数。本书 <code>GeneralTree</code> 提供 <code>preorder</code>、<code>postorder</code> 和 <code>breadth_first</code>。</li>
-<li>为每条无向边调用 <code>DisjointSet::unite(u,v)</code>；最终把每个顶点的 <code>find(i)</code> 放入集合，集合大小就是连通分量数，等于 1 时连通。实际接口是 <code>find</code>、<code>unite</code>、<code>connected</code>。</li>
+<li>为每条无向边调用 <code>DisjointSet::unite(u,v)</code>；最终把每个顶点的 <code>find(i)</code> 放入集合，集合大小就是连通分量数，等于 1 时连通。实际接口是 <code>find</code>、<code>unite</code>、<code>same</code>（不叫 <code>connected</code>）。</li>
 <li>构造父指针链后重复查最深结点；无压缩每次 <span class="math">O(n)</span>，路径压缩第一次仍为 <span class="math">O(n)</span>，之后接近 <span class="math">O(<span class="upr">1</span>)</span>。本书实现同时使用按重量合并和路径压缩，不能靠 <code>unite</code> 造退化链；对照版需单独实现朴素 <code>find</code>。</li>
 </ol>
 <h3 id="课程作业与-ref_dsa-参考答案-5"><a class="anchor" href="#课程作业与-ref_dsa-参考答案-5">#</a>课程作业与 <code>ref_DSA</code> 参考答案</h3>
@@ -497,7 +497,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h3 id="正文上机题参考-8"><a class="anchor" href="#正文上机题参考-8">#</a>正文上机题参考</h3>
 <ol>
 <li>调用实际接口 <code>replacement_selection(input,memory)</code>；守门除了对原书输入固定顺串，还要验证每个顺串有序、所有输入恰出现一次以及 <code>memory==0</code> 被拒绝。</li>
-<li>使用 <code>WinnerTree</code> 的 <code>winner</code>、<code>winner_value</code>、<code>replace</code>；每次随机替换后用 <code>std::min_element</code> 扫描选手数组对拍冠军，并比较 <code>TournamentOps</code> 计数。</li>
+<li>使用 <code>WinnerTree</code> 的 <code>winner()</code>（冠军的值）、<code>winner_index()</code>（冠军是哪一路）和 <code>replace(player,value)</code>；每次随机替换后用 <code>std::min_element</code> 扫描选手数组对拍冠军的值和下标。（<code>detail::TournamentOps</code> 只是 <code>better</code>/<code>worse</code>/<code>next_power_of_two</code> 这几个比较助手，本身不计数；要统计比较次数得自己在测试里数。）</li>
 <li>使用 <code>LoserTree</code> 保存各路当前头元素，冠军输出后以该路下一个值调用 <code>replace</code>；耗尽路用正无穷哨兵。最终输出与把所有向量拼接后 <code>std::sort</code> 对拍。</li>
 <li>分别调用 <code>replacement_selection(input,4/8/16)</code>，记录返回向量的数量与各顺串长度；同一输入下容量增大通常使顺串数不增，但守门应核对记录守恒和各顺串有序，而不是把随机趋势当定理。</li>
 </ol>
@@ -592,8 +592,8 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <ol>
 <li>按本附录默认的 0 起始下标，行优先偏移为 <span class="math"><span class="upr">2</span><span class="bin">×</span><span class="upr">4</span><span class="bin">+</span><span class="upr">1</span><span class="rel">=</span><span class="bold"><span class="upr">9</span></span></span> 个元素；若题目采用 1 起始下标，则同名 <span class="math">a<sub><span class="upr">2</span>,<span class="upr">1</span></sub></span> 的偏移是 <span class="math">(<span class="upr">2</span><span class="bin">−</span><span class="upr">1</span>)<span class="upr">4</span><span class="bin">+</span>(<span class="upr">1</span><span class="bin">−</span><span class="upr">1</span>)<span class="rel">=</span><span class="upr">4</span></span>，必须先声明约定。</li>
 <li>0 起始下三角按行压缩的下标是 <span class="math">i(i<span class="bin">+</span><span class="upr">1</span>)/<span class="upr">2</span><span class="bin">+</span>j</span>，所以 <span class="math">a<sub><span class="upr">3</span>,<span class="upr">1</span></sub></span> 在 <strong>下标 <span class="math"><span class="upr">3</span><span class="bin">×</span><span class="upr">4</span>/<span class="upr">2</span><span class="bin">+</span><span class="upr">1</span><span class="rel">=</span><span class="upr">7</span></span></strong>。</li>
-<li>纯表每个子表只有一个父，对应树；再入表共享子表，对应 DAG；循环表含回边，对应有向环图。释放时纯树可递归，DAG 要引用计数/访问标记避免重复释放，环还需要标记--清扫等可回收环的方案。</li>
-<li>对<strong>单个请求</strong>这道题没有所说的三种例子：请求 <span class="math"><span class="rel">≤</span><span class="upr">1500</span></span> 时首次/最佳/最坏适应都能从某块满足，请求 <span class="math">&gt;<span class="upr">1500</span></span> 时三者都不能满足。三种策略只决定选哪块，从而影响<strong>后续请求序列</strong>；必须再给请求与释放序列，才可能比较谁后来成功。这是题面条件不足，不应编造答案。</li>
+<li>纯表每个子表只有一个父，对应树；再入表共享子表，对应 DAG；循环表含回边，对应有向环图。释放时纯树可递归，DAG 要引用计数/访问标记避免重复释放，环还需要标记–清扫等可回收环的方案。</li>
+<li>请求 <strong>650</strong> 就能把三者一次分开：首次适应从低地址扫，选 <strong>900</strong>；最佳适应挑刚够用的最小块，选 <strong>700</strong>；最坏适应挑当前最大块，选 <strong>1500</strong>。至于「能否满足」，单个请求分辨不出任何东西——<span class="math"><span class="rel">≤</span><span class="upr">1500</span></span> 时三种策略都能从某块满足，<span class="math">&gt;<span class="upr">1500</span></span> 时三者都不能。策略只决定<strong>挑哪一块</strong>，差别要到后续请求上才显出来（这与 12.4 节「只在一块空闲区上测是分辨不出三种策略的」是同一条道理）。</li>
 <li>Trie 为根下共用 <code>c -&gt; a</code>，再分三条边 <code>n</code>、<code>r</code>、<code>t</code>，三端均标记单词结束。查 <code>cab</code> 时走过 <code>c,a</code>，在第三个字符 <code>b</code> 处无边而失败。</li>
 <li>用本书 <code>optimal_bst({1,5,4,3},{5,4,3,2,1})</code> 同口径复算，最优根为 <strong>键 2</strong>，总成本为 <strong>57</strong>。</li>
 <li>插 1 得单根；插 2 得 1 的右孩子；插 3 形成 RR 失衡，对 1 左旋，得到根 2、左右孩子 1 和 3。再插 0 到 1 的左侧，各结点平衡因子仍在 <code>[-1,1]</code>，<strong>不旋转</strong>。</li>
