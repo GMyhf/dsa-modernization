@@ -5,70 +5,74 @@
     {
       "id": "代码10.1",
       "anchor": "class Item {",
-      "test": "代码10.1 Item getter and setter"
+      "test": "代码10.1 Item getter and setter", "py_anchor": "search-hash", "py_test": "代码10.1 getter"
     },
     {
       "id": "算法10.2",
       "anchor": "sequential_search(const std::vector<int>& values",
-      "test": "算法10.2 missing key optional"
+      "test": "算法10.2 missing key optional", "py_anchor": "sequential-binary", "py_test": "算法10.2 顺序检索对拍"
     },
     {
       "id": "算法10.3",
       "anchor": "binary_search(const std::vector<int>& sorted_values",
-      "test": "算法10.3 left boundary"
+      "test": "算法10.3 left boundary", "py_anchor": "sequential-binary", "py_test": "算法10.3 二分检索对拍"
     },
     {
       "id": "代码10.4",
       "anchor": "class IntSet {",
-      "test": "代码10.4 keyed deletion status"
+      "test": "代码10.4 keyed deletion status", "py_anchor": "int-set", "py_test": "代码10.4 删除状态"
     },
     {
       "id": "算法10.5",
       "anchor": "bool insert(int value)",
-      "test": "算法10.5 unique insertion"
+      "test": "算法10.5 unique insertion", "py_anchor": "int-set", "py_test": "算法10.5 插入去重"
     },
     {
       "id": "算法10.6",
       "anchor": "IntSet intersection(const IntSet& other) const",
-      "test": "算法10.6 intersection commutative size"
+      "test": "算法10.6 intersection commutative size", "py_anchor": "int-set", "py_test": "算法10.6 交集"
     },
     {
       "id": "算法10.7",
       "anchor": "bool includes(const IntSet& other) const",
-      "test": "算法10.7 containment"
+      "test": "算法10.7 containment", "py_anchor": "int-set", "py_test": "算法10.7 包含关系"
     },
     {
       "id": "算法10.8",
       "anchor": "std::size_t elf_hash(const std::string& text) noexcept",
-      "test": "算法10.8 ELFhash distinguishes nearby strings"
+      "test": "算法10.8 ELFhash distinguishes nearby strings", "py_anchor": "elf-hash", "py_test": "算法10.8 邻近串散列不同"
     },
     {
       "id": "算法10.9",
       "anchor": "class HashTable {",
-      "test": "算法10.9 table accounting"
+      "test": "算法10.9 table accounting", "py_anchor": "hash-table", "py_test": "算法10.9 容量与计数"
     },
     {
       "id": "算法10.10",
       "anchor": "bool insert(int key)",
-      "test": "算法10.10 linear collision insertion"
+      "test": "算法10.10 linear collision insertion", "py_anchor": "hash-table", "py_test": "算法10.10 碰撞插入"
     },
     {
       "id": "算法10.11",
       "anchor": "std::optional<std::size_t> find_slot(int key) const",
-      "test": "算法10.11 probes through tombstone"
+      "test": "算法10.11 probes through tombstone", "py_anchor": "hash-table", "py_test": "算法10.11 穿过墓碑检索"
     },
     {
       "id": "算法10.12",
       "anchor": "bool erase(int key)",
-      "test": "算法10.12 deletion creates tombstone"
+      "test": "算法10.12 deletion creates tombstone", "py_anchor": "hash-table", "py_test": "算法10.12 墓碑删除"
     },
     {
       "id": "算法10.13",
       "anchor": "std::optional<std::size_t> insertion_slot(int key) const",
-      "test": "算法10.13 first tombstone reused"
+      "test": "算法10.13 first tombstone reused", "py_anchor": "hash-table", "py_test": "算法10.13 复用首个墓碑"
     }
   ],
   "standard": "c++17",
+  "d025_forbidden": {
+    "dict": "第10章闭散列表与集合算法不能由 Python 内建字典替代",
+    "set": "第10章集合运算必须走本单元 IntSet"
+  },
   "owner": "codex",
   "notes": "顺序/二分检索、集合运算、ELFHash、线性探测及墓碑删除。",
   "d001_exceptions": {
