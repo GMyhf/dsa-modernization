@@ -89,6 +89,7 @@ RULES = [
     "R13 正文不得用 LaTeX 式的 `--` 当破折号/区间号——Markdown 原样印出两个减号",
     "R14 正文每道习题/上机题要么在附录里有同号答案，要么在 collab/answer_gaps.json 里登记",
     "R15 书稿里写成 `类名::成员` 的接口名，必须在 code/ 里声明该类的文件中真实存在",
+    "R16 书稿每个带编号的小节，要么在 collab/slide_coverage.json 里登记到真实的课件页，要么登记为引子/不进课件/欠着",
 ]
 
 
@@ -652,6 +653,119 @@ def check_double_dash(path: Path):
     return problems
 
 
+# R16：正文讲了的，课件讲没讲——要有一张说得清的表。
+#
+# 缘由（2026-08-18）：`ARTIFACT-FRESHNESS-2026-08-17` 把「课件内容覆盖」列为黄色——
+# 当次核查没发现不一致，但**没有任何机制**能在正文新增一节时提醒课件跟上。
+# 那份清单还留了一条实测警告：这一项**只能做成显式登记，不能做成匹配器**。
+# 两种自动匹配都试过——按节号匹配得 53 个「未覆盖小节」，按标题关键词得 45 个，
+# 抽查后**全是假阳性**（Prim 在 ch07 课件出现 6 次、KMP 在 ch04 出现 11 次，
+# 却都匹配不上，因为课件页标题本来就不带编号、术语也会换说法）。
+#
+# 判据：书稿每个带编号的小节，都要在 `collab/slide_coverage.json` 里有一条：
+#   covered      —— slides 列出覆盖它的课件页，写成 `章:页标题`，页标题要真实存在；
+#   by-children  —— 这一节只是引子，内容由下级小节承担（闸门检查它确实有已登记的下级）；
+#   declined     —— 有意不进课件，写明理由（本书的「进阶（选读）」节就是这一类）；
+#   pending      —— 欠着，写明缺的是什么。
+# 与 section_gaps / answer_gaps 同一套形状：**先让缺口变成一个数，再让这个数降下去。**
+#
+# 闸门只验「登记了没有、登记的页在不在」，**不验这一页讲得对不对、够不够**——
+# 与 D-014 同一条边界。课件是教学改写，逐字比较本来就不成立。
+SLIDE_COVERAGE = ROOT / "collab" / "slide_coverage.json"
+SLIDE_PAGE_TITLE_RE = re.compile(r"^#\s+(.+?)\s*$", re.M)
+FRONT_MATTER_RE = re.compile(r"^---\n.*?\n---\n", re.S)
+
+
+def slide_pages(slides_root=None):
+    """课件页清单：`章 -> {页标题}`。页标题在一章之内唯一，所以拿它当稳定的页标识。"""
+    root = slides_root or (BOOK / "slides")
+    pages = collections.defaultdict(set)
+    if not root.is_dir():
+        return pages
+    for path in sorted(root.glob("ch*.md")):
+        chapter = path.name.split("-")[0]
+        body = FRONT_MATTER_RE.sub("", path.read_text(encoding="utf-8", errors="replace"), count=1)
+        for page in body.split("\n---\n"):
+            hit = SLIDE_PAGE_TITLE_RE.search(page)
+            if hit:
+                pages[chapter].add(hit.group(1).strip())
+    return pages
+
+
+def load_slide_coverage(path=None):
+    """读登记表，顺便校验每条自己的字段。"""
+    target = path or SLIDE_COVERAGE
+    if not target.is_file():
+        return {}, [f"{rel_label(target)} 不存在：R16 需要这张登记表"]
+    try:
+        raw = json.loads(target.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as err:
+        return {}, [f"{rel_label(target)} 不是合法 JSON：{err}"]
+    entries, problems = {}, []
+    for item in raw.get("coverage", []):
+        section = item.get("section")
+        if not section:
+            problems.append(f"{rel_label(target)} 有一条没写 section")
+            continue
+        if section in entries:
+            problems.append(f"{rel_label(target)} `{section}` 登记了两次")
+            continue
+        kind = item.get("kind")
+        if kind not in ("covered", "by-children", "declined", "pending"):
+            problems.append(f"{rel_label(target)} `{section}` 的 kind=`{kind}` 不在四种之内")
+            continue
+        for field in ("by", "date"):
+            if not item.get(field):
+                problems.append(f"{rel_label(target)} `{section}` 缺 {field}")
+        if kind == "covered" and not item.get("slides"):
+            problems.append(f"{rel_label(target)} `{section}` 是 covered 却没列任何课件页")
+        if kind in ("by-children", "declined", "pending") and not item.get("reason"):
+            problems.append(f"{rel_label(target)} `{section}` 是 {kind} 却没写 reason")
+        entries[section] = item
+    return entries, problems
+
+
+def check_slide_coverage(sections, entries, pages):
+    """R16：小节要么登记到真实的课件页，要么说明为什么不进课件。"""
+    problems = []
+    label = rel_label(SLIDE_COVERAGE)
+    for section in sorted(sections):
+        item = entries.get(section)
+        if item is None:
+            problems.append(
+                f"{label}  R16 书稿有 {section} 这一节，登记表里没有它。"
+                "登记成 covered（列出课件页）/by-children/declined/pending 之一，"
+                "别让它悄悄从课件里消失"
+            )
+            continue
+        if item["kind"] == "covered":
+            for page in item.get("slides", []):
+                chapter, _, title = page.partition(":")
+                if not title:
+                    problems.append(f"{label}  R16 {section} 的 `{page}` 不是 `章:页标题` 的写法")
+                elif chapter not in pages:
+                    problems.append(f"{label}  R16 {section} 引用了 `{chapter}`，没有这一章的课件")
+                elif title not in pages[chapter]:
+                    problems.append(
+                        f"{label}  R16 {section} 登记的课件页 `{page}` 不存在——"
+                        "页标题改过就要同步改这张表"
+                    )
+        elif item["kind"] == "by-children":
+            children = [
+                other for other in sections
+                if other.startswith(section + ".") and entries.get(other)
+            ]
+            if not children:
+                problems.append(
+                    f"{label}  R16 {section} 登记为 by-children，"
+                    "但书稿里它没有已登记的下级小节——引子下面得真有内容"
+                )
+    for section in sorted(entries):
+        if section not in sections:
+            problems.append(f"{label}  R16 登记表里的 {section} 在书稿里已经不存在了，请删掉这一条")
+    return problems
+
+
 # R15：写「本书的接口是 X」之前，让机器去 code/ 里查一次。
 #
 # 缘由（2026-08-18）：T-037 复查在一份 11 步全绿的书稿里手工抓出 4 个**根本不存在**的
@@ -1076,6 +1190,10 @@ def main():
 
     problems += check_exercise_answers(targets, answer_gaps)
 
+    coverage, coverage_problems = load_slide_coverage()
+    problems += coverage_problems
+    problems += check_slide_coverage(book_numbers, coverage, slide_pages())
+
     # legacy.md 是原书缺陷证据，也大量使用 text 引文；只对它运行 R8，
     # 不把书稿专属的章节、图片和清单配对规则强加给证据文件。
     sources = source_texts()
@@ -1095,6 +1213,11 @@ def main():
     if gaps:
         print(f"   节覆盖：原书 {len(original)} 节，已登记 {len(gaps)} 节"
               f"（并入父节 {kinds['merged']}，有意不写 {kinds['declined']}，待补 {kinds['pending']}）")
+    if coverage:
+        slide_kinds = collections.Counter(item["kind"] for item in coverage.values())
+        print(f"   课件覆盖：正文 {len(book_numbers)} 节，登记到课件页 {slide_kinds['covered']} 节"
+              f"（引子 {slide_kinds['by-children']}，有意不进课件 {slide_kinds['declined']}，"
+              f"欠着 {slide_kinds['pending']}）")
 
 
 if __name__ == "__main__":

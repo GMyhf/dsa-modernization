@@ -1,0 +1,1574 @@
+{
+  "_doc": [
+    "R16 的登记表：书稿每个带编号的小节，要么在这里登记到具体的课件页，要么说明为什么不进课件。",
+    "kind=covered     slides 列出覆盖它的课件页，写成 `章:页标题`；页标题必须在该章课件里真实存在。",
+    "kind=by-children 这一节只是引子，内容由下级小节承担——闸门会检查它确实有已登记的下级小节。",
+    "kind=declined    有意不进课件，reason 要说明为什么。",
+    "kind=pending     欠着——这是债，不是解释，reason 里写清楚缺的是什么。",
+    "四种都要 by/date。没登记的小节，check_doc R16 直接报红。",
+    "**这张表只能手工维护，不能用匹配器生成。** 2026-08-17 实测过两种自动匹配：按编号得 53 个",
+    "「未覆盖小节」，按标题关键词得 45 个，抽查后全是假阳性——课件页标题本来就不带编号、",
+    "术语也会换说法（Prim 在 ch07 课件出现 6 次、KMP 在 ch04 出现 11 次，却都匹配不上）。",
+    "闸门只验「登记了没有、登记的页在不在」，不验「这一页讲得对不对、够不够」——那是人工复核项。"
+  ],
+  "coverage": [
+    {
+      "section": "1.1",
+      "kind": "covered",
+      "slides": [
+        "ch01:1.1 一个真问题：股市的传言"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "1.1.1",
+      "kind": "covered",
+      "slides": [
+        "ch01:1.1 一个真问题：股市的传言"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "1.1.2",
+      "kind": "covered",
+      "slides": [
+        "ch01:先把问题抽象掉",
+        "ch01:用什么存这张图"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "1.1.3",
+      "kind": "covered",
+      "slides": [
+        "ch01:用什么存这张图",
+        "ch01:算法：Floyd",
+        "ch01:实现：两件事在一个函数里"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "1.2",
+      "kind": "covered",
+      "slides": [
+        "ch01:1.2 数据结构：三个层次"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "1.2.1",
+      "kind": "covered",
+      "slides": [
+        "ch01:逻辑结构的三分"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "1.2.2",
+      "kind": "covered",
+      "slides": [
+        "ch01:四种存储方法",
+        "ch01:索引：逻辑有序，物理无序"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "1.2.3",
+      "kind": "covered",
+      "slides": [
+        "ch01:1.2.3 抽象数据类型"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "1.3",
+      "kind": "by-children",
+      "reason": "这一节只是引子，内容由它的下级小节承担；课件按下级小节讲",
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "1.3.1",
+      "kind": "pending",
+      "reason": "算法的四条性质（通用/有效/确定/有穷）课件里没有对应页，属于欠账",
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "1.3.2",
+      "kind": "pending",
+      "reason": "算法设计方法（穷举/回溯/分治/递归/贪心/动态规划）课件里没有对应页，属于欠账",
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "1.4",
+      "kind": "covered",
+      "slides": [
+        "ch01:1.4 算法分析：为什么要看增长趋势"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "1.4.1",
+      "kind": "covered",
+      "slides": [
+        "ch01:1.4 算法分析：为什么要看增长趋势",
+        "ch01:大 O、Ω、Θ"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "1.4.2",
+      "kind": "covered",
+      "slides": [
+        "ch01:最好、最坏、平均"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "1.4.3",
+      "kind": "covered",
+      "slides": [
+        "ch01:1.4.3 时间与空间的折衷"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "1.4.4",
+      "kind": "pending",
+      "reason": "「怎么按运算集合和存储层次挑结构」这张取舍表课件里没有，欠一页",
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "2.1",
+      "kind": "covered",
+      "slides": [
+        "ch02:2.1 线性表的抽象数据类型",
+        "ch02:原书这里编译不过"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "2.2",
+      "kind": "covered",
+      "slides": [
+        "ch02:2.2 顺序表：地址公式"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "2.2.1",
+      "kind": "covered",
+      "slides": [
+        "ch02:教学版：三个成员"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "2.2.2",
+      "kind": "covered",
+      "slides": [
+        "ch02:按下标取值与改值",
+        "ch02:按内容查找：「没找到」怎么说",
+        "ch02:现代写法：把两件事合成一个",
+        "ch02:插入：搬 O(n) 个元素",
+        "ch02:扩容：翻倍，不是加一",
+        "ch02:删除：插入的镜像",
+        "ch02:三法则：原书最硬的一处错",
+        "ch02:一个被删掉的设计：游标"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "2.2a",
+      "kind": "declined",
+      "reason": "课件讲教学版；这是书稿的「进阶（选读）」节，书里自己写着「可以整节跳过」，不进课件是有意的",
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "2.3",
+      "kind": "covered",
+      "slides": [
+        "ch02:2.3 链表：换一种存储",
+        "ch02:头结点：让表头不再是特例"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "2.3.1",
+      "kind": "covered",
+      "slides": [
+        "ch02:尾指针：让 append 变成 O(1)",
+        "ch02:循链定位：返回「前驱」",
+        "ch02:删除：两件事不能漏",
+        "ch02:所有权工具怎么选（2.3.1）",
+        "ch02:「链那一行」有实测支撑"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "2.3.2",
+      "kind": "covered",
+      "slides": [
+        "ch02:2.3.2 双链表：多一根指针买什么",
+        "ch02:双链表的删除：两侧都要改"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "2.3.3",
+      "kind": "covered",
+      "slides": [
+        "ch02:2.3.3 循环链表"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "2.3a",
+      "kind": "declined",
+      "reason": "课件讲教学版；这是书稿的「进阶（选读）」节，书里自己写着「可以整节跳过」，不进课件是有意的",
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "2.4",
+      "kind": "covered",
+      "slides": [
+        "ch02:2.4 顺序表与链表的比较"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "3.1",
+      "kind": "covered",
+      "slides": [
+        "ch03:3.1 栈"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "3.1.1",
+      "kind": "covered",
+      "slides": [
+        "ch03:栈的抽象数据类型",
+        "ch03:先问一个问题"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "3.1.2",
+      "kind": "covered",
+      "slides": [
+        "ch03:3.1.2 顺序栈：存储结构",
+        "ch03:教学版：三个成员",
+        "ch03:入栈：满了就翻倍",
+        "ch03:为什么是「翻倍」而不是「加一」",
+        "ch03:出栈：空栈怎么办"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "3.1.2a",
+      "kind": "covered",
+      "slides": [
+        "ch03:原书这里编译不过",
+        "ch03:更安静的一个错：三法则",
+        "ch03:三法则（Rule of Three）"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "3.1.3",
+      "kind": "covered",
+      "slides": [
+        "ch03:3.1.3 链式栈",
+        "ch03:链式栈的入栈与出栈"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "3.1.3a",
+      "kind": "declined",
+      "reason": "课件讲教学版；这是书稿的「进阶（选读）」节，书里自己写着「可以整节跳过」，不进课件是有意的",
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "3.1.4",
+      "kind": "covered",
+      "slides": [
+        "ch03:3.1.4 表达式求值",
+        "ch03:手动走一遍 `3 4 + 2 *`",
+        "ch03:可人写的是中缀式",
+        "ch03:「不低于」三个字是承重的",
+        "ch03:手动走一遍 `1 + 2 * 3`"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "3.1.5",
+      "kind": "covered",
+      "slides": [
+        "ch03:3.1.5 栈与递归",
+        "ch03:运行栈有多大：三个档位，三种结果"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "3.2",
+      "kind": "covered",
+      "slides": [
+        "ch03:3.2 队列"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "3.2.1",
+      "kind": "covered",
+      "slides": [
+        "ch03:3.2 队列"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "3.2.2",
+      "kind": "covered",
+      "slides": [
+        "ch03:顺序队列：为什么要「循环」",
+        "ch03:空和满怎么分",
+        "ch03:两种入队，放在一起看"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "3.2.3",
+      "kind": "covered",
+      "slides": [
+        "ch03:两种入队，放在一起看",
+        "ch03:两种出队 + 一处容易漏的地方"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "3.2.3a",
+      "kind": "declined",
+      "reason": "课件讲教学版；这是书稿的「进阶（选读）」节，书里自己写着「可以整节跳过」，不进课件是有意的",
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "3.3",
+      "kind": "covered",
+      "slides": [
+        "ch03:3.3 栈与队列的比较"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "3.3.1",
+      "kind": "covered",
+      "slides": [
+        "ch03:顺序栈 vs 链式栈",
+        "ch03:3.3 栈与队列的比较"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "3.3.2",
+      "kind": "covered",
+      "slides": [
+        "ch03:3.3 栈与队列的比较"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "3.3.3",
+      "kind": "covered",
+      "slides": [
+        "ch03:3.3 栈与队列的比较"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "4.1",
+      "kind": "covered",
+      "slides": [
+        "ch04:4.1 基本概念"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "4.1.1",
+      "kind": "covered",
+      "slides": [
+        "ch04:4.1.1 字符编码"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "4.1.2",
+      "kind": "covered",
+      "slides": [
+        "ch04:4.1.2 编码顺序不等于语言顺序"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "4.2",
+      "kind": "covered",
+      "slides": [
+        "ch04:4.2 变长存储：这一节的正题"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "4.2.1",
+      "kind": "covered",
+      "slides": [
+        "ch04:4.2 变长存储：这一节的正题",
+        "ch04:空串也要占一个字节"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "4.2.2",
+      "kind": "covered",
+      "slides": [
+        "ch04:空串也要占一个字节"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "4.2.3",
+      "kind": "covered",
+      "slides": [
+        "ch04:追加：为什么是 O(n)",
+        "ch04:抽取子串：原书这里会崩",
+        "ch04:现代写法：越界就抛",
+        "ch04:查找与比较"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "4.2a",
+      "kind": "declined",
+      "reason": "课件讲教学版；这是书稿的「进阶（选读）」节，书里自己写着「可以整节跳过」，不进课件是有意的",
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "4.3",
+      "kind": "covered",
+      "slides": [
+        "ch04:4.3 模式匹配"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "4.3.1",
+      "kind": "covered",
+      "slides": [
+        "ch04:朴素匹配：手动走一遍",
+        "ch04:原书这里算错了"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "4.3.2",
+      "kind": "covered",
+      "slides": [
+        "ch04:有没有更好的办法",
+        "ch04:特征向量 next",
+        "ch04:计算 next：用模式串跟自己匹配"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "4.3.3",
+      "kind": "covered",
+      "slides": [
+        "ch04:KMP：失配时模式退，文本不退",
+        "ch04:朴素与 KMP：代价对照"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "5.1",
+      "kind": "covered",
+      "slides": [
+        "ch05:5.1 定义与五种基本形态"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "5.1.1",
+      "kind": "covered",
+      "slides": [
+        "ch05:5.1 定义与五种基本形态"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "5.1.2",
+      "kind": "covered",
+      "slides": [
+        "ch05:满二叉树与完全二叉树"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "5.1.3",
+      "kind": "covered",
+      "slides": [
+        "ch05:5.1.3 三条要用到的性质",
+        "ch05:性质 5：一棵 n 结点的树里有 n+1 个空指针"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "5.2",
+      "kind": "covered",
+      "slides": [
+        "ch05:5.2 周游：三种深度优先"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "5.2.1",
+      "kind": "covered",
+      "slides": [
+        "ch05:5.2 周游：三种深度优先",
+        "ch05:广度优先：一层一层来"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "5.2.2",
+      "kind": "covered",
+      "slides": [
+        "ch05:5.2 周游：三种深度优先",
+        "ch05:三种周游的代码只差一行",
+        "ch05:表达式树：周游的一个用途"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "5.2.3",
+      "kind": "covered",
+      "slides": [
+        "ch05:广度优先：一层一层来"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "5.3",
+      "kind": "covered",
+      "slides": [
+        "ch05:5.3 存储结构：二叉链表",
+        "ch05:释放：必须后序",
+        "ch05:5.3 另一种存法：完全二叉树进数组"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "5.4",
+      "kind": "covered",
+      "slides": [
+        "ch05:5.4 二叉搜索树",
+        "ch05:插入：指向指针的指针",
+        "ch05:删除：难点只有一个",
+        "ch05:删除：还藏着一步"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "5.5",
+      "kind": "covered",
+      "slides": [
+        "ch05:5.5 堆：完全二叉树 + 数组",
+        "ch05:插入：放末尾，然后上浮",
+        "ch05:删除最小：搬最后一个上来，然后下沉"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "5.5.1a",
+      "kind": "covered",
+      "slides": [
+        "ch05:建堆为什么是 O(n)",
+        "ch05:建堆：把和算出来"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "5.5.2",
+      "kind": "covered",
+      "slides": [
+        "ch05:5.5.2 优先队列"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "5.6",
+      "kind": "covered",
+      "slides": [
+        "ch05:5.6 Huffman 树",
+        "ch05:带权路径长度 WPL"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "5.6.2",
+      "kind": "covered",
+      "slides": [
+        "ch05:5.6.2 为什么需要前缀码",
+        "ch05:Huffman 树天然给出前缀码",
+        "ch05:编码总长恰好等于 WPL",
+        "ch05:译码：用同一棵树"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "5.6a",
+      "kind": "declined",
+      "reason": "课件讲教学版；这是书稿的「进阶（选读）」节，书里自己写着「可以整节跳过」，不进课件是有意的",
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "6.1",
+      "kind": "by-children",
+      "reason": "这一节只是引子，内容由它的下级小节承担；课件按下级小节讲",
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "6.1.1",
+      "kind": "covered",
+      "slides": [
+        "ch06:6.1.1 树与森林"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "6.1.2",
+      "kind": "covered",
+      "slides": [
+        "ch06:6.1.2 森林与二叉树可以互相转换",
+        "ch06:转换的两个方向"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "6.1.3",
+      "kind": "pending",
+      "reason": "树的 ADT 运算表（建根/插长子/插兄弟/问父/删子树）课件里没有，欠一页",
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "6.1.4",
+      "kind": "covered",
+      "slides": [
+        "ch06:6.1.4 树的周游",
+        "ch06:先根与后根"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "6.2",
+      "kind": "covered",
+      "slides": [
+        "ch06:6.2 链式存储：四种表示法"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "6.2.1",
+      "kind": "covered",
+      "slides": [
+        "ch06:子结点表：为什么不够用"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "6.2.2",
+      "kind": "covered",
+      "slides": [
+        "ch06:6.2 链式存储：四种表示法"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "6.2.3",
+      "kind": "covered",
+      "slides": [
+        "ch06:6.2 链式存储：四种表示法"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "6.2.4",
+      "kind": "covered",
+      "slides": [
+        "ch06:6.2.4 动态「左子/右兄」",
+        "ch06:删子树：先脱开，再销毁"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "6.2.5",
+      "kind": "covered",
+      "slides": [
+        "ch06:6.2.5 父指针表示法",
+        "ch06:并查集：等价类问题",
+        "ch06:朴素做法会退化成一条链",
+        "ch06:改进一：重量权衡合并规则",
+        "ch06:改进二：路径压缩"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "6.3",
+      "kind": "covered",
+      "slides": [
+        "ch06:6.3 顺序存储：四种表示法"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "6.3.1",
+      "kind": "covered",
+      "slides": [
+        "ch06:6.3 顺序存储：四种表示法"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "6.3.2",
+      "kind": "covered",
+      "slides": [
+        "ch06:6.3 顺序存储：四种表示法",
+        "ch06:带双标记的先根次序",
+        "ch06:重建：用一把栈"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "6.3.3",
+      "kind": "covered",
+      "slides": [
+        "ch06:6.3 顺序存储：四种表示法"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "6.3.4",
+      "kind": "covered",
+      "slides": [
+        "ch06:6.3 顺序存储：四种表示法"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "6.4",
+      "kind": "covered",
+      "slides": [
+        "ch06:6.4 K 叉树"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "7.1",
+      "kind": "covered",
+      "slides": [
+        "ch07:7.1 基本术语",
+        "ch07:连通与强连通"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "7.2",
+      "kind": "pending",
+      "reason": "图的 ADT 运算表（顶点数/边数/取边权/遍历邻接点）课件里没有，欠一页",
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "7.3",
+      "kind": "by-children",
+      "reason": "这一节只是引子，内容由它的下级小节承担；课件按下级小节讲",
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "7.3.1",
+      "kind": "covered",
+      "slides": [
+        "ch07:7.3.1 相邻矩阵"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "7.3.2",
+      "kind": "covered",
+      "slides": [
+        "ch07:7.3.2 邻接表",
+        "ch07:两种存法的代价对照"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "7.3.3",
+      "kind": "covered",
+      "slides": [
+        "ch07:7.3.3 十字链表：一条弧进两条链"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "7.4",
+      "kind": "covered",
+      "slides": [
+        "ch07:7.4 深度优先周游"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "7.4.1",
+      "kind": "covered",
+      "slides": [
+        "ch07:7.4 深度优先周游"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "7.4.2",
+      "kind": "covered",
+      "slides": [
+        "ch07:广度优先周游"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "7.4.3",
+      "kind": "covered",
+      "slides": [
+        "ch07:7.4.3 拓扑排序",
+        "ch07:拓扑排序：不断摘入度为 0 的点"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "7.5",
+      "kind": "by-children",
+      "reason": "这一节只是引子，内容由它的下级小节承担；课件按下级小节讲",
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "7.5.1",
+      "kind": "covered",
+      "slides": [
+        "ch07:7.5.1 单源最短路：Dijkstra",
+        "ch07:Dijkstra 的实现"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "7.5.2",
+      "kind": "covered",
+      "slides": [
+        "ch07:7.5.2 每对顶点：Floyd"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "7.6",
+      "kind": "covered",
+      "slides": [
+        "ch07:7.6 最小生成树",
+        "ch07:最短路树 ≠ 最小生成树"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "7.6.1",
+      "kind": "covered",
+      "slides": [
+        "ch07:Prim：从点出发"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "7.6.2",
+      "kind": "covered",
+      "slides": [
+        "ch07:Kruskal：从边出发"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "8.1",
+      "kind": "covered",
+      "slides": [
+        "ch08:8.1 基本概念"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "8.2",
+      "kind": "covered",
+      "slides": [
+        "ch08:8.2 插入排序"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "8.2.1",
+      "kind": "covered",
+      "slides": [
+        "ch08:8.2 插入排序",
+        "ch08:插入排序的两个优点"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "8.2.2",
+      "kind": "covered",
+      "slides": [
+        "ch08:8.2.2 Shell 排序"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "8.3",
+      "kind": "by-children",
+      "reason": "这一节只是引子，内容由它的下级小节承担；课件按下级小节讲",
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "8.3.1",
+      "kind": "covered",
+      "slides": [
+        "ch08:8.3.1 直接选择排序"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "8.3.2",
+      "kind": "covered",
+      "slides": [
+        "ch08:8.3.2 堆排序"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "8.4",
+      "kind": "by-children",
+      "reason": "这一节只是引子，内容由它的下级小节承担；课件按下级小节讲",
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "8.4.1",
+      "kind": "covered",
+      "slides": [
+        "ch08:8.4.1 冒泡排序"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "8.4.2",
+      "kind": "covered",
+      "slides": [
+        "ch08:8.4.2 快速排序",
+        "ch08:快排的实现",
+        "ch08:快排最坏情况怎么办"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "8.5",
+      "kind": "covered",
+      "slides": [
+        "ch08:8.5 归并排序"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "8.6",
+      "kind": "covered",
+      "slides": [
+        "ch08:8.6 分配排序：跳出比较模型"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "8.6.1",
+      "kind": "covered",
+      "slides": [
+        "ch08:8.6.1 桶式排序"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "8.6.2",
+      "kind": "covered",
+      "slides": [
+        "ch08:8.6.2 基数排序"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "8.6.3",
+      "kind": "covered",
+      "slides": [
+        "ch08:8.6.3 索引排序"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "8.7",
+      "kind": "covered",
+      "slides": [
+        "ch08:怎么选"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "8.7.1",
+      "kind": "covered",
+      "slides": [
+        "ch08:8.7.1 简单排序的时间代价"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "8.7.2",
+      "kind": "covered",
+      "slides": [
+        "ch08:8.7.2 理论时间与实测时间"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "8.7.3",
+      "kind": "covered",
+      "slides": [
+        "ch08:8.7.3 比较排序的下限"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "9.1",
+      "kind": "covered",
+      "slides": [
+        "ch09:9.1 一次磁盘访问有多贵",
+        "ch09:页 I/O 成本模型"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "9.2",
+      "kind": "covered",
+      "slides": [
+        "ch09:9.2 记录怎样装进页"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "9.3",
+      "kind": "covered",
+      "slides": [
+        "ch09:外排序的基本套路"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "9.3.1",
+      "kind": "covered",
+      "slides": [
+        "ch09:9.3.1 置换选择：让顺串更长",
+        "ch09:置换选择：怎么做到的",
+        "ch09:置换选择：原书序列逐步走"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "9.3.2",
+      "kind": "covered",
+      "slides": [
+        "ch09:9.3.2 二路外排序",
+        "ch09:3000 条记录：二路归并要几趟"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "9.3.3",
+      "kind": "covered",
+      "slides": [
+        "ch09:9.3.3 多路归并：瓶颈在哪",
+        "ch09:赢者树",
+        "ch09:赢者树的重构",
+        "ch09:四路归并：赢家路径怎样更新",
+        "ch09:败者树：省掉「看兄弟」",
+        "ch09:代价小结"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "10.1",
+      "kind": "by-children",
+      "reason": "这一节只是引子，内容由它的下级小节承担；课件按下级小节讲",
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "10.1.1",
+      "kind": "covered",
+      "slides": [
+        "ch10:10.1.1 顺序检索"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "10.1.2",
+      "kind": "covered",
+      "slides": [
+        "ch10:10.1.2 二分检索",
+        "ch10:二分检索：半开区间 trace",
+        "ch10:二分的一个坑：无符号下溢",
+        "ch10:决策树：二分为什么是 $\\log n$"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "10.1.3",
+      "kind": "covered",
+      "slides": [
+        "ch10:10.1.3 分块检索",
+        "ch10:分块检索：先找块，再扫块"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "10.2",
+      "kind": "covered",
+      "slides": [
+        "ch10:10.2 集合"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "10.2.1",
+      "kind": "covered",
+      "slides": [
+        "ch10:10.2 集合"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "10.2.2",
+      "kind": "covered",
+      "slides": [
+        "ch10:10.2 集合"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "10.3",
+      "kind": "covered",
+      "slides": [
+        "ch10:10.3 散列：换一条路"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "10.3.1",
+      "kind": "covered",
+      "slides": [
+        "ch10:10.3.1 散列函数",
+        "ch10:散列函数怎么选"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "10.3.2",
+      "kind": "covered",
+      "slides": [
+        "ch10:10.3.2 开散列（拉链法）"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "10.3.3",
+      "kind": "covered",
+      "slides": [
+        "ch10:10.3.3 闭散列（开地址法）"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "10.3.4",
+      "kind": "covered",
+      "slides": [
+        "ch10:删除：这一节的核心难点",
+        "ch10:解法：墓碑",
+        "ch10:墓碑探测：删除后为什么不能停",
+        "ch10:插入：回收墓碑，但不能提前停"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "10.3.4a",
+      "kind": "declined",
+      "reason": "课件讲教学版；这是书稿的「进阶（选读）」节，书里自己写着「可以整节跳过」，不进课件是有意的",
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "10.3.5",
+      "kind": "covered",
+      "slides": [
+        "ch10:10.3.5 效率分析"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "10.3.6",
+      "kind": "pending",
+      "reason": "「什么时候不该用散列」那张选择表课件里没有，欠一页",
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "11.1",
+      "kind": "covered",
+      "slides": [
+        "ch11:11.1 线性索引",
+        "ch11:二级索引：索引本身也放不下怎么办",
+        "ch11:1000 条记录：索引为什么有四层"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "11.2",
+      "kind": "pending",
+      "reason": "静态索引（多分树、溢出区、重组）课件里没有对应页，欠一页；课件从线性索引直接跳到 B 树",
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "11.3",
+      "kind": "covered",
+      "slides": [
+        "ch11:11.3 倒排索引",
+        "ch11:倒排表的交并",
+        "ch11:倒排表求交：双指针只走一遍",
+        "ch11:短语查询要位置信息"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "11.4",
+      "kind": "covered",
+      "slides": [
+        "ch11:11.4 B 树：为磁盘设计的树",
+        "ch11:B 树的结构",
+        "ch11:插入导致分裂",
+        "ch11:B+ 树：数据全在叶子",
+        "ch11:B+ 树插入 60：分裂传播到根",
+        "ch11:范围查询：B+ 树的看家本领",
+        "ch11:叶子分裂与内部分裂不一样"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "11.4.4",
+      "kind": "covered",
+      "slides": [
+        "ch11:11.4.4 静态索引还是动态索引"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "11.5",
+      "kind": "covered",
+      "slides": [
+        "ch11:11.5 位图索引",
+        "ch11:位图的代价与压缩",
+        "ch11:位图逐位查询与尾部掩码",
+        "ch11:各种索引怎么选"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "12.1",
+      "kind": "by-children",
+      "reason": "这一节只是引子，内容由它的下级小节承担；课件按下级小节讲",
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "12.1.1",
+      "kind": "covered",
+      "slides": [
+        "ch12:12.1.1 多维数组怎么存",
+        "ch12:三维数组地址：逐维算贡献"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "12.1.2",
+      "kind": "covered",
+      "slides": [
+        "ch12:12.1.2 特殊矩阵：只存有用的"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "12.1.3",
+      "kind": "covered",
+      "slides": [
+        "ch12:12.1.3 稀疏矩阵：十字链表",
+        "ch12:十字链表：一次更新维护两条链"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "12.2",
+      "kind": "by-children",
+      "reason": "这一节只是引子，内容由它的下级小节承担；课件按下级小节讲",
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "12.2.1",
+      "kind": "covered",
+      "slides": [
+        "ch12:12.2.1 广义表",
+        "ch12:12.2.2 共享带来的问题：什么时候能删"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "12.2.2",
+      "kind": "covered",
+      "slides": [
+        "ch12:12.2.3 可利用空间表",
+        "ch12:可利用空间表：句柄怎样复用"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "12.2.3",
+      "kind": "covered",
+      "slides": [
+        "ch12:变长块的分配策略",
+        "ch12:释放：相邻空闲块要合并"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "12.2.4",
+      "kind": "covered",
+      "slides": [
+        "ch12:12.2.4 标记-清扫：收回环",
+        "ch12:标记-清扫：无根环也能收回"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "12.3",
+      "kind": "covered",
+      "slides": [
+        "ch12:12.3 Trie：按字符分层",
+        "ch12:最长前缀匹配",
+        "ch12:Patricia：把单孩子链压掉"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "12.4",
+      "kind": "covered",
+      "slides": [
+        "ch12:三种改进的 BST 对照"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "12.4.1",
+      "kind": "covered",
+      "slides": [
+        "ch12:12.4.1 最佳二叉搜索树",
+        "ch12:最佳 BST：最后一格怎样得到 57"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "12.4.2",
+      "kind": "covered",
+      "slides": [
+        "ch12:12.4.2 AVL 树：靠旋转维持平衡",
+        "ch12:AVL 四种旋转：最小守门输入"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    },
+    {
+      "section": "12.4.3",
+      "kind": "covered",
+      "slides": [
+        "ch12:12.4.3 伸展树：不存平衡信息",
+        "ch12:伸展：一字形与之字形"
+      ],
+      "by": "Claude",
+      "date": "2026-08-18"
+    }
+  ]
+}

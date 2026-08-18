@@ -647,6 +647,103 @@ class TestR13DoubleDash(unittest.TestCase):
         self.assertEqual(found, [])
 
 
+class TestR16SlideCoverage(unittest.TestCase):
+    """R16：正文讲了的，课件讲没讲——要有一张说得清的表。
+
+    **缘由**：新鲜度清单把「课件内容覆盖」列为黄色，并留了一条实测警告：
+    这一项只能做成**显式登记**。按节号自动匹配得 53 个「未覆盖小节」、
+    按标题关键词得 45 个，抽查后全是假阳性（Prim 在 ch07 课件出现 6 次却匹配不上）。
+    所以闸门验的是登记表，不是匹配器。
+    """
+
+    def entries(self, *rows):
+        out = {}
+        for row in rows:
+            row.setdefault("by", "Claude")
+            row.setdefault("date", "2026-08-18")
+            out[row["section"]] = row
+        return out
+
+    PAGES = {"ch06": {"6.1.1 树与森林", "6.2 链式存储：四种表示法"}}
+
+    def test_registered_page_passes(self):
+        entries = self.entries({"section": "6.1.1", "kind": "covered",
+                                "slides": ["ch06:6.1.1 树与森林"]})
+        self.assertEqual(
+            check_doc.check_slide_coverage({"6.1.1"}, entries, self.PAGES), [])
+
+    def test_unregistered_section_is_reported(self):
+        """正文新增一节而没登记——这正是此前没有任何机制能提醒的情况。"""
+        problems = check_doc.check_slide_coverage({"6.9"}, {}, self.PAGES)
+        self.assertEqual(len(problems), 1, problems)
+        self.assertIn("R16", problems[0])
+        self.assertIn("6.9", problems[0])
+
+    def test_renamed_slide_page_is_reported(self):
+        """课件页标题改了、登记表没跟着改。"""
+        entries = self.entries({"section": "6.1.1", "kind": "covered",
+                                "slides": ["ch06:树与森林（旧标题）"]})
+        problems = check_doc.check_slide_coverage({"6.1.1"}, entries, self.PAGES)
+        self.assertEqual(len(problems), 1, problems)
+        self.assertIn("不存在", problems[0])
+
+    def test_stale_registry_entry_is_reported(self):
+        """书稿删掉了这一节，登记表还留着。"""
+        entries = self.entries({"section": "6.9", "kind": "pending", "reason": "欠着"})
+        problems = check_doc.check_slide_coverage(set(), entries, self.PAGES)
+        self.assertEqual(len(problems), 1, problems)
+        self.assertIn("已经不存在", problems[0])
+
+    def test_by_children_needs_real_children(self):
+        """引子下面得真有内容，不能拿 by-children 当万能豁免。"""
+        entries = self.entries({"section": "6.1", "kind": "by-children", "reason": "引子"})
+        self.assertTrue(check_doc.check_slide_coverage({"6.1"}, entries, self.PAGES))
+        entries = self.entries(
+            {"section": "6.1", "kind": "by-children", "reason": "引子"},
+            {"section": "6.1.1", "kind": "covered", "slides": ["ch06:6.1.1 树与森林"]})
+        self.assertEqual(
+            check_doc.check_slide_coverage({"6.1", "6.1.1"}, entries, self.PAGES), [])
+
+    def test_declined_and_pending_need_a_reason(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "slide_coverage.json"
+            path.write_text(json.dumps({"coverage": [
+                {"section": "3.1.3a", "kind": "declined", "by": "Claude", "date": "2026-08-18"},
+            ]}, ensure_ascii=False), encoding="utf-8")
+            _, problems = check_doc.load_slide_coverage(path)
+            self.assertTrue(any("reason" in p for p in problems), problems)
+
+    def test_covered_with_no_pages_is_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "slide_coverage.json"
+            path.write_text(json.dumps({"coverage": [
+                {"section": "6.1.1", "kind": "covered", "slides": [],
+                 "by": "Claude", "date": "2026-08-18"},
+            ]}, ensure_ascii=False), encoding="utf-8")
+            _, problems = check_doc.load_slide_coverage(path)
+            self.assertTrue(any("没列任何课件页" in p for p in problems), problems)
+
+    def test_slide_page_titles_are_unique_within_a_chapter(self):
+        """页标题当页标识的前提：一章之内不重名。重名了这条判据就该换 id 方案。"""
+        root = check_doc.BOOK / "slides"
+        for path in sorted(root.glob("ch*.md")):
+            body = check_doc.FRONT_MATTER_RE.sub("", path.read_text(encoding="utf-8"), count=1)
+            titles = [
+                hit.group(1).strip()
+                for page in body.split("\n---\n")
+                for hit in [check_doc.SLIDE_PAGE_TITLE_RE.search(page)] if hit
+            ]
+            self.assertEqual(len(titles), len(set(titles)), f"{path.name} 页标题重名")
+
+    def test_committed_registry_covers_every_section(self):
+        """入库登记表当锚：正文加一节而不登记，这里就红。"""
+        entries, problems = check_doc.load_slide_coverage()
+        self.assertEqual(problems, [])
+        problems = check_doc.check_slide_coverage(
+            check_doc.book_section_numbers(), entries, check_doc.slide_pages())
+        self.assertEqual(problems, [])
+
+
 class TestR15QualifiedNames(unittest.TestCase):
     """R15：书稿点名本书接口时，`类名::成员` 必须真的存在。
 
