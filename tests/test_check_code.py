@@ -504,6 +504,66 @@ class TestD025PythonArm(unittest.TestCase):
                     f"实现里的 {token} 应当被 D-025 拦下，实得：{problems}",
                 )
 
+    def test_ban_is_per_name_not_per_module(self):
+        """D-025 §2b：该封的是绕过某一节课的名字，不是整个 collections。
+
+        封整个模块的代价是第 7 章图算法一上来就得为 defaultdict 写豁免，
+        而豁免写多了，名单就从判据退化成手续。
+        """
+        allowed = (
+            "from collections import defaultdict",          # 不删任何一节，正当管道
+            "from collections import OrderedDict",          # 本书没有对应的课；dict 本身就保序
+            "from collections import namedtuple",
+            "import collections",                           # 光 import 不用，不算违规
+        )
+        for source in allowed:
+            with tempfile.TemporaryDirectory() as tmp, self.subTest(source=source):
+                unit = self._unit(Path(tmp), source + "\n\n\ndef demo(v):\n    return v\n")
+                meta = json.loads((unit / "unit.json").read_text(encoding="utf-8"))
+                self.assertEqual(check_code.check_d025(unit, meta), [],
+                                 f"{source} 不该被拦——它不删本书任何一节课")
+
+    def test_names_that_do_bypass_a_lesson_are_banned_in_every_spelling(self):
+        """deque 删 3.2、Counter 删 8.6.1 与 5.6；换个写法不能绕过去。"""
+        banned = (
+            ("from collections import deque", "deque"),
+            ("from collections import deque as dq", "deque"),
+            ("import collections\n\n\ndef demo(v):\n    return collections.deque()", "deque"),
+            ("from collections import Counter", "Counter"),
+        )
+        for source, token in banned:
+            with tempfile.TemporaryDirectory() as tmp, self.subTest(source=source):
+                unit = self._unit(Path(tmp), source + "\n\n\ndef demo(v):\n    return v\n")
+                meta = json.loads((unit / "unit.json").read_text(encoding="utf-8"))
+                problems = check_code.check_d025(unit, meta)
+                self.assertTrue(any(f"`{token}`" in p for p in problems),
+                                f"{source} 应当被拦，实得：{problems}")
+
+    def test_sort_is_position_sensitive(self):
+        """`sort` 只在被调用时算：形参或局部变量叫 sort 完全正当。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = self._unit(Path(tmp), "def demo(sort, values):\n    return sort(values)\n")
+            meta = json.loads((unit / "unit.json").read_text(encoding="utf-8"))
+            self.assertEqual(check_code.check_d025(unit, meta), [])
+
+    def test_unit_can_add_its_own_bans(self):
+        """dict/set 全局封不现实，但第 10 章讲闭散列表时必须封（D-025 §2b）。"""
+        source = "def demo(values):\n    table = dict()\n    return table\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = self._unit(Path(tmp), source)
+            meta = json.loads((unit / "unit.json").read_text(encoding="utf-8"))
+            self.assertEqual(check_code.check_d025(unit, meta), [], "dict 默认不该被封")
+            meta["d025_forbidden"] = {"dict": "算法10.9–10.12 闭散列表就是本节的课"}
+            problems = check_code.check_d025(unit, meta)
+            self.assertTrue(any("`dict`" in p for p in problems), problems)
+
+    def test_unit_ban_must_carry_a_reason(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = self._unit(Path(tmp), "def demo(v):\n    return v\n")
+            meta = json.loads((unit / "unit.json").read_text(encoding="utf-8"))
+            meta["d025_forbidden"] = {"dict": "  "}
+            self.assertTrue(check_code.check_d025(unit, meta))
+
     def test_comment_mentioning_sorted_is_not_a_violation(self):
         """判据走 AST 而不是正则：注释和字符串里出现 `sorted` 不该报红。"""
         source = (

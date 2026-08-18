@@ -82,18 +82,45 @@ PY_PROFILES = [
 # Python 的标准库把同一件事做得更彻底——`sorted()` 一个调用就是第 8 章全章，
 # `heapq` 一行就是 5.5 节。判据不变，只是换了一份名单。
 # 和 `d001_exceptions` 一样，`unit.json.d025_exceptions` 可以豁免，但**必须写理由**。
+#
+# **名单按「删掉哪一节课」逐条列，不按模块整个封**（D-025 §2b，2026-08-18 人拍板）。
+# 最初这里写的是整个 `collections`，那条太粗：`defaultdict` 与 `namedtuple`
+# 不删任何一节课，是正当管道；真正会删课的只有 `deque` 与 `Counter`。
+# 封整个模块的代价是第 7 章图算法的 Python 版一上来就得为 `defaultdict` 写豁免，
+# 而豁免写多了，名单就从判据退化成手续。
 D025_FORBIDDEN_IMPORTS = {
     "heapq": "D-025 堆与优先队列是 5.5 的课",
     "bisect": "D-025 二分检索是 10.2 的课",
     "re": "D-025 模式匹配是 4.3 的课（KMP）",
-    "collections": "D-025 队列/双端队列是 3.2 的课（确需 defaultdict 等请写豁免理由）",
 }
+# 这些名字**出现即算**，不限于调用位置：`from collections import deque`、
+# `collections.deque`、`d = deque` 都要拦下，否则换个写法就绕过去了。
+D025_FORBIDDEN_NAMES = {
+    "deque": "D-025 队列、循环队列与双端队列是 3.2 的课",
+    "Counter": "D-025 计数是 8.6.1 桶式排序与 5.6 Huffman 频次统计的课",
+}
+# 与 D025_FORBIDDEN_NAMES 的差别是**位置敏感**：这些词只在被调用时算违规。
 D025_FORBIDDEN_CALLS = {
     "sorted": "D-025 排序是第 8 章的课",
     "sort": "D-025 排序是第 8 章的课（`list.sort()`）",
     "print": "D-001§3 数据结构与算法实现内部严禁 I/O",
     "input": "D-001§3 数据结构与算法实现内部严禁 I/O",
 }
+# 再窄一档：这些只在**方法调用**位置算。`sort` 是内建方法名，不是内建函数——
+# `values.sort()` 违规，而把一个排序函数当参数传进来再调用（`sort(values)`，
+# test.py 里就这么写的）完全正当。不分这一档，闸门会把正当写法判红。
+D025_METHOD_ONLY = {"sort"}
+
+# **没有被封的，也记下来，免得下次有人「顺手补全」**：
+#   OrderedDict —— 本书没有「保持插入序的散列表」这一节可删；而且 Python 3.7 起
+#                   普通 dict 本身就保序，封 OrderedDict 却放行 dict 是做样子。
+#   defaultdict / namedtuple —— 不对应任何一节课，是正当管道。
+#
+# 反过来，`dict` 与 `set` 确实会删掉第 10 章的课（算法10.9–10.12 闭散列表、
+# 代码10.4 与算法10.5–10.7 集合），但它们是内建名、在别处又是不可替代的管道，
+# 全局封不现实。所以给单元一个自己加码的口子：`unit.json.d025_forbidden`
+# 列出「**本单元**因为讲这一节而额外禁用的名字」。第 10 章做 Python 版时用它。
+D025_UNIT_BAN_KEY = "d025_forbidden"
 
 
 def python_exe():
@@ -117,10 +144,23 @@ def check_d025(unit_dir: Path, meta):
     except SyntaxError as exc:
         return [f"  ❌ modern.py 语法错误：第 {exc.lineno} 行 {exc.msg}"]
 
+    # 本单元自己加码的禁用名（讲这一节，就不能用现成的那个东西）。
+    unit_bans = {}
+    for token, reason in (meta.get(D025_UNIT_BAN_KEY) or {}).items():
+        if not (isinstance(reason, str) and reason.strip()):
+            return [f"  ❌ unit.json 的 {D025_UNIT_BAN_KEY}['{token}'] 没写理由——"
+                    "自己加码也要说明这一节讲的是什么"]
+        unit_bans[token.strip()] = f"D-025 本单元自禁：{reason.strip()}"
+    names = {**D025_FORBIDDEN_NAMES, **unit_bans}
+
     problems = []
+    seen = set()
+
     def flag(lineno, token, why):
-        if token not in exceptions:
-            problems.append(f"  ❌ modern.py:{lineno} {why}: `{token}`")
+        if token in exceptions or (lineno, token) in seen:
+            return
+        seen.add((lineno, token))
+        problems.append(f"  ❌ modern.py:{lineno} {why}: `{token}`")
 
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
@@ -132,15 +172,25 @@ def check_d025(unit_dir: Path, meta):
             root = (node.module or "").split(".")[0]
             if root in D025_FORBIDDEN_IMPORTS:
                 flag(node.lineno, root, D025_FORBIDDEN_IMPORTS[root])
+            for alias in node.names:
+                if alias.name in names:
+                    flag(node.lineno, alias.name, names[alias.name])
         elif isinstance(node, ast.Call):
             func = node.func
-            name = None
             if isinstance(func, ast.Name):
-                name = func.id
+                name, method = func.id, False
             elif isinstance(func, ast.Attribute):
-                name = func.attr
-            if name in D025_FORBIDDEN_CALLS:
+                name, method = func.attr, True
+            else:
+                name, method = None, False
+            if name in D025_FORBIDDEN_CALLS and (method or name not in D025_METHOD_ONLY):
                 flag(node.lineno, name, D025_FORBIDDEN_CALLS[name])
+        # 位置无关的那一档：`deque(...)`、`collections.deque`、`alias = deque`
+        # 三种写法都要拦，所以直接看 Name / Attribute 节点本身。
+        if isinstance(node, ast.Name) and node.id in names:
+            flag(node.lineno, node.id, names[node.id])
+        elif isinstance(node, ast.Attribute) and node.attr in names:
+            flag(node.lineno, node.attr, names[node.attr])
     return problems
 
 
