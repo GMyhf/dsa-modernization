@@ -16,14 +16,27 @@ i = modern.InvertedIndex()
 i.add_document(1,["the","quick","brown"])
 i.add_document(2,["brown","quick"])
 check(i.and_query(["quick","brown"])==[1,2],"布尔与")
+check(i.or_query(["quick","missing"])==[1,2],"布尔或忽略缺失词")
 check(i.phrase_query(["quick","brown"])==[1],"位置短语")
 check(i.not_query("quick")==[],"非查询")
+check(i.postings("brown")==[1,2],"词项倒排表")
+check(i.postings("missing")==[],"缺失词倒排表为空")
+check(i.document_count()==2 and i.term_count()==3,"文档词项计数")
+check(i.postings_size()==5,"倒排记录数")
+check(i.phrase_query(["brown","quick"])==[2],"短语方向敏感")
+check(i.phrase_query(["quick"])==[1,2],"单词短语等于词项查询")
+check(i.and_query([])==[] and i.phrase_query([])==[],"空查询为空")
 raised = False
 try:
     i.add_document(2,["x"])
 except ValueError:
     raised = True
 check(raised,"文档号严格递增")
+check(modern.intersect([], [1])==[],"空表求交")
+check(modern.unite([], [1,3])==[1,3],"空表求并")
+check(modern.difference([1,3], [])==[1,3],"空表求差")
+check(modern.intersect([1,3], [1,3])==[1,3],"自身求交")
+check(modern.difference([1,3], [1,3])==[],"自身求差")
 shared = shared_cases.load()
 for case in shared:
     left, right = case.input.split("|", 1)
