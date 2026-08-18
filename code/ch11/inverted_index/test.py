@@ -1,4 +1,8 @@
+import sys
+from pathlib import Path
 import modern
+sys.path.insert(0, str(Path(__file__).parents[2] / "support"))
+import shared_cases
 checks = 0
 def check(v,n):
     global checks
@@ -20,4 +24,10 @@ try:
 except ValueError:
     raised = True
 check(raised,"文档号严格递增")
+shared = shared_cases.load()
+for case in shared:
+    left, right = case.input.split("|", 1)
+    operation = modern.intersect if case.operation == "intersect" else modern.difference
+    check(operation(shared_cases.integers(left), shared_cases.integers(right)) == shared_cases.integers(case.expected), "T-047 inverted")
+print(f"共享用例: {len(shared)}")
 print(f"{checks} 项断言")

@@ -1,0 +1,4 @@
+name	operation	input	expected	expected_error
+winner	winner	7,2,5,1	1	
+replacement	replacement	3|4,1,7,2,8,3,6,5	2	
+zero-memory	replacement	0|1,2		invalid_argument

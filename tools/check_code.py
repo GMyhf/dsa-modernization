@@ -79,6 +79,42 @@ PY_PROFILES = [
     ("py-default", []),
     ("py-dev", ["-X", "dev", "-W", "error"]),
 ]
+SHARED_CASE_RE = re.compile(r"共享用例\s*[:：]\s*(\d+)")
+SHARED_ERROR_KINDS = {"", "invalid_argument", "out_of_range"}
+
+
+def shared_case_total(unit_dir: Path, meta):
+    """返回 cases.tsv 的有效用例数；双实现单元缺表即报错。"""
+    has_both = (unit_dir / "modern.py").is_file() and not meta.get("py_skip")
+    path = unit_dir / "cases.tsv"
+    if not path.is_file():
+        return (None, "  ❌ 双实现单元缺 cases.tsv（T-047）") if has_both else (None, None)
+    lines = [line for line in path.read_text(encoding="utf-8").splitlines()
+             if line.strip() and not line.lstrip().startswith("#")]
+    if not lines or lines[0].split("\t") != ["name", "operation", "input", "expected", "expected_error"]:
+        return None, "  ❌ cases.tsv 首行必须是 T-047 的五列表头"
+    total = len(lines) - 1
+    if total < 1:
+        return None, "  ❌ cases.tsv 没有任何共享用例"
+    for number, line in enumerate(lines[1:], 2):
+        fields = line.split("\t")
+        if len(fields) != 5:
+            return None, f"  ❌ cases.tsv:{number} 不是五列 TSV"
+        if fields[4] not in SHARED_ERROR_KINDS:
+            return None, f"  ❌ cases.tsv:{number} 的异常类别未知：{fields[4]}"
+    return total, None
+
+
+def check_shared_report(output, expected, language):
+    if expected is None:
+        return None
+    hit = SHARED_CASE_RE.search(output)
+    if not hit:
+        return f"  ❌ [{language}] 没有报告 `共享用例: N`（T-047）"
+    actual = int(hit.group(1))
+    if actual != expected:
+        return f"  ❌ [{language}] 共享用例报告 {actual}，但 cases.tsv 有 {expected} 条"
+    return None
 
 # D-001 §2 在 C++ 侧禁的是「用 STL 容器替代本章要讲的手写实现」。
 # Python 的标准库把同一件事做得更彻底——`sorted()` 一个调用就是第 8 章全章，
@@ -347,7 +383,7 @@ def check_reported_count_is_computed(unit_dir: Path):
     return []
 
 
-def run_python(unit_dir: Path, profiles=None, meta=None):
+def run_python(unit_dir: Path, profiles=None, meta=None, shared_total=None):
     """跑 test.py 两档。返回 (ok, 日志, 断言数)。"""
     # 单元级 py_skip：整个单元有意不给 Python（D-025 §1）。清单级的 py_skip 挂在
     # listings[] 上，但「原书无对应清单」的单元没有 listings 可挂，
@@ -378,6 +414,10 @@ def run_python(unit_dir: Path, profiles=None, meta=None):
                 f"  ❌ [{name}] Python 测试失败（退出码 {proc.returncode}）"
                 f"\n{indent(proc.stdout + proc.stderr)}"
             )
+        shared_problem = check_shared_report(proc.stdout, shared_total, name)
+        if shared_problem:
+            ok = False
+            logs.append(shared_problem)
             continue
         hit = re.search(r"(\d+)\s*项断言", proc.stdout)
         if hit:
@@ -677,6 +717,11 @@ def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None, degr
     """返回 (ok, 输出片段列表)。"""
     rel = rel_label(unit_dir)
     meta = json.loads((unit_dir / "unit.json").read_text(encoding="utf-8"))
+    shared_total, shared_problem = shared_case_total(unit_dir, meta)
+    if shared_problem:
+        logs = [shared_problem]
+    else:
+        logs = []
     std = meta.get("standard", "c++17")  # D-001
     extra = meta.get("flags", [])
     sources = [str(unit_dir / "test.cpp")]
@@ -686,7 +731,7 @@ def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None, degr
     sources += [str(unit_dir / s) for s in meta.get("extra_sources", [])]
 
     profiles = PROFILES if profiles is None else profiles
-    logs, ok = [], True
+    ok = shared_problem is None
     d001 = check_d001(unit_dir, meta)
     if d001:
         ok = False
@@ -758,6 +803,11 @@ def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None, degr
                     f"\n{indent(run.stdout + run.stderr)}"
                 )
                 continue
+            if kind == "test":
+                report_problem = check_shared_report(run.stdout, shared_total, f"{label}/C++")
+                if report_problem:
+                    ok = False
+                    logs.append(report_problem)
             tail = run.stdout.strip().splitlines()[-1:] or ["(无输出)"]
             hit = re.search(r"(\d+)\s*项断言", run.stdout)
             if hit and kind == "test":
@@ -765,7 +815,9 @@ def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None, degr
             elif hit and kind == "teaching":
                 teaching_assertions = int(hit.group(1))
             logs.append(f"  ✅ [{label}] {tail[0][:80]}")
-    py_ok, py_logs, py_assertions = run_python(unit_dir, meta=meta)
+    py_ok, py_logs, py_assertions = run_python(
+        unit_dir, meta=meta, shared_total=shared_total
+    )
     if not py_ok:
         ok = False
     logs.extend(py_logs)

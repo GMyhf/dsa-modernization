@@ -1,0 +1,4 @@
+name	operation	input	expected	expected_error
+kmp-middle	search	abababd|ababd	2	
+kmp-missing	search	abcdef|gh	-1	
+bad-next	bad_next	abc|a		invalid_argument

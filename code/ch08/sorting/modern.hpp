@@ -12,6 +12,8 @@
 
 namespace dsa::sorting {
 
+inline constexpr std::uint64_t counting_range_limit = 10'000'000ULL;
+
 // >>> sorting
 
 // >>> insertion
@@ -210,7 +212,7 @@ inline void counting_sort(std::vector<int>& values) {
     int high = values[0];
     for (int value : values) { if (value < low) low = value; if (high < value) high = value; }
     const auto range = static_cast<unsigned long long>(static_cast<long long>(high) - low + 1);
-    if (range > 10'000'000ULL) throw std::invalid_argument("counting sort value range is too sparse");
+    if (range > counting_range_limit) throw std::invalid_argument("counting sort value range is too sparse");
     std::vector<std::size_t> counts(static_cast<std::size_t>(range), 0);
     for (int value : values) ++counts[static_cast<std::size_t>(value - low)];
     std::size_t output = 0;

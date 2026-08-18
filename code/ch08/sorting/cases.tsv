@@ -1,0 +1,6 @@
+name	operation	input	expected	expected_error
+counting-limit	constant		10000000	
+insertion-mixed	insertion	3,-2,7,3,0,-2,9,1	-2,-2,0,1,3,3,7,9	
+counting-sparse	counting	-5000001,5000000		invalid_argument
+radix-signed	radix	-256,-1,0,1,256	-256,-1,0,1,256	
+index-order	index	29,12,34,8	3,1,0,2	

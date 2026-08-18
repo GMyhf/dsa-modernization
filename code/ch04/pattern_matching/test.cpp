@@ -4,6 +4,7 @@
 // std::string_view::find 当独立参照物逐个比对，而不是只测"能找到"。
 // 只断言 has_value() 的测试，在原书那份差一实现下同样全绿——那就等于没测。
 #include "modern.hpp"
+#include "support/shared_cases.hpp"
 
 #include <cstdio>
 #include <iostream>
@@ -177,6 +178,23 @@ int main() {
     test_randomised_agreement();
     test_kmp_is_linear_on_the_naive_worst_case();
     test_no_console_output();
+    const auto shared = dsa::shared_cases::load();
+    for (const auto& item : shared) {
+        const auto split = item.input.find('|');
+        const std::string text = item.input.substr(0, split);
+        const std::string pattern = item.input.substr(split + 1);
+        if (item.expected_error == "invalid_argument") {
+            bool raised = false;
+            try { (void)dsa::kmp_search(text, pattern, {}); }
+            catch (const std::invalid_argument&) { raised = true; }
+            check(raised, "T-047 KMP exception");
+        } else {
+            const auto found = dsa::kmp_search(text, pattern);
+            const long actual = found ? static_cast<long>(*found) : -1;
+            check(actual == std::stol(item.expected), "T-047 KMP result");
+        }
+    }
+    std::printf("共享用例: %zu\n", shared.size());
 
     std::printf("PatternMatching: %d 项断言，%d 失败\n", g_checks, g_failed);
     return g_failed == 0 ? 0 : 1;

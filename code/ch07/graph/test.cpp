@@ -1,4 +1,5 @@
 #include "modern.hpp"
+#include "support/shared_cases.hpp"
 
 #include <cstdio>
 #include <stdexcept>
@@ -58,4 +59,35 @@ void test_minimum_spanning_trees() {
     dsa::Graph one(1); check(one.prim(0)->empty() && one.kruskal()->empty(), "MST singleton empty");
 }
 }  // namespace
-int main() { test_traversals_and_topology(); test_shortest_paths(); test_minimum_spanning_trees(); std::printf("Graph: %d 项断言，%d 失败\n", checks, failures); return failures == 0 ? 0 : 1; }
+int main() {
+    test_traversals_and_topology();
+    test_shortest_paths();
+    test_minimum_spanning_trees();
+    const auto shared = dsa::shared_cases::load();
+    for (const auto& item : shared) {
+        if (item.expected_error == "invalid_argument") {
+            const auto edge = dsa::shared_cases::integers(item.input);
+            dsa::Graph graph(2);
+            bool raised = false;
+            try {
+                graph.add_edge(edge[0], edge[1], edge[2]);
+            } catch (const std::invalid_argument&) {
+                raised = true;
+            }
+            check(raised, "T-047 graph exception");
+            continue;
+        }
+        const auto split = item.input.find('|');
+        dsa::Graph graph(std::stoi(item.input.substr(0, split)));
+        for (const auto& encoded :
+             dsa::shared_cases::strings(item.input.substr(split + 1), ';')) {
+            const auto edge = dsa::shared_cases::integers(encoded);
+            graph.add_edge(edge[0], edge[1], edge[2]);
+        }
+        check(graph.dijkstra(0) == dsa::shared_cases::integers(item.expected),
+              "T-047 graph distances");
+    }
+    std::printf("共享用例: %zu\n", shared.size());
+    std::printf("Graph: %d 项断言，%d 失败\n", checks, failures);
+    return failures == 0 ? 0 : 1;
+}

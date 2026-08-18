@@ -1,0 +1,3 @@
+name	operation	input	expected	expected_error
+rle-roundtrip	rle	0,0,0,1,1,7	0,0,0,1,1,7	
+bad-rle	decode	3		invalid_argument

@@ -1,4 +1,5 @@
 #include "modern.hpp"
+#include "support/shared_cases.hpp"
 
 #include <cstdio>
 #include <set>
@@ -150,6 +151,9 @@ int main() {
     test_phrase_query_uses_positions();
     test_repeated_terms_and_ordering_rules();
     test_against_a_reference_set_implementation();
+    const auto shared = dsa::shared_cases::load();
+    for (const auto& item : shared) { const auto split = item.input.find('|'); const auto left = dsa::shared_cases::integers(item.input.substr(0, split)); const auto right = dsa::shared_cases::integers(item.input.substr(split + 1)); const auto actual = item.operation == "intersect" ? dsa::index::InvertedIndex::intersect(left, right) : dsa::index::InvertedIndex::difference(left, right); check(actual == dsa::shared_cases::integers(item.expected), "T-047 inverted"); }
+    std::printf("共享用例: %zu\n", shared.size());
     std::printf("InvertedIndex: %d 项断言，%d 失败\n", checks, failures);
     return failures == 0 ? 0 : 1;
 }

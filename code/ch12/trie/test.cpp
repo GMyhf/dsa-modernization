@@ -1,4 +1,5 @@
 #include "modern.hpp"
+#include "support/shared_cases.hpp"
 
 #include <cstdio>
 #include <stdexcept>
@@ -169,6 +170,31 @@ int main() {
     test_alphabet_is_enforced();
     test_patricia_compresses_single_child_chains();
     test_patricia_handles_prefix_pairs_and_bulk();
+    const auto shared = dsa::shared_cases::load();
+    for (const auto& item : shared) {
+        const auto split = item.input.find('|');
+        const auto words = dsa::shared_cases::strings(item.input.substr(0, split));
+        const auto query = item.input.substr(split + 1);
+        if (!item.expected_error.empty()) {
+            bool raised = false;
+            try {
+                Trie trie;
+                trie.insert(words[0]);
+            } catch (const std::invalid_argument&) {
+                raised = true;
+            }
+            check(raised, "T-047 trie exception");
+        } else if (item.operation == "trie") {
+            Trie trie;
+            for (const auto& word : words) trie.insert(word);
+            check(trie.longest_prefix_of(query) == item.expected, "T-047 trie");
+        } else if (item.operation == "patricia") {
+            PatriciaTree tree;
+            for (const auto& word : words) tree.insert(word);
+            check(tree.contains(query) == (item.expected == "true"), "T-047 patricia");
+        }
+    }
+    std::printf("共享用例: %zu\n", shared.size());
     std::printf("Trie: %d 项断言，%d 失败\n", checks, failures);
     return failures == 0 ? 0 : 1;
 }

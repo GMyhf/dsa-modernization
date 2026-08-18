@@ -2,7 +2,10 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <fstream>
 #include <limits>
+#include <sstream>
+#include <string>
 #include <vector>
 
 namespace {
@@ -76,6 +79,52 @@ void test_algorithm_specific_invariants() {
     check(sorted(linked_radix), "算法8.13 bucket collection is ordered");
     check(dsa::sorting::insertion_index_sort({}).empty(), "算法8.14 empty index sort");
 }
+
+std::vector<int> parse_values(const std::string& text) {
+    std::vector<int> values;
+    std::istringstream input(text);
+    std::string token;
+    while (std::getline(input, token, ',')) {
+        if (!token.empty()) values.push_back(std::stoi(token));
+    }
+    return values;
+}
+
+void test_shared_cases() {
+    std::ifstream input("cases.tsv");
+    std::string line;
+    std::getline(input, line);
+    int shared = 0;
+    while (std::getline(input, line)) {
+        if (line.empty() || line[0] == '#') continue;
+        std::vector<std::string> fields;
+        std::istringstream row(line);
+        std::string field;
+        while (std::getline(row, field, '\t')) fields.push_back(field);
+        while (fields.size() < 5) fields.emplace_back();
+        ++shared;
+        if (fields[1] == "constant") {
+            check(dsa::sorting::counting_range_limit == std::stoull(fields[3]), "T-047 counting limit");
+            continue;
+        }
+        auto values = parse_values(fields[2]);
+        if (fields[4] == "invalid_argument") {
+            bool raised = false;
+            try { dsa::sorting::counting_sort(values); }
+            catch (const std::invalid_argument&) { raised = true; }
+            check(raised, "T-047 expected invalid_argument");
+            continue;
+        }
+        if (fields[1] == "insertion") dsa::sorting::insertion_sort(values);
+        else if (fields[1] == "radix") dsa::sorting::radix_sort(values);
+        else if (fields[1] == "index") {
+            const auto indexes = dsa::sorting::insertion_index_sort(values);
+            values.assign(indexes.begin(), indexes.end());
+        }
+        check(values == parse_values(fields[3]), "T-047 shared result");
+    }
+    std::printf("共享用例: %d\n", shared);
+}
 }  // namespace
 
 int main() {
@@ -94,6 +143,7 @@ int main() {
     test_index_sort();
     test_static_queue_and_tools();
     test_algorithm_specific_invariants();
+    test_shared_cases();
     std::printf("Sorting: %d 项断言，%d 失败\n", checks, failures);
     return failures == 0 ? 0 : 1;
 }

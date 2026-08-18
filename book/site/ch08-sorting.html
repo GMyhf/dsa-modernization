@@ -572,7 +572,7 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
     <span class="t">int</span> high = values[<span class="n">0</span>];
     <span class="k">for</span> (<span class="t">int</span> value : values) { <span class="k">if</span> (value &lt; low) low = value; <span class="k">if</span> (high &lt; value) high = value; }
     <span class="k">const</span> <span class="k">auto</span> range = <span class="k">static_cast</span>&lt;<span class="t">unsigned</span> <span class="t">long</span> <span class="t">long</span>&gt;(<span class="k">static_cast</span>&lt;<span class="t">long</span> <span class="t">long</span>&gt;(high) - low + <span class="n">1</span>);
-    <span class="k">if</span> (range &gt; <span class="n">10&#x27;000&#x27;000ULL</span>) <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;counting sort value range is too sparse&quot;</span>);
+    <span class="k">if</span> (range &gt; counting_range_limit) <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;counting sort value range is too sparse&quot;</span>);
     std::vector&lt;std::<span class="t">size_t</span>&gt; counts(<span class="k">static_cast</span>&lt;std::<span class="t">size_t</span>&gt;(range), <span class="n">0</span>);
     <span class="k">for</span> (<span class="t">int</span> value : values) ++counts[<span class="k">static_cast</span>&lt;std::<span class="t">size_t</span>&gt;(value - low)];
     std::<span class="t">size_t</span> output = <span class="n">0</span>;

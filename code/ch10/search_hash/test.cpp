@@ -1,4 +1,5 @@
 #include "modern.hpp"
+#include "support/shared_cases.hpp"
 
 #include <cstdio>
 #include <stdexcept>
@@ -102,6 +103,13 @@ int main() {
     test_sets();
     test_hash_and_tombstones();
     test_table_lifetime();
+    const auto shared = dsa::shared_cases::load();
+    for (const auto& item : shared) {
+        const auto split = item.input.find('|');
+        if (item.operation == "binary") { const auto values = dsa::shared_cases::integers(item.input.substr(0, split)); const auto found = dsa::search::binary_search(values, std::stoi(item.input.substr(split + 1))); check(found && *found == std::stoul(item.expected), "T-047 binary"); }
+        else { const auto capacity = std::stoul(item.input.substr(0, split)); if (item.expected_error.empty()) { dsa::search::HashTable table(capacity); for (int key : dsa::shared_cases::integers(item.input.substr(split + 1))) (void)table.insert(key); check(table.size() == std::stoul(item.expected), "T-047 hash"); } else { bool raised = false; try { dsa::search::HashTable table(capacity); } catch (const std::invalid_argument&) { raised = true; } check(raised, "T-047 hash exception"); } }
+    }
+    std::printf("共享用例: %zu\n", shared.size());
     std::printf("SearchHash: %d 项断言，%d 失败\n", checks, failures);
     return failures == 0 ? 0 : 1;
 }

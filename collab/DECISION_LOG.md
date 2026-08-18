@@ -9,6 +9,26 @@
 
 ---
 
+## D-028 · 2026-08-18 · T-047：双实现共读五列 TSV，闸门核对两侧条数
+
+**决定**：每个同时提供 C++ 与 Python 的单元必须有 `cases.tsv`，五列固定为
+`name / operation / input / expected / expected_error`。两侧各自读取同一张表、执行全部
+用例并报告 `共享用例: N`；`check_code.py` 分别核对 C++、Python 的 N 都等于表中有效行数。
+缺表、空表、列数不对、漏报或错报都判红。单元级 `py_skip` 不属于双实现，不强造空表。
+
+三个设计点这样定：
+
+1. 用 TSV，不用 JSON。当前数据只需标量和约定分隔符，C++ 零依赖读取器保持在几十行；
+2. 会影响两种实现边界的共享常量也写进表，`operation=constant`。算法8.10 的
+   `10^7` 因此不再靠两份测试手抄；
+3. 异常列只接受语言中立的 `invalid_argument`、`out_of_range` 或空值。各语言适配器负责
+   映射到 `std::invalid_argument` / `ValueError` 等本地类型，闸门拒绝未知类别。
+
+**验收证据**：只把 Python 的 `COUNTING_RANGE_LIMIT` 从 `10_000_000` 改成
+`9_999_999`，C++ Release 仍绿，而 Python 默认档和开发档都报
+`FAIL: T-047 counting-limit`，单元汇总 `0/1`。恢复后复跑通过。这证明只改一种语言的
+阈值会由共享表判红，而不是靠两份测试恰好写了相同数字。
+
 ## D-027 · 2026-08-18 · 人已拍板：`unit.json` 的 `anchor` 改名 `code_line`，两侧命名对齐
 
 **背景**：D-026 的返工里，`py_anchor` 有 5 处被填成了 `# >>> 名字` 那种**切片标记**。

@@ -9,6 +9,7 @@
 """
 
 import sys
+from pathlib import Path
 
 import modern
 
@@ -242,6 +243,41 @@ def test_index_sort() -> None:
     check(order == list(range(6)), "算法8.15 Python 多环后索引仍复位")
 
 
+def parse_values(text: str) -> list[int]:
+    return [] if not text else [int(value) for value in text.split(",")]
+
+
+def test_shared_cases() -> int:
+    lines = Path("cases.tsv").read_text(encoding="utf-8").splitlines()[1:]
+    shared = 0
+    for line in lines:
+        if not line or line.startswith("#"):
+            continue
+        name, operation, raw_input, expected, expected_error = line.split("\t")
+        shared += 1
+        if operation == "constant":
+            check(modern.COUNTING_RANGE_LIMIT == int(expected), f"T-047 {name}")
+            continue
+        values = parse_values(raw_input)
+        if expected_error == "invalid_argument":
+            raised = False
+            try:
+                modern.counting_sort(values)
+            except ValueError:
+                raised = True
+            check(raised, f"T-047 {name} expected invalid_argument")
+            continue
+        if operation == "insertion":
+            modern.insertion_sort(values)
+        elif operation == "radix":
+            modern.radix_sort(values)
+        elif operation == "index":
+            values = modern.insertion_index_sort(values)
+        check(values == parse_values(expected), f"T-047 {name} shared result")
+    print(f"共享用例: {shared}")
+    return shared
+
+
 def main() -> int:
     test_elementary_sorts()
     test_bubble_early_exit_is_observable()
@@ -253,6 +289,7 @@ def main() -> int:
     test_radix_sorts()
     test_radix_does_not_depend_on_machine_word()
     test_index_sort()
+    test_shared_cases()
     print(f"Sorting(Python): {checks} 项断言，{failures} 失败")
     return 0 if failures == 0 else 1
 

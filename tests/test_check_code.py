@@ -783,5 +783,40 @@ class TestUnitLevelPySkip(unittest.TestCase):
             self.assertFalse(ok)
 
 
+class TestSharedCrossLanguageCases(unittest.TestCase):
+    """T-047：表、两侧报告与异常词汇都必须由闸门核对。"""
+
+    def _unit(self, root: Path, table: str):
+        unit = root / "probe"
+        unit.mkdir()
+        (unit / "modern.py").write_text("def identity(value):\n    return value\n", encoding="utf-8")
+        (unit / "cases.tsv").write_text(table, encoding="utf-8")
+        return unit, {"id": "probe", "listings": []}
+
+    def test_dual_unit_requires_table(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = Path(tmp)
+            (unit / "modern.py").write_text("pass\n", encoding="utf-8")
+            total, problem = check_code.shared_case_total(unit, {"listings": []})
+        self.assertIsNone(total)
+        self.assertIn("缺 cases.tsv", problem)
+
+    def test_table_shape_and_error_vocabulary_are_checked(self):
+        header = "name\toperation\tinput\texpected\texpected_error\n"
+        for row, expected in (
+            ("bad\tidentity\t1\t1\n", "不是五列"),
+            ("bad\tidentity\t1\t\tKeyError\n", "异常类别未知"),
+        ):
+            with tempfile.TemporaryDirectory() as tmp, self.subTest(row=row):
+                unit, meta = self._unit(Path(tmp), header + row)
+                _, problem = check_code.shared_case_total(unit, meta)
+                self.assertIn(expected, problem)
+
+    def test_both_reports_must_equal_table_length(self):
+        self.assertIsNone(check_code.check_shared_report("共享用例: 2\n", 2, "C++"))
+        self.assertIn("没有报告", check_code.check_shared_report("ok\n", 2, "Python"))
+        self.assertIn("有 2 条", check_code.check_shared_report("共享用例: 1\n", 2, "C++"))
+
+
 if __name__ == "__main__":
     unittest.main()

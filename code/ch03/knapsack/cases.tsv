@@ -1,0 +1,4 @@
+name	operation	input	expected	expected_error
+subset-found	solve	9|2,3,7	true	
+subset-missing	solve	1|2,3,7	false	
+negative-capacity	solve	-1|2,3		invalid_argument

@@ -1,0 +1,4 @@
+name	operation	input	expected	expected_error
+textbook	optimal	1,5,4,3|5,4,3,2,1	57,2	
+empty	optimal	|7	0,0	
+bad-weights	optimal	1,2|3,4		invalid_argument

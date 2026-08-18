@@ -1,4 +1,5 @@
 #include "modern.hpp"
+#include "support/shared_cases.hpp"
 
 #include <cstdio>
 #include <stdexcept>
@@ -109,6 +110,12 @@ int main() {
     test_replacement_selection();
     test_winner_tree();
     test_loser_tree();
+    const auto shared = dsa::shared_cases::load();
+    for (const auto& item : shared) {
+        if (item.operation == "winner") { dsa::external_sort::WinnerTree tree(dsa::shared_cases::integers(item.input)); check(tree.winner() == std::stoi(item.expected), "T-047 winner"); }
+        else { const auto split = item.input.find('|'); const auto memory = std::stoul(item.input.substr(0, split)); const auto values = dsa::shared_cases::integers(item.input.substr(split + 1)); if (item.expected_error.empty()) check(dsa::external_sort::replacement_selection(values, memory).size() == std::stoul(item.expected), "T-047 replacement"); else { bool raised = false; try { (void)dsa::external_sort::replacement_selection(values, memory); } catch (const std::invalid_argument&) { raised = true; } check(raised, "T-047 replacement exception"); } }
+    }
+    std::printf("共享用例: %zu\n", shared.size());
     std::printf("ExternalSort: %d 项断言，%d 失败\n", checks, failures);
     return failures == 0 ? 0 : 1;
 }

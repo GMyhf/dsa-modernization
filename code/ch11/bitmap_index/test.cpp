@@ -1,4 +1,5 @@
 #include "modern.hpp"
+#include "support/shared_cases.hpp"
 
 #include <algorithm>
 #include <cstdio>
@@ -201,6 +202,9 @@ int main() {
     test_run_length_compression();
     test_signature_has_no_false_negatives();
     test_signature_false_positives_appear_when_it_saturates();
+    const auto shared = dsa::shared_cases::load();
+    for (const auto& item : shared) { const auto values = dsa::shared_cases::integers(item.input); if (item.expected_error.empty()) check(dsa::index::run_length_decode(dsa::index::run_length_encode(std::vector<std::uint64_t>(values.begin(), values.end()))) == std::vector<std::uint64_t>(values.begin(), values.end()), "T-047 bitmap rle"); else { bool raised = false; try { (void)dsa::index::run_length_decode(std::vector<std::uint64_t>(values.begin(), values.end())); } catch (const std::invalid_argument&) { raised = true; } check(raised, "T-047 bitmap exception"); } }
+    std::printf("共享用例: %zu\n", shared.size());
     std::printf("BitmapIndex: %d 项断言，%d 失败\n", checks, failures);
     return failures == 0 ? 0 : 1;
 }

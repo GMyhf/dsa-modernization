@@ -1,7 +1,12 @@
 """第 4 章模式匹配 Python 断言。"""
 
 import random
+import sys
+from pathlib import Path
 import modern
+
+sys.path.insert(0, str(Path(__file__).parents[2] / "support"))
+import shared_cases
 
 checks = 0
 
@@ -41,4 +46,19 @@ try:
 except ValueError:
     raised = True
 check(raised, "算法4.8 拒绝长度错误的 next")
+shared = shared_cases.load()
+for case in shared:
+    text, pattern = case.input.split("|", 1)
+    if case.expected_error == "invalid_argument":
+        raised = False
+        try:
+            modern.kmp_search(text, pattern, [])
+        except ValueError:
+            raised = True
+        check(raised, "T-047 KMP exception")
+    else:
+        found = modern.kmp_search(text, pattern)
+        actual = -1 if found is None else found
+        check(actual == int(case.expected), "T-047 KMP result")
+print(f"共享用例: {len(shared)}")
 print(f"{checks} 项断言")

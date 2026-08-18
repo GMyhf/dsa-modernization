@@ -1,7 +1,12 @@
 """第 3 章背包 Python 断言。"""
 
 import itertools
+import sys
+from pathlib import Path
 import modern
+
+sys.path.insert(0, str(Path(__file__).parents[2] / "support"))
+import shared_cases
 
 checks = 0
 
@@ -43,4 +48,20 @@ check("knapsack_recursive" not in modern.knapsack_with_explicit_stack.__code__.c
       "算法3.11 没有调用递归版")
 check("knapsack_recursive" not in modern.knapsack_optimized.__code__.co_names,
       "算法3.12 没有调用递归版")
+cases = shared_cases.load()
+for case in cases:
+    capacity_text, weights_text = case.input.split("|", 1)
+    capacity = int(capacity_text)
+    weights = shared_cases.integers(weights_text)
+    if case.expected_error == "invalid_argument":
+        raised = False
+        try:
+            modern.knapsack_recursive(capacity, weights)
+        except ValueError:
+            raised = True
+        check(raised, "T-047 knapsack exception")
+    else:
+        found = modern.knapsack_recursive(capacity, weights) is not None
+        check(found == (case.expected == "true"), "T-047 knapsack result")
+print(f"共享用例: {len(cases)}")
 print(f"{checks} 项断言")

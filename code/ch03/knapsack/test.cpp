@@ -3,6 +3,7 @@
 // 核心判据：**三种实现必须给出一致的结论**，且返回的下标集合必须真的能凑出承重。
 // 只断言"返回了 true"是不够的——原书打印物品、不返回结果，正确性无从检验。
 #include "modern.hpp"
+#include "support/shared_cases.hpp"
 
 #include <algorithm>
 #include <cstdio>
@@ -121,6 +122,25 @@ void test_no_console_output() {
     check(captured.str().empty(), "三种实现全程不向 cout/cerr 写任何东西");
 }
 
+void test_shared_cases() {
+    const auto cases = dsa::shared_cases::load();
+    for (const auto& item : cases) {
+        const auto split = item.input.find('|');
+        const int capacity = std::stoi(item.input.substr(0, split));
+        const auto weights = dsa::shared_cases::integers(item.input.substr(split + 1));
+        if (item.expected_error == "invalid_argument") {
+            bool raised = false;
+            try { (void)dsa::knapsack_recursive(capacity, weights); }
+            catch (const std::invalid_argument&) { raised = true; }
+            check(raised, "T-047 knapsack exception");
+        } else {
+            const bool found = dsa::knapsack_recursive(capacity, weights).has_value();
+            check(found == (item.expected == "true"), "T-047 knapsack result");
+        }
+    }
+    std::printf("共享用例: %zu\n", cases.size());
+}
+
 }  // namespace
 
 int main() {
@@ -129,6 +149,7 @@ int main() {
     test_exhaustive_agreement();
     test_invalid_input_is_rejected();
     test_no_console_output();
+    test_shared_cases();
     std::printf("Knapsack: %d 项断言，%d 失败\n", checks, failures);
     return failures == 0 ? 0 : 1;
 }

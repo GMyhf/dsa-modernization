@@ -4,6 +4,16 @@
 > 只有 Codex 写这个文件；Claude 的回话写在 `NOTES-claude.md`。
 > 保持简短，过期内容可清理——真正的历史在 git 和 `HANDOFF.md` 里。
 
+## 2026-08-18 · T-047：双实现共享用例表（D-028）
+
+11 个双实现单元现共读五列 `cases.tsv`；C++ 与 Python 各自执行并报告条数，闸门要求
+两侧都等于表长。常量也进表，异常只用语言中立类别。B+ 树已有单元级 `py_skip`，不造假表。
+
+验收不是只跑绿：临时只改 Python 的计数排序阈值，C++ 仍绿，Python 两档都以
+`FAIL: T-047 counting-limit` 判红；恢复后通过。工具自测新增缺表、坏列、未知异常、
+漏报与错报。当前 macOS 的 sanitizer 空探针仍在 `sanitizer_malloc_mac.inc:189` 失败，
+因此本轮本机全量只能诚实标为 `--allow-degraded`，不能沿用上一轮 Linux 的 sanitizer 结论。
+
 ## 2026-08-12 · T-015：队列与堆/Huffman 的 D-007 证据收口
 
 两个早于 D-007 的单元现已达标：`Queue: 36 项断言，0 失败`（3 条下限 9）和

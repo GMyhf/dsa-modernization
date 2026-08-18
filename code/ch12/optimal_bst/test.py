@@ -8,6 +8,10 @@
 import sys
 
 import modern
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parents[2] / "support"))
+import shared_cases
 
 checks = 0
 failures = 0
@@ -112,6 +116,24 @@ def main() -> int:
     test_root_is_not_simply_the_heaviest_key()
     test_subtree_table_is_consistent()
     test_edges_and_errors()
+    shared = shared_cases.load()
+    for case in shared:
+        left, right = case.input.split("|", 1)
+        successful = shared_cases.integers(left)
+        unsuccessful = shared_cases.integers(right)
+        if case.expected_error:
+            raised = False
+            try:
+                modern.optimal_bst(successful, unsuccessful)
+            except ValueError:
+                raised = True
+            check(raised, "T-047 optimal exception")
+        else:
+            result, roots = modern.optimal_bst(successful, unsuccessful)
+            expected_cost, expected_root = shared_cases.integers(case.expected)
+            check(result[0][len(successful)] == expected_cost, "T-047 optimal cost")
+            check(roots[0][len(successful)] == expected_root, "T-047 optimal root")
+    print(f"共享用例: {len(shared)}")
     print(f"OptimalBST(Python): {checks} 项断言，{failures} 失败")
     return 0 if failures == 0 else 1
 

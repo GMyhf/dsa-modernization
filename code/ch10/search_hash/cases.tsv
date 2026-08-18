@@ -1,0 +1,4 @@
+name	operation	input	expected	expected_error
+binary-found	binary	1,3,5,7|5	2	
+hash-collision	hash	7|1,8,15	3	
+zero-capacity	hash	0|		invalid_argument

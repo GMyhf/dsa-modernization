@@ -6,8 +6,11 @@
 """
 
 import sys
+from pathlib import Path
 
 import modern
+sys.path.insert(0, str(Path(__file__).parents[2] / "support"))
+import shared_cases
 
 checks = 0
 failures = 0
@@ -138,6 +141,23 @@ def main() -> int:
     test_replay_is_logarithmic()
     test_loser_tree_stores_real_losers()
     test_edge_cases()
+    shared = shared_cases.load()
+    for case in shared:
+        if case.operation == "winner":
+            check(modern.WinnerTree(shared_cases.integers(case.input)).winner() == int(case.expected), "T-047 winner")
+        else:
+            memory_text, values_text = case.input.split("|", 1)
+            if case.expected_error:
+                raised = False
+                try:
+                    modern.replacement_selection(shared_cases.integers(values_text), int(memory_text))
+                except ValueError:
+                    raised = True
+                check(raised, "T-047 replacement exception")
+            else:
+                runs = modern.replacement_selection(shared_cases.integers(values_text), int(memory_text))
+                check(len(runs) == int(case.expected), "T-047 replacement")
+    print(f"共享用例: {len(shared)}")
     print(f"ExternalSort(Python): {checks} 项断言，{failures} 失败")
     return 0 if failures == 0 else 1
 

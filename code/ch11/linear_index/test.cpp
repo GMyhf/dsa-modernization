@@ -1,6 +1,8 @@
 #include "modern.hpp"
+#include "support/shared_cases.hpp"
 
 #include <cstdio>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -163,6 +165,18 @@ int main() {
     test_multi_level_grows_and_costs_one_read_per_level();
     test_every_record_is_reachable();
     test_edge_cases();
+    const auto shared = dsa::shared_cases::load();
+    for (const auto& item : shared) {
+        const bool sparse = item.operation == "sparse";
+        dsa::index::MultiLevelIndex index(sparse ? dsa::index::IndexKind::Sparse : dsa::index::IndexKind::Dense, 2, 2);
+        std::vector<std::pair<int, std::string>> records;
+        const auto split = item.input.find('|');
+        std::istringstream rows(item.input.substr(0, split)); std::string row;
+        while (std::getline(rows, row, ',')) { const auto colon = row.find(':'); records.push_back({std::stoi(row.substr(0, colon)), row.substr(colon + 1)}); }
+        if (item.expected_error.empty()) { index.load(records); check(index.find(std::stoi(item.input.substr(split + 1))) == item.expected, "T-047 linear index"); }
+        else { bool raised = false; try { index.load(records); } catch (const std::invalid_argument&) { raised = true; } check(raised, "T-047 linear exception"); }
+    }
+    std::printf("共享用例: %zu\n", shared.size());
     std::printf("LinearIndex: %d 项断言，%d 失败\n", checks, failures);
     return failures == 0 ? 0 : 1;
 }

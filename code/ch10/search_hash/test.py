@@ -1,6 +1,10 @@
 """第 10 章 Python 实现断言；标准容器只在测试侧作裁判。"""
 import random
+import sys
+from pathlib import Path
 import modern
+sys.path.insert(0, str(Path(__file__).parents[2] / "support"))
+import shared_cases
 
 checks = 0
 def check(value, name):
@@ -52,4 +56,22 @@ try:
 except ValueError:
     raised = True
 check(raised, "零容量被拒绝")
+shared = shared_cases.load()
+for case in shared:
+    left, right = case.input.split("|", 1)
+    if case.operation == "binary":
+        check(modern.binary_search(shared_cases.integers(left), int(right)) == int(case.expected), "T-047 binary")
+    elif case.expected_error:
+        raised = False
+        try:
+            modern.HashTable(int(left))
+        except ValueError:
+            raised = True
+        check(raised, "T-047 hash exception")
+    else:
+        table = modern.HashTable(int(left))
+        for key in shared_cases.integers(right):
+            table.insert(key)
+        check(table.size() == int(case.expected), "T-047 hash")
+print(f"共享用例: {len(shared)}")
 print(f"{checks} 项断言")

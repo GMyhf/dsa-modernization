@@ -7,8 +7,11 @@
 """
 
 import sys
+from pathlib import Path
 
 import modern
+sys.path.insert(0, str(Path(__file__).parents[2] / "support"))
+import shared_cases
 
 checks = 0
 failures = 0
@@ -192,6 +195,23 @@ def main() -> int:
     test_topological_sort()
     test_shortest_paths()
     test_minimum_spanning_tree()
+    shared = shared_cases.load()
+    for case in shared:
+        if case.expected_error == "invalid_argument":
+            graph = modern.Graph(2)
+            raised = False
+            try:
+                graph.add_edge(0, 1, -1)
+            except ValueError:
+                raised = True
+            check(raised, "T-047 graph exception")
+        else:
+            graph = modern.Graph(5)
+            for edge in case.input.split("|", 1)[1].split(";"):
+                source, target, weight = shared_cases.integers(edge)
+                graph.add_edge(source, target, weight)
+            check(graph.dijkstra(0) == shared_cases.integers(case.expected), "T-047 graph distances")
+    print(f"共享用例: {len(shared)}")
     print(f"Graph(Python): {checks} 项断言，{failures} 失败")
     return 0 if failures == 0 else 1
 

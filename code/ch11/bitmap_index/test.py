@@ -1,4 +1,8 @@
+import sys
+from pathlib import Path
 import modern
+sys.path.insert(0, str(Path(__file__).parents[2] / "support"))
+import shared_cases
 checks = 0
 def check(v,n):
     global checks
@@ -20,4 +24,17 @@ check(modern.run_length_decode(modern.run_length_encode(bits))==bits,"压缩可�
 s = modern.SignatureFile()
 s.add(1,["a","b"])
 check(1 in s.candidates(["a"]),"签名无假阴性")
+shared = shared_cases.load()
+for case in shared:
+    values = shared_cases.integers(case.input)
+    if case.expected_error:
+        raised = False
+        try:
+            modern.run_length_decode(values)
+        except ValueError:
+            raised = True
+        check(raised, "T-047 bitmap exception")
+    else:
+        check(modern.run_length_decode(modern.run_length_encode(values)) == shared_cases.integers(case.expected), "T-047 bitmap rle")
+print(f"共享用例: {len(shared)}")
 print(f"{checks} 项断言")

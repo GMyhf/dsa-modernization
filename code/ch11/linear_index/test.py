@@ -6,8 +6,11 @@
 """
 
 import sys
+from pathlib import Path
 
 import modern
+sys.path.insert(0, str(Path(__file__).parents[2] / "support"))
+import shared_cases
 
 checks = 0
 failures = 0
@@ -83,6 +86,22 @@ def main() -> int:
     test_sparse_index()
     test_page_reads_follow_levels_not_records()
     test_bad_page_capacity()
+    shared = shared_cases.load()
+    for case in shared:
+        rows_text, key_text = case.input.split("|", 1)
+        rows = [(int(row.split(":", 1)[0]), row.split(":", 1)[1]) for row in rows_text.split(",")]
+        index = modern.MultiLevelIndex(case.operation, 2, 2)
+        if case.expected_error:
+            raised = False
+            try:
+                index.load(rows)
+            except ValueError:
+                raised = True
+            check(raised, "T-047 linear exception")
+        else:
+            index.load(rows)
+            check(index.find(int(key_text)) == case.expected, "T-047 linear index")
+    print(f"共享用例: {len(shared)}")
     print(f"LinearIndex(Python): {checks} 项断言，{failures} 失败")
     return 0 if failures == 0 else 1
 

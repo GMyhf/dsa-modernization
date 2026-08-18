@@ -1,0 +1,4 @@
+name	operation	input	expected	expected_error
+dense-find	dense	3:c,1:a,2:b|2	b	
+sparse-find	sparse	1:a,2:b,3:c|3	c	
+bad-sparse	sparse	2:b,1:a|1		invalid_argument

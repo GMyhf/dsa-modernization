@@ -8,6 +8,10 @@
 import sys
 
 import modern
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parents[2] / "support"))
+import shared_cases
 
 checks = 0
 failures = 0
@@ -140,6 +144,27 @@ def main() -> int:
     test_patricia_prefix_keys()
     test_bit_of()
     test_empty_patricia()
+    shared = shared_cases.load()
+    for case in shared:
+        left, right = case.input.split("|", 1)
+        if case.expected_error:
+            raised = False
+            try:
+                modern.Trie().insert(left)
+            except ValueError:
+                raised = True
+            check(raised, "T-047 trie exception")
+        elif case.operation == "trie":
+            trie = modern.Trie()
+            for word in left.split(","):
+                trie.insert(word)
+            check(trie.longest_prefix_of(right) == case.expected, "T-047 trie")
+        elif case.operation == "patricia":
+            tree = modern.PatriciaTree()
+            for word in left.split(","):
+                tree.insert(word)
+            check(tree.contains(right) == (case.expected == "true"), "T-047 patricia")
+    print(f"共享用例: {len(shared)}")
     print(f"Trie(Python): {checks} 项断言，{failures} 失败")
     return 0 if failures == 0 else 1
 

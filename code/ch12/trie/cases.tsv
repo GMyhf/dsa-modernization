@@ -1,0 +1,4 @@
+name	operation	input	expected	expected_error
+longest-prefix	trie	can,car,cat,do|cartoon	car	
+patricia-prefix	patricia	a,ab,abc|ab	true	
+bad-key	trie	Cat|Cat		invalid_argument
