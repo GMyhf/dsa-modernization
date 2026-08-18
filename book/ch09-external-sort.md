@@ -203,6 +203,35 @@ inline std::vector<std::vector<int>> replacement_selection(const std::vector<int
     return runs;
 }
 ```
+```python file=code/ch09/external_sort/modern.py#replacement-selection
+def replacement_selection(values: list[int], memory: int) -> list[list[int]]:
+    if memory <= 0:
+        raise ValueError("replacement selection memory must be positive")
+    if not values:
+        return []
+    heap = sorted(values[:memory])
+    next_index = memory
+    runs: list[list[int]] = []
+    current: list[int] = []
+    frozen: list[int] = []
+    while heap or next_index < len(values) or frozen:
+        if not heap:
+            if current:
+                runs.append(current)
+            current = []
+            heap = sorted(frozen)
+            frozen = []
+        emitted = heap.pop(0)
+        current.append(emitted)
+        if next_index < len(values):
+            incoming = values[next_index]
+            next_index += 1
+            (heap if incoming >= emitted else frozen).append(incoming)
+            heap.sort()
+    if current:
+        runs.append(current)
+    return runs
+```
 
 ### 9.3.2 二路外排序
 
@@ -343,6 +372,10 @@ private:
     std::size_t leaf_base_{0};
 };
 ```
+```python file=code/ch09/external_sort/modern.py#winner-tree
+class WinnerTree(_Tournament):
+    """代码9.2：根保存全局最小选手。"""
+```
 
 ```cpp file=code/ch09/external_sort/modern.hpp#loser-tree
 // 代码9.3：败者树。内部结点保存败者下标，另用 champion_ 记录全局胜者。
@@ -411,6 +444,17 @@ private:
     std::size_t leaf_base_{0};
     std::size_t champion_{detail::TournamentOps::no_player};
 };
+```
+```python file=code/ch09/external_sort/modern.py#loser-tree
+class LoserTree(_Tournament):
+    """代码9.3：重赛后仍能报告全局胜者。"""
+
+    def loser_at(self, node: int) -> int | None:
+        if node <= 0 or node >= len(self.players):
+            return None
+        winner = self.winner_index()
+        candidates = [index for index in range(len(self.players)) if index != winner]
+        return max(candidates, key=self.players.__getitem__) if candidates else None
 ```
 
 ## 本章小结

@@ -5,17 +5,23 @@
     {
       "id": "算法9.1",
       "anchor": "replacement_selection(const std::vector<int>& input",
-      "test": "算法9.1 textbook input makes two runs"
+      "test": "算法9.1 textbook input makes two runs",
+      "py_anchor": "replacement-selection",
+      "py_test": "算法9.1 textbook input makes two runs"
     },
     {
       "id": "代码9.2",
       "anchor": "class WinnerTree {",
-      "test": "代码9.2 initial winner"
+      "test": "代码9.2 initial winner",
+      "py_anchor": "winner-tree",
+      "py_test": "竞赛树 initial winner"
     },
     {
       "id": "代码9.3",
       "anchor": "class LoserTree {",
-      "test": "代码9.3 initial winner"
+      "test": "代码9.3 initial winner",
+      "py_anchor": "loser-tree",
+      "py_test": "竞赛树 initial winner"
     }
   ],
   "standard": "c++17",
