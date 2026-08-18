@@ -871,5 +871,72 @@ class TestSharedLoaderIsShared(unittest.TestCase):
         self.assertEqual(offenders, {}, f"自己解析用例表的单元：{offenders}")
 
 
+class TestSharedTableActuallyDrivesBothSides(unittest.TestCase):
+    """T-047 复核判据：把 cases.tsv 改坏，两侧都必须变红。
+
+    闸门原本只核对「两侧都报了 N，且 N 等于表长」。条数是最容易凑对的量——
+    ch07/graph 的 Python 侧曾遍历整张表、条数报得完全正确，而异常行的输入是
+    写死的；ch11/bitmap_index 的 C++ 侧曾拿输入跟自己往返比对，从没碰过 expected。
+    两处都在「条数一致」下静默通过。
+    """
+
+    TABLE = ("name\toperation\tinput\texpected\texpected_error\n"
+             "one\tsum\t1,2\t3\t\n")
+
+    def _unit(self, root, py_body):
+        d = root / "ch99" / "probe"
+        d.mkdir(parents=True)
+        (d / "cases.tsv").write_text(self.TABLE, encoding="utf-8")
+        (d / "modern.py").write_text("def total(values):\n    return sum(values)\n",
+                                     encoding="utf-8")
+        (d / "test.py").write_text(py_body, encoding="utf-8")
+        return d
+
+    READS_TABLE = (
+        "import sys\n"
+        "from pathlib import Path\n"
+        "import modern\n"
+        'sys.path.insert(0, str(Path(__file__).parents[2] / "support"))\n'
+        "import shared_cases\n"
+        "shared = shared_cases.load()\n"
+        "bad = 0\n"
+        "for case in shared:\n"
+        "    values = shared_cases.integers(case.input)\n"
+        "    if modern.total(values) != int(case.expected):\n"
+        "        bad += 1\n"
+        'print(f"共享用例: {len(shared)}")\n'
+        "sys.exit(1 if bad else 0)\n"
+    )
+    IGNORES_TABLE = READS_TABLE.replace("int(case.expected)", "3")
+
+    def test_side_that_ignores_expected_is_caught(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = self._unit(Path(tmp), self.IGNORES_TABLE)
+            problems = check_code.mutate_shared_table(unit, None, 1)
+            self.assertTrue(any("Python 侧仍然通过" in p for p in problems), problems)
+
+    def test_side_that_reads_expected_passes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = self._unit(Path(tmp), self.READS_TABLE)
+            self.assertEqual(check_code.mutate_shared_table(unit, None, 1), [])
+
+    def test_table_without_any_expected_is_reported(self):
+        """全是异常行的表，这条自检无从下手——要说出来，不能静默跳过。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = self._unit(Path(tmp), self.READS_TABLE)
+            (unit / "cases.tsv").write_text(
+                "name\toperation\tinput\texpected\texpected_error\n"
+                "boom\tdecode\t3\t\tinvalid_argument\n", encoding="utf-8")
+            problems = check_code.mutate_shared_table(unit, None, 1)
+            self.assertTrue(any("没有一条带 expected 的行" in p for p in problems), problems)
+
+    def test_repo_table_is_left_untouched(self):
+        """改动只落在临时目录里——仓库的表一个字节都不能变。"""
+        table = ROOT / "code" / "ch08" / "sorting" / "cases.tsv"
+        before = table.read_bytes()
+        check_code.mutate_shared_table(table.parent, None, 5)
+        self.assertEqual(table.read_bytes(), before)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -203,7 +203,25 @@ int main() {
     test_signature_has_no_false_negatives();
     test_signature_false_positives_appear_when_it_saturates();
     const auto shared = dsa::shared_cases::load();
-    for (const auto& item : shared) { const auto values = dsa::shared_cases::integers(item.input); if (item.expected_error.empty()) check(dsa::index::run_length_decode(dsa::index::run_length_encode(std::vector<std::uint64_t>(values.begin(), values.end()))) == std::vector<std::uint64_t>(values.begin(), values.end()), "T-047 bitmap rle"); else { bool raised = false; try { (void)dsa::index::run_length_decode(std::vector<std::uint64_t>(values.begin(), values.end())); } catch (const std::invalid_argument&) { raised = true; } check(raised, "T-047 bitmap exception"); } }
+    for (const auto& item : shared) {
+        const auto values = dsa::shared_cases::integers(item.input);
+        const std::vector<std::uint64_t> words(values.begin(), values.end());
+        if (!item.expected_error.empty()) {
+            bool raised = false;
+            try { (void)dsa::index::run_length_decode(words); }
+            catch (const std::invalid_argument&) { raised = true; }
+            check(raised, "T-047 bitmap exception");
+            continue;
+        }
+        // 比对的必须是表里的 expected。原先这里写的是
+        // `decode(encode(values)) == values`——拿输入跟自己往返对，
+        // **从没碰过 expected**：把表里的期望值改坏，C++ 侧照样绿，
+        // 而 Python 侧会红。两侧读同一张表这件事，就是在这种地方漏掉的。
+        const auto expected = dsa::shared_cases::integers(item.expected);
+        const std::vector<std::uint64_t> wanted(expected.begin(), expected.end());
+        check(dsa::index::run_length_decode(dsa::index::run_length_encode(words)) == wanted,
+              "T-047 bitmap rle");
+    }
     std::printf("共享用例: %zu\n", shared.size());
     std::printf("BitmapIndex: %d 项断言，%d 失败\n", checks, failures);
     return failures == 0 ? 0 : 1;

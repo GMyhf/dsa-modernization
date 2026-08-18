@@ -129,6 +129,64 @@ def check_shared_loader(unit_dir: Path):
     return problems
 
 
+def mutate_shared_table(unit_dir: Path, binary, shared_total):
+    """把 `cases.tsv` 改坏，两侧都必须变红——否则它们只是**数了行数**。
+
+    缘由（2026-08-18 复核）：闸门原本只核对「两侧都报了 N，且 N 等于表长」。
+    条数是最容易凑对的量——`ch07/graph` 的 Python 侧当时遍历了整张表、
+    条数报得完全正确，而异常那一行的输入是写死的，改表毫无反应。
+    两边都在数行，没在跑同一件事。
+
+    **这条自检不用重新编译**：`cases.tsv` 是运行期按工作目录读的，
+    所以把已经建好的二进制换个工作目录跑一遍就够了，代价是两次进程启动。
+    改动落在临时目录里，仓库里的表一个字节都不碰。
+    """
+    if shared_total is None:
+        return []
+    lines = (unit_dir / "cases.tsv").read_text(encoding="utf-8").splitlines()
+    target = None
+    for index, line in enumerate(lines[1:], 1):
+        fields = line.split("\t")
+        if len(fields) == 5 and fields[3].strip():
+            target = index
+            break
+    if target is None:
+        return ["  ❌ cases.tsv 里没有一条带 expected 的行——"
+                "「把表改坏，两侧都要红」这条自检就无从下手（T-047）"]
+    fields = lines[target].split("\t")
+    # 往期望值尾巴上加一个字符：对任何真的在比对 expected 的实现，这一定不成立。
+    fields[3] = fields[3] + ("9" if fields[3][-1].isdigit() else "X")
+    lines[target] = "\t".join(fields)
+    corrupted = "\n".join(lines) + "\n"
+
+    problems = []
+    with tempfile.TemporaryDirectory(prefix="dsa-shared-") as tmp:
+        root = Path(tmp)
+        # 镜像成 <临时根>/<章>/<单元>/，因为 test.py 靠 parents[2] 找 support/
+        mirror = root / unit_dir.parent.name / unit_dir.name
+        mirror.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(unit_dir, mirror)
+        if (CODE / "support").is_dir():
+            shutil.copytree(CODE / "support", root / "support")
+        (mirror / "cases.tsv").write_text(corrupted, encoding="utf-8")
+        name = lines[target].split("\t")[0]
+        if binary is not None:
+            run = subprocess.run([str(binary)], capture_output=True, text=True,
+                                 cwd=mirror, timeout=TIMEOUT_SEC)
+            if run.returncode == 0:
+                problems.append(
+                    f"  ❌ 把 cases.tsv 的 `{name}` 行期望值改坏后 **C++ 侧仍然通过**——"
+                    "它报了条数，但没有真的在比对表里的期望值（T-047）")
+        if (unit_dir / "modern.py").is_file() and (unit_dir / "test.py").is_file():
+            run = subprocess.run([python_exe(), "test.py"], capture_output=True, text=True,
+                                 cwd=mirror, timeout=TIMEOUT_SEC)
+            if run.returncode == 0:
+                problems.append(
+                    f"  ❌ 把 cases.tsv 的 `{name}` 行期望值改坏后 **Python 侧仍然通过**——"
+                    "同上（T-047）")
+    return problems
+
+
 def check_shared_report(output, expected, language):
     if expected is None:
         return None
@@ -797,6 +855,7 @@ def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None, degr
 
     assertions = None
     teaching_assertions = None
+    test_binary = None
     for name, flags in profiles:
         for kind, srcs in programs:
             suffix = "" if kind == "test" else f"-{kind}"
@@ -815,6 +874,8 @@ def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None, degr
                 str(binary),
             ]
             proc = subprocess.run(cmd, capture_output=True, text=True, timeout=TIMEOUT_SEC)
+            if kind == "test" and proc.returncode == 0:
+                test_binary = binary
             if proc.returncode != 0:
                 ok = False
                 logs.append(f"  ❌ [{label}] 编译失败\n{indent(proc.stdout + proc.stderr)}")
@@ -842,6 +903,14 @@ def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None, degr
             elif hit and kind == "teaching":
                 teaching_assertions = int(hit.group(1))
             logs.append(f"  ✅ [{label}] {tail[0][:80]}")
+    if ok and shared_total is not None:
+        drift = mutate_shared_table(unit_dir, test_binary, shared_total)
+        if drift:
+            ok = False
+            logs.extend(drift)
+        else:
+            logs.append(f"  ✅ [改坏用例表] 两侧都随之变红（{shared_total} 条共享用例）")
+
     py_ok, py_logs, py_assertions = run_python(
         unit_dir, meta=meta, shared_total=shared_total
     )
