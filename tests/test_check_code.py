@@ -477,7 +477,7 @@ class TestD025PythonArm(unittest.TestCase):
             "title": "Python 臂探针",
             "listings": listings if listings is not None else [
                 {"id": "算法8.1", "anchor": "#pragma once", "test": "int main",
-                 "py_anchor": "def demo(", "py_test": "demo works"}
+                 "py_code_line": "def demo(", "py_test": "demo works"}
             ],
         }
         if exceptions:
@@ -599,7 +599,7 @@ class TestD025PythonArm(unittest.TestCase):
                 Path(tmp), "def demo(values):\n    return values\n",
                 listings=[
                     {"id": "算法8.1", "anchor": "#pragma once", "test": "int main",
-                     "py_anchor": "def demo(", "py_test": "demo works"},
+                     "py_code_line": "def demo(", "py_test": "demo works"},
                     {"id": "算法8.2", "anchor": "#pragma once", "test": "int main"},
                 ],
             )

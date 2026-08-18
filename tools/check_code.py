@@ -283,31 +283,31 @@ def check_python_bindings(unit_dir: Path, meta):
             continue
         listing = entry.get("id", "?")
         skip = entry.get("py_skip")
-        anchor, test = entry.get("py_anchor"), entry.get("py_test")
+        anchor, test = entry.get("py_code_line"), entry.get("py_test")
         if isinstance(skip, str) and skip.strip():
             if anchor or test:
-                problems.append(f"  ❌ {listing} 同时写了 py_skip 和 py_anchor/py_test，二选一")
+                problems.append(f"  ❌ {listing} 同时写了 py_skip 和 py_code_line/py_test，二选一")
             continue
         if skip is not None:
             problems.append(f"  ❌ {listing} 的 py_skip 是空的——不给 Python 可以，不写理由不行")
             continue
         if not (isinstance(anchor, str) and anchor.strip() and isinstance(test, str) and test.strip()):
             problems.append(
-                f"  ❌ {listing} 缺 py_anchor/py_test：本单元有 modern.py，"
+                f"  ❌ {listing} 缺 py_code_line/py_test：本单元有 modern.py，"
                 "每条清单要么给出 Python 锚点，要么写 py_skip 说明理由（D-025）"
             )
             continue
         if anchor in anchors:
-            problems.append(f"  ❌ {listing} 的 py_anchor 与同单元其他清单重复：{anchor}")
+            problems.append(f"  ❌ {listing} 的 py_code_line 与同单元其他清单重复：{anchor}")
         if test in tests_seen:
             problems.append(f"  ❌ {listing} 的 py_test 与同单元其他清单重复：{test}")
         anchors.add(anchor)
         tests_seen.add(test)
         matching = [line for line in source_lines if anchor in line]
         if not matching:
-            problems.append(f"  ❌ {listing} 的 py_anchor 在 modern.py 里不存在：{anchor}")
+            problems.append(f"  ❌ {listing} 的 py_code_line 在 modern.py 里不存在：{anchor}")
         elif all(line.lstrip().startswith("#") for line in matching):
-            problems.append(f"  ❌ {listing} 的 py_anchor 只存在于注释行：{anchor}")
+            problems.append(f"  ❌ {listing} 的 py_code_line 只存在于注释行：{anchor}")
         if test not in tests:
             problems.append(f"  ❌ {listing} 的 py_test 在 test.py 里不存在：{test}")
     return problems

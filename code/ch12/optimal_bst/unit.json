@@ -12,7 +12,7 @@
       "id": "算法12.2",
       "anchor": "OptimalBstResult optimal_bst(",
       "test": "算法12.2 textbook total cost",
-      "py_anchor": "optimal_bst",
+      "py_code_line": "optimal_bst",
       "py_test": "textbook total cost"
     }
   ],

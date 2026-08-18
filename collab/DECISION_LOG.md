@@ -144,7 +144,7 @@ $ python3 tools/check_doc.py book/ch08-sorting.md
 | 退出码非 0 即失败、末行报「N 项断言」 | 同 |
 | R3：```cpp 必须 `file=…#锚点` 且逐字一致 | R3：```python 同，锚点写 `# >>> 名字` |
 | `check_d001`：禁 `<vector>`/`<stack>`/`cout` | `check_d025`：禁 `sorted`/`list.sort`/`heapq`/`bisect`/`print` 出现在实现里 |
-| `unit.json.listings[].anchor` / `.test` | `.py_anchor` / `.py_test`，或 `.py_skip`（**必须写理由**） |
+| `unit.json.listings[].anchor` / `.test` | `.py_code_line` / `.py_test`，或 `.py_skip`（**必须写理由**） |
 
 最后一行是防「悄悄只覆盖一半」：一个单元只要有 `modern.py`，它认领的**每一条**清单
 都得给出 Python 锚点，或者写明为什么这条不给 Python。和 `exclusions.json`

@@ -57,7 +57,7 @@ $ python3 tools/check_doc.py book/ch08-sorting.md
 | --- | --- |
 | `-Werror` + ASan/UBSan 与 `-O2` 两档 | `python3` 默认档与 `python3 -X dev -W error` 两档 |
 | `check_d001` 禁 `<vector>`/`cout` | `check_d025` 用 **AST** 禁 `sorted`/`.sort()`/`heapq`/`bisect`/`re`/`collections`/`print` |
-| `listings[].anchor` / `.test` | `.py_anchor` / `.py_test`，或 `.py_skip`（**必须写理由**） |
+| `listings[].anchor` / `.test` | `.py_code_line` / `.py_test`，或 `.py_skip`（**必须写理由**） |
 | R3 管 ```cpp | R3 管 ```python，锚点 `# >>> 名字`，`#fn:` 按缩进切片 |
 | R8 抓 relabel 成 ```text 的 C++ | R8 同样抓 Python（`def`/`class` 形态 + 逐字比对 `.py`） |
 

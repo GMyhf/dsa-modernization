@@ -6,77 +6,77 @@
       "id": "算法8.1",
       "anchor": "void insertion_sort(std::vector<int>& values)",
       "test": "算法8.1 insertion",
-      "py_anchor": "def insertion_sort(",
+      "py_code_line": "def insertion_sort(",
       "py_test": "算法8.1 Python insertion"
     },
     {
       "id": "算法8.2",
       "anchor": "void shell_sort(std::vector<int>& values)",
       "test": "算法8.2 shell",
-      "py_anchor": "def shell_sort(",
+      "py_code_line": "def shell_sort(",
       "py_test": "算法8.2 Python shell"
     },
     {
       "id": "算法8.3",
       "anchor": "void selection_sort(std::vector<int>& values)",
       "test": "算法8.3 selection",
-      "py_anchor": "def selection_sort(",
+      "py_code_line": "def selection_sort(",
       "py_test": "算法8.3 Python selection"
     },
     {
       "id": "算法8.4",
       "anchor": "void heap_sort(std::vector<int>& values)",
       "test": "算法8.4 heap",
-      "py_anchor": "def heap_sort(",
+      "py_code_line": "def heap_sort(",
       "py_test": "算法8.4 Python heap"
     },
     {
       "id": "算法8.5",
       "anchor": "void bubble_sort(std::vector<int>& values)",
       "test": "算法8.5 bubble",
-      "py_anchor": "def bubble_sort(",
+      "py_code_line": "def bubble_sort(",
       "py_test": "算法8.5 Python bubble"
     },
     {
       "id": "算法8.6",
       "anchor": "void quick_sort(std::vector<int>& values)",
       "test": "算法8.6 quick",
-      "py_anchor": "def quick_sort(",
+      "py_code_line": "def quick_sort(",
       "py_test": "算法8.6 Python quick"
     },
     {
       "id": "算法8.7",
       "anchor": "void quick_sort_optimized(std::vector<int>& values)",
       "test": "算法8.7 quick optimized",
-      "py_anchor": "def quick_sort_optimized(",
+      "py_code_line": "def quick_sort_optimized(",
       "py_test": "算法8.7 Python quick optimized"
     },
     {
       "id": "算法8.8",
       "anchor": "void merge_sort(std::vector<int>& values)",
       "test": "算法8.8 merge",
-      "py_anchor": "def merge_sort(",
+      "py_code_line": "def merge_sort(",
       "py_test": "算法8.8 Python merge"
     },
     {
       "id": "算法8.9",
       "anchor": "void merge_sort_optimized(std::vector<int>& values)",
       "test": "算法8.9 merge optimized",
-      "py_anchor": "def merge_sort_optimized(",
+      "py_code_line": "def merge_sort_optimized(",
       "py_test": "算法8.9 Python merge optimized"
     },
     {
       "id": "算法8.10",
       "anchor": "void counting_sort(std::vector<int>& values)",
       "test": "算法8.10 counting",
-      "py_anchor": "def counting_sort(",
+      "py_code_line": "def counting_sort(",
       "py_test": "算法8.10 Python counting"
     },
     {
       "id": "算法8.11",
       "anchor": "void radix_sort(std::vector<int>& values)",
       "test": "算法8.11 radix",
-      "py_anchor": "def radix_sort(",
+      "py_code_line": "def radix_sort(",
       "py_test": "算法8.11 Python radix"
     },
     {
@@ -89,21 +89,21 @@
       "id": "算法8.13",
       "anchor": "void radix_sort_linked_style(std::vector<int>& values)",
       "test": "算法8.13 linked radix",
-      "py_anchor": "def radix_sort_linked_style(",
+      "py_code_line": "def radix_sort_linked_style(",
       "py_test": "算法8.13 Python linked radix"
     },
     {
       "id": "算法8.14",
       "anchor": "insertion_index_sort(const std::vector<int>& values)",
       "test": "算法8.14 returns sorted indexes",
-      "py_anchor": "def insertion_index_sort(",
+      "py_code_line": "def insertion_index_sort(",
       "py_test": "算法8.14 Python 返回按值排好的下标"
     },
     {
       "id": "算法8.15",
       "anchor": "void adjust_by_index(std::vector<int>& values",
       "test": "算法8.15 adjusts records by cycles",
-      "py_anchor": "def adjust_by_index(",
+      "py_code_line": "def adjust_by_index(",
       "py_test": "算法8.15 Python 沿置换环落实记录顺序"
     },
     {
