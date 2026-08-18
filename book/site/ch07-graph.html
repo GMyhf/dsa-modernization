@@ -498,6 +498,20 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
     visit_depth_first(source, seen, result);
     <span class="k">return</span> result;
 }</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.py">code/ch07/graph/modern.py#dfs</a></div><pre><code><span class="k">def</span> dfs(self, source: <span class="t">int</span>) -&gt; <span class="t">list</span>[<span class="t">int</span>]:
+    self._check_vertex(source)
+    seen = [<span class="k">False</span>] * self.vertices
+    result: <span class="t">list</span>[<span class="t">int</span>] = []
+
+    <span class="k">def</span> visit(vertex: <span class="t">int</span>) -&gt; <span class="k">None</span>:
+        seen[vertex] = <span class="k">True</span>
+        result.append(vertex)
+        <span class="k">for</span> target <span class="k">in</span> <span class="t">range</span>(self.vertices):
+            <span class="k">if</span> self._adjacency[vertex][target] &lt; self.infinity <span class="k">and</span> <span class="k">not</span> seen[target]:
+                visit(target)
+
+    visit(source)
+    <span class="k">return</span> result</code></pre></div>
 <h3 id="742-广度优先周游"><a class="anchor" href="#742-广度优先周游">#</a>7.4.2 广度优先周游</h3>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#bfs</a></div><pre><code>[[nodiscard]] std::vector&lt;std::<span class="t">size_t</span>&gt; bfs(std::<span class="t">size_t</span> source) <span class="k">const</span> {
     check_vertex(source);
@@ -519,6 +533,22 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
     }
     <span class="k">return</span> result;
 }</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.py">code/ch07/graph/modern.py#bfs</a></div><pre><code><span class="k">def</span> bfs(self, source: <span class="t">int</span>) -&gt; <span class="t">list</span>[<span class="t">int</span>]:
+    self._check_vertex(source)
+    seen = [<span class="k">False</span>] * self.vertices
+    queue = [source]
+    head = <span class="n">0</span>
+    seen[source] = <span class="k">True</span>
+    result: <span class="t">list</span>[<span class="t">int</span>] = []
+    <span class="k">while</span> head &lt; <span class="t">len</span>(queue):
+        vertex = queue[head]
+        head += <span class="n">1</span>
+        result.append(vertex)
+        <span class="k">for</span> target <span class="k">in</span> <span class="t">range</span>(self.vertices):
+            <span class="k">if</span> self._adjacency[vertex][target] &lt; self.infinity <span class="k">and</span> <span class="k">not</span> seen[target]:
+                seen[target] = <span class="k">True</span>
+                queue.append(target)
+    <span class="k">return</span> result</code></pre></div>
 <h3 id="743-拓扑排序"><a class="anchor" href="#743-拓扑排序">#</a>7.4.3 拓扑排序</h3>
 <p>统计每个顶点的入度，把入度为 0 的点入队；每取出一个点，就把它指出的入度减 1。若最终取出的点数少于顶点数，图里有环。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#topological</a></div><pre><code>[[nodiscard]] std::optional&lt;std::vector&lt;std::<span class="t">size_t</span>&gt;&gt; topological_sort() <span class="k">const</span> {
@@ -550,6 +580,25 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
     <span class="k">return</span> result.size() == vertices() ? std::optional&lt;std::vector&lt;std::<span class="t">size_t</span>&gt;&gt;(result)
                                        : std::nullopt;
 }</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.py">code/ch07/graph/modern.py#topological</a></div><pre><code><span class="k">def</span> topological_sort(self) -&gt; <span class="t">list</span>[<span class="t">int</span>] | <span class="k">None</span>:
+    indegree = [<span class="n">0</span>] * self.vertices
+    <span class="k">for</span> source <span class="k">in</span> <span class="t">range</span>(self.vertices):
+        <span class="k">for</span> target <span class="k">in</span> <span class="t">range</span>(self.vertices):
+            <span class="k">if</span> source != target <span class="k">and</span> self._adjacency[source][target] &lt; self.infinity:
+                indegree[target] += <span class="n">1</span>
+    queue = [vertex <span class="k">for</span> vertex <span class="k">in</span> <span class="t">range</span>(self.vertices) <span class="k">if</span> indegree[vertex] == <span class="n">0</span>]
+    head = <span class="n">0</span>
+    result: <span class="t">list</span>[<span class="t">int</span>] = []
+    <span class="k">while</span> head &lt; <span class="t">len</span>(queue):
+        source = queue[head]
+        head += <span class="n">1</span>
+        result.append(source)
+        <span class="k">for</span> target <span class="k">in</span> <span class="t">range</span>(self.vertices):
+            <span class="k">if</span> source != target <span class="k">and</span> self._adjacency[source][target] &lt; self.infinity:
+                indegree[target] -= <span class="n">1</span>
+                <span class="k">if</span> indegree[target] == <span class="n">0</span>:
+                    queue.append(target)
+    <span class="k">return</span> result <span class="k">if</span> <span class="t">len</span>(result) == self.vertices <span class="k">else</span> <span class="k">None</span></code></pre></div>
 <h2 id="75-最短路径"><a class="anchor" href="#75-最短路径">#</a>7.5 最短路径</h2>
 <h3 id="751-单源最短路径"><a class="anchor" href="#751-单源最短路径">#</a>7.5.1 单源最短路径</h3>
 <p>Dijkstra 反复选出尚未确定的、当前距离最小的顶点，用它的出边松弛邻居。边权必须非负。</p>
@@ -573,6 +622,21 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
     }
     <span class="k">return</span> distance;
 }</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.py">code/ch07/graph/modern.py#dijkstra</a></div><pre><code><span class="k">def</span> dijkstra(self, source: <span class="t">int</span>) -&gt; <span class="t">list</span>[<span class="t">int</span>]:
+    self._check_vertex(source)
+    distance = [self.infinity] * self.vertices
+    used = [<span class="k">False</span>] * self.vertices
+    distance[source] = <span class="n">0</span>
+    <span class="k">for</span> _ <span class="k">in</span> <span class="t">range</span>(self.vertices):
+        vertex = self._nearest(distance, used)
+        <span class="k">if</span> vertex <span class="k">is</span> <span class="k">None</span> <span class="k">or</span> distance[vertex] == self.infinity:
+            <span class="k">break</span>
+        used[vertex] = <span class="k">True</span>
+        <span class="k">for</span> target <span class="k">in</span> <span class="t">range</span>(self.vertices):
+            candidate = distance[vertex] + self._adjacency[vertex][target]
+            <span class="k">if</span> self._adjacency[vertex][target] &lt; self.infinity <span class="k">and</span> candidate &lt; distance[target]:
+                distance[target] = candidate
+    <span class="k">return</span> distance</code></pre></div>
 <h3 id="752-每对顶点之间的最短路径"><a class="anchor" href="#752-每对顶点之间的最短路径">#</a>7.5.2 每对顶点之间的最短路径</h3>
 <p>Floyd 枚举中转点 <code>via</code>，比较 <code>from→to</code> 与 <code>from→via→to</code>。测试里五个源点的 Dijkstra 与 Floyd 逐项对拍。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#floyd</a></div><pre><code>[[nodiscard]] std::vector&lt;std::vector&lt;<span class="t">int</span>&gt;&gt; floyd() <span class="k">const</span> {
@@ -589,6 +653,15 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
     }
     <span class="k">return</span> distance;
 }</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.py">code/ch07/graph/modern.py#floyd</a></div><pre><code><span class="k">def</span> floyd(self) -&gt; <span class="t">list</span>[<span class="t">list</span>[<span class="t">int</span>]]:
+    distance = [<span class="t">list</span>(row) <span class="k">for</span> row <span class="k">in</span> self._adjacency]
+    <span class="k">for</span> via <span class="k">in</span> <span class="t">range</span>(self.vertices):
+        <span class="k">for</span> source <span class="k">in</span> <span class="t">range</span>(self.vertices):
+            <span class="k">for</span> target <span class="k">in</span> <span class="t">range</span>(self.vertices):
+                candidate = distance[source][via] + distance[via][target]
+                <span class="k">if</span> distance[source][via] &lt; self.infinity <span class="k">and</span> distance[via][target] &lt; self.infinity:
+                    distance[source][target] = <span class="t">min</span>(distance[source][target], candidate)
+    <span class="k">return</span> distance</code></pre></div>
 <h2 id="76-最小生成树"><a class="anchor" href="#76-最小生成树">#</a>7.6 最小生成树</h2>
 <p>目标不是任意两点最短，而是连通全部顶点且选中边的总权最小。</p>
 <h3 id="761-prim-算法"><a class="anchor" href="#761-prim-算法">#</a>7.6.1 Prim 算法</h3>
@@ -618,6 +691,25 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
     }
     <span class="k">return</span> result;
 }</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.py">code/ch07/graph/modern.py#prim</a></div><pre><code><span class="k">def</span> prim(self, source: <span class="t">int</span>) -&gt; <span class="t">list</span>[Edge] | <span class="k">None</span>:
+    self._check_vertex(source)
+    distance = [self.infinity] * self.vertices
+    predecessor = [<span class="n">0</span>] * self.vertices
+    used = [<span class="k">False</span>] * self.vertices
+    result: <span class="t">list</span>[Edge] = []
+    distance[source] = <span class="n">0</span>
+    <span class="k">for</span> _ <span class="k">in</span> <span class="t">range</span>(self.vertices):
+        vertex = self._nearest(distance, used)
+        <span class="k">if</span> vertex <span class="k">is</span> <span class="k">None</span> <span class="k">or</span> distance[vertex] == self.infinity:
+            <span class="k">return</span> <span class="k">None</span>
+        used[vertex] = <span class="k">True</span>
+        <span class="k">if</span> vertex != source:
+            result.append(Edge(predecessor[vertex], vertex, distance[vertex]))
+        <span class="k">for</span> target <span class="k">in</span> <span class="t">range</span>(self.vertices):
+            <span class="k">if</span> <span class="k">not</span> used[target] <span class="k">and</span> self._adjacency[vertex][target] &lt; distance[target]:
+                distance[target] = self._adjacency[vertex][target]
+                predecessor[target] = vertex
+    <span class="k">return</span> result</code></pre></div>
 <h3 id="762-kruskal-算法"><a class="anchor" href="#762-kruskal-算法">#</a>7.6.2 Kruskal 算法</h3>
 <p>把边按权排序，用并查集跳过会形成环的边。连通图上与 Prim 得到相同总权、<code>n-1</code> 条边。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#kruskal</a></div><pre><code>[[nodiscard]] std::optional&lt;std::vector&lt;Edge&gt;&gt; kruskal() <span class="k">const</span> {
@@ -646,6 +738,30 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
     <span class="k">return</span> result.size() + <span class="n">1</span> == vertices() ? std::optional&lt;std::vector&lt;Edge&gt;&gt;(result)
                                             : std::nullopt;
 }</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.py">code/ch07/graph/modern.py#kruskal</a></div><pre><code><span class="k">def</span> kruskal(self) -&gt; <span class="t">list</span>[Edge] | <span class="k">None</span>:
+    edges = [Edge(source, target, self._adjacency[source][target])
+             <span class="k">for</span> source <span class="k">in</span> <span class="t">range</span>(self.vertices) <span class="k">for</span> target <span class="k">in</span> <span class="t">range</span>(source + <span class="n">1</span>, self.vertices)
+             <span class="k">if</span> self._adjacency[source][target] &lt; self.infinity]
+    <span class="k">for</span> end <span class="k">in</span> <span class="t">range</span>(<span class="t">len</span>(edges) - <span class="n">1</span>, <span class="n">0</span>, -<span class="n">1</span>):
+        <span class="k">for</span> index <span class="k">in</span> <span class="t">range</span>(end):
+            <span class="k">if</span> edges[index].weight &gt; edges[index + <span class="n">1</span>].weight:
+                edges[index], edges[index + <span class="n">1</span>] = edges[index + <span class="n">1</span>], edges[index]
+    parent = <span class="t">list</span>(<span class="t">range</span>(self.vertices))
+
+    <span class="k">def</span> root(vertex: <span class="t">int</span>) -&gt; <span class="t">int</span>:
+        <span class="k">while</span> parent[vertex] != vertex:
+            parent[vertex] = parent[parent[vertex]]
+            vertex = parent[vertex]
+        <span class="k">return</span> vertex
+
+    result: <span class="t">list</span>[Edge] = []
+    <span class="k">for</span> edge <span class="k">in</span> edges:
+        left = root(edge.source)
+        right = root(edge.target)
+        <span class="k">if</span> left != right:
+            parent[left] = right
+            result.append(edge)
+    <span class="k">return</span> result <span class="k">if</span> <span class="t">len</span>(result) + <span class="n">1</span> == self.vertices <span class="k">else</span> <span class="k">None</span></code></pre></div>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
 <p>图对前驱和后继的个数都不加限制。边可以无向或有向、可以带权。存储常用邻接矩阵（稠密、问边 <span class="math">O(<span class="upr">1</span>)</span>）和邻接表（稀疏、沿出边走）。周游有深度优先和广度优先。有向无环图可以拓扑排序；有环则无解。非负权单源最短路用 Dijkstra，任意两点用 Floyd。无向连通图的最小生成树可用 Prim 或 Kruskal，二者总权相同。</p>
 <p>本章实现使用邻接矩阵，因此当前 Dijkstra 和 Prim 的直接实现是 <span class="math">O(V<sup><span class="upr">2</span></sup>)</span>，Floyd 是 <span class="math">O(V<sup><span class="upr">3</span></sup>)</span>，空间是 <span class="math">O(V<sup><span class="upr">2</span></sup>)</span>。改用邻接表并配合二叉堆之后，稀疏图上的 Dijkstra 达到 <span class="math">O((V<span class="bin">+</span>E)&thinsp;<span class="upr">log</span>&thinsp;V)</span>—— 这一条现在有实现和实测支撑，见 7.3.2 与 <code>code/ch07/adjacency_list</code>。两个结论各自对应 各自的存储结构，不能互相套用。</p>

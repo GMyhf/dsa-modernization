@@ -759,6 +759,60 @@ AND      : 1 0 0 0 1 0</code></pre></div>
 <li>为 <code>SignatureFile</code> 做一次参数实验：固定语料，改变每词位数，画出假阳性率随位数的变化。</li>
 </ol>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
+<h3 id="python-实现的证据链"><a class="anchor" href="#python-实现的证据链">#</a>Python 实现的证据链</h3>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/linear_index/modern.py">code/ch11/linear_index/modern.py#index-find</a></div><pre><code><span class="k">def</span> find(self,key):
+    <span class="k">if</span> <span class="k">not</span> self._levels: <span class="k">return</span> <span class="k">None</span>
+    page=self._locate(self._levels[-<span class="n">1</span>],<span class="n">0</span>,<span class="t">len</span>(self._levels[-<span class="n">1</span>]),key)
+    <span class="k">for</span> level <span class="k">in</span> <span class="t">range</span>(<span class="t">len</span>(self._levels)-<span class="n">1</span>,<span class="n">0</span>,-<span class="n">1</span>):
+        page=self._levels[level][page][<span class="n">1</span>]; self._reads+=<span class="n">1</span>
+        first=page*self.epp; last=<span class="t">min</span>(first+self.epp,<span class="t">len</span>(self._levels[level-<span class="n">1</span>]))
+        page=self._locate(self._levels[level-<span class="n">1</span>],first,last,key)
+    entry=self._levels[<span class="n">0</span>][page]
+    <span class="k">if</span> self.kind==DENSE:
+        <span class="k">if</span> entry[<span class="n">0</span>]!=key: <span class="k">return</span> <span class="k">None</span>
+        self._reads+=<span class="n">1</span>; <span class="k">return</span> self.records[entry[<span class="n">1</span>]][<span class="n">1</span>]
+    self._reads+=<span class="n">1</span>
+    <span class="k">for</span> record_key,value <span class="k">in</span> self.records[entry[<span class="n">1</span>]*self.rpp:(entry[<span class="n">1</span>]+<span class="n">1</span>)*self.rpp]:
+        <span class="k">if</span> record_key==key: <span class="k">return</span> value
+    <span class="k">return</span> <span class="k">None</span></code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/inverted_index/modern.py">code/ch11/inverted_index/modern.py#inverted-intersect</a></div><pre><code><span class="k">def</span> intersect(left, right):
+    out=[]; i=j=<span class="n">0</span>
+    <span class="k">while</span> i&lt;<span class="t">len</span>(left) <span class="k">and</span> j&lt;<span class="t">len</span>(right):
+        <span class="k">if</span> left[i]&lt;right[j]: i+=<span class="n">1</span>
+        <span class="k">elif</span> right[j]&lt;left[i]: j+=<span class="n">1</span>
+        <span class="k">else</span>: out.append(left[i]); i+=<span class="n">1</span>; j+=<span class="n">1</span>
+    <span class="k">return</span> out
+
+<span class="k">def</span> unite(left, right):
+    out=[]; i=j=<span class="n">0</span>
+    <span class="k">while</span> i&lt;<span class="t">len</span>(left) <span class="k">or</span> j&lt;<span class="t">len</span>(right):
+        <span class="k">if</span> j==<span class="t">len</span>(right) <span class="k">or</span> (i&lt;<span class="t">len</span>(left) <span class="k">and</span> left[i]&lt;right[j]): value=left[i]; i+=<span class="n">1</span>
+        <span class="k">elif</span> i==<span class="t">len</span>(left) <span class="k">or</span> right[j]&lt;left[i]: value=right[j]; j+=<span class="n">1</span>
+        <span class="k">else</span>: value=left[i]; i+=<span class="n">1</span>; j+=<span class="n">1</span>
+        <span class="k">if</span> <span class="k">not</span> out <span class="k">or</span> out[-<span class="n">1</span>]!=value: out.append(value)
+    <span class="k">return</span> out
+
+<span class="k">def</span> difference(left, right):
+    out=[]; j=<span class="n">0</span>
+    <span class="k">for</span> value <span class="k">in</span> left:
+        <span class="k">while</span> j&lt;<span class="t">len</span>(right) <span class="k">and</span> right[j]&lt;value: j+=<span class="n">1</span>
+        <span class="k">if</span> j==<span class="t">len</span>(right) <span class="k">or</span> right[j]!=value: out.append(value)
+    <span class="k">return</span> out</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/bitmap_index/modern.py">code/ch11/bitmap_index/modern.py#bitmap-ops</a></div><pre><code><span class="k">def</span> select_and(self,a,b): <span class="k">return</span> self._combine(a,b,<span class="k">lambda</span> x,y:x&amp;y)
+<span class="k">def</span> select_or(self,a,b): <span class="k">return</span> self._combine(a,b,<span class="k">lambda</span> x,y:x|y)
+<span class="k">def</span> select_not(self,value):
+    bits=[(~word)&amp;MASK <span class="k">for</span> word <span class="k">in</span> self.bitmap(value)]; self._ops+=<span class="t">len</span>(bits)
+    <span class="k">if</span> bits <span class="k">and</span> self._count%<span class="n">64</span>: bits[-<span class="n">1</span>]&amp;=(<span class="n">1</span>&lt;&lt;(self._count%<span class="n">64</span>))-<span class="n">1</span>
+    <span class="k">return</span> self._records(bits)</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/bplus_tree/modern.py">code/ch11/bplus_tree/modern.py#bplus-split</a></div><pre><code><span class="k">def</span> insert(self,key,value):
+    i=<span class="n">0</span>
+    <span class="k">while</span> i&lt;<span class="t">len</span>(self.rows) <span class="k">and</span> self.rows[i][<span class="n">0</span>]&lt;key: i+=<span class="n">1</span>
+    <span class="k">if</span> i&lt;<span class="t">len</span>(self.rows) <span class="k">and</span> self.rows[i][<span class="n">0</span>]==key: self.rows[i]=(key,value); self._writes+=<span class="n">1</span>; <span class="k">return</span> <span class="k">False</span>
+    self.rows.insert(i,(key,value)); self._writes+=<span class="n">1</span>; <span class="k">return</span> <span class="k">True</span></code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/bplus_tree/modern.py">code/ch11/bplus_tree/modern.py#bplus-range</a></div><pre><code><span class="k">def</span> <span class="t">range</span>(self,low,high):
+    <span class="k">if</span> low&gt;high: <span class="k">return</span> []
+    self._reads+=self.height()
+    <span class="k">return</span> [row <span class="k">for</span> row <span class="k">in</span> self.rows <span class="k">if</span> low&lt;=row[<span class="n">0</span>]&lt;=high]</code></pre></div>
 <p>索引是「关键码到记录位置」的表，用来少读磁盘。线性索引分稠密和稀疏，过大就做成多级。静态多分树把一个结点做成一页，树高低、页访问少，但不适合频繁更新。倒排从属性走到记录集合，查询变成交并差。B 树在页内分裂合并以保持平衡；B+ 树把记录放在叶上并用叶链做范围扫描。位图适合低基数属性，签名做粗筛，红黑树是内存有序映射。</p>
 <h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
 <h3 id="补充索引题参考课程第-11-章"><a class="anchor" href="#补充索引题参考课程第-11-章">#</a>补充索引题（参考课程第 11 章）</h3>
@@ -777,7 +831,7 @@ AND      : 1 0 0 0 1 0</code></pre></div>
 <p>见本章末「练习路径」的四条。</p>
 <div class="pagenav"><a href="ch10-search.html"><span class="dir">← 上一篇</span>第10章 检索</a><a href="ch12-advanced.html" style="text-align:right"><span class="dir">下一篇 →</span>第12章 高级数据结构</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#111-线性索引">11.1 线性索引</a><a href="#112-静态索引多分树">11.2 静态索引——多分树</a><a href="#113-倒排索引">11.3 倒排索引</a><a href="#114-动态索引">11.4 动态索引</a><a href="#b-树与-b-树" class="sub">B 树与 B+ 树</a><a href="#1144-动态索引和静态索引性能的比较" class="sub">11.4.4 动态索引和静态索引性能的比较</a><a href="#115-位索引技术">11.5 位索引技术</a><a href="#位图签名和红黑树" class="sub">位图、签名和红黑树</a><a href="#练习路径">练习路径</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充索引题参考课程第-11-章" class="sub">补充索引题（参考课程第 11 章）</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#111-线性索引">11.1 线性索引</a><a href="#112-静态索引多分树">11.2 静态索引——多分树</a><a href="#113-倒排索引">11.3 倒排索引</a><a href="#114-动态索引">11.4 动态索引</a><a href="#b-树与-b-树" class="sub">B 树与 B+ 树</a><a href="#1144-动态索引和静态索引性能的比较" class="sub">11.4.4 动态索引和静态索引性能的比较</a><a href="#115-位索引技术">11.5 位索引技术</a><a href="#位图签名和红黑树" class="sub">位图、签名和红黑树</a><a href="#练习路径">练习路径</a><a href="#本章小结">本章小结</a><a href="#python-实现的证据链" class="sub">Python 实现的证据链</a><a href="#习题">习题</a><a href="#补充索引题参考课程第-11-章" class="sub">补充索引题（参考课程第 11 章）</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch11-index.md</code> 生成

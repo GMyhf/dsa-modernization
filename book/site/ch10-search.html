@@ -628,6 +628,78 @@ A \ B           -&gt; 00000001 = {a}</code></pre></div>
               &lt;&lt; table.slot_at(<span class="n">1</span>).key
               &lt;&lt; <span class="s">&quot;（复用了墓碑）\n&quot;</span>;
 }</code></pre></div>
+<p>Python 版不用 <code>dict</code> 或 <code>set</code> 代做集合与散列；这两个名字由本单元的 <code>d025_forbidden</code> 额外封住。检索、集合、ELFHash 与线性探测都来自下面这份受测源码：</p>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch10/search_hash/modern.py">code/ch10/search_hash/modern.py#sequential-binary</a></div><pre><code><span class="k">def</span> sequential_search(values, key):
+    <span class="k">for</span> i, value <span class="k">in</span> <span class="t">enumerate</span>(values):
+        <span class="k">if</span> value == key: <span class="k">return</span> i
+    <span class="k">return</span> <span class="k">None</span>
+
+<span class="k">def</span> binary_search(values, key):
+    first, last = <span class="n">0</span>, <span class="t">len</span>(values)
+    <span class="k">while</span> first &lt; last:
+        middle = first + (last - first) // <span class="n">2</span>
+        <span class="k">if</span> values[middle] == key: <span class="k">return</span> middle
+        <span class="k">if</span> values[middle] &lt; key: first = middle + <span class="n">1</span>
+        <span class="k">else</span>: last = middle
+    <span class="k">return</span> <span class="k">None</span></code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch10/search_hash/modern.py">code/ch10/search_hash/modern.py#int-set</a></div><pre><code><span class="k">class</span> IntSet:
+    <span class="k">def</span> __init__(self): self._values = []
+    <span class="k">def</span> insert(self, value):
+        <span class="k">if</span> self.contains(value): <span class="k">return</span> <span class="k">False</span>
+        self._values.append(value); <span class="k">return</span> <span class="k">True</span>
+    <span class="k">def</span> erase(self, value):
+        found = sequential_search(self._values, value)
+        <span class="k">if</span> found <span class="k">is</span> <span class="k">None</span>: <span class="k">return</span> <span class="k">False</span>
+        <span class="k">del</span> self._values[found]; <span class="k">return</span> <span class="k">True</span>
+    <span class="k">def</span> contains(self, value): <span class="k">return</span> sequential_search(self._values, value) <span class="k">is</span> <span class="k">not</span> <span class="k">None</span>
+    <span class="k">def</span> intersection(self, other):
+        result = IntSet()
+        <span class="k">for</span> value <span class="k">in</span> self._values:
+            <span class="k">if</span> other.contains(value): result.insert(value)
+        <span class="k">return</span> result
+    <span class="k">def</span> includes(self, other): <span class="k">return</span> <span class="t">all</span>(self.contains(v) <span class="k">for</span> v <span class="k">in</span> other._values)
+    <span class="k">def</span> size(self): <span class="k">return</span> <span class="t">len</span>(self._values)</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch10/search_hash/modern.py">code/ch10/search_hash/modern.py#elf-hash</a></div><pre><code><span class="k">def</span> elf_hash(text):
+    value = <span class="n">0</span>
+    <span class="k">for</span> character <span class="k">in</span> text:
+        value = (value &lt;&lt; <span class="n">4</span>) + ord(character)
+        high = value &amp; <span class="n">0xF0000000</span>
+        <span class="k">if</span> high: value ^= high &gt;&gt; <span class="n">24</span>
+        value &amp;= ~high
+    <span class="k">return</span> value</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch10/search_hash/modern.py">code/ch10/search_hash/modern.py#hash-table</a></div><pre><code><span class="k">class</span> HashTable:
+    <span class="k">def</span> __init__(self, capacity):
+        <span class="k">if</span> capacity &lt;= <span class="n">0</span>: <span class="k">raise</span> ValueError(<span class="s">&quot;hash table capacity must be positive&quot;</span>)
+        self._slots = [<span class="k">None</span>] * capacity; self._size = <span class="n">0</span>
+    <span class="k">def</span> _home(self, key): <span class="k">return</span> <span class="t">abs</span>(key) % <span class="t">len</span>(self._slots)
+    <span class="k">def</span> insert(self, key):
+        first_tombstone = <span class="k">None</span>
+        <span class="k">for</span> step <span class="k">in</span> <span class="t">range</span>(<span class="t">len</span>(self._slots)):
+            i = (self._home(key) + step) % <span class="t">len</span>(self._slots)
+            <span class="k">if</span> self._slots[i] == key: <span class="k">return</span> <span class="k">False</span>
+            <span class="k">if</span> self._slots[i] <span class="k">is</span> _TOMBSTONE <span class="k">and</span> first_tombstone <span class="k">is</span> <span class="k">None</span>:
+                first_tombstone = i
+            <span class="k">if</span> self._slots[i] <span class="k">is</span> <span class="k">None</span>:
+                target = first_tombstone <span class="k">if</span> first_tombstone <span class="k">is</span> <span class="k">not</span> <span class="k">None</span> <span class="k">else</span> i
+                self._slots[target] = key; self._size += <span class="n">1</span>; <span class="k">return</span> <span class="k">True</span>
+        <span class="k">if</span> first_tombstone <span class="k">is</span> <span class="k">None</span>: <span class="k">return</span> <span class="k">False</span>
+        self._slots[first_tombstone] = key; self._size += <span class="n">1</span>; <span class="k">return</span> <span class="k">True</span>
+    <span class="k">def</span> contains(self, key): <span class="k">return</span> self._find(key) <span class="k">is</span> <span class="k">not</span> <span class="k">None</span>
+    <span class="k">def</span> erase(self, key):
+        i = self._find(key)
+        <span class="k">if</span> i <span class="k">is</span> <span class="k">None</span>: <span class="k">return</span> <span class="k">False</span>
+        self._slots[i] = _TOMBSTONE; self._size -= <span class="n">1</span>; <span class="k">return</span> <span class="k">True</span>
+    <span class="k">def</span> _find(self, key):
+        <span class="k">for</span> step <span class="k">in</span> <span class="t">range</span>(<span class="t">len</span>(self._slots)):
+            i = (self._home(key) + step) % <span class="t">len</span>(self._slots)
+            <span class="k">if</span> self._slots[i] <span class="k">is</span> <span class="k">None</span>: <span class="k">return</span> <span class="k">None</span>
+            <span class="k">if</span> self._slots[i] == key: <span class="k">return</span> i
+        <span class="k">return</span> <span class="k">None</span>
+    <span class="k">def</span> size(self): <span class="k">return</span> self._size
+    <span class="k">def</span> capacity(self): <span class="k">return</span> <span class="t">len</span>(self._slots)
+    <span class="k">def</span> slot_at(self, index):
+        <span class="k">if</span> index &lt; <span class="n">0</span> <span class="k">or</span> index &gt;= <span class="t">len</span>(self._slots): <span class="k">raise</span> IndexError(<span class="s">&quot;hash table slot&quot;</span>)
+        <span class="k">return</span> self._slots[index]</code></pre></div>
 <div class="codeblock" data-lang="bash"><pre><code>c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch10/search_hash \
     code/ch10/search_hash/demo.cpp -o /tmp/hash-demo
 /tmp/hash-demo</code></pre></div>

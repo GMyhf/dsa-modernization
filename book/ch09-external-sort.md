@@ -209,7 +209,8 @@ def replacement_selection(values: list[int], memory: int) -> list[list[int]]:
         raise ValueError("replacement selection memory must be positive")
     if not values:
         return []
-    heap = sorted(values[:memory])
+    heap = list(values[:memory])
+    _heapify(heap)
     next_index = memory
     runs: list[list[int]] = []
     current: list[int] = []
@@ -219,15 +220,18 @@ def replacement_selection(values: list[int], memory: int) -> list[list[int]]:
             if current:
                 runs.append(current)
             current = []
-            heap = sorted(frozen)
+            heap = frozen
             frozen = []
-        emitted = heap.pop(0)
+            _heapify(heap)
+        emitted = _heap_pop(heap)
         current.append(emitted)
         if next_index < len(values):
             incoming = values[next_index]
             next_index += 1
-            (heap if incoming >= emitted else frozen).append(incoming)
-            heap.sort()
+            if incoming >= emitted:
+                _heap_push(heap, incoming)
+            else:
+                frozen.append(incoming)
     if current:
         runs.append(current)
     return runs

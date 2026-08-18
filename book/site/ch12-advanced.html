@@ -798,6 +798,81 @@ LR（左右，先左旋再右旋）      RL（右左，先右旋再左旋）
 <p>“均摊 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>”不等于每一次都快。访问深链末端的单次代价仍可达 <span class="math">O(n)</span>；保证的是从任意初始树开始，一串 <span class="math">m</span> 次操作的总成本为 <span class="math">O(m&thinsp;<span class="upr">log</span>&thinsp;n)</span>（另加初始势能）。因此伸展树适合热点键反复出现、又不要求单次延迟上界的场景；实时系统若要求每次查找都在确定高度内结束，更适合 AVL 或红黑树。</p>
 <p>伸展树实现简单，不必维护额外的平衡域；代价是单次操作可能仍是 <span class="math">O(n)</span>，只是摊还之后是对数。 同一实现中的 <code>SplayTree</code> 使用 <code>unique_ptr</code> 维护子树所有权，访问后按一字形/之字形规则旋至根。</p>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
+<h3 id="python-实现的证据链"><a class="anchor" href="#python-实现的证据链">#</a>Python 实现的证据链</h3>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/trie/modern.py">code/ch12/trie/modern.py#trie</a></div><pre><code><span class="k">class</span> Trie:
+    <span class="k">def</span> __init__(self): self.root=_Node(); self._size=<span class="n">0</span>
+    @staticmethod
+    <span class="k">def</span> _valid(word):
+        <span class="k">if</span> <span class="t">any</span>(c&lt;<span class="s">&#x27;a&#x27;</span> <span class="k">or</span> c&gt;<span class="s">&#x27;z&#x27;</span> <span class="k">for</span> c <span class="k">in</span> word): <span class="k">raise</span> ValueError(<span class="s">&quot;trie key must be a..z&quot;</span>)
+    <span class="k">def</span> insert(self,word):
+        self._valid(word); node=self.root; path=[]
+        <span class="k">for</span> c <span class="k">in</span> word: path.append(node); node=node.children.setdefault(c,_Node())
+        <span class="k">if</span> node.terminal: <span class="k">return</span> <span class="k">False</span>
+        node.terminal=<span class="k">True</span>; self._size+=<span class="n">1</span>
+        <span class="k">for</span> item <span class="k">in</span> path: item.passing+=<span class="n">1</span>
+        node.passing+=<span class="n">1</span>; <span class="k">return</span> <span class="k">True</span>
+    <span class="k">def</span> contains(self,word):
+        node=self._find(word); <span class="k">return</span> node <span class="k">is</span> <span class="k">not</span> <span class="k">None</span> <span class="k">and</span> node.terminal
+    <span class="k">def</span> starts_with(self,prefix): <span class="k">return</span> self._find(prefix) <span class="k">is</span> <span class="k">not</span> <span class="k">None</span>
+    <span class="k">def</span> count_with_prefix(self,prefix):
+        node=self._find(prefix); <span class="k">return</span> self._size <span class="k">if</span> prefix==<span class="s">&quot;&quot;</span> <span class="k">else</span> (<span class="n">0</span> <span class="k">if</span> node <span class="k">is</span> <span class="k">None</span> <span class="k">else</span> node.passing)
+    <span class="k">def</span> _find(self,text):
+        node=self.root
+        <span class="k">for</span> c <span class="k">in</span> text:
+            <span class="k">if</span> c <span class="k">not</span> <span class="k">in</span> node.children: <span class="k">return</span> <span class="k">None</span>
+            node=node.children[c]
+        <span class="k">return</span> node
+    <span class="k">def</span> size(self): <span class="k">return</span> self._size
+    <span class="k">def</span> node_count(self):
+        <span class="k">def</span> count(node): <span class="k">return</span> <span class="t">sum</span>(<span class="n">1</span>+count(child) <span class="k">for</span> child <span class="k">in</span> node.children.values())
+        <span class="k">return</span> count(self.root)
+    <span class="k">def</span> keys_with_prefix(self,prefix):
+        node=self._find(prefix); out=[]
+        <span class="k">if</span> node <span class="k">is</span> <span class="k">None</span>: <span class="k">return</span> out
+        <span class="k">def</span> collect(current,text):
+            <span class="k">if</span> current.terminal: out.append(text)
+            <span class="k">for</span> code <span class="k">in</span> <span class="t">range</span>(ord(<span class="s">&#x27;a&#x27;</span>),ord(<span class="s">&#x27;z&#x27;</span>)+<span class="n">1</span>):
+                c=chr(code)
+                <span class="k">if</span> c <span class="k">in</span> current.children: collect(current.children[c],text+c)
+        collect(node,prefix); <span class="k">return</span> out
+    <span class="k">def</span> erase(self,word):
+        <span class="k">if</span> <span class="k">not</span> self.contains(word): <span class="k">return</span> <span class="k">False</span>
+        words=[w <span class="k">for</span> w <span class="k">in</span> self.keys_with_prefix(<span class="s">&quot;&quot;</span>) <span class="k">if</span> w!=word]; self.__init__()
+        <span class="k">for</span> value <span class="k">in</span> words: self.insert(value)
+        <span class="k">return</span> <span class="k">True</span>
+    <span class="c"># &gt;&gt;&gt; trie-longest-prefix</span>
+    <span class="k">def</span> longest_prefix_of(self,text):
+        node=self.root; best=<span class="n">0</span>
+        <span class="k">for</span> i,c <span class="k">in</span> <span class="t">enumerate</span>(text):
+            <span class="k">if</span> c <span class="k">not</span> <span class="k">in</span> node.children: <span class="k">break</span>
+            node=node.children[c]
+            <span class="k">if</span> node.terminal: best=i+<span class="n">1</span>
+        <span class="k">return</span> text[:best]
+    <span class="c"># &lt;&lt;&lt; trie-longest-prefix</span></code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/trie/modern.py">code/ch12/trie/modern.py#trie-longest-prefix</a></div><pre><code><span class="k">def</span> longest_prefix_of(self,text):
+    node=self.root; best=<span class="n">0</span>
+    <span class="k">for</span> i,c <span class="k">in</span> <span class="t">enumerate</span>(text):
+        <span class="k">if</span> c <span class="k">not</span> <span class="k">in</span> node.children: <span class="k">break</span>
+        node=node.children[c]
+        <span class="k">if</span> node.terminal: best=i+<span class="n">1</span>
+    <span class="k">return</span> text[:best]</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/trie/modern.py">code/ch12/trie/modern.py#patricia-bits</a></div><pre><code><span class="k">def</span> bit_of(key,index):
+    byte=index//<span class="n">8</span>
+    <span class="k">return</span> <span class="k">False</span> <span class="k">if</span> byte&gt;=<span class="t">len</span>(key) <span class="k">else</span> <span class="t">bool</span>((ord(key[byte])&gt;&gt;(<span class="n">7</span>-index%<span class="n">8</span>))&amp;<span class="n">1</span>)</code></pre></div>
+<p>算法12.1 的可利用空间表属于存储管理侧，因此不给 Python 薄封装；最佳 BST 的动态规划属于算法侧：</p>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/optimal_bst/modern.py">code/ch12/optimal_bst/modern.py#optimal-bst</a></div><pre><code><span class="k">def</span> optimal_bst(successful, unsuccessful):
+    <span class="k">if</span> <span class="t">len</span>(unsuccessful) != <span class="t">len</span>(successful) + <span class="n">1</span>: <span class="k">raise</span> ValueError(<span class="s">&quot;weight count&quot;</span>)
+    n = <span class="t">len</span>(successful); cost = [[<span class="n">0</span>]*(n+<span class="n">1</span>) <span class="k">for</span> _ <span class="k">in</span> <span class="t">range</span>(n+<span class="n">1</span>)]; root = [[<span class="n">0</span>]*(n+<span class="n">1</span>) <span class="k">for</span> _ <span class="k">in</span> <span class="t">range</span>(n+<span class="n">1</span>)]
+    weight = [[<span class="n">0</span>]*(n+<span class="n">1</span>) <span class="k">for</span> _ <span class="k">in</span> <span class="t">range</span>(n+<span class="n">1</span>)]
+    <span class="k">for</span> i <span class="k">in</span> <span class="t">range</span>(n+<span class="n">1</span>): weight[i][i] = unsuccessful[i]
+    <span class="k">for</span> length <span class="k">in</span> <span class="t">range</span>(<span class="n">1</span>, n+<span class="n">1</span>):
+        <span class="k">for</span> first <span class="k">in</span> <span class="t">range</span>(n-length+<span class="n">1</span>):
+            last = first + length; weight[first][last] = weight[first][last-<span class="n">1</span>] + successful[last-<span class="n">1</span>] + unsuccessful[last]
+            cost[first][last] = <span class="n">10</span>**<span class="n">30</span>
+            <span class="k">for</span> r <span class="k">in</span> <span class="t">range</span>(first+<span class="n">1</span>, last+<span class="n">1</span>):
+                candidate = cost[first][r-<span class="n">1</span>] + cost[r][last] + weight[first][last]
+                <span class="k">if</span> candidate &lt; cost[first][last]: cost[first][last], root[first][last] = candidate, r
+    <span class="k">return</span> cost, root</code></pre></div>
 <p>多维数组按行优先或列优先顺序存放，按下标随机访问；三角、对称、稀疏矩阵可以压缩。广义表的元素可以是原子或子表，头尾分解对应递归。动态存储要处理碎片和回收：首次/最佳/最坏适应，引用计数与标记清除。Trie 按字符分支并共享前缀，Patricia 压缩单孩子路径。最优 BST 用动态规划选根；AVL 用平衡因子和四种旋转保证 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>；伸展树用访问后上移做均摊平衡。可利用空间表是定长结点的显式空闲栈，不劫持全局 <code>new</code>。</p>
 <h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
 <h3 id="补充概念与上机题参考课程第-12-章"><a class="anchor" href="#补充概念与上机题参考课程第-12-章">#</a>补充概念与上机题（参考课程第 12 章）</h3>
@@ -824,7 +899,7 @@ LR（左右，先左旋再右旋）      RL（右左，先右旋再左旋）
 </ol>
 <div class="pagenav"><a href="ch11-index.html"><span class="dir">← 上一篇</span>第11章 索引技术</a><a href="exercises.html" style="text-align:right"><span class="dir">下一篇 →</span>习题、上机题与参考答案</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#121-多维数组">12.1 多维数组</a><a href="#1211-多维数组的存储" class="sub">12.1.1 多维数组的存储</a><a href="#1212-特殊矩阵" class="sub">12.1.2 特殊矩阵</a><a href="#1213-稀疏矩阵" class="sub">12.1.3 稀疏矩阵</a><a href="#122-广义表和存储管理">12.2 广义表和存储管理</a><a href="#1221-广义表的定义和存储结构" class="sub">12.2.1 广义表的定义和存储结构</a><a href="#1222-可利用空间表" class="sub">12.2.2 可利用空间表</a><a href="#1223-存储的动态分配和回收" class="sub">12.2.3 存储的动态分配和回收</a><a href="#1224-失败处理策略和无用单元回收" class="sub">12.2.4 失败处理策略和无用单元回收</a><a href="#123-trie-结构和-patricia-树">12.3 Trie 结构和 Patricia 树</a><a href="#124-改进的二叉搜索树">12.4 改进的二叉搜索树</a><a href="#1241-最佳二叉搜索树" class="sub">12.4.1 最佳二叉搜索树</a><a href="#1242-平衡的二叉搜索树" class="sub">12.4.2 平衡的二叉搜索树</a><a href="#1243-伸展树" class="sub">12.4.3 伸展树</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充概念与上机题参考课程第-12-章" class="sub">补充概念与上机题（参考课程第 12 章）</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#121-多维数组">12.1 多维数组</a><a href="#1211-多维数组的存储" class="sub">12.1.1 多维数组的存储</a><a href="#1212-特殊矩阵" class="sub">12.1.2 特殊矩阵</a><a href="#1213-稀疏矩阵" class="sub">12.1.3 稀疏矩阵</a><a href="#122-广义表和存储管理">12.2 广义表和存储管理</a><a href="#1221-广义表的定义和存储结构" class="sub">12.2.1 广义表的定义和存储结构</a><a href="#1222-可利用空间表" class="sub">12.2.2 可利用空间表</a><a href="#1223-存储的动态分配和回收" class="sub">12.2.3 存储的动态分配和回收</a><a href="#1224-失败处理策略和无用单元回收" class="sub">12.2.4 失败处理策略和无用单元回收</a><a href="#123-trie-结构和-patricia-树">12.3 Trie 结构和 Patricia 树</a><a href="#124-改进的二叉搜索树">12.4 改进的二叉搜索树</a><a href="#1241-最佳二叉搜索树" class="sub">12.4.1 最佳二叉搜索树</a><a href="#1242-平衡的二叉搜索树" class="sub">12.4.2 平衡的二叉搜索树</a><a href="#1243-伸展树" class="sub">12.4.3 伸展树</a><a href="#本章小结">本章小结</a><a href="#python-实现的证据链" class="sub">Python 实现的证据链</a><a href="#习题">习题</a><a href="#补充概念与上机题参考课程第-12-章" class="sub">补充概念与上机题（参考课程第 12 章）</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch12-advanced.md</code> 生成

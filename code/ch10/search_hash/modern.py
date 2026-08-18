@@ -91,3 +91,19 @@ class HashTable:
 # <<< hash-table
 
 _TOMBSTONE = object()
+
+# 清单锚点使用这些明确的教学入口，避免同名方法在不同类之间产生歧义。
+def item_init(key): return Item(key)
+def intset_insert(values, value):
+    result=IntSet(); result._values=list(values); result.insert(value); return result
+def intset_erase(values, value):
+    result=IntSet(); result._values=list(values); result.erase(value); return result
+def intset_intersection(left, right):
+    a=IntSet(); a._values=list(left); b=IntSet(); b._values=list(right); return a.intersection(b)
+def intset_includes(left, right):
+    a=IntSet(); a._values=list(left); b=IntSet(); b._values=list(right); return a.includes(b)
+def hash_capacity(capacity): return HashTable(capacity).capacity()
+def hash_insert(table, key): return table.insert(key)
+def hash_contains(table, key): return table.contains(key)
+def hash_erase(table, key): return table.erase(key)
+def hash_slot_at(table, index): return table.slot_at(index)

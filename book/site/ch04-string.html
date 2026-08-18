@@ -514,6 +514,20 @@ String&amp; <span class="k">operator</span>=(String&amp;&amp; other) <span class
     }
     <span class="k">return</span> i &gt;= m ? std::optional&lt;std::<span class="t">size_t</span>&gt;(j - m) : std::nullopt;
 }</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/pattern_matching/modern.py">code/ch04/pattern_matching/modern.py#naive</a></div><pre><code><span class="k">def</span> naive_search(text: <span class="t">str</span>, pattern: <span class="t">str</span>) -&gt; <span class="t">int</span> | <span class="k">None</span>:
+    <span class="s">&quot;&quot;&quot;朴素匹配：返回首次出现的 0 起始下标。&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="k">not</span> pattern:
+        <span class="k">return</span> <span class="n">0</span>
+    i = <span class="n">0</span>
+    j = <span class="n">0</span>
+    <span class="k">while</span> i &lt; <span class="t">len</span>(pattern) <span class="k">and</span> j &lt; <span class="t">len</span>(text):
+        <span class="k">if</span> text[j] == pattern[i]:
+            i += <span class="n">1</span>
+            j += <span class="n">1</span>
+        <span class="k">else</span>:
+            j = j - i + <span class="n">1</span>
+            i = <span class="n">0</span>
+    <span class="k">return</span> j - <span class="t">len</span>(pattern) <span class="k">if</span> i == <span class="t">len</span>(pattern) <span class="k">else</span> <span class="k">None</span></code></pre></div>
 <p>失配时 <code>j = j - i + 1</code> 把目标下标退回本趟起点的<strong>下一个</strong>位置——这一步的&quot;+1&quot;是对的， 它表示&quot;换一个起点重来&quot;。最坏情况下，每个起点都要比较到模式末尾才失配 （例如 T = &quot;aaa…a&quot;、P = &quot;aa…ab&quot;），总比较次数为 O(|T|·|P|)。</p>
 <h4 id="一处必须指出的错误原书的返回值差-1"><a class="anchor" href="#一处必须指出的错误原书的返回值差-1">#</a>一处必须指出的错误：原书的返回值差 1</h4>
 <p>原书【算法4.6】与【算法4.8】在匹配成功时都写：</p>
@@ -583,6 +597,22 @@ std::string::find 对照         = 2</code></pre></div>
     }
     <span class="k">return</span> next;
 }</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/pattern_matching/modern.py">code/ch04/pattern_matching/modern.py#build-next</a></div><pre><code><span class="k">def</span> build_next(pattern: <span class="t">str</span>) -&gt; <span class="t">list</span>[<span class="t">int</span>]:
+    <span class="s">&quot;&quot;&quot;计算原书算法4.7的优化版 next 数组。&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="k">not</span> pattern:
+        <span class="k">return</span> []
+    next_values = [-<span class="n">1</span>] * <span class="t">len</span>(pattern)
+    i = <span class="n">0</span>
+    k = -<span class="n">1</span>
+    <span class="k">while</span> i &lt; <span class="t">len</span>(pattern):
+        <span class="k">while</span> k &gt;= <span class="n">0</span> <span class="k">and</span> pattern[i] != pattern[k]:
+            k = next_values[k]
+        i += <span class="n">1</span>
+        k += <span class="n">1</span>
+        <span class="k">if</span> i == <span class="t">len</span>(pattern):
+            <span class="k">break</span>
+        next_values[i] = next_values[k] <span class="k">if</span> pattern[i] == pattern[k] <span class="k">else</span> k
+    <span class="k">return</span> next_values</code></pre></div>
 <p><code>next[i] = next[k]</code> 那一步是原书所说的&quot;优化&quot;：如果 <code>P[i]</code> 与 <code>P[k]</code> 相同， 那么用 <code>k</code> 作为回退目标必然会再失配一次，不如直接借用 <code>next[k]</code> 一步到位。</p>
 <p>对模式 <code>&quot;abcdaabcab&quot;</code>，算法产生：</p>
 <div class="table-wrap"><table><thead><tr>
@@ -667,6 +697,23 @@ std::string::find 对照         = 2</code></pre></div>
                                                            std::string_view pattern) {
     <span class="k">return</span> kmp_search(text, pattern, build_next(pattern));
 }</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/pattern_matching/modern.py">code/ch04/pattern_matching/modern.py#kmp</a></div><pre><code><span class="k">def</span> kmp_search(text: <span class="t">str</span>, pattern: <span class="t">str</span>, next_values: <span class="t">list</span>[<span class="t">int</span>] | <span class="k">None</span> = <span class="k">None</span>) -&gt; <span class="t">int</span> | <span class="k">None</span>:
+    <span class="s">&quot;&quot;&quot;KMP 匹配；目标串下标只向前移动。&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="k">not</span> pattern:
+        <span class="k">return</span> <span class="n">0</span>
+    <span class="k">if</span> next_values <span class="k">is</span> <span class="k">None</span>:
+        next_values = build_next(pattern)
+    <span class="k">if</span> <span class="t">len</span>(next_values) != <span class="t">len</span>(pattern):
+        <span class="k">raise</span> ValueError(<span class="s">&quot;kmp_search: next 数组长度与模式不符&quot;</span>)
+    i = <span class="n">0</span>
+    j = <span class="n">0</span>
+    <span class="k">while</span> i &lt; <span class="t">len</span>(pattern) <span class="k">and</span> j &lt; <span class="t">len</span>(text):
+        <span class="k">if</span> i == -<span class="n">1</span> <span class="k">or</span> text[j] == pattern[i]:
+            i += <span class="n">1</span>
+            j += <span class="n">1</span>
+        <span class="k">else</span>:
+            i = next_values[i]
+    <span class="k">return</span> j - <span class="t">len</span>(pattern) <span class="k">if</span> i == <span class="t">len</span>(pattern) <span class="k">else</span> <span class="k">None</span></code></pre></div>
 <p><strong>时间代价的关键在于目标下标 <code>j</code> 只增不减。</strong> 循环体里 <code>++j</code> 至多执行 |T| 次， 与它同处一条语句的 <code>++i</code> 也不超过 |T| 次；能让 <code>i</code> 减少的只有 <code>i = next[i]</code>， 而 <code>next[i] &lt; i</code>，所以每执行一次 <code>i</code> 至少减 1；一旦减到 −1，下一步必然进入 <code>++i, ++j</code> 分支。因此 <code>i = next[i]</code> 的执行次数不超过 <code>++i, ++j</code> 的次数加 1， 整个循环体至多执行 2|T| + 1 次——<strong>与目标串长度成线性关系</strong>。</p>
 <p>加上计算 next 的 O(|P|)，KMP 整体为 O(|P| + |T|)。而同一个模式的特征向量 只需算一次即可跨多个目标复用，这一点接口里用「next 由调用方传入」显式表达。</p>
 <p>本书的测试用朴素算法的最坏情况（T = 20 万个 &#x27;a&#x27;，P = 1999 个 &#x27;a&#x27; 加一个 &#x27;b&#x27;） 验证这条线性性质：KMP 在其上瞬间完成，而失配后不按特征值回退的实现会退化成 O(|T|·|P|)，直接撞上构建闸门的超时。</p>

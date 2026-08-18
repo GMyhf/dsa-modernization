@@ -1217,6 +1217,22 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
                ? std::optional&lt;knapsack_solution&gt;(std::move(chosen))
                : std::nullopt;
 }</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/knapsack/modern.py">code/ch03/knapsack/modern.py#recursive</a></div><pre><code><span class="k">def</span> knapsack_recursive(capacity: <span class="t">int</span>, weights: <span class="t">list</span>[<span class="t">int</span>]) -&gt; <span class="t">list</span>[<span class="t">int</span>] | <span class="k">None</span>:
+    <span class="s">&quot;&quot;&quot;算法3.10：两条递归规则，返回选中物品的下标。&quot;&quot;&quot;</span>
+    _validate(capacity, weights)
+    chosen: <span class="t">list</span>[<span class="t">int</span>] = []
+
+    <span class="k">def</span> solve(remaining: <span class="t">int</span>, count: <span class="t">int</span>) -&gt; <span class="t">bool</span>:
+        <span class="k">if</span> remaining == <span class="n">0</span>:
+            <span class="k">return</span> <span class="k">True</span>
+        <span class="k">if</span> remaining &lt; <span class="n">0</span> <span class="k">or</span> count == <span class="n">0</span>:
+            <span class="k">return</span> <span class="k">False</span>
+        <span class="k">if</span> solve(remaining - weights[count - <span class="n">1</span>], count - <span class="n">1</span>):
+            chosen.append(count - <span class="n">1</span>)
+            <span class="k">return</span> <span class="k">True</span>
+        <span class="k">return</span> solve(remaining, count - <span class="n">1</span>)
+
+    <span class="k">return</span> chosen <span class="k">if</span> solve(capacity, <span class="t">len</span>(weights)) <span class="k">else</span> <span class="k">None</span></code></pre></div>
 <p>两个递归出口、两条递归规则，本书一字未改。改的是两处： 原书 <code>w[]</code> 是一个<strong>从未声明的全局数组</strong>，这里作参数传入； 原书在选中物品时 <code>cout &lt;&lt; w[n-1]</code> 直接打印，调用方拿不到解、正确性也无从检验， 这里把下标收集起来返回——测试因此可以独立验算：<strong>把返回的下标对应的重量加起来， 必须恰好等于承重</strong>。</p>
 <h4 id="把它机械地改写成循环"><a class="anchor" href="#把它机械地改写成循环">#</a>把它机械地改写成循环</h4>
 <p>原书的做法是引入一个显式栈，每帧保存四个域：参数 s 与 n、<strong>返回地址</strong> rd、结果单元 k。 返回地址是关键——它记的是&quot;这一层算完之后该回到哪一步继续&quot;， 正是编译器为你做的那件事。原书用 <code>goto label0/1/2/3</code> 表达它。</p>
@@ -1282,6 +1298,30 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
 
     <span class="k">return</span> child_result ? std::optional&lt;knapsack_solution&gt;(std::move(chosen)) : std::nullopt;
 }</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/knapsack/modern.py">code/ch03/knapsack/modern.py#explicit-stack</a></div><pre><code><span class="k">def</span> knapsack_with_explicit_stack(capacity: <span class="t">int</span>, weights: <span class="t">list</span>[<span class="t">int</span>]) -&gt; <span class="t">list</span>[<span class="t">int</span>] | <span class="k">None</span>:
+    <span class="s">&quot;&quot;&quot;算法3.11：用栈帧中的返回地址机械模拟递归。&quot;&quot;&quot;</span>
+    _validate(capacity, weights)
+    enter, after_rule1, after_rule2 = <span class="t">range</span>(<span class="n">3</span>)
+    stack = [(capacity, <span class="t">len</span>(weights), enter)]
+    chosen: <span class="t">list</span>[<span class="t">int</span>] = []
+    child_result = <span class="k">False</span>
+    <span class="k">while</span> stack:
+        remaining, count, stage = stack.pop()
+        <span class="k">if</span> stage == enter:
+            <span class="k">if</span> remaining == <span class="n">0</span>:
+                child_result = <span class="k">True</span>
+            <span class="k">elif</span> remaining &lt; <span class="n">0</span> <span class="k">or</span> count == <span class="n">0</span>:
+                child_result = <span class="k">False</span>
+            <span class="k">else</span>:
+                stack.append((remaining, count, after_rule1))
+                stack.append((remaining - weights[count - <span class="n">1</span>], count - <span class="n">1</span>, enter))
+        <span class="k">elif</span> stage == after_rule1:
+            <span class="k">if</span> child_result:
+                chosen.append(count - <span class="n">1</span>)
+            <span class="k">else</span>:
+                stack.append((remaining, count, after_rule2))
+                stack.append((remaining, count - <span class="n">1</span>, enter))
+    <span class="k">return</span> chosen <span class="k">if</span> child_result <span class="k">else</span> <span class="k">None</span></code></pre></div>
 <p><code>Enter</code> / <code>AfterRule1</code> / <code>AfterRule2</code> 与原书的 label0 / label1 / label2 一一对应。 <strong>不用 goto 的理由是硬的</strong>：goto 跳进跳出会让编译器无法保证局部对象的构造与析构 配对，在有 RAII 的 C++ 里不能这么写。</p>
 <h4 id="优化让每层要记的东西更少"><a class="anchor" href="#优化让每层要记的东西更少">#</a>优化：让每层要记的东西更少</h4>
 <p>原书接着指出两点可以省：</p>
@@ -1350,6 +1390,36 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
 
     <span class="k">return</span> child_result ? std::optional&lt;knapsack_solution&gt;(std::move(chosen)) : std::nullopt;
 }</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/knapsack/modern.py">code/ch03/knapsack/modern.py#optimized</a></div><pre><code><span class="k">def</span> knapsack_optimized(capacity: <span class="t">int</span>, weights: <span class="t">list</span>[<span class="t">int</span>]) -&gt; <span class="t">list</span>[<span class="t">int</span>] | <span class="k">None</span>:
+    <span class="s">&quot;&quot;&quot;算法3.12：栈帧只保存剩余承重和返回地址。&quot;&quot;&quot;</span>
+    _validate(capacity, weights)
+    enter, after_rule1, after_rule2 = <span class="t">range</span>(<span class="n">3</span>)
+    stack = [(capacity, enter)]
+    chosen: <span class="t">list</span>[<span class="t">int</span>] = []
+    child_result = <span class="k">False</span>
+    size = <span class="t">len</span>(weights)
+    depth = <span class="n">1</span>
+    <span class="k">while</span> stack:
+        remaining, stage = stack.pop()
+        depth -= <span class="n">1</span>
+        count = size - depth
+        <span class="k">if</span> stage == enter:
+            <span class="k">if</span> remaining == <span class="n">0</span>:
+                child_result = <span class="k">True</span>
+            <span class="k">elif</span> remaining &lt; <span class="n">0</span> <span class="k">or</span> count == <span class="n">0</span>:
+                child_result = <span class="k">False</span>
+            <span class="k">else</span>:
+                stack.append((remaining, after_rule1))
+                stack.append((remaining - weights[count - <span class="n">1</span>], enter))
+                depth += <span class="n">2</span>
+        <span class="k">elif</span> stage == after_rule1:
+            <span class="k">if</span> child_result:
+                chosen.append(count - <span class="n">1</span>)
+            <span class="k">else</span>:
+                stack.append((remaining, after_rule2))
+                stack.append((remaining, enter))
+                depth += <span class="n">2</span>
+    <span class="k">return</span> chosen <span class="k">if</span> child_result <span class="k">else</span> <span class="k">None</span></code></pre></div>
 <p><strong>这才是本节真正的&quot;优化&quot;</strong>：不是让它跑得更快，而是让每层要记的东西更少。 手工模拟递归的全部意义就在这里——你必须想清楚&quot;每一层到底需要记住什么&quot;， 而这正是编译器替你想过的那个问题。</p>
 <blockquote><p><strong>一句实话</strong>：写这个单元时，第一版显式栈实现我把&quot;返回地址&quot;塞进了位标志里， 结果死循环、撞上构建超时；改写成与原书 label 一一对应的状态机之后才一次通过。 手工模拟递归确实容易写错——而原书那份用 goto 的版本从未被编译器验证过。 算法3.12 里 <code>stack.top</code> 同时被当成数据成员（<code>t = stack.top;</code>）和成员函数 （<code>stack.top(&amp;tmp);</code>），任何一种解释下都编译不过。</p></blockquote>
 <h2 id="与原书的对照"><a class="anchor" href="#与原书的对照">#</a>与原书的对照</h2>

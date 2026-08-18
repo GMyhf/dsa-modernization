@@ -376,6 +376,37 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
     }
     <span class="k">return</span> runs;
 }</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch09/external_sort/modern.py">code/ch09/external_sort/modern.py#replacement-selection</a></div><pre><code><span class="k">def</span> replacement_selection(values: <span class="t">list</span>[<span class="t">int</span>], memory: <span class="t">int</span>) -&gt; <span class="t">list</span>[<span class="t">list</span>[<span class="t">int</span>]]:
+    <span class="k">if</span> memory &lt;= <span class="n">0</span>:
+        <span class="k">raise</span> ValueError(<span class="s">&quot;replacement selection memory must be positive&quot;</span>)
+    <span class="k">if</span> <span class="k">not</span> values:
+        <span class="k">return</span> []
+    heap = <span class="t">list</span>(values[:memory])
+    _heapify(heap)
+    next_index = memory
+    runs: <span class="t">list</span>[<span class="t">list</span>[<span class="t">int</span>]] = []
+    current: <span class="t">list</span>[<span class="t">int</span>] = []
+    frozen: <span class="t">list</span>[<span class="t">int</span>] = []
+    <span class="k">while</span> heap <span class="k">or</span> next_index &lt; <span class="t">len</span>(values) <span class="k">or</span> frozen:
+        <span class="k">if</span> <span class="k">not</span> heap:
+            <span class="k">if</span> current:
+                runs.append(current)
+            current = []
+            heap = frozen
+            frozen = []
+            _heapify(heap)
+        emitted = _heap_pop(heap)
+        current.append(emitted)
+        <span class="k">if</span> next_index &lt; <span class="t">len</span>(values):
+            incoming = values[next_index]
+            next_index += <span class="n">1</span>
+            <span class="k">if</span> incoming &gt;= emitted:
+                _heap_push(heap, incoming)
+            <span class="k">else</span>:
+                frozen.append(incoming)
+    <span class="k">if</span> current:
+        runs.append(current)
+    <span class="k">return</span> runs</code></pre></div>
 <h3 id="932-二路外排序"><a class="anchor" href="#932-二路外排序">#</a>9.3.2 二路外排序</h3>
 <p>对 m 个顺串两两归并，趟数是 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>m⌉</span>。置换选择把初始顺串变长，就是为了减小 m。</p>
 <p>归并两条顺串至少需要三个缓冲页：两页分别保存两路尚未消费的记录，一页收集输出。比较两个输入缓冲的队首，把较小者移入输出缓冲；某个输入页耗尽就读该顺串下一页，输出页满则整页写回。这样每个输入页恰好读一次，每个输出页恰好写一次。</p>
@@ -596,6 +627,8 @@ R3:  6  8 30</code></pre></div>
     std::vector&lt;std::<span class="t">size_t</span>&gt; tree_;
     std::<span class="t">size_t</span> leaf_base_{<span class="n">0</span>};
 };</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch09/external_sort/modern.py">code/ch09/external_sort/modern.py#winner-tree</a></div><pre><code><span class="k">class</span> WinnerTree(_Tournament):
+    <span class="s">&quot;&quot;&quot;代码9.2：根保存全局最小选手。&quot;&quot;&quot;</span></code></pre></div>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch09/external_sort/modern.hpp">code/ch09/external_sort/modern.hpp#loser-tree</a></div><pre><code><span class="c">// 代码9.3：败者树。内部结点保存败者下标，另用 champion_ 记录全局胜者。</span>
 <span class="c">// 替换一名选手时只需沿叶到根重赛，不必访问兄弟子树的内部结构。</span>
 <span class="k">class</span> LoserTree {
@@ -662,6 +695,15 @@ R3:  6  8 30</code></pre></div>
     std::<span class="t">size_t</span> leaf_base_{<span class="n">0</span>};
     std::<span class="t">size_t</span> champion_{detail::TournamentOps::no_player};
 };</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch09/external_sort/modern.py">code/ch09/external_sort/modern.py#loser-tree</a></div><pre><code><span class="k">class</span> LoserTree(_Tournament):
+    <span class="s">&quot;&quot;&quot;代码9.3：重赛后仍能报告全局胜者。&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> loser_at(self, node: <span class="t">int</span>) -&gt; <span class="t">int</span> | <span class="k">None</span>:
+        <span class="k">if</span> node &lt;= <span class="n">0</span> <span class="k">or</span> node &gt;= <span class="t">len</span>(self.players):
+            <span class="k">return</span> <span class="k">None</span>
+        winner = self.winner_index()
+        candidates = [index <span class="k">for</span> index <span class="k">in</span> <span class="t">range</span>(<span class="t">len</span>(self.players)) <span class="k">if</span> index != winner]
+        <span class="k">return</span> <span class="t">max</span>(candidates, key=self.players.__getitem__) <span class="k">if</span> candidates <span class="k">else</span> <span class="k">None</span></code></pre></div>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
 <p>外存按页存取，一次定位比一次比较贵几个数量级，所以外排序首先要减少读写次数。文件是外存上的记录集合，逻辑组织与物理组织（顺序、索引、散列）要分开看。外排序先生成初始顺串再多路归并。置换选择用堆把不属于当前顺串的记录冻结，第一趟平均长度约 <span class="math"><span class="upr">2</span>M</span>，而不是 <span class="math">M</span>。<span class="math">k</span> 路归并用赢者树或败者树在 <span class="math">O(<span class="upr">log</span>&thinsp;k)</span> 时间内选出当前最小。</p>
 <h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
