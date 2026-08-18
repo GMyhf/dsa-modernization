@@ -4,7 +4,7 @@
   "listings": [
     {
       "id": "代码7.4",
-      "anchor": "class GraphList {",
+      "code_line": "class GraphList {",
       "test": "7.4 邻接表存储量随 V+E 走"
     }
   ],

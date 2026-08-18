@@ -4,12 +4,12 @@
   "listings": [
     {
       "id": "代码5.11",
-      "anchor": "class MinHeap {",
+      "code_line": "class MinHeap {",
       "test": "最小元素按序弹出"
     },
     {
       "id": "代码5.12",
-      "anchor": "class HuffmanTree {",
+      "code_line": "class HuffmanTree {",
       "test": "Huffman 树总权重"
     }
   ],

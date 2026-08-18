@@ -4,17 +4,17 @@
   "listings": [
     {
       "id": "代码3.1",
-      "anchor": "class ArrayStack {",
+      "code_line": "class ArrayStack {",
       "test": "默认构造是空栈"
     },
     {
       "id": "代码3.2",
-      "anchor": "std::optional<T> pop()",
+      "code_line": "std::optional<T> pop()",
       "test": "pop 出 3"
     },
     {
       "id": "算法3.3",
-      "anchor": "void ensure_capacity()",
+      "code_line": "void ensure_capacity()",
       "test": "扩容次数是对数级（翻倍策略生效）"
     }
   ],

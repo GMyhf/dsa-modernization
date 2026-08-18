@@ -4,52 +4,52 @@
   "listings": [
     {
       "id": "代码6.1",
-      "anchor": "class GeneralTree {",
+      "code_line": "class GeneralTree {",
       "test": "代码6.1 deep copy source unchanged"
     },
     {
       "id": "代码6.2",
-      "anchor": "GeneralTree(const GeneralTree& other)",
+      "code_line": "GeneralTree(const GeneralTree& other)",
       "test": "代码6.2 self assignment"
     },
     {
       "id": "算法6.3",
-      "anchor": "void preorder(Visitor&& visitor) const",
+      "code_line": "void preorder(Visitor&& visitor) const",
       "test": "算法6.3 preorder"
     },
     {
       "id": "算法6.4",
-      "anchor": "void postorder(Visitor&& visitor) const",
+      "code_line": "void postorder(Visitor&& visitor) const",
       "test": "算法6.4 postorder"
     },
     {
       "id": "算法6.5",
-      "anchor": "void breadth_first(Visitor&& visitor) const",
+      "code_line": "void breadth_first(Visitor&& visitor) const",
       "test": "算法6.5 breadth first"
     },
     {
       "id": "代码6.6",
-      "anchor": "Node* insert_first(Node* parent, const T& value)",
+      "code_line": "Node* insert_first(Node* parent, const T& value)",
       "test": "代码6.6 insert first prepends"
     },
     {
       "id": "代码6.7",
-      "anchor": "void delete_subtree(Node* node)",
+      "code_line": "void delete_subtree(Node* node)",
       "test": "代码6.7 delete first child reconnects"
     },
     {
       "id": "代码6.8",
-      "anchor": "class DisjointSet {",
+      "code_line": "class DisjointSet {",
       "test": "代码6.8 weighted union"
     },
     {
       "id": "算法6.9",
-      "anchor": "std::size_t find(std::size_t index)",
+      "code_line": "std::size_t find(std::size_t index)",
       "test": "算法6.9 compressed root"
     },
     {
       "id": "算法6.10",
-      "anchor": "GeneralTree from_dual_tag(const DualTagNode* nodes",
+      "code_line": "GeneralTree from_dual_tag(const DualTagNode* nodes",
       "test": "算法6.10 先根周游还原出原序列"
     }
   ],

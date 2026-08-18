@@ -524,29 +524,38 @@ def check_listing_bindings(unit_dir: Path, meta):
         if (unit_dir / name).is_file()
     )
     tests = (unit_dir / "test.cpp").read_text(encoding="utf-8") if (unit_dir / "test.cpp").is_file() else ""
-    anchors, tests_seen = set(), set()
+    code_lines, tests_seen = set(), set()
     source_lines = sources.splitlines()
     for entry in listings:
         if not isinstance(entry, dict):
-            problems.append(f"  ❌ 清单绑定格式错误：{entry!r}（必须为 {{id, anchor, test}} 对象）")
+            problems.append(
+                f"  ❌ 清单绑定格式错误：{entry!r}（必须为 {{id, code_line, test}} 对象）")
             continue
-        listing, anchor, test = entry.get("id"), entry.get("anchor"), entry.get("test")
-        if not all(isinstance(x, str) and x.strip() for x in (listing, anchor, test)):
-            problems.append(f"  ❌ 清单绑定字段不完整：{entry!r}")
+        listing, code_line, test = entry.get("id"), entry.get("code_line"), entry.get("test")
+        if not all(isinstance(x, str) and x.strip() for x in (listing, code_line, test)):
+            problems.append(
+                f"  ❌ 清单绑定字段不完整：{entry!r}"
+                "（要 id / code_line / test 三项；code_line 是实现里的**一行真代码**，"
+                "例如 `void push(const T& value)`，**不是** `// >>> 名字` 那种切片标记）"
+            )
             continue
-        if anchor in anchors:
-            problems.append(f"  ❌ {listing} 的实现锚点与同单元其他清单重复：{anchor}")
+        if code_line in code_lines:
+            problems.append(f"  ❌ {listing} 的 code_line 与同单元其他清单重复：{code_line}")
         if test in tests_seen:
-            problems.append(f"  ❌ {listing} 的测试锚点与同单元其他清单重复：{test}")
-        anchors.add(anchor)
+            problems.append(f"  ❌ {listing} 的测试名与同单元其他清单重复：{test}")
+        code_lines.add(code_line)
         tests_seen.add(test)
-        matching_lines = [line for line in source_lines if anchor in line]
+        matching_lines = [line for line in source_lines if code_line in line]
         if not matching_lines:
-            problems.append(f"  ❌ {listing} 的实现锚点不存在：{anchor}")
+            problems.append(f"  ❌ {listing} 的 code_line 在实现里不存在：{code_line}")
         elif all(line.lstrip().startswith(("//", "/*", "*")) for line in matching_lines):
-            problems.append(f"  ❌ {listing} 的实现锚点只存在于注释行：{anchor}")
+            problems.append(
+                f"  ❌ {listing} 的 code_line 只存在于注释行：{code_line}"
+                "——填 `// >>> 名字` 这种切片标记是最常见的一种填法错误，"
+                "这里要的是实现里的一行真代码"
+            )
         if test not in tests:
-            problems.append(f"  ❌ {listing} 的测试锚点不存在：{test}")
+            problems.append(f"  ❌ {listing} 的测试名在 test.cpp 里不存在：{test}")
     return problems
 
 

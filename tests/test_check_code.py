@@ -25,7 +25,7 @@ def make_unit(root: Path, test_src, standard="c++20"):
     d.mkdir(parents=True)
     (d / "unit.json").write_text(
         json.dumps({"id": "probe", "title": "闸门探针", "listings": [
-            {"id": "算法3.3", "anchor": "#pragma once", "test": "int main"}
+            {"id": "算法3.3", "code_line": "#pragma once", "test": "int main"}
         ], "standard": standard}),
         encoding="utf-8",
     )
@@ -407,24 +407,24 @@ class TestListingBindings(unittest.TestCase):
             (unit / "test.cpp").write_text("test_one test_two\n", encoding="utf-8")
             meta = {"listings": [
                 "算法1.1",
-                {"id": "算法1.2", "anchor": "comment-only", "test": "test_one"},
-                {"id": "算法1.3", "anchor": "void real_anchor()", "test": "test_two"},
-                {"id": "算法1.4", "anchor": "void real_anchor()", "test": "test_two"},
+                {"id": "算法1.2", "code_line": "comment-only", "test": "test_one"},
+                {"id": "算法1.3", "code_line": "void real_anchor()", "test": "test_two"},
+                {"id": "算法1.4", "code_line": "void real_anchor()", "test": "test_two"},
             ]}
             problems = check_code.check_listing_bindings(unit, meta)
         joined = "\n".join(problems)
         self.assertIn("清单绑定格式错误", joined)
         self.assertIn("只存在于注释行", joined)
-        self.assertIn("实现锚点与同单元其他清单重复", joined)
-        self.assertIn("测试锚点与同单元其他清单重复", joined)
+        self.assertIn("的 code_line 与同单元其他清单重复", joined)
+        self.assertIn("的测试名与同单元其他清单重复", joined)
 
-    def test_removing_algorithm_6_10_implementation_names_missing_anchor(self):
+    def test_removing_algorithm_6_10_implementation_names_missing_code_line(self):
         """重放 2026-08-16 的冒领：删完整实现，必须先由 T-025 具名报红。"""
         source_dir = ROOT / "code" / "ch06" / "general_tree"
         meta = json.loads((source_dir / "unit.json").read_text(encoding="utf-8"))
-        anchor = next(e["anchor"] for e in meta["listings"] if e["id"] == "算法6.10")
+        code_line = next(e["code_line"] for e in meta["listings"] if e["id"] == "算法6.10")
         source = (source_dir / "modern.hpp").read_text(encoding="utf-8")
-        start = source.index(anchor)
+        start = source.index(code_line)
         start = source.rfind("\n", 0, start) + 1
         brace = source.index("{", start)
         depth, end = 0, brace
@@ -443,7 +443,7 @@ class TestListingBindings(unittest.TestCase):
                 (source_dir / "test.cpp").read_text(encoding="utf-8"), encoding="utf-8")
             problems = check_code.check_listing_bindings(unit, meta)
         self.assertIn(
-            f"  ❌ 算法6.10 的实现锚点不存在：{anchor}", problems,
+            f"  ❌ 算法6.10 的 code_line 在实现里不存在：{code_line}", problems,
             "必须由绑定闸门具名定位，不能等编译失败",
         )
 
@@ -476,7 +476,7 @@ class TestD025PythonArm(unittest.TestCase):
             "id": "pyprobe",
             "title": "Python 臂探针",
             "listings": listings if listings is not None else [
-                {"id": "算法8.1", "anchor": "#pragma once", "test": "int main",
+                {"id": "算法8.1", "code_line": "#pragma once", "test": "int main",
                  "py_code_line": "def demo(", "py_test": "demo works"}
             ],
         }
@@ -598,9 +598,9 @@ class TestD025PythonArm(unittest.TestCase):
             unit = self._unit(
                 Path(tmp), "def demo(values):\n    return values\n",
                 listings=[
-                    {"id": "算法8.1", "anchor": "#pragma once", "test": "int main",
+                    {"id": "算法8.1", "code_line": "#pragma once", "test": "int main",
                      "py_code_line": "def demo(", "py_test": "demo works"},
-                    {"id": "算法8.2", "anchor": "#pragma once", "test": "int main"},
+                    {"id": "算法8.2", "code_line": "#pragma once", "test": "int main"},
                 ],
             )
             meta = json.loads((unit / "unit.json").read_text(encoding="utf-8"))
@@ -611,7 +611,7 @@ class TestD025PythonArm(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             unit = self._unit(
                 Path(tmp), "def demo(values):\n    return values\n",
-                listings=[{"id": "算法8.1", "anchor": "#pragma once", "test": "int main",
+                listings=[{"id": "算法8.1", "code_line": "#pragma once", "test": "int main",
                            "py_skip": ""}],
             )
             meta = json.loads((unit / "unit.json").read_text(encoding="utf-8"))

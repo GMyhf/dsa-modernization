@@ -4,37 +4,37 @@
   "listings": [
     {
       "id": "代码2.6",
-      "anchor": "struct SinglyLink {",
+      "code_line": "struct SinglyLink {",
       "test": "代码2.6 单链结点保存数据和后继"
     },
     {
       "id": "代码2.7",
-      "anchor": "class LinkedList {",
+      "code_line": "class LinkedList {",
       "test": "四次插入后长度正确"
     },
     {
       "id": "算法2.8",
-      "anchor": "const T& at(size_type pos) const",
+      "code_line": "const T& at(size_type pos) const",
       "test": "at 非 const 重载可修改元素"
     },
     {
       "id": "算法2.9",
-      "anchor": "std::optional<size_type> find(const T& value) const",
+      "code_line": "std::optional<size_type> find(const T& value) const",
       "test": "算法2.9：每个位置都定位到正确的结点"
     },
     {
       "id": "算法2.10",
-      "anchor": "void insert_impl(size_type pos, U&& value)",
+      "code_line": "void insert_impl(size_type pos, U&& value)",
       "test": "头部、中间、尾部插入均保持顺序"
     },
     {
       "id": "算法2.11",
-      "anchor": "T remove(size_type pos)",
+      "code_line": "T remove(size_type pos)",
       "test": "删尾后连续 append 仍接在真尾部"
     },
     {
       "id": "代码2.12",
-      "anchor": "struct DoublyLink {",
+      "code_line": "struct DoublyLink {",
       "test": "代码2.12 双链结点维护前驱和后继"
     }
   ],

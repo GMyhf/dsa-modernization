@@ -4,52 +4,52 @@
   "listings": [
     {
       "id": "代码5.1",
-      "anchor": "class BinaryTree {",
+      "code_line": "class BinaryTree {",
       "test": "深拷贝不共享子树"
     },
     {
       "id": "代码5.2",
-      "anchor": "void create_tree(U&& value",
+      "code_line": "void create_tree(U&& value",
       "test": "make_empty 后为空树"
     },
     {
       "id": "算法5.3",
-      "anchor": "void preorder(Visitor&& visit) const",
+      "code_line": "void preorder(Visitor&& visit) const",
       "test": "算法5.3 前序递归周游"
     },
     {
       "id": "算法5.4",
-      "anchor": "void preorder_iterative(Visitor&& visit) const",
+      "code_line": "void preorder_iterative(Visitor&& visit) const",
       "test": "算法5.4 非递归前序周游"
     },
     {
       "id": "算法5.5",
-      "anchor": "void inorder_iterative(Visitor&& visit) const",
+      "code_line": "void inorder_iterative(Visitor&& visit) const",
       "test": "算法5.5 非递归中序周游"
     },
     {
       "id": "算法5.6",
-      "anchor": "void postorder_iterative(Visitor&& visit) const",
+      "code_line": "void postorder_iterative(Visitor&& visit) const",
       "test": "算法5.6 非递归后序周游"
     },
     {
       "id": "算法5.7",
-      "anchor": "void level_order(Visitor&& visit) const",
+      "code_line": "void level_order(Visitor&& visit) const",
       "test": "算法5.7 层次周游"
     },
     {
       "id": "代码5.8",
-      "anchor": "const Node* parent_of(const Node* wanted) const noexcept",
+      "code_line": "const Node* parent_of(const Node* wanted) const noexcept",
       "test": "代码5.8 能找到父结点"
     },
     {
       "id": "算法5.9",
-      "anchor": "bool insert(const T& value)",
+      "code_line": "bool insert(const T& value)",
       "test": "算法5.9 插入唯一键"
     },
     {
       "id": "算法5.10",
-      "anchor": "bool remove(const T& value)",
+      "code_line": "bool remove(const T& value)",
       "test": "算法5.10 删除有左子树结点"
     }
   ],

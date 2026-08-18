@@ -4,22 +4,22 @@
   "listings": [
     {
       "id": "代码4.1",
-      "anchor": "class String {",
+      "code_line": "class String {",
       "test": "默认构造是空串"
     },
     {
       "id": "算法4.3",
-      "anchor": "String& concatenate(const char* s)",
+      "code_line": "String& concatenate(const char* s)",
       "test": "concatenate 接在串尾"
     },
     {
       "id": "算法4.4",
-      "anchor": "int compare(const String& other) const noexcept",
+      "code_line": "int compare(const String& other) const noexcept",
       "test": "小于时 compare 为负"
     },
     {
       "id": "算法4.5",
-      "anchor": "String substr(size_type pos, size_type len) const",
+      "code_line": "String substr(size_type pos, size_type len) const",
       "test": "从中间抽取"
     }
   ],

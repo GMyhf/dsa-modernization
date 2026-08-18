@@ -4,7 +4,7 @@
   "listings": [
     {
       "id": "代码3.4",
-      "anchor": "class LinkedStack {",
+      "code_line": "class LinkedStack {",
       "test": "压三个后栈顶是最后压入的"
     }
   ],

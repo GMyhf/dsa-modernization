@@ -4,17 +4,17 @@
   "listings": [
     {
       "id": "代码3.13",
-      "anchor": "class ArrayQueue {",
+      "code_line": "class ArrayQueue {",
       "test": "代码3.13 FIFO across wrap"
     },
     {
       "id": "代码3.14",
-      "anchor": "bool full() const noexcept",
+      "code_line": "bool full() const noexcept",
       "test": "代码3.14 sacrificed slot detects full"
     },
     {
       "id": "代码3.15",
-      "anchor": "class LinkedQueue {",
+      "code_line": "class LinkedQueue {",
       "test": "代码3.15 copied queue is independent"
     }
   ],

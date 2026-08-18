@@ -4,13 +4,13 @@
   "listings": [
     {
       "id": "算法12.1",
-      "anchor": "class ReusableNodePool {",
+      "code_line": "class ReusableNodePool {",
       "test": "算法12.1 reuses released slot",
       "py_skip": "可利用空间表是存储管理侧，Python 不提供等价实现。"
     },
     {
       "id": "算法12.2",
-      "anchor": "OptimalBstResult optimal_bst(",
+      "code_line": "OptimalBstResult optimal_bst(",
       "test": "算法12.2 textbook total cost",
       "py_code_line": "optimal_bst",
       "py_test": "textbook total cost"

@@ -4,117 +4,117 @@
   "listings": [
     {
       "id": "算法8.1",
-      "anchor": "void insertion_sort(std::vector<int>& values)",
+      "code_line": "void insertion_sort(std::vector<int>& values)",
       "test": "算法8.1 insertion",
       "py_code_line": "def insertion_sort(",
       "py_test": "算法8.1 Python insertion"
     },
     {
       "id": "算法8.2",
-      "anchor": "void shell_sort(std::vector<int>& values)",
+      "code_line": "void shell_sort(std::vector<int>& values)",
       "test": "算法8.2 shell",
       "py_code_line": "def shell_sort(",
       "py_test": "算法8.2 Python shell"
     },
     {
       "id": "算法8.3",
-      "anchor": "void selection_sort(std::vector<int>& values)",
+      "code_line": "void selection_sort(std::vector<int>& values)",
       "test": "算法8.3 selection",
       "py_code_line": "def selection_sort(",
       "py_test": "算法8.3 Python selection"
     },
     {
       "id": "算法8.4",
-      "anchor": "void heap_sort(std::vector<int>& values)",
+      "code_line": "void heap_sort(std::vector<int>& values)",
       "test": "算法8.4 heap",
       "py_code_line": "def heap_sort(",
       "py_test": "算法8.4 Python heap"
     },
     {
       "id": "算法8.5",
-      "anchor": "void bubble_sort(std::vector<int>& values)",
+      "code_line": "void bubble_sort(std::vector<int>& values)",
       "test": "算法8.5 bubble",
       "py_code_line": "def bubble_sort(",
       "py_test": "算法8.5 Python bubble"
     },
     {
       "id": "算法8.6",
-      "anchor": "void quick_sort(std::vector<int>& values)",
+      "code_line": "void quick_sort(std::vector<int>& values)",
       "test": "算法8.6 quick",
       "py_code_line": "def quick_sort(",
       "py_test": "算法8.6 Python quick"
     },
     {
       "id": "算法8.7",
-      "anchor": "void quick_sort_optimized(std::vector<int>& values)",
+      "code_line": "void quick_sort_optimized(std::vector<int>& values)",
       "test": "算法8.7 quick optimized",
       "py_code_line": "def quick_sort_optimized(",
       "py_test": "算法8.7 Python quick optimized"
     },
     {
       "id": "算法8.8",
-      "anchor": "void merge_sort(std::vector<int>& values)",
+      "code_line": "void merge_sort(std::vector<int>& values)",
       "test": "算法8.8 merge",
       "py_code_line": "def merge_sort(",
       "py_test": "算法8.8 Python merge"
     },
     {
       "id": "算法8.9",
-      "anchor": "void merge_sort_optimized(std::vector<int>& values)",
+      "code_line": "void merge_sort_optimized(std::vector<int>& values)",
       "test": "算法8.9 merge optimized",
       "py_code_line": "def merge_sort_optimized(",
       "py_test": "算法8.9 Python merge optimized"
     },
     {
       "id": "算法8.10",
-      "anchor": "void counting_sort(std::vector<int>& values)",
+      "code_line": "void counting_sort(std::vector<int>& values)",
       "test": "算法8.10 counting",
       "py_code_line": "def counting_sort(",
       "py_test": "算法8.10 Python counting"
     },
     {
       "id": "算法8.11",
-      "anchor": "void radix_sort(std::vector<int>& values)",
+      "code_line": "void radix_sort(std::vector<int>& values)",
       "test": "算法8.11 radix",
       "py_code_line": "def radix_sort(",
       "py_test": "算法8.11 Python radix"
     },
     {
       "id": "代码8.12",
-      "anchor": "class StaticQueue {",
+      "code_line": "class StaticQueue {",
       "test": "代码8.12 FIFO and empty optional",
       "py_skip": "固定容量环形队列是存储管理（容量、环绕、回卷），按 D-025 §1 属于存储侧。Python 的 list 没有容量这个概念，照写只剩一层空包装；算法8.13 的 Python 版改用普通 list 作桶，「按桶序收集保证稳定」这个教学点一字未少。"
     },
     {
       "id": "算法8.13",
-      "anchor": "void radix_sort_linked_style(std::vector<int>& values)",
+      "code_line": "void radix_sort_linked_style(std::vector<int>& values)",
       "test": "算法8.13 linked radix",
       "py_code_line": "def radix_sort_linked_style(",
       "py_test": "算法8.13 Python linked radix"
     },
     {
       "id": "算法8.14",
-      "anchor": "insertion_index_sort(const std::vector<int>& values)",
+      "code_line": "insertion_index_sort(const std::vector<int>& values)",
       "test": "算法8.14 returns sorted indexes",
       "py_code_line": "def insertion_index_sort(",
       "py_test": "算法8.14 Python 返回按值排好的下标"
     },
     {
       "id": "算法8.15",
-      "anchor": "void adjust_by_index(std::vector<int>& values",
+      "code_line": "void adjust_by_index(std::vector<int>& values",
       "test": "算法8.15 adjusts records by cycles",
       "py_code_line": "def adjust_by_index(",
       "py_test": "算法8.15 Python 沿置换环落实记录顺序"
     },
     {
       "id": "代码8.16",
-      "anchor": "random_values(std::size_t count",
+      "code_line": "random_values(std::size_t count",
       "test": "代码8.16 deterministic seed",
       "py_skip": "可复现随机数据是测试基础设施而非本章算法。Python 用 random.Random(seed) 一行即得，重写一遍没有教学增量；test.py 需要随机数据时直接用标准库。"
     },
     {
       "id": "代码8.17",
-      "anchor": "class Stopwatch {",
+      "code_line": "class Stopwatch {",
       "test": "代码8.17 monotonic elapsed time",
       "py_skip": "计时同上：time.perf_counter() 就是单调时钟，本书不必再教一遍怎么包装它。"
     }

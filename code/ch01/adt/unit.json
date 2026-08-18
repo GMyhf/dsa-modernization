@@ -4,12 +4,12 @@
   "listings": [
     {
       "id": "算法1.1",
-      "anchor": "std::optional<std::size_t> best_source() const",
+      "code_line": "std::optional<std::size_t> best_source() const",
       "test": "算法1.1 选出 B3"
     },
     {
       "id": "代码1.2",
-      "anchor": "class RumorNetwork {",
+      "code_line": "class RumorNetwork {",
       "test": "算法1.1 retains lower duplicate edge"
     }
   ],

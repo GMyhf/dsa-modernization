@@ -132,12 +132,12 @@ def load_units(code_root=CODE):
             for entry in listings:
                 if not isinstance(entry, dict):
                     problems.append(
-                        f"{rel}: listings 条目 {entry!r} 必须使用 {{id, anchor, test}} 对象"
+                        f"{rel}: listings 条目 {entry!r} 必须使用 {{id, code_line, test}} 对象"
                     )
                     continue
                 if not all(isinstance(entry.get(key), str) and entry[key].strip()
-                           for key in ("id", "anchor", "test")):
-                    problems.append(f"{rel}: listings 对象缺少非空的 id/anchor/test：{entry!r}")
+                           for key in ("id", "code_line", "test")):
+                    problems.append(f"{rel}: listings 对象缺少非空的 id/code_line/test：{entry!r}")
         std = data.get("standard", DEFAULT_STANDARD)
         if std not in KNOWN_STANDARDS:
             problems.append(f"{rel}: standard={std!r} 不在 {KNOWN_STANDARDS}")
