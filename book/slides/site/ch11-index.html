@@ -140,7 +140,22 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <td style="text-align:left"><span class="math">⌈<span class="upr">4</span>/<span class="upr">4</span>⌉</span></td>
 </tr>
 </tbody></table></div>
-<p>一次查询沿“顶层 → 三级 → 二级 → 一级 → 数据页”下降。 层数由<strong>页扇出</strong>决定，不是由二叉树高度决定。</p></section><section class="slide" data-notes=""><h1 id="113-倒排索引"><a class="anchor" href="#113-倒排索引">#</a>11.3 倒排索引</h1>
+<p>一次查询沿“顶层 → 三级 → 二级 → 一级 → 数据页”下降。 层数由<strong>页扇出</strong>决定，不是由二叉树高度决定。</p></section><section class="slide" data-notes=""><h1 id="112-静态索引多分树"><a class="anchor" href="#112-静态索引多分树">#</a>11.2 静态索引：多分树</h1>
+<figure><img loading="lazy" src="../../assets/879fc43030b02cb8.jpg" alt="图 11.3 多分树"><figcaption>图 11.3 多分树</figcaption></figure>
+<p>磁盘按页读写，所以<strong>一个索引结点就设计成恰好装满一页</strong>。 二叉树每个结点只有两个孩子，同样多的 key 会把树撑得很高。</p>
+<p>覆盖一百万个叶页：二叉树约 <strong>20</strong> 层，100 路树只要 <strong>3</strong> 层。 页内要多比较几个分界 key，但<strong>整页已经在内存里</strong>——比多读一次外存页便宜得多。</p></section><section class="slide" data-notes="&lt;p&gt;接下一节的话头：B+ 树把「重组」换成了「就地分裂与合并」。
+批量装入这件事本身没被淘汰——&lt;code&gt;code/ch11/bplus_tree&lt;/code&gt; 的 &lt;code&gt;bulk_load&lt;/code&gt; 做的正是
+「排好序、连续填叶页、用每个孩子的最小 key 建上一层」，
+装出来的就是 11.4 那张图的形状。差别只在后续怎么维护。&lt;/p&gt;"><h1 id="扇出是算出来的不是拍的"><a class="anchor" href="#扇出是算出来的不是拍的">#</a>扇出是算出来的，不是拍的</h1>
+<p>页大小 4096 字节，一项「关键码 + 孩子页号」占 16 字节，扣掉页头 —— 大约放 250 项，<strong>扇出约 251</strong>。关键码变长或页头变大，扇出就掉。</p>
+<p><strong>数据库索引偏爱短关键码，不只为省空间，更为压低树高。</strong></p>
+<p>静态多分树<strong>批量装入时按页填满，之后结构不再变</strong>：</p>
+<ul>
+<li>插入多出来的记录 → 进<strong>溢出区</strong>，查询多一次 I/O</li>
+<li>删除 → 页变稀，利用率下降</li>
+<li>攒够了 → <strong>重组整棵树</strong></li>
+</ul>
+<p>所以它适合「一次建好、很少改」的文件，不适合频繁更新的目录。</p></section><section class="slide" data-notes=""><h1 id="113-倒排索引"><a class="anchor" href="#113-倒排索引">#</a>11.3 倒排索引</h1>
 <p>从「文档 → 它含哪些词」翻转成「词 → 它出现在哪些文档」。</p>
 <div class="codeblock" data-lang="text"><pre><code>文档 1: the quick brown fox
 文档 2: the lazy dog
@@ -424,7 +439,7 @@ python3 tools/check_code.py code/ch11/inverted_index</code></pre></div>
 <blockquote><p>B+ 树的测试里有一条 <code>validate()</code>：每次插入删除后都检查 「所有叶子同层、每个结点半满、叶子链有序」这三条不变量。</p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第11章 索引技术</div><div class="thumb"><div class="no">2</div>11.1 线性索引</div><div class="thumb"><div class="no">3</div>二级索引：索引本身也放不下怎么办</div><div class="thumb"><div class="no">4</div>1000 条记录：索引为什么有四层</div><div class="thumb"><div class="no">5</div>11.3 倒排索引</div><div class="thumb"><div class="no">6</div>倒排表的交并</div><div class="thumb"><div class="no">7</div>倒排表求交：双指针只走一遍</div><div class="thumb"><div class="no">8</div>短语查询要位置信息</div><div class="thumb"><div class="no">9</div>11.4 B 树：为磁盘设计的树</div><div class="thumb"><div class="no">10</div>B 树的结构</div><div class="thumb"><div class="no">11</div>插入导致分裂</div><div class="thumb"><div class="no">12</div>B+ 树：数据全在叶子</div><div class="thumb"><div class="no">13</div>B+ 树插入 60：分裂传播到根</div><div class="thumb"><div class="no">14</div>范围查询：B+ 树的看家本领</div><div class="thumb"><div class="no">15</div>叶子分裂与内部分裂不一样</div><div class="thumb"><div class="no">16</div>11.4.4 静态索引还是动态索引</div><div class="thumb"><div class="no">17</div>11.5 位图索引</div><div class="thumb"><div class="no">18</div>位图的代价与压缩</div><div class="thumb"><div class="no">19</div>位图逐位查询与尾部掩码</div><div class="thumb"><div class="no">20</div>各种索引怎么选</div><div class="thumb"><div class="no">21</div>本章小结</div><div class="thumb"><div class="no">22</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第11章 索引技术</div><div class="thumb"><div class="no">2</div>11.1 线性索引</div><div class="thumb"><div class="no">3</div>二级索引：索引本身也放不下怎么办</div><div class="thumb"><div class="no">4</div>1000 条记录：索引为什么有四层</div><div class="thumb"><div class="no">5</div>11.2 静态索引：多分树</div><div class="thumb"><div class="no">6</div>扇出是算出来的，不是拍的</div><div class="thumb"><div class="no">7</div>11.3 倒排索引</div><div class="thumb"><div class="no">8</div>倒排表的交并</div><div class="thumb"><div class="no">9</div>倒排表求交：双指针只走一遍</div><div class="thumb"><div class="no">10</div>短语查询要位置信息</div><div class="thumb"><div class="no">11</div>11.4 B 树：为磁盘设计的树</div><div class="thumb"><div class="no">12</div>B 树的结构</div><div class="thumb"><div class="no">13</div>插入导致分裂</div><div class="thumb"><div class="no">14</div>B+ 树：数据全在叶子</div><div class="thumb"><div class="no">15</div>B+ 树插入 60：分裂传播到根</div><div class="thumb"><div class="no">16</div>范围查询：B+ 树的看家本领</div><div class="thumb"><div class="no">17</div>叶子分裂与内部分裂不一样</div><div class="thumb"><div class="no">18</div>11.4.4 静态索引还是动态索引</div><div class="thumb"><div class="no">19</div>11.5 位图索引</div><div class="thumb"><div class="no">20</div>位图的代价与压缩</div><div class="thumb"><div class="no">21</div>位图逐位查询与尾部掩码</div><div class="thumb"><div class="no">22</div>各种索引怎么选</div><div class="thumb"><div class="no">23</div>本章小结</div><div class="thumb"><div class="no">24</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -437,7 +452,7 @@ python3 tools/check_code.py code/ch11/inverted_index</code></pre></div>
 <b>第11章 索引技术</b><span>现代 C++ 数据结构教程</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 22</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 24</b>
 </div>
 <script>
 (function(){

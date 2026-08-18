@@ -255,7 +255,76 @@ k 的含义是「只允许经过前 k 个顶点中转」，它必须是&lt;stron
     数据关系 R: 结点之间有什么关系
     基本操作 P: 对外提供哪些运算
 }</code></pre></div>
-<p>用它的人只能通过这些运算访问数据，<strong>不能去翻内部表示</strong>—— 所以换实现不用改调用方。</p></section><section class="slide" data-notes="&lt;p&gt;强调一句：常数和低阶项不是不重要，是&lt;strong&gt;不能用来区分算法&lt;/strong&gt;。
+<p>用它的人只能通过这些运算访问数据，<strong>不能去翻内部表示</strong>—— 所以换实现不用改调用方。</p></section><section class="slide" data-notes="&lt;p&gt;「有穷」这一条最容易被当成废话，其实是四条里唯一需要单独证明的。
+可以让学生看辗转相除：为什么它一定停？因为余数严格递减且非负——
+这是一个&lt;strong&gt;递减到底的量&lt;/strong&gt;，后面讲循环不变式和递归深度时会反复用到同一招。&lt;/p&gt;"><h1 id="131-什么才算一个算法"><a class="anchor" href="#131-什么才算一个算法">#</a>1.3.1 什么才算「一个算法」</h1>
+<p>算法是<strong>对求解过程的描述</strong>：具体、有限的操作步骤。四条性质缺一不可。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">性质</th>
+<th style="text-align:left">要求</th>
+<th style="text-align:left">违反时长什么样</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><strong>通用</strong></td>
+<td style="text-align:left">凡符合声明类型的输入都能求解且正确</td>
+<td style="text-align:left">只对书上那组样例成立</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>有效</strong></td>
+<td style="text-align:left">每一步都是人或机器能确切执行的动作</td>
+<td style="text-align:left">出现「想办法算出 X」这种话</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>确定</strong></td>
+<td style="text-align:left">做完这一步，下一步是什么必须说死</td>
+<td style="text-align:left">停在被锁住的状态</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>有穷</strong></td>
+<td style="text-align:left">有限步内停机</td>
+<td style="text-align:left">死循环</td>
+</tr>
+</tbody></table></div>
+<p><strong>指令条数有限 ≠ 执行步数有限</strong>——循环条件写错，5 行也能转个没完。 结束条件要单独检查。</p>
+<p>程序是算法落在某种语言里的样子。<strong>一个对某类输入会永远循环的程序， 不是那个问题的算法。</strong></p></section><section class="slide" data-notes=""><h1 id="132-步骤从哪来六种设计方法"><a class="anchor" href="#132-步骤从哪来六种设计方法">#</a>1.3.2 步骤从哪来：六种设计方法</h1>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">方法</th>
+<th style="text-align:left">做法</th>
+<th style="text-align:left">本书哪里用</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><strong>穷举</strong></td>
+<td style="text-align:left">把有限的候选按固定顺序一一列出来检查</td>
+<td style="text-align:left"><code>switch</code> 就是小范围穷举</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>回溯</strong></td>
+<td style="text-align:left">枚举候选；不可能成功就退回上一步换下一个</td>
+<td style="text-align:left">第 3 章背包，第 5–7 章深度优先</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>分治</strong></td>
+<td style="text-align:left">剖成同类的小问题，分别解，再合并</td>
+<td style="text-align:left">第 8 章快排/归并，第 10 章二分</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>递归</strong></td>
+<td style="text-align:left">子问题是原问题的缩小版时的自然写法</td>
+<td style="text-align:left">与分治常常成对出现</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>贪心</strong></td>
+<td style="text-align:left">每步按局部最优做<strong>不可撤回</strong>的选择</td>
+<td style="text-align:left">第 7 章 Prim、Kruskal、Dijkstra</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>动态规划</strong></td>
+<td style="text-align:left">子问题重叠，算过的存表备查</td>
+<td style="text-align:left">第 7 章 Floyd，第 12 章最优 BST</td>
+</tr>
+</tbody></table></div>
+<p>贪心能不能用，全看<strong>度量标准选得对不对</strong>；动态规划针对的是 「按分治递归会把同一子问题算很多次」。</p>
+<p>1.1 节要<strong>任意两点</strong>最短路、顶点又少，所以选 Floyd， 而不是对每个起点跑一遍 Dijkstra。</p></section><section class="slide" data-notes="&lt;p&gt;强调一句：常数和低阶项不是不重要，是&lt;strong&gt;不能用来区分算法&lt;/strong&gt;。
 n 小的时候 O(n^2) 完全可能比 O(n log n) 快，这在第 8 章讲插入排序时会再遇到。&lt;/p&gt;"><h1 id="14-算法分析为什么要看增长趋势"><a class="anchor" href="#14-算法分析为什么要看增长趋势">#</a>1.4 算法分析：为什么要看增长趋势</h1>
 <p>程序跑多久跟机器、编译器、输入都有关。要比较<strong>算法</strong>而不是<strong>这次运行</strong>， 就只能看「输入变大时，代价怎么涨」。</p>
 <figure><img loading="lazy" src="../../assets/c33523f30da594f0.jpg" alt="图 1.5 常用函数的增长趋势"><figcaption>图 1.5 常用函数的增长趋势</figcaption></figure></section><section class="slide" data-notes="&lt;p&gt;可以举个反例：说「插入排序是 O(n^2)」对，说「插入排序是 Θ(n^2)」就错了——
@@ -327,7 +396,18 @@ n 小的时候 O(n^2) 完全可能比 O(n log n) 快，这在第 8 章讲插入�
 <td style="text-align:left">第 11 章</td>
 <td style="text-align:left">索引用附加空间换少读盘</td>
 </tr>
-</tbody></table></div></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
+</tbody></table></div></section><section class="slide" data-notes=""><h1 id="144-怎么挑结构先问运算再问规模"><a class="anchor" href="#144-怎么挑结构先问运算再问规模">#</a>1.4.4 怎么挑结构：先问运算，再问规模</h1>
+<p><strong>第一问：这份数据上要做哪些运算？</strong></p>
+<ul>
+<li>要不要按下标随机访问</li>
+<li>会不会在中间频繁插入、删除</li>
+<li>要不要按关键码直接找到某条记录</li>
+</ul>
+<p><strong>第二问：规模多大、数据在哪一层存储？</strong></p>
+<p>一次磁盘 I/O 往往比一次内存比较贵<strong>几个数量级</strong>—— 所以第 9、11 章数的是<strong>访外页数</strong>，不是比较次数。</p>
+<p>回到 1.1 节：只有五个经纪人、要任意两点最短路 → <strong>相邻矩阵 + Floyd</strong>，实现简单，<span class="math">n<span class="rel">=</span><span class="upr">5</span></span> 时三重循环可以忽略。</p>
+<p>换成顶点很多、边很少、只问单源 → 就该是<strong>邻接表 + Dijkstra</strong>。</p>
+<p><strong>同一个问题，规模一变，答案就变。</strong> 后面每一章都会再做一次这样的取舍。</p></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
 <ul>
 <li>问题求解的第一步是<strong>抽象</strong>：把应用语言翻译成结构语言</li>
 <li>数据结构分三层：<strong>逻辑结构、存储结构、运算</strong></li>
@@ -344,7 +424,7 @@ n 小的时候 O(n^2) 完全可能比 O(n log n) 快，这在第 8 章讲插入�
 <blockquote><p>全书的判据都是一样的：<strong>把实现改回错的写法，必须有一条断言会红。</strong></p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第1章 概论</div><div class="thumb"><div class="no">2</div>1.1 一个真问题：股市的传言</div><div class="thumb"><div class="no">3</div>先把问题抽象掉</div><div class="thumb"><div class="no">4</div>用什么存这张图</div><div class="thumb"><div class="no">5</div>算法：Floyd</div><div class="thumb"><div class="no">6</div>实现：两件事在一个函数里</div><div class="thumb"><div class="no">7</div>1.2 数据结构：三个层次</div><div class="thumb"><div class="no">8</div>逻辑结构的三分</div><div class="thumb"><div class="no">9</div>四种存储方法</div><div class="thumb"><div class="no">10</div>索引：逻辑有序，物理无序</div><div class="thumb"><div class="no">11</div>1.2.3 抽象数据类型</div><div class="thumb"><div class="no">12</div>1.4 算法分析：为什么要看增长趋势</div><div class="thumb"><div class="no">13</div>大 O、Ω、Θ</div><div class="thumb"><div class="no">14</div>最好、最坏、平均</div><div class="thumb"><div class="no">15</div>1.4.3 时间与空间的折衷</div><div class="thumb"><div class="no">16</div>本章小结</div><div class="thumb"><div class="no">17</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第1章 概论</div><div class="thumb"><div class="no">2</div>1.1 一个真问题：股市的传言</div><div class="thumb"><div class="no">3</div>先把问题抽象掉</div><div class="thumb"><div class="no">4</div>用什么存这张图</div><div class="thumb"><div class="no">5</div>算法：Floyd</div><div class="thumb"><div class="no">6</div>实现：两件事在一个函数里</div><div class="thumb"><div class="no">7</div>1.2 数据结构：三个层次</div><div class="thumb"><div class="no">8</div>逻辑结构的三分</div><div class="thumb"><div class="no">9</div>四种存储方法</div><div class="thumb"><div class="no">10</div>索引：逻辑有序，物理无序</div><div class="thumb"><div class="no">11</div>1.2.3 抽象数据类型</div><div class="thumb"><div class="no">12</div>1.3.1 什么才算「一个算法」</div><div class="thumb"><div class="no">13</div>1.3.2 步骤从哪来：六种设计方法</div><div class="thumb"><div class="no">14</div>1.4 算法分析：为什么要看增长趋势</div><div class="thumb"><div class="no">15</div>大 O、Ω、Θ</div><div class="thumb"><div class="no">16</div>最好、最坏、平均</div><div class="thumb"><div class="no">17</div>1.4.3 时间与空间的折衷</div><div class="thumb"><div class="no">18</div>1.4.4 怎么挑结构：先问运算，再问规模</div><div class="thumb"><div class="no">19</div>本章小结</div><div class="thumb"><div class="no">20</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -357,7 +437,7 @@ n 小的时候 O(n^2) 完全可能比 O(n log n) 快，这在第 8 章讲插入�
 <b>第1章 概论</b><span>现代 C++ 数据结构教程</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 17</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 20</b>
 </div>
 <script>
 (function(){

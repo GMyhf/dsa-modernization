@@ -350,7 +350,45 @@ std::optional&lt;std::<span class="t">size_t</span>&gt; insertion_slot(<span cla
 </tr>
 </tbody></table></div>
 <p><strong>注意最后一列</strong>：<span class="math">α<span class="rel">→</span><span class="upr">1</span></span> 时它<strong>爆炸</strong>。</p>
-<p>所以闭散列表通常在 <span class="math">α</span> 超过 0.5–0.75 时就要扩容重散列。</p></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
+<p>所以闭散列表通常在 <span class="math">α</span> 超过 0.5–0.75 时就要扩容重散列。</p></section><section class="slide" data-notes=""><h1 id="1036-什么时候不该用散列"><a class="anchor" href="#1036-什么时候不该用散列">#</a>10.3.6 什么时候不该用散列</h1>
+<p>符号表、缓存、去重都常用散列。但选结构要<strong>先问操作</strong>，不要先比复杂度符号。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">需求</th>
+<th style="text-align:left">用什么</th>
+<th style="text-align:left">为什么不是散列</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">精确查一个键</td>
+<td style="text-align:left"><strong>散列表</strong></td>
+<td style="text-align:left">正是它的长项</td>
+</tr>
+<tr>
+<td style="text-align:left">按键从小到大遍历</td>
+<td style="text-align:left">有序表 / 搜索树</td>
+<td style="text-align:left">散列槽位没有关键码顺序</td>
+</tr>
+<tr>
+<td style="text-align:left">查 <code>[low,high]</code> 范围</td>
+<td style="text-align:left">B+ 树 / 有序数组</td>
+<td style="text-align:left">散列不能定位相邻键</td>
+</tr>
+<tr>
+<td style="text-align:left">数据很少、更新不频繁</td>
+<td style="text-align:left">线性表</td>
+<td style="text-align:left">实现和内存开销更小</td>
+</tr>
+<tr>
+<td style="text-align:left">需要<strong>最坏</strong> <span class="math">O(<span class="upr">log</span>&thinsp;n)</span></td>
+<td style="text-align:left">平衡搜索树</td>
+<td style="text-align:left">普通散列只保证<strong>期望</strong>代价</td>
+</tr>
+</tbody></table></div>
+<p>两条容易漏的工程细节：</p>
+<ul>
+<li>缓存还要处理<strong>容量淘汰</strong>；</li>
+<li>去重要<strong>保存原始键</strong>，好确认「散列值相同但键不同」的碰撞。</li>
+</ul>
+<p><strong>散列值只是候选地址或摘要，不能代替关键码相等判断。</strong></p></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
 <ul>
 <li>顺序检索 <span class="math">O(n)</span> 不要求有序；二分 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span> 要求有序；分块 <span class="math">O(<span class="sqrt">n</span>)</span> 折中</li>
 <li>二分要用<strong>半开区间</strong>，避开无符号下溢；中点用 <code>first + (last-first)/2</code></li>
@@ -370,7 +408,7 @@ std::optional&lt;std::<span class="t">size_t</span>&gt; insertion_slot(<span cla
 <blockquote><p>最后一条只有拿非 ASCII 字节做输入才看得出来——测试里那条用例就是为它写的。</p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第10章 检索</div><div class="thumb"><div class="no">2</div>10.1.1 顺序检索</div><div class="thumb"><div class="no">3</div>10.1.2 二分检索</div><div class="thumb"><div class="no">4</div>二分检索：半开区间 trace</div><div class="thumb"><div class="no">5</div>二分的一个坑：无符号下溢</div><div class="thumb"><div class="no">6</div>决策树：二分为什么是 $\log n$</div><div class="thumb"><div class="no">7</div>10.1.3 分块检索</div><div class="thumb"><div class="no">8</div>分块检索：先找块，再扫块</div><div class="thumb"><div class="no">9</div>10.2 集合</div><div class="thumb"><div class="no">10</div>10.3 散列：换一条路</div><div class="thumb"><div class="no">11</div>10.3.1 散列函数</div><div class="thumb"><div class="no">12</div>散列函数怎么选</div><div class="thumb"><div class="no">13</div>10.3.2 开散列（拉链法）</div><div class="thumb"><div class="no">14</div>10.3.3 闭散列（开地址法）</div><div class="thumb"><div class="no">15</div>删除：这一节的核心难点</div><div class="thumb"><div class="no">16</div>解法：墓碑</div><div class="thumb"><div class="no">17</div>墓碑探测：删除后为什么不能停</div><div class="thumb"><div class="no">18</div>插入：回收墓碑，但不能提前停</div><div class="thumb"><div class="no">19</div>10.3.5 效率分析</div><div class="thumb"><div class="no">20</div>本章小结</div><div class="thumb"><div class="no">21</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第10章 检索</div><div class="thumb"><div class="no">2</div>10.1.1 顺序检索</div><div class="thumb"><div class="no">3</div>10.1.2 二分检索</div><div class="thumb"><div class="no">4</div>二分检索：半开区间 trace</div><div class="thumb"><div class="no">5</div>二分的一个坑：无符号下溢</div><div class="thumb"><div class="no">6</div>决策树：二分为什么是 $\log n$</div><div class="thumb"><div class="no">7</div>10.1.3 分块检索</div><div class="thumb"><div class="no">8</div>分块检索：先找块，再扫块</div><div class="thumb"><div class="no">9</div>10.2 集合</div><div class="thumb"><div class="no">10</div>10.3 散列：换一条路</div><div class="thumb"><div class="no">11</div>10.3.1 散列函数</div><div class="thumb"><div class="no">12</div>散列函数怎么选</div><div class="thumb"><div class="no">13</div>10.3.2 开散列（拉链法）</div><div class="thumb"><div class="no">14</div>10.3.3 闭散列（开地址法）</div><div class="thumb"><div class="no">15</div>删除：这一节的核心难点</div><div class="thumb"><div class="no">16</div>解法：墓碑</div><div class="thumb"><div class="no">17</div>墓碑探测：删除后为什么不能停</div><div class="thumb"><div class="no">18</div>插入：回收墓碑，但不能提前停</div><div class="thumb"><div class="no">19</div>10.3.5 效率分析</div><div class="thumb"><div class="no">20</div>10.3.6 什么时候不该用散列</div><div class="thumb"><div class="no">21</div>本章小结</div><div class="thumb"><div class="no">22</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -383,7 +421,7 @@ std::optional&lt;std::<span class="t">size_t</span>&gt; insertion_slot(<span cla
 <b>第10章 检索</b><span>现代 C++ 数据结构教程</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 21</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 22</b>
 </div>
 <script>
 (function(){

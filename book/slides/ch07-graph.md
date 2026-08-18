@@ -38,6 +38,26 @@ subtitle: 现代 C++ 数据结构教程
 
 ---
 
+# 7.2 图的 ADT：对外有哪些运算
+
+| 运算 | 干什么 | `Graph` 上的名字 |
+| --- | --- | --- |
+| 构造 | 指定顶点数建一张空图 | `Graph(count)` |
+| 加边 | 加一条带权边（可选有向/无向） | `Graph::add_edge` |
+| 问规模 | 有多少个顶点 | `Graph::vertices` |
+| 周游 | 深度优先 / 广度优先 | `Graph::dfs` / `Graph::bfs` |
+| 拓扑 | 排一个线性次序，有环则说不出来 | `Graph::topological_sort` |
+| 最短路 | 单源 / 每对顶点 | `Graph::dijkstra` / `Graph::floyd` |
+| 最小生成树 | 从点长 / 从边挑 | `Graph::prim` / `Graph::kruskal` |
+
+**「有环」「不连通」不是异常，是可预期的结果**——所以
+`topological_sort`、`prim`、`kruskal` 返回 `std::optional`，空值就是答案。
+
+原书【代码7.1】【代码7.2】的 ADT 声明残缺，标识符还被 OCR 的空格切断。
+本书直接把运算定义在 `Graph` 上。
+
+---
+
 # 7.3.1 相邻矩阵
 
 `m[i][j]` 是 i 到 j 一条边的权，不通就是「无穷大」。

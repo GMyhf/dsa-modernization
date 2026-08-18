@@ -106,7 +106,50 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <li>无向图：任意两点有路径 → <strong>连通</strong>；极大连通子图 → <strong>连通分量</strong></li>
 <li>有向图：任意两点<strong>互相</strong>可达 → <strong>强连通</strong>；极大者 → <strong>强连通分量</strong></li>
 </ul>
-<figure><img loading="lazy" src="../../assets/68c8cdd24e9e933e.jpg" alt="图 7.6 有向图的两个强连通分量"><figcaption>图 7.6 有向图的两个强连通分量</figcaption></figure></section><section class="slide" data-notes="&lt;p&gt;infinity 取 INT_MAX/4 而不是 INT_MAX——Floyd 里两个 infinity 会相加，
+<figure><img loading="lazy" src="../../assets/68c8cdd24e9e933e.jpg" alt="图 7.6 有向图的两个强连通分量"><figcaption>图 7.6 有向图的两个强连通分量</figcaption></figure></section><section class="slide" data-notes=""><h1 id="72-图的-adt对外有哪些运算"><a class="anchor" href="#72-图的-adt对外有哪些运算">#</a>7.2 图的 ADT：对外有哪些运算</h1>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">运算</th>
+<th style="text-align:left">干什么</th>
+<th style="text-align:left"><code>Graph</code> 上的名字</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">构造</td>
+<td style="text-align:left">指定顶点数建一张空图</td>
+<td style="text-align:left"><code>Graph(count)</code></td>
+</tr>
+<tr>
+<td style="text-align:left">加边</td>
+<td style="text-align:left">加一条带权边（可选有向/无向）</td>
+<td style="text-align:left"><code>Graph::add_edge</code></td>
+</tr>
+<tr>
+<td style="text-align:left">问规模</td>
+<td style="text-align:left">有多少个顶点</td>
+<td style="text-align:left"><code>Graph::vertices</code></td>
+</tr>
+<tr>
+<td style="text-align:left">周游</td>
+<td style="text-align:left">深度优先 / 广度优先</td>
+<td style="text-align:left"><code>Graph::dfs</code> / <code>Graph::bfs</code></td>
+</tr>
+<tr>
+<td style="text-align:left">拓扑</td>
+<td style="text-align:left">排一个线性次序，有环则说不出来</td>
+<td style="text-align:left"><code>Graph::topological_sort</code></td>
+</tr>
+<tr>
+<td style="text-align:left">最短路</td>
+<td style="text-align:left">单源 / 每对顶点</td>
+<td style="text-align:left"><code>Graph::dijkstra</code> / <code>Graph::floyd</code></td>
+</tr>
+<tr>
+<td style="text-align:left">最小生成树</td>
+<td style="text-align:left">从点长 / 从边挑</td>
+<td style="text-align:left"><code>Graph::prim</code> / <code>Graph::kruskal</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>「有环」「不连通」不是异常，是可预期的结果</strong>——所以 <code>topological_sort</code>、<code>prim</code>、<code>kruskal</code> 返回 <code>std::optional</code>，空值就是答案。</p>
+<p>原书【代码7.1】【代码7.2】的 ADT 声明残缺，标识符还被 OCR 的空格切断。 本书直接把运算定义在 <code>Graph</code> 上。</p></section><section class="slide" data-notes="&lt;p&gt;infinity 取 INT_MAX/4 而不是 INT_MAX——Floyd 里两个 infinity 会相加，
 用 INT_MAX 就溢出了，而有符号溢出是未定义行为。这一处第 1 章也讲过。
 
 无向图加边要加两次，本书用 directed 参数表达。&lt;/p&gt;"><h1 id="731-相邻矩阵"><a class="anchor" href="#731-相邻矩阵">#</a>7.3.1 相邻矩阵</h1>
@@ -338,7 +381,7 @@ python3 tools/check_code.py code/ch07/adjacency_list</code></pre></div>
 <blockquote><p>邻接表和相邻矩阵两套实现在测试里<strong>逐项对拍</strong>： 同一张图上，所有算法必须给出同样的答案。</p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第7章 图</div><div class="thumb"><div class="no">2</div>7.1 基本术语</div><div class="thumb"><div class="no">3</div>连通与强连通</div><div class="thumb"><div class="no">4</div>7.3.1 相邻矩阵</div><div class="thumb"><div class="no">5</div>7.3.2 邻接表</div><div class="thumb"><div class="no">6</div>两种存法的代价对照</div><div class="thumb"><div class="no">7</div>7.3.3 十字链表：一条弧进两条链</div><div class="thumb"><div class="no">8</div>7.4 深度优先周游</div><div class="thumb"><div class="no">9</div>广度优先周游</div><div class="thumb"><div class="no">10</div>7.4.3 拓扑排序</div><div class="thumb"><div class="no">11</div>拓扑排序：不断摘入度为 0 的点</div><div class="thumb"><div class="no">12</div>7.5.1 单源最短路：Dijkstra</div><div class="thumb"><div class="no">13</div>Dijkstra 的实现</div><div class="thumb"><div class="no">14</div>7.5.2 每对顶点：Floyd</div><div class="thumb"><div class="no">15</div>7.6 最小生成树</div><div class="thumb"><div class="no">16</div>Prim：从点出发</div><div class="thumb"><div class="no">17</div>Kruskal：从边出发</div><div class="thumb"><div class="no">18</div>最短路树 ≠ 最小生成树</div><div class="thumb"><div class="no">19</div>本章小结</div><div class="thumb"><div class="no">20</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第7章 图</div><div class="thumb"><div class="no">2</div>7.1 基本术语</div><div class="thumb"><div class="no">3</div>连通与强连通</div><div class="thumb"><div class="no">4</div>7.2 图的 ADT：对外有哪些运算</div><div class="thumb"><div class="no">5</div>7.3.1 相邻矩阵</div><div class="thumb"><div class="no">6</div>7.3.2 邻接表</div><div class="thumb"><div class="no">7</div>两种存法的代价对照</div><div class="thumb"><div class="no">8</div>7.3.3 十字链表：一条弧进两条链</div><div class="thumb"><div class="no">9</div>7.4 深度优先周游</div><div class="thumb"><div class="no">10</div>广度优先周游</div><div class="thumb"><div class="no">11</div>7.4.3 拓扑排序</div><div class="thumb"><div class="no">12</div>拓扑排序：不断摘入度为 0 的点</div><div class="thumb"><div class="no">13</div>7.5.1 单源最短路：Dijkstra</div><div class="thumb"><div class="no">14</div>Dijkstra 的实现</div><div class="thumb"><div class="no">15</div>7.5.2 每对顶点：Floyd</div><div class="thumb"><div class="no">16</div>7.6 最小生成树</div><div class="thumb"><div class="no">17</div>Prim：从点出发</div><div class="thumb"><div class="no">18</div>Kruskal：从边出发</div><div class="thumb"><div class="no">19</div>最短路树 ≠ 最小生成树</div><div class="thumb"><div class="no">20</div>本章小结</div><div class="thumb"><div class="no">21</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -351,7 +394,7 @@ python3 tools/check_code.py code/ch07/adjacency_list</code></pre></div>
 <b>第7章 图</b><span>现代 C++ 数据结构教程</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 20</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 21</b>
 </div>
 <script>
 (function(){

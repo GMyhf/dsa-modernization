@@ -115,7 +115,47 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 答案：至少两棵。&lt;/p&gt;"><h1 id="转换的两个方向"><a class="anchor" href="#转换的两个方向">#</a>转换的两个方向</h1>
 <figure><img loading="lazy" src="../../assets/d6b8aba5bba23c9b.jpg" alt="图6.3 森林转换为二叉树"><figcaption>图6.3 森林转换为二叉树</figcaption></figure>
 <p><strong>森林 → 二叉树</strong>：连兄弟、留长子、旋转 45 度。</p>
-<p><strong>二叉树 → 森林</strong>：反过来做。任何二叉树都能转回唯一的森林。</p></section><section class="slide" data-notes="&lt;p&gt;注意树没有「中序」——根只有一个位置可放（最前或最后），
+<p><strong>二叉树 → 森林</strong>：反过来做。任何二叉树都能转回唯一的森林。</p></section><section class="slide" data-notes="&lt;p&gt;可以问一句：为什么 ADT 里没有「取第 k 个孩子」？
+因为那会承诺一个这套存储给不了的代价。ADT 该说的是能做什么、代价多少，
+而不是把所有想得到的运算都列上。&lt;/p&gt;"><h1 id="613-树的-adt对外有哪些运算"><a class="anchor" href="#613-树的-adt对外有哪些运算">#</a>6.1.3 树的 ADT：对外有哪些运算</h1>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">运算</th>
+<th style="text-align:left">干什么</th>
+<th style="text-align:left"><code>GeneralTree</code> 上的名字</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">建根</td>
+<td style="text-align:left">用一个值建出根结点</td>
+<td style="text-align:left"><code>GeneralTree::create_root</code></td>
+</tr>
+<tr>
+<td style="text-align:left">插入长子</td>
+<td style="text-align:left">在某结点下插入<strong>第一个</strong>孩子</td>
+<td style="text-align:left"><code>GeneralTree::insert_first</code></td>
+</tr>
+<tr>
+<td style="text-align:left">插入兄弟</td>
+<td style="text-align:left">在某结点旁插入<strong>下一个</strong>兄弟</td>
+<td style="text-align:left"><code>GeneralTree::insert_next</code></td>
+</tr>
+<tr>
+<td style="text-align:left">问父亲</td>
+<td style="text-align:left">取某结点的父结点</td>
+<td style="text-align:left"><code>GeneralTree::parent_of</code></td>
+</tr>
+<tr>
+<td style="text-align:left">删子树</td>
+<td style="text-align:left">摘掉一棵子树并销毁</td>
+<td style="text-align:left"><code>GeneralTree::delete_subtree</code></td>
+</tr>
+<tr>
+<td style="text-align:left">周游</td>
+<td style="text-align:left">先根 / 后根 / 层次</td>
+<td style="text-align:left"><code>preorder</code> / <code>postorder</code> / <code>breadth_first</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>「插入长子」和「插入兄弟」这一对，就是「左子/右兄」在接口上的样子</strong>—— 一般树没有「第 <span class="math">k</span> 个孩子」这种 <span class="math">O(<span class="upr">1</span>)</span> 运算，孩子只能顺兄弟链走。</p>
+<p>原书【代码6.1】【代码6.2】只给出声明。本书把这些运算直接写在 <code>GeneralTree</code> 上， 不再另设一个空的抽象基类。</p></section><section class="slide" data-notes="&lt;p&gt;注意树没有「中序」——根只有一个位置可放（最前或最后），
 因为孩子不止两个，没有「中间」可言。&lt;/p&gt;"><h1 id="614-树的周游"><a class="anchor" href="#614-树的周游">#</a>6.1.4 树的周游</h1>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">周游</th>
@@ -354,7 +394,7 @@ rtag       0  1  0  1  1  1  0  0  1  1     0 = 有下一个兄弟</code></pre><
 <blockquote><p>第三条会让「规模 3 的集合与规模 2 的集合合并、根应是前者」那条断言变红—— 两种规则长出的树形状不同。</p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第6章 树</div><div class="thumb"><div class="no">2</div>6.1.1 树与森林</div><div class="thumb"><div class="no">3</div>6.1.2 森林与二叉树可以互相转换</div><div class="thumb"><div class="no">4</div>转换的两个方向</div><div class="thumb"><div class="no">5</div>6.1.4 树的周游</div><div class="thumb"><div class="no">6</div>先根与后根</div><div class="thumb"><div class="no">7</div>6.2 链式存储：四种表示法</div><div class="thumb"><div class="no">8</div>子结点表：为什么不够用</div><div class="thumb"><div class="no">9</div>6.2.4 动态「左子/右兄」</div><div class="thumb"><div class="no">10</div>删子树：先脱开，再销毁</div><div class="thumb"><div class="no">11</div>6.2.5 父指针表示法</div><div class="thumb"><div class="no">12</div>并查集：等价类问题</div><div class="thumb"><div class="no">13</div>朴素做法会退化成一条链</div><div class="thumb"><div class="no">14</div>改进一：重量权衡合并规则</div><div class="thumb"><div class="no">15</div>改进二：路径压缩</div><div class="thumb"><div class="no">16</div>6.3 顺序存储：四种表示法</div><div class="thumb"><div class="no">17</div>带双标记的先根次序</div><div class="thumb"><div class="no">18</div>重建：用一把栈</div><div class="thumb"><div class="no">19</div>6.4 K 叉树</div><div class="thumb"><div class="no">20</div>本章小结</div><div class="thumb"><div class="no">21</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第6章 树</div><div class="thumb"><div class="no">2</div>6.1.1 树与森林</div><div class="thumb"><div class="no">3</div>6.1.2 森林与二叉树可以互相转换</div><div class="thumb"><div class="no">4</div>转换的两个方向</div><div class="thumb"><div class="no">5</div>6.1.3 树的 ADT：对外有哪些运算</div><div class="thumb"><div class="no">6</div>6.1.4 树的周游</div><div class="thumb"><div class="no">7</div>先根与后根</div><div class="thumb"><div class="no">8</div>6.2 链式存储：四种表示法</div><div class="thumb"><div class="no">9</div>子结点表：为什么不够用</div><div class="thumb"><div class="no">10</div>6.2.4 动态「左子/右兄」</div><div class="thumb"><div class="no">11</div>删子树：先脱开，再销毁</div><div class="thumb"><div class="no">12</div>6.2.5 父指针表示法</div><div class="thumb"><div class="no">13</div>并查集：等价类问题</div><div class="thumb"><div class="no">14</div>朴素做法会退化成一条链</div><div class="thumb"><div class="no">15</div>改进一：重量权衡合并规则</div><div class="thumb"><div class="no">16</div>改进二：路径压缩</div><div class="thumb"><div class="no">17</div>6.3 顺序存储：四种表示法</div><div class="thumb"><div class="no">18</div>带双标记的先根次序</div><div class="thumb"><div class="no">19</div>重建：用一把栈</div><div class="thumb"><div class="no">20</div>6.4 K 叉树</div><div class="thumb"><div class="no">21</div>本章小结</div><div class="thumb"><div class="no">22</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -367,7 +407,7 @@ rtag       0  1  0  1  1  1  0  0  1  1     0 = 有下一个兄弟</code></pre><
 <b>第6章 树</b><span>现代 C++ 数据结构教程</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 21</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 22</b>
 </div>
 <script>
 (function(){
