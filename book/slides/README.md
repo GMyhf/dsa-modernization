@@ -22,7 +22,7 @@ Markdown 还有一个 .pptx 给不了的好处：**幻灯片上的代码由闸�
 ```text
 ---
 title: 第3章 栈与队列
-subtitle: 现代 C++ 数据结构教程
+subtitle: 数据结构与算法：Python 讲算法，C++ 讲实现
 ---
 
 # 这一页的标题

@@ -54,18 +54,19 @@ ASSETS_HREF = "../assets/"
 # 学生用 PDF：首页给一个下载卡片。页数来自 tools/build_book_pdf.py 落下的 sidecar
 # （PDF 自身的页树是压缩的，挖不出来），体积直接量文件。PDF 不在时卡片自动消失，
 # 构建照常通过——网页版不该因为没排版 PDF 就构建不出来。
-PDF_NAME = "现代C++数据结构教程.pdf"
+PDF_NAME = "数据结构与算法.pdf"
 PDF_FILE = BOOK / "pdf" / PDF_NAME
 PDF_INFO = BOOK / "pdf" / "build-info.json"
 PDF_HREF = "../pdf/" + PDF_NAME
 
-BOOK_TITLE = "现代 C++ 数据结构教程"
+BOOK_TITLE = "数据结构与算法：Python 讲算法，C++ 讲实现"
 DESCRIPTION = ("《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编："
-               "保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。")
+               "保留原书章节脉络与算法思想，示例统一为可编译、可测试的 C++17；"
+               "讲算法的章节另给一份同样跑过测试的 Python 实现。")
 
 # (Markdown 文件, 输出文件名, 侧栏分组)。侧栏标题取自各文件的 H1，不在这里重复维护。
 PAGES = [
-    ("现代C++数据结构教程.md", "index.html", "front"),
+    ("数据结构与算法.md", "index.html", "front"),
     ("ch01-adt.md", "ch01-adt.html", "body"),
     ("ch02-linear-list.md", "ch02-linear-list.html", "body"),
     ("ch03-stack.md", "ch03-stack.html", "body"),
@@ -290,6 +291,53 @@ def highlight_cpp(code):
     return "".join(out)
 
 
+# --------------------------------------------------------------------------- Python 高亮
+
+# D-025 起书里有两种语言。Python 块若只做 html.escape，读者会看到一段没有层次的
+# 灰字——那等于在版面上把它降格成附录。分词规则与 C++ 那份共用同一批 span 类名，
+# 于是两种语言的关键字、字符串、注释在页面上是同一种颜色语义。
+PY_KEYWORDS = {
+    "and", "as", "assert", "async", "await", "break", "class", "continue", "def",
+    "del", "elif", "else", "except", "finally", "for", "from", "global", "if",
+    "import", "in", "is", "lambda", "nonlocal", "not", "or", "pass", "raise",
+    "return", "try", "while", "with", "yield", "None", "True", "False",
+}
+PY_BUILTINS = {
+    "abs", "all", "any", "bool", "bytes", "dict", "enumerate", "float", "int",
+    "isinstance", "len", "list", "max", "min", "object", "print", "range",
+    "reversed", "set", "str", "sum", "tuple", "type", "zip",
+}
+# 三引号串必须排在单引号串前面，否则 `"""` 会被当成「空串 + 一个引号」拆开。
+PY_TOKEN = re.compile(r"""
+    (?P<comment>\#[^\n]*)
+  | (?P<string>[rbfuRBFU]{0,2}(?:\"\"\".*?\"\"\"|'''.*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'))
+  | (?P<number>\b(?:0[xXbBoO][0-9a-fA-F_]+|[0-9][0-9_]*(?:\.[0-9_]*)?(?:[eE][+-]?[0-9]+)?)\b)
+  | (?P<word>[A-Za-z_][A-Za-z0-9_]*)
+""", re.X | re.S | re.M)
+
+
+def highlight_python(code):
+    """构建期高亮：只加标签，一个字符都不改（tests 里有断言盯着）。"""
+    out, last = [], 0
+    for match in PY_TOKEN.finditer(code):
+        out.append(html.escape(code[last:match.start()]))
+        kind = match.lastgroup
+        text = html.escape(match.group(0))
+        if kind == "word":
+            word = match.group(0)
+            if word in PY_KEYWORDS:
+                out.append(f'<span class="k">{text}</span>')
+            elif word in PY_BUILTINS:
+                out.append(f'<span class="t">{text}</span>')
+            else:
+                out.append(text)
+        else:
+            out.append(f'<span class="{kind[0]}">{text}</span>')
+        last = match.end()
+    out.append(html.escape(code[last:]))
+    return "".join(out)
+
+
 # --------------------------------------------------------------------------- 链接改写
 
 class Context:
@@ -392,7 +440,12 @@ def render_blocks(lines, ctx, anchors):
                 index += 1
             index += 1  # 吃掉收尾围栏
             code = "\n".join(body)
-            rendered = highlight_cpp(code) if language == "cpp" else html.escape(code)
+            if language == "cpp":
+                rendered = highlight_cpp(code)
+            elif language == "python":
+                rendered = highlight_python(code)
+            else:
+                rendered = html.escape(code)
             source = ""
             path = re.match(r"file=(\S+)", info)
             if path:

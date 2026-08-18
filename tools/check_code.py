@@ -10,6 +10,8 @@
   2. Debug 构建带 ASan + UBSan，-fno-sanitize-recover=all：越界和 UB 当场崩
   3. Release 构建 -O2 再跑一遍：只在某个优化档下成立的测试不算数
   4. test.cpp 自带断言，退出码非 0 即失败
+  5. D-025：单元若有 modern.py，还要跑 test.py 两档（默认档 / `-X dev -W error`），
+     并按 D-025 的名单查「一行把这一章删掉」的标准库调用
 
 用法:
   python3 tools/check_code.py                    # 全部单元
@@ -17,6 +19,7 @@
   python3 tools/check_code.py --keep             # 保留 .build/ 便于手工复现
 """
 import argparse
+import ast
 import json
 import re
 import shutil
@@ -59,6 +62,163 @@ D001_FORBIDDEN = [
         "D-001§2 不得用 STL 容器替代本章要讲的手写实现",
     ),
 ]
+
+
+# ── D-025：Python 臂 ────────────────────────────────────────────────────────
+#
+# C++ 侧有两档构建（sanitizer 与 -O2），Python 没有 sanitizer 可跑，但**有**一档
+# 真正会多抓东西的模式：`-X dev` 打开开发模式（调试用内存分配器、更严的默认警告
+# 过滤器），`-W error` 把 DeprecationWarning 这类「现在能跑、下一版就不能跑」
+# 的东西变成失败。
+#
+# 反过来，`-O` 档**故意不跑**：`-O` 会把 assert 语句整个剥掉，那一档下测试恒绿。
+# 一个永远不会红的档不是第二重保险，是伪证。
+PY_PROFILES = [
+    ("py-default", []),
+    ("py-dev", ["-X", "dev", "-W", "error"]),
+]
+
+# D-001 §2 在 C++ 侧禁的是「用 STL 容器替代本章要讲的手写实现」。
+# Python 的标准库把同一件事做得更彻底——`sorted()` 一个调用就是第 8 章全章，
+# `heapq` 一行就是 5.5 节。判据不变，只是换了一份名单。
+# 和 `d001_exceptions` 一样，`unit.json.d025_exceptions` 可以豁免，但**必须写理由**。
+D025_FORBIDDEN_IMPORTS = {
+    "heapq": "D-025 堆与优先队列是 5.5 的课",
+    "bisect": "D-025 二分检索是 10.2 的课",
+    "re": "D-025 模式匹配是 4.3 的课（KMP）",
+    "collections": "D-025 队列/双端队列是 3.2 的课（确需 defaultdict 等请写豁免理由）",
+}
+D025_FORBIDDEN_CALLS = {
+    "sorted": "D-025 排序是第 8 章的课",
+    "sort": "D-025 排序是第 8 章的课（`list.sort()`）",
+    "print": "D-001§3 数据结构与算法实现内部严禁 I/O",
+    "input": "D-001§3 数据结构与算法实现内部严禁 I/O",
+}
+
+
+def python_exe():
+    return sys.executable or shutil.which("python3")
+
+
+def check_d025(unit_dir: Path, meta):
+    """modern.py 里有没有「一行把这一章删掉」的调用。用 AST 而不是正则——
+    注释里出现 `sorted` 不该报红，`x.sort()` 该报红，正则两头都做不好。"""
+    path = unit_dir / "modern.py"
+    if not path.is_file():
+        return []
+    exceptions = {
+        token.strip(): reason.strip()
+        for token, reason in (meta.get("d025_exceptions") or {}).items()
+        if isinstance(reason, str) and reason.strip()
+    }
+    source = path.read_text(encoding="utf-8")
+    try:
+        tree = ast.parse(source, filename=str(path))
+    except SyntaxError as exc:
+        return [f"  ❌ modern.py 语法错误：第 {exc.lineno} 行 {exc.msg}"]
+
+    problems = []
+    def flag(lineno, token, why):
+        if token not in exceptions:
+            problems.append(f"  ❌ modern.py:{lineno} {why}: `{token}`")
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                root = alias.name.split(".")[0]
+                if root in D025_FORBIDDEN_IMPORTS:
+                    flag(node.lineno, root, D025_FORBIDDEN_IMPORTS[root])
+        elif isinstance(node, ast.ImportFrom):
+            root = (node.module or "").split(".")[0]
+            if root in D025_FORBIDDEN_IMPORTS:
+                flag(node.lineno, root, D025_FORBIDDEN_IMPORTS[root])
+        elif isinstance(node, ast.Call):
+            func = node.func
+            name = None
+            if isinstance(func, ast.Name):
+                name = func.id
+            elif isinstance(func, ast.Attribute):
+                name = func.attr
+            if name in D025_FORBIDDEN_CALLS:
+                flag(node.lineno, name, D025_FORBIDDEN_CALLS[name])
+    return problems
+
+
+def check_python_bindings(unit_dir: Path, meta):
+    """有 modern.py 的单元，它认领的每一条清单都得给出 Python 锚点，或写明为什么不给。
+
+    这条防的是「悄悄只覆盖一半」：Python 版实现了 17 条里的 5 条，
+    书上却按「本章双实现」印，读者无从知道哪几条其实没有。
+    """
+    if not (unit_dir / "modern.py").is_file():
+        return []
+    problems = []
+    source = (unit_dir / "modern.py").read_text(encoding="utf-8")
+    source_lines = source.splitlines()
+    tests = (unit_dir / "test.py").read_text(encoding="utf-8") if (unit_dir / "test.py").is_file() else ""
+    anchors, tests_seen = set(), set()
+    for entry in meta.get("listings", []):
+        if not isinstance(entry, dict):
+            continue
+        listing = entry.get("id", "?")
+        skip = entry.get("py_skip")
+        anchor, test = entry.get("py_anchor"), entry.get("py_test")
+        if isinstance(skip, str) and skip.strip():
+            if anchor or test:
+                problems.append(f"  ❌ {listing} 同时写了 py_skip 和 py_anchor/py_test，二选一")
+            continue
+        if skip is not None:
+            problems.append(f"  ❌ {listing} 的 py_skip 是空的——不给 Python 可以，不写理由不行")
+            continue
+        if not (isinstance(anchor, str) and anchor.strip() and isinstance(test, str) and test.strip()):
+            problems.append(
+                f"  ❌ {listing} 缺 py_anchor/py_test：本单元有 modern.py，"
+                "每条清单要么给出 Python 锚点，要么写 py_skip 说明理由（D-025）"
+            )
+            continue
+        if anchor in anchors:
+            problems.append(f"  ❌ {listing} 的 py_anchor 与同单元其他清单重复：{anchor}")
+        if test in tests_seen:
+            problems.append(f"  ❌ {listing} 的 py_test 与同单元其他清单重复：{test}")
+        anchors.add(anchor)
+        tests_seen.add(test)
+        matching = [line for line in source_lines if anchor in line]
+        if not matching:
+            problems.append(f"  ❌ {listing} 的 py_anchor 在 modern.py 里不存在：{anchor}")
+        elif all(line.lstrip().startswith("#") for line in matching):
+            problems.append(f"  ❌ {listing} 的 py_anchor 只存在于注释行：{anchor}")
+        if test not in tests:
+            problems.append(f"  ❌ {listing} 的 py_test 在 test.py 里不存在：{test}")
+    return problems
+
+
+def run_python(unit_dir: Path, profiles=None):
+    """跑 test.py 两档。返回 (ok, 日志, 断言数)。"""
+    if not (unit_dir / "modern.py").is_file() and not (unit_dir / "test.py").is_file():
+        return True, [], None
+    logs, ok, assertions = [], True, None
+    if not (unit_dir / "test.py").is_file():
+        return False, ["  ❌ 有 modern.py 却没有 test.py：Python 实现不能是唯一没人验的代码（D-025）"], None
+    if not (unit_dir / "modern.py").is_file():
+        return False, ["  ❌ 有 test.py 却没有 modern.py。"], None
+    for name, flags in (PY_PROFILES if profiles is None else profiles):
+        cmd = [python_exe(), *flags, "test.py"]
+        proc = subprocess.run(
+            cmd, capture_output=True, text=True, cwd=unit_dir, timeout=TIMEOUT_SEC
+        )
+        if proc.returncode != 0:
+            ok = False
+            logs.append(
+                f"  ❌ [{name}] Python 测试失败（退出码 {proc.returncode}）"
+                f"\n{indent(proc.stdout + proc.stderr)}"
+            )
+            continue
+        hit = re.search(r"(\d+)\s*项断言", proc.stdout)
+        if hit:
+            assertions = int(hit.group(1))
+        tail = proc.stdout.strip().splitlines()[-1:] or ["(无输出)"]
+        logs.append(f"  ✅ [{name}] {tail[0][:80]}")
+    return ok, logs, assertions
 
 
 def strip_comments_and_strings(source: str) -> str:
@@ -129,7 +289,7 @@ EVIDENCE_MARKERS = ("error:", "runtime error", "Sanitizer", "$ g++", "$ ./")
 MIN_TEACHING_ASSERTIONS = 10
 
 
-def check_substance(unit_dir: Path, meta, assertions, teaching_assertions=None):
+def check_substance(unit_dir: Path, meta, assertions, teaching_assertions=None, py_assertions=None):
     """单元里到底有没有东西。返回 problems 列表。
 
     判据刻意保守：现有的扎实单元是每条清单 8–18 项断言，
@@ -152,6 +312,21 @@ def check_substance(unit_dir: Path, meta, assertions, teaching_assertions=None):
                 f"  ❌ 教学版只有 {teaching_assertions} 项断言（下限 {MIN_TEACHING_ASSERTIONS}）。"
                 "正文整块印出来的那一份，不能比工程版验得松。"
             )
+
+    # Python 侧的密度按**它自己认领了几条清单**算，而不是按单元的全部清单：
+    # py_skip 掉的那些本来就不该要求 Python 断言（D-025）。
+    if (unit_dir / "modern.py").is_file() and py_assertions is not None:
+        claimed = [
+            e for e in meta.get("listings", [])
+            if isinstance(e, dict) and not (e.get("py_skip") or "").strip()
+        ]
+        if claimed:
+            need = max(MIN_ASSERTIONS_PER_LISTING * len(claimed), MIN_ASSERTIONS_PER_UNIT)
+            if py_assertions < need:
+                problems.append(
+                    f"  ❌ Python 断言密度不足：{len(claimed)} 条清单认领了 Python 实现，"
+                    f"只有 {py_assertions} 项断言（下限 {need}）。"
+                )
 
     legacy = unit_dir / "legacy.md"
     if legacy.is_file():
@@ -343,6 +518,15 @@ def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None, degr
     if bindings:
         ok = False
         logs.extend(bindings)
+    # D-025 Python 臂：静态判据先跑，跑不跑得起来后面见分晓
+    d025 = check_d025(unit_dir, meta)
+    if d025:
+        ok = False
+        logs.extend(d025)
+    py_bindings = check_python_bindings(unit_dir, meta)
+    if py_bindings:
+        ok = False
+        logs.extend(py_bindings)
 
     programs, structure = unit_programs(unit_dir, sources)
     if structure:
@@ -391,7 +575,14 @@ def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None, degr
             elif hit and kind == "teaching":
                 teaching_assertions = int(hit.group(1))
             logs.append(f"  ✅ [{label}] {tail[0][:80]}")
-    substance = check_substance(unit_dir, meta, assertions, teaching_assertions)
+    py_ok, py_logs, py_assertions = run_python(unit_dir)
+    if not py_ok:
+        ok = False
+    logs.extend(py_logs)
+
+    substance = check_substance(
+        unit_dir, meta, assertions, teaching_assertions, py_assertions
+    )
     if substance:
         ok = False
         logs.extend(substance)
@@ -475,10 +666,16 @@ def main():
         shutil.rmtree(workdir, ignore_errors=True)
 
     print("\n".join(blocks))
+    with_python = [u for u in units if (u / "modern.py").is_file()]
     print(
         f"\n{'❌' if failed else '✅'} {len(units) - len(failed)}/{len(units)} 个单元通过"
         f"（每个 {len(profiles)} 种构建：{', '.join(n for n, _ in profiles)}）"
     )
+    if with_python:
+        print(
+            f"   其中 {len(with_python)} 个单元另有 Python 实现，"
+            f"各跑 {len(PY_PROFILES)} 档：{', '.join(n for n, _ in PY_PROFILES)}（D-025）"
+        )
     if degraded_note:
         # 降级必须在结论旁边再喊一次：交接包里只贴尾部几行的人不能被瞒过去。
         print("⚠️  本次为降级运行，未跑 sanitizer 档——上面的绿不代表内存与 UB 干净。")

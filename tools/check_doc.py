@@ -123,9 +123,17 @@ def source_texts(code_root=None):
     out = {}
     if not root.is_dir():
         return out
-    for path in sorted(list(root.rglob("*.hpp")) + list(root.rglob("*.cpp"))):
+    globs = ["*.hpp", "*.cpp", "*.py"]  # D-025：Python 实现同样是「本书自己的代码」
+    paths = sorted(q for g in globs for q in root.rglob(g))
+    for path in paths:
         out[rel_label(path)] = _normalize_code(path.read_text(encoding="utf-8", errors="replace"))
     return out
+
+
+# 「至少是一个带函数体的定义」这条判据要按语言各写一遍：C++ 数花括号，
+# Python 没有花括号可数，只能认 `def` / `class` 开头的行。两条都留着
+# MIN_COPIED_CHARS 的下限，正文里那些「摘一行出来讲」的教学片段才不会被误判。
+PY_DEF_RE = re.compile(r"^\s*(?:async\s+)?(?:def|class)\s+\w", re.M)
 
 
 def copied_from_source(body, sources):
@@ -133,10 +141,12 @@ def copied_from_source(body, sources):
     normalized = _normalize_code(body)
     if len(normalized) < MIN_COPIED_CHARS:
         return None
-    if "{" not in normalized or "}" not in normalized:
+    braced = "{" in normalized and "}" in normalized
+    pythonic = PY_DEF_RE.search(normalized) is not None
+    if not braced and not pythonic:
         return None
     for name, content in sources.items():
-        if normalized in content:
+        if (pythonic if name.endswith(".py") else braced) and normalized in content:
             return name
     return None
 
@@ -169,6 +179,23 @@ def function_like_text(body):
     return False
 
 
+def python_function_like_text(body):
+    """长 text 块里是否有 Python 函数/类定义形态。
+
+    存在的理由与 C++ 那条完全一样：R3 只管 ```python 块，把它relabel 成 ```text
+    就能绕过逐字核对。原书是 2008 年的 C++，里面不可能出现 `def foo(...):`，
+    所以这条判据不会把原书引文误伤。
+    """
+    normalized = _normalize_code(body)
+    if len(normalized) < MIN_COPIED_CHARS:
+        return False
+    for line in body.splitlines():
+        code = line.split("#", 1)[0]
+        if re.match(r"^\s*(?:async\s+)?(?:def|class)\s+\w[\w]*\s*[(:]", code) and code.rstrip().endswith(":"):
+            return True
+    return False
+
+
 def original_listing_reason(info):
     match = ORIGINAL_LISTING_RE.search(info)
     return match.group(1).strip() if match else None
@@ -187,6 +214,7 @@ def check_r8(path: Path, sources=None):
         body = "\n".join(block["body"])
         origin = copied_from_source(body, sources)
         function_like = function_like_text(body)
+        py_like = python_function_like_text(body)
         reason = original_listing_reason(block["info"])
         has_marker = "original-listing" in block["info"]
         prefix = f"{rel_label(path)}:{block['start']}  "
@@ -197,16 +225,23 @@ def check_r8(path: Path, sources=None):
             # 而这段字节逐字来自 `code/`——它就是本书自己的代码，不是引文。
             # 2026-08-17 实测：加一句 original-listing="就想这么写" 就能让逐字抄的
             # `push()` 从报红变成放行，等于把 D-010 堵的那个口子重新打开。
+            fence = "python" if origin.endswith(".py") else "cpp"
             problems.append(
                 prefix + f"R8 这段 text 块逐字抄自 {origin}；那是本书自己的代码，"
                 "不是原书引文，original-listing= 豁免对它不适用。"
-                "改写成 ```cpp file=<路径>#<锚点>，交给 R3 逐字核对。"
+                f"改写成 ```{fence} file=<路径>#<锚点>，交给 R3 逐字核对。"
             )
         elif function_like and not reason:
             problems.append(
                 prefix + "R8 这段长 text 块形似 C++ 函数定义；本书自己的代码要写成 "
                 "```cpp file=<路径>#<锚点>，交给 R3 逐字核对。"
                 "若确为无法编译的原书引文，须在围栏上写 original-listing=\"具体理由\"。"
+            )
+        elif py_like and not reason:
+            problems.append(
+                prefix + "R8 这段长 text 块形似 Python 定义；本书自己的代码要写成 "
+                "```python file=<路径>#<锚点>，交给 R3 逐字核对（D-025）。"
+                "若确为不该进 code/ 的引文，须在围栏上写 original-listing=\"具体理由\"。"
             )
     return problems
 
@@ -380,19 +415,82 @@ def read_function(path: Path, name):
     return "\n\n".join(chunks), None
 
 
+# D-025：Python 与 C++ 走同一条 R3 契约，差别只在注释符——C++ 是 `// >>> 名字`，
+# Python 是 `# >>> 名字`。把它做成一个函数而不是在三处各判一次 `.py`，
+# 是因为 sync_book.py 也要用同一套规则，两边判据一旦分家书稿就会和源码漂开。
+def comment_marker(path: Path):
+    return "#" if path.suffix == ".py" else "//"
+
+
 def read_slice(path: Path, anchor):
-    """按引用取切片：`#fn:名字` 走函数名，其余走 `// >>> 锚点`。"""
+    """按引用取切片：`#fn:名字` 走函数名，其余走 `// >>> 锚点`（`.py` 是 `# >>> 锚点`）。"""
     match = FUNCTION_REF.match(anchor)
     if match:
-        return read_function(path, match.group(1).strip())
+        name = match.group(1).strip()
+        return read_python_function(path, name) if path.suffix == ".py" else read_function(path, name)
     return read_anchor(path, anchor)
+
+
+def read_python_function(path: Path, name):
+    """取名为 name 的 def/class 定义，含紧贴其上的装饰器与注释。多个同名依次取出。
+
+    Python 没有花括号，定义的边界由**缩进**定：从 `def name(` 那一行起，
+    到下一个缩进不深于它的非空行为止。这条规则对嵌套函数、类里的方法一样成立。
+    """
+    lines = path.read_text(encoding="utf-8").splitlines()
+    pattern = re.compile(rf"^(\s*)(?:async\s+)?(?:def|class)\s+{re.escape(name)}\s*[(:]")
+    chunks, idx = [], 0
+    while idx < len(lines):
+        found = pattern.match(lines[idx])
+        if not found:
+            idx += 1
+            continue
+        indent = len(found.group(1))
+        head = idx
+        # 教学代码的注释就是内容的一半，装饰器更是定义的一部分——一起带上
+        while head > 0:
+            prev = lines[head - 1]
+            if prev.strip().startswith(("#", "@")) and len(prev) - len(prev.lstrip()) == indent:
+                head -= 1
+            else:
+                break
+        # 先把**函数头**吃完再按缩进找边界。参数表跨行、且闭合括号顶格时——
+        #     def f(
+        #         a, b
+        #     ):
+        # ——`):` 那行的缩进是 0，纯缩进规则会在这里就收尾，把函数体整个丢掉。
+        # 判据：括号配平且该行以 `:` 结束，函数头才算完。
+        depth, header_end = 0, idx
+        while header_end < len(lines):
+            code = lines[header_end].split("#", 1)[0]
+            depth += code.count("(") - code.count(")")
+            depth += code.count("[") - code.count("]")
+            if depth <= 0 and code.rstrip().endswith(":"):
+                break
+            header_end += 1
+        if header_end >= len(lines):
+            header_end = idx
+        tail, cursor = header_end + 1, header_end + 1
+        while cursor < len(lines):
+            line = lines[cursor]
+            if line.strip():
+                if len(line) - len(line.lstrip()) <= indent:
+                    break
+                tail = cursor + 1
+            cursor += 1
+        chunks.append("\n".join(lines[head:tail]))
+        idx = tail
+    if not chunks:
+        return None, f"{path} 里没有名为 `{name}` 的 def/class 定义"
+    return "\n\n".join(chunks), None
 
 
 def read_anchor(path: Path, anchor):
     """取 `// >>> anchor` 与 `// <<< anchor` 之间的内容（不含标记行本身）。"""
     lines = path.read_text(encoding="utf-8").splitlines()
-    open_pat = re.compile(rf"//\s*>>>\s*{re.escape(anchor)}\s*$")
-    close_pat = re.compile(rf"//\s*<<<\s*{re.escape(anchor)}\s*$")
+    mark = re.escape(comment_marker(path))
+    open_pat = re.compile(rf"{mark}\s*>>>\s*{re.escape(anchor)}\s*$")
+    close_pat = re.compile(rf"{mark}\s*<<<\s*{re.escape(anchor)}\s*$")
     start = end = None
     for idx, line in enumerate(lines):
         if start is None and open_pat.search(line):
@@ -401,9 +499,11 @@ def read_anchor(path: Path, anchor):
             end = idx
             break
     if start is None:
-        return None, f"{path} 里没有锚点 `// >>> {anchor}`"
+        return None, f"{path} 里没有锚点 `{comment_marker(path)} >>> {anchor}`"
     if end is None:
-        return None, f"{path} 的锚点 `{anchor}` 只有开头没有 `// <<< {anchor}`"
+        return None, (
+            f"{path} 的锚点 `{anchor}` 只有开头没有 `{comment_marker(path)} <<< {anchor}`"
+        )
     return "\n".join(lines[start:end]), None
 
 
@@ -1068,18 +1168,28 @@ def check_file(path: Path, listings, sources=None):
                         add(block["start"] + 1 + offset, f"R2 {desc}: `{line.strip()[:60]}`")
                         break
 
-        # R3 引用契约
-        if lang == "cpp":
+        # R3 引用契约（D-025 起 python 与 cpp 同规矩：印出来的就是跑过的那份）
+        if lang in ("cpp", "python"):
+            what = "Python" if lang == "python" else "C++"
+            runs = "能跑的 .py 文件" if lang == "python" else "能编译的文件"
             if not ref:
                 add(
                     block["start"],
-                    "R3 cpp 代码块没有 file= 引用。书稿里的 C++ 必须来自 code/ 下能编译的文件，"
+                    f"R3 {lang} 代码块没有 file= 引用。书稿里的 {what} 必须来自 code/ 下{runs}，"
                     "示意性片段请标 ```text",
                 )
                 continue
             target = ROOT / ref
             if not target.is_file():
                 add(block["start"], f"R3 file={ref} 不存在")
+                continue
+            # 语言标签与文件后缀必须一致：标 python 却指向 .hpp（或反过来）时，
+            # 逐字比对仍然会过，但书上印的语言是假的。
+            if lang == "python" and target.suffix != ".py":
+                add(block["start"], f"R3 python 代码块的 file= 指向了 {target.suffix or '无后缀'} 文件：{ref}")
+                continue
+            if lang == "cpp" and target.suffix == ".py":
+                add(block["start"], f"R3 cpp 代码块的 file= 指向了 .py 文件：{ref}")
                 continue
             if anchor:
                 expected, err = read_slice(target, anchor)

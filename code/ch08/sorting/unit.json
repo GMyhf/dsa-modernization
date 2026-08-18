@@ -5,92 +5,123 @@
     {
       "id": "算法8.1",
       "anchor": "void insertion_sort(std::vector<int>& values)",
-      "test": "算法8.1 insertion"
+      "test": "算法8.1 insertion",
+      "py_anchor": "def insertion_sort(",
+      "py_test": "算法8.1 Python insertion"
     },
     {
       "id": "算法8.2",
       "anchor": "void shell_sort(std::vector<int>& values)",
-      "test": "算法8.2 shell"
+      "test": "算法8.2 shell",
+      "py_anchor": "def shell_sort(",
+      "py_test": "算法8.2 Python shell"
     },
     {
       "id": "算法8.3",
       "anchor": "void selection_sort(std::vector<int>& values)",
-      "test": "算法8.3 selection"
+      "test": "算法8.3 selection",
+      "py_anchor": "def selection_sort(",
+      "py_test": "算法8.3 Python selection"
     },
     {
       "id": "算法8.4",
       "anchor": "void heap_sort(std::vector<int>& values)",
-      "test": "算法8.4 heap"
+      "test": "算法8.4 heap",
+      "py_anchor": "def heap_sort(",
+      "py_test": "算法8.4 Python heap"
     },
     {
       "id": "算法8.5",
       "anchor": "void bubble_sort(std::vector<int>& values)",
-      "test": "算法8.5 bubble"
+      "test": "算法8.5 bubble",
+      "py_anchor": "def bubble_sort(",
+      "py_test": "算法8.5 Python bubble"
     },
     {
       "id": "算法8.6",
       "anchor": "void quick_sort(std::vector<int>& values)",
-      "test": "算法8.6 quick"
+      "test": "算法8.6 quick",
+      "py_anchor": "def quick_sort(",
+      "py_test": "算法8.6 Python quick"
     },
     {
       "id": "算法8.7",
       "anchor": "void quick_sort_optimized(std::vector<int>& values)",
-      "test": "算法8.7 quick optimized"
+      "test": "算法8.7 quick optimized",
+      "py_anchor": "def quick_sort_optimized(",
+      "py_test": "算法8.7 Python quick optimized"
     },
     {
       "id": "算法8.8",
       "anchor": "void merge_sort(std::vector<int>& values)",
-      "test": "算法8.8 merge"
+      "test": "算法8.8 merge",
+      "py_anchor": "def merge_sort(",
+      "py_test": "算法8.8 Python merge"
     },
     {
       "id": "算法8.9",
       "anchor": "void merge_sort_optimized(std::vector<int>& values)",
-      "test": "算法8.9 merge optimized"
+      "test": "算法8.9 merge optimized",
+      "py_anchor": "def merge_sort_optimized(",
+      "py_test": "算法8.9 Python merge optimized"
     },
     {
       "id": "算法8.10",
       "anchor": "void counting_sort(std::vector<int>& values)",
-      "test": "算法8.10 counting"
+      "test": "算法8.10 counting",
+      "py_anchor": "def counting_sort(",
+      "py_test": "算法8.10 Python counting"
     },
     {
       "id": "算法8.11",
       "anchor": "void radix_sort(std::vector<int>& values)",
-      "test": "算法8.11 radix"
+      "test": "算法8.11 radix",
+      "py_anchor": "def radix_sort(",
+      "py_test": "算法8.11 Python radix"
     },
     {
       "id": "代码8.12",
       "anchor": "class StaticQueue {",
-      "test": "代码8.12 FIFO and empty optional"
+      "test": "代码8.12 FIFO and empty optional",
+      "py_skip": "固定容量环形队列是存储管理（容量、环绕、回卷），按 D-025 §1 属于存储侧。Python 的 list 没有容量这个概念，照写只剩一层空包装；算法8.13 的 Python 版改用普通 list 作桶，「按桶序收集保证稳定」这个教学点一字未少。"
     },
     {
       "id": "算法8.13",
       "anchor": "void radix_sort_linked_style(std::vector<int>& values)",
-      "test": "算法8.13 linked radix"
+      "test": "算法8.13 linked radix",
+      "py_anchor": "def radix_sort_linked_style(",
+      "py_test": "算法8.13 Python linked radix"
     },
     {
       "id": "算法8.14",
       "anchor": "insertion_index_sort(const std::vector<int>& values)",
-      "test": "算法8.14 returns sorted indexes"
+      "test": "算法8.14 returns sorted indexes",
+      "py_anchor": "def insertion_index_sort(",
+      "py_test": "算法8.14 Python 返回按值排好的下标"
     },
     {
       "id": "算法8.15",
       "anchor": "void adjust_by_index(std::vector<int>& values",
-      "test": "算法8.15 adjusts records by cycles"
+      "test": "算法8.15 adjusts records by cycles",
+      "py_anchor": "def adjust_by_index(",
+      "py_test": "算法8.15 Python 沿置换环落实记录顺序"
     },
     {
       "id": "代码8.16",
       "anchor": "random_values(std::size_t count",
-      "test": "代码8.16 deterministic seed"
+      "test": "代码8.16 deterministic seed",
+      "py_skip": "可复现随机数据是测试基础设施而非本章算法。Python 用 random.Random(seed) 一行即得，重写一遍没有教学增量；test.py 需要随机数据时直接用标准库。"
     },
     {
       "id": "代码8.17",
       "anchor": "class Stopwatch {",
-      "test": "代码8.17 monotonic elapsed time"
+      "test": "代码8.17 monotonic elapsed time",
+      "py_skip": "计时同上：time.perf_counter() 就是单调时钟，本书不必再教一遍怎么包装它。"
     }
   ],
   "standard": "c++17",
   "owner": "codex",
-  "notes": "插入、Shell、选择、堆、冒泡、快排、归并、计数/基数和索引排序的可测实现。",
+  "notes": "插入、Shell、选择、堆、冒泡、快排、归并、计数/基数和索引排序的可测实现。 D-025（2026-08-18）：本单元加 Python 双实现 modern.py + test.py，14 条清单认领 Python、3 条写明 py_skip；Python 侧 123 项断言。基数排序不能照搬 C++ 的「异或最高位」——Python 整数无定长，改用整体平移，见 modern.py 注释与 test.py 的 10**30 用例。",
   "d001_exceptions": {
     "#include<vector>": "排序输入与临时归并/计数存储；本章教授排序而非另造数组容器。",
     "#include<algorithm>": "使用标准库 heap 与 merge 作为已验证的算法基础设施，并保留各排序 API。"

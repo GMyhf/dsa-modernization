@@ -24,10 +24,10 @@ PDF_DIR = BOOK / "pdf"
 WORK = ROOT / ".build" / "book-pdf"
 ASSEMBLED = WORK / "assembled.md"
 PREAMBLE = PDF_DIR / "preamble.tex"
-OUTPUT = PDF_DIR / "现代C++数据结构教程.pdf"
+OUTPUT = PDF_DIR / "数据结构与算法.pdf"
 
 CHAPTERS = [
-    BOOK / "现代C++数据结构教程.md",
+    BOOK / "数据结构与算法.md",
     BOOK / "ch01-adt.md",
     BOOK / "ch02-linear-list.md",
     BOOK / "ch03-stack.md",
@@ -47,7 +47,7 @@ CHAPTERS = [
 ]
 
 FRONT_MATTER = """---
-title: 现代 C++ 数据结构教程
+title: 数据结构与算法：Python 讲算法，C++ 讲实现
 author:
   - 基于张铭、王腾蛟、赵海燕《数据结构与算法》重编
   - 高等教育出版社 2008 年版教学内容的现代化讲义
@@ -218,9 +218,9 @@ def rewrite_links(text: str) -> str:
 
 def drop_repo_meta(text: str, path: Path) -> str:
     """学生 PDF 不需要仓库地位说明和指向 collab 的工程注释。"""
-    if path.name == "现代C++数据结构教程.md":
+    if path.name == "数据结构与算法.md":
         # 封面已经印了书名，这篇只作不编号的前言，避免 TOC 里再出现一章同名。
-        text = text.replace("# 现代 C++ 数据结构教程\n", "# 写给学生\n", 1)
+        text = text.replace("# 数据结构与算法：Python 讲算法，C++ 讲实现\n", "# 写给学生\n", 1)
         text = text.replace(
             "这是 `dsa_raw.md` 的可读替代稿：保留原书的章节脉络、数据结构与算法思想，移除 OCR\n"
             "> 噪声，并把所有示例统一为可编译、可测试的 C++17。原 OCR 底稿继续只作为考证材料保留，\n"
@@ -305,7 +305,7 @@ def assemble() -> str:
         # 每章从新页开始，但前言那份总目录不要再套一层 chapter
         if path.name == "ch01-adt.md":
             parts.append("\\mainmatter\n")
-        elif path.name != "现代C++数据结构教程.md":
+        elif path.name != "数据结构与算法.md":
             parts.append("\\newpage\n")
         if path.name == "勘误.md":
             parts.append("\\appendix\n")

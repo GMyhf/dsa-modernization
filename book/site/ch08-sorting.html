@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>第8章 内部排序 · 现代 C++ 数据结构教程</title>
-<meta name="description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<title>第8章 内部排序 · 数据结构与算法：Python 讲算法，C++ 讲实现</title>
+<meta name="description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，示例统一为可编译、可测试的 C++17；讲算法的章节另给一份同样跑过测试的 Python 实现。">
 <meta property="og:title" content="第8章 内部排序">
-<meta property="og:description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，全部示例统一为可编译、可测试的 C++17。">
+<meta property="og:description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，示例统一为可编译、可测试的 C++17；讲算法的章节另给一份同样跑过测试的 Python 实现。">
 <meta property="og:type" content="article">
 <style>
 :root{color-scheme:light;
@@ -144,7 +144,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 </head>
 <body>
 <header class="masthead"><div class="inner">
-<p class="eyebrow"><a href="index.html">现代 C++ 数据结构教程</a></p>  <h1>第8章 内部排序</h1>
+<p class="eyebrow"><a href="index.html">数据结构与算法：Python 讲算法，C++ 讲实现</a></p>  <h1>第8章 内部排序</h1>
 
   <p class="meta"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/book/ch08-sorting.md">Markdown 源文件</a>
     · <a href="https://github.com/GMyhf/dsa-modernization">GitHub 仓库</a>
@@ -269,6 +269,20 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
         values[hole] = value;
     }
 }</code></pre></div>
+<p>本书讲<strong>算法</strong>的章节同时给一份 Python 实现，讲<strong>存储管理</strong>的章节只有 C++（D-025）。 两份不是逐行翻译：策略是同一份，代价不是同一份——差在哪里，每处都会点名。</p>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.py">code/ch08/sorting/modern.py#insertion</a></div><pre><code><span class="c"># 算法8.1：直接插入排序。相等元素不越过彼此，故稳定。</span>
+<span class="k">def</span> insertion_sort(values: <span class="t">list</span>[<span class="t">int</span>]) -&gt; <span class="k">None</span>:
+    <span class="k">for</span> index <span class="k">in</span> <span class="t">range</span>(<span class="n">1</span>, <span class="t">len</span>(values)):
+        value = values[index]
+        hole = index
+        <span class="c"># `hole &gt; 0` 这个条件在 Python 里是**承重的**，不是防御性写法：</span>
+        <span class="c"># C++ 版越界会被 ASan 当场抓住，Python 的 values[-1] 却合法——</span>
+        <span class="c"># 它悄悄环绕到最后一个元素，把排序结果搅乱而不报任何错。</span>
+        <span class="k">while</span> hole &gt; <span class="n">0</span> <span class="k">and</span> value &lt; values[hole - <span class="n">1</span>]:
+            values[hole] = values[hole - <span class="n">1</span>]
+            hole -= <span class="n">1</span>
+        values[hole] = value</code></pre></div>
+<p><code>hole &gt; 0</code> 这个条件在 Python 里是<strong>承重的</strong>，不是防御性写法。C++ 版写漏了， 下标越界会被 AddressSanitizer 当场抓住；Python 的 <code>values[-1]</code> 却完全合法—— 它环绕到最后一个元素，把结果悄悄排错而不报任何错。同一处笔误， 一种语言当场崩，另一种语言交出一个看起来正常的错答案。</p>
 <h3 id="822-shell-排序"><a class="anchor" href="#822-shell-排序">#</a>8.2.2 Shell 排序</h3>
 <p>直接插入的代价几乎全花在「一次只能挪一格」上：一个很小的元素落在末尾，就得一路挪回 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 次。Shell 排序（D. L. Shell，1959）先用较大的增量粗排一遍——把相隔 <code>gap</code> 个位置的 元素看成一个子序列，各自做插入排序——让远处的元素先大步靠近自己该在的位置；然后缩小增量， 重复；最后一趟增量为 1，就是一次普通的直接插入排序，但此时序列已经<strong>基本有序</strong>， 插入排序在这种输入上接近 <span class="math">Θ(n)</span>。</p>
 <p>本书按原书取「增量每次减半」。仍用上面那个序列，两个 34 用 34 和 34′ 区分：</p>
@@ -344,6 +358,26 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
         sift_down(values, <span class="n">0</span>, end - <span class="n">1</span>);
     }
 }</code></pre></div>
+<p>Python 版同样手写筛选，不借 <code>heapq</code>：</p>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.py">code/ch08/sorting/modern.py#heap</a></div><pre><code><span class="c"># 算法8.4：手写最大堆筛选与堆排序，不借 heapq——那一行就是 5.5 节全节。</span>
+<span class="k">def</span> sift_down(values: <span class="t">list</span>[<span class="t">int</span>], root: <span class="t">int</span>, count: <span class="t">int</span>) -&gt; <span class="k">None</span>:
+    <span class="k">while</span> root * <span class="n">2</span> + <span class="n">1</span> &lt; count:
+        child = root * <span class="n">2</span> + <span class="n">1</span>
+        <span class="k">if</span> child + <span class="n">1</span> &lt; count <span class="k">and</span> values[child] &lt; values[child + <span class="n">1</span>]:
+            child += <span class="n">1</span>
+        <span class="k">if</span> values[root] &gt;= values[child]:
+            <span class="k">return</span>
+        values[root], values[child] = values[child], values[root]
+        root = child
+
+
+<span class="k">def</span> heap_sort(values: <span class="t">list</span>[<span class="t">int</span>]) -&gt; <span class="k">None</span>:
+    <span class="k">for</span> root <span class="k">in</span> <span class="t">range</span>(<span class="t">len</span>(values) // <span class="n">2</span> - <span class="n">1</span>, -<span class="n">1</span>, -<span class="n">1</span>):
+        sift_down(values, root, <span class="t">len</span>(values))
+    <span class="k">for</span> end <span class="k">in</span> <span class="t">range</span>(<span class="t">len</span>(values) - <span class="n">1</span>, <span class="n">0</span>, -<span class="n">1</span>):
+        values[<span class="n">0</span>], values[end] = values[end], values[<span class="n">0</span>]
+        sift_down(values, <span class="n">0</span>, end)</code></pre></div>
+<p><code>heapq.heapify</code> 加 <code>heappop</code> 三行就能排完一个表，但那三行就是 5.5 节全节。 本书的闸门有一条规则专查这件事——Python 实现文件里出现 <code>heapq</code>、<code>bisect</code>、 <code>sorted</code>、<code>list.sort</code> 一律判红，要豁免得在 <code>unit.json</code> 里写明理由（D-025）。</p>
 <h2 id="84-交换排序"><a class="anchor" href="#84-交换排序">#</a>8.4 交换排序</h2>
 <h3 id="841-冒泡排序"><a class="anchor" href="#841-冒泡排序">#</a>8.4.1 冒泡排序</h3>
 <p>冒泡排序不停地比较<strong>相邻</strong>两个记录，逆序就交换；一趟走完，最大（或最小）的那个必然被顶到 一端，就像气泡浮出水面。原书是从数组末端往前比，每趟把最小的推到最左；本书从前往后比， 每趟把最大的顶到最右——原书自己也写了「算法的具体实现取决于编程人员的个人喜好」， 两种写法对称等价。</p>
@@ -402,6 +436,36 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 
 <span class="c">// 算法8.6：手写快排。</span>
 <span class="k">inline</span> <span class="t">void</span> quick_sort(std::vector&lt;<span class="t">int</span>&gt;&amp; values) { quick_sort_range(values, <span class="n">0</span>, values.size()); }</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.py">code/ch08/sorting/modern.py#quick</a></div><pre><code><span class="k">def</span> partition(values: <span class="t">list</span>[<span class="t">int</span>], first: <span class="t">int</span>, last: <span class="t">int</span>) -&gt; <span class="t">int</span>:
+    <span class="s">&quot;&quot;&quot;以 [first, last) 的末元素为轴划分，返回轴的落点。&quot;&quot;&quot;</span>
+    pivot = values[last - <span class="n">1</span>]
+    boundary = first
+    <span class="k">for</span> index <span class="k">in</span> <span class="t">range</span>(first, last - <span class="n">1</span>):
+        <span class="k">if</span> values[index] &lt; pivot:
+            values[boundary], values[index] = values[index], values[boundary]
+            boundary += <span class="n">1</span>
+    values[boundary], values[last - <span class="n">1</span>] = values[last - <span class="n">1</span>], values[boundary]
+    <span class="k">return</span> boundary
+
+
+<span class="k">def</span> quick_sort_range(values: <span class="t">list</span>[<span class="t">int</span>], first: <span class="t">int</span>, last: <span class="t">int</span>) -&gt; <span class="k">None</span>:
+    <span class="k">if</span> last - first &lt; <span class="n">2</span>:
+        <span class="k">return</span>
+    middle = partition(values, first, last)
+    quick_sort_range(values, first, middle)
+    quick_sort_range(values, middle + <span class="n">1</span>, last)
+
+
+<span class="c"># 算法8.6：手写快排。</span>
+<span class="c">#</span>
+<span class="c"># **这一版在 Python 里会真的崩，而在 C++ 里只是慢**：末元素当轴，遇到已排好序的</span>
+<span class="c"># 输入就退化成 n 层递归。C++ 有 8 MB 栈，几万层才炸；CPython 的递归上限默认是</span>
+<span class="c"># 1000 层，一千个有序元素就抛 RecursionError。同一个算法缺陷，两种语言的暴露</span>
+<span class="c"># 阈值差两个数量级——8.7 的「短侧递归」因此在 Python 里不是优化，是能不能跑。</span>
+<span class="c"># test.py 里有断言把这两件事都钉住。</span>
+<span class="k">def</span> quick_sort(values: <span class="t">list</span>[<span class="t">int</span>]) -&gt; <span class="k">None</span>:
+    quick_sort_range(values, <span class="n">0</span>, <span class="t">len</span>(values))</code></pre></div>
+<p><strong>这一版在 Python 里会真的崩，而在 C++ 里只是慢。</strong> 末元素当枢轴，遇到已排好序的 输入就退化成 <span class="math">n</span> 层递归。C++ 默认 8 MB 栈，几万层才炸；CPython 的递归上限默认 1000 层，<strong>两千个有序元素就抛 <code>RecursionError</code></strong>。同一个算法缺陷， 两种语言的暴露阈值差两个数量级——下面那条「只对较短的一侧递归」的优化， 在 C++ 里是省栈，在 Python 里是<strong>能不能跑完</strong>。</p>
 <p>基础版有两处会出事，原书算法8.7 给了对策：</p>
 <ul>
 <li><strong>递归太深</strong>。每次只把区间切成两半再各自递归，划分不平衡时深度可达 <span class="math">n</span>； 已经排好序的输入配上「取末元素作枢轴」正是最坏情形。对策是<strong>只对较短的一侧递归， 较长的一侧改成循环</strong>——这样递归深度被压到 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>，因为每次递归的区间至少减半。</li>
@@ -410,6 +474,8 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#fn:quick_sort_optimized</a></div><pre><code><span class="k">inline</span> <span class="t">void</span> quick_sort_optimized(std::vector&lt;<span class="t">int</span>&gt;&amp; values) {
     quick_sort_optimized_range(values, <span class="n">0</span>, values.size());
 }</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.py">code/ch08/sorting/modern.py#fn:quick_sort_optimized</a></div><pre><code><span class="k">def</span> quick_sort_optimized(values: <span class="t">list</span>[<span class="t">int</span>]) -&gt; <span class="k">None</span>:
+    quick_sort_optimized_range(values, <span class="n">0</span>, <span class="t">len</span>(values))</code></pre></div>
 <p>注意这两条优化管的是<strong>栈深与常数</strong>，管不了<strong>最坏时间</strong>：枢轴仍取末元素， 已排好序的输入照样是 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span> 次比较。8.7.2 节的实测里， 2 万个已排好序的数，优化快排要 105.9 毫秒，而插入排序只要 0.0 毫秒—— <strong>快排在这种输入上比 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span> 的插入排序还慢</strong>。想根治，得换枢轴策略 （三数取中、随机枢轴），那是习题里的事。</p>
 <h2 id="85-归并排序"><a class="anchor" href="#85-归并排序">#</a>8.5 归并排序</h2>
 <p>归并排序采用分治法：先把区间二分，递归地排好左右两个子区间，再用一次线性扫描把两个 有序区间合并。区间长度小于 2 时已经有序，因此递归可以停止。每一层合并总共扫描 <code>n</code> 个元素，递推式为</p>
@@ -442,6 +508,43 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
     std::vector&lt;<span class="t">int</span>&gt; buffer(values.size());
     merge_sort_range(values, buffer, <span class="n">0</span>, values.size());
 }</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.py">code/ch08/sorting/modern.py#merge</a></div><pre><code><span class="k">def</span> merge_ranges(values: <span class="t">list</span>[<span class="t">int</span>], buffer: <span class="t">list</span>[<span class="t">int</span>],
+                 first: <span class="t">int</span>, middle: <span class="t">int</span>, last: <span class="t">int</span>) -&gt; <span class="k">None</span>:
+    left, right, output = first, middle, first
+    <span class="k">while</span> left &lt; middle <span class="k">and</span> right &lt; last:
+        <span class="c"># `&lt;` 而不是 `&lt;=`：相等时取左边，稳定性就是从这一个符号来的。</span>
+        <span class="k">if</span> values[right] &lt; values[left]:
+            buffer[output] = values[right]
+            right += <span class="n">1</span>
+        <span class="k">else</span>:
+            buffer[output] = values[left]
+            left += <span class="n">1</span>
+        output += <span class="n">1</span>
+    <span class="k">while</span> left &lt; middle:
+        buffer[output] = values[left]
+        left += <span class="n">1</span>
+        output += <span class="n">1</span>
+    <span class="k">while</span> right &lt; last:
+        buffer[output] = values[right]
+        right += <span class="n">1</span>
+        output += <span class="n">1</span>
+    values[first:last] = buffer[first:last]
+
+
+<span class="k">def</span> merge_sort_range(values: <span class="t">list</span>[<span class="t">int</span>], buffer: <span class="t">list</span>[<span class="t">int</span>], first: <span class="t">int</span>, last: <span class="t">int</span>) -&gt; <span class="k">None</span>:
+    <span class="k">if</span> last - first &lt; <span class="n">2</span>:
+        <span class="k">return</span>
+    middle = first + (last - first) // <span class="n">2</span>
+    merge_sort_range(values, buffer, first, middle)
+    merge_sort_range(values, buffer, middle, last)
+    merge_ranges(values, buffer, first, middle, last)
+
+
+<span class="c"># 算法8.8：两路归并排序。辅助空间 O(n)，一次开够，不在递归里反复申请。</span>
+<span class="k">def</span> merge_sort(values: <span class="t">list</span>[<span class="t">int</span>]) -&gt; <span class="k">None</span>:
+    buffer = [<span class="n">0</span>] * <span class="t">len</span>(values)
+    merge_sort_range(values, buffer, <span class="n">0</span>, <span class="t">len</span>(values))</code></pre></div>
+<p><code>values[right] &lt; values[left]</code> 里的这个 <code>&lt;</code> 就是稳定性的全部来源：相等时取左边。 写成 <code>&lt;=</code> 就取右边，稳定性当场消失——<strong>而 C++ 那份 <code>std::vector&lt;int&gt;</code> 的实现 根本无法验证这一点</strong>，两个相等的 <code>3</code> 换不换位置，排完一模一样。 Python 这份不必改一个字就能排任何可比较的对象，于是测试里放一种 「只按 key 比较、payload 不参与比较」的记录，排完检查 payload 是否还是入场顺序。 把那个 <code>&lt;</code> 改成 <code>&lt;=</code>，这条断言会红。</p>
 <p>空序列和单元素序列都能直接通过。</p>
 <p>原书算法8.9 给了两处优化，本书都实现了：</p>
 <ul>
@@ -477,6 +580,32 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
         <span class="k">while</span> (counts[bucket]-- != <span class="n">0</span>) values[output++] = <span class="k">static_cast</span>&lt;<span class="t">int</span>&gt;(bucket) + low;
     }
 }</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.py">code/ch08/sorting/modern.py#fn:counting_sort</a></div><pre><code><span class="c"># 算法8.10：桶式（计数）排序，支持负数但不适合巨大稀疏值域。</span>
+<span class="c">#</span>
+<span class="c"># 与 C++ 版的一处**实质**差别：C++ 里 `high - low + 1` 本身就可能溢出 int，</span>
+<span class="c"># 那一版必须先转成 long long 再算。Python 的整数没有宽度，这个坑不存在——</span>
+<span class="c"># 但值域上限的检查一条都不能少，它挡的是内存而不是溢出。</span>
+<span class="k">def</span> counting_sort(values: <span class="t">list</span>[<span class="t">int</span>]) -&gt; <span class="k">None</span>:
+    <span class="k">if</span> <span class="k">not</span> values:
+        <span class="k">return</span>
+    low = high = values[<span class="n">0</span>]
+    <span class="k">for</span> value <span class="k">in</span> values:
+        <span class="k">if</span> value &lt; low:
+            low = value
+        <span class="k">if</span> high &lt; value:
+            high = value
+    span = high - low + <span class="n">1</span>
+    <span class="k">if</span> span &gt; COUNTING_RANGE_LIMIT:
+        <span class="k">raise</span> ValueError(<span class="s">&quot;counting sort value range is too sparse&quot;</span>)
+    counts = [<span class="n">0</span>] * span
+    <span class="k">for</span> value <span class="k">in</span> values:
+        counts[value - low] += <span class="n">1</span>
+    output = <span class="n">0</span>
+    <span class="k">for</span> bucket, count <span class="k">in</span> <span class="t">enumerate</span>(counts):
+        <span class="k">for</span> _ <span class="k">in</span> <span class="t">range</span>(count):
+            values[output] = bucket + low
+            output += <span class="n">1</span></code></pre></div>
+<p>C++ 版计算值域时必须先转成 <code>long long</code>：<code>high - low + 1</code> 在 <code>int</code> 里自己就会溢出。 Python 的整数没有宽度，这个坑不存在——<strong>但值域上限的检查一条都不能少</strong>， 它挡的是内存，不是溢出。</p>
 <p>第一，<strong>不要求下界为 0</strong>。实现先扫出实际的 <code>[low, high]</code>，按 <code>value - low</code> 计数， 于是负数不需要调用者先做平移——原书那个「所有记录都位于区间 <span class="math">[<span class="upr">0</span>,&thinsp;<span class="upr">max</span>&thinsp;)</span>」的前提， 在真实数据上往往是不成立的。</p>
 <p>第二，<strong>值域太稀疏时直接抛异常</strong>。桶式排序的时间与空间都是 <span class="math">Θ(m<span class="bin">+</span>n)</span>： <span class="math">m</span> 是值域长度，不是元素个数。排 10 个数、值域却是 <span class="math">[<span class="upr">0</span>,<span class="upr">10</span><sup><span class="upr">9</span></sup>)</span> 时，它会试图分配十亿个计数器。 原书没有防线，本书在 <span class="math">m&gt;<span class="upr">10</span><sup><span class="upr">7</span></sup></span> 时抛 <code>std::invalid_argument</code>——<strong>让它当场失败， 好过让它把机器拖垮</strong>。判断能不能用桶式排序，靠的正是这个 <span class="math">m</span> 与 <span class="math">n</span> 的比值： <span class="math">m<span class="rel">=</span>Θ(n)</span> 时总代价 <span class="math">Θ(n)</span>，是相对比较排序的一次飞跃； <span class="math">m</span> 涨到 <span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 或 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>，优势立刻消失，还倒贴 <span class="math">Θ(m<span class="bin">+</span>n)</span> 的空间。</p>
 <p>还有一处要说清楚：本书实现按计数<strong>重建取值</strong>（<code>values[output++] = bucket + low</code>）， 而不是像原书那样把原记录搬进结果数组。对纯整数，两者的输出完全一样，稳定性无从区分； 但只要记录带上了卫星数据（学号、姓名），就必须回到原书的写法——<strong>倒序扫描 + 搬移原记录</strong>。 这一点在把本节代码推广到真实记录时是个坑。</p>
@@ -500,6 +629,38 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
         values.swap(buffer);
     }
 }</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.py">code/ch08/sorting/modern.py#radix</a></div><pre><code><span class="c"># 算法8.11：LSD 基数排序，每趟按 8 位分桶。</span>
+<span class="c">#</span>
+<span class="c"># **C++ 版那个「异或最高位」的技巧在 Python 里不成立**，这是本章最值得看的一处</span>
+<span class="c"># 语言差异。C++ 的 int 是定长补码，把符号位翻过来，负数的位模式就整体排到正数</span>
+<span class="c"># 前面，一趟不用特殊处理。Python 的整数是任意精度、没有「最高位」这个东西，</span>
+<span class="c"># `-1` 的二进制是概念上无限长的 1。所以这里换一种同样只扫两遍的办法：</span>
+<span class="c"># **整体平移到非负区间**，排完再平移回来。代价是多一次 min 扫描，</span>
+<span class="c"># 换来的是不依赖任何机器字长——这份实现对 10**30 一样成立。</span>
+<span class="k">def</span> radix_sort(values: <span class="t">list</span>[<span class="t">int</span>]) -&gt; <span class="k">None</span>:
+    <span class="k">if</span> <span class="k">not</span> values:
+        <span class="k">return</span>
+    shift_base = <span class="t">min</span>(values)
+    keys = [value - shift_base <span class="k">for</span> value <span class="k">in</span> values]
+    largest = <span class="t">max</span>(keys)
+    buffer = [<span class="n">0</span>] * <span class="t">len</span>(keys)
+    shift = <span class="n">0</span>
+    <span class="k">while</span> (largest &gt;&gt; shift) &gt; <span class="n">0</span> <span class="k">or</span> shift == <span class="n">0</span>:
+        counts = [<span class="n">0</span>] * RADIX_BUCKETS
+        <span class="k">for</span> key <span class="k">in</span> keys:
+            counts[(key &gt;&gt; shift) &amp; (RADIX_BUCKETS - <span class="n">1</span>)] += <span class="n">1</span>
+        offset = <span class="n">0</span>
+        <span class="k">for</span> bucket <span class="k">in</span> <span class="t">range</span>(RADIX_BUCKETS):
+            counts[bucket], offset = offset, offset + counts[bucket]
+        <span class="k">for</span> key <span class="k">in</span> keys:
+            digit = (key &gt;&gt; shift) &amp; (RADIX_BUCKETS - <span class="n">1</span>)
+            buffer[counts[digit]] = key
+            counts[digit] += <span class="n">1</span>
+        keys, buffer = buffer, keys
+        shift += RADIX_BITS
+    <span class="k">for</span> index, key <span class="k">in</span> <span class="t">enumerate</span>(keys):
+        values[index] = key + shift_base</code></pre></div>
+<p><strong>C++ 版那个「异或最高位」的技巧在 Python 里不成立</strong>，这是本章最值得看的一处语言差异。 C++ 的 <code>int</code> 是定长补码，把符号位翻过来，负数的位模式就整体排到正数前面，一趟不用特殊处理。 Python 的整数是任意精度、<strong>没有「最高位」这个东西</strong>，<code>-1</code> 的二进制是概念上无限长的 1。 所以 Python 版换成<strong>整体平移到非负区间</strong>，排完再平移回来：代价是多一次 <code>min</code> 扫描， 换来的是不依赖任何机器字长——这份实现对 <span class="math"><span class="upr">10</span><sup><span class="upr">30</span></sup></span> 一样成立，测试里就是拿这个规模钉住的。</p>
 <p>一趟按一个字节分配，4 趟覆盖 32 位，因此时间是 <span class="math">Θ(d(n<span class="bin">+</span>r))</span>：<span class="math">d<span class="rel">=</span><span class="upr">4</span></span> 趟， 每趟 <span class="math">r<span class="rel">=</span><span class="upr">256</span></span> 个桶。与桶式排序相比，基数排序把「值域 <span class="math">m</span>」换成了「位数 <span class="math">d</span> 与基数 <span class="math">r</span>」， 于是 <span class="math">[<span class="upr">0</span>,<span class="upr">2</span><sup><span class="upr">32</span></sup>)</span> 这样的值域也排得动——代价是要扫 4 遍。</p>
 <p>上面这版把桶做成了计数数组（先数、再累加、再放），桶是<strong>隐式</strong>的。 原书算法8.13 走的是另一条路：桶是<strong>显式</strong>的队列，每趟把记录 <code>push</code> 进 256 个队列， 再按桶号依次 <code>pop</code> 出来。它更接近「分配-收集」这个名字的字面意思，也更容易看懂； 代价是每趟都要维护 256 个队列。原书为此专门给了一个定长队列（代码8.12）：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#static-queue</a></div><pre><code><span class="c">// 代码8.12：固定容量 FIFO，是基数排序的桶而非通用 STL queue 替身。</span>
@@ -526,6 +687,7 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
     std::<span class="t">size_t</span> front_{<span class="n">0</span>};
     std::<span class="t">size_t</span> size_{<span class="n">0</span>};
 };</code></pre></div>
+<p><strong>代码8.12 是本章 Python 侧唯一不给实现的三条清单之一</strong>（另两条是代码8.16 随机数据与 代码8.17 计时）。理由写在 <code>code/ch08/sorting/unit.json</code> 的 <code>py_skip</code> 字段里： 容量、环绕、下标回卷都是<strong>存储管理</strong>，而 Python 的 <code>list</code> 没有容量这个概念， 照着写只会得到一层没有内容的包装。下面算法8.13 的 Python 版改用普通 <code>list</code> 作桶， 这一节要讲的东西——稳定性来自「桶内保持入桶顺序、收集时按桶号从小到大」——一个字都没少。</p>
 <p>它不是 <code>std::queue</code> 的替身，而是基数排序的桶：容量固定、不扩容，<code>push</code> 满了返回 <code>false</code>， <code>pop</code> 空了返回 <code>std::nullopt</code>（D-001 §3c：可预期的空状态用 <code>optional</code>，不是错误）。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#fn:radix_sort_linked_style</a></div><pre><code><span class="c">// 算法8.13：以显式桶队列演示顺序收集的基数排序。</span>
 <span class="k">inline</span> <span class="t">void</span> radix_sort_linked_style(std::vector&lt;<span class="t">int</span>&gt;&amp; values) {
@@ -543,6 +705,31 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
         values.swap(buffer);
     }
 }</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.py">code/ch08/sorting/modern.py#fn:radix_sort_linked_style</a></div><pre><code><span class="c"># 算法8.13：以显式桶队列演示「分桶 — 按桶序收集」的基数排序。</span>
+<span class="c">#</span>
+<span class="c"># C++ 版这里用的是【代码8.12】那个固定容量环形队列。Python 侧按 D-025 §1</span>
+<span class="c"># 不实现 8.12：容量、环绕、下标回卷都是**存储管理**，而 list 没有容量这个概念，</span>
+<span class="c"># 照着写只会得到一层没有内容的包装。桶换成普通 list，这一节要讲的东西</span>
+<span class="c"># ——稳定性来自「桶内保持入桶顺序、收集时按桶号从小到大」——一个字都没少。</span>
+<span class="k">def</span> radix_sort_linked_style(values: <span class="t">list</span>[<span class="t">int</span>]) -&gt; <span class="k">None</span>:
+    <span class="k">if</span> <span class="k">not</span> values:
+        <span class="k">return</span>
+    shift_base = <span class="t">min</span>(values)
+    keys = [value - shift_base <span class="k">for</span> value <span class="k">in</span> values]
+    largest = <span class="t">max</span>(keys)
+    shift = <span class="n">0</span>
+    <span class="k">while</span> (largest &gt;&gt; shift) &gt; <span class="n">0</span> <span class="k">or</span> shift == <span class="n">0</span>:
+        buckets: <span class="t">list</span>[<span class="t">list</span>[<span class="t">int</span>]] = [[] <span class="k">for</span> _ <span class="k">in</span> <span class="t">range</span>(RADIX_BUCKETS)]
+        <span class="k">for</span> key <span class="k">in</span> keys:
+            buckets[(key &gt;&gt; shift) &amp; (RADIX_BUCKETS - <span class="n">1</span>)].append(key)
+        output = <span class="n">0</span>
+        <span class="k">for</span> bucket <span class="k">in</span> buckets:
+            <span class="k">for</span> key <span class="k">in</span> bucket:
+                keys[output] = key
+                output += <span class="n">1</span>
+        shift += RADIX_BITS
+    <span class="k">for</span> index, key <span class="k">in</span> <span class="t">enumerate</span>(keys):
+        values[index] = key + shift_base</code></pre></div>
 <p>两种写法排出来的结果逐字节相同，测试对拍了这一点。<strong>分配排序天然稳定</strong>： 同一个桶里的记录按进桶顺序出桶，从头到尾没有任何一次比较能打乱它们。</p>
 <h3 id="863-索引排序"><a class="anchor" href="#863-索引排序">#</a>8.6.3 索引排序</h3>
 <p>前面所有算法都在<strong>搬记录</strong>。当记录很大——一条学籍记录几百字节，一张图片几兆——搬移的代价 就压过了比较的代价。索引排序（也叫地址排序）的办法是：<strong>只排下标，不动记录</strong>。</p>
@@ -564,6 +751,17 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
     }
     <span class="k">return</span> indexes;
 }</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.py">code/ch08/sorting/modern.py#fn:insertion_index_sort</a></div><pre><code><span class="c"># 算法8.14：排序索引，不移动原记录。记录大而键小时，搬索引比搬记录便宜得多。</span>
+<span class="k">def</span> insertion_index_sort(values: <span class="t">list</span>[<span class="t">int</span>]) -&gt; <span class="t">list</span>[<span class="t">int</span>]:
+    indexes = <span class="t">list</span>(<span class="t">range</span>(<span class="t">len</span>(values)))
+    <span class="k">for</span> i <span class="k">in</span> <span class="t">range</span>(<span class="n">1</span>, <span class="t">len</span>(indexes)):
+        index = indexes[i]
+        hole = i
+        <span class="k">while</span> hole &gt; <span class="n">0</span> <span class="k">and</span> values[index] &lt; values[indexes[hole - <span class="n">1</span>]]:
+            indexes[hole] = indexes[hole - <span class="n">1</span>]
+            hole -= <span class="n">1</span>
+        indexes[hole] = index
+    <span class="k">return</span> indexes</code></pre></div>
 <p>注意这里<strong>稳定性是免费的</strong>：插入排序不越过相等元素，所以 34 与 34′ 的先后没变 （<code>index</code> 里 2 排在 4 前面）。</p>
 <p>如果最终还是要把记录本身排好，就得按索引把数组整理一遍，而且要在 <span class="math">O(n)</span> 时间内完成—— 否则前面省下的搬移又还回去了。做法是顺着<strong>置换环</strong>走：从下标 0 开始， 0 该放 5 的值、5 该放 4 的值、4 该放 2 的值、2 该放 0 的值，一圈回到起点， 这一环上的元素一次到位；每到位一个就把它的索引改成自己的下标，从此不再参与后续的环。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#fn:adjust_by_index</a></div><pre><code><span class="c">// 算法8.15：沿置换环把索引顺序落实为记录顺序。</span>
@@ -582,6 +780,21 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
         indexes[current] = current;
     }
 }</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.py">code/ch08/sorting/modern.py#fn:adjust_by_index</a></div><pre><code><span class="c"># 算法8.15：沿置换环把索引顺序落实为记录顺序。</span>
+<span class="c"># 每个元素最多被搬一次，整趟 O(n) 次移动、O(1) 辅助空间。</span>
+<span class="k">def</span> adjust_by_index(values: <span class="t">list</span>[<span class="t">int</span>], indexes: <span class="t">list</span>[<span class="t">int</span>]) -&gt; <span class="k">None</span>:
+    <span class="k">for</span> first <span class="k">in</span> <span class="t">range</span>(<span class="t">len</span>(values)):
+        <span class="k">if</span> indexes[first] == first:
+            <span class="k">continue</span>
+        current = first
+        saved = values[first]
+        <span class="k">while</span> indexes[current] != first:
+            source = indexes[current]
+            values[current] = values[source]
+            indexes[current] = current
+            current = source
+        values[current] = saved
+        indexes[current] = current</code></pre></div>
 <p>这组数据一共两个环：</p>
 <div class="codeblock" data-lang="text"><pre><code>环 {0, 5, 4, 2}    12   25   29   64   34  34′   32   45
 环 {3, 6, 7}       12   25   29   32   34  34′   45   64</code></pre></div>

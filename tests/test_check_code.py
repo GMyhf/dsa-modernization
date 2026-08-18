@@ -461,5 +461,134 @@ class TestOutputTruncation(unittest.TestCase):
         self.assertNotIn("省略", check_code.indent("a\nb\nc"))
 
 
+class TestD025PythonArm(unittest.TestCase):
+    """D-025 的 Python 臂：和 C++ 侧一样，闸门要有牙。
+
+    这里不测「排序写得对不对」——那是 code/ch08/sorting/test.py 的事。
+    这里测的是：一段把整章委托给标准库的 Python，闸门必须判红；
+    一条没给 Python 锚点又没写 py_skip 的清单，闸门必须判红。
+    """
+
+    def _unit(self, root: Path, modern_py, listings=None, exceptions=None):
+        d = root / "pyprobe"
+        d.mkdir(parents=True)
+        meta = {
+            "id": "pyprobe",
+            "title": "Python 臂探针",
+            "listings": listings if listings is not None else [
+                {"id": "算法8.1", "anchor": "#pragma once", "test": "int main",
+                 "py_anchor": "def demo(", "py_test": "demo works"}
+            ],
+        }
+        if exceptions:
+            meta["d025_exceptions"] = exceptions
+        (d / "unit.json").write_text(json.dumps(meta, ensure_ascii=False), encoding="utf-8")
+        (d / "modern.py").write_text(modern_py, encoding="utf-8")
+        (d / "test.py").write_text("# demo works\nprint('1 项断言，0 失败')\n", encoding="utf-8")
+        return d
+
+    def test_stdlib_shortcut_is_rejected(self):
+        """`sorted()` / `heapq` 一行就是一整章，实现文件里出现即判红。"""
+        for source, token in (
+            ("def demo(values):\n    return sorted(values)\n", "sorted"),
+            ("def demo(values):\n    values.sort()\n", "sort"),
+            ("import heapq\n\n\ndef demo(values):\n    return values\n", "heapq"),
+            ("import bisect\n\n\ndef demo(values):\n    return values\n", "bisect"),
+        ):
+            with tempfile.TemporaryDirectory() as tmp, self.subTest(token=token):
+                unit = self._unit(Path(tmp), source)
+                meta = json.loads((unit / "unit.json").read_text(encoding="utf-8"))
+                problems = check_code.check_d025(unit, meta)
+                self.assertTrue(
+                    any(f"`{token}`" in p for p in problems),
+                    f"实现里的 {token} 应当被 D-025 拦下，实得：{problems}",
+                )
+
+    def test_comment_mentioning_sorted_is_not_a_violation(self):
+        """判据走 AST 而不是正则：注释和字符串里出现 `sorted` 不该报红。"""
+        source = (
+            "# 这里刻意不调用 sorted()，理由见 D-025\n"
+            'DOC = "不要用 sorted"\n\n\n'
+            "def demo(values):\n    return values\n"
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = self._unit(Path(tmp), source)
+            meta = json.loads((unit / "unit.json").read_text(encoding="utf-8"))
+            self.assertEqual(check_code.check_d025(unit, meta), [])
+
+    def test_written_exception_lifts_the_ban(self):
+        """和 d001_exceptions 一样：可以豁免，但必须写理由。"""
+        source = "def demo(values):\n    return sorted(values)\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = self._unit(Path(tmp), source,
+                              exceptions={"sorted": "本单元讲的是稳定性判定，不是排序本身"})
+            meta = json.loads((unit / "unit.json").read_text(encoding="utf-8"))
+            self.assertEqual(check_code.check_d025(unit, meta), [])
+
+    def test_empty_exception_reason_does_not_lift_the_ban(self):
+        source = "def demo(values):\n    return sorted(values)\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = self._unit(Path(tmp), source, exceptions={"sorted": "   "})
+            meta = json.loads((unit / "unit.json").read_text(encoding="utf-8"))
+            self.assertTrue(check_code.check_d025(unit, meta))
+
+    def test_every_listing_needs_a_python_verdict(self):
+        """有 modern.py 就不许沉默：每条清单要么给锚点，要么写 py_skip 说明理由。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = self._unit(
+                Path(tmp), "def demo(values):\n    return values\n",
+                listings=[
+                    {"id": "算法8.1", "anchor": "#pragma once", "test": "int main",
+                     "py_anchor": "def demo(", "py_test": "demo works"},
+                    {"id": "算法8.2", "anchor": "#pragma once", "test": "int main"},
+                ],
+            )
+            meta = json.loads((unit / "unit.json").read_text(encoding="utf-8"))
+            problems = check_code.check_python_bindings(unit, meta)
+            self.assertTrue(any("算法8.2" in p for p in problems), problems)
+
+    def test_py_skip_must_carry_a_reason(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = self._unit(
+                Path(tmp), "def demo(values):\n    return values\n",
+                listings=[{"id": "算法8.1", "anchor": "#pragma once", "test": "int main",
+                           "py_skip": ""}],
+            )
+            meta = json.loads((unit / "unit.json").read_text(encoding="utf-8"))
+            self.assertTrue(check_code.check_python_bindings(unit, meta))
+
+    def test_anchor_must_exist_outside_comments(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = self._unit(Path(tmp), "# def demo(values)\ndef other(v):\n    return v\n")
+            meta = json.loads((unit / "unit.json").read_text(encoding="utf-8"))
+            problems = check_code.check_python_bindings(unit, meta)
+            self.assertTrue(any("只存在于注释行" in p or "不存在" in p for p in problems), problems)
+
+    def test_modern_py_without_test_py_is_rejected(self):
+        """Python 实现不能是唯一没人验的代码。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = self._unit(Path(tmp), "def demo(values):\n    return values\n")
+            (unit / "test.py").unlink()
+            ok, logs, _ = check_code.run_python(unit)
+            self.assertFalse(ok)
+            self.assertTrue(any("没有 test.py" in line for line in logs), logs)
+
+    def test_optimized_out_asserts_profile_is_not_used(self):
+        """`-O` 会把 assert 剥掉，那一档下测试恒绿——它必须不在名单里。"""
+        for _, flags in check_code.PY_PROFILES:
+            self.assertNotIn("-O", flags)
+            self.assertNotIn("-OO", flags)
+
+    def test_failing_python_test_turns_the_unit_red(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = self._unit(Path(tmp), "def demo(values):\n    return values\n")
+            (unit / "test.py").write_text(
+                "# demo works\nimport sys\nprint('1 项断言，1 失败')\nsys.exit(1)\n",
+                encoding="utf-8",
+            )
+            ok, logs, _ = check_code.run_python(unit)
+            self.assertFalse(ok, logs)
+
+
 if __name__ == "__main__":
     unittest.main()

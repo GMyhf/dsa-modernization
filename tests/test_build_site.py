@@ -12,6 +12,7 @@ import io
 import re
 import sys
 import unittest
+import urllib.parse
 from html import unescape
 from pathlib import Path
 
@@ -201,12 +202,13 @@ class TestDownloadCard(unittest.TestCase):
     def test_card_href_follows_publish_layout(self):
         original = build_site.PDF_HREF
         try:
-            build_site.PDF_HREF = "现代C++数据结构教程.pdf"
+            build_site.PDF_HREF = "数据结构与算法.pdf"
             card = build_site.download_card()
         finally:
             build_site.PDF_HREF = original
-        # 中文文件名要转义，否则某些服务器上点了就是 404
-        self.assertIn("%E7%8E%B0", card)
+        # 中文文件名要转义，否则某些服务器上点了就是 404。
+        # 不写死某个字的编码——更名一次就要改一次测试，那种测试守的是名字不是行为。
+        self.assertIn(urllib.parse.quote("数据结构与算法.pdf"), card)
         self.assertNotIn('href="../pdf/', card)
 
     def test_no_pdf_means_no_card(self):
@@ -259,6 +261,39 @@ class TestGate(unittest.TestCase):
             self.assertIn("ch01-adt.html", err)
         finally:
             page.write_text(original, encoding="utf-8")
+
+class TestPythonCodeFidelity(unittest.TestCase):
+    """D-025：Python 块的高亮同样只加标签，不改一个字节。"""
+
+    SAMPLE = ('def demo(values: list[int]) -> None:\n'
+              '    """文档串里有 <尖括号> 与 \'引号\'"""\n'
+              '    # 注释里有 & 和 <\n'
+              '    total = 0x1F\n'
+              '    for value in values:\n'
+              '        total += len(str(value))\n')
+
+    def test_highlight_preserves_every_byte(self):
+        self.assertEqual(strip_tags(build_site.highlight_python(self.SAMPLE)), self.SAMPLE)
+
+    def test_highlight_actually_marks_keywords(self):
+        rendered = build_site.highlight_python(self.SAMPLE)
+        self.assertIn('<span class="k">def</span>', rendered)
+        self.assertIn('<span class="k">for</span>', rendered)
+        self.assertIn('<span class="t">len</span>', rendered)
+
+    def test_triple_quoted_string_is_one_token(self):
+        """三引号串若被拆开，后面整段代码都会被当成字符串——版面会当场崩掉。"""
+        rendered = build_site.highlight_python(self.SAMPLE)
+        self.assertEqual(rendered.count('<span class="s">'), 1, rendered)
+
+    def test_mangled_code_would_go_red(self):
+        broken = build_site.highlight_python(self.SAMPLE).replace("total", "", 1)
+        self.assertNotEqual(strip_tags(broken), self.SAMPLE)
+
+    def test_python_fence_is_dispatched_to_python_highlighter(self):
+        html_out = render("```python\ndef demo():\n    return None\n```\n")
+        self.assertIn('data-lang="python"', html_out)
+        self.assertIn('<span class="k">def</span>', html_out)
 
 
 if __name__ == "__main__":

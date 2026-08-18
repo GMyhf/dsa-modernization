@@ -54,7 +54,7 @@ SITE = SLIDES / "site"
 # 课件页住在 book/slides/site/，插图住在 book/assets/。不复制第二份，往上退两级。
 ASSETS_HREF = "../../assets/"
 
-DECK_TITLE = "现代 C++ 数据结构教程 · 课件"
+DECK_TITLE = "数据结构与算法：Python 讲算法，C++ 讲实现 · 课件"
 
 # 分页符：整行只有三个减号。**必须在代码围栏之外**——`---` 在 C++ 注释里
 # 完全可能出现，切错了会把一页代码劈成两半。
@@ -374,7 +374,7 @@ def build(check_only=False, out_dir=None, assets_href=None):
             ctx.page = src.name
             meta, slides = render_deck(src, ctx)
             title = meta.get("title") or src.stem
-            subtitle = meta.get("subtitle", "现代 C++ 数据结构教程")
+            subtitle = meta.get("subtitle", "数据结构与算法：Python 讲算法，C++ 讲实现")
             out_name = src.stem + ".html"
             links = '<a href="index.html" style="color:var(--muted)">目录</a>'
             pages[out_name] = page_html(title, subtitle, slides, links)

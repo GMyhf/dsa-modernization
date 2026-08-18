@@ -11,14 +11,20 @@
 现代化要保住的是原书的教学内容、编号与讲法；换掉的是那套写法；
 而「换对了」这件事**由机器复验，不靠自觉**。
 
+成书名为《数据结构与算法：Python 讲算法，C++ 讲实现》。书名即分工：
+讲**存储管理**的章节只有 C++（顺序栈、链表、字符串类、内存分配器——
+三法则、五法则、强异常保证在 Python 里没有对应物，写出来是把课删掉）；
+讲**算法**的章节 C++ 与 Python 各给一份，两份走同一条证据链。理由见 `collab/DECISION_LOG.md` 的 **D-025**。
+
 ## 现状
 
 ```
 台账   104 已现代化 / 1 退场 / 0 待办  = 105 条清单
-书稿   16 个文件（12 章正文 + 总目录 + 习题 + 勘误 + 插图），8 条规则通过
+书稿   16 个文件（12 章正文 + 总目录 + 习题 + 勘误 + 插图），16 条规则通过
 成品   PDF（book/pdf/）与网页版（book/site/，双击 index.html 即可读）
 代码   32 个单元 × 2 种构建（Debug+ASan/UBSan、Release-O2）
-自测   115 项（闸门自己的单元测试）
+       其中 1 个单元另有 Python 实现，再跑 2 档（默认、-X dev -W error）
+自测   301 项（闸门自己的单元测试）
 ```
 
 `python3 tools/handoff.py --verify` 退出码 0。
@@ -90,7 +96,7 @@ git add -A && git commit -m "..." && git push
 | 路径 | 是什么 |
 | --- | --- |
 | `dsa_raw.md` | OCR 底稿，**只读**。1MB / 11978 行 / 12 章 / 105 条清单 / 292 张外链插图 |
-| `book/` | 现代化后的书稿：12 章正文 + [总目录](book/现代C++数据结构教程.md) + [原书勘误](book/勘误.md) + [插图](book/插图.md)。292 张图在 `book/assets/`。发给学生的带书签 PDF：[`book/pdf/现代C++数据结构教程.pdf`](book/pdf/现代C++数据结构教程.pdf)（`python3 tools/build_book_pdf.py` 重编）；浏览器版：[`book/site/index.html`](book/site/index.html)（`python3 tools/build_site.py` 重编） |
+| `book/` | 现代化后的书稿：12 章正文 + [总目录](book/数据结构与算法.md) + [原书勘误](book/勘误.md) + [插图](book/插图.md)。292 张图在 `book/assets/`。发给学生的带书签 PDF：[`book/pdf/数据结构与算法.pdf`](book/pdf/数据结构与算法.pdf)（`python3 tools/build_book_pdf.py` 重编）；浏览器版：[`book/site/index.html`](book/site/index.html)（`python3 tools/build_site.py` 重编） |
 | `code/<章>/<单元>/` | 一个清单单元：`unit.json`（认领哪几条清单）、`legacy.md`（原书写法→缺陷证据→现代写法）、`modern.hpp`、`test.cpp` |
 | `code/support/` | 各章测试共用的故障注入探针（只放探针，不放任何数据结构实现） |
 | `tools/` | 闸门与脚手架，纯标准库 |

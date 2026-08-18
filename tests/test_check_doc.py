@@ -959,6 +959,200 @@ class TestR9Formulas(unittest.TestCase):
         self.assertEqual(self.check("# 标题\n\n```text\n$$\nnot math\n$$\n```\n"), [])
 
 
+class TestD025PythonBlocks(unittest.TestCase):
+    """D-025：```python 块与 ```cpp 块受同一条 R3 契约管。
+
+    每一条都配一个「会红」的用例——2026-08-18 立 D-025 之前，
+    下面这些情形**全部是绿的**，那正是这条决策的由来。
+    """
+
+    SOURCE = (
+        '"""探针模块。"""\n'
+        "\n"
+        "# >>> demo\n"
+        "def demo(values):\n"
+        "    # 注释也是切片的一部分\n"
+        "    return values\n"
+        "# <<< demo\n"
+        "\n"
+        "\n"
+        "def other(values):\n"
+        "    return values\n"
+    )
+
+    def _with_module(self, body_lines, info):
+        """在临时仓库里放一个 .py，再用给定的围栏检查一段书稿。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            module = root / "code" / "probe" / "modern.py"
+            module.parent.mkdir(parents=True)
+            module.write_text(self.SOURCE, encoding="utf-8")
+            chapter = root / "chapter.md"
+            fence = "```" + info if info else "```"
+            chapter.write_text(
+                "# 探针\n\n" + fence + "\n" + "\n".join(body_lines) + "\n```\n",
+                encoding="utf-8",
+            )
+            old = check_doc.ROOT
+            check_doc.ROOT = root
+            try:
+                return check_doc.check_file(chapter, set())
+            finally:
+                check_doc.ROOT = old
+
+    def test_python_anchor_uses_hash_marker(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            module = Path(tmp) / "modern.py"
+            module.write_text(self.SOURCE, encoding="utf-8")
+            body, err = check_doc.read_slice(module, "demo")
+            self.assertIsNone(err)
+            self.assertIn("def demo(values):", body)
+            self.assertNotIn(">>>", body)
+
+    def test_cpp_anchor_marker_is_unchanged(self):
+        """改锚点分发时最容易顺手把 C++ 那条也改坏。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            header = Path(tmp) / "modern.hpp"
+            header.write_text("// >>> push\nvoid push();\n// <<< push\n", encoding="utf-8")
+            body, err = check_doc.read_slice(header, "push")
+            self.assertIsNone(err)
+            self.assertEqual(body, "void push();")
+
+    def test_python_function_slice_stops_at_dedent(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            module = Path(tmp) / "modern.py"
+            module.write_text(self.SOURCE, encoding="utf-8")
+            body, err = check_doc.read_slice(module, "fn:demo")
+            self.assertIsNone(err)
+            self.assertIn("def demo(values):", body)
+            self.assertNotIn("def other", body, "切片越过了 def 的缩进边界")
+
+    def test_multiline_signature_with_dedented_paren(self):
+        """参数表跨行、闭合括号顶格：纯缩进规则会在 `):` 那行就收尾，把函数体丢掉。
+
+        2026-08-18 写 `read_python_function` 时留下的活缺陷，当天补掉——
+        `modern.py` 里当时没有这种写法，所以它不会被任何现有书稿触发。
+        """
+        source = (
+            "def spread(\n"
+            "    first,\n"
+            "    second\n"
+            "):\n"
+            "    total = first + second\n"
+            "    return total\n"
+            "\n"
+            "\n"
+            "def after(x):\n"
+            "    return x\n"
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            module = Path(tmp) / "modern.py"
+            module.write_text(source, encoding="utf-8")
+            body, err = check_doc.read_slice(module, "fn:spread")
+            self.assertIsNone(err)
+            self.assertIn("return total", body, "函数体被丢掉了")
+            self.assertNotIn("def after", body, "切片越过了下一个定义")
+
+    def test_missing_python_function_is_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            module = Path(tmp) / "modern.py"
+            module.write_text(self.SOURCE, encoding="utf-8")
+            body, err = check_doc.read_slice(module, "fn:nope")
+            self.assertIsNone(body)
+            self.assertIn("nope", err)
+
+    def test_python_block_without_file_is_rejected(self):
+        problems = self._with_module(["def demo(values):", "    return values"], "python")
+        self.assertTrue(any("R3" in p for p in problems), problems)
+
+    def test_python_block_must_point_at_a_py_file(self):
+        problems = self._with_module(["x"], "python file=code/probe/modern.hpp#demo")
+        self.assertTrue(any("R3" in p for p in problems), problems)
+
+    def test_matching_python_block_passes(self):
+        problems = self._with_module(
+            ["def demo(values):", "    # 注释也是切片的一部分", "    return values"],
+            "python file=code/probe/modern.py#demo",
+        )
+        self.assertEqual(problems, [], problems)
+
+    def test_drifted_python_block_is_rejected(self):
+        problems = self._with_module(
+            ["def demo(values):", "    # 注释也是切片的一部分", "    return values[::-1]"],
+            "python file=code/probe/modern.py#demo",
+        )
+        self.assertTrue(any("R3" in p for p in problems), problems)
+
+    def test_relabelling_python_as_text_is_caught_by_r8(self):
+        """R8 的整个由来就是这个逃生口，Python 侧不能再开一次。"""
+        long_body = [
+            "def demo_with_enough_bytes_to_pass_the_threshold(values):",
+            "    total = 0",
+            "    for value in values:",
+            "        total = total + value",
+            "    return total",
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            module = root / "code" / "probe" / "modern.py"
+            module.parent.mkdir(parents=True)
+            module.write_text("\n".join(long_body) + "\n", encoding="utf-8")
+            chapter = root / "chapter.md"
+            chapter.write_text("```text\n" + "\n".join(long_body) + "\n```\n", encoding="utf-8")
+            problems = check_doc.check_r8(chapter, check_doc.source_texts(root / "code"))
+        self.assertTrue(any("R8" in p and "modern.py" in p for p in problems), problems)
+
+    def test_python_shaped_text_block_is_caught_even_if_not_verbatim(self):
+        long_body = [
+            "def a_function_whose_body_is_long_enough_to_matter(values):",
+            "    accumulator = 0",
+            "    for value in values:",
+            "        accumulator = accumulator + value",
+            "    return accumulator",
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            chapter = Path(tmp) / "chapter.md"
+            chapter.write_text("```text\n" + "\n".join(long_body) + "\n```\n", encoding="utf-8")
+            problems = check_doc.check_r8(chapter, {})
+        self.assertTrue(any("R8" in p for p in problems), problems)
+
+    def test_original_cpp_listing_is_still_allowed_as_text(self):
+        """原书是 2008 年的 C++，不会有 def；Python 这条判据不该误伤引文。"""
+        body = [
+            "template <class T> class arrStack : public Stack<T> {",
+            "  int top;",
+            "  bool top(T& item);",
+            "};",
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            chapter = Path(tmp) / "chapter.md"
+            chapter.write_text(
+                '```text original-listing="原书按印刷无法编译，只能原样照抄"\n'
+                + "\n".join(body) + "\n```\n",
+                encoding="utf-8",
+            )
+            problems = check_doc.check_r8(chapter, {})
+        self.assertEqual(problems, [], problems)
+
+    def test_sync_book_writes_python_blocks(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            module = root / "code" / "probe" / "modern.py"
+            module.parent.mkdir(parents=True)
+            module.write_text(self.SOURCE, encoding="utf-8")
+            chapter = root / "chapter.md"
+            chapter.write_text("```python file=code/probe/modern.py#demo\n```\n", encoding="utf-8")
+            old_doc, old_sync = check_doc.ROOT, sync_book.ROOT
+            check_doc.ROOT = sync_book.ROOT = root
+            try:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    ok, count = sync_book.sync_file(chapter, write=True)
+            finally:
+                check_doc.ROOT, sync_book.ROOT = old_doc, old_sync
+            self.assertTrue(ok)
+            self.assertEqual(count, 1)
+            self.assertIn("def demo(values):", chapter.read_text(encoding="utf-8"))
+
 
 if __name__ == "__main__":
     unittest.main()

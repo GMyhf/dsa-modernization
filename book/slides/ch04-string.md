@@ -1,6 +1,6 @@
 ---
 title: 第4章 字符串
-subtitle: 现代 C++ 数据结构教程
+subtitle: 数据结构与算法：Python 讲算法，C++ 讲实现
 ---
 
 # 第4章 字符串

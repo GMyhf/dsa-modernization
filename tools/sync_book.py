@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """sync_book.py — 用 code/ 里的真实源码填充书稿里的代码块。
 
-`check_doc.py` 的 R3 只负责**验**：书稿里的 cpp 块必须和 `file=` 指向的源码逐字一致。
+`check_doc.py` 的 R3 只负责**验**：书稿里的 cpp / python 块必须和 `file=` 指向的源码逐字一致。
 本脚本负责**写**：把源码灌进去。于是「改了代码忘了改书」这件事从「靠自觉」
 变成了「跑一条命令」。
 
@@ -33,7 +33,7 @@ def sync_file(path: Path, write=False):
     edits = []  # (start_idx, end_idx, new_body_lines)
     for block in iter_blocks(text):
         lang, ref, anchor = parse_info(block["info"])
-        if lang != "cpp" or not ref:
+        if lang not in ("cpp", "python") or not ref:  # D-025：python 块同样由本脚本写
             continue
         target = ROOT / ref
         if not target.is_file():

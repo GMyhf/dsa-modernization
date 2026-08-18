@@ -1,6 +1,62 @@
 # HANDOFF · 交接日志
 
-### 2026-08-18 · Claude → Codex · 清账：Review → Done、删一次性脚本、PLAN 编号撞车
+### 2026-08-18 · Claude → Codex · Python 进书：闸门的 Python 臂 + 第 8 章试点（D-025 / T-041 / T-042）
+
+人拍板把 Python 融进本书（课件仓库 `../2026spring-cs201`），并定了新书名
+《数据结构与算法：Python 讲算法，C++ 讲实现》。边界与理由在 **D-025**，
+本轮交付前两项：闸门的 Python 臂，和第 8 章的双实现试点。更名走 T-046，另开提交。
+
+**先证明洞是真的**：往 `book/ch08-sorting.md` 追加 `def quick_sort(a): return sorted(a)`
+（无 `file=`，且把整章委托给标准库），`check_doc` 报「✅ 16 条规则通过，退出码 0」。
+`python` 早在白名单里，R3 只认 ```cpp、R8 只看 ```text——直接贴课件代码，
+书会变成一半机器复验、一半散文。
+
+**闸门四处对等改造**：`check_d025` 用 AST 禁 `sorted`/`.sort()`/`heapq`/`bisect`/`re`/
+`collections`/`print`（可在 `unit.json.d025_exceptions` 写理由豁免）；
+`modern.py` + `test.py` 跑两档（`python3` 默认档与 `python3 -X dev -W error`，
+`-O` 档**故意排除**——它剥掉 assert，那一档恒绿）；R3/R8/sync_book 扩到 ```python，
+锚点 `# >>> 名字`、`#fn:` 按缩进切片；`listings[]` 新增 `py_anchor`/`py_test`/`py_skip`，
+有 `modern.py` 的单元每条清单必须给出其一。
+
+**第 8 章试点**：`code/ch08/sorting/modern.py` + `test.py`，17 条清单 14 条给 Python、
+3 条写 `py_skip`（代码8.12/8.16/8.17，都是存储或测试基础设施）。**Python 侧 129 项断言。**
+两份实现不是逐行翻译，三处语言差异各有断言：
+① 算法8.6 的快排在 Python 里**跑不完**（递归上限 1000，两千个有序元素 `RecursionError`），
+所以 8.7 的短侧递归在这里不是优化是能不能跑；
+② 算法8.11 的「异或最高位」在 Python 不成立（整数任意精度、没有最高位），
+改整体平移，测试拿 $10^{30}$ 钉住；
+③ 稳定性在 C++ 那份 `vector<int>` 上**根本无法验证**，Python 那份不改一个字就能排
+任意可比较对象，于是稳定性成了可断言的东西。
+
+**变异自检 15/15**：实现侧 6 条、闸门侧 5 条、书稿侧 4 条，全部判红且都以具名断言
+（有两条第一版靠抛异常变红，已改强）。**记一次自欺未遂**：最初挑的「建堆起点错一位」
+闸门是绿的，但那不是漏网——多筛一个合法结点本就不是缺陷。换成「筛选不挑较大孩子」
+立刻红 5 条。挑一堆无害变异再宣布全抓住，是变异自检最常见的骗法。
+
+**闸门尾部（本轮实际输出）**：
+
+```console
+$ python3 tools/check_code.py
+✅ 32/32 个单元通过（每个 2 种构建：debug+asan+ubsan, release-O2）
+   其中 1 个单元另有 Python 实现，各跑 2 档：py-default, py-dev（D-025）
+$ python3 tools/check_doc.py
+✅ 书稿体检通过：29 个文件，16 条规则
+$ python3 tools/ledger.py
+✅ 台账一致（104 已现代化 / 1 退场 / 0 待办 = 105；Python 不参与计数，见 D-025 §3）
+```
+
+**红线自检**：`dsa_raw.md` 未动 ✅｜书稿 Python 全部 `file=` 引用且 R3 逐字一致 ✅｜
+没有用标准库替掉手写实现（`check_d025` 现在机器守着）✅｜编号与交叉引用未漂 ✅｜
+台账等式不变（Python 不重复认领清单）✅｜零第三方依赖（`test.py` 零框架，不引 pytest）✅
+
+**请你重点看**（详见 `NOTES-claude.md`）：
+1. `check_d025` 的名单是**我定的不是人拍板的**，`collections` 那条我最没把握——
+   第 7 章图算法的 Python 版大概率要为 `defaultdict` 走豁免。该不该拆细到只禁 `deque`？
+2. **跨语言差分测试是当前最大的空档**：`test.cpp` 与 `test.py` 各验各的，
+   没有任何机制保证两份实现在同一输入上同答案。算法8.10 的稀疏阈值 10^7 是**手抄**的。
+3. `py_skip` 的理由只验非空，没有机器判据——和 `exclusions.json` 同一种软肋。
+
+## 2026-08-18 · Claude → Codex · 清账：Review → Done、删一次性脚本、PLAN 编号撞车
 
 **23 条卡在 Review 的任务改为 Done。** 不是批量刷状态——每条都写明**是什么在管着它**，
 判据一律是机器能复跑的东西：32/32 单元双档 + T-025 的逐条绑定（实现单元）、
