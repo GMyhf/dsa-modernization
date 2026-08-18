@@ -30,7 +30,7 @@
 | T-002 | **红队**：Codex 找漏——D-001 静态检查的正则盲区、`bad_alloc`/移动赋值故障注入、`peek()` 接口 | Done | Codex | 建议起点：R2 的注释剥离能否被绕过？R3 的 dedent 比对能否被空白差异欺骗？台账能否被「认领了但 listings 写错编号」骗过？任务书见 `collab/REDTEAM-BRIEF-T002.md`。**红队达标**：交出两条会失败的测试，均为真缺陷（`cc26132`）。 — Claude 复核（2026-08-12）：两处诊断全部认可；异常安全的**修复方式返工一次**（判据由「可不可拷贝」改为「移动赋值抛不抛」，否则 std::string 每次扩容深拷贝，实测 63/63 次搬迁全是拷贝→改后 0 次），并补上唯一能分辨两种策略的守门用例。Codex 报告的 ASan 失败经 Linux 复现确认为 macOS 环境问题，已做成工具自检（D-006）。断言 55→58 |
 | T-003a | 第 2 章顺序表（代码2.1 / 代码2.2 / 算法2.3 / 算法2.4 / 算法2.5，5 条清单） | Review | Claude | `code/ch02/array_list` + `book/ch02-linear-list.md`。47 项断言，变异自检 6/6 全抓。**又抓到原书三处编译级硬伤**：`delete` 当函数名、`class List` 无 `public:`（全部成员私有）、算法2.3 的 `n` 未声明。另发现设计问题：`position` 游标住在容器里（const 不能遍历、不能嵌套遍历），已改为 `begin()/end()` |
 | T-003b | 第 2 章链表（代码2.6–代码2.12，7 条清单） | Review | Codex | `code/ch02/linked_list` + `book/ch02-linear-list.md`。2026-08-12 已逐条核对并实现：头结点、尾指针 O(1) append、循链定位、插入/删除、单/双链结点、Rule of Five；30 项断言与两条变异自检通过，待 Claude 复核 |
-| T-004 | `ArrayStack` 改用未初始化存储 + placement new | Backlog | — | 现在用 `unique_ptr<T[]>`，会把容量内所有槽位默认构造出来——与原书 `new T[mSize]` 同样的限制，**没有恶化也没有解决**。记在这里而不是悄悄带过。见 `legacy.md` 第四节 |
+| T-004 | `ArrayStack` 改用未初始化存储 + placement new | Done | Claude | 2026-08-18 落地（D-024）。先量后改：预留容量 1000 时构造的对象 1000 → 0；`T` 不再需要可默认构造；`clear()` 之后活着的元素 1024（占 200 KB）→ 0。教学版 `teaching.hpp` 保持 `new T[n]` 不变，两版差别写进 3.1.2a（D-012 分层）。新引入的义务写在明处：对齐要自己传，去掉就是 heap-buffer-overflow。顺带销掉一道挂了六天的旧题——`move_if_noexcept` 在构造语境下本来就是对的，此前是容器把构造和分配捆在了一起。变异自检 6/6，断言 62 → 74。 |
 | T-004a | 第 4 章模式匹配（算法4.6 / 4.7 / 4.8） | Review | Claude | `code/ch04/pattern_matching` + `book/ch04-string.md`。56 项断言（含 3000 组随机对拍），变异自检 5/5 全抓。**发现原书算法错**：算法4.6 与 4.8 的返回值 `j-pLen+1` 在 0 起始下标下一律差 1，四组数据对拍证实；另发现正文 next 数组比模式还长一位，与图4.11 矛盾。首次动用 `d001_exceptions`（`<vector>` 承载 next，附理由） |
 | T-004b | 第 4 章字符串类（代码4.1 / 算法4.3 / 算法4.4 / 算法4.5） | Review | Claude | `code/ch04/string_class`。49 项断言，变异自检 5/5 全抓。原书三处硬伤：`assert(str != '\0')` 是指针与整数比较、本身编译不过；`String(char* s)` 使书中自己的例子 `String s1 = "Hello"` 在 `-Werror` 下编译失败；算法4.5 越界 `return NULL` → `strlen(nullptr)` 运行期 SEGV。**另有两条我的猜测被证据否掉并原样记进 legacy.md 第五节**（`strcmp` 同名不冲突；「编译不过」口径过强）。第 4 章至此 7/8 完成 + 1 退场 |
 | T-011 | **第 5 章二叉树**（12 条清单：代码5.1/5.2、算法5.3–5.7、代码5.8、算法5.9/5.10、代码5.11/5.12） | Review | Codex | `code/ch05/binary_tree` + `code/ch05/heap_huffman` + `book/ch05-binary-tree.md`。本机 Release：34 + 18 项断言全过；ASan 空探针失败，只完成 `--allow-degraded`。请 Claude 做完整双构建与泄漏/悬垂专项变异。代码5.8 OCR 边界已定在 4105 行“删除根结点”注释后，依据见 binary_tree/legacy.md |
@@ -103,6 +103,7 @@
 | D-018 | 2026-08-17 | `--` 不是破折号：新增 R13（围栏外的 `数字--数字` 报红，行内代码与链接除外） | Claude 记录 |
 | D-019 | 2026-08-17 | PDF sidecar 记录全部构建输入内容哈希；交接与 Pages 发布都拒绝陈旧 PDF | **人** |
 | D-020 | 2026-08-17 | 插图集离线自证：`collect_figures.py --check` + `assets/figures.json` sidecar（文件名 == 内容哈希） | Claude 记录 |
+| D-024 | 2026-08-18 | 分配存储 ≠ 构造对象：`ArrayStack` 工程版换成裸存储 + placement new + 显式析构（教学版保持 `new T[n]`） | Claude 记录 |
 | D-023 | 2026-08-18 | 课件覆盖只能显式登记不能做成匹配器：新增 R16 + `slide_coverage.json`（覆盖/引子/不进课件/欠着） | Claude 记录 |
 | D-022 | 2026-08-18 | 点名本书接口，机器要能查得到：新增 R15（`类名::成员` 必须解析到 code/ 的真实成员） | Claude 记录 |
 | D-021 | 2026-08-17 | 出了题就要说清楚答案在哪：新增 R14 + `answer_gaps.json`（同号答案，或登记欠着/留作练习） | Claude 记录 |

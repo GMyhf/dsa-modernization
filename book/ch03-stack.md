@@ -357,12 +357,18 @@ $1+2+\cdots+n = O(n^2)$ 次；翻倍的话，总搬运次数是 $1+2+4+\cdots+n 
 //
 // 这里用的是**裸指针**，所以这五个函数是承重的，不是仪式——
 // 少写一个，ASan 立刻能复现出崩溃（见 legacy.md 缺陷 4 的实测输出）。
+/// 逐个**拷贝构造**进新槽位。构造到一半抛异常时，已经建好的那几个要自己析构掉——
+/// `new T[n]` 版本不用写这一段（数组 new 会替你回滚），裸存储要自己负责。
 ArrayStack(const ArrayStack& other)
-    : capacity_(other.capacity_),
-      top_index_(other.top_index_),
-      data_(other.capacity_ ? new T[other.capacity_] : nullptr) {
-    for (size_type i = 0; i < top_index_; ++i) {
-        data_[i] = other.data_[i];
+    : capacity_(other.capacity_), top_index_(0), data_(allocate(other.capacity_)) {
+    try {
+        for (; top_index_ < other.top_index_; ++top_index_) {
+            construct_at(top_index_, other.data_[top_index_]);
+        }
+    } catch (...) {
+        destroy_range(data_, top_index_);
+        deallocate(data_, capacity_);
+        throw;
     }
 }
 
@@ -386,7 +392,11 @@ ArrayStack& operator=(ArrayStack&& other) noexcept {
     return *this;
 }
 
-~ArrayStack() { delete[] data_; }
+/// 先析构还活着的元素，再还存储。顺序反了就是对已释放内存调析构。
+~ArrayStack() {
+    destroy_range(data_, top_index_);
+    deallocate(data_, capacity_);
+}
 ```
 
 拷贝赋值用的是**拷贝并交换**(copy-and-swap)：先构造一个完整副本，再与自身交换。
@@ -408,8 +418,13 @@ std::optional<T> pop() {
     if (empty()) {
         return std::nullopt;
     }
+    // 三步的次序是承重的：先把值搬出来（可能抛），成功了才缩短逻辑长度，
+    // 最后**显式析构**那个槽位。若把 --top_index_ 提到前面，移动一抛，
+    // 那个元素就既不在栈里、也没人析构它了。
+    std::optional<T> value(std::move(data_[top_index_ - 1]));
     --top_index_;
-    return std::optional<T>(std::move(data_[top_index_]));
+    data_[top_index_].~T();
+    return value;
 }
 
 /// 读栈顶但不弹出，返回**副本**。空栈返回 std::nullopt，不是未定义行为。
@@ -477,30 +492,29 @@ void ensure_capacity() {
         throw std::overflow_error("ArrayStack: 容量翻倍会溢出");
     }
     const size_type next = capacity_ == 0 ? kInitialCapacity : capacity_ * 2;
-    T* fresh = new T[next];
+    T* fresh = allocate(next);
+    size_type built = 0;
     try {
-        for (size_type i = 0; i < top_index_; ++i) {
-            // 这里是**赋值**而不是构造，所以不能用 std::move_if_noexcept：
-            // 它检查的是移动**构造**是否 noexcept，而可抛的移动赋值会在搬迁
-            // 中途把原栈的元素掏空——红队 T-002 实测复现过（见 legacy.md 缺陷 11）。
+        for (; built < top_index_; ++built) {
+            // 搬迁现在是**构造**，于是 std::move_if_noexcept 恰好就是对的工具：
+            // 它问的正是「移动**构造**抛不抛」，而这里执行的正是移动构造。
             //
-            // 判据必须落在「移动赋值抛不抛」这一个维度上：
-            //   移动赋值 noexcept → 移动。不可能抛，强异常保证不受影响，也不白白深拷贝。
-            //   否则             → 复制。拷贝赋值取 const&，抛了也动不了原栈；
-            //                      上面的 static_assert 保证走到这里的 T 一定可复制赋值。
-            if constexpr (std::is_nothrow_move_assignable<T>::value) {
-                fresh[i] = std::move(data_[i]);
-            } else {
-                fresh[i] = data_[i];
-            }
+            // 2026-08-12 第一版把这件事做在**赋值**语义上，两者的异常规格可以不同，
+            // 红队 T-002 就是从这个缝里打进来的（legacy.md 缺陷 11），
+            // 当时只能手写「看移动赋值抛不抛」的判据。换成裸存储后这道题消失了：
+            //   移动构造 noexcept → 移动，不抛，也不白白深拷贝；
+            //   否则             → 复制，抛了也动不了原栈（上面的 static_assert 保证可复制构造）。
+            construct_at_in(fresh, built, std::move_if_noexcept(data_[built]));
         }
     } catch (...) {
-        // 裸指针的代价：RAII 版本不用写这一段。搬迁失败要自己收拾新缓冲区，
-        // 且此时还没动 data_/capacity_，所以原栈完好——这就是强异常保证。
-        delete[] fresh;
+        // 裸存储的代价：搬迁失败要自己析构已经建好的那几个、再还掉新存储。
+        // 此时 data_/capacity_ 一个字节都没动，所以原栈完好——这就是强异常保证。
+        destroy_range(fresh, built);
+        deallocate(fresh, next);
         throw;
     }
-    delete[] data_;
+    destroy_range(data_, top_index_);
+    deallocate(data_, capacity_);
     data_ = fresh;
     capacity_ = next;
 }
@@ -524,33 +538,112 @@ void ensure_capacity() {
 把「先建后换」改回原书的「先释放旧的」，Debug 构建下 UBSan 当场报空指针引用，
 Release 构建直接段错误。
 
-#### 四、一个容易踩空的地方：`move_if_noexcept` 在这里是错的
+#### 四、存储层：分配存储 ≠ 构造对象
 
-搬迁元素时，一个几乎条件反射的写法是 `std::move_if_noexcept(data_[i])`——
-「移动可能抛就退回拷贝」，标准库容器扩容正是这么做的。**但在这段代码里它是错的。**
+教学版用 `new T[n]` 拿到数组——一行就有，讲「顺序栈就是一块连续数组」够用了。
+但这一行做了两件事：**申请存储**，以及**把整块槽位默认构造一遍**。第二件是白做的。
 
-`std::move_if_noexcept` 的判据是 `T` 的**移动构造**是否 `noexcept`。而这里
-`fresh` 已经由 `new T[next]` 默认构造好了，搬迁执行的是**移动赋值**。
-两者是不同的函数，可以有不同的异常规格：一个类完全可以移动构造 `noexcept`、
-移动赋值却会抛。这时 `move_if_noexcept` 会放行移动，而抛出发生在搬到一半时——
-**原栈里已经被移动走的那些元素，已经被掏空了**，强异常保证就此破裂。
+先量，再改。用一个数构造次数的探针：
 
-这个洞不是推演出来的：本书的测试里有一个正是这种形状的类型
-（移动构造 `noexcept`，第 3 次移动赋值抛异常），它让原来的实现真的失败了。
+```text
+① 构造 ArrayStack<Counted>(1000)，一次 push 都没有：构造了 1000 个对象
+```
 
-判据要落在**实际执行的那个操作**上：
+预留 1000 的容量，就先造出 1000 个没人要的对象。原书 `new T[mSize]` 一模一样。
+而且这一行还顺手给使用者加了一条限制——`T` 必须可默认构造：
 
-- 移动赋值 `noexcept` → 移动。不可能抛，强异常保证不受影响，也不必白白深拷贝。
-- 否则 → 拷贝。拷贝赋值取 `const&`，抛了也动不了原栈。
+```text
+error: static assertion failed: ArrayStack<T>: T 必须可默认构造（底层 new T[n] 会构造整块槽位）
+```
 
-第二条要求 `T` 可拷贝赋值，所以类头处那条 `static_assert` 写明：
-不可拷贝的 `T` 必须满足 `is_nothrow_move_assignable`。**这是本容器对元素类型的
-一条真实约束**，写成编译期断言，好过让它变成运行期某次扩容失败后的谜案。
+栈没有任何理由要求元素能默认构造。这条限制不是设计出来的，是 `new T[n]` 漏出来的。
 
-反过来也要小心：判据若写成「可拷贝就拷贝」，`std::string`
-（移动赋值本就是 `noexcept`）每次扩容都会退化成深拷贝，
-算法3.3 摊还 O(1) 的分析就打了折扣。测试里因此有一条用例专门数拷贝次数——
-**这两种写法都能通过其他所有断言，只有这条能把它们分开。**
+还有第三笔账。教学版的 `clear()` 只写 `size_ = 0`，槽位里的对象一个也没析构。
+用一个每实例自带 200 字节堆内存的探针量：
+
+```text
+满栈 1000：存活 1024 个，持有 204800 字节
+clear() 之后：存活 1024 个，仍持有 204800 字节（逻辑长度已经是 0）
+再 push 3 个：存活 1024 个——只有 3 个是栈里的，其余 1021 个谁也够不着
+```
+
+注意是 **1024 而不是 1000**：多出来的 24 个是扩容时默认构造、从未被用过的空槽位。
+
+工程版把这两件事拆开：**存储只是字节，对象在真正入栈时才构造，出栈时立刻析构。**
+
+```cpp file=code/ch03/array_stack/modern.hpp#storage
+// 存储层：分配存储 / 构造对象 / 析构对象 / 归还存储，四件事分开。
+//
+// 用 `::operator new(bytes, align_val_t)` 而不是 `new T[n]`：后者会顺手把
+// 整块槽位默认构造一遍。**代价是对齐要自己管**——`new T[n]` 替你保证的
+// 对齐，这里必须显式传 alignof(T)，否则 `alignas(64)` 的元素会落在错地方。
+// 这是裸存储换来的自由所对应的那份义务。
+[[nodiscard]] static T* allocate(size_type count) {
+    if (count == 0) {
+        return nullptr;
+    }
+    if (count > std::numeric_limits<size_type>::max() / sizeof(T)) {
+        throw std::overflow_error("ArrayStack: 请求的字节数溢出");
+    }
+    void* raw = ::operator new(count * sizeof(T), std::align_val_t{alignof(T)});
+    return static_cast<T*>(raw);
+}
+
+static void deallocate(T* block, size_type count) noexcept {
+    if (block == nullptr) {
+        return;
+    }
+    ::operator delete(static_cast<void*>(block), count * sizeof(T),
+                      std::align_val_t{alignof(T)});
+}
+
+/// 在第 index 个槽位上就地构造一个 T。槽位在此之前是**生存储，不是对象**。
+template <typename U>
+void construct_at(size_type index, U&& value) {
+    construct_at_in(data_, index, std::forward<U>(value));
+}
+
+template <typename U>
+static void construct_at_in(T* block, size_type index, U&& value) {
+    ::new (static_cast<void*>(block + index)) T(std::forward<U>(value));
+}
+
+/// 逆序析构 [0, count) 这些元素。只析构，不还存储。
+static void destroy_range(T* block, size_type count) noexcept {
+    for (size_type i = count; i-- > 0;) {
+        block[i].~T();
+    }
+}
+```
+
+于是 `push` 是**构造**而不是赋值，`pop` 在搬走值之后显式调 `~T()`，`clear` 逐个析构。
+同一组测量变成：
+
+```text
+① 构造 ArrayStack<Counted>(1000)：构造了 0 个对象
+满栈 1000：存活 1000 个；clear() 之后：存活 0 个；再 push 3 个：存活 3 个
+```
+
+**这份自由对应一份义务：对齐要自己管。** `new T[n]` 替你保证的对齐，
+`::operator new(bytes)` 不管，所以 `allocate()` 必须显式传 `alignof(T)`。
+把那个参数去掉，`alignas(64)` 的元素当场越界——ASan 报 heap-buffer-overflow，
+`-O2` 档直接段错误。教学版不必操心这件事，因为它没拿走这份自由。
+
+**一个副产品：一道旧题消失了。** 早先这里有个坑——搬迁元素时写
+`std::move_if_noexcept(data_[i])` 几乎是条件反射，但它的判据是**移动构造**抛不抛，
+而 `new T[n]` 版本的槽位已经构造好了，搬迁执行的是**移动赋值**。两者是不同的函数，
+可以有不同的异常规格：移动构造 `noexcept`、移动赋值却会抛的类型是存在的，
+本书测试里就有一个，它当场打穿了第一版实现——被移动走的元素已经掏空，
+强异常保证就此破裂。当时只能手写判据：看移动赋值抛不抛。
+
+换成裸存储之后，搬迁执行的**就是移动构造**，`move_if_noexcept` 问的正是那个问题。
+工具和语境对上了，手写判据可以删掉。这不是「顺手变好看了」——
+**它说明当初那个坑的根源不是用错了工具，而是容器把对象构造和存储分配捆在了一起。**
+
+守门用例仍然是两条，缺一不可：移动构造会抛的类型，扩容必须**一次移动都不用**
+（数出来是 0 次移动、4 次拷贝）；移动构造 `noexcept` 的类型，扩容**一次都不许拷贝**
+（否则 `std::string` 每次扩容都变深拷贝，算法3.3 摊还 O(1) 的分析就打了折扣）。
+这两种写法都能通过其他所有断言，只有这两条能把它们分开。
 
 #### 五、`push` 的两个重载
 
@@ -559,15 +652,17 @@ Release 构建直接段错误。
 ```cpp file=code/ch03/array_stack/modern.hpp#push
 /// 入栈。容量不足时按算法3.3 的策略翻倍。
 /// 强异常保证：搬迁在新缓冲区上完成，中途抛异常则原栈原封不动。
+/// 注意是**构造**而不是赋值：那个槽位此前根本没有对象。
+/// 构造失败时 top_index_ 还没加，栈原样不动。
 void push(const T& item) {
     ensure_capacity();
-    data_[top_index_] = item;
+    construct_at(top_index_, item);
     ++top_index_;
 }
 
 void push(T&& item) {
     ensure_capacity();
-    data_[top_index_] = std::move(item);
+    construct_at(top_index_, std::move(item));
     ++top_index_;
 }
 ```
@@ -579,10 +674,12 @@ void push(T&& item) {
 
 #### 六、对元素类型的编译期约束
 
-工程版的类头上还有四条 `static_assert`。它们不参与运行，只在编译期检查
-「你放进来的这个 `T` 合不合格」：必须能默认构造（`new T[n]` 会构造整块槽位）、
-必须能移动赋值（搬迁要用）、不可拷贝的 `T` 必须能无异常移动赋值（上一小节的判据）、
-不能是引用类型。
+工程版的类头上还有三条 `static_assert`。它们不参与运行，只在编译期检查
+「你放进来的这个 `T` 合不合格」：必须能移动或复制构造（`push` 要把元素构造进槽位）、
+移动构造要么不抛、要么 `T` 可复制构造（扩容的强异常保证靠这条）、不能是引用类型。
+
+**原本还有第四条：必须能默认构造。** 上一小节把存储层换掉之后，那条限制连同
+`new T[n]` 一起消失了——少一条对使用者的要求，是这次改动最实在的收益之一。
 
 这四条写在类里而不是文档里，是因为**编译期报错永远比运行期谜案便宜**。
 教学版没有它们：`T` 不合格时报错会发生在模板实例化的深处，信息难看，但同样报错。

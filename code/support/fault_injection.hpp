@@ -132,6 +132,83 @@ private:
     }
 };
 
+/// 第 N 次**拷贝构造**抛异常。
+///
+/// `Fragile` 打的是拷贝**赋值**——那是「先默认构造整块槽位、再往里赋值」的容器
+/// （`new T[n]`）才会走的路。改成裸存储 + placement new 之后，搬迁执行的是
+/// 拷贝**构造**，injection 也得跟着挪到构造上，否则用例会安静地不再触发（T-004）。
+///
+/// 它没有移动构造（用户声明了拷贝构造就不会隐式生成），所以 `std::move_if_noexcept`
+/// 必然选中拷贝构造这条路。
+struct ThrowingCopyConstruction {
+    int v{0};
+    inline static int copies = 0;
+    inline static int throw_at = 0;  // 0 表示不抛
+
+    ThrowingCopyConstruction() = default;
+    explicit ThrowingCopyConstruction(int x) : v(x) {}
+    ThrowingCopyConstruction(const ThrowingCopyConstruction& other) : v(other.v) {
+        if (throw_at != 0 && ++copies == throw_at) {
+            throw std::runtime_error("ThrowingCopyConstruction: 注入的拷贝构造失败");
+        }
+    }
+    ThrowingCopyConstruction& operator=(const ThrowingCopyConstruction&) = default;
+
+    static void reset(int at = 0) {
+        copies = 0;
+        throw_at = at;
+    }
+};
+
+/// 移动构造**不是** `noexcept` 且会抛；拷贝构造正常。
+///
+/// 这是 `std::move_if_noexcept` 的判据本身：遇到这种 T，扩容必须退回拷贝，
+/// 于是注入的移动失败**一次都不该发生**。用它守住「强异常保证没被移动优化吃掉」。
+struct ThrowingMoveConstruction {
+    int v{0};
+    inline static int moves = 0;
+    inline static int copies = 0;
+    inline static int throw_at = 0;
+
+    ThrowingMoveConstruction() = default;
+    explicit ThrowingMoveConstruction(int x) : v(x) {}
+    ThrowingMoveConstruction(const ThrowingMoveConstruction& other) : v(other.v) { ++copies; }
+    ThrowingMoveConstruction(ThrowingMoveConstruction&& other) : v(other.v) {  // 故意不 noexcept
+        ++moves;
+        if (throw_at != 0 && moves == throw_at) {
+            throw std::runtime_error("ThrowingMoveConstruction: 注入的移动构造失败");
+        }
+        other.v = -1;
+    }
+    ThrowingMoveConstruction& operator=(const ThrowingMoveConstruction&) = default;
+
+    static void reset(int at = 0) {
+        moves = 0;
+        copies = 0;
+        throw_at = at;
+    }
+};
+
+/// 数**构造**次数（不是赋值）。移动构造是 `noexcept`，形状与 `std::string` 一致。
+/// 用来证明「移动构造不抛的 T，扩容时一次都不该深拷贝」。
+struct CountedConstruction {
+    int v{0};
+    inline static int copies = 0;
+    inline static int moves = 0;
+
+    CountedConstruction() = default;
+    explicit CountedConstruction(int x) : v(x) {}
+    CountedConstruction(const CountedConstruction& other) : v(other.v) { ++copies; }
+    CountedConstruction(CountedConstruction&& other) noexcept : v(other.v) { ++moves; }
+    CountedConstruction& operator=(const CountedConstruction&) = default;
+    CountedConstruction& operator=(CountedConstruction&&) noexcept = default;
+
+    static void reset() {
+        copies = 0;
+        moves = 0;
+    }
+};
+
 /// 数拷贝次数。用来证明「该走移动的地方没有偷偷深拷贝」。
 /// 移动赋值是 `noexcept`，形状与 `std::string`、`std::unique_ptr` 一致。
 struct CheapMove {

@@ -20,5 +20,5 @@
   ],
   "standard": "c++17",
   "owner": "claude",
-  "notes": "按 collab/DECISION_LOG.md D-001 落地：C++17、裸指针 + 显式五法则、optional 接口、越界抛标准异常。原书 arrStack 按印刷原样无法编译（int top 与 bool top(T&) 重名）；算法3.3 的 i 未声明。详见 legacy.md。"
+  "notes": "按 collab/DECISION_LOG.md D-001 落地：C++17、裸指针 + 显式五法则、optional 接口、越界抛标准异常。原书 arrStack 按印刷原样无法编译（int top 与 bool top(T&) 重名）；算法3.3 的 i 未声明。详见 legacy.md。T-004（2026-08-18）把存储层换成「裸存储 + placement new + 显式析构」：预留容量不再默认构造槽位、元素不必可默认构造、pop/clear 逐个析构，代价是对齐要自己传（缺陷 12/13/14）。"
 }

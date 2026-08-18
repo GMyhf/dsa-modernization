@@ -179,6 +179,14 @@ Debug 档 UBSan 立刻报 `reference binding to null pointer`，Release 档直�
 
 ### 缺陷 11（现代化过程中自己引入的）：`move_if_noexcept` 在赋值语境下是错的
 
+> **2026-08-18（T-004）追记**：改用裸存储之后，扩容搬迁执行的是移动**构造**，
+> `std::move_if_noexcept` 问的正是「移动构造抛不抛」——**这道题从根上消失了**。
+> 判据不再需要手写，守门用例也从「注入拷贝赋值失败」挪到了「注入拷贝构造失败」
+> （`ThrowingCopyConstruction`）与「移动构造会抛时必须退回拷贝」
+> （`test_throwing_move_construction_falls_back_to_copy`，数 0 次移动 / 4 次拷贝）。
+> 2026-08-12 交接里挂着的那个疑问「`move_if_noexcept` 在赋值而非构造语义下是否还有意义」，
+> 到这里才算真正有了答案：**它本来就只适用于构造语境，当时的容器用错了语境。**
+
 这一条**不是原书的错，是我们第一版现代化实现的错**，记在这里因为它比原书的很多毛病更值得学。
 
 第一版扩容搬迁写的是 `fresh[i] = std::move_if_noexcept(data_[i])`——
@@ -212,15 +220,90 @@ Codex 的两条故障注入用例照样通过。
 
 - 仍然是手写的、基于数组的栈，仍然自己管缓冲区；
 - 扩容仍是算法3.3 的「满了翻倍」，摊还 O(1) 的教学点原样保留；
-- `clear()` 仍然只把长度归零、留着容量复用，与原书语义一致。
+- `clear()` 仍然留着容量复用，与原书语义一致（但 T-004 之后它会**逐个析构**元素，
+  见缺陷 13——原书那种「只把长度归零」把死元素留在槽位里）。
+
+### 缺陷 12：`new T[n]` 把整块槽位默认构造了一遍（T-004，2026-08-18 修）
+
+**这一条原本记在「已知欠账」里**（「和原书完全相同，没有恶化、也没有解决」），
+T-004 把它做完了。先量再改：
+
+```
+$ g++ -std=c++17 -Wall -Wextra -I code/ch03/array_stack evidence.cpp -o t && ./t
+① 构造 ArrayStack<Counted>(1000)，一次 push 都没有：构造了 1000 个对象
+```
+
+预留 1000 的容量，先造出 1000 个没人要的对象。原书 `new T[mSize]` 一模一样。
+
+同一行还附带一条对使用者的限制——`T` 必须可默认构造，而栈没有任何理由要求这个：
+
+```
+$ g++ -std=c++17 -I code/ch03/array_stack nodefault.cpp -o t
+modern.hpp:34:53: error: static assertion failed: ArrayStack<T>: T 必须可默认构造（底层 new T[n] 会构造整块槽位）
+```
+
+**改法**：把「分配存储」和「构造对象」拆开——`::operator new(bytes, align_val_t)`
+只要字节，`placement new` 在真正入栈时才构造，`~T()` 显式析构。改完再量：
+
+```
+① 构造 ArrayStack<Counted>(1000)，一次 push 都没有：构造了 0 个对象
+$ g++ ... nodefault.cpp -o t && ./t     # 编译通过，运行正常
+```
+
+守门用例：`test.cpp::test_reserved_capacity_constructs_nothing`、
+`test.cpp::test_element_need_not_be_default_constructible`。
+变异自检：把构造函数改回「把槽位全建出来」，前者当场红。
+
+### 缺陷 13：`pop`/`clear` 之后死元素还活着
+
+`new T[n]` 版本的 `clear()` 只写 `top_index_ = 0`，槽位里的对象一个都没析构。
+用一个每个实例自带 200 字节堆内存的探针量：
+
+```
+满栈 1000：存活 Big 对象 1024 个，持有 204800 字节
+clear() 之后：存活 1024 个，仍持有 204800 字节（逻辑长度已经是 0）
+再 push 3 个：存活 1024 个——只有 3 个是栈里的，其余 1021 个是谁也够不着的死元素
+```
+
+注意 **1024 而不是 1000**：多出来的 24 个是扩容时默认构造、从来没被用过的空槽位。
+
+改用显式析构之后：
+
+```
+满栈 1000：存活 Big 对象 1000 个，持有 200000 字节
+clear() 之后：存活 0 个，仍持有 0 字节
+再 push 3 个：存活 3 个——其余 0 个是谁也够不着的死元素
+```
+
+守门用例：`test.cpp::test_pop_and_clear_destroy_elements`。
+变异自检：把 `clear()` 改回「只把长度归零」，ASan 报
+`1584 byte(s) leaked in 99 allocation(s)`；把 `pop()` 里的 `~T()` 删掉，
+三条断言同时红。
+
+### 缺陷 14（这次改动**新引入**的义务）：对齐要自己管
+
+`new T[n]` 替你保证元素对齐；`::operator new(bytes)` 不管。所以 `allocate()`
+必须显式传 `std::align_val_t{alignof(T)}`——**裸存储换来的自由，对应的就是这份义务**。
+把那个参数去掉，`alignas(64)` 的元素当场越界：
+
+```
+==326311==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000000008
+（-O2 档则直接 SIGSEGV，退出码 -11）
+```
+
+守门用例：`test.cpp::test_over_aligned_element`。
+
+顺带一条**测试基础设施**的变化，写在这里免得后人当成疏忽：
+`support/fault_injection.hpp` 里的 `AllocationFailure` 靠重载 `T::operator new[]`
+注入 `bad_alloc`，而新实现调的是**全局**的 `::operator new`，那个探针在本单元
+再也不会被调用。改成在 `test.cpp` 本翻译单元替换全局的对齐版 `operator new`
+（转调普通 `::operator new` 再自己对齐，ASan 照常记账）。
+两个替换标了 `noinline`——gcc 会把它们内联进 `deallocate` 后按**标准**语义做配对分析，
+于是 `-Wmismatched-new-delete`/`-Warray-bounds` 对一个合法的全局替换报红；
+不内联就没有那个上下文。这里没有用 `#pragma` 关诊断：关掉的是整条规则，
+不内联只挡这一处误判。
 
 ## 四、已知欠账
-
-`new T[capacity]` 会把容量内的所有槽位**默认构造**出来，因此 `T` 必须可默认构造
-（`modern.hpp` 顶部的 `static_assert` 把这条限制显式写了出来）。
-这一点和原书 `new T[mSize]` 完全相同，属于**没有恶化、也没有解决**。
-真正的容器做法是申请未初始化存储 + placement new，只在槽位真正被使用时构造对象。
-这条记在 `collab/PLAN.md` 的 **T-004**，不在本单元里悄悄带过。
 
 ~~另一条小欠账：`top()` 返回副本，对 move-only 元素不可用。~~
 **2026-08-12 已销账**：人拍板补充 D-001 第 3b 条，新增
