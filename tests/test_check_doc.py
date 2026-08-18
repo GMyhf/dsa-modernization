@@ -647,6 +647,85 @@ class TestR13DoubleDash(unittest.TestCase):
         self.assertEqual(found, [])
 
 
+class TestR15QualifiedNames(unittest.TestCase):
+    """R15：书稿点名本书接口时，`类名::成员` 必须真的存在。
+
+    **缘由**：T-037 复查在一份 11 步全绿的书稿里手工抓出 4 个不存在的接口名
+    （`MinHeap::pop_min`、`HuffmanTree::code`、`DisjointSet::connected`、
+    `WinnerTree::winner_value`）。R3 只管 ```cpp 块，散文里点名的接口此前不受任何约束。
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        code = Path(self.tmp.name) / "code" / "ch05" / "heap"
+        code.mkdir(parents=True)
+        (code / "modern.hpp").write_text(
+            "namespace dsa::sorting {\n"
+            "class MinHeap {\n"
+            "public:\n"
+            "    void insert(int value);\n"
+            "    int remove_min();\n"
+            "};\n"
+            "inline void heap_sort(std::vector<int>& v);\n"
+            "}\n",
+            encoding="utf-8",
+        )
+        self.index = check_doc.code_symbol_index(Path(self.tmp.name) / "code")
+
+    def check(self, text):
+        path = Path(self.tmp.name) / "x.md"
+        path.write_text(text, encoding="utf-8")
+        return check_doc.check_qualified_names(path, self.index)
+
+    def test_real_member_passes(self):
+        self.assertEqual(self.check("调用 `MinHeap::remove_min()` 取最小值。\n"), [])
+
+    def test_missing_member_is_reported(self):
+        """真实缺陷：附录写的是 `pop_min`，实现里叫 `remove_min`。"""
+        problems = self.check("反复 `MinHeap::pop_min` 可得到升序。\n")
+        self.assertEqual(len(problems), 1, problems)
+        self.assertIn("R15", problems[0])
+        self.assertIn("pop_min", problems[0])
+
+    def test_unknown_type_is_reported(self):
+        problems = self.check("用 `WinnerTree::winner_index()` 取冠军。\n")
+        self.assertEqual(len(problems), 1, problems)
+        self.assertIn("既不是类也不是命名空间", problems[0])
+
+    def test_namespace_member_is_checked_against_that_namespace(self):
+        self.assertEqual(self.check("调用 `sorting::heap_sort`。\n"), [])
+        self.assertTrue(self.check("调用 `sorting::bogo_sort`。\n"))
+
+    def test_std_is_skipped(self):
+        """标准库不归我们管。"""
+        self.assertEqual(self.check("返回 `std::nullopt` 就是有环。\n"), [])
+
+    def test_file_scoped_test_names_are_not_qualified_ids(self):
+        """`test.cpp::某用例` 是本仓库的「文件::用例」写法，不是 C++ 限定名。"""
+        self.assertEqual(self.check("对应用例 `test.cpp::test_copy_is_deep`。\n"), [])
+
+    def test_code_fences_are_skipped(self):
+        """围栏里的代码归 R3 管，逐字来自 code/，不重复判。"""
+        self.assertEqual(self.check("```cpp\nMinHeap::pop_min();\n```\n"), [])
+
+    def test_prose_outside_backticks_is_not_checked(self):
+        """只看行内代码：散文里提到原书的 arrStack<T>::push 不该被当成本书接口。"""
+        self.assertEqual(self.check("原书写的是 arrStack<T>::push。\n"), [])
+
+    def test_committed_book_and_legacy_are_clean(self):
+        """入库书稿当锚：以后谁再点名一个不存在的接口，这里就红。"""
+        index = check_doc.code_symbol_index()
+        found = []
+        for path in sorted(check_doc.BOOK.rglob("*.md")):
+            if "pdf" in path.relative_to(check_doc.BOOK).parts:
+                continue
+            found += check_doc.check_qualified_names(path, index)
+        for legacy in sorted((check_doc.ROOT / "code").rglob("legacy.md")):
+            found += check_doc.check_qualified_names(legacy, index)
+        self.assertEqual(found, [])
+
+
 class TestR14ExerciseAnswers(unittest.TestCase):
     """R14：出了题，就得说清楚答案在哪。
 

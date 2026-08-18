@@ -304,8 +304,8 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 </ol>
 <h3 id="正文上机题参考-2"><a class="anchor" href="#正文上机题参考-2">#</a>正文上机题参考</h3>
 <ol>
-<li>采用上题两个栈方案；若复用本书容器，<code>ArrayStack::push</code>、<code>pop</code>、<code>empty</code> 是实际接口。守门用例要覆盖空队列、交错入出和 <code>out</code> 非空时继续入队。</li>
-<li>用 <code>front</code>、<code>count</code> 和循环数组实现，四端操作均按模取下标。至少测试容量 1、满后拒绝、绕回以及从两端删到空；本书 <code>ArrayQueue</code> 的实际接口是 <code>enqueue</code>、<code>dequeue</code>、<code>empty</code>、<code>full</code>，但它本身不是双端队列。</li>
+<li>采用上题两个栈方案；若复用本书容器，<code>ArrayStack::push</code>、<code>ArrayStack::pop</code>、<code>ArrayStack::empty</code> 是实际接口。守门用例要覆盖空队列、交错入出和 <code>out</code> 非空时继续入队。</li>
+<li>用 <code>front</code>、<code>count</code> 和循环数组实现，四端操作均按模取下标。至少测试容量 1、满后拒绝、绕回以及从两端删到空；本书的实际接口是 <code>ArrayQueue::enqueue</code>、<code>ArrayQueue::dequeue</code>、<code>ArrayQueue::empty</code>、<code>ArrayQueue::full</code>，但它本身不是双端队列。</li>
 <li>一个辅助队列时，每插入 <span class="math">x</span>，先入队，再轮转原有元素，使队头始终为最小值。插入最坏 <span class="math">O(n)</span>，删除最小 <span class="math">O(<span class="upr">1</span>)</span>；两个辅助队列也可做归并式插入。</li>
 <li>一个辅助栈时做 <code>s1 -&gt; aux -&gt; s2</code> 两次转移。若只许有限个标量而元素数无界，则不能保持任意长栈的原顺序；需要递归调用栈或能容纳 <span class="math">n</span> 个值的外部存储。</li>
 <li>递归 <code>fib(n)=fib(n-1)+fib(n-2)</code> 会重复计算，时间指数级。显式栈帧保存 <code>(n,阶段,左结果)</code> 可模拟调用；更实用的非递归只保留前两项，时间 <span class="math">O(n)</span>、空间 <span class="math">O(<span class="upr">1</span>)</span>。</li>
@@ -331,14 +331,14 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <li>先给 <span class="math">t</span> 的字符建存在表，再扫描 <span class="math">s</span>；字符不在 <span class="math">t</span> 且第一次出现时，追加到新串并记录当前位置。时间 <span class="math">O(|s|<span class="bin">+</span>|t|)</span>，字节字母表下额外空间 <span class="math">O(<span class="upr">1</span>)</span>。</li>
 <li>判据是 <span class="math">|T|<span class="rel">=</span>|T&#x27;|</span> 且 <span class="math">T</span> 是 <span class="math">T&#x27;<span class="bin">+</span>T&#x27;</span> 的子串，用 <code>kmp_search(T&#x27;+T&#x27;, T)</code> 在 <span class="math">O(|T|)</span> 时间完成。原书用的例子 <code>arc</code> 与 <code>car</code> 正是这样：<code>arc</code> 的循环移位是 <code>arc</code>、<code>rca</code>、<code>car</code>。<strong>不要先反转再找</strong>——<code>reverse(&quot;arc&quot;)=&quot;cra&quot;</code>，<code>&quot;cracra&quot;</code> 里根本没有 <code>car</code>，那个判据会把原书自己的例子判否。</li>
 <li>从左到右找 <span class="math">t</span> 的非重叠出现位置，把未匹配片段写入新缓冲；空 <span class="math">t</span> 必须单独约定为不删除。用 KMP 为 <span class="math">O(|s|<span class="bin">+</span>|t|)</span>，朴素反复查找最坏 <span class="math">O(|s||t|)</span>。</li>
-<li>按本书 <code>build_next</code> 的优化定义，<code>BAAABBBAA</code> 的特征向量是 <strong><code>[-1,0,0,0,-1,1,1,0,0]</code></strong>。在目标串中首个完整匹配从 <strong>下标 19</strong> 开始；失配时文本下标不退，只按向量回退模式下标。</li>
+<li>按本书 <code>dsa::build_next</code> 的优化定义，<code>BAAABBBAA</code> 的特征向量是 <strong><code>[-1,0,0,0,-1,1,1,0,0]</code></strong>。在目标串中首个完整匹配从 <strong>下标 19</strong> 开始；失配时文本下标不退，只按向量回退模式下标。</li>
 </ol>
 <h3 id="正文上机题参考-3"><a class="anchor" href="#正文上机题参考-3">#</a>正文上机题参考</h3>
 <ol>
 <li>跳过可选负号后逐位做 <code>value=value*10+digit</code>；拒绝空串、孤立负号和非数字，并在乘 10、加当前位之前检查 <code>int</code> 上下界。时间 <span class="math">O(n)</span>。</li>
 <li>扫描时遇数字开始累积，直到非数字才输出并计数；文件结束时若仍在数字中要补输出一次。若允许负整数，只有紧邻数字的 <code>-</code> 才作符号。</li>
 <li>可把每个后缀排序，再比较相邻后缀的最长公共前缀；<code>abcdacdac</code> 的最长重复子串为 <strong><code>cdac</code></strong>，起点 2 和 5。规模大时应改用后缀数组或后缀自动机。</li>
-<li>行表用 <code>std::vector&lt;String&gt;</code> 或链表保存，当前行是下标/迭代器；插删后统一修正当前行。查找替换必须调用实际接口 <code>build_next</code>、<code>kmp_search</code>，字符串切片可用 <code>String::substr</code>，不能把环境自带 <code>find</code> 冒充 KMP。</li>
+<li>行表用 <code>std::vector&lt;String&gt;</code> 或链表保存，当前行是下标/迭代器；插删后统一修正当前行。查找替换必须调用实际接口 <code>dsa::build_next</code>、<code>dsa::kmp_search</code>，字符串切片可用 <code>String::substr</code>，不能把环境自带 <code>find</code> 冒充 KMP。</li>
 </ol>
 <h3 id="课程作业与-ref_dsa-参考答案-3"><a class="anchor" href="#课程作业与-ref_dsa-参考答案-3">#</a>课程作业与 <code>ref_DSA</code> 参考答案</h3>
 <ol>
@@ -369,9 +369,9 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h3 id="正文上机题参考-4"><a class="anchor" href="#正文上机题参考-4">#</a>正文上机题参考</h3>
 <ol>
 <li>先序首元素定根，在中序中切分左右区间递归构造；重复键会使切分不唯一，应拒绝或另带唯一 ID。构造后用 <code>BinaryTree::postorder</code> 输出。</li>
-<li>使用实际接口 <code>BinarySearchTree::insert</code>、<code>remove</code>、<code>inorder</code>；依次插入递增键会形成高为 <span class="math">n</span> 的右链，使查找和插删退化到 <span class="math">O(n)</span>。</li>
-<li><code>MinHeap::insert</code> 建堆后反复 <code>remove_min()</code>（返回 <code>std::optional&lt;T&gt;</code>，堆空时是 <code>std::nullopt</code>）可得到升序；逐个插入建堆 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，全部弹出仍为 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>。计时要排除数据生成和输出并多次重复。</li>
-<li>教学版 <code>code/ch05/heap_huffman/teaching.hpp</code> 里 <code>HuffmanTree(symbols,weights,count)</code> 才带字符表，查询接口是 <code>code_of(symbol)</code>、<code>encode</code>、<code>decode</code>、<code>weighted_path_length</code>；工程版 <code>modern.hpp</code> 的 <code>HuffmanTree(weights,count)</code> 只建树、只对外给 <code>total_weight()</code>，做这道题要用教学版。同权值编码可能不唯一，守门条件应是前缀无歧义、往返一致和 WPL 最小。</li>
+<li>使用实际接口 <code>BinarySearchTree::insert</code>、<code>BinarySearchTree::remove</code>、<code>BinarySearchTree::inorder</code>；依次插入递增键会形成高为 <span class="math">n</span> 的右链，使查找和插删退化到 <span class="math">O(n)</span>。</li>
+<li><code>MinHeap::insert</code> 建堆后反复 <code>MinHeap::remove_min()</code>（返回 <code>std::optional&lt;T&gt;</code>，堆空时是 <code>std::nullopt</code>）可得到升序；逐个插入建堆 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，全部弹出仍为 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>。计时要排除数据生成和输出并多次重复。</li>
+<li>教学版 <code>code/ch05/heap_huffman/teaching.hpp</code> 里 <code>HuffmanTree(symbols,weights,count)</code> 才带字符表，查询接口是 <code>HuffmanTree::code_of</code>、<code>HuffmanTree::encode</code>、<code>HuffmanTree::decode</code>、<code>HuffmanTree::weighted_path_length</code>；工程版 <code>modern.hpp</code> 的 <code>HuffmanTree(weights,count)</code> 只建树、只对外给 <code>total_weight()</code>，做这道题要用教学版。同权值编码可能不唯一，守门条件应是前缀无歧义、往返一致和 WPL 最小。</li>
 </ol>
 <h3 id="课程作业与-ref_dsa-参考答案-4"><a class="anchor" href="#课程作业与-ref_dsa-参考答案-4">#</a>课程作业与 <code>ref_DSA</code> 参考答案</h3>
 <ol>
@@ -392,7 +392,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h3 id="正文习题答案-5"><a class="anchor" href="#正文习题答案-5">#</a>正文习题答案</h3>
 <ol>
 <li>森林转二叉树时，每个结点的第一个孩子接左指针、下一个兄弟接右指针，各棵树的根也沿右指针相连；逆变换把左链恢复为孩子、右链恢复为兄弟。逐边做两次后，每条父子/兄弟关系回到原处，故互逆。</li>
-<li>对题面给的 <code>A(B(E,F),C(G),D(H,I,J))</code>：先根 <strong><code>ABEFCGDHIJ</code></strong>，后根 <strong><code>EFBGCHIJDA</code></strong>，层次 <strong><code>ABCDEFGHIJ</code></strong>。先根是「根，再从左到右各子树」，后根是「从左到右各子树，再根」，层次用队列逐层扫描。核对时用 <code>GeneralTree::preorder</code>、<code>postorder</code>、<code>breadth_first</code>——注意层次序列与另两个的差别只在同层结点何时被访问。</li>
+<li>对题面给的 <code>A(B(E,F),C(G),D(H,I,J))</code>：先根 <strong><code>ABEFCGDHIJ</code></strong>，后根 <strong><code>EFBGCHIJDA</code></strong>，层次 <strong><code>ABCDEFGHIJ</code></strong>。先根是「根，再从左到右各子树」，后根是「从左到右各子树，再根」，层次用队列逐层扫描。核对时用 <code>GeneralTree::preorder</code>、<code>GeneralTree::postorder</code>、<code>GeneralTree::breadth_first</code>——注意层次序列与另两个的差别只在同层结点何时被访问。</li>
 <li>度为 2 的有序树只区分“第一个/第二个孩子”；只有一个孩子时它就是第一个孩子。二叉树还区分左、右，因此根只有右孩子 B、左孩子为空是合法二叉树，却没有对应的度为 2 有序树形态。</li>
 <li>例如根 A 有孩子 B、C，C 有孩子 D；带度数后根序列为 <code>B/0, D/0, C/1, A/2</code>。叶结点直接压栈；读到 <code>C/1</code> 弹 1 棵作其孩子再压回 C，读到 <code>A/2</code> 按逆序弹 C、B，接回原来的 B、C 次序。</li>
 <li>按重量合并后可写成 <code>parent=[0,0,0,3,3,5,6]</code>：0、1、2 一组，3、4 一组。随后 <code>find(0)</code> 时 0 已是根，父指针<strong>不变化</strong>；若想观察压缩应查非根，但本书 <code>DisjointSet::unite</code> 已按重量合并，这个例子不会形成深链。</li>
@@ -400,8 +400,8 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 </ol>
 <h3 id="正文上机题参考-5"><a class="anchor" href="#正文上机题参考-5">#</a>正文上机题参考</h3>
 <ol>
-<li>转换时保存第一个孩子/下一兄弟关系，往返后除比较先根序列，还应比较每个结点的孩子数。本书 <code>GeneralTree</code> 提供 <code>preorder</code>、<code>postorder</code> 和 <code>breadth_first</code>。</li>
-<li>为每条无向边调用 <code>DisjointSet::unite(u,v)</code>；最终把每个顶点的 <code>find(i)</code> 放入集合，集合大小就是连通分量数，等于 1 时连通。实际接口是 <code>find</code>、<code>unite</code>、<code>same</code>（不叫 <code>connected</code>）。</li>
+<li>转换时保存第一个孩子/下一兄弟关系，往返后除比较先根序列，还应比较每个结点的孩子数。本书提供 <code>GeneralTree::preorder</code>、<code>GeneralTree::postorder</code> 和 <code>GeneralTree::breadth_first</code>。</li>
+<li>为每条无向边调用 <code>DisjointSet::unite(u,v)</code>；最终把每个顶点的 <code>find(i)</code> 放入集合，集合大小就是连通分量数，等于 1 时连通。实际接口是 <code>DisjointSet::find</code>、<code>DisjointSet::unite</code>、<code>DisjointSet::same</code>——<strong>没有</strong> <code>connected</code> 这个名字。</li>
 <li>构造父指针链后重复查最深结点；无压缩每次 <span class="math">O(n)</span>，路径压缩第一次仍为 <span class="math">O(n)</span>，之后接近 <span class="math">O(<span class="upr">1</span>)</span>。本书实现同时使用按重量合并和路径压缩，不能靠 <code>unite</code> 造退化链；对照版需单独实现朴素 <code>find</code>。</li>
 </ol>
 <h3 id="课程作业与-ref_dsa-参考答案-5"><a class="anchor" href="#课程作业与-ref_dsa-参考答案-5">#</a>课程作业与 <code>ref_DSA</code> 参考答案</h3>
@@ -431,7 +431,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 </ol>
 <h3 id="正文上机题参考-6"><a class="anchor" href="#正文上机题参考-6">#</a>正文上机题参考</h3>
 <ol>
-<li>调用 <code>Graph::topological_sort</code> 或 <code>GraphList::topological_sort</code>，返回 <code>std::nullopt</code> 就是有环；读入时用 <code>add_edge</code> 检查顶点范围。</li>
+<li>调用 <code>Graph::topological_sort</code> 或 <code>GraphList::topological_sort</code>，返回 <code>std::nullopt</code> 就是有环；读入时用 <code>Graph::add_edge</code> 检查顶点范围。</li>
 <li><code>Graph::dijkstra(source)</code> 返回距离；若还要路径，应同步维护 <code>predecessor[v]</code>，松弛成功时记录前驱，再从终点逆推。负权输入必须拒绝。</li>
 <li><code>Graph::prim</code> 与 <code>kruskal</code> 对每张连通无向图都应返回 <span class="math">V<span class="bin">−</span><span class="upr">1</span></span> 条边且总权相等；随机生成时先保证一棵生成树，再补随机边。</li>
 <li>给 <code>GraphList</code> 增加 <code>remove_edge(from,to,directed)</code>：在邻接向量中线性查找删除，故 <span class="math">O(<span class="upr">deg</span>&thinsp;from)</span>；无向边还要删反向项。矩阵只需把一个或两个格恢复为 <code>infinity</code>，故 <span class="math">O(<span class="upr">1</span>)</span>。</li>
@@ -457,18 +457,18 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <ol>
 <li>对 <code>{49,38,65,97,76,13,27}</code>：直接插入第一趟为 <strong><code>{38,49,65,97,76,13,27}</code></strong>；冒泡第一趟为 <strong><code>{38,49,65,76,13,27,97}</code></strong>；简单选择第一趟为 <strong><code>{13,38,65,97,76,49,27}</code></strong>。</li>
 <li>插入排序只在新键严格小于前键时移动，相等键不会越过，故稳定。堆排序的远距离交换会跨过相等键；例如带身份的 <code>[(2,a),(2,b),(1,c)]</code> 建大顶堆后换根与末尾，可能让 <code>(2,b)</code> 排到 <code>(2,a)</code> 前。</li>
-<li>本书 <code>partition</code> 取末元素为枢轴，扫描 <code>[first,last-1)</code>，小于枢轴的交换到 <code>boundary</code> 左边，最后把枢轴换到 <code>boundary</code>。已升序、逆序或全相等输入会每次切出空侧，递归式 <span class="math">T(n)<span class="rel">=</span>T(n<span class="bin">−</span><span class="upr">1</span>)<span class="bin">+</span>Θ(n)<span class="rel">=</span>Θ(n<sup><span class="upr">2</span></sup>)</span>。</li>
+<li>本书 <code>sorting::partition</code> 取末元素为枢轴，扫描 <code>[first,last-1)</code>，小于枢轴的交换到 <code>boundary</code> 左边，最后把枢轴换到 <code>boundary</code>。已升序、逆序或全相等输入会每次切出空侧，递归式 <span class="math">T(n)<span class="rel">=</span>T(n<span class="bin">−</span><span class="upr">1</span>)<span class="bin">+</span>Θ(n)<span class="rel">=</span>Θ(n<sup><span class="upr">2</span></sup>)</span>。</li>
 <li>题面未指定 8 个数。以 <code>{49,38,65,97,76,13,27,50}</code> 为可复算例：建大顶堆得 <code>{97,76,65,50,49,13,27,38}</code>；逐趟交换并下沉后为 <code>{76,50,65,38,49,13,27,97}</code>、<code>{65,50,27,38,49,13,76,97}</code>、<code>{50,49,27,38,13,65,76,97}</code>、<code>{49,38,27,13,50,65,76,97}</code>、<code>{38,13,27,49,50,65,76,97}</code>、<code>{27,13,38,49,50,65,76,97}</code>、<code>{13,27,38,49,50,65,76,97}</code>。</li>
-<li>常规二路归并需要 <span class="math">O(n)</span> 辅助数组。可以原地归并，但要靠旋转、块归并等复杂技术，通常增加实现复杂度、常数甚至比较/移动次数；本书 <code>merge_sort</code> 明确分配一个 <code>buffer</code>。</li>
-<li>直接按二补码字节做无符号 LSD 排序会把负数排在正数后。本书 <code>radix_sort</code> 把 <code>int</code> 转为 <code>uint32_t</code> 后异或 <code>0x80000000U</code>，翻转符号位，使无符号次序与有符号数值次序一致。</li>
+<li>常规二路归并需要 <span class="math">O(n)</span> 辅助数组。可以原地归并，但要靠旋转、块归并等复杂技术，通常增加实现复杂度、常数甚至比较/移动次数；本书 <code>sorting::merge_sort</code> 明确分配一个 <code>buffer</code>。</li>
+<li>直接按二补码字节做无符号 LSD 排序会把负数排在正数后。本书 <code>sorting::radix_sort</code> 把 <code>int</code> 转为 <code>uint32_t</code> 后异或 <code>0x80000000U</code>，翻转符号位，使无符号次序与有符号数值次序一致。</li>
 <li>数据很小或近乎有序时选插入排序，因常数小、稳定且可接近 <span class="math">O(n)</span>；要求最坏 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 且只能用 <span class="math">O(<span class="upr">1</span>)</span> 额外数组空间时选堆；要求稳定且容得下 <span class="math">O(n)</span> 缓冲时选归并；一般内存随机数据常选优化快排。</li>
 </ol>
 <h3 id="正文上机题参考-7"><a class="anchor" href="#正文上机题参考-7">#</a>正文上机题参考</h3>
 <ol>
-<li>用 <code>random_values</code> 生成同一母本，复制后分别调用 <code>insertion_sort</code>、<code>heap_sort</code>、<code>quick_sort</code>、<code>merge_sort</code>，用 <code>Stopwatch::start/elapsed_seconds</code> 计时。排除生成和复制时间，每个规模重复多次并核对结果相同。</li>
-<li>本书快排取末元素为枢轴，升序、逆序、全相等都可退化；记录 <code>quick_sort_range</code> 的最大递归深度，应随 <span class="math">n</span> 线性增长。<code>quick_sort_optimized</code> 只限制栈深和小分区常数，不改变最坏比较次数。</li>
-<li>监视哨版把待插入值暂存到下标 0，省去内层边界判断；与 <code>insertion_sort</code> 对拍空、单元素、重复、随机和逆序输入。若占用下标 0，接口要明确有效数据区从 1 开始。</li>
-<li>调用 <code>radix_sort</code> 后与 <code>std::sort</code> 对拍，数据必须含 <code>INT_MIN</code>、<code>-1</code>、<code>0</code>、正数、<code>INT_MAX</code> 和重复值；本书现有实现覆盖完整 <code>int</code> 范围。</li>
+<li>用 <code>sorting::random_values</code> 生成同一母本，复制后分别调用 <code>sorting::insertion_sort</code>、<code>sorting::heap_sort</code>、<code>sorting::quick_sort</code>、<code>sorting::merge_sort</code>，用 <code>Stopwatch::start</code> 与 <code>Stopwatch::elapsed_seconds</code> 计时。排除生成和复制时间，每个规模重复多次并核对结果相同。</li>
+<li>本书快排取末元素为枢轴，升序、逆序、全相等都可退化；记录 <code>sorting::quick_sort_range</code> 的最大递归深度，应随 <span class="math">n</span> 线性增长。<code>sorting::quick_sort_optimized</code> 只限制栈深和小分区常数，不改变最坏比较次数。</li>
+<li>监视哨版把待插入值暂存到下标 0，省去内层边界判断；与 <code>sorting::insertion_sort</code> 对拍空、单元素、重复、随机和逆序输入。若占用下标 0，接口要明确有效数据区从 1 开始。</li>
+<li>调用 <code>sorting::radix_sort</code> 后与 <code>std::sort</code> 对拍，数据必须含 <code>INT_MIN</code>、<code>-1</code>、<code>0</code>、正数、<code>INT_MAX</code> 和重复值；本书现有实现覆盖完整 <code>int</code> 范围。</li>
 </ol>
 <h3 id="课程作业与-ref_dsa-参考答案-7"><a class="anchor" href="#课程作业与-ref_dsa-参考答案-7">#</a>课程作业与 <code>ref_DSA</code> 参考答案</h3>
 <ol>
@@ -489,17 +489,17 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h3 id="正文习题答案-8"><a class="anchor" href="#正文习题答案-8">#</a>正文习题答案</h3>
 <ol>
 <li>外存按页传输是因为一次定位的固定成本远大于连续传一页；逐记录随机读会反复付定位代价。缓冲把一页记录留在内存中批量处理，顺序读写可把 I/O 次数降到页数数量级。</li>
-<li>用本书 <code>replacement_selection</code> 同逻辑实算，<span class="math">M<span class="rel">=</span><span class="upr">7</span></span> 时得到两个顺串：<strong><code>15 25 30 35 45 49 50 60</code></strong> 和 <strong><code>1 16 27</code></strong>。读入 16、27、1 时它们小于当前已输出值，依次冻结到下一顺串；60 可留在本顺串。</li>
+<li>用本书 <code>external_sort::replacement_selection</code> 同逻辑实算，<span class="math">M<span class="rel">=</span><span class="upr">7</span></span> 时得到两个顺串：<strong><code>15 25 30 35 45 49 50 60</code></strong> 和 <strong><code>1 16 27</code></strong>。读入 16、27、1 时它们小于当前已输出值，依次冻结到下一顺串；60 可留在本顺串。</li>
 <li>若 <span class="math">M</span> 能装下全部输入，不再有后续记录需要冻结；先建最小堆再连续弹出，得到一个包含全部记录的有序顺串，等价于堆排序的输出阶段。</li>
 <li>赢者树内部结点记两子树的胜者，败者树记本场败者、总冠军另存。替换一个叶后，只有该叶到根路径上的比赛结果可能变化，路径长 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>k⌉</span>，其他子树结果仍有效。</li>
 <li>二路归并每趟把顺串数约减半，需 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>m⌉</span> 趟。置换选择让初始顺串平均长度约为 <span class="math"><span class="upr">2</span>M</span>（依输入分布而异），从源头减少 <span class="math">m</span>，从而减少归并趟数和整文件读写。</li>
 </ol>
 <h3 id="正文上机题参考-8"><a class="anchor" href="#正文上机题参考-8">#</a>正文上机题参考</h3>
 <ol>
-<li>调用实际接口 <code>replacement_selection(input,memory)</code>；守门除了对原书输入固定顺串，还要验证每个顺串有序、所有输入恰出现一次以及 <code>memory==0</code> 被拒绝。</li>
-<li>使用 <code>WinnerTree</code> 的 <code>winner()</code>（冠军的值）、<code>winner_index()</code>（冠军是哪一路）和 <code>replace(player,value)</code>；每次随机替换后用 <code>std::min_element</code> 扫描选手数组对拍冠军的值和下标。（<code>detail::TournamentOps</code> 只是 <code>better</code>/<code>worse</code>/<code>next_power_of_two</code> 这几个比较助手，本身不计数；要统计比较次数得自己在测试里数。）</li>
-<li>使用 <code>LoserTree</code> 保存各路当前头元素，冠军输出后以该路下一个值调用 <code>replace</code>；耗尽路用正无穷哨兵。最终输出与把所有向量拼接后 <code>std::sort</code> 对拍。</li>
-<li>分别调用 <code>replacement_selection(input,4/8/16)</code>，记录返回向量的数量与各顺串长度；同一输入下容量增大通常使顺串数不增，但守门应核对记录守恒和各顺串有序，而不是把随机趋势当定理。</li>
+<li>调用实际接口 <code>external_sort::replacement_selection(input,memory)</code>；守门除了对原书输入固定顺串，还要验证每个顺串有序、所有输入恰出现一次以及 <code>memory==0</code> 被拒绝。</li>
+<li>使用 <code>WinnerTree::winner()</code>（冠军的值）、<code>WinnerTree::winner_index()</code>（冠军是哪一路）和 <code>WinnerTree::replace(player,value)</code>；每次随机替换后用 <code>std::min_element</code> 扫描选手数组对拍冠军的值和下标。（<code>detail::TournamentOps</code> 只是 <code>TournamentOps::better</code>、<code>TournamentOps::worse</code>、<code>TournamentOps::next_power_of_two</code> 这几个比较助手，本身不计数；要统计比较次数得自己在测试里数。）</li>
+<li>使用 <code>LoserTree</code> 保存各路当前头元素，冠军输出后以该路下一个值调用 <code>LoserTree::replace</code>；耗尽路用正无穷哨兵。最终输出与把所有向量拼接后 <code>std::sort</code> 对拍。</li>
+<li>分别调用 <code>external_sort::replacement_selection(input,4/8/16)</code>，记录返回向量的数量与各顺串长度；同一输入下容量增大通常使顺串数不增，但守门应核对记录守恒和各顺串有序，而不是把随机趋势当定理。</li>
 </ol>
 <h3 id="课程作业与-ref_dsa-参考答案-8"><a class="anchor" href="#课程作业与-ref_dsa-参考答案-8">#</a>课程作业与 <code>ref_DSA</code> 参考答案</h3>
 <ol>
@@ -524,14 +524,14 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <li>集合插入重复元素是正常、可预期的集合操作，不是异常；返回 <code>bool</code> 可让 <code>true</code> 表示确实新增、<code>false</code> 表示原来已有，调用方无需用异常处理普通分支。本书 <code>IntSet::insert</code> 正是该契约。</li>
 <li>表长 5 时 1 入槽 1，6 碰撞后入槽 2，11 入槽 3。若删除 1 后把槽 1 标成空，从哈希位置 1 查 6 会见空即停，错误地报告不存在；必须留下墓碑。本书 <code>HashTable::erase</code> 使用 <code>SlotState::tombstone</code>。</li>
 <li>开散列删除链结点即可，装填因子可大于 1，但每项多指针/分配开销；闭散列删除要墓碑，装填因子必须小于 1，存储连续、缓存友好但会聚集。</li>
-<li><code>char</code> 是否有符号由实现决定；直接提升负 <code>char</code> 会符号扩展，使同一非 ASCII 字节在不同平台产生不同哈希。按 <code>unsigned char</code> 读取保证每字节都落在 0..255，本书 <code>elf_hash</code> 因而可移植。</li>
+<li><code>char</code> 是否有符号由实现决定；直接提升负 <code>char</code> 会符号扩展，使同一非 ASCII 字节在不同平台产生不同哈希。按 <code>unsigned char</code> 读取保证每字节都落在 0..255，本书 <code>search::elf_hash</code> 因而可移植。</li>
 </ol>
 <h3 id="正文上机题参考-9"><a class="anchor" href="#正文上机题参考-9">#</a>正文上机题参考</h3>
 <ol>
-<li><code>sequential_search</code> 直接对原序列测，<code>binary_search</code> 必须先排序；散列用 <code>HashTable::contains</code>。只统计查询阶段，并分别报告成功/失败探测次数和装填因子。</li>
-<li>使用 <code>HashTable::insert</code>、<code>erase</code>、<code>contains</code>：在容量 5 表中插入 1、6、11，删 1 后仍应找到 6、11；<code>slot_at(1)</code> 应显示墓碑而不是空槽。</li>
+<li><code>search::sequential_search</code> 直接对原序列测，<code>search::binary_search</code> 必须先排序；散列用 <code>HashTable::contains</code>。只统计查询阶段，并分别报告成功/失败探测次数和装填因子。</li>
+<li>使用 <code>HashTable::insert</code>、<code>HashTable::erase</code>、<code>HashTable::contains</code>：在容量 5 表中插入 1、6、11，删 1 后仍应找到 6、11；<code>HashTable::slot_at(1)</code> 应显示墓碑而不是空槽。</li>
 <li>当 <code>size/capacity&gt;0.7</code> 时申请更大素数容量，把所有 <code>used</code> 槽重新 <code>insert</code>，墓碑不搬。用平均/最大探测长度比较扩表前后，不能只看运行时间。</li>
-<li><code>IntSet</code> 的公开契约是 <code>insert</code>、<code>erase</code>、<code>contains</code>、<code>intersection</code>、<code>includes</code>。散列表替换内部存储后保持这些签名和返回语义，原测试无需知道实现变化。</li>
+<li><code>IntSet</code> 的公开契约是 <code>IntSet::insert</code>、<code>IntSet::erase</code>、<code>IntSet::contains</code>、<code>IntSet::intersection</code>、<code>IntSet::includes</code>。散列表替换内部存储后保持这些签名和返回语义，原测试无需知道实现变化。</li>
 </ol>
 <h3 id="课程作业与-ref_dsa-参考答案-9"><a class="anchor" href="#课程作业与-ref_dsa-参考答案-9">#</a>课程作业与 <code>ref_DSA</code> 参考答案</h3>
 <ol>
@@ -564,7 +564,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <li>位图适合低基数属性、批量布尔查询，内存/外存皆可且擅长集合运算；签名适合先过滤、允许假阳性但不能假阴性；红黑树适合内存点查和动态更新；B+ 树按页组织，适合外存点查与范围扫描。</li>
 </ol>
 <h3 id="正文上机题参考-10"><a class="anchor" href="#正文上机题参考-10">#</a>正文上机题参考</h3>
-<p>本章正文没有独立编号的上机题，而是指向末尾四条“练习路径”。对应做法是：把 <code>MultiLevelIndex</code> 页内定位改成二分并确认 <code>page_reads()</code> 不变；给 <code>InvertedIndex</code> 增加差值编码且能边解码边求交；给 <code>BPlusTree</code> 增加范围删除并在每步后调用 <code>validate()</code>；给 <code>BitmapIndex</code> 增加 WAH 编解码，与现有 <code>run_length_encode/decode</code> 对拍并正确处理尾位。</p>
+<p>本章正文没有独立编号的上机题，而是指向末尾四条“练习路径”。对应做法是：把 <code>MultiLevelIndex</code> 页内定位改成二分并确认 <code>MultiLevelIndex::page_reads()</code> 不变；给 <code>InvertedIndex</code> 增加差值编码且能边解码边求交；给 <code>BPlusTree</code> 增加范围删除并在每步后调用 <code>BPlusTree::validate()</code>；给 <code>BitmapIndex</code> 增加 WAH 编解码，与现有 <code>index::run_length_encode</code>、<code>index::run_length_decode</code> 对拍并正确处理尾位。</p>
 <h3 id="课程作业与-ref_dsa-参考答案-10"><a class="anchor" href="#课程作业与-ref_dsa-参考答案-10">#</a>课程作业与 <code>ref_DSA</code> 参考答案</h3>
 <ol>
 <li><strong>[课程第十一章答案第 1 题]</strong> 稠密索引为每条记录建索引项；稀疏索引按数据块建项，空间小但块内还需二次查找。容量题应先算每页记录数、每页索引项数，再乘可驻留页数。</li>
@@ -595,16 +595,16 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <li>纯表每个子表只有一个父，对应树；再入表共享子表，对应 DAG；循环表含回边，对应有向环图。释放时纯树可递归，DAG 要引用计数/访问标记避免重复释放，环还需要标记–清扫等可回收环的方案。</li>
 <li>请求 <strong>650</strong> 就能把三者一次分开：首次适应从低地址扫，选 <strong>900</strong>；最佳适应挑刚够用的最小块，选 <strong>700</strong>；最坏适应挑当前最大块，选 <strong>1500</strong>。至于「能否满足」，单个请求分辨不出任何东西——<span class="math"><span class="rel">≤</span><span class="upr">1500</span></span> 时三种策略都能从某块满足，<span class="math">&gt;<span class="upr">1500</span></span> 时三者都不能。策略只决定<strong>挑哪一块</strong>，差别要到后续请求上才显出来（这与 12.4 节「只在一块空闲区上测是分辨不出三种策略的」是同一条道理）。</li>
 <li>Trie 为根下共用 <code>c -&gt; a</code>，再分三条边 <code>n</code>、<code>r</code>、<code>t</code>，三端均标记单词结束。查 <code>cab</code> 时走过 <code>c,a</code>，在第三个字符 <code>b</code> 处无边而失败。</li>
-<li>用本书 <code>optimal_bst({1,5,4,3},{5,4,3,2,1})</code> 同口径复算，最优根为 <strong>键 2</strong>，总成本为 <strong>57</strong>。</li>
+<li>用本书 <code>advanced::optimal_bst({1,5,4,3},{5,4,3,2,1})</code> 同口径复算，最优根为 <strong>键 2</strong>，总成本为 <strong>57</strong>。</li>
 <li>插 1 得单根；插 2 得 1 的右孩子；插 3 形成 RR 失衡，对 1 左旋，得到根 2、左右孩子 1 和 3。再插 0 到 1 的左侧，各结点平衡因子仍在 <code>[-1,1]</code>，<strong>不旋转</strong>。</li>
 <li>一字形（zig-zig）与之字形（zig-zag）都用两次旋转把目标从孙辈升到祖父位置，即升两层；区别是旋转方向同向还是反向。半伸展减少每次调整幅度，连续访问热点仍会逐步把它提到高层，同时降低单次重构常数。</li>
 </ol>
 <h3 id="正文上机题参考-11"><a class="anchor" href="#正文上机题参考-11">#</a>正文上机题参考</h3>
 <ol>
 <li>封装长度 <span class="math">n(n<span class="bin">+</span><span class="upr">1</span>)/<span class="upr">2</span></span> 的数组，<code>set/get(i,j)</code> 先检查 <code>0&lt;=j&lt;=i&lt;n</code>，再用 <code>i(i+1)/2+j</code>。对所有合法位置与稠密矩阵对拍，并测试上三角和越界拒绝。</li>
-<li>使用实际类 <code>ReusableNodePool&lt;T&gt;</code> 的 <code>acquire</code>、<code>get</code>、<code>release</code>、<code>available</code>；测试容量耗尽返回空、释放后复用同一槽、越界释放和重复释放返回 <code>false</code>。</li>
-<li>使用 <code>Trie::insert</code>、<code>contains</code>、<code>erase</code>；每轮与 <code>std::set&lt;std::string&gt;</code> 对拍。输入只接受实现支持的字母范围，并覆盖空串、重复词、前缀词以及删除后保留共享前缀。</li>
-<li>调用 <code>optimal_bst(successful,unsuccessful)</code>，核对 <code>cost[0][n]</code> 与 <code>root[0][n]</code>；按根表递归重建区间，最后验证每个键恰出现一次、加权查找成本等于 DP 结果。</li>
+<li>使用实际类 <code>ReusableNodePool&lt;T&gt;</code> 的 <code>ReusableNodePool::acquire</code>、<code>ReusableNodePool::get</code>、<code>ReusableNodePool::release</code>、<code>ReusableNodePool::available</code>；测试容量耗尽返回空、释放后复用同一槽、越界释放和重复释放返回 <code>false</code>。</li>
+<li>使用 <code>Trie::insert</code>、<code>Trie::contains</code>、<code>Trie::erase</code>；每轮与 <code>std::set&lt;std::string&gt;</code> 对拍。输入只接受实现支持的字母范围，并覆盖空串、重复词、前缀词以及删除后保留共享前缀。</li>
+<li>调用 <code>advanced::optimal_bst(successful,unsuccessful)</code>，核对 <code>cost[0][n]</code> 与 <code>root[0][n]</code>；按根表递归重建区间，最后验证每个键恰出现一次、加权查找成本等于 DP 结果。</li>
 </ol>
 <h3 id="课程作业与-ref_dsa-参考答案-11"><a class="anchor" href="#课程作业与-ref_dsa-参考答案-11">#</a>课程作业与 <code>ref_DSA</code> 参考答案</h3>
 <ol>

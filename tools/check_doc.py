@@ -88,6 +88,7 @@ RULES = [
     "R12 正文里「第 X.Y 节」这类引用必须指向真实存在的节；带「原书」标记的按底稿解析",
     "R13 正文不得用 LaTeX 式的 `--` 当破折号/区间号——Markdown 原样印出两个减号",
     "R14 正文每道习题/上机题要么在附录里有同号答案，要么在 collab/answer_gaps.json 里登记",
+    "R15 书稿里写成 `类名::成员` 的接口名，必须在 code/ 里声明该类的文件中真实存在",
 ]
 
 
@@ -651,6 +652,153 @@ def check_double_dash(path: Path):
     return problems
 
 
+# R15：写「本书的接口是 X」之前，让机器去 code/ 里查一次。
+#
+# 缘由（2026-08-18）：T-037 复查在一份 11 步全绿的书稿里手工抓出 4 个**根本不存在**的
+# 接口名——`MinHeap::pop_min`（实为 `remove_min`）、`HuffmanTree::code`（实为 `code_of`）、
+# `DisjointSet::connected`（实为 `same`）、`WinnerTree::winner_value`（实为 `winner_index`）。
+# 它们全都长得像真的，而 R3 只管 ```cpp 块的逐字一致，**正文散文里点名的接口不受任何约束**。
+# 学生照着抄，编译器才告诉他这个名字不存在。
+#
+# 判据只收**限定形式** `类名::成员`（或 `命名空间::名字`），而且只看行内代码：
+#   - 类名要在 code/ 下某个文件里 `class`/`struct` 声明过；命名空间同理；
+#   - 成员要是**该类类体里声明过的名字**；命名空间下的名字则要出现在声明该命名空间的文件里。
+#     不是「code/ 里任何地方有这个词」——见 _members_of 上面那段为什么。
+#   - `std::` 开头一律跳过（标准库不归我们管）。
+#   - `test.cpp::某用例` 是本仓库的「文件::用例」写法，不是 C++ 限定名，按前面带 `.` 排除。
+#
+# **明确不做**的那一半，免得这条规则被当成比它更强的东西：裸写的 `push`、`erase`
+# 不在判据内。章节内部上下文已经点明了类，硬要求限定形式会让正文难读；
+# 而「反引号里的裸标识符必须在 code/ 里出现过」这条曾实测过——附录里 57 处命中，
+# 只有 1 处是真缺陷（`connected`），其余是题面字符串（`ABCDEFGHIJKL`、`cdac`）、
+# 路径（`ref_DSA`）和伪变量（`S1`、`cur`）。**那是个假阳性机器，不要装回来。**
+# 覆盖面靠写法约定补：附录里「实际接口是 …」这类断言句一律写限定形式（2026-08-18 已规范化）。
+QUALIFIED_NAME_RE = re.compile(r"(?<![.\w])([A-Za-z_][A-Za-z0-9_]*(?:::[A-Za-z_][A-Za-z0-9_]*)+)")
+INLINE_SPAN_RE = re.compile(r"`([^`\n]+)`")
+TYPE_DECL_RE = re.compile(r"\b(?:class|struct)\s+([A-Za-z_][A-Za-z0-9_]*)")
+NAMESPACE_DECL_RE = re.compile(r"\bnamespace\s+([A-Za-z_][A-Za-z0-9_:]*)")
+
+
+# 成员名只从**类体内部**取，而且只认两种写法：`名字(`（成员函数）和
+# 一行末尾的 `… 名字;` / `… 名字{…};` / `… 名字 = …;`（数据成员）。
+#
+# 为什么不用「这个词在该文件里出现过」：一开始就是那么写的，结果变异自检当场打脸——
+# 把 `HuffmanTree::code_of` 改回错误的 `HuffmanTree::code`，闸门**没有报红**，
+# 因为 teaching.hpp 的 `encode()` 里有一行局部变量 `auto code = code_of(c);`。
+# 判据松一格，真缺陷就从这一格漏过去。
+# `enum class SlotState { empty, used, tombstone };` 的「成员」是枚举值本身：
+# 书稿写的 `SlotState::tombstone` 就得按它来判，否则整个枚举被当成「不存在的类」。
+ENUM_DECL_RE = re.compile(r"\benum\s+(?:class|struct)\s+([A-Za-z_][A-Za-z0-9_]*)[^{;]*\{([^}]*)\}")
+MEMBER_CALL_RE = re.compile(r"(?<![A-Za-z0-9_])([A-Za-z_][A-Za-z0-9_]*)\s*\(")
+MEMBER_FIELD_RE = re.compile(
+    r"^\s*[A-Za-z_][A-Za-z0-9_:<>,\s*&]*?\s([A-Za-z_][A-Za-z0-9_]*)\s*(?:\{[^;]*\})?\s*(?:=[^;]*)?;\s*$"
+)
+
+
+def _members_of(body, start):
+    """从 `class X` 的声明处向后括号配对，取出这个类体里的成员名。"""
+    open_brace = body.find("{", start)
+    if open_brace < 0 or ";" in body[start:open_brace]:
+        return set()          # 前置声明 `class X;`，没有类体
+    depth, index = 0, open_brace
+    while index < len(body):
+        if body[index] == "{":
+            depth += 1
+        elif body[index] == "}":
+            depth -= 1
+            if depth == 0:
+                break
+        index += 1
+    # 只取**类体最外层**的文本：函数体、初始化块里的东西不是这个类的成员。
+    # 第二次收紧（同一次变异自检）：`HuffmanTree::code` 曾靠 `encode()` 体内的
+    # 一行 `auto code = code_of(c);` 蒙混过关——那是局部变量，不是成员。
+    inner, depth = [], 0
+    for char in body[open_brace + 1:index]:
+        if char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+        elif depth == 0:
+            inner.append(char)
+        if char == "\n":
+            inner.append("\n")
+    top_level = "".join(inner)
+    names = set(MEMBER_CALL_RE.findall(top_level))
+    for line in top_level.splitlines():
+        field = MEMBER_FIELD_RE.match(line)
+        if field:
+            names.add(field.group(1))
+    return names
+
+
+def code_symbol_index(code_root=None):
+    """code/ 的符号索引：类名 -> 成员名集合；命名空间 -> 声明它的文件。"""
+    root = code_root or (ROOT / "code")
+    types = collections.defaultdict(set)
+    namespaces = collections.defaultdict(set)
+    tokens = {}
+    if not root.is_dir():
+        return {"types": types, "namespaces": namespaces, "tokens": tokens}
+    for path in sorted(list(root.rglob("*.hpp")) + list(root.rglob("*.cpp"))):
+        body = path.read_text(encoding="utf-8", errors="replace")
+        for match in TYPE_DECL_RE.finditer(body):
+            members = _members_of(body, match.end())
+            if members:
+                types[match.group(1)] |= members
+        for match in ENUM_DECL_RE.finditer(body):
+            values = {
+                item.split("=")[0].strip()
+                for item in match.group(2).split(",")
+                if item.split("=")[0].strip()
+            }
+            types[match.group(1)] |= values
+        for match in NAMESPACE_DECL_RE.finditer(body):
+            for segment in match.group(1).split("::"):
+                namespaces[segment].add(path)
+        tokens[path] = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", body))
+    return {"types": types, "namespaces": namespaces, "tokens": tokens}
+
+
+def check_qualified_names(path, index):
+    """R15：行内代码里的 `类名::成员` 必须在 code/ 里真的存在。"""
+    problems = []
+    in_fence = False
+    for lineno, line in enumerate(
+        path.read_text(encoding="utf-8", errors="replace").splitlines(), 1
+    ):
+        if line.strip().startswith("```"):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        for span in INLINE_SPAN_RE.findall(line):
+            for name in QUALIFIED_NAME_RE.findall(span):
+                segments = name.split("::")
+                if segments[0] == "std":
+                    continue
+                member, qualifier = segments[-1], segments[-2]
+                prefix = f"{rel_label(path)}:{lineno}  R15 `{name}` "
+                if qualifier in index["types"]:
+                    if member not in index["types"][qualifier]:
+                        problems.append(
+                            prefix + f"—— code/ 里的 `{qualifier}` 没有 `{member}` 这个成员。"
+                            "书稿点名本书接口前请 `grep -rn` 一次；T-037 复查一次抓到 4 个这样的名字。"
+                        )
+                elif qualifier in index["namespaces"]:
+                    owners = index["namespaces"][qualifier]
+                    if not any(member in index["tokens"][owner] for owner in owners):
+                        where = "、".join(sorted(rel_label(o) for o in owners))
+                        problems.append(
+                            prefix + f"—— 命名空间 `{qualifier}` 落在 {where}，里面没有 `{member}`。"
+                        )
+                else:
+                    problems.append(
+                        prefix + f"—— `{qualifier}` 在 code/ 里既不是类也不是命名空间。"
+                        "若这是原书引文而非本书接口，请放进 ```text 块或去掉 `::` 写法。"
+                    )
+    return problems
+
+
 # R14：出了题，就得说清楚答案在哪。
 #
 # 缘由（2026-08-17）：书稿 12 章一共出了 **96 道习题 + 40 道上机题**，
@@ -918,11 +1066,13 @@ def main():
     original_numbers = set(original)
     answer_gaps, answer_problems = load_answer_gaps()
     problems += answer_problems
+    symbols = code_symbol_index()
     for target in targets:
         problems += check_file(target, listings)
         problems += check_sections(target, gaps, original)
         problems += check_section_refs(target, book_numbers, original_numbers)
         problems += check_double_dash(target)
+        problems += check_qualified_names(target, symbols)
 
     problems += check_exercise_answers(targets, answer_gaps)
 
@@ -931,6 +1081,7 @@ def main():
     sources = source_texts()
     for legacy in sorted((ROOT / "code").rglob("legacy.md")):
         problems += check_r8(legacy, sources)
+        problems += check_qualified_names(legacy, symbols)
 
     if problems:
         print("\n".join(f"❌ {p}" for p in problems))
