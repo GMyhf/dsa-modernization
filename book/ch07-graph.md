@@ -369,6 +369,22 @@ DFS 进入一个顶点就立刻标记已访问，再沿编号从小到大的出�
     return result;
 }
 ```
+```python file=code/ch07/graph/modern.py#dfs
+def dfs(self, source: int) -> list[int]:
+    self._check_vertex(source)
+    seen = [False] * self.vertices
+    result: list[int] = []
+
+    def visit(vertex: int) -> None:
+        seen[vertex] = True
+        result.append(vertex)
+        for target in range(self.vertices):
+            if self._adjacency[vertex][target] < self.infinity and not seen[target]:
+                visit(target)
+
+    visit(source)
+    return result
+```
 
 ### 7.4.2 广度优先周游
 
@@ -393,6 +409,24 @@ DFS 进入一个顶点就立刻标记已访问，再沿编号从小到大的出�
     }
     return result;
 }
+```
+```python file=code/ch07/graph/modern.py#bfs
+def bfs(self, source: int) -> list[int]:
+    self._check_vertex(source)
+    seen = [False] * self.vertices
+    queue = [source]
+    head = 0
+    seen[source] = True
+    result: list[int] = []
+    while head < len(queue):
+        vertex = queue[head]
+        head += 1
+        result.append(vertex)
+        for target in range(self.vertices):
+            if self._adjacency[vertex][target] < self.infinity and not seen[target]:
+                seen[target] = True
+                queue.append(target)
+    return result
 ```
 
 ### 7.4.3 拓扑排序
@@ -430,6 +464,27 @@ DFS 进入一个顶点就立刻标记已访问，再沿编号从小到大的出�
                                        : std::nullopt;
 }
 ```
+```python file=code/ch07/graph/modern.py#topological
+def topological_sort(self) -> list[int] | None:
+    indegree = [0] * self.vertices
+    for source in range(self.vertices):
+        for target in range(self.vertices):
+            if source != target and self._adjacency[source][target] < self.infinity:
+                indegree[target] += 1
+    queue = [vertex for vertex in range(self.vertices) if indegree[vertex] == 0]
+    head = 0
+    result: list[int] = []
+    while head < len(queue):
+        source = queue[head]
+        head += 1
+        result.append(source)
+        for target in range(self.vertices):
+            if source != target and self._adjacency[source][target] < self.infinity:
+                indegree[target] -= 1
+                if indegree[target] == 0:
+                    queue.append(target)
+    return result if len(result) == self.vertices else None
+```
 
 ## 7.5 最短路径
 
@@ -459,6 +514,23 @@ Dijkstra 反复选出尚未确定的、当前距离最小的顶点，用它的�
     return distance;
 }
 ```
+```python file=code/ch07/graph/modern.py#dijkstra
+def dijkstra(self, source: int) -> list[int]:
+    self._check_vertex(source)
+    distance = [self.infinity] * self.vertices
+    used = [False] * self.vertices
+    distance[source] = 0
+    for _ in range(self.vertices):
+        vertex = self._nearest(distance, used)
+        if vertex is None or distance[vertex] == self.infinity:
+            break
+        used[vertex] = True
+        for target in range(self.vertices):
+            candidate = distance[vertex] + self._adjacency[vertex][target]
+            if self._adjacency[vertex][target] < self.infinity and candidate < distance[target]:
+                distance[target] = candidate
+    return distance
+```
 
 ### 7.5.2 每对顶点之间的最短路径
 
@@ -479,6 +551,17 @@ Floyd 枚举中转点 `via`，比较 `from→to` 与 `from→via→to`。测试�
     }
     return distance;
 }
+```
+```python file=code/ch07/graph/modern.py#floyd
+def floyd(self) -> list[list[int]]:
+    distance = [list(row) for row in self._adjacency]
+    for via in range(self.vertices):
+        for source in range(self.vertices):
+            for target in range(self.vertices):
+                candidate = distance[source][via] + distance[via][target]
+                if distance[source][via] < self.infinity and distance[via][target] < self.infinity:
+                    distance[source][target] = min(distance[source][target], candidate)
+    return distance
 ```
 
 ## 7.6 最小生成树
@@ -516,6 +599,27 @@ Floyd 枚举中转点 `via`，比较 `from→to` 与 `from→via→to`。测试�
     return result;
 }
 ```
+```python file=code/ch07/graph/modern.py#prim
+def prim(self, source: int) -> list[Edge] | None:
+    self._check_vertex(source)
+    distance = [self.infinity] * self.vertices
+    predecessor = [0] * self.vertices
+    used = [False] * self.vertices
+    result: list[Edge] = []
+    distance[source] = 0
+    for _ in range(self.vertices):
+        vertex = self._nearest(distance, used)
+        if vertex is None or distance[vertex] == self.infinity:
+            return None
+        used[vertex] = True
+        if vertex != source:
+            result.append(Edge(predecessor[vertex], vertex, distance[vertex]))
+        for target in range(self.vertices):
+            if not used[target] and self._adjacency[vertex][target] < distance[target]:
+                distance[target] = self._adjacency[vertex][target]
+                predecessor[target] = vertex
+    return result
+```
 
 ### 7.6.2 Kruskal 算法
 
@@ -548,6 +652,32 @@ Floyd 枚举中转点 `via`，比较 `from→to` 与 `from→via→to`。测试�
     return result.size() + 1 == vertices() ? std::optional<std::vector<Edge>>(result)
                                             : std::nullopt;
 }
+```
+```python file=code/ch07/graph/modern.py#kruskal
+def kruskal(self) -> list[Edge] | None:
+    edges = [Edge(source, target, self._adjacency[source][target])
+             for source in range(self.vertices) for target in range(source + 1, self.vertices)
+             if self._adjacency[source][target] < self.infinity]
+    for end in range(len(edges) - 1, 0, -1):
+        for index in range(end):
+            if edges[index].weight > edges[index + 1].weight:
+                edges[index], edges[index + 1] = edges[index + 1], edges[index]
+    parent = list(range(self.vertices))
+
+    def root(vertex: int) -> int:
+        while parent[vertex] != vertex:
+            parent[vertex] = parent[parent[vertex]]
+            vertex = parent[vertex]
+        return vertex
+
+    result: list[Edge] = []
+    for edge in edges:
+        left = root(edge.source)
+        right = root(edge.target)
+        if left != right:
+            parent[left] = right
+            result.append(edge)
+    return result if len(result) + 1 == self.vertices else None
 ```
 
 ## 本章小结
