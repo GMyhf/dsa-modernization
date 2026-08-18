@@ -294,7 +294,10 @@ def check_python_bindings(unit_dir: Path, meta):
         if not (isinstance(anchor, str) and anchor.strip() and isinstance(test, str) and test.strip()):
             problems.append(
                 f"  ❌ {listing} 缺 py_code_line/py_test：本单元有 modern.py，"
-                "每条清单要么给出 Python 锚点，要么写 py_skip 说明理由（D-025）"
+                "每条清单要么给出 modern.py 里的**一行真代码**（例如 `def kmp_search(`），"
+                "要么写 py_skip 说明理由（D-025）。"
+                "注意它**不是** `# >>> 名字` 那种切片标记——那是给书稿围栏 `#锚点` 用的，"
+                "两者同名为「锚点」曾经绊倒过人，字段改名 py_code_line 就是为此（D-026）"
             )
             continue
         if anchor in anchors:
@@ -307,7 +310,11 @@ def check_python_bindings(unit_dir: Path, meta):
         if not matching:
             problems.append(f"  ❌ {listing} 的 py_code_line 在 modern.py 里不存在：{anchor}")
         elif all(line.lstrip().startswith("#") for line in matching):
-            problems.append(f"  ❌ {listing} 的 py_code_line 只存在于注释行：{anchor}")
+            problems.append(
+                f"  ❌ {listing} 的 py_code_line 只存在于注释行：{anchor}"
+                "——填 `# >>> 名字` 这种切片标记是最常见的一种填法错误，"
+                "这里要的是实现里的一行真代码"
+            )
         if test not in tests:
             problems.append(f"  ❌ {listing} 的 py_test 在 test.py 里不存在：{test}")
     return problems
