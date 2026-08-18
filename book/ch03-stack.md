@@ -1398,6 +1398,25 @@ runtime error: signed integer overflow: 21 * 2432902008176640000
 }
 ```
 
+```python file=code/ch03/knapsack/modern.py#recursive
+def knapsack_recursive(capacity: int, weights: list[int]) -> list[int] | None:
+    """算法3.10：两条递归规则，返回选中物品的下标。"""
+    _validate(capacity, weights)
+    chosen: list[int] = []
+
+    def solve(remaining: int, count: int) -> bool:
+        if remaining == 0:
+            return True
+        if remaining < 0 or count == 0:
+            return False
+        if solve(remaining - weights[count - 1], count - 1):
+            chosen.append(count - 1)
+            return True
+        return solve(remaining, count - 1)
+
+    return chosen if solve(capacity, len(weights)) else None
+```
+
 两个递归出口、两条递归规则，本书一字未改。改的是两处：
 原书 `w[]` 是一个**从未声明的全局数组**，这里作参数传入；
 原书在选中物品时 `cout << w[n-1]` 直接打印，调用方拿不到解、正确性也无从检验，
@@ -1476,6 +1495,33 @@ runtime error: signed integer overflow: 21 * 2432902008176640000
 }
 ```
 
+```python file=code/ch03/knapsack/modern.py#explicit-stack
+def knapsack_with_explicit_stack(capacity: int, weights: list[int]) -> list[int] | None:
+    """算法3.11：用栈帧中的返回地址机械模拟递归。"""
+    _validate(capacity, weights)
+    enter, after_rule1, after_rule2 = range(3)
+    stack = [(capacity, len(weights), enter)]
+    chosen: list[int] = []
+    child_result = False
+    while stack:
+        remaining, count, stage = stack.pop()
+        if stage == enter:
+            if remaining == 0:
+                child_result = True
+            elif remaining < 0 or count == 0:
+                child_result = False
+            else:
+                stack.append((remaining, count, after_rule1))
+                stack.append((remaining - weights[count - 1], count - 1, enter))
+        elif stage == after_rule1:
+            if child_result:
+                chosen.append(count - 1)
+            else:
+                stack.append((remaining, count, after_rule2))
+                stack.append((remaining, count - 1, enter))
+    return chosen if child_result else None
+```
+
 `Enter` / `AfterRule1` / `AfterRule2` 与原书的 label0 / label1 / label2 一一对应。
 **不用 goto 的理由是硬的**：goto 跳进跳出会让编译器无法保证局部对象的构造与析构
 配对，在有 RAII 的 C++ 里不能这么写。
@@ -1551,6 +1597,39 @@ runtime error: signed integer overflow: 21 * 2432902008176640000
 
     return child_result ? std::optional<knapsack_solution>(std::move(chosen)) : std::nullopt;
 }
+```
+
+```python file=code/ch03/knapsack/modern.py#optimized
+def knapsack_optimized(capacity: int, weights: list[int]) -> list[int] | None:
+    """算法3.12：栈帧只保存剩余承重和返回地址。"""
+    _validate(capacity, weights)
+    enter, after_rule1, after_rule2 = range(3)
+    stack = [(capacity, enter)]
+    chosen: list[int] = []
+    child_result = False
+    size = len(weights)
+    depth = 1
+    while stack:
+        remaining, stage = stack.pop()
+        depth -= 1
+        count = size - depth
+        if stage == enter:
+            if remaining == 0:
+                child_result = True
+            elif remaining < 0 or count == 0:
+                child_result = False
+            else:
+                stack.append((remaining, after_rule1))
+                stack.append((remaining - weights[count - 1], enter))
+                depth += 2
+        elif stage == after_rule1:
+            if child_result:
+                chosen.append(count - 1)
+            else:
+                stack.append((remaining, after_rule2))
+                stack.append((remaining, enter))
+                depth += 2
+    return chosen if child_result else None
 ```
 
 **这才是本节真正的"优化"**：不是让它跑得更快，而是让每层要记的东西更少。
