@@ -6,12 +6,12 @@
 """
 
 import sys
+from pathlib import Path
 
 import modern
-import sys
-from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parents[2] / "support"))
-import shared_cases
+import shared_cases  # noqa: E402  共享用例表的读取器（T-047）
 
 checks = 0
 failures = 0

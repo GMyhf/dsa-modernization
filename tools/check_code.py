@@ -105,6 +105,30 @@ def shared_case_total(unit_dir: Path, meta):
     return total, None
 
 
+def check_shared_loader(unit_dir: Path):
+    """有 cases.tsv 的单元必须走 `code/support/shared_cases.*` 读表，不许自己解析。
+
+    缘由（2026-08-18）：`ch08/sorting` 交来时两种语言各手抄了一份解析。它能跑，
+    但两份抄本对同一张表的读法**并不相同**——C++ 那份对列数只补不校
+    （`while (fields.size() < 5) emplace_back()`，六列的行照收），
+    Python 那份按五元组解包、当场抛。表一旦加列，两边就静默分家，
+    而「共享用例」这四个字正是靠两边读同一张表才成立的。
+    """
+    if not (unit_dir / "cases.tsv").is_file():
+        return []
+    problems = []
+    for name, needle in (("test.cpp", "shared_cases::load"), ("test.py", "shared_cases.load")):
+        path = unit_dir / name
+        if not path.is_file():
+            continue
+        if needle not in path.read_text(encoding="utf-8"):
+            problems.append(
+                f"  ❌ {name} 有 cases.tsv 却没有调用 `{needle}`——"
+                "共享用例表只能由 code/support/shared_cases.* 读，自己解析会与另一侧静默分家（T-047）"
+            )
+    return problems
+
+
 def check_shared_report(output, expected, language):
     if expected is None:
         return None
@@ -414,6 +438,10 @@ def run_python(unit_dir: Path, profiles=None, meta=None, shared_total=None):
                 f"  ❌ [{name}] Python 测试失败（退出码 {proc.returncode}）"
                 f"\n{indent(proc.stdout + proc.stderr)}"
             )
+            # 这一档已经判红，别再往下走去打那行 ✅——2026-08-18 实测，
+            # 只改 Python 阈值时同一档同时印出「❌ 退出码 1」和「✅ …1 失败」。
+            # 交接包里贴的就是这几行日志，自相矛盾的日志比没有日志更坏。
+            continue
         shared_problem = check_shared_report(proc.stdout, shared_total, name)
         if shared_problem:
             ok = False
@@ -718,10 +746,9 @@ def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None, degr
     rel = rel_label(unit_dir)
     meta = json.loads((unit_dir / "unit.json").read_text(encoding="utf-8"))
     shared_total, shared_problem = shared_case_total(unit_dir, meta)
-    if shared_problem:
-        logs = [shared_problem]
-    else:
-        logs = []
+    logs = [shared_problem] if shared_problem else []
+    loader_problems = check_shared_loader(unit_dir)
+    logs.extend(loader_problems)
     std = meta.get("standard", "c++17")  # D-001
     extra = meta.get("flags", [])
     sources = [str(unit_dir / "test.cpp")]
@@ -731,7 +758,7 @@ def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None, degr
     sources += [str(unit_dir / s) for s in meta.get("extra_sources", [])]
 
     profiles = PROFILES if profiles is None else profiles
-    ok = shared_problem is None
+    ok = shared_problem is None and not loader_problems
     d001 = check_d001(unit_dir, meta)
     if d001:
         ok = False

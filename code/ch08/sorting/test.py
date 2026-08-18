@@ -13,6 +13,9 @@ from pathlib import Path
 
 import modern
 
+sys.path.insert(0, str(Path(__file__).parents[2] / "support"))
+import shared_cases  # noqa: E402  共享用例表的读取器（T-047）
+
 checks = 0
 failures = 0
 
@@ -243,39 +246,37 @@ def test_index_sort() -> None:
     check(order == list(range(6)), "算法8.15 Python 多环后索引仍复位")
 
 
-def parse_values(text: str) -> list[int]:
-    return [] if not text else [int(value) for value in text.split(",")]
-
-
 def test_shared_cases() -> int:
-    lines = Path("cases.tsv").read_text(encoding="utf-8").splitlines()[1:]
-    shared = 0
-    for line in lines:
-        if not line or line.startswith("#"):
+    """用例表由 support/shared_cases.py 读，**不再自己解析**（T-047）。
+
+    本单元原先手抄了一份解析，两种语言各一份。它能跑，但格式一变就会与另外
+    十个单元静默分家：C++ 那份抄本对列数只补不校，六列的行照收；
+    这份却按五元组解包、当场抛。两边对同一张表的读法不同，
+    「共享用例」这四个字就名存实亡了。
+    """
+    shared = shared_cases.load()
+    for case in shared:
+        if case.operation == "constant":
+            check(modern.COUNTING_RANGE_LIMIT == int(case.expected), f"T-047 {case.name}")
             continue
-        name, operation, raw_input, expected, expected_error = line.split("\t")
-        shared += 1
-        if operation == "constant":
-            check(modern.COUNTING_RANGE_LIMIT == int(expected), f"T-047 {name}")
-            continue
-        values = parse_values(raw_input)
-        if expected_error == "invalid_argument":
+        values = shared_cases.integers(case.input)
+        if case.expected_error == "invalid_argument":
             raised = False
             try:
                 modern.counting_sort(values)
             except ValueError:
                 raised = True
-            check(raised, f"T-047 {name} expected invalid_argument")
+            check(raised, f"T-047 {case.name} expected invalid_argument")
             continue
-        if operation == "insertion":
+        if case.operation == "insertion":
             modern.insertion_sort(values)
-        elif operation == "radix":
+        elif case.operation == "radix":
             modern.radix_sort(values)
-        elif operation == "index":
+        elif case.operation == "index":
             values = modern.insertion_index_sort(values)
-        check(values == parse_values(expected), f"T-047 {name} shared result")
-    print(f"共享用例: {shared}")
-    return shared
+        check(values == shared_cases.integers(case.expected), f"T-047 {case.name} shared result")
+    print(f"共享用例: {len(shared)}")
+    return len(shared)
 
 
 def main() -> int:

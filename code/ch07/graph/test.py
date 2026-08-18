@@ -198,19 +198,25 @@ def main() -> int:
     shared = shared_cases.load()
     for case in shared:
         if case.expected_error == "invalid_argument":
-            graph = modern.Graph(2)
+            # 这一行的输入**必须来自表**。原先这里写死了 add_edge(0, 1, -1)，
+            # 而 C++ 侧读的是 case.input——同一张表，两边跑的却不是同一件事，
+            # 改表里的边也不会有任何反应。共享用例的意义就在这一行上。
+            source, target, weight = shared_cases.integers(case.input)
+            graph = modern.Graph(max(source, target) + 1)
             raised = False
             try:
-                graph.add_edge(0, 1, -1)
+                graph.add_edge(source, target, weight)
             except ValueError:
                 raised = True
-            check(raised, "T-047 graph exception")
+            check(raised, f"T-047 {case.name} exception")
         else:
-            graph = modern.Graph(5)
-            for edge in case.input.split("|", 1)[1].split(";"):
+            count, edges = case.input.split("|", 1)
+            graph = modern.Graph(int(count))
+            for edge in edges.split(";"):
                 source, target, weight = shared_cases.integers(edge)
                 graph.add_edge(source, target, weight)
-            check(graph.dijkstra(0) == shared_cases.integers(case.expected), "T-047 graph distances")
+            check(graph.dijkstra(0) == shared_cases.integers(case.expected),
+                  f"T-047 {case.name} distances")
     print(f"共享用例: {len(shared)}")
     print(f"Graph(Python): {checks} 项断言，{failures} 失败")
     return 0 if failures == 0 else 1

@@ -29,6 +29,52 @@
 `FAIL: T-047 counting-limit`，单元汇总 `0/1`。恢复后复跑通过。这证明只改一种语言的
 阈值会由共享表判红，而不是靠两份测试恰好写了相同数字。
 
+### 复核追记（Claude，同日）：验收面从 1 个单元扩到 11 个，并补了三处
+
+D-028 的验收证据只覆盖了 `ch08/sorting` 一个单元。**把同一手法铺到全部 11 个双实现单元**：
+逐个把 `cases.tsv` 里第一条带 `expected` 的行改坏，跑 `check_code.py <单元>`，
+记录两侧各自是否变红。
+
+```text
+code/ch03/knapsack           改坏 solve        闸门红  C++红  Py红
+code/ch04/pattern_matching   改坏 search       闸门红  C++红  Py红
+code/ch07/graph              改坏 dijkstra     闸门红  C++红  Py红
+code/ch08/sorting            改坏 constant     闸门红  C++红  Py红
+code/ch09/external_sort      改坏 winner       闸门红  C++红  Py红
+code/ch10/search_hash        改坏 binary       闸门红  C++红  Py红
+code/ch11/bitmap_index       改坏 rle          闸门红  C++红  Py红
+code/ch11/inverted_index     改坏 intersect    闸门红  C++红  Py红
+code/ch11/linear_index       改坏 dense        闸门红  C++红  Py红
+code/ch12/optimal_bst        改坏 optimal      闸门红  C++红  Py红
+code/ch12/trie               改坏 trie         闸门红  C++红  Py红
+```
+
+**11/11 两侧同时变红**——这比「某一个单元改阈值会红」强得多：它证明每个单元的
+两份测试都真的在读表、且读的是同一张。反向也验了（只改 C++ 的
+`counting_range_limit`，C++ 两档红、Python 绿），机制双向成立。
+
+复核中改掉三处：
+
+1. **日志会自相矛盾。** `run_python` 里那个 `continue` 挪到了共享报告分支上，
+   于是 Python 测试失败时同一档既印 `❌ 退出码 1` 又印 `✅ …1 失败`。
+   判定没错（`ok` 仍是 False），但交接包里贴的就是这几行——
+   **自相矛盾的日志比没有日志更坏**。
+2. **`ch08/sorting` 没走共享读取器**，两种语言各手抄了一份解析。它能跑，
+   但两份抄本对同一张表的读法**并不相同**：C++ 那份对列数只补不校
+   （`while (fields.size() < 5) emplace_back()`，六列的行照收），
+   Python 那份按五元组解包、当场抛。表一旦加列，两边就静默分家。已改为调用
+   `code/support/shared_cases.*`，并新增闸门判据 `check_shared_loader`：
+   有 `cases.tsv` 的单元，两侧必须出现 `shared_cases::load` / `shared_cases.load`。
+   （顺带被 `-Werror=unused-function` 抓出一个失去引用的 `parse_values`。）
+3. **`ch07/graph` 的 Python 侧异常行没读表。** C++ 侧读的是 `item.input`，
+   Python 侧却写死了 `add_edge(0, 1, -1)`——同一张表，两边跑的不是同一件事，
+   改表里的边 Python 侧毫无反应。已改为逐字段解析；实测把该行改成 `0,1,5`
+   后 Python 侧当场 `FAIL: T-047 negative-edge exception`。
+
+> 第 3 条值得单独记：**「两侧都读同一张表」这件事本身也需要被验证**，
+> 不能因为两侧都打印了 `共享用例: N` 就认为它们在做同一件事。
+> 条数一致只证明两边都数了同样多行，不证明它们跑了同样的输入。
+
 ## D-027 · 2026-08-18 · 人已拍板：`unit.json` 的 `anchor` 改名 `code_line`，两侧命名对齐
 
 **背景**：D-026 的返工里，`py_anchor` 有 5 处被填成了 `# >>> 名字` 那种**切片标记**。

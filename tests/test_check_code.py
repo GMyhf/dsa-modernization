@@ -818,5 +818,58 @@ class TestSharedCrossLanguageCases(unittest.TestCase):
         self.assertIn("有 2 条", check_code.check_shared_report("共享用例: 1\n", 2, "C++"))
 
 
+class TestSharedLoaderIsShared(unittest.TestCase):
+    """T-047：有 cases.tsv 的单元必须走 code/support/shared_cases.*，不许自己解析。
+
+    缘由：ch08/sorting 交来时两种语言各手抄了一份解析，且两份**读法不同**——
+    C++ 那份对列数只补不校，Python 那份按五元组解包当场抛。表一加列就静默分家。
+    """
+
+    def _unit(self, root, cpp, py, with_table=True):
+        d = root / "probe"
+        d.mkdir(parents=True)
+        if with_table:
+            (d / "cases.tsv").write_text(
+                "name\toperation\tinput\texpected\texpected_error\n"
+                "one\tsum\t1,2\t3\t\n", encoding="utf-8")
+        (d / "test.cpp").write_text(cpp, encoding="utf-8")
+        (d / "test.py").write_text(py, encoding="utf-8")
+        return d
+
+    def test_hand_rolled_parser_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = self._unit(
+                Path(tmp),
+                'std::ifstream input("cases.tsv");\n',
+                'lines = open("cases.tsv").read().splitlines()\n',
+            )
+            problems = check_code.check_shared_loader(unit)
+            self.assertEqual(len(problems), 2, problems)
+            self.assertTrue(any("test.cpp" in p for p in problems), problems)
+            self.assertTrue(any("test.py" in p for p in problems), problems)
+
+    def test_shared_loader_passes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = self._unit(
+                Path(tmp),
+                "const auto shared = dsa::shared_cases::load();\n",
+                "shared = shared_cases.load()\n",
+            )
+            self.assertEqual(check_code.check_shared_loader(unit), [])
+
+    def test_unit_without_table_is_not_required_to_load(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = self._unit(Path(tmp), "int main() {}\n", "pass\n", with_table=False)
+            self.assertEqual(check_code.check_shared_loader(unit), [])
+
+    def test_every_repo_unit_with_a_table_uses_the_shared_loader(self):
+        offenders = {}
+        for table in sorted((ROOT / "code").rglob("cases.tsv")):
+            found = check_code.check_shared_loader(table.parent)
+            if found:
+                offenders[str(table.parent.relative_to(ROOT))] = found
+        self.assertEqual(offenders, {}, f"自己解析用例表的单元：{offenders}")
+
+
 if __name__ == "__main__":
     unittest.main()
