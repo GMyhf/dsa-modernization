@@ -98,7 +98,7 @@ covered 的页列表清空、拿 by-children 当豁免——五种全部当场�
 
 ## D-022 · 2026-08-18 · Claude 记录：点名本书接口，机器要能查得到（新增 R15）
 
-**背景**：T-037 复查在一份 **11 步全绿**的书稿里手工抓出 4 个**根本不存在**的接口名：
+**背景**：T-037 复查在一份 **10 步全绿**的书稿里手工抓出 4 个**根本不存在**的接口名：
 `MinHeap::pop_min`（实为 `remove_min`）、`HuffmanTree::code`（实为 `code_of`）、
 `DisjointSet::connected`（实为 `same`）、`WinnerTree::winner_value`（实为 `winner_index`）。
 四个都长得像真的。R3 保证 ```cpp 块与 `code/` 逐字一致，**但散文里点名的接口不受任何约束**——
