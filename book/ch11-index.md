@@ -589,71 +589,97 @@ int main() {
 
 ```python file=code/ch11/linear_index/modern.py#index-find
 def find(self,key):
-    if not self._levels: return None
-    page=self._locate(self._levels[-1],0,len(self._levels[-1]),key)
+    if not self._levels:
+        return None
+    page = self._locate(self._levels[-1],0,len(self._levels[-1]),key)
     for level in range(len(self._levels)-1,0,-1):
-        page=self._levels[level][page][1]; self._reads+=1
-        first=page*self.epp; last=min(first+self.epp,len(self._levels[level-1]))
-        page=self._locate(self._levels[level-1],first,last,key)
-    entry=self._levels[0][page]
+        page = self._levels[level][page][1]
+        self._reads += 1
+        first = page*self.epp
+        last = min(first+self.epp,len(self._levels[level-1]))
+        page = self._locate(self._levels[level-1],first,last,key)
+    entry = self._levels[0][page]
     if self.kind==DENSE:
-        if entry[0]!=key: return None
-        self._reads+=1; return self.records[entry[1]][1]
-    self._reads+=1
+        if entry[0]!=key:
+            return None
+        self._reads += 1
+        return self.records[entry[1]][1]
+    self._reads += 1
     for record_key,value in self.records[entry[1]*self.rpp:(entry[1]+1)*self.rpp]:
-        if record_key==key: return value
+        if record_key==key:
+            return value
     return None
 ```
 
 ```python file=code/ch11/inverted_index/modern.py#inverted-intersect
 def intersect(left, right):
-    out=[]; i=j=0
+    out = []
+    i=j = 0
     while i<len(left) and j<len(right):
-        if left[i]<right[j]: i+=1
-        elif right[j]<left[i]: j+=1
-        else: out.append(left[i]); i+=1; j+=1
+        if left[i]<right[j]:
+            i += 1
+        elif right[j]<left[i]:
+            j += 1
+        else:
+            out.append(left[i])
+            i += 1
+            j += 1
     return out
 
 def unite(left, right):
-    out=[]; i=j=0
+    out = []
+    i=j = 0
     while i<len(left) or j<len(right):
-        if j==len(right) or (i<len(left) and left[i]<right[j]): value=left[i]; i+=1
-        elif i==len(left) or right[j]<left[i]: value=right[j]; j+=1
-        else: value=left[i]; i+=1; j+=1
-        if not out or out[-1]!=value: out.append(value)
+        if j==len(right) or (i<len(left) and left[i]<right[j]):
+            value = left[i]
+            i += 1
+        elif i==len(left) or right[j]<left[i]:
+            value = right[j]
+            j += 1
+        else:
+            value = left[i]
+            i += 1
+            j += 1
+        if not out or out[-1]!=value:
+            out.append(value)
     return out
 
 def difference(left, right):
-    out=[]; j=0
+    out = []
+    j = 0
     for value in left:
-        while j<len(right) and right[j]<value: j+=1
-        if j==len(right) or right[j]!=value: out.append(value)
+        while j<len(right) and right[j]<value:
+            j += 1
+        if j==len(right) or right[j]!=value:
+            out.append(value)
     return out
 ```
 
 ```python file=code/ch11/bitmap_index/modern.py#bitmap-ops
-def select_and(self,a,b): return self._combine(a,b,lambda x,y:x&y)
-def select_or(self,a,b): return self._combine(a,b,lambda x,y:x|y)
+def select_and(self,a,b):
+    return self._combine(a,b,lambda x,y:x&y)
+def select_or(self,a,b):
+    return self._combine(a,b,lambda x,y:x|y)
 def select_not(self,value):
-    bits=[(~word)&MASK for word in self.bitmap(value)]; self._ops+=len(bits)
-    if bits and self._count%64: bits[-1]&=(1<<(self._count%64))-1
+    bits = [(~word)&MASK for word in self.bitmap(value)]
+    self._ops += len(bits)
+    if bits and self._count%64:
+        bits[-1] &= (1<<(self._count%64))-1
     return self._records(bits)
 ```
 
-```python file=code/ch11/bplus_tree/modern.py#bplus-split
-def insert(self,key,value):
-    i=0
-    while i<len(self.rows) and self.rows[i][0]<key: i+=1
-    if i<len(self.rows) and self.rows[i][0]==key: self.rows[i]=(key,value); self._writes+=1; return False
-    self.rows.insert(i,(key,value)); self._writes+=1; return True
-```
+**B+ 树这一节没有 Python 版，理由值得单独讲一句。** 本书讲算法的章节两种语言各给一份
+（D-025），但 B+ 树讲的**不是算法，是页式存储管理**：页容量、装填因子、结点分裂、
+删除时的借位与合并，以及 `page_reads()` / `page_writes()` 这两个只有在真的按页访问时
+才有意义的计数器。这些东西在一个 `list` 上无处安放——和 3.1 节的顺序栈、4.2 节的
+字符串类是同一条线。
 
-```python file=code/ch11/bplus_tree/modern.py#bplus-range
-def range(self,low,high):
-    if low>high: return []
-    self._reads+=self.height()
-    return [row for row in self.rows if low<=row[0]<=high]
-```
+这不是事后的托词，是**试出来的**。本书曾提交过一版 Python「B+ 树」：内部是一个有序
+`list`，`height()` 与 `leaf_count()` 由记录数套公式算出，`page_reads()` 累加的是那个
+公式的结果，而标着「结点分裂」的那段代码里没有任何分裂。它跑得通，闸门也是绿的——
+**因为一个不存在的结构，没有任何断言能证伪它**。理由与那次的结论一起记在
+`code/ch11/bplus_tree/unit.json` 的 `py_skip` 字段里，闸门核对该单元确实没有
+`modern.py`。想看 B+ 树按页分裂到底怎么写，读上面那段 C++。
 
 索引是「关键码到记录位置」的表，用来少读磁盘。线性索引分稠密和稀疏，过大就做成多级。静态多分树把一个结点做成一页，树高低、页访问少，但不适合频繁更新。倒排从属性走到记录集合，查询变成交并差。B 树在页内分裂合并以保持平衡；B+ 树把记录放在叶上并用叶链做范围扫描。位图适合低基数属性，签名做粗筛，红黑树是内存有序映射。
 

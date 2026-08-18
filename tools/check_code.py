@@ -20,12 +20,14 @@
 """
 import argparse
 import ast
+import io
 import json
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
+import tokenize
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -121,6 +123,75 @@ D025_METHOD_ONLY = {"sort"}
 # 全局封不现实。所以给单元一个自己加码的口子：`unit.json.d025_forbidden`
 # 列出「**本单元**因为讲这一节而额外禁用的名字」。第 10 章做 Python 版时用它。
 D025_UNIT_BAN_KEY = "d025_forbidden"
+
+
+# ── D-026：Python 代码风格，机器守住的三条 ──────────────────────────────────
+#
+# D-001 §4 给 C++ 定了命名与形态；D-025 引入 Python 时只定了证据链，**没定风格**。
+# 后果当天就出现了：ch10–ch12 的实现写成 `self.kind=kind; self.rpp=records_per_page`，
+# 而这些字节是**要印进书里**的（R3 逐字契约）。教材印出来的代码比课件还难读，
+# 是本项目最不该出的错。
+#
+# 只守机器能判准的三条，不做半吊子的 PEP8：
+#   1. 一行一句——`;` 不作语句分隔符
+#   2. 复合语句的体另起一行——不写 `if x: return y`
+#   3. 赋值号两侧各一个空格——`a = 1` 而不是 `a=1`
+# 类型注解没有进这三条：它值得要求，但「哪些算公开接口」没有机器判据，
+# 写成规则就会变成一条谁都能绕的软规定。宁可不写，也不写守不住的。
+PYSTYLE_COMPOUND = (ast.If, ast.For, ast.While, ast.With, ast.Try,
+                    ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+PYSTYLE_ASSIGN_OP = re.compile(r"^ (?:[-+*/%@&|^]|//|\*\*|>>|<<)?= $")
+
+
+def check_pystyle(path: Path):
+    """返回该文件的风格问题列表。判据见 D-026。"""
+    source = path.read_text(encoding="utf-8")
+    lines = source.splitlines()
+    problems = []
+    name = path.name
+
+    # 1. 分号。走 tokenize 而不是字符串查找——注释和字面量里的 `;` 不算。
+    try:
+        for token in tokenize.generate_tokens(io.StringIO(source).readline):
+            if token.type == tokenize.OP and token.string == ";":
+                problems.append(f"  ❌ {name}:{token.start[0]} D-026 一行一句：`;` 不作语句分隔符")
+    except (tokenize.TokenError, IndentationError) as exc:
+        return [f"  ❌ {name} 无法分词：{exc}"]
+
+    try:
+        tree = ast.parse(source, filename=str(path))
+    except SyntaxError as exc:
+        return problems + [f"  ❌ {name}:{exc.lineno} 语法错误：{exc.msg}"]
+
+    for node in ast.walk(tree):
+        # 2. 复合语句的体不能贴在头一行
+        if isinstance(node, PYSTYLE_COMPOUND) and node.body:
+            if getattr(node.body[0], "lineno", None) == node.lineno:
+                problems.append(
+                    f"  ❌ {name}:{node.lineno} D-026 复合语句的体要另起一行"
+                    f"（`{lines[node.lineno - 1].strip()[:56]}`）"
+                )
+        # 3. 赋值号两侧各一个空格
+        if isinstance(node, (ast.Assign, ast.AugAssign, ast.AnnAssign)):
+            value = getattr(node, "value", None)
+            # 左边界要取「`=` 之前的最后一个节点」。带注解的赋值里那是**注解**
+            # 而不是目标——取错就会把 `result: list[int] = []` 这种完全合规的写法判红
+            # （2026-08-18 第一版就这么错了，12 处假阳性全在这里）。
+            if isinstance(node, ast.AnnAssign):
+                left = node.annotation
+            elif isinstance(node, ast.Assign):
+                left = node.targets[-1]
+            else:
+                left = node.target
+            if value is None or value.lineno != left.end_lineno:
+                continue  # 跨行赋值不判，判据不可靠
+            segment = lines[left.end_lineno - 1][left.end_col_offset:value.col_offset]
+            if not PYSTYLE_ASSIGN_OP.match(segment):
+                problems.append(
+                    f"  ❌ {name}:{node.lineno} D-026 赋值号两侧各留一个空格"
+                    f"（`{lines[node.lineno - 1].strip()[:56]}`）"
+                )
+    return problems
 
 
 def python_exe():
@@ -242,8 +313,46 @@ def check_python_bindings(unit_dir: Path, meta):
     return problems
 
 
-def run_python(unit_dir: Path, profiles=None):
+def check_reported_count_is_computed(unit_dir: Path):
+    """`N 项断言` 里的 N 必须是**数出来的**，不能是写死的字面量。
+
+    2026-08-18 实测：`code/ch12/trie/test.py` 印的是 `print("12 项断言")`——
+    一个常量。密度闸门读的正是这个数，于是删掉一半断言它也照报 12。
+    这不是风格问题，是**闸门被自己读的那行字架空**。
+    """
+    path = unit_dir / "test.py"
+    if not path.is_file():
+        return []
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    except SyntaxError:
+        return []  # 语法错误由 run_python 报，这里不重复
+    for node in ast.walk(tree):
+        if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                and node.func.id == "print" and node.args):
+            continue
+        first = node.args[0]
+        if isinstance(first, ast.Constant) and isinstance(first.value, str) \
+                and "项断言" in first.value:
+            return [f"  ❌ test.py:{node.lineno} 断言数是写死的字面量"
+                    f"（`{first.value.strip()[:40]}`）——闸门读的就是这个数，"
+                    "它必须由一个真的计数器算出来"]
+    return []
+
+
+def run_python(unit_dir: Path, profiles=None, meta=None):
     """跑 test.py 两档。返回 (ok, 日志, 断言数)。"""
+    # 单元级 py_skip：整个单元有意不给 Python（D-025 §1）。清单级的 py_skip 挂在
+    # listings[] 上，但「原书无对应清单」的单元没有 listings 可挂，
+    # 决定就没有落脚处——那正是 ch11/bplus_tree 需要的形状。
+    unit_skip = (meta or {}).get("py_skip")
+    if isinstance(unit_skip, str) and unit_skip.strip():
+        if (unit_dir / "modern.py").is_file() or (unit_dir / "test.py").is_file():
+            return False, ["  ❌ unit.json 写了 py_skip（本单元不给 Python），"
+                           "却仍有 modern.py / test.py"], None
+        return True, ["  · 本单元按 D-025 §1 不提供 Python 实现（unit.json 的 py_skip 写明了理由）"], None
+    if unit_skip is not None:
+        return False, ["  ❌ unit.json 的 py_skip 是空的——不给 Python 可以，不写理由不行"], None
     if not (unit_dir / "modern.py").is_file() and not (unit_dir / "test.py").is_file():
         return True, [], None
     logs, ok, assertions = [], True, None
@@ -370,13 +479,15 @@ def check_substance(unit_dir: Path, meta, assertions, teaching_assertions=None, 
             e for e in meta.get("listings", [])
             if isinstance(e, dict) and not (e.get("py_skip") or "").strip()
         ]
-        if claimed:
-            need = max(MIN_ASSERTIONS_PER_LISTING * len(claimed), MIN_ASSERTIONS_PER_UNIT)
-            if py_assertions < need:
-                problems.append(
-                    f"  ❌ Python 断言密度不足：{len(claimed)} 条清单认领了 Python 实现，"
-                    f"只有 {py_assertions} 项断言（下限 {need}）。"
-                )
+        # 「原书无对应清单」的单元（ch11/ch12 那几个）claimed 为空，此前**完全没有下限**——
+        # 一个有 modern.py 的单元可以只写 4 条断言而闸门不响。至少按单元下限兜住。
+        need = max(MIN_ASSERTIONS_PER_LISTING * len(claimed), MIN_ASSERTIONS_PER_UNIT)
+        if py_assertions < need:
+            where = f"{len(claimed)} 条清单认领了 Python 实现" if claimed else "本单元有 Python 实现"
+            problems.append(
+                f"  ❌ Python 断言密度不足：{where}，"
+                f"只有 {py_assertions} 项断言（下限 {need}）。"
+            )
 
     legacy = unit_dir / "legacy.md"
     if legacy.is_file():
@@ -577,6 +688,19 @@ def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None, degr
     if py_bindings:
         ok = False
         logs.extend(py_bindings)
+    counted = check_reported_count_is_computed(unit_dir)
+    if counted:
+        ok = False
+        logs.extend(counted)
+    style = []
+    for name in ("modern.py", "test.py"):
+        if (unit_dir / name).is_file():
+            style.extend(check_pystyle(unit_dir / name))
+    if style:
+        ok = False
+        logs.extend(style[:8])
+        if len(style) > 8:
+            logs.append(f"  ❌ …另有 {len(style) - 8} 处 D-026 风格问题（同类，不逐条列）")
 
     programs, structure = unit_programs(unit_dir, sources)
     if structure:
@@ -625,7 +749,7 @@ def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None, degr
             elif hit and kind == "teaching":
                 teaching_assertions = int(hit.group(1))
             logs.append(f"  ✅ [{label}] {tail[0][:80]}")
-    py_ok, py_logs, py_assertions = run_python(unit_dir)
+    py_ok, py_logs, py_assertions = run_python(unit_dir, meta=meta)
     if not py_ok:
         ok = False
     logs.extend(py_logs)

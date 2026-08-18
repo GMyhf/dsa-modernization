@@ -649,6 +649,139 @@ class TestD025PythonArm(unittest.TestCase):
             ok, logs, _ = check_code.run_python(unit)
             self.assertFalse(ok, logs)
 
+class TestD026PythonStyle(unittest.TestCase):
+    """D-026：书上印的 Python 不能比课件还难读，三条机器守住。
+
+    每条都配一个「会红」的用例和一个「不该红」的用例——只测通过路径的
+    检查器等于没有检查器（tests/test_check_doc.py 开头那句话，这里同样适用）。
+    """
+
+    def _check(self, source):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "probe.py"
+            path.write_text(source, encoding="utf-8")
+            return check_code.check_pystyle(path)
+
+    def test_semicolon_is_rejected(self):
+        problems = self._check("a = 1; b = 2\n")
+        self.assertTrue(any("一行一句" in p for p in problems), problems)
+
+    def test_semicolon_inside_string_or_comment_is_fine(self):
+        """判据走 tokenize，不是字符串查找。"""
+        self.assertEqual(self._check('TEXT = "a; b"  # 这里也有 ; 号\n'), [])
+
+    def test_single_line_compound_is_rejected(self):
+        for source in ("if True: pass\n",
+                       "for i in range(3): print(i)\n",
+                       "def f(): return 1\n",
+                       "class A: pass\n"):
+            with self.subTest(source=source):
+                problems = self._check(source)
+                self.assertTrue(any("另起一行" in p for p in problems), problems)
+
+    def test_multiline_compound_is_fine(self):
+        self.assertEqual(self._check("def f():\n    return 1\n"), [])
+
+    def test_assignment_spacing_is_rejected(self):
+        for source in ("a=1\n", "a =1\n", "a+= 1\n"):
+            with self.subTest(source=source):
+                problems = self._check(source)
+                self.assertTrue(any("空格" in p for p in problems), problems)
+
+    def test_annotated_assignment_is_not_a_false_positive(self):
+        """`result: list[int] = []` 完全合规。
+
+        第一版把左边界取成**目标**而不是**注解**，12 处全仓假阳性都出在这里
+        （2026-08-18 实测）。这条断言就是那次的凭据。
+        """
+        self.assertEqual(self._check("result: list[int] = []\n"), [])
+
+    def test_keyword_argument_and_default_are_not_assignments(self):
+        self.assertEqual(self._check("def f(x=1):\n    return f(x=2)\n"), [])
+
+    def test_dict_literal_is_not_a_compound_statement(self):
+        self.assertEqual(self._check('d = {"k": 1}\n'), [])
+
+    def test_repo_python_is_clean(self):
+        """全仓实跑：这条一旦红，就是有人又把书上要印的代码压成了单行。"""
+        offenders = {}
+        for path in sorted(list((ROOT / "code").rglob("modern.py"))
+                           + list((ROOT / "code").rglob("test.py"))):
+            found = check_code.check_pystyle(path)
+            if found:
+                offenders[str(path.relative_to(ROOT))] = len(found)
+        self.assertEqual(offenders, {}, f"D-026 风格问题：{offenders}")
+
+
+class TestAssertionCountMustBeComputed(unittest.TestCase):
+    """`N 项断言` 里的 N 是闸门读的那个数，它必须是算出来的。
+
+    缘由（2026-08-18）：`code/ch12/trie/test.py` 印的是 `print("12 项断言")`——
+    一个字面量。删掉一半断言它照报 12，密度闸门被自己读的那行字架空。
+    """
+
+    def _unit(self, root, test_source):
+        d = root / "probe"
+        d.mkdir(parents=True)
+        (d / "test.py").write_text(test_source, encoding="utf-8")
+        return d
+
+    def test_literal_count_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = self._unit(Path(tmp), 'print("12 项断言")\n')
+            problems = check_code.check_reported_count_is_computed(unit)
+            self.assertTrue(any("写死" in p for p in problems), problems)
+
+    def test_computed_count_is_accepted(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = self._unit(Path(tmp), 'checks = 3\nprint(f"{checks} 项断言")\n')
+            self.assertEqual(check_code.check_reported_count_is_computed(unit), [])
+
+    def test_repo_tests_all_compute_their_count(self):
+        offenders = [str(p.parent.relative_to(ROOT))
+                     for p in sorted((ROOT / "code").rglob("test.py"))
+                     if check_code.check_reported_count_is_computed(p.parent)]
+        self.assertEqual(offenders, [], f"断言数写死的单元：{offenders}")
+
+
+class TestUnitLevelPySkip(unittest.TestCase):
+    """整个单元有意不给 Python（D-026 §2）。
+
+    清单级 py_skip 挂在 listings[] 上，而「原书无对应清单」的单元没有 listings
+    可挂——ch11/bplus_tree 正是这种形状，决定必须另有落脚处。
+    """
+
+    def _unit(self, root, meta_extra, with_python):
+        d = root / "probe"
+        d.mkdir(parents=True)
+        meta = {"id": "probe", "title": "探针", "listings": []}
+        meta.update(meta_extra)
+        (d / "unit.json").write_text(json.dumps(meta, ensure_ascii=False), encoding="utf-8")
+        if with_python:
+            (d / "modern.py").write_text("def demo():\n    return 1\n", encoding="utf-8")
+            (d / "test.py").write_text('checks = 1\nprint(f"{checks} 项断言")\n', encoding="utf-8")
+        return d, meta
+
+    def test_declared_skip_without_python_passes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            unit, meta = self._unit(Path(tmp), {"py_skip": "本节讲页式存储管理"}, False)
+            ok, logs, _ = check_code.run_python(unit, meta=meta)
+            self.assertTrue(ok, logs)
+            self.assertTrue(any("不提供 Python" in line for line in logs), logs)
+
+    def test_declared_skip_with_python_is_rejected(self):
+        """说了不给，却还留着 modern.py——两份事实互相打架，必须判红。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            unit, meta = self._unit(Path(tmp), {"py_skip": "本节讲页式存储管理"}, True)
+            ok, logs, _ = check_code.run_python(unit, meta=meta)
+            self.assertFalse(ok, logs)
+
+    def test_empty_skip_reason_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            unit, meta = self._unit(Path(tmp), {"py_skip": "   "}, False)
+            ok, _, _ = check_code.run_python(unit, meta=meta)
+            self.assertFalse(ok)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -6,11 +6,13 @@ checks = 0
 def check(value, name):
     global checks
     checks += 1
-    if not value: raise AssertionError(name)
+    if not value:
+        raise AssertionError(name)
 
 item = modern.Item("old")
 check(item.key() == "old", "代码10.1 getter")
-item.set_key("new"); check(item.key() == "new", "代码10.1 setter")
+item.set_key("new")
+check(item.key() == "new", "代码10.1 setter")
 
 random.seed(1013)
 for size in range(25):
@@ -22,9 +24,12 @@ for size in range(25):
         found = modern.binary_search(ordered, key)
         check((found is not None and ordered[found] == key) == (key in ordered), "算法10.3 二分检索对拍")
 
-left = modern.IntSet(); right = modern.IntSet()
-for value in [1, 2, 2, 3]: left.insert(value)
-for value in [2, 3, 4]: right.insert(value)
+left = modern.IntSet()
+right = modern.IntSet()
+for value in [1, 2, 2, 3]:
+    left.insert(value)
+for value in [2, 3, 4]:
+    right.insert(value)
 check(left.size() == 3, "算法10.5 插入去重")
 check(left.intersection(right).size() == 2, "算法10.6 交集")
 check(not left.includes(right), "算法10.7 包含关系")
@@ -33,7 +38,8 @@ check(modern.elf_hash("abc") != modern.elf_hash("abd"), "算法10.8 邻近串散
 
 table = modern.HashTable(7)
 check(table.capacity() == 7 and table.size() == 0, "算法10.9 容量与计数")
-for key in [1, 8, 15]: check(table.insert(key), "算法10.10 碰撞插入")
+for key in [1, 8, 15]:
+    check(table.insert(key), "算法10.10 碰撞插入")
 check(table.erase(8) and table.contains(15), "算法10.11 穿过墓碑检索")
 check(table.insert(22) and table.slot_at(2) == 22, "算法10.13 复用首个墓碑")
 check(not table.insert(15) and table.size() == 3, "墓碑前方不能漏掉重复键")
@@ -41,7 +47,9 @@ check(table.erase(1) and table.erase(22) and table.erase(15), "算法10.12 墓�
 check(table.size() == 0 and not table.contains(999), "散列表删空")
 
 raised = False
-try: modern.HashTable(0)
-except ValueError: raised = True
+try:
+    modern.HashTable(0)
+except ValueError:
+    raised = True
 check(raised, "零容量被拒绝")
 print(f"{checks} 项断言")

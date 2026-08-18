@@ -6,21 +6,21 @@
       "id": "算法4.6",
       "anchor": "naive_search(std::string_view text,",
       "test": "算法4.6：朴素匹配的下标与标准库一致",
-      "py_anchor": "naive",
+      "py_anchor": "def naive_search(",
       "py_test": "算法4.6 朴素匹配"
     },
     {
       "id": "算法4.7",
       "anchor": "build_next(std::string_view pattern)",
       "test": "算法4.7：next 数组与书中图4.11",
-      "py_anchor": "build-next",
+      "py_anchor": "def build_next(",
       "py_test": "算法4.7 图4.11"
     },
     {
       "id": "算法4.8",
       "anchor": "kmp_search(std::string_view text,",
       "test": "算法4.8：KMP 的下标与标准库一致",
-      "py_anchor": "kmp",
+      "py_anchor": "def kmp_search(",
       "py_test": "算法4.8 KMP"
     }
   ],

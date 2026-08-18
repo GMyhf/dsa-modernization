@@ -6,22 +6,22 @@
       "id": "算法9.1",
       "anchor": "replacement_selection(const std::vector<int>& input",
       "test": "算法9.1 textbook input makes two runs",
-      "py_anchor": "replacement-selection",
-      "py_test": "算法9.1 textbook input makes two runs"
+      "py_anchor": "def replacement_selection(",
+      "py_test": "算法9.1 顺串长度可超过内存容量（置换选择的全部卖点）"
     },
     {
       "id": "代码9.2",
       "anchor": "class WinnerTree {",
       "test": "代码9.2 initial winner",
-      "py_anchor": "winner-tree",
-      "py_test": "竞赛树 initial winner"
+      "py_anchor": "class WinnerTree",
+      "py_test": "代码9.2 胜者树"
     },
     {
       "id": "代码9.3",
       "anchor": "class LoserTree {",
       "test": "代码9.3 initial winner",
-      "py_anchor": "loser-tree",
-      "py_test": "竞赛树 initial winner"
+      "py_anchor": "class LoserTree",
+      "py_test": "代码9.3 每个内部结点记的输家落在它管辖的叶子区间内"
     }
   ],
   "standard": "c++17",

@@ -205,33 +205,36 @@ inline std::vector<std::vector<int>> replacement_selection(const std::vector<int
 ```
 ```python file=code/ch09/external_sort/modern.py#replacement-selection
 def replacement_selection(values: list[int], memory: int) -> list[list[int]]:
+    """算法9.1：置换选择。内存里放得下 memory 个记录，产生长度可超过 memory 的顺串。"""
     if memory <= 0:
-        raise ValueError("replacement selection memory must be positive")
-    if not values:
-        return []
-    heap = list(values[:memory])
-    _heapify(heap)
-    next_index = memory
+        raise ValueError("memory must be positive")
     runs: list[list[int]] = []
-    current: list[int] = []
+    heap: list[int] = []
     frozen: list[int] = []
-    while heap or next_index < len(values) or frozen:
+    source = list(values)
+    cursor = 0
+    while cursor < len(source) and len(heap) < memory:
+        heap.append(source[cursor])
+        cursor += 1
+    _heapify(heap)
+    current: list[int] = []
+    while heap or frozen:
         if not heap:
-            if current:
-                runs.append(current)
+            # 工作区空了：这一趟顺串到此为止，冻结区整体解冻成下一趟的工作区。
+            runs.append(current)
             current = []
-            heap = frozen
-            frozen = []
+            heap, frozen = frozen, []
             _heapify(heap)
-        emitted = _heap_pop(heap)
-        current.append(emitted)
-        if next_index < len(values):
-            incoming = values[next_index]
-            next_index += 1
-            if incoming >= emitted:
-                _heap_push(heap, incoming)
+            continue
+        smallest = _heap_pop(heap)
+        current.append(smallest)
+        if cursor < len(source):
+            nxt = source[cursor]
+            cursor += 1
+            if nxt < smallest:
+                frozen.append(nxt)  # 比刚输出的还小，进不了本趟顺串
             else:
-                frozen.append(incoming)
+                _heap_push(heap, nxt)
     if current:
         runs.append(current)
     return runs
@@ -378,7 +381,33 @@ private:
 ```
 ```python file=code/ch09/external_sort/modern.py#winner-tree
 class WinnerTree(_Tournament):
-    """代码9.2：根保存全局最小选手。"""
+    """代码9.2：内部结点记**赢家**，根就是全局最小的那一路。
+
+    重建一个结点要看它两个孩子的赢家，所以替换选手后沿路每层各比一次。
+    """
+
+    def _winner_at(self, node: int) -> int:
+        # 叶子层不占内部结点的位置：第 j 个选手就在 _size + j 上，它自己是自己的赢家。
+        return node - self._size if node >= self._size else self._tree[node]
+
+    def _build(self) -> None:
+        for node in range(self._size - 1, 0, -1):
+            self._tree[node] = self._better(self._winner_at(node * 2),
+                                            self._winner_at(node * 2 + 1))
+
+    def winner_index(self) -> int | None:
+        if not self.players:
+            return None
+        return self._winner_at(1)
+
+    def replace(self, player: int, value: int) -> None:
+        self._check_player(player)
+        self.players[player] = value
+        node = (self._size + player) // 2
+        while node >= 1:
+            self._tree[node] = self._better(self._winner_at(node * 2),
+                                            self._winner_at(node * 2 + 1))
+            node //= 2
 ```
 
 ```cpp file=code/ch09/external_sort/modern.hpp#loser-tree
@@ -451,14 +480,64 @@ private:
 ```
 ```python file=code/ch09/external_sort/modern.py#loser-tree
 class LoserTree(_Tournament):
-    """代码9.3：重赛后仍能报告全局胜者。"""
+    """代码9.3：内部结点记**输家**，另用 `_champion` 记全局胜者。
+
+    与胜者树同一套重赛路径，差别只在留下什么痕迹：胜者树只留赢家，
+    败者树把每一场的输家也记在结点上。外排序要这份痕迹——
+    `loser_at(node)` 就是「这一路是在哪一层、被谁淘汰的」，
+    而胜者树把这件事丢掉了。
+
+    两个数组一起维护（`_subtree_winner` 与 `_loser`），所以替换**任意**一片叶子
+    都成立，不只是替换当前冠军。只留输家数组的写法看着更省，
+    但那样只有「替换冠军」这一种用法是对的——k 路归并恰好只用那一种，
+    于是错误可以长期不被发现。这里不取那条捷径。
+    """
+
+    def __init__(self, players: list[int]) -> None:
+        self._loser: list[int | None] = []
+        self._subtree_winner: list[int] = []
+        self._champion: int | None = None
+        super().__init__(players)
+
+    def _match(self, left: int, right: int) -> tuple[int, int]:
+        """一场比赛，返回 (赢家, 输家)。一次比较，两个结果。"""
+        winner = self._better(left, right)
+        return winner, (right if winner == left else left)
+
+    def _build(self) -> None:
+        self._loser = [None] * self._size
+        self._subtree_winner = [0] * (self._size * 2)
+        for index in range(self._size):
+            self._subtree_winner[self._size + index] = index
+        for node in range(self._size - 1, 0, -1):
+            self._replay_node(node)
+        self._champion = self._subtree_winner[1]
+
+    def _replay_node(self, node: int) -> None:
+        winner, loser = self._match(self._subtree_winner[node * 2],
+                                    self._subtree_winner[node * 2 + 1])
+        self._loser[node] = loser
+        self._subtree_winner[node] = winner
+
+    def winner_index(self) -> int | None:
+        if not self.players:
+            return None
+        return self._champion
+
+    def replace(self, player: int, value: int) -> None:
+        self._check_player(player)
+        self.players[player] = value
+        node = (self._size + player) // 2
+        while node >= 1:
+            self._replay_node(node)
+            node //= 2
+        self._champion = self._subtree_winner[1]
 
     def loser_at(self, node: int) -> int | None:
-        if node <= 0 or node >= len(self.players):
+        """第 node 个内部结点上记着的输家。越界返回 None。"""
+        if node <= 0 or node >= self._size:
             return None
-        winner = self.winner_index()
-        candidates = [index for index in range(len(self.players)) if index != winner]
-        return max(candidates, key=self.players.__getitem__) if candidates else None
+        return self._loser[node]
 ```
 
 ## 本章小结

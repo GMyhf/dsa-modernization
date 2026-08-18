@@ -569,88 +569,166 @@ LR（左右，先左旋再右旋）      RL（右左，先右旋再左旋）
 
 ```python file=code/ch12/trie/modern.py#trie
 class Trie:
-    def __init__(self): self.root=_Node(); self._size=0
+    """12.4 Trie：每个字符一层，公共前缀共享同一条路径。"""
+
+    def __init__(self) -> None:
+        self.root = _Node()
+        self._size = 0
+
     @staticmethod
-    def _valid(word):
-        if any(c<'a' or c>'z' for c in word): raise ValueError("trie key must be a..z")
-    def insert(self,word):
-        self._valid(word); node=self.root; path=[]
-        for c in word: path.append(node); node=node.children.setdefault(c,_Node())
-        if node.terminal: return False
-        node.terminal=True; self._size+=1
-        for item in path: item.passing+=1
-        node.passing+=1; return True
-    def contains(self,word):
-        node=self._find(word); return node is not None and node.terminal
-    def starts_with(self,prefix): return self._find(prefix) is not None
-    def count_with_prefix(self,prefix):
-        node=self._find(prefix); return self._size if prefix=="" else (0 if node is None else node.passing)
-    def _find(self,text):
-        node=self.root
-        for c in text:
-            if c not in node.children: return None
-            node=node.children[c]
-        return node
-    def size(self): return self._size
-    def node_count(self):
-        def count(node): return sum(1+count(child) for child in node.children.values())
-        return count(self.root)
-    def keys_with_prefix(self,prefix):
-        node=self._find(prefix); out=[]
-        if node is None: return out
-        def collect(current,text):
-            if current.terminal: out.append(text)
-            for code in range(ord('a'),ord('z')+1):
-                c=chr(code)
-                if c in current.children: collect(current.children[c],text+c)
-        collect(node,prefix); return out
-    def erase(self,word):
-        if not self.contains(word): return False
-        words=[w for w in self.keys_with_prefix("") if w!=word]; self.__init__()
-        for value in words: self.insert(value)
+    def _valid(word: str) -> None:
+        if any(c < "a" or c > "z" for c in word):
+            raise ValueError("trie key must be a..z")
+
+    def insert(self, word: str) -> bool:
+        self._valid(word)
+        node = self.root
+        path = []
+        for c in word:
+            path.append(node)
+            node = node.children.setdefault(c, _Node())
+        if node.terminal:
+            return False
+        node.terminal = True
+        self._size += 1
+        # passing 是「有多少个键经过这里」，count_with_prefix 靠它一次问答，
+        # 而不是把子树数一遍。维护它的代价就落在这一行。
+        for item in path:
+            item.passing += 1
+        node.passing += 1
         return True
+
+    def contains(self, word: str) -> bool:
+        node = self._find(word)
+        return node is not None and node.terminal
+
+    def starts_with(self, prefix: str) -> bool:
+        return self._find(prefix) is not None
+
+    def count_with_prefix(self, prefix: str) -> int:
+        if prefix == "":
+            return self._size
+        node = self._find(prefix)
+        return 0 if node is None else node.passing
+
+    def _find(self, text: str) -> _Node | None:
+        node = self.root
+        for c in text:
+            if c not in node.children:
+                return None
+            node = node.children[c]
+        return node
+
+    def size(self) -> int:
+        return self._size
+
+    def node_count(self) -> int:
+        def count(node: _Node) -> int:
+            return sum(1 + count(child) for child in node.children.values())
+
+        return count(self.root)
+
+    def keys_with_prefix(self, prefix: str) -> list[str]:
+        node = self._find(prefix)
+        out: list[str] = []
+        if node is None:
+            return out
+
+        def collect(current: _Node, text: str) -> None:
+            if current.terminal:
+                out.append(text)
+            # 按 a..z 的顺序下降，收集结果因此天然有序，不必再排一次。
+            for code in range(ord("a"), ord("z") + 1):
+                c = chr(code)
+                if c in current.children:
+                    collect(current.children[c], text + c)
+
+        collect(node, prefix)
+        return out
+
+    def erase(self, word: str) -> bool:
+        if not self.contains(word):
+            return False
+        node = self.root
+        path = []
+        for c in word:
+            path.append((node, c))
+            node = node.children[c]
+        node.terminal = False
+        node.passing -= 1
+        self._size -= 1
+        # 自底向上摘掉不再承载任何键的结点：passing 归零且没有孩子就该消失。
+        for parent, c in reversed(path):
+            parent.passing -= 1
+            child = parent.children[c]
+            if child.passing == 0 and not child.children:
+                del parent.children[c]
+        return True
+
     # >>> trie-longest-prefix
-    def longest_prefix_of(self,text):
-        node=self.root; best=0
-        for i,c in enumerate(text):
-            if c not in node.children: break
-            node=node.children[c]
-            if node.terminal: best=i+1
+    def longest_prefix_of(self, text: str) -> str:
+        """text 的哪个前缀是树里最长的那个键。走不动就回退到最近一次的词尾。"""
+        node = self.root
+        best = 0
+        for i, c in enumerate(text):
+            if c not in node.children:
+                break
+            node = node.children[c]
+            if node.terminal:
+                best = i + 1
         return text[:best]
     # <<< trie-longest-prefix
 ```
 
 ```python file=code/ch12/trie/modern.py#trie-longest-prefix
-def longest_prefix_of(self,text):
-    node=self.root; best=0
-    for i,c in enumerate(text):
-        if c not in node.children: break
-        node=node.children[c]
-        if node.terminal: best=i+1
+def longest_prefix_of(self, text: str) -> str:
+    """text 的哪个前缀是树里最长的那个键。走不动就回退到最近一次的词尾。"""
+    node = self.root
+    best = 0
+    for i, c in enumerate(text):
+        if c not in node.children:
+            break
+        node = node.children[c]
+        if node.terminal:
+            best = i + 1
     return text[:best]
 ```
 
 ```python file=code/ch12/trie/modern.py#patricia-bits
-def bit_of(key,index):
-    byte=index//8
-    return False if byte>=len(key) else bool((ord(key[byte])>>(7-index%8))&1)
+def bit_of(key: str, index: int) -> bool:
+    """键的第 index 位（从最高位数起）。超出键长一律当 0——
+
+    这一条让「一个键是另一个键的前缀」也能被分开：`"a"` 与 `"ab"` 在
+    第 8 位之后就靠这个 0 区分。求首个不同位时把上界取到 `(最长+1)*8`，
+    正是为了给这个「虚拟的结尾」留出位置。
+    """
+    byte = index // 8
+    if byte >= len(key):
+        return False
+    return bool((ord(key[byte]) >> (7 - index % 8)) & 1)
 ```
 
 算法12.1 的可利用空间表属于存储管理侧，因此不给 Python 薄封装；最佳 BST 的动态规划属于算法侧：
 
 ```python file=code/ch12/optimal_bst/modern.py#optimal-bst
 def optimal_bst(successful, unsuccessful):
-    if len(unsuccessful) != len(successful) + 1: raise ValueError("weight count")
-    n = len(successful); cost = [[0]*(n+1) for _ in range(n+1)]; root = [[0]*(n+1) for _ in range(n+1)]
+    if len(unsuccessful) != len(successful) + 1:
+        raise ValueError("weight count")
+    n = len(successful)
+    cost = [[0]*(n+1) for _ in range(n+1)]
+    root = [[0]*(n+1) for _ in range(n+1)]
     weight = [[0]*(n+1) for _ in range(n+1)]
-    for i in range(n+1): weight[i][i] = unsuccessful[i]
+    for i in range(n+1):
+        weight[i][i] = unsuccessful[i]
     for length in range(1, n+1):
         for first in range(n-length+1):
-            last = first + length; weight[first][last] = weight[first][last-1] + successful[last-1] + unsuccessful[last]
+            last = first + length
+            weight[first][last] = weight[first][last-1] + successful[last-1] + unsuccessful[last]
             cost[first][last] = 10**30
             for r in range(first+1, last+1):
                 candidate = cost[first][r-1] + cost[r][last] + weight[first][last]
-                if candidate < cost[first][last]: cost[first][last], root[first][last] = candidate, r
+                if candidate < cost[first][last]:
+                    cost[first][last], root[first][last] = candidate, r
     return cost, root
 ```
 

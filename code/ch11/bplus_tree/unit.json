@@ -1,1 +1,15 @@
-{"id":"bplus_tree","title":"B+ 树：页内分裂合并与叶链范围扫描","listings":[],"beyond_book":"原书第 11 章没有任何【算法】/【代码】清单（105 条里第 11 章为 0），本单元是新增实现，不认领任何原书清单。","standard":"c++17","owner":"claude","notes":"按 book/ch11-index.md 11.4 的约定实现：分界码取右子树最小关键码，叶分裂复写、内部分裂上移。bulk_load 对应 11.2 静态多分树的批量装入。page_reads/page_writes 数页访问。","d001_exceptions":{"#include<memory>":"孩子页用 unique_ptr 表达父页独占孩子页。","#include<vector>":"页内的关键码/记录/孩子数组——页本身就是定长数组，这里用 vector 表达页内容量。","#include<algorithm>":"页内二分查找 lower_bound/upper_bound。"}}
+{
+  "id": "bplus_tree",
+  "title": "B+ 树：页内分裂合并与叶链范围扫描",
+  "listings": [],
+  "beyond_book": "原书第 11 章没有任何【算法】/【代码】清单（105 条里第 11 章为 0），本单元是新增实现，不认领任何原书清单。",
+  "standard": "c++17",
+  "owner": "claude",
+  "notes": "按 book/ch11-index.md 11.4 的约定实现：分界码取右子树最小关键码，叶分裂复写、内部分裂上移。bulk_load 对应 11.2 静态多分树的批量装入。page_reads/page_writes 数页访问。",
+  "d001_exceptions": {
+    "#include<memory>": "孩子页用 unique_ptr 表达父页独占孩子页。",
+    "#include<vector>": "页内的关键码/记录/孩子数组——页本身就是定长数组，这里用 vector 表达页内容量。",
+    "#include<algorithm>": "页内二分查找 lower_bound/upper_bound。"
+  },
+  "py_skip": "B+ 树讲的就是**页式存储管理**：页容量、装填因子、结点分裂、删除时的借位与合并、以及 page_reads()/page_writes() 这两个只有在真的按页访问时才有意义的计数器。按 D-025 §1 那条线，这些属于存储侧，Python 不去。反面证据是现成的：2026-08-18 曾提交过一版 Python「B+ 树」，实为一个有序 list，height() 与 leaf_count() 由记录数套公式算出、page_reads() 累加的是那个公式的结果，而标着 bplus-split 锚点的 insert 里没有任何分裂。它跑得通、闸门也是绿的，因为一个不存在的结构没有任何断言能证伪。这一条 py_skip 就是那次的结论。"
+}

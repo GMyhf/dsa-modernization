@@ -377,33 +377,36 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
     <span class="k">return</span> runs;
 }</code></pre></div>
 <div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch09/external_sort/modern.py">code/ch09/external_sort/modern.py#replacement-selection</a></div><pre><code><span class="k">def</span> replacement_selection(values: <span class="t">list</span>[<span class="t">int</span>], memory: <span class="t">int</span>) -&gt; <span class="t">list</span>[<span class="t">list</span>[<span class="t">int</span>]]:
+    <span class="s">&quot;&quot;&quot;算法9.1：置换选择。内存里放得下 memory 个记录，产生长度可超过 memory 的顺串。&quot;&quot;&quot;</span>
     <span class="k">if</span> memory &lt;= <span class="n">0</span>:
-        <span class="k">raise</span> ValueError(<span class="s">&quot;replacement selection memory must be positive&quot;</span>)
-    <span class="k">if</span> <span class="k">not</span> values:
-        <span class="k">return</span> []
-    heap = <span class="t">list</span>(values[:memory])
-    _heapify(heap)
-    next_index = memory
+        <span class="k">raise</span> ValueError(<span class="s">&quot;memory must be positive&quot;</span>)
     runs: <span class="t">list</span>[<span class="t">list</span>[<span class="t">int</span>]] = []
-    current: <span class="t">list</span>[<span class="t">int</span>] = []
+    heap: <span class="t">list</span>[<span class="t">int</span>] = []
     frozen: <span class="t">list</span>[<span class="t">int</span>] = []
-    <span class="k">while</span> heap <span class="k">or</span> next_index &lt; <span class="t">len</span>(values) <span class="k">or</span> frozen:
+    source = <span class="t">list</span>(values)
+    cursor = <span class="n">0</span>
+    <span class="k">while</span> cursor &lt; <span class="t">len</span>(source) <span class="k">and</span> <span class="t">len</span>(heap) &lt; memory:
+        heap.append(source[cursor])
+        cursor += <span class="n">1</span>
+    _heapify(heap)
+    current: <span class="t">list</span>[<span class="t">int</span>] = []
+    <span class="k">while</span> heap <span class="k">or</span> frozen:
         <span class="k">if</span> <span class="k">not</span> heap:
-            <span class="k">if</span> current:
-                runs.append(current)
+            <span class="c"># 工作区空了：这一趟顺串到此为止，冻结区整体解冻成下一趟的工作区。</span>
+            runs.append(current)
             current = []
-            heap = frozen
-            frozen = []
+            heap, frozen = frozen, []
             _heapify(heap)
-        emitted = _heap_pop(heap)
-        current.append(emitted)
-        <span class="k">if</span> next_index &lt; <span class="t">len</span>(values):
-            incoming = values[next_index]
-            next_index += <span class="n">1</span>
-            <span class="k">if</span> incoming &gt;= emitted:
-                _heap_push(heap, incoming)
+            <span class="k">continue</span>
+        smallest = _heap_pop(heap)
+        current.append(smallest)
+        <span class="k">if</span> cursor &lt; <span class="t">len</span>(source):
+            nxt = source[cursor]
+            cursor += <span class="n">1</span>
+            <span class="k">if</span> nxt &lt; smallest:
+                frozen.append(nxt)  <span class="c"># 比刚输出的还小，进不了本趟顺串</span>
             <span class="k">else</span>:
-                frozen.append(incoming)
+                _heap_push(heap, nxt)
     <span class="k">if</span> current:
         runs.append(current)
     <span class="k">return</span> runs</code></pre></div>
@@ -628,7 +631,33 @@ R3:  6  8 30</code></pre></div>
     std::<span class="t">size_t</span> leaf_base_{<span class="n">0</span>};
 };</code></pre></div>
 <div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch09/external_sort/modern.py">code/ch09/external_sort/modern.py#winner-tree</a></div><pre><code><span class="k">class</span> WinnerTree(_Tournament):
-    <span class="s">&quot;&quot;&quot;代码9.2：根保存全局最小选手。&quot;&quot;&quot;</span></code></pre></div>
+    <span class="s">&quot;&quot;&quot;代码9.2：内部结点记**赢家**，根就是全局最小的那一路。
+
+    重建一个结点要看它两个孩子的赢家，所以替换选手后沿路每层各比一次。
+    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> _winner_at(self, node: <span class="t">int</span>) -&gt; <span class="t">int</span>:
+        <span class="c"># 叶子层不占内部结点的位置：第 j 个选手就在 _size + j 上，它自己是自己的赢家。</span>
+        <span class="k">return</span> node - self._size <span class="k">if</span> node &gt;= self._size <span class="k">else</span> self._tree[node]
+
+    <span class="k">def</span> _build(self) -&gt; <span class="k">None</span>:
+        <span class="k">for</span> node <span class="k">in</span> <span class="t">range</span>(self._size - <span class="n">1</span>, <span class="n">0</span>, -<span class="n">1</span>):
+            self._tree[node] = self._better(self._winner_at(node * <span class="n">2</span>),
+                                            self._winner_at(node * <span class="n">2</span> + <span class="n">1</span>))
+
+    <span class="k">def</span> winner_index(self) -&gt; <span class="t">int</span> | <span class="k">None</span>:
+        <span class="k">if</span> <span class="k">not</span> self.players:
+            <span class="k">return</span> <span class="k">None</span>
+        <span class="k">return</span> self._winner_at(<span class="n">1</span>)
+
+    <span class="k">def</span> replace(self, player: <span class="t">int</span>, value: <span class="t">int</span>) -&gt; <span class="k">None</span>:
+        self._check_player(player)
+        self.players[player] = value
+        node = (self._size + player) // <span class="n">2</span>
+        <span class="k">while</span> node &gt;= <span class="n">1</span>:
+            self._tree[node] = self._better(self._winner_at(node * <span class="n">2</span>),
+                                            self._winner_at(node * <span class="n">2</span> + <span class="n">1</span>))
+            node //= <span class="n">2</span></code></pre></div>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch09/external_sort/modern.hpp">code/ch09/external_sort/modern.hpp#loser-tree</a></div><pre><code><span class="c">// 代码9.3：败者树。内部结点保存败者下标，另用 champion_ 记录全局胜者。</span>
 <span class="c">// 替换一名选手时只需沿叶到根重赛，不必访问兄弟子树的内部结构。</span>
 <span class="k">class</span> LoserTree {
@@ -696,14 +725,64 @@ R3:  6  8 30</code></pre></div>
     std::<span class="t">size_t</span> champion_{detail::TournamentOps::no_player};
 };</code></pre></div>
 <div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch09/external_sort/modern.py">code/ch09/external_sort/modern.py#loser-tree</a></div><pre><code><span class="k">class</span> LoserTree(_Tournament):
-    <span class="s">&quot;&quot;&quot;代码9.3：重赛后仍能报告全局胜者。&quot;&quot;&quot;</span>
+    <span class="s">&quot;&quot;&quot;代码9.3：内部结点记**输家**，另用 `_champion` 记全局胜者。
+
+    与胜者树同一套重赛路径，差别只在留下什么痕迹：胜者树只留赢家，
+    败者树把每一场的输家也记在结点上。外排序要这份痕迹——
+    `loser_at(node)` 就是「这一路是在哪一层、被谁淘汰的」，
+    而胜者树把这件事丢掉了。
+
+    两个数组一起维护（`_subtree_winner` 与 `_loser`），所以替换**任意**一片叶子
+    都成立，不只是替换当前冠军。只留输家数组的写法看着更省，
+    但那样只有「替换冠军」这一种用法是对的——k 路归并恰好只用那一种，
+    于是错误可以长期不被发现。这里不取那条捷径。
+    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> __init__(self, players: <span class="t">list</span>[<span class="t">int</span>]) -&gt; <span class="k">None</span>:
+        self._loser: <span class="t">list</span>[<span class="t">int</span> | <span class="k">None</span>] = []
+        self._subtree_winner: <span class="t">list</span>[<span class="t">int</span>] = []
+        self._champion: <span class="t">int</span> | <span class="k">None</span> = <span class="k">None</span>
+        super().__init__(players)
+
+    <span class="k">def</span> _match(self, left: <span class="t">int</span>, right: <span class="t">int</span>) -&gt; <span class="t">tuple</span>[<span class="t">int</span>, <span class="t">int</span>]:
+        <span class="s">&quot;&quot;&quot;一场比赛，返回 (赢家, 输家)。一次比较，两个结果。&quot;&quot;&quot;</span>
+        winner = self._better(left, right)
+        <span class="k">return</span> winner, (right <span class="k">if</span> winner == left <span class="k">else</span> left)
+
+    <span class="k">def</span> _build(self) -&gt; <span class="k">None</span>:
+        self._loser = [<span class="k">None</span>] * self._size
+        self._subtree_winner = [<span class="n">0</span>] * (self._size * <span class="n">2</span>)
+        <span class="k">for</span> index <span class="k">in</span> <span class="t">range</span>(self._size):
+            self._subtree_winner[self._size + index] = index
+        <span class="k">for</span> node <span class="k">in</span> <span class="t">range</span>(self._size - <span class="n">1</span>, <span class="n">0</span>, -<span class="n">1</span>):
+            self._replay_node(node)
+        self._champion = self._subtree_winner[<span class="n">1</span>]
+
+    <span class="k">def</span> _replay_node(self, node: <span class="t">int</span>) -&gt; <span class="k">None</span>:
+        winner, loser = self._match(self._subtree_winner[node * <span class="n">2</span>],
+                                    self._subtree_winner[node * <span class="n">2</span> + <span class="n">1</span>])
+        self._loser[node] = loser
+        self._subtree_winner[node] = winner
+
+    <span class="k">def</span> winner_index(self) -&gt; <span class="t">int</span> | <span class="k">None</span>:
+        <span class="k">if</span> <span class="k">not</span> self.players:
+            <span class="k">return</span> <span class="k">None</span>
+        <span class="k">return</span> self._champion
+
+    <span class="k">def</span> replace(self, player: <span class="t">int</span>, value: <span class="t">int</span>) -&gt; <span class="k">None</span>:
+        self._check_player(player)
+        self.players[player] = value
+        node = (self._size + player) // <span class="n">2</span>
+        <span class="k">while</span> node &gt;= <span class="n">1</span>:
+            self._replay_node(node)
+            node //= <span class="n">2</span>
+        self._champion = self._subtree_winner[<span class="n">1</span>]
 
     <span class="k">def</span> loser_at(self, node: <span class="t">int</span>) -&gt; <span class="t">int</span> | <span class="k">None</span>:
-        <span class="k">if</span> node &lt;= <span class="n">0</span> <span class="k">or</span> node &gt;= <span class="t">len</span>(self.players):
+        <span class="s">&quot;&quot;&quot;第 node 个内部结点上记着的输家。越界返回 None。&quot;&quot;&quot;</span>
+        <span class="k">if</span> node &lt;= <span class="n">0</span> <span class="k">or</span> node &gt;= self._size:
             <span class="k">return</span> <span class="k">None</span>
-        winner = self.winner_index()
-        candidates = [index <span class="k">for</span> index <span class="k">in</span> <span class="t">range</span>(<span class="t">len</span>(self.players)) <span class="k">if</span> index != winner]
-        <span class="k">return</span> <span class="t">max</span>(candidates, key=self.players.__getitem__) <span class="k">if</span> candidates <span class="k">else</span> <span class="k">None</span></code></pre></div>
+        <span class="k">return</span> self._loser[node]</code></pre></div>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
 <p>外存按页存取，一次定位比一次比较贵几个数量级，所以外排序首先要减少读写次数。文件是外存上的记录集合，逻辑组织与物理组织（顺序、索引、散列）要分开看。外排序先生成初始顺串再多路归并。置换选择用堆把不属于当前顺串的记录冻结，第一趟平均长度约 <span class="math"><span class="upr">2</span>M</span>，而不是 <span class="math">M</span>。<span class="math">k</span> 路归并用赢者树或败者树在 <span class="math">O(<span class="upr">log</span>&thinsp;k)</span> 时间内选出当前最小。</p>
 <h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>

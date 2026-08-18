@@ -6,70 +6,70 @@
       "id": "代码7.1",
       "anchor": "class Graph {",
       "test": "代码7.1 vertex count",
-      "py_anchor": "graph",
+      "py_anchor": "class Graph:",
       "py_test": "代码7.1 vertex count"
     },
     {
       "id": "代码7.2",
       "anchor": "struct Edge {",
       "test": "MST singleton empty",
-      "py_anchor": "graph",
-      "py_test": "算法7.10 Prim has n-1 edges"
+      "py_anchor": "class Edge:",
+      "py_test": "代码7.2 Edge 带权且可比较"
     },
     {
       "id": "代码7.3",
       "anchor": "void add_edge(std::size_t from",
       "test": "代码7.3 rejects negative Dijkstra weight",
-      "py_anchor": "graph-build",
+      "py_anchor": "def add_edge(self",
       "py_test": "代码7.3 rejects negative Dijkstra weight"
     },
     {
       "id": "算法7.5",
       "anchor": "std::vector<std::size_t> dfs(std::size_t source) const",
       "test": "算法7.5 DFS order",
-      "py_anchor": "dfs",
-      "py_test": "算法7.5 DFS order"
+      "py_anchor": "def dfs(self",
+      "py_test": "算法7.5 DFS 先走到底"
     },
     {
       "id": "算法7.6",
       "anchor": "std::vector<std::size_t> bfs(std::size_t source) const",
       "test": "算法7.6 BFS order",
-      "py_anchor": "bfs",
-      "py_test": "算法7.6 BFS order"
+      "py_anchor": "def bfs(self",
+      "py_test": "算法7.6 BFS 先铺一层"
     },
     {
       "id": "算法7.7",
       "anchor": "topological_sort() const",
       "test": "算法7.7 topological endpoints",
-      "py_anchor": "topological",
-      "py_test": "算法7.7 topological endpoints"
+      "py_anchor": "def topological_sort(self",
+      "py_test": "算法7.7 拓扑序尊重每一条边的方向"
     },
     {
       "id": "算法7.8",
       "anchor": "std::vector<int> dijkstra(std::size_t source) const",
       "test": "算法7.8 unreachable stays infinity",
-      "py_anchor": "dijkstra",
+      "py_anchor": "def dijkstra(self",
       "py_test": "算法7.8 Dijkstra matches 算法7.9 Floyd"
     },
     {
       "id": "算法7.9",
       "anchor": "std::vector<std::vector<int>> floyd() const",
       "test": "算法7.9 uses intermediate vertices",
-      "py_anchor": "floyd",
+      "py_anchor": "def floyd(self",
       "py_test": "算法7.9 uses intermediate vertices"
     },
     {
       "id": "算法7.10",
       "anchor": "std::optional<std::vector<Edge>> prim",
       "test": "算法7.10 Prim has n-1 edges",
-      "py_anchor": "prim",
+      "py_anchor": "def prim(self",
       "py_test": "算法7.10 Prim has n-1 edges"
     },
     {
       "id": "算法7.11",
       "anchor": "std::optional<std::vector<Edge>> kruskal() const",
       "test": "算法7.11 Kruskal has n-1 edges",
-      "py_anchor": "kruskal",
+      "py_anchor": "def kruskal(self",
       "py_test": "算法7.11 Kruskal has n-1 edges"
     }
   ],

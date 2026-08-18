@@ -2,45 +2,61 @@
 
 # >>> search-hash
 class Item:
-    def __init__(self, key): self._key = key
-    def key(self): return self._key
-    def set_key(self, key): self._key = key
+    def __init__(self, key):
+        self._key = key
+    def key(self):
+        return self._key
+    def set_key(self, key):
+        self._key = key
 # <<< search-hash
 
 # >>> sequential-binary
 def sequential_search(values, key):
     for i, value in enumerate(values):
-        if value == key: return i
+        if value == key:
+            return i
     return None
 
 def binary_search(values, key):
     first, last = 0, len(values)
     while first < last:
         middle = first + (last - first) // 2
-        if values[middle] == key: return middle
-        if values[middle] < key: first = middle + 1
-        else: last = middle
+        if values[middle] == key:
+            return middle
+        if values[middle] < key:
+            first = middle + 1
+        else:
+            last = middle
     return None
 # <<< sequential-binary
 
 # >>> int-set
 class IntSet:
-    def __init__(self): self._values = []
+    def __init__(self):
+        self._values = []
     def insert(self, value):
-        if self.contains(value): return False
-        self._values.append(value); return True
+        if self.contains(value):
+            return False
+        self._values.append(value)
+        return True
     def erase(self, value):
         found = sequential_search(self._values, value)
-        if found is None: return False
-        del self._values[found]; return True
-    def contains(self, value): return sequential_search(self._values, value) is not None
+        if found is None:
+            return False
+        del self._values[found]
+        return True
+    def contains(self, value):
+        return sequential_search(self._values, value) is not None
     def intersection(self, other):
         result = IntSet()
         for value in self._values:
-            if other.contains(value): result.insert(value)
+            if other.contains(value):
+                result.insert(value)
         return result
-    def includes(self, other): return all(self.contains(v) for v in other._values)
-    def size(self): return len(self._values)
+    def includes(self, other):
+        return all(self.contains(v) for v in other._values)
+    def size(self):
+        return len(self._values)
 # <<< int-set
 
 # >>> elf-hash
@@ -49,7 +65,8 @@ def elf_hash(text):
     for character in text:
         value = (value << 4) + ord(character)
         high = value & 0xF0000000
-        if high: value ^= high >> 24
+        if high:
+            value ^= high >> 24
         value &= ~high
     return value
 # <<< elf-hash
@@ -57,53 +74,91 @@ def elf_hash(text):
 # >>> hash-table
 class HashTable:
     def __init__(self, capacity):
-        if capacity <= 0: raise ValueError("hash table capacity must be positive")
-        self._slots = [None] * capacity; self._size = 0
-    def _home(self, key): return abs(key) % len(self._slots)
+        if capacity <= 0:
+            raise ValueError("hash table capacity must be positive")
+        self._slots = [None] * capacity
+        self._size = 0
+    def _home(self, key):
+        return abs(key) % len(self._slots)
     def insert(self, key):
         first_tombstone = None
         for step in range(len(self._slots)):
             i = (self._home(key) + step) % len(self._slots)
-            if self._slots[i] == key: return False
+            if self._slots[i] == key:
+                return False
             if self._slots[i] is _TOMBSTONE and first_tombstone is None:
                 first_tombstone = i
             if self._slots[i] is None:
                 target = first_tombstone if first_tombstone is not None else i
-                self._slots[target] = key; self._size += 1; return True
-        if first_tombstone is None: return False
-        self._slots[first_tombstone] = key; self._size += 1; return True
-    def contains(self, key): return self._find(key) is not None
+                self._slots[target] = key
+                self._size += 1
+                return True
+        if first_tombstone is None:
+            return False
+        self._slots[first_tombstone] = key
+        self._size += 1
+        return True
+    def contains(self, key):
+        return self._find(key) is not None
     def erase(self, key):
         i = self._find(key)
-        if i is None: return False
-        self._slots[i] = _TOMBSTONE; self._size -= 1; return True
+        if i is None:
+            return False
+        self._slots[i] = _TOMBSTONE
+        self._size -= 1
+        return True
     def _find(self, key):
         for step in range(len(self._slots)):
             i = (self._home(key) + step) % len(self._slots)
-            if self._slots[i] is None: return None
-            if self._slots[i] == key: return i
+            if self._slots[i] is None:
+                return None
+            if self._slots[i] == key:
+                return i
         return None
-    def size(self): return self._size
-    def capacity(self): return len(self._slots)
+    def size(self):
+        return self._size
+    def capacity(self):
+        return len(self._slots)
     def slot_at(self, index):
-        if index < 0 or index >= len(self._slots): raise IndexError("hash table slot")
+        if index < 0 or index >= len(self._slots):
+            raise IndexError("hash table slot")
         return self._slots[index]
 # <<< hash-table
 
 _TOMBSTONE = object()
 
 # 清单锚点使用这些明确的教学入口，避免同名方法在不同类之间产生歧义。
-def item_init(key): return Item(key)
+def item_init(key):
+    return Item(key)
 def intset_insert(values, value):
-    result=IntSet(); result._values=list(values); result.insert(value); return result
+    result = IntSet()
+    result._values = list(values)
+    result.insert(value)
+    return result
 def intset_erase(values, value):
-    result=IntSet(); result._values=list(values); result.erase(value); return result
+    result = IntSet()
+    result._values = list(values)
+    result.erase(value)
+    return result
 def intset_intersection(left, right):
-    a=IntSet(); a._values=list(left); b=IntSet(); b._values=list(right); return a.intersection(b)
+    a = IntSet()
+    a._values = list(left)
+    b = IntSet()
+    b._values = list(right)
+    return a.intersection(b)
 def intset_includes(left, right):
-    a=IntSet(); a._values=list(left); b=IntSet(); b._values=list(right); return a.includes(b)
-def hash_capacity(capacity): return HashTable(capacity).capacity()
-def hash_insert(table, key): return table.insert(key)
-def hash_contains(table, key): return table.contains(key)
-def hash_erase(table, key): return table.erase(key)
-def hash_slot_at(table, index): return table.slot_at(index)
+    a = IntSet()
+    a._values = list(left)
+    b = IntSet()
+    b._values = list(right)
+    return a.includes(b)
+def hash_capacity(capacity):
+    return HashTable(capacity).capacity()
+def hash_insert(table, key):
+    return table.insert(key)
+def hash_contains(table, key):
+    return table.contains(key)
+def hash_erase(table, key):
+    return table.erase(key)
+def hash_slot_at(table, index):
+    return table.slot_at(index)

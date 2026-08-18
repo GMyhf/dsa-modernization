@@ -6,21 +6,21 @@
       "id": "算法3.10",
       "anchor": "knapsack_recursive(",
       "test": "递归版与暴力枚举结论一致",
-      "py_anchor": "recursive",
+      "py_anchor": "def knapsack_recursive(",
       "py_test": "背包存在性"
     },
     {
       "id": "算法3.11",
       "anchor": "knapsack_with_explicit_stack(",
       "test": "显式栈版与暴力枚举结论一致",
-      "py_anchor": "explicit-stack",
+      "py_anchor": "def knapsack_with_explicit_stack(",
       "py_test": "算法3.11 没有调用递归版"
     },
     {
       "id": "算法3.12",
       "anchor": "knapsack_optimized(",
       "test": "优化版与暴力枚举结论一致",
-      "py_anchor": "optimized",
+      "py_anchor": "def knapsack_optimized(",
       "py_test": "算法3.12 没有调用递归版"
     }
   ],

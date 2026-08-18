@@ -800,78 +800,156 @@ LR（左右，先左旋再右旋）      RL（右左，先右旋再左旋）
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
 <h3 id="python-实现的证据链"><a class="anchor" href="#python-实现的证据链">#</a>Python 实现的证据链</h3>
 <div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/trie/modern.py">code/ch12/trie/modern.py#trie</a></div><pre><code><span class="k">class</span> Trie:
-    <span class="k">def</span> __init__(self): self.root=_Node(); self._size=<span class="n">0</span>
+    <span class="s">&quot;&quot;&quot;12.4 Trie：每个字符一层，公共前缀共享同一条路径。&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> __init__(self) -&gt; <span class="k">None</span>:
+        self.root = _Node()
+        self._size = <span class="n">0</span>
+
     @staticmethod
-    <span class="k">def</span> _valid(word):
-        <span class="k">if</span> <span class="t">any</span>(c&lt;<span class="s">&#x27;a&#x27;</span> <span class="k">or</span> c&gt;<span class="s">&#x27;z&#x27;</span> <span class="k">for</span> c <span class="k">in</span> word): <span class="k">raise</span> ValueError(<span class="s">&quot;trie key must be a..z&quot;</span>)
-    <span class="k">def</span> insert(self,word):
-        self._valid(word); node=self.root; path=[]
-        <span class="k">for</span> c <span class="k">in</span> word: path.append(node); node=node.children.setdefault(c,_Node())
-        <span class="k">if</span> node.terminal: <span class="k">return</span> <span class="k">False</span>
-        node.terminal=<span class="k">True</span>; self._size+=<span class="n">1</span>
-        <span class="k">for</span> item <span class="k">in</span> path: item.passing+=<span class="n">1</span>
-        node.passing+=<span class="n">1</span>; <span class="k">return</span> <span class="k">True</span>
-    <span class="k">def</span> contains(self,word):
-        node=self._find(word); <span class="k">return</span> node <span class="k">is</span> <span class="k">not</span> <span class="k">None</span> <span class="k">and</span> node.terminal
-    <span class="k">def</span> starts_with(self,prefix): <span class="k">return</span> self._find(prefix) <span class="k">is</span> <span class="k">not</span> <span class="k">None</span>
-    <span class="k">def</span> count_with_prefix(self,prefix):
-        node=self._find(prefix); <span class="k">return</span> self._size <span class="k">if</span> prefix==<span class="s">&quot;&quot;</span> <span class="k">else</span> (<span class="n">0</span> <span class="k">if</span> node <span class="k">is</span> <span class="k">None</span> <span class="k">else</span> node.passing)
-    <span class="k">def</span> _find(self,text):
-        node=self.root
-        <span class="k">for</span> c <span class="k">in</span> text:
-            <span class="k">if</span> c <span class="k">not</span> <span class="k">in</span> node.children: <span class="k">return</span> <span class="k">None</span>
-            node=node.children[c]
-        <span class="k">return</span> node
-    <span class="k">def</span> size(self): <span class="k">return</span> self._size
-    <span class="k">def</span> node_count(self):
-        <span class="k">def</span> count(node): <span class="k">return</span> <span class="t">sum</span>(<span class="n">1</span>+count(child) <span class="k">for</span> child <span class="k">in</span> node.children.values())
-        <span class="k">return</span> count(self.root)
-    <span class="k">def</span> keys_with_prefix(self,prefix):
-        node=self._find(prefix); out=[]
-        <span class="k">if</span> node <span class="k">is</span> <span class="k">None</span>: <span class="k">return</span> out
-        <span class="k">def</span> collect(current,text):
-            <span class="k">if</span> current.terminal: out.append(text)
-            <span class="k">for</span> code <span class="k">in</span> <span class="t">range</span>(ord(<span class="s">&#x27;a&#x27;</span>),ord(<span class="s">&#x27;z&#x27;</span>)+<span class="n">1</span>):
-                c=chr(code)
-                <span class="k">if</span> c <span class="k">in</span> current.children: collect(current.children[c],text+c)
-        collect(node,prefix); <span class="k">return</span> out
-    <span class="k">def</span> erase(self,word):
-        <span class="k">if</span> <span class="k">not</span> self.contains(word): <span class="k">return</span> <span class="k">False</span>
-        words=[w <span class="k">for</span> w <span class="k">in</span> self.keys_with_prefix(<span class="s">&quot;&quot;</span>) <span class="k">if</span> w!=word]; self.__init__()
-        <span class="k">for</span> value <span class="k">in</span> words: self.insert(value)
+    <span class="k">def</span> _valid(word: <span class="t">str</span>) -&gt; <span class="k">None</span>:
+        <span class="k">if</span> <span class="t">any</span>(c &lt; <span class="s">&quot;a&quot;</span> <span class="k">or</span> c &gt; <span class="s">&quot;z&quot;</span> <span class="k">for</span> c <span class="k">in</span> word):
+            <span class="k">raise</span> ValueError(<span class="s">&quot;trie key must be a..z&quot;</span>)
+
+    <span class="k">def</span> insert(self, word: <span class="t">str</span>) -&gt; <span class="t">bool</span>:
+        self._valid(word)
+        node = self.root
+        path = []
+        <span class="k">for</span> c <span class="k">in</span> word:
+            path.append(node)
+            node = node.children.setdefault(c, _Node())
+        <span class="k">if</span> node.terminal:
+            <span class="k">return</span> <span class="k">False</span>
+        node.terminal = <span class="k">True</span>
+        self._size += <span class="n">1</span>
+        <span class="c"># passing 是「有多少个键经过这里」，count_with_prefix 靠它一次问答，</span>
+        <span class="c"># 而不是把子树数一遍。维护它的代价就落在这一行。</span>
+        <span class="k">for</span> item <span class="k">in</span> path:
+            item.passing += <span class="n">1</span>
+        node.passing += <span class="n">1</span>
         <span class="k">return</span> <span class="k">True</span>
+
+    <span class="k">def</span> contains(self, word: <span class="t">str</span>) -&gt; <span class="t">bool</span>:
+        node = self._find(word)
+        <span class="k">return</span> node <span class="k">is</span> <span class="k">not</span> <span class="k">None</span> <span class="k">and</span> node.terminal
+
+    <span class="k">def</span> starts_with(self, prefix: <span class="t">str</span>) -&gt; <span class="t">bool</span>:
+        <span class="k">return</span> self._find(prefix) <span class="k">is</span> <span class="k">not</span> <span class="k">None</span>
+
+    <span class="k">def</span> count_with_prefix(self, prefix: <span class="t">str</span>) -&gt; <span class="t">int</span>:
+        <span class="k">if</span> prefix == <span class="s">&quot;&quot;</span>:
+            <span class="k">return</span> self._size
+        node = self._find(prefix)
+        <span class="k">return</span> <span class="n">0</span> <span class="k">if</span> node <span class="k">is</span> <span class="k">None</span> <span class="k">else</span> node.passing
+
+    <span class="k">def</span> _find(self, text: <span class="t">str</span>) -&gt; _Node | <span class="k">None</span>:
+        node = self.root
+        <span class="k">for</span> c <span class="k">in</span> text:
+            <span class="k">if</span> c <span class="k">not</span> <span class="k">in</span> node.children:
+                <span class="k">return</span> <span class="k">None</span>
+            node = node.children[c]
+        <span class="k">return</span> node
+
+    <span class="k">def</span> size(self) -&gt; <span class="t">int</span>:
+        <span class="k">return</span> self._size
+
+    <span class="k">def</span> node_count(self) -&gt; <span class="t">int</span>:
+        <span class="k">def</span> count(node: _Node) -&gt; <span class="t">int</span>:
+            <span class="k">return</span> <span class="t">sum</span>(<span class="n">1</span> + count(child) <span class="k">for</span> child <span class="k">in</span> node.children.values())
+
+        <span class="k">return</span> count(self.root)
+
+    <span class="k">def</span> keys_with_prefix(self, prefix: <span class="t">str</span>) -&gt; <span class="t">list</span>[<span class="t">str</span>]:
+        node = self._find(prefix)
+        out: <span class="t">list</span>[<span class="t">str</span>] = []
+        <span class="k">if</span> node <span class="k">is</span> <span class="k">None</span>:
+            <span class="k">return</span> out
+
+        <span class="k">def</span> collect(current: _Node, text: <span class="t">str</span>) -&gt; <span class="k">None</span>:
+            <span class="k">if</span> current.terminal:
+                out.append(text)
+            <span class="c"># 按 a..z 的顺序下降，收集结果因此天然有序，不必再排一次。</span>
+            <span class="k">for</span> code <span class="k">in</span> <span class="t">range</span>(ord(<span class="s">&quot;a&quot;</span>), ord(<span class="s">&quot;z&quot;</span>) + <span class="n">1</span>):
+                c = chr(code)
+                <span class="k">if</span> c <span class="k">in</span> current.children:
+                    collect(current.children[c], text + c)
+
+        collect(node, prefix)
+        <span class="k">return</span> out
+
+    <span class="k">def</span> erase(self, word: <span class="t">str</span>) -&gt; <span class="t">bool</span>:
+        <span class="k">if</span> <span class="k">not</span> self.contains(word):
+            <span class="k">return</span> <span class="k">False</span>
+        node = self.root
+        path = []
+        <span class="k">for</span> c <span class="k">in</span> word:
+            path.append((node, c))
+            node = node.children[c]
+        node.terminal = <span class="k">False</span>
+        node.passing -= <span class="n">1</span>
+        self._size -= <span class="n">1</span>
+        <span class="c"># 自底向上摘掉不再承载任何键的结点：passing 归零且没有孩子就该消失。</span>
+        <span class="k">for</span> parent, c <span class="k">in</span> <span class="t">reversed</span>(path):
+            parent.passing -= <span class="n">1</span>
+            child = parent.children[c]
+            <span class="k">if</span> child.passing == <span class="n">0</span> <span class="k">and</span> <span class="k">not</span> child.children:
+                <span class="k">del</span> parent.children[c]
+        <span class="k">return</span> <span class="k">True</span>
+
     <span class="c"># &gt;&gt;&gt; trie-longest-prefix</span>
-    <span class="k">def</span> longest_prefix_of(self,text):
-        node=self.root; best=<span class="n">0</span>
-        <span class="k">for</span> i,c <span class="k">in</span> <span class="t">enumerate</span>(text):
-            <span class="k">if</span> c <span class="k">not</span> <span class="k">in</span> node.children: <span class="k">break</span>
-            node=node.children[c]
-            <span class="k">if</span> node.terminal: best=i+<span class="n">1</span>
+    <span class="k">def</span> longest_prefix_of(self, text: <span class="t">str</span>) -&gt; <span class="t">str</span>:
+        <span class="s">&quot;&quot;&quot;text 的哪个前缀是树里最长的那个键。走不动就回退到最近一次的词尾。&quot;&quot;&quot;</span>
+        node = self.root
+        best = <span class="n">0</span>
+        <span class="k">for</span> i, c <span class="k">in</span> <span class="t">enumerate</span>(text):
+            <span class="k">if</span> c <span class="k">not</span> <span class="k">in</span> node.children:
+                <span class="k">break</span>
+            node = node.children[c]
+            <span class="k">if</span> node.terminal:
+                best = i + <span class="n">1</span>
         <span class="k">return</span> text[:best]
     <span class="c"># &lt;&lt;&lt; trie-longest-prefix</span></code></pre></div>
-<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/trie/modern.py">code/ch12/trie/modern.py#trie-longest-prefix</a></div><pre><code><span class="k">def</span> longest_prefix_of(self,text):
-    node=self.root; best=<span class="n">0</span>
-    <span class="k">for</span> i,c <span class="k">in</span> <span class="t">enumerate</span>(text):
-        <span class="k">if</span> c <span class="k">not</span> <span class="k">in</span> node.children: <span class="k">break</span>
-        node=node.children[c]
-        <span class="k">if</span> node.terminal: best=i+<span class="n">1</span>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/trie/modern.py">code/ch12/trie/modern.py#trie-longest-prefix</a></div><pre><code><span class="k">def</span> longest_prefix_of(self, text: <span class="t">str</span>) -&gt; <span class="t">str</span>:
+    <span class="s">&quot;&quot;&quot;text 的哪个前缀是树里最长的那个键。走不动就回退到最近一次的词尾。&quot;&quot;&quot;</span>
+    node = self.root
+    best = <span class="n">0</span>
+    <span class="k">for</span> i, c <span class="k">in</span> <span class="t">enumerate</span>(text):
+        <span class="k">if</span> c <span class="k">not</span> <span class="k">in</span> node.children:
+            <span class="k">break</span>
+        node = node.children[c]
+        <span class="k">if</span> node.terminal:
+            best = i + <span class="n">1</span>
     <span class="k">return</span> text[:best]</code></pre></div>
-<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/trie/modern.py">code/ch12/trie/modern.py#patricia-bits</a></div><pre><code><span class="k">def</span> bit_of(key,index):
-    byte=index//<span class="n">8</span>
-    <span class="k">return</span> <span class="k">False</span> <span class="k">if</span> byte&gt;=<span class="t">len</span>(key) <span class="k">else</span> <span class="t">bool</span>((ord(key[byte])&gt;&gt;(<span class="n">7</span>-index%<span class="n">8</span>))&amp;<span class="n">1</span>)</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/trie/modern.py">code/ch12/trie/modern.py#patricia-bits</a></div><pre><code><span class="k">def</span> bit_of(key: <span class="t">str</span>, index: <span class="t">int</span>) -&gt; <span class="t">bool</span>:
+    <span class="s">&quot;&quot;&quot;键的第 index 位（从最高位数起）。超出键长一律当 0——
+
+    这一条让「一个键是另一个键的前缀」也能被分开：`&quot;a&quot;` 与 `&quot;ab&quot;` 在
+    第 8 位之后就靠这个 0 区分。求首个不同位时把上界取到 `(最长+1)*8`，
+    正是为了给这个「虚拟的结尾」留出位置。
+    &quot;&quot;&quot;</span>
+    byte = index // <span class="n">8</span>
+    <span class="k">if</span> byte &gt;= <span class="t">len</span>(key):
+        <span class="k">return</span> <span class="k">False</span>
+    <span class="k">return</span> <span class="t">bool</span>((ord(key[byte]) &gt;&gt; (<span class="n">7</span> - index % <span class="n">8</span>)) &amp; <span class="n">1</span>)</code></pre></div>
 <p>算法12.1 的可利用空间表属于存储管理侧，因此不给 Python 薄封装；最佳 BST 的动态规划属于算法侧：</p>
 <div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/optimal_bst/modern.py">code/ch12/optimal_bst/modern.py#optimal-bst</a></div><pre><code><span class="k">def</span> optimal_bst(successful, unsuccessful):
-    <span class="k">if</span> <span class="t">len</span>(unsuccessful) != <span class="t">len</span>(successful) + <span class="n">1</span>: <span class="k">raise</span> ValueError(<span class="s">&quot;weight count&quot;</span>)
-    n = <span class="t">len</span>(successful); cost = [[<span class="n">0</span>]*(n+<span class="n">1</span>) <span class="k">for</span> _ <span class="k">in</span> <span class="t">range</span>(n+<span class="n">1</span>)]; root = [[<span class="n">0</span>]*(n+<span class="n">1</span>) <span class="k">for</span> _ <span class="k">in</span> <span class="t">range</span>(n+<span class="n">1</span>)]
+    <span class="k">if</span> <span class="t">len</span>(unsuccessful) != <span class="t">len</span>(successful) + <span class="n">1</span>:
+        <span class="k">raise</span> ValueError(<span class="s">&quot;weight count&quot;</span>)
+    n = <span class="t">len</span>(successful)
+    cost = [[<span class="n">0</span>]*(n+<span class="n">1</span>) <span class="k">for</span> _ <span class="k">in</span> <span class="t">range</span>(n+<span class="n">1</span>)]
+    root = [[<span class="n">0</span>]*(n+<span class="n">1</span>) <span class="k">for</span> _ <span class="k">in</span> <span class="t">range</span>(n+<span class="n">1</span>)]
     weight = [[<span class="n">0</span>]*(n+<span class="n">1</span>) <span class="k">for</span> _ <span class="k">in</span> <span class="t">range</span>(n+<span class="n">1</span>)]
-    <span class="k">for</span> i <span class="k">in</span> <span class="t">range</span>(n+<span class="n">1</span>): weight[i][i] = unsuccessful[i]
+    <span class="k">for</span> i <span class="k">in</span> <span class="t">range</span>(n+<span class="n">1</span>):
+        weight[i][i] = unsuccessful[i]
     <span class="k">for</span> length <span class="k">in</span> <span class="t">range</span>(<span class="n">1</span>, n+<span class="n">1</span>):
         <span class="k">for</span> first <span class="k">in</span> <span class="t">range</span>(n-length+<span class="n">1</span>):
-            last = first + length; weight[first][last] = weight[first][last-<span class="n">1</span>] + successful[last-<span class="n">1</span>] + unsuccessful[last]
+            last = first + length
+            weight[first][last] = weight[first][last-<span class="n">1</span>] + successful[last-<span class="n">1</span>] + unsuccessful[last]
             cost[first][last] = <span class="n">10</span>**<span class="n">30</span>
             <span class="k">for</span> r <span class="k">in</span> <span class="t">range</span>(first+<span class="n">1</span>, last+<span class="n">1</span>):
                 candidate = cost[first][r-<span class="n">1</span>] + cost[r][last] + weight[first][last]
-                <span class="k">if</span> candidate &lt; cost[first][last]: cost[first][last], root[first][last] = candidate, r
+                <span class="k">if</span> candidate &lt; cost[first][last]:
+                    cost[first][last], root[first][last] = candidate, r
     <span class="k">return</span> cost, root</code></pre></div>
 <p>多维数组按行优先或列优先顺序存放，按下标随机访问；三角、对称、稀疏矩阵可以压缩。广义表的元素可以是原子或子表，头尾分解对应递归。动态存储要处理碎片和回收：首次/最佳/最坏适应，引用计数与标记清除。Trie 按字符分支并共享前缀，Patricia 压缩单孩子路径。最优 BST 用动态规划选根；AVL 用平衡因子和四种旋转保证 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>；伸展树用访问后上移做均摊平衡。可利用空间表是定长结点的显式空闲栈，不劫持全局 <code>new</code>。</p>
 <h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
