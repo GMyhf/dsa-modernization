@@ -307,6 +307,13 @@ def parse_info(info):
 #
 # 代价写明：函数改名 → 引用失效并报错（这是好事，比悄悄印错强）；
 # 同名重载全部一并取出（讲课时本来就该一起看），中间空一行隔开。
+#
+# 「一并取出」这条在**同一个文件里两个类各有一个同名私有辅助函数**时会印错：
+# `teaching.hpp` 里 `BinaryTree::inorder_impl` 与 `BinarySearchTree::inorder_impl`
+# 都叫 `inorder_impl`，`#fn:inorder_impl` 于是把两份连着印出来——课件
+# 「三种周游的代码只差一行」那一页曾经就是这样，读者看到的是同一个函数抄了两遍。
+# 所以再给一种写法：`#fn:类名::函数名` 把搜索范围限定在那个类的类体里
+# （与 R15 的 `类名::成员` 写法一致）。类名找不到照样报红。
 FUNCTION_REF = re.compile(r"^fn:(.+)$")
 
 
@@ -362,13 +369,45 @@ def _is_definition(stripped, row, col):
     return False
 
 
+def _class_body(stripped, class_name):
+    """`class C {` / `struct C {` 的类体行区间 [起, 止)；找不到返回 None。"""
+    head = re.compile(r"(?<![A-Za-z0-9_])(?:class|struct)\s+" + re.escape(class_name)
+                      + r"(?![A-Za-z0-9_])")
+    for index, text in enumerate(stripped):
+        if not head.search(text):
+            continue
+        # 前置声明 `class C;` 和基类列表里的 `class C` 都不带类体，跳过
+        for row in range(index, min(index + 4, len(stripped))):
+            if "{" in stripped[row]:
+                depth = 0
+                for scan in range(row, len(stripped)):
+                    depth += stripped[scan].count("{") - stripped[scan].count("}")
+                    if depth == 0:
+                        return index, scan + 1
+                return index, len(stripped)
+            if ";" in stripped[row]:
+                break
+    return None
+
+
 def read_function(path: Path, name):
-    """取出名为 name 的函数定义（含紧邻其上的注释）。多个重载依次取出。"""
+    """取出名为 name 的函数定义（含紧邻其上的注释）。多个重载依次取出。
+
+    `name` 写成 `类名::函数名` 时，只在那个类的类体里找。
+    """
     lines = path.read_text(encoding="utf-8").splitlines()
     stripped, in_block = [], False
     for line in lines:
         code, in_block = strip_comments_and_strings(line, in_block)
         stripped.append(code)
+
+    scope_name, begin, end = None, 0, len(stripped)
+    if "::" in name:
+        scope_name, _, name = name.rpartition("::")
+        span = _class_body(stripped, scope_name)
+        if span is None:
+            return None, f"{path} 里没有名为 `{scope_name}` 的类/结构体定义"
+        begin, end = span
 
     # `\b` 在这里不够用：析构函数 `~ArrayStack(` 的 `~` 前面是空格，两个都是
     # 非单词字符，`\b` 不成立。而且若只排除单词字符，找 `ArrayStack` 会把
@@ -376,8 +415,8 @@ def read_function(path: Path, name):
     boundary = "(?<![A-Za-z0-9_])" if name.startswith("~") else "(?<![A-Za-z0-9_~])"
     pattern = re.compile(boundary + re.escape(name) + r"\s*\(")
 
-    chunks, index = [], 0
-    while index < len(stripped):
+    chunks, index = [], begin
+    while index < end:
         found = pattern.search(stripped[index])
         if not found:
             index += 1
@@ -404,14 +443,25 @@ def read_function(path: Path, name):
             index += 1
             continue
 
-        # 把紧贴在上面的注释一起带上——教学代码的注释就是内容的一半
-        top = index
-        while top > 0 and lines[top - 1].strip().startswith("//"):
-            top -= 1
+        # 把紧贴在上面的注释一起带上——教学代码的注释就是内容的一半。
+        # `template <...>` 也一起带上：成员函数模板的模板头就在上一行，
+        # 丢了它，印在书上的那段代码自己就不成立了。
+        top, took_template = index, False
+        while top > 0:
+            above = lines[top - 1].strip()
+            if above.startswith("//"):
+                top -= 1
+                continue
+            if above.startswith("template") and not took_template:
+                top -= 1
+                took_template = True
+                continue
+            break
         chunks.append("\n".join(lines[top:row + 1]))
         index = row + 1
     if not chunks:
-        return None, f"{path} 里没有名为 `{name}` 的函数定义"
+        where = f"`{scope_name}` 类体里" if scope_name else ""
+        return None, f"{path} {where}没有名为 `{name}` 的函数定义"
     return "\n\n".join(chunks), None
 
 

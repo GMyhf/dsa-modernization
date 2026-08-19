@@ -179,13 +179,15 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 </tr>
 </tbody></table></div>
 <p><strong>「按先根次序周游树」等于「对应二叉树的前序周游」</strong>—— 这是上一页那个转换的直接推论。</p></section><section class="slide" data-notes=""><h1 id="先根与后根"><a class="anchor" href="#先根与后根">#</a>先根与后根</h1>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp">code/ch06/general_tree/modern.hpp#fn:pre</a></div><pre><code><span class="k">static</span> <span class="t">void</span> pre(Node* node, Visitor&amp; visitor) {
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp">code/ch06/general_tree/modern.hpp#fn:pre</a></div><pre><code><span class="k">template</span> &lt;<span class="k">class</span> Visitor&gt;
+<span class="k">static</span> <span class="t">void</span> pre(Node* node, Visitor&amp; visitor) {
     <span class="k">for</span> (; node != <span class="k">nullptr</span>; node = node-&gt;sibling) {
         visitor(node-&gt;value);
         pre(node-&gt;child, visitor);
     }
 }</code></pre></div>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp">code/ch06/general_tree/modern.hpp#fn:post</a></div><pre><code><span class="k">static</span> <span class="t">void</span> post(Node* node, Visitor&amp; visitor) {
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp">code/ch06/general_tree/modern.hpp#fn:post</a></div><pre><code><span class="k">template</span> &lt;<span class="k">class</span> Visitor&gt;
+<span class="k">static</span> <span class="t">void</span> post(Node* node, Visitor&amp; visitor) {
     <span class="k">for</span> (; node != <span class="k">nullptr</span>; node = node-&gt;sibling) {
         post(node-&gt;child, visitor);
         visitor(node-&gt;value);

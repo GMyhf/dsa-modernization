@@ -132,24 +132,19 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 </tr>
 </tbody></table></div>
 <figure><img loading="lazy" src="../../assets/7c6579b015042738.jpg" alt="图 5.5 二叉树示例"><figcaption>图 5.5 二叉树示例</figcaption></figure></section><section class="slide" data-notes=""><h1 id="三种周游的代码只差一行"><a class="anchor" href="#三种周游的代码只差一行">#</a>三种周游的代码只差一行</h1>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/teaching.hpp">code/ch05/binary_tree/teaching.hpp#fn:preorder_impl</a></div><pre><code><span class="k">static</span> <span class="t">void</span> preorder_impl(<span class="k">const</span> Node* node, Visitor&amp; visit) {
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/teaching.hpp">code/ch05/binary_tree/teaching.hpp#fn:BinaryTree::preorder_impl</a></div><pre><code><span class="k">template</span> &lt;<span class="k">typename</span> Visitor&gt;
+<span class="k">static</span> <span class="t">void</span> preorder_impl(<span class="k">const</span> Node* node, Visitor&amp; visit) {
     <span class="k">if</span> (node == <span class="k">nullptr</span>) <span class="k">return</span>;
     visit(node-&gt;value);                 <span class="c">// 根</span>
     preorder_impl(node-&gt;left, visit);   <span class="c">// 左</span>
     preorder_impl(node-&gt;right, visit);  <span class="c">// 右</span>
 }</code></pre></div>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/teaching.hpp">code/ch05/binary_tree/teaching.hpp#fn:inorder_impl</a></div><pre><code><span class="k">static</span> <span class="t">void</span> inorder_impl(<span class="k">const</span> Node* node, Visitor&amp; visit) {
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/teaching.hpp">code/ch05/binary_tree/teaching.hpp#fn:BinaryTree::inorder_impl</a></div><pre><code><span class="k">template</span> &lt;<span class="k">typename</span> Visitor&gt;
+<span class="k">static</span> <span class="t">void</span> inorder_impl(<span class="k">const</span> Node* node, Visitor&amp; visit) {
     <span class="k">if</span> (node == <span class="k">nullptr</span>) <span class="k">return</span>;
     inorder_impl(node-&gt;left, visit);    <span class="c">// 左</span>
     visit(node-&gt;value);                 <span class="c">// 根</span>
     inorder_impl(node-&gt;right, visit);   <span class="c">// 右</span>
-}
-
-<span class="k">static</span> <span class="t">void</span> inorder_impl(<span class="k">const</span> Node* node, Visitor&amp; visit) {
-    <span class="k">if</span> (node == <span class="k">nullptr</span>) <span class="k">return</span>;
-    inorder_impl(node-&gt;left, visit);
-    visit(node-&gt;value);
-    inorder_impl(node-&gt;right, visit);
 }</code></pre></div>
 <p><strong>形状和定义一样，一眼就能对上</strong>——这正是递归在这一章的价值。</p></section><section class="slide" data-notes="&lt;p&gt;可以问：为什么不能用递归做层次周游？
 答案：递归天然是深度优先的，层次周游需要「跨子树」的次序，必须显式队列。&lt;/p&gt;"><h1 id="广度优先一层一层来"><a class="anchor" href="#广度优先一层一层来">#</a>广度优先：一层一层来</h1>

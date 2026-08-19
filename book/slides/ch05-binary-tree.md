@@ -98,7 +98,8 @@ subtitle: 数据结构与算法：Python 讲算法，C++ 讲实现
 
 # 三种周游的代码只差一行
 
-```cpp file=code/ch05/binary_tree/teaching.hpp#fn:preorder_impl
+```cpp file=code/ch05/binary_tree/teaching.hpp#fn:BinaryTree::preorder_impl
+template <typename Visitor>
 static void preorder_impl(const Node* node, Visitor& visit) {
     if (node == nullptr) return;
     visit(node->value);                 // 根
@@ -107,19 +108,13 @@ static void preorder_impl(const Node* node, Visitor& visit) {
 }
 ```
 
-```cpp file=code/ch05/binary_tree/teaching.hpp#fn:inorder_impl
+```cpp file=code/ch05/binary_tree/teaching.hpp#fn:BinaryTree::inorder_impl
+template <typename Visitor>
 static void inorder_impl(const Node* node, Visitor& visit) {
     if (node == nullptr) return;
     inorder_impl(node->left, visit);    // 左
     visit(node->value);                 // 根
     inorder_impl(node->right, visit);   // 右
-}
-
-static void inorder_impl(const Node* node, Visitor& visit) {
-    if (node == nullptr) return;
-    inorder_impl(node->left, visit);
-    visit(node->value);
-    inorder_impl(node->right, visit);
 }
 ```
 

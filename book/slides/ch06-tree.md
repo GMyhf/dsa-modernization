@@ -114,6 +114,7 @@ subtitle: 数据结构与算法：Python 讲算法，C++ 讲实现
 # 先根与后根
 
 ```cpp file=code/ch06/general_tree/modern.hpp#fn:pre
+template <class Visitor>
 static void pre(Node* node, Visitor& visitor) {
     for (; node != nullptr; node = node->sibling) {
         visitor(node->value);
@@ -123,6 +124,7 @@ static void pre(Node* node, Visitor& visitor) {
 ```
 
 ```cpp file=code/ch06/general_tree/modern.hpp#fn:post
+template <class Visitor>
 static void post(Node* node, Visitor& visitor) {
     for (; node != nullptr; node = node->sibling) {
         post(node->child, visitor);

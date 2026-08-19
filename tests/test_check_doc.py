@@ -1156,3 +1156,96 @@ class TestD025PythonBlocks(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestFunctionSliceScope(unittest.TestCase):
+    """`#fn:类名::函数名` —— 同一文件里两个类各有一个同名私有辅助函数时的消歧。
+
+    活缺陷记录：课件「三种周游的代码只差一行」那一页曾经用 `#fn:inorder_impl`，
+    而 `code/ch05/binary_tree/teaching.hpp` 里 `BinaryTree` 与 `BinarySearchTree`
+    各有一个 `inorder_impl`，于是那一页把同一个函数印了两遍（版本不同、看着像抄错）。
+    R3 逐字比对照样通过——它只保证「印的和源码一致」，不保证「印的是想要的那一个」。
+    """
+
+    SOURCE = (
+        "template <typename T>\n"
+        "class TreeNode {\n"
+        "    template <typename Visitor>\n"
+        "    static void walk(const Node* node, Visitor& visit) {\n"
+        "        visit(node->tag);\n"
+        "    }\n"
+        "};\n"
+        "\n"
+        "template <typename T>\n"
+        "class Tree {\n"
+        "    // 带注释的那一个\n"
+        "    template <typename Visitor>\n"
+        "    static void walk(const Node* node, Visitor& visit) {\n"
+        "        visit(node->value);   // 树版\n"
+        "    }\n"
+        "};\n"
+        "\n"
+        "template <typename T>\n"
+        "class SearchTree {\n"
+        "    template <typename Visitor>\n"
+        "    static void walk(const Node* node, Visitor& visit) {\n"
+        "        visit(node->key);\n"
+        "    }\n"
+        "};\n"
+    )
+
+    @contextlib.contextmanager
+    def _header(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "teaching.hpp"
+            path.write_text(self.SOURCE, encoding="utf-8")
+            yield path
+
+    def test_unscoped_name_takes_all(self):
+        """不加类名时的老行为不变：同名的全取出来。"""
+        with self._header() as path:
+            body, err = check_doc.read_slice(path, "fn:walk")
+            self.assertIsNone(err)
+            self.assertIn("node->tag", body)
+            self.assertIn("node->value", body)
+            self.assertIn("node->key", body)
+
+    def test_scoped_name_takes_only_that_class(self):
+        with self._header() as path:
+            body, err = check_doc.read_slice(path, "fn:Tree::walk")
+            self.assertIsNone(err)
+            self.assertIn("node->value", body)
+            self.assertNotIn("node->key", body, "切片越过了类体边界")
+
+    def test_scoped_name_matches_class_exactly(self):
+        """类名要整词匹配：`Tree` 不能命中先出现的 `TreeNode`，也不能命中 `SearchTree`。"""
+        with self._header() as path:
+            body, err = check_doc.read_slice(path, "fn:Tree::walk")
+            self.assertIsNone(err)
+            self.assertNotIn("node->tag", body, "`Tree` 命中了 `TreeNode` 的类体")
+            body, err = check_doc.read_slice(path, "fn:SearchTree::walk")
+            self.assertIsNone(err)
+            self.assertIn("node->key", body)
+            self.assertNotIn("node->value", body)
+
+    def test_unknown_class_is_reported(self):
+        with self._header() as path:
+            body, err = check_doc.read_slice(path, "fn:Nope::walk")
+            self.assertIsNone(body)
+            self.assertIn("Nope", err)
+
+    def test_unknown_function_in_known_class_is_reported(self):
+        with self._header() as path:
+            body, err = check_doc.read_slice(path, "fn:Tree::nope")
+            self.assertIsNone(body)
+            self.assertIn("Tree", err)
+            self.assertIn("nope", err)
+
+    def test_template_header_travels_with_the_function(self):
+        """成员函数模板的 `template <...>` 丢了，印在书上的那段代码自己就不成立。"""
+        with self._header() as path:
+            body, err = check_doc.read_slice(path, "fn:Tree::walk")
+            self.assertIsNone(err)
+            self.assertIn("template <typename Visitor>", body)
+            self.assertIn("// 带注释的那一个", body, "模板头上方的注释被丢掉了")
+            self.assertNotIn("class Tree", body, "把类头也一起吞了")

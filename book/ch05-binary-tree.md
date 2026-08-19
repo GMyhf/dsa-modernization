@@ -25,7 +25,7 @@
   D   E
 ```
 
-图 5.5 就是上面这棵树。
+这棵 5 个结点的小树是本章示例程序用的例子。5.2.2 讨论周游次序时会换成原书图 5.5 那棵 9 个结点的树——结点多一些，三种周游的差别才看得出来。
 
 四种周游访问的是同一组结点，次序不同：
 
@@ -150,11 +150,140 @@ BST 中序: 1 3 4 6 7 8 10 14
 
 ### 5.2.2 深度优先周游二叉树
 
-先序 / 中序 / 后序的递归版就是三行：访问自己与走进左右孩子的次序不同。迭代版用一棵手写链式栈模拟调用栈，按 D-001 §3d 只作补充，不替换递归主实现。
+深度优先周游的思路是尽量往深处走：沿左链一路下降，遇到左子树为空就退回最近的、右子树尚未访问的分支结点，转向它的右孩子，再继续尽量往左。重复到没有结点可退为止，每个结点恰好被访问一次。
+
+周游一棵二叉树就是做三件事：访问当前结点（记作 t）、周游左子树（L）、周游右子树（R）。三件事共有 6 种排列，习惯上总是先左后右，于是只剩三种——就是本节的三种深度优先周游：
+
+| 次序 | 名字 | 递归定义 |
+| --- | --- | --- |
+| tLR | 前序（preorder） | 访问根 → 前序周游左子树 → 前序周游右子树 |
+| LtR | 中序（inorder） | 中序周游左子树 → 访问根 → 中序周游右子树 |
+| LRt | 后序（postorder） | 后序周游左子树 → 后序周游右子树 → 访问根 |
+
+![图 5.5 二叉树示例：根 A；左子树的根 B 有孩子 D 和 E，E 有左孩子 G；右子树的根 C 有右孩子 F，F 有孩子 H 和 I](assets/7c6579b015042738.jpg)
+
+对图 5.5 这棵树，三种周游给出三个不同的序列：
+
+| 周游 | 序列 |
+| --- | --- |
+| 前序 | A B D E G C F H I |
+| 中序 | D B G E A C H F I |
+| 后序 | D G E B H I F C A |
+
+周游把非线性的树摊成一个线性序列，「前驱」「后继」这类本属于线性结构的说法，对树才有了意义——但它取决于用的是哪一种周游。结点 E 在前序序列里的前驱是 D、后继是 G；在中序序列里前驱是 G、后继是 A；在后序序列里前驱是 G、后继是 B。同一个结点，换一种次序就换一批邻居。
+
+原书【算法5.3】把三种周游写成三个递归函数，与存储结构无关。教学版照搬这个结构（完整实现见 5.3）：
+
+```cpp file=code/ch05/binary_tree/teaching.hpp#fn:BinaryTree::preorder_impl
+template <typename Visitor>
+static void preorder_impl(const Node* node, Visitor& visit) {
+    if (node == nullptr) return;
+    visit(node->value);                 // 根
+    preorder_impl(node->left, visit);   // 左
+    preorder_impl(node->right, visit);  // 右
+}
+```
+
+```cpp file=code/ch05/binary_tree/teaching.hpp#fn:BinaryTree::inorder_impl
+template <typename Visitor>
+static void inorder_impl(const Node* node, Visitor& visit) {
+    if (node == nullptr) return;
+    inorder_impl(node->left, visit);    // 左
+    visit(node->value);                 // 根
+    inorder_impl(node->right, visit);   // 右
+}
+```
+
+```cpp file=code/ch05/binary_tree/teaching.hpp#fn:BinaryTree::postorder_impl
+template <typename Visitor>
+static void postorder_impl(const Node* node, Visitor& visit) {
+    if (node == nullptr) return;
+    postorder_impl(node->left, visit);  // 左
+    postorder_impl(node->right, visit); // 右
+    visit(node->value);                 // 根
+}
+```
+
+三个函数的形状完全一样，只差 `visit` 那一行放在哪里。**递归在这一章的价值就在这里：代码的形状和定义的形状能一眼对上。** 读的时候要把「访问」和「走进去」分清楚——`visit(node->value)` 是访问，`preorder_impl(node->left, visit)` 是走进去；报错的序列多半来自把这两件事混为一谈。
+
+每个结点进出各一次，三种周游的时间代价都是 $O(n)$。空间代价是递归深度，等于树高：平衡时约 $\log_2 n$，退化成一条链时是 $n$，5.1.1 说的「压穿运行栈」就是这种树。工程版另给了三个用手写链式栈显式模拟调用栈的迭代版（`preorder_iterative`、`inorder_iterative`、`postorder_iterative`），按 D-001 §3d 只作补充，不替换递归主实现，见 5.6a。
+
+#### 表达式树：周游的一个用途
+
+三种周游次序不是三种口味，它们各自对应一种实用的表达式写法。图 5.6 是表达式 $A + B \times (C + D)$ 的二叉树表示：运算符落在内部结点，运算对象落在叶结点，括号一个都不出现——树的形状已经把运算次序记下来了。
+
+![图 5.6 表达式树：根是加号，左孩子是 A，右孩子是乘号；乘号的左孩子是 B，右孩子是加号，其孩子为 C 和 D](assets/b3d4ed61cc80d7d7.jpg)
+
+| 周游 | 得到 | 本例 |
+| --- | --- | --- |
+| 前序 | **前缀**表达式（波兰式） | `+ A × B + C D` |
+| 中序 | 中缀表达式（缺括号） | `A + B × C + D` |
+| 后序 | **后缀**表达式（逆波兰式） | `A B C D + × +` |
+
+中序那一行值得多看一眼：它和原式长得像，但**括号丢了**，照它算出来的是 $A + B \times C + D$，已经不是原来的表达式。要印回可读的中缀式，必须在周游时按优先级补括号。前缀式和后缀式不需要括号——运算符出现的位置本身就定死了运算次序。
+
+第 3.1.4 节那个后缀表达式求值器（原书【算法3.5】）吃的正是这棵树后序周游的结果；那一节把中缀式转成后缀式的工作，换个说法就是「建出这棵表达式树，再后序周游一遍」。原书本章上机题第 2 题「表达式二叉树」要做的就是这件事：读入一种表达式，在机内建出这棵树，再按要求输出另外两种。
 
 ### 5.2.3 广度优先周游二叉树
 
-层次周游用手写链式 FIFO，不用 `std::queue` 替代本节要教的队列用法。
+深度优先是尽量往深走，广度优先是一层一层走：先访问第 0 层的根，再从左到右访问第 1 层，第 $i$ 层访问完了再去第 $i+1$ 层。对图 5.5 那棵树，结果是 A B C D E F G H I。
+
+深度优先靠**栈**（写成递归时就是运行栈），广度优先靠**队列**：
+
+```text
+把根入队
+只要队列非空:
+    出队一个结点, 访问它
+    它的左孩子入队
+    它的右孩子入队
+```
+
+上层结点总是比下层结点先入队，队列又先进先出，于是出队次序自然就是逐层从左到右。
+
+**为什么不能像前三种那样写成递归？** 递归的形状天生是深度优先的：一层调用只能带着「当前子树」往下走，而层次周游要在兄弟子树之间横向跳——第 2 层的最后一个结点和第 3 层的第一个结点常常分属不同的子树。这个跨子树的次序只能由一个显式的队列记住，递归的调用栈替不了它。
+
+原书【算法5.7】在这里直接用了 `std::queue`。教学版改成在 `level_order` 里现写一条极简的链式 FIFO：本节要教的就是「队列在这里起了什么作用」，一行 `std::queue<Node*>` 会把它藏起来。队列本身第 3.2 节已经讲过，这里只是用它。
+
+```cpp file=code/ch05/binary_tree/teaching.hpp#fn:BinaryTree::level_order
+// 【算法5.7】层次周游：一层一层从左到右。
+// 深度优先靠栈（这里是递归用的运行栈），广度优先靠**队列**。
+template <typename Visitor>
+void level_order(Visitor visit) const {
+    // 一条极简的链式队列，只在这个函数里用
+    struct Pending {
+        const Node* node;
+        Pending* next;
+    };
+    Pending* front = nullptr;
+    Pending* rear = nullptr;
+
+    if (root_ != nullptr) {
+        front = rear = new Pending{root_, nullptr};
+    }
+    while (front != nullptr) {
+        Pending* item = front;               // 出队
+        front = front->next;
+        if (front == nullptr) {
+            rear = nullptr;
+        }
+        const Node* node = item->node;
+        delete item;
+
+        visit(node->value);
+
+        if (node->left != nullptr) {         // 左右孩子依次入队
+            Pending* fresh = new Pending{node->left, nullptr};
+            if (rear == nullptr) { front = rear = fresh; } else { rear->next = fresh; rear = fresh; }
+        }
+        if (node->right != nullptr) {
+            Pending* fresh = new Pending{node->right, nullptr};
+            if (rear == nullptr) { front = rear = fresh; } else { rear->next = fresh; rear = fresh; }
+        }
+    }
+}
+```
+
+每个结点入队、出队各一次，时间同样是 $O(n)$。空间由结点最多的那一层决定：最坏是满的完全二叉树，队列最长时装着最下面一整层，约 $(n+1)/2$ 个结点。这与深度优先的空间代价（正比于树高）正好互补——树越平衡，深度优先越省；树越接近一条链，广度优先越省。
 
 ## 5.3 二叉树的存储结构
 
