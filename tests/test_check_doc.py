@@ -744,6 +744,119 @@ class TestR16SlideCoverage(unittest.TestCase):
         self.assertEqual(problems, [])
 
 
+class TestR17SlidePageOrigin(unittest.TestCase):
+    """R17：反过来问一遍——课件这一页，正文有它的家吗？
+
+    **缘由**（2026-08-19）：R16 只管「正文 → 课件」。人从课件网页版点出
+    `ch05` 第 9 页「表达式树：周游的一个用途」在正文找不到对应内容时，R16 全绿——
+    5.2.2 确实登记了这一页，而 5.2.2 的正文当时只有一句话。同一条记录反过来读才是问题。
+
+    这条规则守的是**孤儿页**：课件讲了、没有任何一节认领的页。它**不**承诺看得出
+    「这一节的正文配不配得上它登记的那几页」——那是人工复核项（D-030 里有实测数据）。
+    """
+
+    PAGES = {"ch06": {"6.1.1 树与森林", "本章小结", "树状数组"}}
+
+    def coverage(self, *rows):
+        out = {}
+        for row in rows:
+            row.setdefault("by", "Claude")
+            row.setdefault("date", "2026-08-19")
+            out[row["section"]] = row
+        return out
+
+    def registry(self, *rows):
+        out = {}
+        for row in rows:
+            row.setdefault("kind", "frame")
+            row.setdefault("reason", "章末小结页")
+            row.setdefault("by", "Claude")
+            row.setdefault("date", "2026-08-19")
+            out[row["page"]] = row
+        return out
+
+    def test_claimed_and_registered_pages_pass(self):
+        coverage = self.coverage({"section": "6.1.1", "kind": "covered",
+                                  "slides": ["ch06:6.1.1 树与森林"]})
+        registry = self.registry(
+            {"page": "ch06:本章小结"},
+            {"page": "ch06:树状数组", "kind": "extra", "reason": "正文没有树状数组，见 T-045"})
+        self.assertEqual(check_doc.check_slide_pages(coverage, registry, self.PAGES), [])
+
+    def test_orphan_page_is_reported(self):
+        """课件多讲了一页，正文没有它的家，也没人登记——就是这条规则的靶子。"""
+        coverage = self.coverage({"section": "6.1.1", "kind": "covered",
+                                  "slides": ["ch06:6.1.1 树与森林"]})
+        registry = self.registry({"page": "ch06:本章小结"})
+        problems = check_doc.check_slide_pages(coverage, registry, self.PAGES)
+        self.assertEqual(len(problems), 1, problems)
+        self.assertIn("R17", problems[0])
+        self.assertIn("树状数组", problems[0])
+
+    def test_page_cannot_have_two_origins(self):
+        """既被某一节认领又单独登记：两张表会各说各话。"""
+        coverage = self.coverage({"section": "6.1.1", "kind": "covered",
+                                  "slides": ["ch06:6.1.1 树与森林", "ch06:本章小结",
+                                             "ch06:树状数组"]})
+        registry = self.registry({"page": "ch06:本章小结"})
+        problems = check_doc.check_slide_pages(coverage, registry, self.PAGES)
+        self.assertEqual(len(problems), 1, problems)
+        self.assertIn("一页只能有一个出处", problems[0])
+
+    def test_renamed_page_in_registry_is_reported(self):
+        coverage = self.coverage({"section": "6.1.1", "kind": "covered",
+                                  "slides": ["ch06:6.1.1 树与森林", "ch06:树状数组"]})
+        registry = self.registry({"page": "ch06:小结（旧标题）"})
+        problems = check_doc.check_slide_pages(coverage, registry, self.PAGES)
+        self.assertTrue(any("不存在" in p for p in problems), problems)
+        self.assertTrue(any("本章小结" in p for p in problems), problems)
+
+    def test_only_covered_entries_claim_pages(self):
+        """pending/declined 的 slides 字段不算认领——它没说这一页归它。"""
+        coverage = self.coverage({"section": "6.1.1", "kind": "pending", "reason": "欠着",
+                                  "slides": ["ch06:6.1.1 树与森林"]})
+        registry = self.registry({"page": "ch06:本章小结"}, {"page": "ch06:树状数组"})
+        problems = check_doc.check_slide_pages(coverage, registry, self.PAGES)
+        self.assertEqual(len(problems), 1, problems)
+        self.assertIn("6.1.1 树与森林", problems[0])
+
+    def test_registry_fields_are_validated(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "slide_coverage.json"
+            path.write_text(json.dumps({"coverage": [], "pages": [
+                {"page": "ch06:本章小结", "kind": "frame", "by": "Claude", "date": "2026-08-19"},
+                {"page": "ch06:树状数组", "kind": "orphan", "reason": "x",
+                 "by": "Claude", "date": "2026-08-19"},
+                {"page": "ch06:另一页", "kind": "extra", "reason": "x", "date": "2026-08-19"},
+            ]}, ensure_ascii=False), encoding="utf-8")
+            entries, problems = check_doc.load_slide_page_registry(path)
+            self.assertTrue(any("缺 reason" in p for p in problems), problems)
+            self.assertTrue(any("frame/extra" in p for p in problems), problems)
+            self.assertTrue(any("缺 by" in p for p in problems), problems)
+            self.assertNotIn("ch06:树状数组", entries, "kind 不合法的还进了表")
+
+    def test_duplicate_registration_is_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "slide_coverage.json"
+            path.write_text(json.dumps({"coverage": [], "pages": [
+                {"page": "ch06:本章小结", "kind": "frame", "reason": "x",
+                 "by": "Claude", "date": "2026-08-19"},
+                {"page": "ch06:本章小结", "kind": "frame", "reason": "x",
+                 "by": "Claude", "date": "2026-08-19"},
+            ]}, ensure_ascii=False), encoding="utf-8")
+            _, problems = check_doc.load_slide_page_registry(path)
+            self.assertTrue(any("登记了两次" in p for p in problems), problems)
+
+    def test_committed_registry_accounts_for_every_page(self):
+        """入库登记表当锚：课件加一页而不登记，这里就红。"""
+        coverage, problems = check_doc.load_slide_coverage()
+        self.assertEqual(problems, [])
+        registry, problems = check_doc.load_slide_page_registry()
+        self.assertEqual(problems, [])
+        self.assertEqual(
+            check_doc.check_slide_pages(coverage, registry, check_doc.slide_pages()), [])
+
+
 class TestR15QualifiedNames(unittest.TestCase):
     """R15：书稿点名本书接口时，`类名::成员` 必须真的存在。
 
@@ -909,14 +1022,18 @@ class TestR14ExerciseAnswers(unittest.TestCase):
         self.assertTrue(any("kind" in p for p in problems), problems)
 
     def test_committed_book_has_every_exercise_accounted_for(self):
-        """入库当锚：136 道正文题，要么有同号答案，要么登记在案。"""
+        """入库当锚：137 道正文题，要么有同号答案，要么登记在案。
+
+        2026-08-19：136 → 137。第 5 章补回原书上机题第 2 题「表达式二叉树」（新书第 5 题），
+        附录同步加了同号答案。数字变了必须来这里改一次——这就是这条锚的用处。
+        """
         gaps, problems = check_doc.load_answer_gaps()
         self.assertEqual(problems, [])
         found = check_doc.check_exercise_answers(
             sorted(check_doc.BOOK.glob("ch*.md")), gaps)
         self.assertEqual(found, [])
         answered = sum(check_doc.answered_exercises().values())
-        self.assertEqual(answered + len(gaps), 136, "正文题总数变了就要重新盘一遍")
+        self.assertEqual(answered + len(gaps), 137, "正文题总数变了就要重新盘一遍")
 
 
 class TestR9Formulas(unittest.TestCase):

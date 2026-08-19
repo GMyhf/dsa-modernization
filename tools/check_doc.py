@@ -90,6 +90,7 @@ RULES = [
     "R14 正文每道习题/上机题要么在附录里有同号答案，要么在 collab/answer_gaps.json 里登记",
     "R15 书稿里写成 `类名::成员` 的接口名，必须在 code/ 里声明该类的文件中真实存在",
     "R16 书稿每个带编号的小节，要么在 collab/slide_coverage.json 里登记到真实的课件页，要么登记为引子/不进课件/欠着",
+    "R17 反向：每一页课件要么被某一节的 R16 登记引用，要么在 slide_coverage.json 的 pages 里登记为章首页/课件独有",
 ]
 
 
@@ -875,6 +876,86 @@ def load_slide_coverage(path=None):
     return entries, problems
 
 
+# R17：反过来问一遍——课件这一页，正文有它的家吗？
+#
+# 缘由（2026-08-19）：R16 只管「正文 → 课件」。人从课件网页版点出 ch05 第 9 页
+# 「表达式树：周游的一个用途」在正文找不到对应内容时，R16 全绿——因为 5.2.2 确实
+# 登记了这一页，而 5.2.2 的正文当时只有一句话。**同一条记录反过来读才是问题。**
+#
+# 这条规则守的是**孤儿页**：课件讲了、没有任何一节认领的页。它不承诺能看出
+# 「这一节的正文配不配得上它登记的那几页」——那仍是人工复核项（见 D-030 的实测）。
+#
+# 判据：`slide_pages()` 数出来的每一页，要么出现在某一节 covered 的 slides 列表里，
+# 要么在 `slide_coverage.json` 的 `pages` 列表里有一条：
+#   frame  —— 章首页、本章小结、上机这类不讲某一节的页；
+#   extra  —— 课件独有、正文没有的内容。**这是一条债**，reason 要写清欠的是什么。
+# 一页只能有一个出处：被某一节认领了就不该再登记，否则两张表会各说各话。
+def load_slide_page_registry(path=None):
+    """读 `pages` 列表，顺便校验每条自己的字段。"""
+    target = path or SLIDE_COVERAGE
+    if not target.is_file():
+        return {}, []
+    try:
+        raw = json.loads(target.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}, []          # JSON 坏了由 load_slide_coverage 报，不重复报一遍
+    entries, problems = {}, []
+    label = rel_label(target)
+    for item in raw.get("pages", []):
+        page = item.get("page")
+        if not page:
+            problems.append(f"{label} 的 pages 里有一条没写 page")
+            continue
+        if page in entries:
+            problems.append(f"{label} 的 pages 里 `{page}` 登记了两次")
+            continue
+        if item.get("kind") not in ("frame", "extra"):
+            problems.append(f"{label} 的 pages 里 `{page}` 的 kind=`{item.get('kind')}` 不是 frame/extra")
+            continue
+        for field in ("reason", "by", "date"):
+            if not item.get(field):
+                problems.append(f"{label} 的 pages 里 `{page}` 缺 {field}")
+        entries[page] = item
+    return entries, problems
+
+
+def check_slide_pages(coverage, registry, pages):
+    """R17：每一页课件都要有出处——被某一节认领，或在 pages 里登记。"""
+    problems = []
+    label = rel_label(SLIDE_COVERAGE)
+    claimed = {}
+    for section, item in coverage.items():
+        if item.get("kind") != "covered":
+            continue
+        for page in item.get("slides", []):
+            claimed.setdefault(page, section)
+    for chapter in sorted(pages):
+        for title in sorted(pages[chapter]):
+            page = f"{chapter}:{title}"
+            if page in claimed and page in registry:
+                problems.append(
+                    f"{label}  R17 课件页 `{page}` 既被 {claimed[page]} 认领，"
+                    "又在 pages 里登记了——一页只能有一个出处"
+                )
+            elif page not in claimed and page not in registry:
+                problems.append(
+                    f"{label}  R17 课件页 `{page}` 没有出处：正文没有哪一节登记它，"
+                    "pages 里也没有它。登记成 frame（章首/小结/上机页）或 "
+                    "extra（课件独有、正文没有——写清欠的是什么），别让课件比书多讲一节还没人知道"
+                )
+    for page in sorted(registry):
+        chapter, _, title = page.partition(":")
+        if not title:
+            problems.append(f"{label}  R17 pages 里的 `{page}` 不是 `章:页标题` 的写法")
+        elif chapter not in pages:
+            problems.append(f"{label}  R17 pages 里的 `{page}` 引用了 `{chapter}`，没有这一章的课件")
+        elif title not in pages[chapter]:
+            problems.append(
+                f"{label}  R17 pages 里登记的课件页 `{page}` 不存在——页标题改过就要同步改这张表"
+            )
+    return problems
+
+
 def check_slide_coverage(sections, entries, pages):
     """R16：小节要么登记到真实的课件页，要么说明为什么不进课件。"""
     problems = []
@@ -1352,7 +1433,11 @@ def main():
 
     coverage, coverage_problems = load_slide_coverage()
     problems += coverage_problems
-    problems += check_slide_coverage(book_numbers, coverage, slide_pages())
+    slides = slide_pages()
+    problems += check_slide_coverage(book_numbers, coverage, slides)
+    page_registry, page_problems = load_slide_page_registry()
+    problems += page_problems
+    problems += check_slide_pages(coverage, page_registry, slides)
 
     # legacy.md 是原书缺陷证据，也大量使用 text 引文；只对它运行 R8，
     # 不把书稿专属的章节、图片和清单配对规则强加给证据文件。
@@ -1378,6 +1463,11 @@ def main():
         print(f"   课件覆盖：正文 {len(book_numbers)} 节，登记到课件页 {slide_kinds['covered']} 节"
               f"（引子 {slide_kinds['by-children']}，有意不进课件 {slide_kinds['declined']}，"
               f"欠着 {slide_kinds['pending']}）")
+        page_kinds = collections.Counter(item["kind"] for item in page_registry.values())
+        total_pages = sum(len(titles) for titles in slides.values())
+        print(f"   课件页归属：共 {total_pages} 页，正文认领 "
+              f"{total_pages - len(page_registry)} 页"
+              f"（章首/小结/上机 {page_kinds['frame']}，课件独有 {page_kinds['extra']}）")
 
 
 if __name__ == "__main__":
