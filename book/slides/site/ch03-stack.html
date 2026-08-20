@@ -523,10 +523,58 @@ std::optional&lt;T&gt; dequeue() {
 <li><strong>上机</strong>：<code>code/ch03/</code> 下每个单元都有 <code>teaching_test.cpp</code>， 先跑通，再<strong>故意改坏一处</strong>，看哪条断言变红</li>
 </ul>
 <div class="codeblock" data-lang="bash"><pre><code>python3 tools/check_code.py code/ch03/array_stack</code></pre></div>
-<blockquote><p>判据：<strong>把实现退回原书的写法，必须有一条断言会红。</strong> 写不出这样的用例，说明还没想清楚那条性质是什么。</p></blockquote></section></div>
+<blockquote><p>判据：<strong>把实现退回原书的写法，必须有一条断言会红。</strong> 写不出这样的用例，说明还没想清楚那条性质是什么。</p></blockquote></section><section class="slide" data-notes=""><h1 id="单调栈把还没找到答案的位置留下"><a class="anchor" href="#单调栈把还没找到答案的位置留下">#</a>单调栈：把“还没找到答案”的位置留下</h1>
+<ul>
+<li>栈里放索引，不放值；从左到右扫描</li>
+<li>当前值严格大于栈顶值：栈顶的下一个更大位置就是当前下标</li>
+<li>等值不弹出，因此语义是“严格更大”</li>
+<li>每个位置最多入栈、出栈一次：时间 <code>O(n)</code>，空间 <code>O(n)</code></li>
+</ul>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/monotonic_stack/modern.hpp">code/ch03/monotonic_stack/modern.hpp#next-greater</a></div><pre><code><span class="c">/// 对每个位置返回右侧第一个严格更大值的位置；不存在时返回 n。</span>
+<span class="k">inline</span> std::vector&lt;std::<span class="t">size_t</span>&gt; next_greater_indices(<span class="k">const</span> std::vector&lt;<span class="t">int</span>&gt;&amp; values) {
+    <span class="k">const</span> std::<span class="t">size_t</span> n = values.size();
+    std::vector&lt;std::<span class="t">size_t</span>&gt; answer(n, n);
+    std::vector&lt;std::<span class="t">size_t</span>&gt; stack;
+    <span class="k">for</span> (std::<span class="t">size_t</span> i = <span class="n">0</span>; i &lt; n; ++i) {
+        <span class="k">while</span> (!stack.empty() &amp;&amp; values[stack.back()] &lt; values[i]) {
+            answer[stack.back()] = i;
+            stack.pop_back();
+        }
+        stack.push_back(i);
+    }
+    <span class="k">return</span> answer;
+}</code></pre></div></section><section class="slide" data-notes=""><h1 id="单调栈直方图最大矩形"><a class="anchor" href="#单调栈直方图最大矩形">#</a>单调栈：直方图最大矩形</h1>
+<p>在末尾放一个虚拟高度 <code>0</code>，把所有未结算柱子弹出。柱子 <code>h</code> 弹出时：</p>
+<ul>
+<li>右边界是当前下标，左边界是新的栈顶加一</li>
+<li>宽度 = 右边界 - 左边界</li>
+<li>面积 = <code>h × width</code></li>
+</ul>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/monotonic_stack/modern.hpp">code/ch03/monotonic_stack/modern.hpp#histogram</a></div><pre><code><span class="c">/// 直方图最大矩形面积；在末尾放一个 0，统一清空仍有候选边界的栈。</span>
+<span class="k">inline</span> <span class="t">long</span> <span class="t">long</span> largest_rectangle_area(<span class="k">const</span> std::vector&lt;<span class="t">int</span>&gt;&amp; heights) {
+    <span class="k">for</span> (<span class="t">int</span> height : heights) {
+        <span class="k">if</span> (height &lt; <span class="n">0</span>) <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;histogram height must be non-negative&quot;</span>);
+    }
+    std::vector&lt;std::<span class="t">size_t</span>&gt; stack;
+    <span class="t">long</span> <span class="t">long</span> best = <span class="n">0</span>;
+    <span class="k">for</span> (std::<span class="t">size_t</span> i = <span class="n">0</span>; i &lt;= heights.size(); ++i) {
+        <span class="k">const</span> <span class="t">int</span> current = i == heights.size() ? <span class="n">0</span> : heights[i];
+        <span class="k">while</span> (!stack.empty() &amp;&amp; heights[stack.back()] &gt; current) {
+            <span class="k">const</span> std::<span class="t">size_t</span> top = stack.back();
+            stack.pop_back();
+            <span class="k">const</span> std::<span class="t">size_t</span> left = stack.empty() ? <span class="n">0</span> : stack.back() + <span class="n">1</span>;
+            <span class="k">const</span> <span class="t">long</span> <span class="t">long</span> width = <span class="k">static_cast</span>&lt;<span class="t">long</span> <span class="t">long</span>&gt;(i - left);
+            <span class="k">const</span> <span class="t">long</span> <span class="t">long</span> area = <span class="k">static_cast</span>&lt;<span class="t">long</span> <span class="t">long</span>&gt;(heights[top]) * width;
+            <span class="k">if</span> (area &gt; best) best = area;
+        }
+        stack.push_back(i);
+    }
+    <span class="k">return</span> best;
+}</code></pre></div>
+<p>独立验证用枚举区间最小高度对拍，不用单调栈当自己的答案。</p></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第3章 栈与队列</div><div class="thumb"><div class="no">2</div>这一章讲什么</div><div class="thumb"><div class="no">3</div>3.1 栈</div><div class="thumb"><div class="no">4</div>栈的抽象数据类型</div><div class="thumb"><div class="no">5</div>先问一个问题</div><div class="thumb"><div class="no">6</div>3.1.2 顺序栈：存储结构</div><div class="thumb"><div class="no">7</div>教学版：三个成员</div><div class="thumb"><div class="no">8</div>入栈：满了就翻倍</div><div class="thumb"><div class="no">9</div>为什么是「翻倍」而不是「加一」</div><div class="thumb"><div class="no">10</div>出栈：空栈怎么办</div><div class="thumb"><div class="no">11</div>原书这里编译不过</div><div class="thumb"><div class="no">12</div>更安静的一个错：三法则</div><div class="thumb"><div class="no">13</div>三法则（Rule of Three）</div><div class="thumb"><div class="no">14</div>3.1.3 链式栈</div><div class="thumb"><div class="no">15</div>链式栈的入栈与出栈</div><div class="thumb"><div class="no">16</div>顺序栈 vs 链式栈</div><div class="thumb"><div class="no">17</div>3.1.4 表达式求值</div><div class="thumb"><div class="no">18</div>手动走一遍 `3 4 + 2 *`</div><div class="thumb"><div class="no">19</div>可人写的是中缀式</div><div class="thumb"><div class="no">20</div>「不低于」三个字是承重的</div><div class="thumb"><div class="no">21</div>手动走一遍 `1 + 2 * 3`</div><div class="thumb"><div class="no">22</div>3.1.5 栈与递归</div><div class="thumb"><div class="no">23</div>运行栈有多大：三个档位，三种结果</div><div class="thumb"><div class="no">24</div>3.2 队列</div><div class="thumb"><div class="no">25</div>顺序队列：为什么要「循环」</div><div class="thumb"><div class="no">26</div>空和满怎么分</div><div class="thumb"><div class="no">27</div>两种入队，放在一起看</div><div class="thumb"><div class="no">28</div>两种出队 + 一处容易漏的地方</div><div class="thumb"><div class="no">29</div>3.3 栈与队列的比较</div><div class="thumb"><div class="no">30</div>本章小结</div><div class="thumb"><div class="no">31</div>习题与上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第3章 栈与队列</div><div class="thumb"><div class="no">2</div>这一章讲什么</div><div class="thumb"><div class="no">3</div>3.1 栈</div><div class="thumb"><div class="no">4</div>栈的抽象数据类型</div><div class="thumb"><div class="no">5</div>先问一个问题</div><div class="thumb"><div class="no">6</div>3.1.2 顺序栈：存储结构</div><div class="thumb"><div class="no">7</div>教学版：三个成员</div><div class="thumb"><div class="no">8</div>入栈：满了就翻倍</div><div class="thumb"><div class="no">9</div>为什么是「翻倍」而不是「加一」</div><div class="thumb"><div class="no">10</div>出栈：空栈怎么办</div><div class="thumb"><div class="no">11</div>原书这里编译不过</div><div class="thumb"><div class="no">12</div>更安静的一个错：三法则</div><div class="thumb"><div class="no">13</div>三法则（Rule of Three）</div><div class="thumb"><div class="no">14</div>3.1.3 链式栈</div><div class="thumb"><div class="no">15</div>链式栈的入栈与出栈</div><div class="thumb"><div class="no">16</div>顺序栈 vs 链式栈</div><div class="thumb"><div class="no">17</div>3.1.4 表达式求值</div><div class="thumb"><div class="no">18</div>手动走一遍 `3 4 + 2 *`</div><div class="thumb"><div class="no">19</div>可人写的是中缀式</div><div class="thumb"><div class="no">20</div>「不低于」三个字是承重的</div><div class="thumb"><div class="no">21</div>手动走一遍 `1 + 2 * 3`</div><div class="thumb"><div class="no">22</div>3.1.5 栈与递归</div><div class="thumb"><div class="no">23</div>运行栈有多大：三个档位，三种结果</div><div class="thumb"><div class="no">24</div>3.2 队列</div><div class="thumb"><div class="no">25</div>顺序队列：为什么要「循环」</div><div class="thumb"><div class="no">26</div>空和满怎么分</div><div class="thumb"><div class="no">27</div>两种入队，放在一起看</div><div class="thumb"><div class="no">28</div>两种出队 + 一处容易漏的地方</div><div class="thumb"><div class="no">29</div>3.3 栈与队列的比较</div><div class="thumb"><div class="no">30</div>本章小结</div><div class="thumb"><div class="no">31</div>习题与上机</div><div class="thumb"><div class="no">32</div>单调栈：把“还没找到答案”的位置留下</div><div class="thumb"><div class="no">33</div>单调栈：直方图最大矩形</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -539,7 +587,7 @@ std::optional&lt;T&gt; dequeue() {
 <b>第3章 栈与队列</b><span>数据结构与算法：Python 讲算法，C++ 讲实现</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 31</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 33</b>
 </div>
 <script>
 (function(){

@@ -573,3 +573,35 @@ python3 tools/check_code.py code/ch12/balanced_trees
 
 > 平衡树的测试里有一条不变量检查：每次插入删除后都验证
 > 「任何结点左右子树高度差不超过 1」。
+
+---
+
+# 树状数组：动态前缀和
+
+普通数组在“单点修改”和“区间查询”之间只能二选一：
+
+- 原数组：修改 `O(1)`，查询 `O(n)`
+- 前缀和：查询 `O(1)`，修改 `O(n)`
+- Fenwick：两者都是 `O(log n)`，空间 `O(n)`
+
+树状数组仍是一块平坦数组；第 `i` 个内部位置管辖长度 `lowbit(i)` 的区间。
+
+---
+
+# 树状数组：两个 lowbit 方向
+
+- 查询：`i -= lowbit(i)`，把前缀拆成互不重叠的块
+- 更新：`i += lowbit(i)`，访问所有包含该位置的块
+- `lowbit(i) = i & -i`，内部下标从 1 开始
+
+```cpp file=code/ch12/fenwick/modern.hpp#fn:add
+void add(std::size_t index, long long delta) {
+    check_index(index);
+    values_[index] += delta;
+    for (std::size_t cursor = index + 1; cursor <= size(); cursor += lowbit(cursor)) {
+        tree_[cursor] += delta;
+    }
+}
+```
+
+教材接口把外部下标改成 0 起始，区间统一为 `[left, right)`，避免把边界规则藏在调用方。

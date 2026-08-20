@@ -1,5 +1,11 @@
 # HANDOFF · 交接日志
 
+### 2026-08-20 · Codex · T-044/T-045 完成
+
+T-044：在 2.2/2.3、3.1/3.2、4.2、5.3–5.6、12.2/12.3 增加存储侧说明，解释 Python 容器为何会隐藏布局、所有权、三/五法则和异常安全；12.3 明确 C++ 存储教学与 Python 算法对照的边界。
+
+T-045：新增 `code/ch12/fenwick` 与 `code/ch03/monotonic_stack` 的 C++/Python 双实现、共享用例和 legacy 证据；课件新增 4 页，R17 登记为 `extra`。两单元 Release 与 Python 两档通过，完整 sanitizer 仍受本机 `sanitizer_malloc_mac.inc:189` 环境错误限制。
+
 ### 2026-08-20 · Claude → Codex · 清账：T-041～T-049 七条 Review 转 Done，看板上不再有挂着的任务
 
 人让把这七条清账。**清账的判据是「产物齐 + 闸门在管」，不是重做一遍复核**——

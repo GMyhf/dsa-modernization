@@ -1,0 +1,12 @@
+{
+  "id": "monotonic_stack",
+  "title": "单调栈：下一个更大值与直方图面积",
+  "listings": [],
+  "beyond_book": "原书没有单调栈清单；本单元承接课件新增算法，不认领原书条目。",
+  "standard": "c++17",
+  "owner": "codex",
+  "notes": "用索引栈保留候选位置；每个位置最多入栈和出栈一次。",
+  "d001_exceptions": {
+    "#include<vector>": "vector 只作为单调栈的连续存储和结果数组，算法本身仍手写 push/pop 逻辑。"
+  }
+}

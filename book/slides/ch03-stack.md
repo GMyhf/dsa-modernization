@@ -666,3 +666,65 @@ python3 tools/check_code.py code/ch03/array_stack
 布置作业时强调最后这一句。学生最容易写出「顺手测一下」的用例——
 那种用例在原书那份有 bug 的实现上同样全绿，等于没测。
 -->
+
+---
+
+# 单调栈：把“还没找到答案”的位置留下
+
+- 栈里放索引，不放值；从左到右扫描
+- 当前值严格大于栈顶值：栈顶的下一个更大位置就是当前下标
+- 等值不弹出，因此语义是“严格更大”
+- 每个位置最多入栈、出栈一次：时间 `O(n)`，空间 `O(n)`
+
+```cpp file=code/ch03/monotonic_stack/modern.hpp#next-greater
+/// 对每个位置返回右侧第一个严格更大值的位置；不存在时返回 n。
+inline std::vector<std::size_t> next_greater_indices(const std::vector<int>& values) {
+    const std::size_t n = values.size();
+    std::vector<std::size_t> answer(n, n);
+    std::vector<std::size_t> stack;
+    for (std::size_t i = 0; i < n; ++i) {
+        while (!stack.empty() && values[stack.back()] < values[i]) {
+            answer[stack.back()] = i;
+            stack.pop_back();
+        }
+        stack.push_back(i);
+    }
+    return answer;
+}
+```
+
+---
+
+# 单调栈：直方图最大矩形
+
+在末尾放一个虚拟高度 `0`，把所有未结算柱子弹出。柱子 `h` 弹出时：
+
+- 右边界是当前下标，左边界是新的栈顶加一
+- 宽度 = 右边界 - 左边界
+- 面积 = `h × width`
+
+```cpp file=code/ch03/monotonic_stack/modern.hpp#histogram
+/// 直方图最大矩形面积；在末尾放一个 0，统一清空仍有候选边界的栈。
+inline long long largest_rectangle_area(const std::vector<int>& heights) {
+    for (int height : heights) {
+        if (height < 0) throw std::invalid_argument("histogram height must be non-negative");
+    }
+    std::vector<std::size_t> stack;
+    long long best = 0;
+    for (std::size_t i = 0; i <= heights.size(); ++i) {
+        const int current = i == heights.size() ? 0 : heights[i];
+        while (!stack.empty() && heights[stack.back()] > current) {
+            const std::size_t top = stack.back();
+            stack.pop_back();
+            const std::size_t left = stack.empty() ? 0 : stack.back() + 1;
+            const long long width = static_cast<long long>(i - left);
+            const long long area = static_cast<long long>(heights[top]) * width;
+            if (area > best) best = area;
+        }
+        stack.push_back(i);
+    }
+    return best;
+}
+```
+
+独立验证用枚举区间最小高度对拍，不用单调栈当自己的答案。

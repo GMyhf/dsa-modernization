@@ -1,0 +1,5 @@
+name	operation	input	expected	expected_error
+prefix-basic	prefix	1,2,3,4|3	6	
+range-basic	range	1,2,3,4|1,4	9	
+empty-prefix	prefix	|0	0	
+bad-index	prefix	1,2|3		out_of_range

@@ -1,0 +1,12 @@
+{
+  "id": "fenwick",
+  "title": "树状数组（Fenwick tree）",
+  "listings": [],
+  "beyond_book": "原书没有树状数组清单；本单元承接课件新增内容，不认领原书条目。",
+  "standard": "c++17",
+  "owner": "codex",
+  "notes": "公共接口使用 0 起始下标和半开区间；内部树状数组使用 1 起始下标。",
+  "d001_exceptions": {
+    "#include<vector>": "树状数组本身就是用连续数组保存隐含树节点，vector 是本算法要讲的存储载体。"
+  }
+}

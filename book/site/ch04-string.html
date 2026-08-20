@@ -233,6 +233,8 @@ true true      # (&quot;123&quot; &lt; std::string(&quot;1234&quot;))、(std::st
 false true     # (&quot;123&quot; &lt; &quot;1234&quot;)、(&quot;1234&quot; &lt; &quot;23&quot;)——第一个的答案反了</code></pre></div>
 <p>同一行代码，两边只要有一边是 <code>std::string</code>，比的就是内容；两边都是裸字面量，比的就是地址，而地址由编译器摆放决定。所以本书凡是比较字符串，一律先落到 <code>String</code>/<code>std::string</code> 上，再谈编码顺序。</p>
 <h2 id="42-字符串的存储结构和实现"><a class="anchor" href="#42-字符串的存储结构和实现">#</a>4.2 字符串的存储结构和实现</h2>
+<h3 id="为什么这一节没有-python-版"><a class="anchor" href="#为什么这一节没有-python-版">#</a>为什么这一节没有 Python 版</h3>
+<p>本节的对象是一个自管理的字符缓冲区：长度、容量、结尾空字符、深复制和移动后的源对象状态都属于接口契约。Python <code>str</code> 是不可变的运行时对象，<code>list</code> 也不会让读者实现缓冲区的分配、释放和强异常保证；把它们当作“字符串类的 Python 版”会跳过本节的存储布局和所有权问题。因此算法 4.3 的模式匹配有 Python 版，4.2 的字符串类只保留 C++ 实现。</p>
 <p><code>String</code> 采用动态变长的存储结构：内部持有一块以 <code>&#x27;\0&#x27;</code> 结尾的字符数组和当前长度， 构造时按初值长度分配，赋值时按新长度重新分配。这正是本节要教的内容， 所以缓冲区是<strong>裸 <code>char*</code></strong>——换成 <code>std::string</code> 这一节就没了。</p>
 <h3 id="421-字符串的顺序存储"><a class="anchor" href="#421-字符串的顺序存储">#</a>4.2.1 字符串的顺序存储</h3>
 <p>字符串用一段连续字符数组存储，末尾保留 <code>\0</code>，并单独记录不含终止符的长度。 下标访问是 O(1)，插入、拼接和抽取需要复制字符。</p>
@@ -774,7 +776,7 @@ std::string::find 对照         = 2</code></pre></div>
 </ol>
 <div class="pagenav"><a href="ch03-stack.html"><span class="dir">← 上一篇</span>第3章 栈与队列</a><a href="ch05-binary-tree.html" style="text-align:right"><span class="dir">下一篇 →</span>第5章 二叉树</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#41-字符串的基本概念">4.1 字符串的基本概念</a><a href="#411-字符编码" class="sub">4.1.1 字符编码</a><a href="#412-字符的编码顺序" class="sub">4.1.2 字符的编码顺序</a><a href="#42-字符串的存储结构和实现">4.2 字符串的存储结构和实现</a><a href="#421-字符串的顺序存储" class="sub">4.2.1 字符串的顺序存储</a><a href="#422-字符串类-class-string-的存储结构" class="sub">4.2.2 字符串类 class String 的存储结构</a><a href="#423-字符串运算的实现" class="sub">4.2.3 字符串运算的实现</a><a href="#42a-进阶选读从教学版到工程版" class="sub">4.2a 进阶（选读）：从教学版到工程版</a><a href="#43-字符串的模式匹配">4.3 字符串的模式匹配</a><a href="#431-朴素的模式匹配算法" class="sub">4.3.1 朴素的模式匹配算法</a><a href="#432-字符串的特征向量" class="sub">4.3.2 字符串的特征向量</a><a href="#433-kmp-模式匹配算法" class="sub">4.3.3 KMP 模式匹配算法</a><a href="#与原书的对照">与原书的对照</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#41-字符串的基本概念">4.1 字符串的基本概念</a><a href="#411-字符编码" class="sub">4.1.1 字符编码</a><a href="#412-字符的编码顺序" class="sub">4.1.2 字符的编码顺序</a><a href="#42-字符串的存储结构和实现">4.2 字符串的存储结构和实现</a><a href="#为什么这一节没有-python-版" class="sub">为什么这一节没有 Python 版</a><a href="#421-字符串的顺序存储" class="sub">4.2.1 字符串的顺序存储</a><a href="#422-字符串类-class-string-的存储结构" class="sub">4.2.2 字符串类 class String 的存储结构</a><a href="#423-字符串运算的实现" class="sub">4.2.3 字符串运算的实现</a><a href="#42a-进阶选读从教学版到工程版" class="sub">4.2a 进阶（选读）：从教学版到工程版</a><a href="#43-字符串的模式匹配">4.3 字符串的模式匹配</a><a href="#431-朴素的模式匹配算法" class="sub">4.3.1 朴素的模式匹配算法</a><a href="#432-字符串的特征向量" class="sub">4.3.2 字符串的特征向量</a><a href="#433-kmp-模式匹配算法" class="sub">4.3.3 KMP 模式匹配算法</a><a href="#与原书的对照">与原书的对照</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch04-string.md</code> 生成

@@ -319,6 +319,8 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>第二行是十字链表<strong>吃亏</strong>的地方，第三行才是它存在的理由。<code>code/ch12/sparse_matrix</code> 的实现里，插入时在两条链上各定位一次并同时接上，删除时同样从两条链上各摘一次——都是<strong>局部</strong>操作，不碰其他行列。测试用一个 200×200 的对角线矩阵量过：扫第 7 列只走过 3 个结点，而不是全表的 202 个。</p>
 <p>结点所有权归容器，两条链都是裸指针，析构沿行链<strong>迭代</strong>释放。这里不能用 <code>unique_ptr</code> 串链——一行里非零元一多，递归析构就会压穿栈（判据见 2.3.1 节的「所有权工具怎么选」；实测数字在该单元的 <code>legacy.md</code> 里）。</p>
 <h2 id="122-广义表和存储管理"><a class="anchor" href="#122-广义表和存储管理">#</a>12.2 广义表和存储管理</h2>
+<h3 id="为什么这一节没有-python-版"><a class="anchor" href="#为什么这一节没有-python-版">#</a>为什么这一节没有 Python 版</h3>
+<p>广义表、共享子表和回收算法讨论的是存储图而不是普通嵌套序列：结点可能被多个表共享，释放时要避免重复访问，还要处理空闲块和环。Python 的引用计数/垃圾回收会替实现者维护这些关系，<code>list</code> 也无法表达本节的空闲表、句柄复用和强异常保证。这里因此只给 C++，让所有权、访问标记和回收顺序成为可见的教学对象。</p>
 <p>线性表的元素是不可再分的原子。广义表放宽这条：元素可以是原子，也可以是另一个广义表。按是否共享、是否有环，分成三种：纯表对应树（每个子表只出现一次）；再入表对应有向无环图（子表可以被共享）；循环表对应有环图。存储上常用带头尾指针的结点；表一旦共享，释放时就必须处理别名，不能只按树来递归 <code>delete</code>。</p>
 <h3 id="1221-广义表的定义和存储结构"><a class="anchor" href="#1221-广义表的定义和存储结构">#</a>12.2.1 广义表的定义和存储结构</h3>
 <p>表头是第一个元素，表尾是去掉表头后剩下的那个表。空表既没有头也没有尾。任何一个非空广义表都可以唯一地拆成「头 + 尾」，所以递归算法写成「先处理头、再处理尾」就和定义对上了。</p>
@@ -568,6 +570,8 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>标记阶段用<strong>显式栈</strong>而不是递归：垃圾回收恰恰是在内存吃紧时跑的，那时最不该再去吃调用栈（同 2.3.1 节「所有权工具怎么选」的判据）。测试里有 20 万个对象的深链，递归标记必然压穿栈。</p>
 <p>它仍然是教学模型：没有栈扫描、没有写屏障、没有分代，也不区分「这是指针」和「这只是个看起来像地址的整数」——而那恰恰是真实垃圾回收器最难的部分。</p>
 <h2 id="123-trie-结构和-patricia-树"><a class="anchor" href="#123-trie-结构和-patricia-树">#</a>12.3 Trie 结构和 Patricia 树</h2>
+<h3 id="为什么这一节没有-python-版-1"><a class="anchor" href="#为什么这一节没有-python-版-1">#</a>为什么这一节没有 Python 版</h3>
+<p>本节的 C++ 版本属于存储侧：它把 Trie 结点、Patricia 内部结点布局、共享前缀回收和按位分支不变量都变成可观察的对象。Python 版本保留，是为了对照查找、前缀计数等算法行为；它不是 C++ 所有权和布局的逐行替代，Python <code>dict</code> 或垃圾回收会把那部分教学内容隐藏掉。因此两种语言在这里承担的不是同一层任务：算法结果可对拍，存储管理仍以 C++ 为准。</p>
 <p>二叉搜索树按整个关键码比较，树的形状依赖插入次序。Trie 换一种切法：按关键码的字符（或二进制位）一层一层分支，第 <span class="math">i</span> 层对应第 <span class="math">i</span> 个字符。公共前缀在树里只存一次，所以它特别适合字典、IP 路由这种「按前缀分类」的问题。查找沿着字符走，时间与关键码长度成正比，与表里有多少个词关系不大。</p>
 <p>把 <code>can</code>、<code>car</code>、<code>cat</code>、<code>do</code> 插进一棵字母 Trie，公共前缀 <code>ca</code> 只出现一次：</p>
 <figure><img loading="lazy" src="../assets/31bf5d17531c99f5.jpg" alt="图 12.17 按字符分支存放单词的 Trie"><figcaption>图 12.17 按字符分支存放单词的 Trie</figcaption></figure>
@@ -977,7 +981,7 @@ LR（左右，先左旋再右旋）      RL（右左，先右旋再左旋）
 </ol>
 <div class="pagenav"><a href="ch11-index.html"><span class="dir">← 上一篇</span>第11章 索引技术</a><a href="exercises.html" style="text-align:right"><span class="dir">下一篇 →</span>习题、上机题与参考答案</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#121-多维数组">12.1 多维数组</a><a href="#1211-多维数组的存储" class="sub">12.1.1 多维数组的存储</a><a href="#1212-特殊矩阵" class="sub">12.1.2 特殊矩阵</a><a href="#1213-稀疏矩阵" class="sub">12.1.3 稀疏矩阵</a><a href="#122-广义表和存储管理">12.2 广义表和存储管理</a><a href="#1221-广义表的定义和存储结构" class="sub">12.2.1 广义表的定义和存储结构</a><a href="#1222-可利用空间表" class="sub">12.2.2 可利用空间表</a><a href="#1223-存储的动态分配和回收" class="sub">12.2.3 存储的动态分配和回收</a><a href="#1224-失败处理策略和无用单元回收" class="sub">12.2.4 失败处理策略和无用单元回收</a><a href="#123-trie-结构和-patricia-树">12.3 Trie 结构和 Patricia 树</a><a href="#124-改进的二叉搜索树">12.4 改进的二叉搜索树</a><a href="#1241-最佳二叉搜索树" class="sub">12.4.1 最佳二叉搜索树</a><a href="#1242-平衡的二叉搜索树" class="sub">12.4.2 平衡的二叉搜索树</a><a href="#1243-伸展树" class="sub">12.4.3 伸展树</a><a href="#本章小结">本章小结</a><a href="#python-实现的证据链" class="sub">Python 实现的证据链</a><a href="#习题">习题</a><a href="#补充概念与上机题参考课程第-12-章" class="sub">补充概念与上机题（参考课程第 12 章）</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#121-多维数组">12.1 多维数组</a><a href="#1211-多维数组的存储" class="sub">12.1.1 多维数组的存储</a><a href="#1212-特殊矩阵" class="sub">12.1.2 特殊矩阵</a><a href="#1213-稀疏矩阵" class="sub">12.1.3 稀疏矩阵</a><a href="#122-广义表和存储管理">12.2 广义表和存储管理</a><a href="#为什么这一节没有-python-版" class="sub">为什么这一节没有 Python 版</a><a href="#1221-广义表的定义和存储结构" class="sub">12.2.1 广义表的定义和存储结构</a><a href="#1222-可利用空间表" class="sub">12.2.2 可利用空间表</a><a href="#1223-存储的动态分配和回收" class="sub">12.2.3 存储的动态分配和回收</a><a href="#1224-失败处理策略和无用单元回收" class="sub">12.2.4 失败处理策略和无用单元回收</a><a href="#123-trie-结构和-patricia-树">12.3 Trie 结构和 Patricia 树</a><a href="#为什么这一节没有-python-版-1" class="sub">为什么这一节没有 Python 版</a><a href="#124-改进的二叉搜索树">12.4 改进的二叉搜索树</a><a href="#1241-最佳二叉搜索树" class="sub">12.4.1 最佳二叉搜索树</a><a href="#1242-平衡的二叉搜索树" class="sub">12.4.2 平衡的二叉搜索树</a><a href="#1243-伸展树" class="sub">12.4.3 伸展树</a><a href="#本章小结">本章小结</a><a href="#python-实现的证据链" class="sub">Python 实现的证据链</a><a href="#习题">习题</a><a href="#补充概念与上机题参考课程第-12-章" class="sub">补充概念与上机题（参考课程第 12 章）</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch12-advanced.md</code> 生成

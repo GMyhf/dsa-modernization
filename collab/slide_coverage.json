@@ -1854,6 +1854,34 @@
       "reason": "章首页：列本章路线，不讲某一节",
       "by": "Claude",
       "date": "2026-08-19"
+    },
+    {
+      "page": "ch03:单调栈：把“还没找到答案”的位置留下",
+      "kind": "extra",
+      "reason": "课件新增算法：原书没有单调栈清单；实现与测试见 code/ch03/monotonic_stack",
+      "by": "Codex",
+      "date": "2026-08-20"
+    },
+    {
+      "page": "ch12:树状数组：动态前缀和",
+      "kind": "extra",
+      "reason": "课件新增算法：原书没有树状数组清单；实现与测试见 code/ch12/fenwick",
+      "by": "Codex",
+      "date": "2026-08-20"
+    },
+    {
+      "page": "ch03:单调栈：直方图最大矩形",
+      "kind": "extra",
+      "reason": "课件新增算法：原书没有单调栈清单；实现与测试见 code/ch03/monotonic_stack",
+      "by": "Codex",
+      "date": "2026-08-20"
+    },
+    {
+      "page": "ch12:树状数组：两个 lowbit 方向",
+      "kind": "extra",
+      "reason": "课件新增算法：原书没有树状数组清单；实现与测试见 code/ch12/fenwick",
+      "by": "Codex",
+      "date": "2026-08-20"
     }
   ]
 }

@@ -1,0 +1,5 @@
+name	operation	input	expected	expected_error
+next-greater	nge	2,1,2,4,3	3,2,3,5,5	
+next-smaller	nse	4,5,2,10,8	2,2,5,4,5	
+histogram	hist	2,1,5,6,2,3	10	
+negative-height	hist	2,-1,3		invalid_argument

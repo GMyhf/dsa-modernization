@@ -271,6 +271,8 @@ append 之后尾元素是 30</code></pre></div>
 </tr>
 </tbody></table></div>
 <h2 id="22-顺序表"><a class="anchor" href="#22-顺序表">#</a>2.2 顺序表</h2>
+<h3 id="为什么这一节没有-python-版"><a class="anchor" href="#为什么这一节没有-python-版">#</a>为什么这一节没有 Python 版</h3>
+<p>这里故意只给 C++。顺序表的重点不是“把几个值放进一个序列”，而是容量、对象生命周期和扩容失败时旧数组是否仍然有效。若直接写成 Python <code>list</code>，扩容、元素搬迁和析构都由解释器隐藏；读者得到的是一个可用的容器，却看不到三法则、移动语义和强异常保证为何存在。算法侧可以把同一思想用 Python 重讲，存储侧若也用 <code>list</code>，反而会把本节要教的课删掉。</p>
 <p>按顺序方式存储的线性表称为顺序表(array-based list)，又称向量(vector)，通过数组建立。</p>
 <p>假设每个元素占用 L 个存储单元，顺序表的开始结点 k₀ 的存储位置记为 b = loc(k₀)，称为首地址；则下标为 i 的元素 kᵢ 的存储位置为</p>
 <div class="math math-display"><span class="upr">loc</span>(k<sub>i</sub>)<span class="rel">=</span>b<span class="bin">+</span>i<span class="bin">×</span>L</div>
@@ -760,6 +762,8 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 <p><strong>刻意没改的</strong>：连续存储、按下标 O(1) 随机存取、插入与删除搬动 O(n) 个元素。 这三条正是 2.3 节拿顺序表和链表做对比的全部依据，一条都不能优化掉。</p>
 <p>完整实现见 <code>code/ch02/array_list/modern.hpp</code>，测试见同目录 <code>test.cpp</code> （47 项断言，覆盖上表每一行；用 <code>python3 tools/check_code.py</code> 在 <code>-Werror</code> + ASan/UBSan 与 <code>-O2</code> 两种构建下各跑一遍）。</p>
 <h2 id="23-链表"><a class="anchor" href="#23-链表">#</a>2.3 链表</h2>
+<h3 id="为什么这一节没有-python-版-1"><a class="anchor" href="#为什么这一节没有-python-版-1">#</a>为什么这一节没有 Python 版</h3>
+<p>链表这一节要看的是结点所有权：谁负责 <code>new</code> 出来的结点、拷贝时是否深复制、异常和析构时怎样沿链释放。Python 的 <code>list</code> 既不是这条链，也不要求读者实现拷贝构造、拷贝赋值、移动构造和析构；即便手写 Python 结点，垃圾回收仍会把所有权边界变得不可观察。因此这里保留 C++ 的裸指针与五法则，Python 版只会成为另一种容器写法。</p>
 <p>顺序表用物理相邻表示逻辑相邻，所以按下标读取是 O(1)，但中间插入和删除需要搬动 后续元素。链表把逻辑相邻写进结点的链接域：结点可以散落在内存中；给定一个前驱结点后， 插入或删除只改常数条指针。代价也必须如实保留：要按位置找到那个前驱，仍须从表头循链， 所以按位置访问、查找、插入和删除的总时间仍是 O(n)。</p>
 <h3 id="教学版完整实现-1"><a class="anchor" href="#教学版完整实现-1">#</a>教学版：完整实现</h3>
 <p>下面是一份<strong>完整的、能直接编译运行的</strong>单链表。一个文件、一个类。 后面 2.3.1、2.3.2 两节就是把它拆开逐段讲。</p>
@@ -1403,7 +1407,7 @@ Node* insert_before(Node* pos, U&amp;&amp; value) {
 </ol>
 <div class="pagenav"><a href="ch01-adt.html"><span class="dir">← 上一篇</span>第1章 概论</a><a href="ch03-stack.html" style="text-align:right"><span class="dir">下一篇 →</span>第3章 栈与队列</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#21-线性表的概念">2.1 线性表的概念</a><a href="#22-顺序表">2.2 顺序表</a><a href="#教学版完整实现" class="sub">教学版：完整实现</a><a href="#221-顺序表的类定义" class="sub">2.2.1 顺序表的类定义</a><a href="#222-顺序表的运算实现" class="sub">2.2.2 顺序表的运算实现</a><a href="#22a-进阶选读从教学版到工程版" class="sub">2.2a 进阶（选读）：从教学版到工程版</a><a href="#与原书的对照">与原书的对照</a><a href="#23-链表">2.3 链表</a><a href="#教学版完整实现-1" class="sub">教学版：完整实现</a><a href="#231-单链表" class="sub">2.3.1 单链表</a><a href="#232-双链表" class="sub">2.3.2 双链表</a><a href="#233-循环链表" class="sub">2.3.3 循环链表</a><a href="#23a-进阶选读从教学版到工程版" class="sub">2.3a 进阶（选读）：从教学版到工程版</a><a href="#24-线性表实现方法的比较">2.4 线性表实现方法的比较</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#21-线性表的概念">2.1 线性表的概念</a><a href="#22-顺序表">2.2 顺序表</a><a href="#为什么这一节没有-python-版" class="sub">为什么这一节没有 Python 版</a><a href="#教学版完整实现" class="sub">教学版：完整实现</a><a href="#221-顺序表的类定义" class="sub">2.2.1 顺序表的类定义</a><a href="#222-顺序表的运算实现" class="sub">2.2.2 顺序表的运算实现</a><a href="#22a-进阶选读从教学版到工程版" class="sub">2.2a 进阶（选读）：从教学版到工程版</a><a href="#与原书的对照">与原书的对照</a><a href="#23-链表">2.3 链表</a><a href="#为什么这一节没有-python-版-1" class="sub">为什么这一节没有 Python 版</a><a href="#教学版完整实现-1" class="sub">教学版：完整实现</a><a href="#231-单链表" class="sub">2.3.1 单链表</a><a href="#232-双链表" class="sub">2.3.2 双链表</a><a href="#233-循环链表" class="sub">2.3.3 循环链表</a><a href="#23a-进阶选读从教学版到工程版" class="sub">2.3a 进阶（选读）：从教学版到工程版</a><a href="#24-线性表实现方法的比较">2.4 线性表实现方法的比较</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch02-linear-list.md</code> 生成

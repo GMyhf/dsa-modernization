@@ -608,10 +608,30 @@ python3 tools/check_code.py code/ch12/balanced_trees</code></pre></div>
 <li>往 AVL 里按<strong>升序</strong>插入 1..1000，量一下树高（对比普通 BST）</li>
 <li>在伸展树上反复访问同一个键，看它是不是一直在根附近</li>
 </ul>
-<blockquote><p>平衡树的测试里有一条不变量检查：每次插入删除后都验证 「任何结点左右子树高度差不超过 1」。</p></blockquote></section></div>
+<blockquote><p>平衡树的测试里有一条不变量检查：每次插入删除后都验证 「任何结点左右子树高度差不超过 1」。</p></blockquote></section><section class="slide" data-notes=""><h1 id="树状数组动态前缀和"><a class="anchor" href="#树状数组动态前缀和">#</a>树状数组：动态前缀和</h1>
+<p>普通数组在“单点修改”和“区间查询”之间只能二选一：</p>
+<ul>
+<li>原数组：修改 <code>O(1)</code>，查询 <code>O(n)</code></li>
+<li>前缀和：查询 <code>O(1)</code>，修改 <code>O(n)</code></li>
+<li>Fenwick：两者都是 <code>O(log n)</code>，空间 <code>O(n)</code></li>
+</ul>
+<p>树状数组仍是一块平坦数组；第 <code>i</code> 个内部位置管辖长度 <code>lowbit(i)</code> 的区间。</p></section><section class="slide" data-notes=""><h1 id="树状数组两个-lowbit-方向"><a class="anchor" href="#树状数组两个-lowbit-方向">#</a>树状数组：两个 lowbit 方向</h1>
+<ul>
+<li>查询：<code>i -= lowbit(i)</code>，把前缀拆成互不重叠的块</li>
+<li>更新：<code>i += lowbit(i)</code>，访问所有包含该位置的块</li>
+<li><code>lowbit(i) = i &amp; -i</code>，内部下标从 1 开始</li>
+</ul>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/fenwick/modern.hpp">code/ch12/fenwick/modern.hpp#fn:add</a></div><pre><code><span class="t">void</span> add(std::<span class="t">size_t</span> index, <span class="t">long</span> <span class="t">long</span> delta) {
+    check_index(index);
+    values_[index] += delta;
+    <span class="k">for</span> (std::<span class="t">size_t</span> cursor = index + <span class="n">1</span>; cursor &lt;= size(); cursor += lowbit(cursor)) {
+        tree_[cursor] += delta;
+    }
+}</code></pre></div>
+<p>教材接口把外部下标改成 0 起始，区间统一为 <code>[left, right)</code>，避免把边界规则藏在调用方。</p></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第12章 高级数据结构</div><div class="thumb"><div class="no">2</div>12.1.1 多维数组怎么存</div><div class="thumb"><div class="no">3</div>三维数组地址：逐维算贡献</div><div class="thumb"><div class="no">4</div>12.1.2 特殊矩阵：只存有用的</div><div class="thumb"><div class="no">5</div>12.1.3 稀疏矩阵：十字链表</div><div class="thumb"><div class="no">6</div>十字链表：一次更新维护两条链</div><div class="thumb"><div class="no">7</div>12.2.1 广义表</div><div class="thumb"><div class="no">8</div>12.2.2 共享带来的问题：什么时候能删</div><div class="thumb"><div class="no">9</div>12.2.3 可利用空间表</div><div class="thumb"><div class="no">10</div>可利用空间表：句柄怎样复用</div><div class="thumb"><div class="no">11</div>变长块的分配策略</div><div class="thumb"><div class="no">12</div>释放：相邻空闲块要合并</div><div class="thumb"><div class="no">13</div>12.2.4 标记-清扫：收回环</div><div class="thumb"><div class="no">14</div>标记-清扫：无根环也能收回</div><div class="thumb"><div class="no">15</div>12.3 Trie：按字符分层</div><div class="thumb"><div class="no">16</div>最长前缀匹配</div><div class="thumb"><div class="no">17</div>Patricia：把单孩子链压掉</div><div class="thumb"><div class="no">18</div>12.4.1 最佳二叉搜索树</div><div class="thumb"><div class="no">19</div>最佳 BST：最后一格怎样得到 57</div><div class="thumb"><div class="no">20</div>12.4.2 AVL 树：靠旋转维持平衡</div><div class="thumb"><div class="no">21</div>AVL 四种旋转：最小守门输入</div><div class="thumb"><div class="no">22</div>12.4.3 伸展树：不存平衡信息</div><div class="thumb"><div class="no">23</div>伸展：一字形与之字形</div><div class="thumb"><div class="no">24</div>三种改进的 BST 对照</div><div class="thumb"><div class="no">25</div>本章小结</div><div class="thumb"><div class="no">26</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第12章 高级数据结构</div><div class="thumb"><div class="no">2</div>12.1.1 多维数组怎么存</div><div class="thumb"><div class="no">3</div>三维数组地址：逐维算贡献</div><div class="thumb"><div class="no">4</div>12.1.2 特殊矩阵：只存有用的</div><div class="thumb"><div class="no">5</div>12.1.3 稀疏矩阵：十字链表</div><div class="thumb"><div class="no">6</div>十字链表：一次更新维护两条链</div><div class="thumb"><div class="no">7</div>12.2.1 广义表</div><div class="thumb"><div class="no">8</div>12.2.2 共享带来的问题：什么时候能删</div><div class="thumb"><div class="no">9</div>12.2.3 可利用空间表</div><div class="thumb"><div class="no">10</div>可利用空间表：句柄怎样复用</div><div class="thumb"><div class="no">11</div>变长块的分配策略</div><div class="thumb"><div class="no">12</div>释放：相邻空闲块要合并</div><div class="thumb"><div class="no">13</div>12.2.4 标记-清扫：收回环</div><div class="thumb"><div class="no">14</div>标记-清扫：无根环也能收回</div><div class="thumb"><div class="no">15</div>12.3 Trie：按字符分层</div><div class="thumb"><div class="no">16</div>最长前缀匹配</div><div class="thumb"><div class="no">17</div>Patricia：把单孩子链压掉</div><div class="thumb"><div class="no">18</div>12.4.1 最佳二叉搜索树</div><div class="thumb"><div class="no">19</div>最佳 BST：最后一格怎样得到 57</div><div class="thumb"><div class="no">20</div>12.4.2 AVL 树：靠旋转维持平衡</div><div class="thumb"><div class="no">21</div>AVL 四种旋转：最小守门输入</div><div class="thumb"><div class="no">22</div>12.4.3 伸展树：不存平衡信息</div><div class="thumb"><div class="no">23</div>伸展：一字形与之字形</div><div class="thumb"><div class="no">24</div>三种改进的 BST 对照</div><div class="thumb"><div class="no">25</div>本章小结</div><div class="thumb"><div class="no">26</div>上机</div><div class="thumb"><div class="no">27</div>树状数组：动态前缀和</div><div class="thumb"><div class="no">28</div>树状数组：两个 lowbit 方向</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -624,7 +644,7 @@ python3 tools/check_code.py code/ch12/balanced_trees</code></pre></div>
 <b>第12章 高级数据结构</b><span>数据结构与算法：Python 讲算法，C++ 讲实现</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 26</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 28</b>
 </div>
 <script>
 (function(){

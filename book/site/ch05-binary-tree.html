@@ -407,6 +407,8 @@ BST 中序: 1 3 4 6 7 8 10 14
 }</code></pre></div>
 <p>每个结点入队、出队各一次，时间同样是 <span class="math">O(n)</span>。空间由结点最多的那一层决定：最坏是满的完全二叉树，队列最长时装着最下面一整层，约 <span class="math">(n<span class="bin">+</span><span class="upr">1</span>)/<span class="upr">2</span></span> 个结点。这与深度优先的空间代价（正比于树高）正好互补——树越平衡，深度优先越省；树越接近一条链，广度优先越省。</p>
 <h2 id="53-二叉树的存储结构"><a class="anchor" href="#53-二叉树的存储结构">#</a>5.3 二叉树的存储结构</h2>
+<h3 id="为什么这一节没有-python-版"><a class="anchor" href="#为什么这一节没有-python-版">#</a>为什么这一节没有 Python 版</h3>
+<p>本节讲的是结点的动态存储和树的所有权：析构要遍历并释放每个结点，拷贝要深复制，移动要转移根指针，还要考虑递归实现的栈边界。Python 的对象引用和垃圾回收不会给出 C++ 五法则或强异常保证的对应练习；用嵌套 <code>list</code> 表示树更会把结点布局抹掉。因此这里的教学实现只提供 C++，算法层的周游和搜索才适合做双语言对照。</p>
 <p><code>create_tree</code> 先 <code>new</code> 出新根，再把两棵子树的根指针挪过来，最后才清空自己原来的树。这样即使 <code>new</code> 抛异常，调用方的两棵子树也不动。链式存储是本节主实现；完全二叉树还可以按 5.1.3 的编号放进数组，堆就是这种用法。</p>
 <h4 id="教学版完整实现"><a class="anchor" href="#教学版完整实现">#</a>教学版：完整实现</h4>
 <p>下面是一份<strong>完整的、能直接编译运行的</strong>二叉树与二叉搜索树。一个文件、两个类。 <strong>递归是这一章的正题</strong>，所以周游、释放、深拷贝这里全部写成递归—— 形状和定义一样，一眼就能对上。5.4a 会说明递归的代价与工程版的处理。</p>
@@ -733,6 +735,8 @@ BST 中序: 1 3 4 6 7 8 10 14
     Node* root_;
 };</code></pre></div>
 <h2 id="54-二叉搜索树"><a class="anchor" href="#54-二叉搜索树">#</a>5.4 二叉搜索树</h2>
+<h3 id="为什么这一节没有-python-版-1"><a class="anchor" href="#为什么这一节没有-python-版-1">#</a>为什么这一节没有 Python 版</h3>
+<p>二叉搜索树的查找算法可以用 Python 讲，但本章这一实现还要展示结点的拥有关系、删除时子树指针的转移、深拷贝和析构。Python 容器会替我们保管这些资源，无法让读者观察“删除一个结点后谁负责释放它”或强异常保证如何维持，所以存储实现不另写 Python 包装。</p>
 <p>二叉搜索树要求左子树的键都小于根、右子树都大于根。中序周游因此正好是排序。插入重复键、删除不存在的键都是可预期状态，返回 <code>false</code>，不抛异常。删除有左右孩子的结点时，用左子树里最右的前驱替换它：先把前驱从原位置摘下，再让它继承被删结点的两棵子树，最后只 <code>delete</code> 被删结点一次。漏掉「先脱离原父」会形成环或二次释放。</p>
 <p>二叉搜索树的实现就在上面那份教学版清单里的 <code>BinarySearchTree</code>。三处值得停一下：</p>
 <ul>
@@ -741,6 +745,8 @@ BST 中序: 1 3 4 6 7 8 10 14
 <li><strong>前驱自己可能还有一个左孩子</strong>，顶替之前必须先把它接走 （<code>*predecessor_link = replacement-&gt;left;</code>）。漏了这一句，树上会出现环—— 教学版的测试专门搭了一棵这样的树，去掉那句，中序周游立刻无限递归、ASan 报栈溢出。</li>
 </ul>
 <h2 id="55-堆与优先队列"><a class="anchor" href="#55-堆与优先队列">#</a>5.5 堆与优先队列</h2>
+<h3 id="为什么这一节没有-python-版-2"><a class="anchor" href="#为什么这一节没有-python-版-2">#</a>为什么这一节没有 Python 版</h3>
+<p>这里的教学版堆把完全二叉树直接放进自有数组，并明确处理扩容、元素移动和对象销毁；优先队列则依赖这份存储不变量。Python <code>heapq</code> 一行就替代了整节，Python <code>list</code> 也不会呈现五法则与异常安全。为了不把存储课伪装成算法调用，本节保留 C++ 教学实现；算法侧的排序和动态规划另有 Python 双实现。</p>
 <p>最小堆是一棵完全二叉树，父结点不大于孩子；用数组存时，下标 <code>i</code> 的孩子是 <code>2i+1</code> 和 <code>2i+2</code>。<code>sift_down</code> 必须比较左右两个孩子。空堆上 <code>remove_min()</code> 返回 <code>nullopt</code>。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/heap_huffman/demo.cpp">code/ch05/heap_huffman/demo.cpp</a></div><pre><code><span class="c">// 第 5 章「先跑一遍」：用教学版 MinHeap 与 HuffmanTree。</span>
 <span class="c">// 编译运行：</span>
@@ -1134,6 +1140,8 @@ BST 中序: 1 3 4 6 7 8 10 14
 <p>优先队列保存带关键码的元素，核心操作是查看或移除当前最小（或最大）元素，而不是保持全部元素有序。无序表的插入可为 <span class="math">O(<span class="upr">1</span>)</span>，但取最小值要 <span class="math">O(n)</span>；有序表取最小值可为 <span class="math">O(<span class="upr">1</span>)</span>，但插入要移动元素。堆在两者之间取得平衡：查看堆顶为 <span class="math">O(<span class="upr">1</span>)</span>，插入与移除堆顶为 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>，建堆为 <span class="math">O(n)</span>。</p>
 <p>本书的 <code>MinHeap&lt;T&gt;</code> 就是一个最小优先队列：<code>insert</code> 对应入队，<code>remove_min</code> 对应取出最高优先级任务，空队列以 <code>std::nullopt</code> 表示。Huffman 构造反复取两个最小权值，Dijkstra 和 Prim 则反复取当前距离或边权最小的候选；这些算法需要的是“下一项最优”，不需要把整个队列排序。若应用要求相同优先级保持到达顺序，还要把到达序号作为第二关键码显式存入元素。</p>
 <h2 id="56-huffman-树及其应用"><a class="anchor" href="#56-huffman-树及其应用">#</a>5.6 Huffman 树及其应用</h2>
+<h3 id="为什么这一节没有-python-版-3"><a class="anchor" href="#为什么这一节没有-python-版-3">#</a>为什么这一节没有 Python 版</h3>
+<p>本节的 Huffman 教学实现同时承担树结点的所有权、优先队列数组和异常路径的清理；例如权值校验必须在第一次 <code>new</code> 之前完成，否则中途抛异常会泄漏已经建立的结点。Python 的 <code>heapq</code> 与垃圾回收会把这两个存储问题藏掉，留下的只是一个算法结果。因此这里不提供 Python 版，避免读者误以为两种语言承担的是同一层教学内容。</p>
 <p>Huffman 树反复取出两个最小权，合成它们的和，直到只剩一棵——这就是前缀编码的那棵树。 根权等于全部叶子权之和。实现就在 5.5 那份教学版清单里的 <code>HuffmanTree</code>。</p>
 <p><strong>为什么用堆</strong>：每一轮都要「取当前最小的两棵」。用数组线性扫是 O(n) 一轮、 总共 O(n²)；用最小堆是 O(log n) 一轮、总共 O(n log n)。这是 5.5 节那个数据结构 在这里换来的东西。</p>
 <p>衡量一棵 Huffman 树好不好，用<strong>带权路径长度</strong>(WPL)：每个叶子的权重乘以它的深度再求和。 以原书的权 2、3、4、7 为例，合并过程是 2+3=5 → 4+5=9 → 7+9=16， 于是 2 和 3 落在第 3 层、4 在第 2 层、7 在第 1 层：</p>
@@ -1247,7 +1255,7 @@ Direct leak of 24 byte(s) in 1 object(s) allocated from:
 </ol>
 <div class="pagenav"><a href="ch04-string.html"><span class="dir">← 上一篇</span>第4章 字符串</a><a href="ch06-tree.html" style="text-align:right"><span class="dir">下一篇 →</span>第6章 树</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#51-二叉树的概念">5.1 二叉树的概念</a><a href="#511-二叉树的定义和基本术语" class="sub">5.1.1 二叉树的定义和基本术语</a><a href="#512-满二叉树完全二叉树扩充二叉树" class="sub">5.1.2 满二叉树、完全二叉树、扩充二叉树</a><a href="#513-二叉树的主要性质" class="sub">5.1.3 二叉树的主要性质</a><a href="#52-二叉树的周游">5.2 二叉树的周游</a><a href="#521-二叉树的抽象数据类型" class="sub">5.2.1 二叉树的抽象数据类型</a><a href="#522-深度优先周游二叉树" class="sub">5.2.2 深度优先周游二叉树</a><a href="#523-广度优先周游二叉树" class="sub">5.2.3 广度优先周游二叉树</a><a href="#53-二叉树的存储结构">5.3 二叉树的存储结构</a><a href="#54-二叉搜索树">5.4 二叉搜索树</a><a href="#55-堆与优先队列">5.5 堆与优先队列</a><a href="#551a-建堆为什么是-on-而不是-onlog-n" class="sub">5.5.1a 建堆为什么是 $O(n)$ 而不是 $O(n\log n)$</a><a href="#552-优先队列" class="sub">5.5.2 优先队列</a><a href="#56-huffman-树及其应用">5.6 Huffman 树及其应用</a><a href="#562-huffman-编码" class="sub">5.6.2 Huffman 编码</a><a href="#56a-进阶选读从教学版到工程版" class="sub">5.6a 进阶（选读）：从教学版到工程版</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充证明题参考课程第-5-章" class="sub">补充证明题（参考课程第 5 章）</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#51-二叉树的概念">5.1 二叉树的概念</a><a href="#511-二叉树的定义和基本术语" class="sub">5.1.1 二叉树的定义和基本术语</a><a href="#512-满二叉树完全二叉树扩充二叉树" class="sub">5.1.2 满二叉树、完全二叉树、扩充二叉树</a><a href="#513-二叉树的主要性质" class="sub">5.1.3 二叉树的主要性质</a><a href="#52-二叉树的周游">5.2 二叉树的周游</a><a href="#521-二叉树的抽象数据类型" class="sub">5.2.1 二叉树的抽象数据类型</a><a href="#522-深度优先周游二叉树" class="sub">5.2.2 深度优先周游二叉树</a><a href="#523-广度优先周游二叉树" class="sub">5.2.3 广度优先周游二叉树</a><a href="#53-二叉树的存储结构">5.3 二叉树的存储结构</a><a href="#为什么这一节没有-python-版" class="sub">为什么这一节没有 Python 版</a><a href="#54-二叉搜索树">5.4 二叉搜索树</a><a href="#为什么这一节没有-python-版-1" class="sub">为什么这一节没有 Python 版</a><a href="#55-堆与优先队列">5.5 堆与优先队列</a><a href="#为什么这一节没有-python-版-2" class="sub">为什么这一节没有 Python 版</a><a href="#551a-建堆为什么是-on-而不是-onlog-n" class="sub">5.5.1a 建堆为什么是 $O(n)$ 而不是 $O(n\log n)$</a><a href="#552-优先队列" class="sub">5.5.2 优先队列</a><a href="#56-huffman-树及其应用">5.6 Huffman 树及其应用</a><a href="#为什么这一节没有-python-版-3" class="sub">为什么这一节没有 Python 版</a><a href="#562-huffman-编码" class="sub">5.6.2 Huffman 编码</a><a href="#56a-进阶选读从教学版到工程版" class="sub">5.6a 进阶（选读）：从教学版到工程版</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充证明题参考课程第-5-章" class="sub">补充证明题（参考课程第 5 章）</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch05-binary-tree.md</code> 生成

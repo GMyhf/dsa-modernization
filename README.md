@@ -21,9 +21,9 @@
 ```
 台账   104 已现代化 / 1 退场 / 0 待办  = 105 条清单
 书稿   29 个文件（12 章正文 + 总目录 + 习题 + 勘误 + 插图，加 13 套课件），17 条规则通过
-成品   PDF（book/pdf/，480 页）、网页版（book/site/，双击 index.html 即可读）
-       与课件（book/slides/，282 页幻灯片）
-代码   32 个单元 × 2 种构建（Debug+ASan/UBSan、Release-O2）
+成品   PDF（book/pdf/，496 页）、网页版（book/site/，双击 index.html 即可读）
+       与课件（book/slides/，286 页幻灯片）
+代码   34 个单元 × 2 种构建（Debug+ASan/UBSan、Release-O2）
        其中 1 个单元另有 Python 实现，再跑 2 档（默认、-X dev -W error）
 自测   357 项（闸门自己的单元测试）
 ```
@@ -64,7 +64,7 @@ python3 tools/build_slides.py         # 把 book/slides/*.md 渲染成课件 boo
 ```
 
 网页版在线可读：**<https://gmyhf.github.io/dsa-modernization/>**，
-首页顶上有整本 PDF 的下载卡片（480 页 / 8.1 MB，卡片上的数字由构建器读文件得出，不是手写的）。
+首页顶上有整本 PDF 的下载卡片（496 页 / 8.1 MB，卡片上的数字由构建器读文件得出，不是手写的）。
 本地读就双击 `book/site/index.html`，或 `python3 -m http.server -d book` 后打开
 `http://localhost:8000/site/`。它是 `book/*.md` 的产物，闸门里有一条
 `build_site.py --check` 盯着两者不许脱节。
@@ -129,7 +129,7 @@ git add -A && git commit -m "..." && git push
 
 ## 闸门证明不了什么
 
-**这一节是这份 README 里最该读的部分。** 所有的绿——退出码 0、32/32 单元、
+**这一节是这份 README 里最该读的部分。** 所有的绿——退出码 0、34/34 单元、
 几百项断言——都只证明了「被测试走到的那些路径，在这台机器上、这次构建里没出问题」。
 完整版（含可复现的测量程序）在 [`collab/UNVERIFIED-RISKS.md`](collab/UNVERIFIED-RISKS.md)，
 下面是必须先知道的几条。
