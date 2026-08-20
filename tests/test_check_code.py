@@ -353,6 +353,45 @@ class TestTeachingAndDemoAreVerified(unittest.TestCase):
             problems = check_code.check_substance(unit, meta, assertions=30, teaching_assertions=3)
         self.assertTrue(any("教学版只有 3 项断言" in p for p in problems), problems)
 
+    def test_beyond_book_unit_still_has_a_cpp_floor(self):
+        """`listings` 为空的单元，C++ 侧此前**整条密度判据不适用**（2026-08-20 复核发现）。
+
+        Python 侧的同一个洞在 T-048 补过；C++ 侧一直开着，而 T-045 的两个课件新增单元
+        正好都是这个形状。判据：没认领清单也要过单元下限。
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = make_unit(Path(tmp), "int main() { return 0; }\n")
+            meta = json.loads((unit / "unit.json").read_text(encoding="utf-8"))
+            meta["listings"] = []
+            meta["beyond_book"] = "原书没有对应清单"
+            problems = check_code.check_substance(unit, meta, assertions=1)
+        self.assertTrue(any("没有认领清单" in p for p in problems), problems)
+
+    def test_beyond_book_unit_at_the_floor_passes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = make_unit(Path(tmp), "int main() { return 0; }\n")
+            meta = json.loads((unit / "unit.json").read_text(encoding="utf-8"))
+            meta["listings"] = []
+            meta["beyond_book"] = "原书没有对应清单"
+            self.assertEqual(
+                check_code.check_substance(unit, meta, assertions=check_code.MIN_ASSERTIONS_PER_UNIT),
+                [])
+
+    def test_every_beyond_book_unit_in_the_repo_clears_the_floor(self):
+        """仓库锚点：14 个 beyond_book 单元今天全在下限之上，堵这个洞不该弄红任何一个。"""
+        thin = []
+        for path in sorted((ROOT / "code").glob("*/*/unit.json")):
+            meta = json.loads(path.read_text(encoding="utf-8"))
+            if meta.get("listings"):
+                continue
+            source = (path.parent / "test.cpp")
+            if not source.is_file():
+                continue
+            calls = source.read_text(encoding="utf-8").count("check(")
+            if calls < check_code.MIN_ASSERTIONS_PER_UNIT:
+                thin.append(str(path.parent.relative_to(ROOT)))
+        self.assertEqual(thin, [], f"这些 beyond_book 单元的 check() 调用少于下限：{thin}")
+
     def test_adequate_teaching_test_passes(self):
         with tempfile.TemporaryDirectory() as tmp:
             unit = make_unit(Path(tmp), "int main() { return 0; }\n")

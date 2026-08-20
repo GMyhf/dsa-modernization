@@ -590,12 +590,18 @@ def check_substance(unit_dir: Path, meta, assertions, teaching_assertions=None, 
     """
     problems = []
     listings = len(meta.get("listings", []))
-    if assertions is not None and listings:
+    if assertions is not None:
+        # 「原书无对应清单」的单元（beyond_book）没有 listings 可乘，此前 C++ 侧**整条判据不适用**——
+        # 一个 beyond_book 单元可以只写 1 项断言而闸门不响。Python 侧的同一个洞在 T-048 补过了
+        # （见下面那段注释），C++ 侧一直开着，T-045 又添了两个这样的单元，所以在这里一并堵上：
+        # 有清单按 3×清单数，没清单也至少要过单元下限。
         need = max(MIN_ASSERTIONS_PER_LISTING * listings, MIN_ASSERTIONS_PER_UNIT)
         if assertions < need:
+            where = (f"{listings} 条清单只有 {assertions} 项断言"
+                     if listings else f"本单元没有认领清单，但只有 {assertions} 项断言")
             problems.append(
-                f"  ❌ 断言密度不足：{listings} 条清单只有 {assertions} 项断言"
-                f"（下限 {need}）。清单被认领却几乎没有被验证。"
+                f"  ❌ 断言密度不足：{where}"
+                f"（下限 {need}）。{'清单被认领却几乎没有被验证。' if listings else 'beyond_book 不是不用验的意思。'}"
             )
 
     if (unit_dir / "teaching.hpp").is_file() and teaching_assertions is not None:
