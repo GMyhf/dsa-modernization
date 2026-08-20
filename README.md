@@ -25,7 +25,7 @@
        与课件（book/slides/，286 页幻灯片）
 代码   34 个单元 × 2 种构建（Debug+ASan/UBSan、Release-O2）
        其中 1 个单元另有 Python 实现，再跑 2 档（默认、-X dev -W error）
-自测   360 项（闸门自己的单元测试）
+自测   365 项（闸门自己的单元测试）
 ```
 
 `python3 tools/handoff.py --verify` 退出码 0。
@@ -102,7 +102,7 @@ git add -A && git commit -m "..." && git push
 | `code/<章>/<单元>/` | 一个清单单元：`unit.json`（认领哪几条清单）、`legacy.md`（原书写法→缺陷证据→现代写法）、`modern.hpp`、`test.cpp` |
 | `code/support/` | 各章测试共用的故障注入探针（只放探针，不放任何数据结构实现） |
 | `tools/` | 闸门与脚手架，纯标准库 |
-| `tests/` | 闸门自身的单元测试，360 项 |
+| `tests/` | 闸门自身的单元测试，365 项 |
 | `collab/` | 协作事实源：PLAN / DECISION_LOG / HANDOFF / 双向 NOTES / 退场记录 |
 
 ## 四条闸门

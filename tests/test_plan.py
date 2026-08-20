@@ -11,12 +11,14 @@
 
 内容对不对（这条任务是不是真做完了）仍是人工复核项——与 D-014 同一条边界。
 """
+import collections
 import re
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PLAN = ROOT / "collab" / "PLAN.md"
+LOG = ROOT / "collab" / "DECISION_LOG.md"
 
 TASK_ROW_RE = re.compile(r"^\| (T-[0-9a-z]+) \|")
 STATUSES = {"Backlog", "In progress", "Review", "Done"}
@@ -71,3 +73,60 @@ class TestPlanShape(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestDecisionNumbers(unittest.TestCase):
+    """决策编号也要唯一，索引也要对得上。
+
+    **缘由（2026-08-20，复核方报的）**：`D-032` 被两条不同的决策同时占用——
+    Codex 记的「T-044/T-045 分开验收」和我记的「算法侧可以用 STL」。
+    我写第二条时没查重号。查下去发现这不是第一次：`D-017` 从 2026-08-17 起就被
+    两条内容不同的决策占着（Claude 的 R12、Codex 的 R11），三个月没人发现。
+
+    编号撞车的代价与任务号撞车一模一样——**引用一个编号时，你不知道说的是哪一条**，
+    而 `unit.json`、书稿、交接记录里到处是「见 D-0xx」。PLAN 的索引同样会烂：
+    同一天查出来 8 条决策**根本没进索引**（D-007~D-010、D-025~D-028）。
+
+    所以三条判据：编号唯一、每条决策都进索引、索引里的编号都指得到真东西。
+    决策内容对不对仍是人工复核项——与 D-014 同一条边界。
+    """
+
+    HEADING_RE = re.compile(r"^## (D-\S+(?: §\S+)?) ·", re.M)
+    INDEX_RE = re.compile(r"^\| (D-\S+(?: §\S+)?) \|", re.M)
+
+    def headings(self, text=None):
+        return self.HEADING_RE.findall(text if text is not None else LOG.read_text(encoding="utf-8"))
+
+    def index_ids(self, text=None):
+        text = text if text is not None else PLAN.read_text(encoding="utf-8")
+        return self.INDEX_RE.findall(text[text.index("## Decision Log"):])
+
+    def test_decision_numbers_are_unique(self):
+        counts = collections.Counter(self.headings())
+        dupes = sorted(number for number, times in counts.items() if times > 1)
+        self.assertEqual(dupes, [], f"DECISION_LOG 里有重号：{dupes}——引用它的人不知道指的是哪一条")
+
+    def test_every_decision_is_in_the_plan_index(self):
+        missing = sorted(set(self.headings()) - set(self.index_ids()))
+        self.assertEqual(missing, [], f"这些决策没进 PLAN 的索引，等于查不到：{missing}")
+
+    def test_every_index_row_points_at_something_real(self):
+        """索引里可以写 `D-001 §3b` 这种子条款，但它的母条必须真的存在。"""
+        headings = set(self.headings())
+        bases = {h.split(" §")[0] for h in headings}
+        dangling = [i for i in self.index_ids()
+                    if i not in headings and i.split(" §")[0] not in bases]
+        self.assertEqual(dangling, [], f"索引指向不存在的决策：{dangling}")
+
+    def test_duplicate_number_would_go_red(self):
+        """变异自检：把两条决策写成同一个号，第一条必须红。"""
+        faked = LOG.read_text(encoding="utf-8").replace("## D-030 ·", "## D-029 ·", 1)
+        numbers = self.headings(faked)
+        self.assertNotEqual(len(numbers), len(set(numbers)))
+
+    def test_missing_index_row_would_go_red(self):
+        """变异自检：从索引里删掉一行，第二条必须红。"""
+        plan = PLAN.read_text(encoding="utf-8")
+        i = plan.index("| D-030 |")
+        faked = plan[:i] + plan[plan.index("\n", i) + 1:]
+        self.assertTrue(set(self.headings()) - set(self.index_ids(faked)))
