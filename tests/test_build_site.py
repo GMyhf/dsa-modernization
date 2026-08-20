@@ -134,6 +134,65 @@ class TestLinks(unittest.TestCase):
         self.assertEqual(len(build_site.find_problems(ctx)), 1)
 
 
+class TestNestedInline(unittest.TestCase):
+    """占位符会嵌套——链接标记里裹着行内代码，还原顺序错了就整段文字消失。
+
+    这不是假想：首页那两条「递归深度风险见 `collab/UNVERIFIED-RISKS.md`」的链接
+    曾经在网页上渲染成一个**空链接**，页面里留下的是四个 NUL 字节；NUL 在浏览器里
+    不占地方，所以肉眼只看到「见 。」，而构建、check_doc、--check 全绿。
+    """
+
+    def nuls(self, markdown, ctx=None):
+        ctx = ctx or build_site.Context()
+        ctx.page = "x.html"
+        return build_site.render_inline(markdown, ctx)
+
+    def test_code_inside_link_label_survives(self):
+        out = self.nuls("风险见 [`collab/UNVERIFIED-RISKS.md`](../collab/UNVERIFIED-RISKS.md)。")
+        self.assertNotIn("\x00", out)
+        self.assertIn("<code>collab/UNVERIFIED-RISKS.md</code></a>", out)
+
+    def test_math_inside_link_label_survives(self):
+        out = self.nuls("见 [第 $O(n)$ 节](ch01-adt.md#x)。")
+        self.assertNotIn("\x00", out)
+        self.assertIn('<span class="math">', out)
+
+    def test_ascending_restore_would_go_red(self):
+        """变异自检：把还原顺序改回从前往后，上面两条必须红。"""
+        original = build_site.decorate
+
+        def ascending(text, stash):
+            text = build_site.html.escape(text)
+            for index, markup in enumerate(stash):
+                text = text.replace(f"\x00{index}\x00", markup)
+            return text
+
+        try:
+            build_site.decorate = ascending
+            broken = self.nuls("风险见 [`collab/UNVERIFIED-RISKS.md`](../collab/UNVERIFIED-RISKS.md)。")
+        finally:
+            build_site.decorate = original
+        self.assertIn("\x00", broken)
+
+    def test_inline_image_alt_is_plain_text(self):
+        """alt 里只能是书稿原文：塞进 <span class="math"> 会把属性引号顶断。"""
+        out = self.nuls("行内图 ![(a) 由 $T_1$ 构成](assets/x.jpg) 在句中。")
+        self.assertNotIn("\x00", out)
+        self.assertIn('alt="(a) 由 $T_1$ 构成"', out)
+        self.assertNotIn('alt="(a) 由 <span', out)
+
+    def test_no_page_carries_a_nul_byte(self):
+        """仓库锚点：整本书稿加课件，渲染完不许留下一个 NUL。"""
+        pages = sorted((ROOT / "book").glob("*.md")) + sorted((ROOT / "book" / "slides").glob("*.md"))
+        self.assertGreater(len(pages), 20)
+        for path in pages:
+            ctx = build_site.Context()
+            ctx.page = path.name
+            for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+                self.assertNotIn("\x00", build_site.render_inline(line, ctx),
+                                 f"{path.name}:{number} 渲染后留下了占位符")
+
+
 class TestMath(unittest.TestCase):
     def test_ocr_spacing_does_not_break_subscripts(self):
         """`a _ { 1 6 }` 与 `a_{16}` 同义 —— 不跳空格的话下标会退化成一个空格。"""

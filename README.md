@@ -20,11 +20,12 @@
 
 ```
 台账   104 已现代化 / 1 退场 / 0 待办  = 105 条清单
-书稿   16 个文件（12 章正文 + 总目录 + 习题 + 勘误 + 插图），16 条规则通过
-成品   PDF（book/pdf/）与网页版（book/site/，双击 index.html 即可读）
+书稿   29 个文件（12 章正文 + 总目录 + 习题 + 勘误 + 插图，加 13 套课件），17 条规则通过
+成品   PDF（book/pdf/，480 页）、网页版（book/site/，双击 index.html 即可读）
+       与课件（book/slides/，282 页幻灯片）
 代码   32 个单元 × 2 种构建（Debug+ASan/UBSan、Release-O2）
        其中 1 个单元另有 Python 实现，再跑 2 档（默认、-X dev -W error）
-自测   301 项（闸门自己的单元测试）
+自测   357 项（闸门自己的单元测试）
 ```
 
 `python3 tools/handoff.py --verify` 退出码 0。
@@ -59,10 +60,11 @@ python3 tools/ledger.py               # 105 条清单现在做到哪了
 python3 tools/check_code.py           # 只跑 code/：-Werror + ASan/UBSan + O2 双构建
 python3 tools/check_doc.py            # 只跑 book/：OCR 残留、编号、插图、代码块一致性
 python3 tools/build_site.py           # 把书稿渲染成网页版 book/site/，入口 index.html
+python3 tools/build_slides.py         # 把 book/slides/*.md 渲染成课件 book/slides/site/
 ```
 
 网页版在线可读：**<https://gmyhf.github.io/dsa-modernization/>**，
-首页顶上有整本 PDF 的下载卡片（364 页 / 7.6 MB，卡片上的数字由构建器读文件得出，不是手写的）。
+首页顶上有整本 PDF 的下载卡片（480 页 / 8.1 MB，卡片上的数字由构建器读文件得出，不是手写的）。
 本地读就双击 `book/site/index.html`，或 `python3 -m http.server -d book` 后打开
 `http://localhost:8000/site/`。它是 `book/*.md` 的产物，闸门里有一条
 `build_site.py --check` 盯着两者不许脱节。
@@ -100,7 +102,7 @@ git add -A && git commit -m "..." && git push
 | `code/<章>/<单元>/` | 一个清单单元：`unit.json`（认领哪几条清单）、`legacy.md`（原书写法→缺陷证据→现代写法）、`modern.hpp`、`test.cpp` |
 | `code/support/` | 各章测试共用的故障注入探针（只放探针，不放任何数据结构实现） |
 | `tools/` | 闸门与脚手架，纯标准库 |
-| `tests/` | 闸门自身的单元测试，115 项 |
+| `tests/` | 闸门自身的单元测试，357 项 |
 | `collab/` | 协作事实源：PLAN / DECISION_LOG / HANDOFF / 双向 NOTES / 退场记录 |
 
 ## 四条闸门
@@ -108,8 +110,8 @@ git add -A && git commit -m "..." && git push
 1. **台账**（`ledger.py`）——原书 105 条清单，每条要么被某个 `code/` 单元认领，
    要么在 `collab/exclusions.json` 里带理由退场。**没有第三种状态**，
    「已覆盖 + 退场 + 待办 = 105」这条等式由脚本守着。
-2. **书稿体检**（`check_doc.py`）——7 条规则拦 OCR 残留、假语言标签、断掉的交叉引用、
-   热链插图。其中最硬的 R3：书稿里的每段 C++ 必须用 ` ```cpp file=... ` 引用 `code/`
+2. **书稿体检**（`check_doc.py`）——17 条规则拦 OCR 残留、假语言标签、断掉的交叉引用、
+   热链插图、没答案的习题、没进课件的小节。其中最硬的 R3：书稿里的每段 C++ 必须用 ` ```cpp file=... ` 引用 `code/`
    下的真实文件并**逐字一致**。书上印的代码就是跑过的那份代码。
 3. **代码**（`check_code.py`）——每个单元在 `-Wall -Wextra -Wpedantic -Werror` 下
    编译两遍：Debug + ASan/UBSan，以及 Release -O2。两遍都要真跑起来、断言全过。
@@ -127,7 +129,7 @@ git add -A && git commit -m "..." && git push
 
 ## 闸门证明不了什么
 
-**这一节是这份 README 里最该读的部分。** 所有的绿——退出码 0、19/19 单元、
+**这一节是这份 README 里最该读的部分。** 所有的绿——退出码 0、32/32 单元、
 几百项断言——都只证明了「被测试走到的那些路径，在这台机器上、这次构建里没出问题」。
 完整版（含可复现的测量程序）在 [`collab/UNVERIFIED-RISKS.md`](collab/UNVERIFIED-RISKS.md)，
 下面是必须先知道的几条。

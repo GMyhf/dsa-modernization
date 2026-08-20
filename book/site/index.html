@@ -474,10 +474,10 @@ python3 tools/check_doc.py</code></pre></div>
 <li><strong>算法思想优先。</strong> 没有用标准库容器或排序算法替代本章要教的核心结构或算法。</li>
 <li><strong>资源所有权显式。</strong> 手写数组和结点链使用 RAII、析构、深复制和移动语义管理寿命。</li>
 <li><strong>测试是正文的一部分。</strong> 每个实现目录的 <code>test.cpp</code> 都覆盖其声明的原书清单；运行测试比 阅读一段未经执行的伪代码更可靠。</li>
-<li><strong>风险如实保留。</strong> 递归树周游与析构仍适合教学，但极深退化结构存在栈溢出风险；详见 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/collab/UNVERIFIED-RISKS.md" class="ext"> 0 </a>。</li>
+<li><strong>风险如实保留。</strong> 递归树周游与析构仍适合教学，但极深退化结构存在栈溢出风险；详见 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/collab/UNVERIFIED-RISKS.md" class="ext"><code>collab/UNVERIFIED-RISKS.md</code></a>。</li>
 </ul>
 <h2 id="验证与边界"><a class="anchor" href="#验证与边界">#</a>验证与边界</h2>
-<p>本教程覆盖原书 105 条算法/代码清单。<code>code/</code> 下的每个单元都有对应的 <code>unit.json</code>、现代实现、 原书问题证据和可执行测试；书稿的 C++ 代码由工具逐字同步。完整的边界条件、未覆盖故障路径与 递归深度风险见 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/collab/UNVERIFIED-RISKS.md" class="ext"> 2 </a>。</p>
+<p>本教程覆盖原书 105 条算法/代码清单。<code>code/</code> 下的每个单元都有对应的 <code>unit.json</code>、现代实现、 原书问题证据和可执行测试；书稿的 C++ 代码由工具逐字同步。完整的边界条件、未覆盖故障路径与 递归深度风险见 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/collab/UNVERIFIED-RISKS.md" class="ext"><code>collab/UNVERIFIED-RISKS.md</code></a>。</p>
 <p>本教程采用 C++17，侧重数据结构的实现与算法语义。它不提供文件系统、数据库页缓存、并发控制 或跨平台性能承诺；这些属于使用数据结构的系统层设计。</p>
 <div class="pagenav"><span></span><a href="ch01-adt.html" style="text-align:right"><span class="dir">下一篇 →</span>第1章 概论</a></div>
 </main>

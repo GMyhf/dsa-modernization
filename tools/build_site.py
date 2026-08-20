@@ -378,29 +378,46 @@ def image_tag(alt, src, ctx):
 # --------------------------------------------------------------------------- 行内
 
 def decorate(text, stash):
-    """转义 → 粗体/斜体 → 把占位符换回真正的标签。"""
+    """转义 → 粗体/斜体 → 把占位符换回真正的标签。
+
+    还原**必须从后往前**：占位符会嵌套（`[`code`](url)` 的链接标记里裹着行内代码
+    的占位符），而占位符总是先内后外地入栈，所以内层编号一定比外层小。顺序还原时
+    外层还没展开，内层那个编号已经被跳过去了——留在页面上的就是一串 NUL 字节，
+    浏览器把它渲染成空白，链接文字整个消失（首页那两条 UNVERIFIED-RISKS 链接
+    就是这么丢的）。倒着还原，外层先落地，内层随后总能被扫到。
+    """
     text = html.escape(text)
     text = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", text)
     text = re.sub(r"(?<!\*)\*([^*\s][^*]*)\*(?!\*)", r"<em>\1</em>", text)
-    for index, markup in enumerate(stash):
-        text = text.replace(f"\x00{index}\x00", markup)
+    for index in range(len(stash) - 1, -1, -1):
+        text = text.replace(f"\x00{index}\x00", stash[index])
     return text
 
 
 def render_inline(text, ctx):
-    stash = []
+    stash, source = [], []
 
-    def keep(markup):
+    def keep(markup, raw):
+        """markup 进页面，raw 是它在书稿里的原样——alt 属性只能要后者。"""
         stash.append(markup)
+        source.append(raw)
         return f"\x00{len(stash) - 1}\x00"
 
+    def plain(text):
+        """把占位符还原成书稿原文：alt 里塞 <span> 会把属性引号顶断。"""
+        for index in range(len(source) - 1, -1, -1):
+            text = text.replace(f"\x00{index}\x00", source[index])
+        return text
+
     # 行内代码要在转义之前摘出来，否则代码里的 < > 会被处理两次
-    text = re.sub(r"`([^`]+)`", lambda m: keep(f"<code>{html.escape(m.group(1))}</code>"), text)
+    text = re.sub(r"`([^`]+)`",
+                  lambda m: keep(f"<code>{html.escape(m.group(1))}</code>", m.group(0)), text)
     text = re.sub(r"\$([^$\n]+)\$",
-                  lambda m: keep(f'<span class="math">{render_math(m.group(1), ctx.unknown_tex)}</span>'),
+                  lambda m: keep(f'<span class="math">{render_math(m.group(1), ctx.unknown_tex)}</span>',
+                                 m.group(0)),
                   text)
     text = re.sub(r"!\[([^\]]*)\]\(([^)\s]+)\)",
-                  lambda m: keep(image_tag(m.group(1), m.group(2), ctx)), text)
+                  lambda m: keep(image_tag(plain(m.group(1)), m.group(2), ctx), m.group(0)), text)
 
     def take_link(match):
         label, href = match.group(1), match.group(2)
@@ -408,7 +425,7 @@ def render_inline(text, ctx):
         ctx.links.append((ctx.page, href, new))
         external = ' class="ext"' if new.startswith("http") else ""
         return keep(f'<a href="{html.escape(new, quote=True)}"{external}>'
-                    f'{decorate(label, [])}</a>')
+                    f'{decorate(label, [])}</a>', match.group(0))
 
     text = re.sub(r"\[([^\]]+)\]\(([^)\s]+)\)", take_link, text)
     return decorate(text, stash)

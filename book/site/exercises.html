@@ -240,7 +240,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 </ol>
 <h3 id="正文上机题参考"><a class="anchor" href="#正文上机题参考">#</a>正文上机题参考</h3>
 <ol>
-<li>设 <span class="math">f(m,n)</span> 是「把 <span class="math">m</span> 拆成若干个不超过 <span class="math">n</span> 的自然数之和」的方案数，按「用不用一个 <span class="math">n</span>」分两类： $<span class="math">f(m,n)<span class="rel">=</span>f(m<span class="bin">−</span>n, n)<span class="bin">+</span>f(m, n<span class="bin">−</span><span class="upr">1</span>).</span><span class="math">边界：</span>f(0,n)=1<span class="math">（空拆法算一种）、</span>m&gt;0<span class="math">且</span>n=0 8<span class="math">f(m,n)</span>9 n&gt;m<span class="math">时取</span>f(m,m)<span class="math">。验证</span>f(5,3)=5<span class="math">，与题面给的五种一致。直接递归会重复计算，改成</span>O(mn)<span class="math">的二维递推即可；空间可滚动到</span>O(m)$。</li>
+<li>设 <span class="math">f(m,n)</span> 是「把 <span class="math">m</span> 拆成若干个不超过 <span class="math">n</span> 的自然数之和」的方案数，按「用不用一个 <span class="math">n</span>」分两类： $<span class="math">f(m,n)<span class="rel">=</span>f(m<span class="bin">−</span>n, n)<span class="bin">+</span>f(m, n<span class="bin">−</span><span class="upr">1</span>).</span><span class="math">边界：</span>f(0,n)=1<span class="math">（空拆法算一种）、</span>m&gt;0<span class="math">且</span>n=0<span class="math">时为</span>0<span class="math">、</span>n&gt;m<span class="math">时取</span>f(m,m)<span class="math">。验证</span>f(5,3)=5<span class="math">，与题面给的五种一致。直接递归会重复计算，改成</span>O(mn)<span class="math">的二维递推即可；空间可滚动到</span>O(m)$。</li>
 <li>复数 ADT 的要点全在接口上，不在算术上：三个构造函数不要用默认参数塞成一个（题目要的就是重载）；<strong>单参数构造要写 <code>explicit</code></strong>，否则 <code>Complex c = 3.0;</code> 这种隐式转换会悄悄发生；四则运算写成对称的自由函数（或 <code>friend</code>）比写成成员更自然，因为 <code>2.0 + c</code> 也该成立；除法要先判分母模长为零并抛 <code>std::invalid_argument</code>（D-001 §3：容器与 ADT 内部不打印，错误靠异常）；<code>operator&lt;&lt;</code> 只负责格式化，不做判断。本书不用 <code>std::complex</code> 代替——这道题练的正是「自己定义一个类型」。</li>
 </ol>
 <h3 id="课程作业与-ref_dsa-参考答案"><a class="anchor" href="#课程作业与-ref_dsa-参考答案">#</a>课程作业与 <code>ref_DSA</code> 参考答案</h3>
@@ -675,7 +675,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>本附录引用的课程答案来自：</p>
 <ul>
 <li><code>ref_数据结构与算法A 2021秋/2021书面作业答案1-12章/</code> 内各章书面作业答案；</li>
-<li><a href="https://github.com/ICUlizhi/Data-Structure-and-Algorithm-A-of-pku" class="ext"> 0 </a> 的 <code>notes-理论-期中后/</code> 中第 7–12 章复习笔记（仅吸收可独立核验的题型和结论）；</li>
+<li><a href="https://github.com/ICUlizhi/Data-Structure-and-Algorithm-A-of-pku" class="ext"><code>Data-Structure-and-Algorithm-A-of-pku</code></a> 的 <code>notes-理论-期中后/</code> 中第 7–12 章复习笔记（仅吸收可独立核验的题型和结论）；</li>
 <li>同目录下的《教材1-6章勘误表.pdf》。</li>
 </ul>
 <p><code>ref_DSA</code> 引用均在题目标记中写出相对路径。追踪状态汇总见 <code>collab/TRACEABILITY-MATRIX.md</code>。课程 PDF/Word 中依赖图片才能确定具体数值的题目，本附录只引用 可由文本独立核验的结论；没有看清题图时不猜最终序列或树形。</p>
