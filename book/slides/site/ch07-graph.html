@@ -369,12 +369,16 @@ Dijkstra 树总权 5，MST 总权 4。&lt;/p&gt;"><h1 id="prim从点出发"><a c
 </ul>
 <p>两个目标不同，结果自然不同。</p></section><section class="slide" data-notes=""><h1 id="课堂讲解卡图算法先看存储和不变量"><a class="anchor" href="#课堂讲解卡图算法先看存储和不变量">#</a>课堂讲解卡：图算法先看存储和不变量</h1>
 <p>先决定图是稠密还是稀疏，再选邻接矩阵或邻接表；随后给算法写不变量：已确定的距离、已访问的顶点或当前生成树。</p></section><section class="slide" data-notes=""><h1 id="课堂例题从-0-出发的带权图"><a class="anchor" href="#课堂例题从-0-出发的带权图">#</a>课堂例题：从 0 出发的带权图</h1>
-<p>用 Dijkstra 逐轮确定最小暂定距离，用 Floyd 逐个开放中间顶点；两种算法算出的距离应一致，但访问模式不同。 再删掉一个入度为 0 的点，观察拓扑排序为什么会暴露环。</p></section><section class="slide" data-notes=""><h1 id="课末自检"><a class="anchor" href="#课末自检">#</a>课末自检</h1>
+<p>用 Dijkstra 逐轮确定最小暂定距离，用 Floyd 逐个开放中间顶点；两种算法算出的距离应一致，但访问模式不同。 再删掉一个入度为 0 的点，观察拓扑排序为什么会暴露环。</p></section><section class="slide" data-notes=""><h1 id="课堂例题答案三个算法的结果"><a class="anchor" href="#课堂例题答案三个算法的结果">#</a>课堂例题答案：三个算法的结果</h1>
+<p>Dijkstra 每轮确定最小暂定距离，要求边权非负；Floyd 按中间点编号逐轮更新，允许负边但不能有负环。拓扑排序若仍有顶点未摘除，说明剩余子图有环。</p></section><section class="slide" data-notes=""><h1 id="课末自检"><a class="anchor" href="#课末自检">#</a>课末自检</h1>
 <ul>
 <li>Dijkstra 为什么不能处理负权边？</li>
 <li>DFS/BFS 的 <code>seen</code> 何时标记，能否避免重复入队？</li>
 <li>Prim 与 Kruskal 都生成什么对象，为什么不等于最短路树？</li>
 <li>十字链表的两条链是否始终描述同一组弧？</li>
+</ul></section><section class="slide" data-notes=""><h1 id="课末自检参考答案"><a class="anchor" href="#课末自检参考答案">#</a>课末自检参考答案</h1>
+<ul>
+<li>Dijkstra 的贪心前提被负边破坏。\n- DFS/BFS 入队或入栈时及时标记，避免重复加入。\n- Prim/Kruskal 生成最小生成树，最短路树优化的是源点距离。\n- 每条弧同时在出链和入链中出现，插删必须同步维护。</li>
 </ul></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
 <ul>
 <li>图的存法决定算法代价：稀疏用<strong>邻接表</strong>，稠密用<strong>相邻矩阵</strong></li>
@@ -395,7 +399,7 @@ python3 tools/check_code.py code/ch07/adjacency_list</code></pre></div>
 <blockquote><p>邻接表和邻接矩阵两套实现在测试里<strong>逐项对拍</strong>： 同一张图上，所有算法必须给出同样的答案。</p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第7章 图</div><div class="thumb"><div class="no">2</div>7.1 基本术语</div><div class="thumb"><div class="no">3</div>连通与强连通</div><div class="thumb"><div class="no">4</div>7.2 图的 ADT：对外有哪些运算</div><div class="thumb"><div class="no">5</div>7.3.1 相邻矩阵</div><div class="thumb"><div class="no">6</div>7.3.2 邻接表</div><div class="thumb"><div class="no">7</div>两种存法的代价对照</div><div class="thumb"><div class="no">8</div>7.3.3 十字链表：一条弧进两条链</div><div class="thumb"><div class="no">9</div>7.4 深度优先周游</div><div class="thumb"><div class="no">10</div>广度优先周游</div><div class="thumb"><div class="no">11</div>7.4.3 拓扑排序</div><div class="thumb"><div class="no">12</div>拓扑排序：不断摘入度为 0 的点</div><div class="thumb"><div class="no">13</div>7.5.1 单源最短路：Dijkstra</div><div class="thumb"><div class="no">14</div>Dijkstra 的实现</div><div class="thumb"><div class="no">15</div>7.5.2 每对顶点：Floyd</div><div class="thumb"><div class="no">16</div>7.6 最小生成树</div><div class="thumb"><div class="no">17</div>Prim：从点出发</div><div class="thumb"><div class="no">18</div>Kruskal：从边出发</div><div class="thumb"><div class="no">19</div>最短路树 ≠ 最小生成树</div><div class="thumb"><div class="no">20</div>课堂讲解卡：图算法先看存储和不变量</div><div class="thumb"><div class="no">21</div>课堂例题：从 0 出发的带权图</div><div class="thumb"><div class="no">22</div>课末自检</div><div class="thumb"><div class="no">23</div>本章小结</div><div class="thumb"><div class="no">24</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第7章 图</div><div class="thumb"><div class="no">2</div>7.1 基本术语</div><div class="thumb"><div class="no">3</div>连通与强连通</div><div class="thumb"><div class="no">4</div>7.2 图的 ADT：对外有哪些运算</div><div class="thumb"><div class="no">5</div>7.3.1 相邻矩阵</div><div class="thumb"><div class="no">6</div>7.3.2 邻接表</div><div class="thumb"><div class="no">7</div>两种存法的代价对照</div><div class="thumb"><div class="no">8</div>7.3.3 十字链表：一条弧进两条链</div><div class="thumb"><div class="no">9</div>7.4 深度优先周游</div><div class="thumb"><div class="no">10</div>广度优先周游</div><div class="thumb"><div class="no">11</div>7.4.3 拓扑排序</div><div class="thumb"><div class="no">12</div>拓扑排序：不断摘入度为 0 的点</div><div class="thumb"><div class="no">13</div>7.5.1 单源最短路：Dijkstra</div><div class="thumb"><div class="no">14</div>Dijkstra 的实现</div><div class="thumb"><div class="no">15</div>7.5.2 每对顶点：Floyd</div><div class="thumb"><div class="no">16</div>7.6 最小生成树</div><div class="thumb"><div class="no">17</div>Prim：从点出发</div><div class="thumb"><div class="no">18</div>Kruskal：从边出发</div><div class="thumb"><div class="no">19</div>最短路树 ≠ 最小生成树</div><div class="thumb"><div class="no">20</div>课堂讲解卡：图算法先看存储和不变量</div><div class="thumb"><div class="no">21</div>课堂例题：从 0 出发的带权图</div><div class="thumb"><div class="no">22</div>课堂例题答案：三个算法的结果</div><div class="thumb"><div class="no">23</div>课末自检</div><div class="thumb"><div class="no">24</div>课末自检参考答案</div><div class="thumb"><div class="no">25</div>本章小结</div><div class="thumb"><div class="no">26</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -408,7 +412,7 @@ python3 tools/check_code.py code/ch07/adjacency_list</code></pre></div>
 <b>第7章 图</b><span>数据结构与算法：Python 讲算法，C++ 讲实现</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 24</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 26</b>
 </div>
 <script>
 (function(){

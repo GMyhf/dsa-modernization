@@ -2134,6 +2134,174 @@
       "reason": "课堂自检清单：复习稀疏格式、回收算法、Trie 和三种搜索树",
       "by": "Codex",
       "date": "2026-08-22"
+    },
+    {
+      "page": "ch01:课堂例题答案：Floyd 的三轮更新",
+      "kind": "extra",
+      "reason": "课堂例题的逐步答案，与前页五个城市最短路配套",
+      "by": "Codex",
+      "date": "2026-08-22"
+    },
+    {
+      "page": "ch01:课末自检参考答案",
+      "kind": "extra",
+      "reason": "课堂自检的参考答案",
+      "by": "Codex",
+      "date": "2026-08-22"
+    },
+    {
+      "page": "ch02:课堂例题答案：扩容搬运次数",
+      "kind": "extra",
+      "reason": "课堂例题的摊还分析答案",
+      "by": "Codex",
+      "date": "2026-08-22"
+    },
+    {
+      "page": "ch02:课末自检参考答案",
+      "kind": "extra",
+      "reason": "课堂自检的参考答案",
+      "by": "Codex",
+      "date": "2026-08-22"
+    },
+    {
+      "page": "ch03:课堂例题答案：`1 + 2 * 3`",
+      "kind": "extra",
+      "reason": "表达式求值例题的逐步答案",
+      "by": "Codex",
+      "date": "2026-08-22"
+    },
+    {
+      "page": "ch03:课末自检参考答案",
+      "kind": "extra",
+      "reason": "课堂自检的参考答案",
+      "by": "Codex",
+      "date": "2026-08-22"
+    },
+    {
+      "page": "ch04:课堂例题答案：`ABABC` 的回退",
+      "kind": "extra",
+      "reason": "KMP 例题的逐步答案",
+      "by": "Codex",
+      "date": "2026-08-22"
+    },
+    {
+      "page": "ch04:课末自检参考答案",
+      "kind": "extra",
+      "reason": "课堂自检的参考答案",
+      "by": "Codex",
+      "date": "2026-08-22"
+    },
+    {
+      "page": "ch05:课堂例题答案：BST 与堆",
+      "kind": "extra",
+      "reason": "BST 与堆对比例题的逐步答案",
+      "by": "Codex",
+      "date": "2026-08-22"
+    },
+    {
+      "page": "ch05:课末自检参考答案",
+      "kind": "extra",
+      "reason": "课堂自检的参考答案",
+      "by": "Codex",
+      "date": "2026-08-22"
+    },
+    {
+      "page": "ch06:课堂例题答案：并查集合并",
+      "kind": "extra",
+      "reason": "并查集例题的逐步答案",
+      "by": "Codex",
+      "date": "2026-08-22"
+    },
+    {
+      "page": "ch06:课末自检参考答案",
+      "kind": "extra",
+      "reason": "课堂自检的参考答案",
+      "by": "Codex",
+      "date": "2026-08-22"
+    },
+    {
+      "page": "ch07:课堂例题答案：三个算法的结果",
+      "kind": "extra",
+      "reason": "图算法例题的对照答案",
+      "by": "Codex",
+      "date": "2026-08-22"
+    },
+    {
+      "page": "ch07:课末自检参考答案",
+      "kind": "extra",
+      "reason": "课堂自检的参考答案",
+      "by": "Codex",
+      "date": "2026-08-22"
+    },
+    {
+      "page": "ch08:课堂例题答案：排序路径对照",
+      "kind": "extra",
+      "reason": "排序方法对比例题的答案",
+      "by": "Codex",
+      "date": "2026-08-22"
+    },
+    {
+      "page": "ch08:课末自检参考答案",
+      "kind": "extra",
+      "reason": "课堂自检的参考答案",
+      "by": "Codex",
+      "date": "2026-08-22"
+    },
+    {
+      "page": "ch09:课堂例题答案：M=3",
+      "kind": "extra",
+      "reason": "置换选择例题的逐步答案",
+      "by": "Codex",
+      "date": "2026-08-22"
+    },
+    {
+      "page": "ch09:课末自检参考答案",
+      "kind": "extra",
+      "reason": "课堂自检的参考答案",
+      "by": "Codex",
+      "date": "2026-08-22"
+    },
+    {
+      "page": "ch10:课堂例题答案：三种查询",
+      "kind": "extra",
+      "reason": "三种查询方法对比例题的答案",
+      "by": "Codex",
+      "date": "2026-08-22"
+    },
+    {
+      "page": "ch10:课末自检参考答案",
+      "kind": "extra",
+      "reason": "课堂自检的参考答案",
+      "by": "Codex",
+      "date": "2026-08-22"
+    },
+    {
+      "page": "ch11:课堂例题答案：B+ 树范围查询",
+      "kind": "extra",
+      "reason": "B+ 树范围查询例题的答案",
+      "by": "Codex",
+      "date": "2026-08-22"
+    },
+    {
+      "page": "ch11:课末自检参考答案",
+      "kind": "extra",
+      "reason": "课堂自检的参考答案",
+      "by": "Codex",
+      "date": "2026-08-22"
+    },
+    {
+      "page": "ch12:课堂例题答案：共享与环",
+      "kind": "extra",
+      "reason": "共享对象和循环引用例题的答案",
+      "by": "Codex",
+      "date": "2026-08-22"
+    },
+    {
+      "page": "ch12:课末自检参考答案",
+      "kind": "extra",
+      "reason": "课堂自检的参考答案",
+      "by": "Codex",
+      "date": "2026-08-22"
     }
   ]
 }

@@ -385,12 +385,16 @@ rtag       0  1  0  1  1  1  0  0  1  1     0 = 有下一个兄弟</code></pre><
 下标 i 的父亲          (i - 1) / K</code></pre></div>
 <p>第 11 章的 B 树、B+ 树就是 K 叉树的一种。</p></section><section class="slide" data-notes=""><h1 id="课堂讲解卡森林二叉树与并查集"><a class="anchor" href="#课堂讲解卡森林二叉树与并查集">#</a>课堂讲解卡：森林、二叉树与并查集</h1>
 <p>左孩子右兄弟把“任意多个孩子”编码成两个指针；并查集则把树的父指针用于维护等价类，而不是表达遍历顺序。</p></section><section class="slide" data-notes=""><h1 id="课堂例题合并三个集合"><a class="anchor" href="#课堂例题合并三个集合">#</a>课堂例题：合并三个集合</h1>
-<p>先执行 <code>union(1,2)</code>、<code>union(3,4)</code>、<code>union(2,3)</code>，画出父指针变化；再执行 <code>find(4)</code>，比较路径压缩前后的链长。</p></section><section class="slide" data-notes=""><h1 id="课末自检"><a class="anchor" href="#课末自检">#</a>课末自检</h1>
+<p>先执行 <code>union(1,2)</code>、<code>union(3,4)</code>、<code>union(2,3)</code>，画出父指针变化；再执行 <code>find(4)</code>，比较路径压缩前后的链长。</p></section><section class="slide" data-notes=""><h1 id="课堂例题答案并查集合并"><a class="anchor" href="#课堂例题答案并查集合并">#</a>课堂例题答案：并查集合并</h1>
+<p>先得到 <code>{1,2}</code> 和 <code>{3,4}</code>，再把两个代表合并。按大小合并时小树根挂到大树根；<code>find(4)</code> 返回同一代表并压缩沿途路径。路径压缩只改变父指针，不改变集合划分。</p></section><section class="slide" data-notes=""><h1 id="课末自检"><a class="anchor" href="#课末自检">#</a>课末自检</h1>
 <ul>
 <li>森林转换为二叉树时，右指针表示什么？</li>
 <li>为什么按大小合并能避免树高线性增长？</li>
 <li>路径压缩改变了哪些父指针，是否改变集合语义？</li>
 <li>双标记表示法解决了什么空间问题，现代替代方案是什么？</li>
+</ul></section><section class="slide" data-notes=""><h1 id="课末自检参考答案"><a class="anchor" href="#课末自检参考答案">#</a>课末自检参考答案</h1>
+<ul>
+<li>左指针是第一个孩子，右指针是下一个兄弟。\n- 按大小合并限制树高，路径压缩降低后续 find 代价。\n- 路径压缩不改变等价类语义。\n- 双标记利用空链接记录遍历信息；现代可用 LOUDS、平衡括号等编码。</li>
 </ul></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
 <ul>
 <li>一般树的问题可以通过「左子/右兄」搬到<strong>二叉树</strong>上解决</li>
@@ -411,7 +415,7 @@ rtag       0  1  0  1  1  1  0  0  1  1     0 = 有下一个兄弟</code></pre><
 <blockquote><p>第三条会让「规模 3 的集合与规模 2 的集合合并、根应是前者」那条断言变红—— 两种规则长出的树形状不同。</p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第6章 树</div><div class="thumb"><div class="no">2</div>6.1.1 树与森林</div><div class="thumb"><div class="no">3</div>6.1.2 森林与二叉树可以互相转换</div><div class="thumb"><div class="no">4</div>转换的两个方向</div><div class="thumb"><div class="no">5</div>6.1.3 树的 ADT：对外有哪些运算</div><div class="thumb"><div class="no">6</div>6.1.4 树的周游</div><div class="thumb"><div class="no">7</div>先根与后根</div><div class="thumb"><div class="no">8</div>6.2 链式存储：四种表示法</div><div class="thumb"><div class="no">9</div>子结点表：为什么不够用</div><div class="thumb"><div class="no">10</div>6.2.4 动态「左子/右兄」</div><div class="thumb"><div class="no">11</div>删子树：先脱开，再销毁</div><div class="thumb"><div class="no">12</div>6.2.5 父指针表示法</div><div class="thumb"><div class="no">13</div>并查集：等价类问题</div><div class="thumb"><div class="no">14</div>朴素做法会退化成一条链</div><div class="thumb"><div class="no">15</div>改进一：重量权衡合并规则</div><div class="thumb"><div class="no">16</div>改进二：路径压缩</div><div class="thumb"><div class="no">17</div>6.3 顺序存储：四种表示法</div><div class="thumb"><div class="no">18</div>带双标记的先根次序</div><div class="thumb"><div class="no">19</div>重建：用一把栈</div><div class="thumb"><div class="no">20</div>6.4 K 叉树</div><div class="thumb"><div class="no">21</div>课堂讲解卡：森林、二叉树与并查集</div><div class="thumb"><div class="no">22</div>课堂例题：合并三个集合</div><div class="thumb"><div class="no">23</div>课末自检</div><div class="thumb"><div class="no">24</div>本章小结</div><div class="thumb"><div class="no">25</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第6章 树</div><div class="thumb"><div class="no">2</div>6.1.1 树与森林</div><div class="thumb"><div class="no">3</div>6.1.2 森林与二叉树可以互相转换</div><div class="thumb"><div class="no">4</div>转换的两个方向</div><div class="thumb"><div class="no">5</div>6.1.3 树的 ADT：对外有哪些运算</div><div class="thumb"><div class="no">6</div>6.1.4 树的周游</div><div class="thumb"><div class="no">7</div>先根与后根</div><div class="thumb"><div class="no">8</div>6.2 链式存储：四种表示法</div><div class="thumb"><div class="no">9</div>子结点表：为什么不够用</div><div class="thumb"><div class="no">10</div>6.2.4 动态「左子/右兄」</div><div class="thumb"><div class="no">11</div>删子树：先脱开，再销毁</div><div class="thumb"><div class="no">12</div>6.2.5 父指针表示法</div><div class="thumb"><div class="no">13</div>并查集：等价类问题</div><div class="thumb"><div class="no">14</div>朴素做法会退化成一条链</div><div class="thumb"><div class="no">15</div>改进一：重量权衡合并规则</div><div class="thumb"><div class="no">16</div>改进二：路径压缩</div><div class="thumb"><div class="no">17</div>6.3 顺序存储：四种表示法</div><div class="thumb"><div class="no">18</div>带双标记的先根次序</div><div class="thumb"><div class="no">19</div>重建：用一把栈</div><div class="thumb"><div class="no">20</div>6.4 K 叉树</div><div class="thumb"><div class="no">21</div>课堂讲解卡：森林、二叉树与并查集</div><div class="thumb"><div class="no">22</div>课堂例题：合并三个集合</div><div class="thumb"><div class="no">23</div>课堂例题答案：并查集合并</div><div class="thumb"><div class="no">24</div>课末自检</div><div class="thumb"><div class="no">25</div>课末自检参考答案</div><div class="thumb"><div class="no">26</div>本章小结</div><div class="thumb"><div class="no">27</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -424,7 +428,7 @@ rtag       0  1  0  1  1  1  0  0  1  1     0 = 有下一个兄弟</code></pre><
 <b>第6章 树</b><span>数据结构与算法：Python 讲算法，C++ 讲实现</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 25</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 27</b>
 </div>
 <script>
 (function(){

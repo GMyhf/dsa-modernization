@@ -314,12 +314,16 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 </tbody></table></div>
 <p><strong>优化的两个方向</strong>：置换选择减少<strong>段数</strong>，多路归并减少<strong>轮数</strong>。</p></section><section class="slide" data-notes=""><h1 id="课堂讲解卡外排序先算-io"><a class="anchor" href="#课堂讲解卡外排序先算-io">#</a>课堂讲解卡：外排序先算 I/O</h1>
 <p>内存只放得下 M 条记录时，目标不是少比较，而是少读写磁盘页。初始顺串、归并路数和缓冲区大小共同决定总 I/O。</p></section><section class="slide" data-notes=""><h1 id="课堂例题m3-的置换选择"><a class="anchor" href="#课堂例题m3-的置换选择">#</a>课堂例题：M=3 的置换选择</h1>
-<p>输入 <code>4,1,3,2,5,0</code>：先建容量 3 的堆，输出不小于上次输出的记录，较小的记录冻结到下一顺串。 让学生列出两条顺串，再用二路或四路归并合成最终结果。</p></section><section class="slide" data-notes=""><h1 id="课末自检"><a class="anchor" href="#课末自检">#</a>课末自检</h1>
+<p>输入 <code>4,1,3,2,5,0</code>：先建容量 3 的堆，输出不小于上次输出的记录，较小的记录冻结到下一顺串。 让学生列出两条顺串，再用二路或四路归并合成最终结果。</p></section><section class="slide" data-notes=""><h1 id="课堂例题答案m3"><a class="anchor" href="#课堂例题答案m3">#</a>课堂例题答案：M=3</h1>
+<p>初始堆为 <code>1,4,3</code>，输出 1 后读入 2，继续当前顺串；输出 3 后读入 0，因 <code>0&lt;3</code> 冻结。当前顺串为 <code>1,2,3,4,5</code>，下一顺串从冻结的 0 开始，再进行归并。</p></section><section class="slide" data-notes=""><h1 id="课末自检"><a class="anchor" href="#课末自检">#</a>课末自检</h1>
 <ul>
 <li>为什么顺序读写通常比随机访问便宜？</li>
 <li>置换选择如何使顺串平均长于 M？</li>
 <li>赢者树和败者树每次更新为什么是 O(log k)？</li>
 <li>页大小、记录大小和归并路数之间如何权衡？</li>
+</ul></section><section class="slide" data-notes=""><h1 id="课末自检参考答案"><a class="anchor" href="#课末自检参考答案">#</a>课末自检参考答案</h1>
+<ul>
+<li>顺序读写能合并页访问，随机访问会频繁触发定位和换页。\n- 置换选择把不破坏当前顺序的输入继续留在堆中。\n- 选择树更新只沿一条叶到根路径，代价 O(log k)。\n- 更大页和更多路数减少轮数，但增加缓冲区成本。</li>
 </ul></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
 <ul>
 <li>外排序数的是<strong>外存访问次数</strong>，不是比较次数</li>
@@ -338,7 +342,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <blockquote><p>测试里赢者树和败者树<strong>逐项对拍</strong>：同一组输入，输出序列必须完全相同。</p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第9章 文件管理和外排序</div><div class="thumb"><div class="no">2</div>9.1 一次磁盘访问有多贵</div><div class="thumb"><div class="no">3</div>页 I/O 成本模型</div><div class="thumb"><div class="no">4</div>9.2 记录怎样装进页</div><div class="thumb"><div class="no">5</div>外排序的基本套路</div><div class="thumb"><div class="no">6</div>9.3.1 置换选择：让顺串更长</div><div class="thumb"><div class="no">7</div>置换选择：怎么做到的</div><div class="thumb"><div class="no">8</div>置换选择：原书序列逐步走</div><div class="thumb"><div class="no">9</div>9.3.2 二路外排序</div><div class="thumb"><div class="no">10</div>3000 条记录：二路归并要几趟</div><div class="thumb"><div class="no">11</div>9.3.3 多路归并：瓶颈在哪</div><div class="thumb"><div class="no">12</div>赢者树</div><div class="thumb"><div class="no">13</div>赢者树的重构</div><div class="thumb"><div class="no">14</div>四路归并：赢家路径怎样更新</div><div class="thumb"><div class="no">15</div>败者树：省掉「看兄弟」</div><div class="thumb"><div class="no">16</div>代价小结</div><div class="thumb"><div class="no">17</div>课堂讲解卡：外排序先算 I/O</div><div class="thumb"><div class="no">18</div>课堂例题：M=3 的置换选择</div><div class="thumb"><div class="no">19</div>课末自检</div><div class="thumb"><div class="no">20</div>本章小结</div><div class="thumb"><div class="no">21</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第9章 文件管理和外排序</div><div class="thumb"><div class="no">2</div>9.1 一次磁盘访问有多贵</div><div class="thumb"><div class="no">3</div>页 I/O 成本模型</div><div class="thumb"><div class="no">4</div>9.2 记录怎样装进页</div><div class="thumb"><div class="no">5</div>外排序的基本套路</div><div class="thumb"><div class="no">6</div>9.3.1 置换选择：让顺串更长</div><div class="thumb"><div class="no">7</div>置换选择：怎么做到的</div><div class="thumb"><div class="no">8</div>置换选择：原书序列逐步走</div><div class="thumb"><div class="no">9</div>9.3.2 二路外排序</div><div class="thumb"><div class="no">10</div>3000 条记录：二路归并要几趟</div><div class="thumb"><div class="no">11</div>9.3.3 多路归并：瓶颈在哪</div><div class="thumb"><div class="no">12</div>赢者树</div><div class="thumb"><div class="no">13</div>赢者树的重构</div><div class="thumb"><div class="no">14</div>四路归并：赢家路径怎样更新</div><div class="thumb"><div class="no">15</div>败者树：省掉「看兄弟」</div><div class="thumb"><div class="no">16</div>代价小结</div><div class="thumb"><div class="no">17</div>课堂讲解卡：外排序先算 I/O</div><div class="thumb"><div class="no">18</div>课堂例题：M=3 的置换选择</div><div class="thumb"><div class="no">19</div>课堂例题答案：M=3</div><div class="thumb"><div class="no">20</div>课末自检</div><div class="thumb"><div class="no">21</div>课末自检参考答案</div><div class="thumb"><div class="no">22</div>本章小结</div><div class="thumb"><div class="no">23</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -351,7 +355,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <b>第9章 文件管理和外排序</b><span>数据结构与算法：Python 讲算法，C++ 讲实现</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 21</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 23</b>
 </div>
 <script>
 (function(){
