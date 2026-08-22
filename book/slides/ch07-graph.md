@@ -18,7 +18,7 @@ subtitle: 数据结构与算法：Python 讲算法，C++ 讲实现
 
 # 7.1 基本术语
 
-![图 7.2 图的示例](../assets/25d6dac564f61138.jpg)
+![图 7.2 图的示例](../assets/combined/fig-7-2.png)
 
 - $G = (V, E)$：顶点集 + 边集
 - **无向图**的边是顶点对 $(u,v)$；**有向图**的边（弧）是序偶 $\langle u,v\rangle$
