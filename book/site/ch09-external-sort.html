@@ -284,6 +284,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>图9.1 置换选择：工作区是最小堆。弹出堆顶后，下一条记录若不小于刚输出的值就入堆，否则冻结到下一趟。</p>
 <p>若把整份输入推进一个堆再依次弹出，得到的是一条完全有序序列——那是堆排序，不是置换选择。旧实现曾经这样做，测试只断言 <code>{3,1,2} → {1,2,3}</code>，堆排序也能过。现在的接口返回<strong>若干顺串</strong>，并用原书这组数据守门。</p>
 <p>多路归并时，每次要在 k 路的队首里选出最小者。赢者树的内部结点保存胜者下标；败者树的内部结点保存败者，另用一个冠军槽记录全局最小。替换一名选手后，两者都只需沿叶到根重赛。</p>
+<p>赢者树和败者树统称<strong>选择树</strong>（tournament tree），是外部排序多路归并中的专用优化； 内存内的一般“取最小”任务通常直接使用二叉堆或优先队列，只有需要反复从固定的多路输入中选冠军时才值得维护选择树。</p>
 <p>先跑一遍：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch09/external_sort/demo.cpp">code/ch09/external_sort/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
 

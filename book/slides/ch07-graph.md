@@ -60,6 +60,8 @@ subtitle: 数据结构与算法：Python 讲算法，C++ 讲实现
 
 # 7.3.1 相邻矩阵
 
+原书沿用“相邻矩阵”一词；现代资料通常称**邻接矩阵**（adjacency matrix）。
+
 `m[i][j]` 是 i 到 j 一条边的权，不通就是「无穷大」。
 
 ```cpp file=code/ch07/graph/modern.hpp#graph-build
@@ -421,9 +423,9 @@ python3 tools/check_code.py code/ch07/adjacency_list
 ```
 
 - 用 `GraphList::scan_steps()` 量一量：同一张稀疏图上，
-  邻接表和相邻矩阵各扫了多少条边
+  邻接表和邻接矩阵各扫了多少条边
 - 把 Floyd 的 k 循环挪到里层，看哪条断言变红
 - 构造一个带负权边的图，看 Dijkstra 给出什么
 
-> 邻接表和相邻矩阵两套实现在测试里**逐项对拍**：
+> 邻接表和邻接矩阵两套实现在测试里**逐项对拍**：
 > 同一张图上，所有算法必须给出同样的答案。

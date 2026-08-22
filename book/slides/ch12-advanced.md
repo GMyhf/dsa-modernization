@@ -97,6 +97,8 @@ subtitle: 数据结构与算法：Python 讲算法，C++ 讲实现
 
 # 十字链表：一次更新维护两条链
 
+十字链表（orthogonal list）是双向索引的历史教材表示；工程中还常用 COO、CSR、CSC，后者连续存储、缓存局部性更好。
+
 非零元：`(0,1,8)`、`(0,4,2)`、`(2,1,5)`、`(3,3,7)`。
 
 | 操作后 | 第 0 行链 | 第 2 行链 | 第 1 列链 | $t$ |
@@ -158,6 +160,8 @@ static void release(GenNode* node) noexcept {
 ---
 
 # 12.2.3 可利用空间表
+
+“可利用空间表”即 **free list**；固定大小对象的工程实现还常称 arena、pool 或 slab allocator。
 
 系统的 `new`/`delete` 太通用也太慢。**固定大小**的结点可以自己管：
 

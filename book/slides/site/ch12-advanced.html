@@ -157,6 +157,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
     }
     <span class="k">return</span> <span class="n">0</span>;  <span class="c">// 没有存的位置就是零，不是错误</span>
 }</code></pre></div></section><section class="slide" data-notes=""><h1 id="十字链表一次更新维护两条链"><a class="anchor" href="#十字链表一次更新维护两条链">#</a>十字链表：一次更新维护两条链</h1>
+<p>十字链表（orthogonal list）是双向索引的历史教材表示；工程中还常用 COO、CSR、CSC，后者连续存储、缓存局部性更好。</p>
 <p>非零元：<code>(0,1,8)</code>、<code>(0,4,2)</code>、<code>(2,1,5)</code>、<code>(3,3,7)</code>。</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">操作后</th>
@@ -212,6 +213,7 @@ C = (a, C)          递归表!</code></pre></div>
 }</code></pre></div>
 <p>答案：<strong>引用计数</strong>。每被引用一次加一，释放一次减一，减到 0 才真删。</p></section><section class="slide" data-notes="&lt;p&gt;适用前提是&lt;strong&gt;结点大小固定&lt;/strong&gt;——这样任何一个空闲结点都能满足任何一次分配，
 不需要挑，也不会产生碎片。下一页讲大小不定时怎么办。&lt;/p&gt;"><h1 id="1223-可利用空间表"><a class="anchor" href="#1223-可利用空间表">#</a>12.2.3 可利用空间表</h1>
+<p>“可利用空间表”即 <strong>free list</strong>；固定大小对象的工程实现还常称 arena、pool 或 slab allocator。</p>
 <p>系统的 <code>new</code>/<code>delete</code> 太通用也太慢。<strong>固定大小</strong>的结点可以自己管：</p>
 <div class="codeblock" data-lang="text"><pre><code>把释放的结点串成一条链  -&gt;  「可利用空间表」
 分配: 从链头摘一个       O(1), 不回到系统分配器

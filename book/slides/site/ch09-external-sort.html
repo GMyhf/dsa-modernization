@@ -233,7 +233,8 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <li>总代价：<span class="math">N(k<span class="bin">−</span><span class="upr">1</span>)</span> 次比较</li>
 </ul>
 <p><strong>路数 k 增大，轮数降了，但每步的比较次数升了</strong>——两者对冲。</p>
-<p>要真正受益，就得让「挑最小」变便宜：<strong>选择树</strong>。</p></section><section class="slide" data-notes="&lt;p&gt;建树 O(k)。取走根之后，只有从那片叶子到根的这一条路径需要重算——
+<p>要真正受益，就得让「挑最小」变便宜：<strong>选择树</strong>。</p>
+<p>赢者树和败者树统称 <strong>tournament tree（选择树）</strong>，主要服务外部排序的多路归并；一般内存内取最小通常直接使用二叉堆或优先队列。</p></section><section class="slide" data-notes="&lt;p&gt;建树 O(k)。取走根之后，只有从那片叶子到根的这一条路径需要重算——
 &lt;strong&gt;O(log k)&lt;/strong&gt;，而不是 O(k)。
 于是 k 路归并的总比较次数从 N(k-1) 降到 N log k。&lt;/p&gt;"><h1 id="赢者树"><a class="anchor" href="#赢者树">#</a>赢者树</h1>
 <figure><img loading="lazy" src="../../assets/dffb7316183b2881.jpg" alt="图9.4 含有5 个选手的赢者树"><figcaption>图9.4 含有5 个选手的赢者树</figcaption></figure>

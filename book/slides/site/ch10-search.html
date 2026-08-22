@@ -259,12 +259,14 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <li>把实际输入均匀铺到槽位</li>
 </ul>
 <p>“看起来随机”不等于无冲突；冲突处理始终是散列表的一部分。</p></section><section class="slide" data-notes=""><h1 id="1032-开散列拉链法"><a class="anchor" href="#1032-开散列拉链法">#</a>10.3.2 开散列（拉链法）</h1>
+<p>现代资料通常称 <strong>separate chaining（分离链接）</strong>；“开”指冲突元素放到槽外的链或桶中。</p>
 <figure><img loading="lazy" src="../../assets/70ba08a893dc9d64.jpg" alt="图 10.7 开散列方法的图示"><figcaption>图 10.7 开散列方法的图示</figcaption></figure>
 <p>冲突的元素挂成一条链。</p>
 <ul>
 <li>优点：装载因子可以大于 1；删除简单</li>
 <li>缺点：额外的指针空间；缓存局部性差</li>
 </ul></section><section class="slide" data-notes=""><h1 id="1033-闭散列开地址法"><a class="anchor" href="#1033-闭散列开地址法">#</a>10.3.3 闭散列（开地址法）</h1>
+<p>现代资料通常称 <strong>open addressing（开放地址法）</strong>；所有元素都留在主表槽位中并按探测序列处理冲突。</p>
 <p><strong>所有元素都住在表里</strong>，不另开链表。</p>
 <p>关键码先由散列函数算出<strong>基地址</strong>；那一格被占了就往后找——<strong>线性探测</strong>。</p>
 <div class="codeblock" data-lang="text"><pre><code>表长 7,  插入 3, 10, 17   (三者的基地址都是 3)

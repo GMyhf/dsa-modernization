@@ -158,6 +158,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 用 INT_MAX 就溢出了，而有符号溢出是未定义行为。这一处第 1 章也讲过。
 
 无向图加边要加两次，本书用 directed 参数表达。&lt;/p&gt;"><h1 id="731-相邻矩阵"><a class="anchor" href="#731-相邻矩阵">#</a>7.3.1 相邻矩阵</h1>
+<p>原书沿用“相邻矩阵”一词；现代资料通常称<strong>邻接矩阵</strong>（adjacency matrix）。</p>
 <p><code>m[i][j]</code> 是 i 到 j 一条边的权，不通就是「无穷大」。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#graph-build</a></div><pre><code><span class="k">explicit</span> Graph(std::<span class="t">size_t</span> count) : adjacency_(count, std::vector&lt;<span class="t">int</span>&gt;(count, infinity)) {
     <span class="k">for</span> (std::<span class="t">size_t</span> vertex = <span class="n">0</span>; vertex &lt; count; ++vertex) {
@@ -379,11 +380,11 @@ Dijkstra 树总权 5，MST 总权 4。&lt;/p&gt;"><h1 id="prim从点出发"><a c
 <div class="codeblock" data-lang="bash"><pre><code>python3 tools/check_code.py code/ch07/graph
 python3 tools/check_code.py code/ch07/adjacency_list</code></pre></div>
 <ul>
-<li>用 <code>GraphList::scan_steps()</code> 量一量：同一张稀疏图上， 邻接表和相邻矩阵各扫了多少条边</li>
+<li>用 <code>GraphList::scan_steps()</code> 量一量：同一张稀疏图上， 邻接表和邻接矩阵各扫了多少条边</li>
 <li>把 Floyd 的 k 循环挪到里层，看哪条断言变红</li>
 <li>构造一个带负权边的图，看 Dijkstra 给出什么</li>
 </ul>
-<blockquote><p>邻接表和相邻矩阵两套实现在测试里<strong>逐项对拍</strong>： 同一张图上，所有算法必须给出同样的答案。</p></blockquote></section></div>
+<blockquote><p>邻接表和邻接矩阵两套实现在测试里<strong>逐项对拍</strong>： 同一张图上，所有算法必须给出同样的答案。</p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
 <div class="overview"><div class="thumb"><div class="no">1</div>第7章 图</div><div class="thumb"><div class="no">2</div>7.1 基本术语</div><div class="thumb"><div class="no">3</div>连通与强连通</div><div class="thumb"><div class="no">4</div>7.2 图的 ADT：对外有哪些运算</div><div class="thumb"><div class="no">5</div>7.3.1 相邻矩阵</div><div class="thumb"><div class="no">6</div>7.3.2 邻接表</div><div class="thumb"><div class="no">7</div>两种存法的代价对照</div><div class="thumb"><div class="no">8</div>7.3.3 十字链表：一条弧进两条链</div><div class="thumb"><div class="no">9</div>7.4 深度优先周游</div><div class="thumb"><div class="no">10</div>广度优先周游</div><div class="thumb"><div class="no">11</div>7.4.3 拓扑排序</div><div class="thumb"><div class="no">12</div>拓扑排序：不断摘入度为 0 的点</div><div class="thumb"><div class="no">13</div>7.5.1 单源最短路：Dijkstra</div><div class="thumb"><div class="no">14</div>Dijkstra 的实现</div><div class="thumb"><div class="no">15</div>7.5.2 每对顶点：Floyd</div><div class="thumb"><div class="no">16</div>7.6 最小生成树</div><div class="thumb"><div class="no">17</div>Prim：从点出发</div><div class="thumb"><div class="no">18</div>Kruskal：从边出发</div><div class="thumb"><div class="no">19</div>最短路树 ≠ 最小生成树</div><div class="thumb"><div class="no">20</div>本章小结</div><div class="thumb"><div class="no">21</div>上机</div></div>

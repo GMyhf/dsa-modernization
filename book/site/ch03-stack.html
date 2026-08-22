@@ -1072,6 +1072,7 @@ LinkedStack&amp; <span class="k">operator</span>=(LinkedStack&amp;&amp; other) <
 后缀  23 34 45 * 5 6 + 7 + / +</code></pre></div>
 <p>括号不匹配的两种情形（右括号多了、左括号多了）分别对应规则表里的第三条和第五条， 各有一条用例；两者都抛 <code>std::invalid_argument</code>，不打印任何东西。</p>
 <h3 id="315-栈与递归"><a class="anchor" href="#315-栈与递归">#</a>3.1.5 栈与递归</h3>
+<p>原书所说的“活动记录”在现代编译器与运行时资料中通常称为<strong>栈帧</strong>（stack frame）：其中保存返回地址、参数、局部变量及必要的保存寄存器。名称不同，描述的是同一类调用栈记录。</p>
 <blockquote><p><strong>本节开篇先摆一组实测数字。</strong> 原书正文说递归「需要在内存中开辟一个称为 运行栈(runtime stack)的<strong>足够大</strong>的动态区」。多大算足够大？这是可以量的， 而量出来的结果里有一条相当反直觉。</p></blockquote>
 <h3 id="运行栈有多大三个档位三种结果"><a class="anchor" href="#运行栈有多大三个档位三种结果">#</a>运行栈有多大：三个档位，三种结果</h3>
 <p>同一份递归源码（每层做一次加法后返回），在一台 Linux 机器上 （gcc 13.3，<code>ulimit -s</code> 为默认的 8 MB）逐档加深度：</p>

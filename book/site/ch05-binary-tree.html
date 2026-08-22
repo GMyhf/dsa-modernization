@@ -212,6 +212,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p><strong>性质 5（满二叉树定理推论）</strong>：非空二叉树的<strong>空子树数目等于其结点数加 1</strong>。</p>
 <blockquote><p><strong>证明.</strong> 设二叉树为 <span class="math">T</span>，把它所有的空子树都换成树叶，得到的扩充二叉树记为 <span class="math">T&#x27;</span>。 <span class="math">T&#x27;</span> 是满二叉树，而 <span class="math">T</span> 原来的每个结点在 <span class="math">T&#x27;</span> 里都成了分支结点。 由满二叉树定理，<span class="math">T&#x27;</span> 的树叶数 = 分支结点数 + 1 = <span class="math">T</span> 的结点数 + 1。 而每片新添的树叶恰好对应 <span class="math">T</span> 的一棵空子树，所以 <span class="math">T</span> 的空子树数目等于它的结点数加 1。∎</p></blockquote>
 <p>性质 5 不是纸面游戏：它说明<strong>一棵 <span class="math">n</span> 个结点的二叉树里有 <span class="math">n<span class="bin">+</span><span class="upr">1</span></span> 个空指针</strong>。 链式存储时这些空指针占的空间和结点本身同阶——线索二叉树、Trie 的压缩、 第 12 章 PATRICIA 的动机都从这里来。</p>
+<p>线索二叉树（threaded binary tree）通过复用空指针保存遍历前驱或后继，适合教学和 需要低额外空间遍历的专门场景；现代通用库通常直接使用显式栈、父指针或迭代器， 因此不应把线索化当作默认的树表示。</p>
 <h2 id="52-二叉树的周游"><a class="anchor" href="#52-二叉树的周游">#</a>5.2 二叉树的周游</h2>
 <h3 id="521-二叉树的抽象数据类型"><a class="anchor" href="#521-二叉树的抽象数据类型">#</a>5.2.1 二叉树的抽象数据类型</h3>
 <p>二叉树 ADT 的基本操作包括建树、判空、取得根和左右子树，以及先序、中序、后序和层次周游。 具体存储结构留到 5.3；本节先从调用方观察这些操作。</p>

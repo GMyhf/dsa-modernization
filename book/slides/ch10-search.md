@@ -236,6 +236,8 @@ inline std::size_t elf_hash(const std::string& text) {
 
 # 10.3.2 开散列（拉链法）
 
+现代资料通常称 **separate chaining（分离链接）**；“开”指冲突元素放到槽外的链或桶中。
+
 ![图 10.7 开散列方法的图示](../assets/70ba08a893dc9d64.jpg)
 
 冲突的元素挂成一条链。
@@ -246,6 +248,8 @@ inline std::size_t elf_hash(const std::string& text) {
 ---
 
 # 10.3.3 闭散列（开地址法）
+
+现代资料通常称 **open addressing（开放地址法）**；所有元素都留在主表槽位中并按探测序列处理冲突。
 
 **所有元素都住在表里**，不另开链表。
 
