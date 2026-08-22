@@ -165,6 +165,8 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>自然界里孩子的左右次序往往无所谓，这种树叫无序树。计算机存储是有序的，所以实现时通常把孩子从左到右编上号，当作有序树。注意：度为 2 的有序树还不是二叉树——删掉第一个孩子后，第二个会顶上来占第一的位置；二叉树必须能表示「左空、右不空」这种左右不对称。</p>
 <p>森林是零棵或多棵互不相交的树的集合（通常有序）。一棵树里，某个结点的全部子树组成一个森林；给这个森林加上一个公共根，就又变成一棵树。</p>
 <p>树有多种画法。树形表示法是根在上的倒挂树；凹入表示法用长短线表示层次，像书的目录；文氏图用嵌套圆；嵌套括号把根写在左边、子树写在括号里，例如 <code>A(B(D(I,J),E), C(F,G(K,L),H))</code>。表示法多样，说明树在建模里用得广。</p>
+<figure><img loading="lazy" src="../assets/ch06/fig-6-2.png" alt="图 6.2 树形结构的凹入表、文氏图和嵌套括号表示"><figcaption>图 6.2 树形结构的凹入表、文氏图和嵌套括号表示</figcaption></figure>
+<p>图 6.2　同一棵树的三种等价表示。凹入表适合按层次阅读，文氏图突出包含关系，嵌套括号则便于作为文本编码或输入。</p>
 <p>例如 A 的孩子是 B、C、D，B 的孩子是 E、F。用左孩子 / 右兄弟画出来：</p>
 <div class="codeblock" data-lang="text"><pre><code>A
 └─ child → B ── sibling → C ── sibling → D
@@ -178,6 +180,8 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <li><strong>旋转</strong>：以根为轴顺时针转一下，画面才像通常的二叉树。</li>
 </ol>
 <p>转换后，一个结点的左孩子是它在原树（或森林）里的第一个孩子，右孩子是原来的下一个兄弟。左枝上是父子关系，右枝上是兄弟关系。单棵树的根没有兄弟，所以转成二叉树后根的右孩子一定为空。</p>
+<figure><img loading="lazy" src="../assets/ch06/fig-6-3.png" alt="图 6.3 森林经过连线、切线、旋转转换为二叉树"><figcaption>图 6.3 森林经过连线、切线、旋转转换为二叉树</figcaption></figure>
+<p>图 6.3　森林转换为二叉树的过程：先把兄弟连线，再切去多余的父子线，最后旋转整理方向。</p>
 <p>形式地说：森林 <span class="math">F<span class="rel">=</span>{T<sub><span class="upr">1</span></sub>,T<sub><span class="upr">2</span></sub>,…,T<sub>n</sub>}</span> 转成二叉树 <span class="math">B(F)</span>——<span class="math">F</span> 空则 <span class="math">B(F)</span> 空；否则 <span class="math">B(F)</span> 的根是 <span class="math">T<sub><span class="upr">1</span></sub></span> 的根，<span class="math">B(F)</span> 的左子树是 <span class="math">T<sub><span class="upr">1</span></sub></span> 的子树森林转成的二叉树，<span class="math">B(F)</span> 的右子树是 <span class="math">{T<sub><span class="upr">2</span></sub>,…,T<sub>n</sub>}</span> 转成的二叉树。</p>
 <p>反过来是三步的逆：逆时针旋转；若 <span class="math">x</span> 是 <span class="math">y</span> 的左孩子，就把 <span class="math">x</span> 以及 <span class="math">x</span> 右侧整条右链上的结点都补连到 <span class="math">y</span>；再删掉所有到右孩子的边。二叉树 <span class="math">B</span> 对应的森林 <span class="math">F(B)</span>：空树对应空森林；否则 <span class="math">F(B)</span> 是一棵以 <span class="math">B</span> 的根为根、以 <span class="math">F(B<sub>L</sub>)</span> 为子树森林的树，再加上 <span class="math">F(B<sub>R</sub>)</span>。这两种转换互逆。</p>
 <h3 id="613-树的抽象数据类型"><a class="anchor" href="#613-树的抽象数据类型">#</a>6.1.3 树的抽象数据类型</h3>
