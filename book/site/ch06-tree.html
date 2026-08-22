@@ -173,9 +173,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <div class="codeblock" data-lang="text"><pre><code>A
 └─ child → B ── sibling → C ── sibling → D
             └─ child → E ── sibling → F</code></pre></div>
-<p>任意度的树只需两个指针域。代价是不能 <span class="math">O(<span class="upr">1</span>)</span> 取得「第 <span class="math">k</span> 个孩子」，必须沿兄弟链走过去。图 6.7 就是这张图。</p>
-<figure><img loading="lazy" src="../assets/8bf52bea5e1deae9.jpg" alt="图 6.7 “左子/右兄”表示两棵树"><figcaption>图 6.7 “左子/右兄”表示两棵树</figcaption></figure>
-<p>图 6.7　左孩子—右兄弟表示法把任意度的树压成两个链接域。</p>
+<p>任意度的树只需两个指针域。代价是不能 <span class="math">O(<span class="upr">1</span>)</span> 取得「第 <span class="math">k</span> 个孩子」，必须沿兄弟链走过去。</p>
 <h3 id="612-森林与二叉树的等价转换"><a class="anchor" href="#612-森林与二叉树的等价转换">#</a>6.1.2 森林与二叉树的等价转换</h3>
 <p>树和森林都可以一对一地变成二叉树，相关操作也就都能转到二叉树上做。形象的做法是「连线、切线、旋转」三步：</p>
 <ol>
@@ -226,6 +224,9 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>图 6.6　每个结点单独保存孩子表的表示法。</p>
 <h3 id="622-静态左子右兄表示法"><a class="anchor" href="#622-静态左子右兄表示法">#</a>6.2.2 静态“左子/右兄”表示法</h3>
 <p>结点数事先已知时，不必每个结点 <code>new</code> 一次，用数组下标代替指针即可：<code>child</code>、<code>sibling</code> 存的是另一个下标，而不是地址。语义与动态版相同，只是存储从堆变成一块连续数组。适合并查集那种「一开始就知道有 <span class="math">n</span> 个元素」的场合。</p>
+<p>下面是静态“左子/右兄”表示法的一个实例。每个结点元素包括值、父结点、最左子结点和右侧兄弟结点四个域。</p>
+<figure><img loading="lazy" src="../assets/8bf52bea5e1deae9.jpg" alt="图 6.7 “左子/右兄”表示两棵树"><figcaption>图 6.7 “左子/右兄”表示两棵树</figcaption></figure>
+<p>图 6.7　左孩子—右兄弟表示法把任意度的树压成两个链接域。</p>
 <figure><img loading="lazy" src="../assets/d4fafa1c3b802b3f.jpg" alt="图 6.8 使用静态“左子/右兄”实现对树的归并"><figcaption>图 6.8 使用静态“左子/右兄”实现对树的归并</figcaption></figure>
 <p>图 6.8　静态数组中的左子、右兄链接和树的归并。</p>
 <h3 id="623-动态表示法"><a class="anchor" href="#623-动态表示法">#</a>6.2.3 动态表示法</h3>
