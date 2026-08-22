@@ -460,7 +460,10 @@ n 不大时 vector 往往比 list 快，哪怕理论上后者插删更优。
 <li>空 optional 表示“没有找到”，比未初始化出参安全。</li>
 <li>删除要同时维护前驱、后继以及头尾指针。</li>
 <li>随机访问和缓存局部性重要时优先连续数组；已知结点位置且插删多时链表更合适。</li>
-</ul></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
+</ul></section><section class="slide" data-notes=""><h1 id="板书演算顺序表插入"><a class="anchor" href="#板书演算顺序表插入">#</a>板书演算：顺序表插入</h1>
+<p>表 <code>[10,20,30,40]</code> 在位置 2 插入 25：先把 40 移到 4，再把 30 移到 3，最后写入 25，结果 <code>[10,20,25,30,40]</code>。</p></section><section class="slide" data-notes=""><h1 id="反例从前向后搬"><a class="anchor" href="#反例从前向后搬">#</a>反例：从前向后搬</h1>
+<p>若从位置 2 向后搬，先把 30 写到 3，再把位置 3 的 30 写到 4，原来的 40 已丢失。</p></section><section class="slide" data-notes=""><h1 id="课堂练习与答案"><a class="anchor" href="#课堂练习与答案">#</a>课堂练习与答案</h1>
+<p>课堂练习：容量 4 的表追加第 5 个元素，列出扩容前后 data、size、capacity。答案：申请容量 8，复制 4 个旧元素，写入新元素后 size=5、capacity=8。</p></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
 <ul>
 <li>同一个线性表 ADT，两种存储结构，<strong>代价互补</strong></li>
 <li>顺序表：地址公式 → O(1) 随机存取；插删要搬</li>
@@ -481,7 +484,7 @@ python3 tools/check_code.py code/ch02/linked_list</code></pre></div>
 <blockquote><p><strong>写不出「会红」的用例，说明还没想清楚那条性质是什么。</strong></p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第2章 线性表</div><div class="thumb"><div class="no">2</div>2.1 线性表的抽象数据类型</div><div class="thumb"><div class="no">3</div>原书这里编译不过</div><div class="thumb"><div class="no">4</div>2.2 顺序表：地址公式</div><div class="thumb"><div class="no">5</div>教学版：三个成员</div><div class="thumb"><div class="no">6</div>按下标取值与改值</div><div class="thumb"><div class="no">7</div>按内容查找：「没找到」怎么说</div><div class="thumb"><div class="no">8</div>现代写法：把两件事合成一个</div><div class="thumb"><div class="no">9</div>插入：搬 O(n) 个元素</div><div class="thumb"><div class="no">10</div>扩容：翻倍，不是加一</div><div class="thumb"><div class="no">11</div>删除：插入的镜像</div><div class="thumb"><div class="no">12</div>三法则：原书最硬的一处错</div><div class="thumb"><div class="no">13</div>一个被删掉的设计：游标</div><div class="thumb"><div class="no">14</div>2.3 链表：换一种存储</div><div class="thumb"><div class="no">15</div>头结点：让表头不再是特例</div><div class="thumb"><div class="no">16</div>尾指针：让 append 变成 O(1)</div><div class="thumb"><div class="no">17</div>循链定位：返回「前驱」</div><div class="thumb"><div class="no">18</div>删除：两件事不能漏</div><div class="thumb"><div class="no">19</div>2.3.2 双链表：多一根指针买什么</div><div class="thumb"><div class="no">20</div>双链表的删除：两侧都要改</div><div class="thumb"><div class="no">21</div>所有权工具怎么选（2.3.1）</div><div class="thumb"><div class="no">22</div>「链那一行」有实测支撑</div><div class="thumb"><div class="no">23</div>2.3.3 循环链表</div><div class="thumb"><div class="no">24</div>2.4 顺序表与链表的比较</div><div class="thumb"><div class="no">25</div>课堂讲解卡：一次插入到底慢在哪里</div><div class="thumb"><div class="no">26</div>课堂例题：扩容与摊还代价</div><div class="thumb"><div class="no">27</div>课堂例题答案：扩容搬运次数</div><div class="thumb"><div class="no">28</div>课末自检</div><div class="thumb"><div class="no">29</div>课末自检参考答案</div><div class="thumb"><div class="no">30</div>本章小结</div><div class="thumb"><div class="no">31</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第2章 线性表</div><div class="thumb"><div class="no">2</div>2.1 线性表的抽象数据类型</div><div class="thumb"><div class="no">3</div>原书这里编译不过</div><div class="thumb"><div class="no">4</div>2.2 顺序表：地址公式</div><div class="thumb"><div class="no">5</div>教学版：三个成员</div><div class="thumb"><div class="no">6</div>按下标取值与改值</div><div class="thumb"><div class="no">7</div>按内容查找：「没找到」怎么说</div><div class="thumb"><div class="no">8</div>现代写法：把两件事合成一个</div><div class="thumb"><div class="no">9</div>插入：搬 O(n) 个元素</div><div class="thumb"><div class="no">10</div>扩容：翻倍，不是加一</div><div class="thumb"><div class="no">11</div>删除：插入的镜像</div><div class="thumb"><div class="no">12</div>三法则：原书最硬的一处错</div><div class="thumb"><div class="no">13</div>一个被删掉的设计：游标</div><div class="thumb"><div class="no">14</div>2.3 链表：换一种存储</div><div class="thumb"><div class="no">15</div>头结点：让表头不再是特例</div><div class="thumb"><div class="no">16</div>尾指针：让 append 变成 O(1)</div><div class="thumb"><div class="no">17</div>循链定位：返回「前驱」</div><div class="thumb"><div class="no">18</div>删除：两件事不能漏</div><div class="thumb"><div class="no">19</div>2.3.2 双链表：多一根指针买什么</div><div class="thumb"><div class="no">20</div>双链表的删除：两侧都要改</div><div class="thumb"><div class="no">21</div>所有权工具怎么选（2.3.1）</div><div class="thumb"><div class="no">22</div>「链那一行」有实测支撑</div><div class="thumb"><div class="no">23</div>2.3.3 循环链表</div><div class="thumb"><div class="no">24</div>2.4 顺序表与链表的比较</div><div class="thumb"><div class="no">25</div>课堂讲解卡：一次插入到底慢在哪里</div><div class="thumb"><div class="no">26</div>课堂例题：扩容与摊还代价</div><div class="thumb"><div class="no">27</div>课堂例题答案：扩容搬运次数</div><div class="thumb"><div class="no">28</div>课末自检</div><div class="thumb"><div class="no">29</div>课末自检参考答案</div><div class="thumb"><div class="no">30</div>板书演算：顺序表插入</div><div class="thumb"><div class="no">31</div>反例：从前向后搬</div><div class="thumb"><div class="no">32</div>课堂练习与答案</div><div class="thumb"><div class="no">33</div>本章小结</div><div class="thumb"><div class="no">34</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -494,7 +497,7 @@ python3 tools/check_code.py code/ch02/linked_list</code></pre></div>
 <b>第2章 线性表</b><span>数据结构与算法：Python 讲算法，C++ 讲实现</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 31</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 34</b>
 </div>
 <script>
 (function(){

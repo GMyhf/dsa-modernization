@@ -411,7 +411,10 @@ std::optional&lt;std::<span class="t">size_t</span>&gt; insertion_slot(<span cla
 <li>装载因子过高会增加冲突和探测长度，因此要扩容重散列。</li>
 <li>墓碑保留探测链连续性。</li>
 <li>前缀、范围和有序遍历应考虑树或排序数组，而非哈希表。</li>
-</ul></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
+</ul></section><section class="slide" data-notes=""><h1 id="状态演算墓碑探测"><a class="anchor" href="#状态演算墓碑探测">#</a>状态演算：墓碑探测</h1>
+<p>槽位 3、10、17 冲突并形成探测链。删除 3 后槽 3 标为墓碑；查询 17 遇到墓碑不能停，继续探测到 17 才能成功。</p></section><section class="slide" data-notes=""><h1 id="反例删除后直接置空"><a class="anchor" href="#反例删除后直接置空">#</a>反例：删除后直接置空</h1>
+<p>直接置空会让查询在第一个空槽提前返回“不存在”，即使目标键仍在后续槽位。</p></section><section class="slide" data-notes=""><h1 id="课堂练习与答案"><a class="anchor" href="#课堂练习与答案">#</a>课堂练习与答案</h1>
+<p>课堂练习：装载因子从 0.5 升到 0.9 时会发生什么？答案：探测长度和聚集显著增加，应扩容重散列或改用分离链接。</p></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
 <ul>
 <li>顺序检索 <span class="math">O(n)</span> 不要求有序；二分 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span> 要求有序；分块 <span class="math">O(<span class="sqrt">n</span>)</span> 折中</li>
 <li>二分要用<strong>半开区间</strong>，避开无符号下溢；中点用 <code>first + (last-first)/2</code></li>
@@ -431,7 +434,7 @@ std::optional&lt;std::<span class="t">size_t</span>&gt; insertion_slot(<span cla
 <blockquote><p>最后一条只有拿非 ASCII 字节做输入才看得出来——测试里那条用例就是为它写的。</p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第10章 检索</div><div class="thumb"><div class="no">2</div>10.1.1 顺序检索</div><div class="thumb"><div class="no">3</div>10.1.2 二分检索</div><div class="thumb"><div class="no">4</div>二分检索：半开区间 trace</div><div class="thumb"><div class="no">5</div>二分的一个坑：无符号下溢</div><div class="thumb"><div class="no">6</div>决策树：二分为什么是 $\log n$</div><div class="thumb"><div class="no">7</div>10.1.3 分块检索</div><div class="thumb"><div class="no">8</div>分块检索：先找块，再扫块</div><div class="thumb"><div class="no">9</div>10.2 集合</div><div class="thumb"><div class="no">10</div>10.3 散列：换一条路</div><div class="thumb"><div class="no">11</div>10.3.1 散列函数</div><div class="thumb"><div class="no">12</div>散列函数怎么选</div><div class="thumb"><div class="no">13</div>10.3.2 开散列（拉链法）</div><div class="thumb"><div class="no">14</div>10.3.3 闭散列（开地址法）</div><div class="thumb"><div class="no">15</div>删除：这一节的核心难点</div><div class="thumb"><div class="no">16</div>解法：墓碑</div><div class="thumb"><div class="no">17</div>墓碑探测：删除后为什么不能停</div><div class="thumb"><div class="no">18</div>插入：回收墓碑，但不能提前停</div><div class="thumb"><div class="no">19</div>10.3.5 效率分析</div><div class="thumb"><div class="no">20</div>10.3.6 什么时候不该用散列</div><div class="thumb"><div class="no">21</div>课堂讲解卡：搜索方法由信息组织决定</div><div class="thumb"><div class="no">22</div>课堂例题：同一批键的三种查询</div><div class="thumb"><div class="no">23</div>课堂例题答案：三种查询</div><div class="thumb"><div class="no">24</div>课末自检</div><div class="thumb"><div class="no">25</div>课末自检参考答案</div><div class="thumb"><div class="no">26</div>本章小结</div><div class="thumb"><div class="no">27</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第10章 检索</div><div class="thumb"><div class="no">2</div>10.1.1 顺序检索</div><div class="thumb"><div class="no">3</div>10.1.2 二分检索</div><div class="thumb"><div class="no">4</div>二分检索：半开区间 trace</div><div class="thumb"><div class="no">5</div>二分的一个坑：无符号下溢</div><div class="thumb"><div class="no">6</div>决策树：二分为什么是 $\log n$</div><div class="thumb"><div class="no">7</div>10.1.3 分块检索</div><div class="thumb"><div class="no">8</div>分块检索：先找块，再扫块</div><div class="thumb"><div class="no">9</div>10.2 集合</div><div class="thumb"><div class="no">10</div>10.3 散列：换一条路</div><div class="thumb"><div class="no">11</div>10.3.1 散列函数</div><div class="thumb"><div class="no">12</div>散列函数怎么选</div><div class="thumb"><div class="no">13</div>10.3.2 开散列（拉链法）</div><div class="thumb"><div class="no">14</div>10.3.3 闭散列（开地址法）</div><div class="thumb"><div class="no">15</div>删除：这一节的核心难点</div><div class="thumb"><div class="no">16</div>解法：墓碑</div><div class="thumb"><div class="no">17</div>墓碑探测：删除后为什么不能停</div><div class="thumb"><div class="no">18</div>插入：回收墓碑，但不能提前停</div><div class="thumb"><div class="no">19</div>10.3.5 效率分析</div><div class="thumb"><div class="no">20</div>10.3.6 什么时候不该用散列</div><div class="thumb"><div class="no">21</div>课堂讲解卡：搜索方法由信息组织决定</div><div class="thumb"><div class="no">22</div>课堂例题：同一批键的三种查询</div><div class="thumb"><div class="no">23</div>课堂例题答案：三种查询</div><div class="thumb"><div class="no">24</div>课末自检</div><div class="thumb"><div class="no">25</div>课末自检参考答案</div><div class="thumb"><div class="no">26</div>状态演算：墓碑探测</div><div class="thumb"><div class="no">27</div>反例：删除后直接置空</div><div class="thumb"><div class="no">28</div>课堂练习与答案</div><div class="thumb"><div class="no">29</div>本章小结</div><div class="thumb"><div class="no">30</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -444,7 +447,7 @@ std::optional&lt;std::<span class="t">size_t</span>&gt; insertion_slot(<span cla
 <b>第10章 检索</b><span>数据结构与算法：Python 讲算法，C++ 讲实现</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 27</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 30</b>
 </div>
 <script>
 (function(){

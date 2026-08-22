@@ -436,7 +436,10 @@ n 小的时候 O(n^2) 完全可能比 O(n log n) 快，这在第 8 章讲插入�
 <li>同一 ADT 可有数组、链表或索引等不同实现。</li>
 <li>大 O 比较规模增长趋势，不能只看一次小输入的计时。</li>
 <li>反例应针对结论边界，例如稠密图不适合邻接表的空间优势。</li>
-</ul></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
+</ul></section><section class="slide" data-notes=""><h1 id="板书演算floyd-一次更新"><a class="anchor" href="#板书演算floyd-一次更新">#</a>板书演算：Floyd 一次更新</h1>
+<p>取 <code>D[0][2]=9</code>、<code>D[0][1]=3</code>、<code>D[1][2]=4</code>：经过顶点 1 后候选值为 <code>3+4=7</code>，所以把 9 更新成 7。每次更新只比较旧值和候选值。</p></section><section class="slide" data-notes=""><h1 id="反例只看直达边"><a class="anchor" href="#反例只看直达边">#</a>反例：只看直达边</h1>
+<p>图中 <code>0→2=9</code>，但 <code>0→1=3→2=4</code>。若只读邻接矩阵中的直达边，会错过真正最短路。</p></section><section class="slide" data-notes=""><h1 id="课堂练习与答案"><a class="anchor" href="#课堂练习与答案">#</a>课堂练习与答案</h1>
+<p>课堂练习：设计一个三点图，要求直达边不是最短路；写出 Floyd 更新前后的矩阵。答案：任取 <code>0→2=10,0→1=3,1→2=4</code>，最终 <code>D[0][2]=7</code>。</p></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
 <ul>
 <li>问题求解的第一步是<strong>抽象</strong>：把应用语言翻译成结构语言</li>
 <li>数据结构分三层：<strong>逻辑结构、存储结构、运算</strong></li>
@@ -453,7 +456,7 @@ n 小的时候 O(n^2) 完全可能比 O(n log n) 快，这在第 8 章讲插入�
 <blockquote><p>全书的判据都是一样的：<strong>把实现改回错的写法，必须有一条断言会红。</strong></p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第1章 概论</div><div class="thumb"><div class="no">2</div>1.1 一个真问题：股市的传言</div><div class="thumb"><div class="no">3</div>先把问题抽象掉</div><div class="thumb"><div class="no">4</div>用什么存这张图</div><div class="thumb"><div class="no">5</div>算法：Floyd</div><div class="thumb"><div class="no">6</div>实现：两件事在一个函数里</div><div class="thumb"><div class="no">7</div>1.2 数据结构：三个层次</div><div class="thumb"><div class="no">8</div>逻辑结构的三分</div><div class="thumb"><div class="no">9</div>四种存储方法</div><div class="thumb"><div class="no">10</div>索引：逻辑有序，物理无序</div><div class="thumb"><div class="no">11</div>1.2.3 抽象数据类型</div><div class="thumb"><div class="no">12</div>1.3.1 什么才算「一个算法」</div><div class="thumb"><div class="no">13</div>1.3.2 步骤从哪来：六种设计方法</div><div class="thumb"><div class="no">14</div>1.4 算法分析：为什么要看增长趋势</div><div class="thumb"><div class="no">15</div>大 O、Ω、Θ</div><div class="thumb"><div class="no">16</div>最好、最坏、平均</div><div class="thumb"><div class="no">17</div>1.4.3 时间与空间的折衷</div><div class="thumb"><div class="no">18</div>1.4.4 怎么挑结构：先问运算，再问规模</div><div class="thumb"><div class="no">19</div>课堂讲解卡：从问题到算法</div><div class="thumb"><div class="no">20</div>课堂例题：五个城市的最短路</div><div class="thumb"><div class="no">21</div>课堂例题答案：Floyd 的三轮更新</div><div class="thumb"><div class="no">22</div>课末自检</div><div class="thumb"><div class="no">23</div>课末自检参考答案</div><div class="thumb"><div class="no">24</div>本章小结</div><div class="thumb"><div class="no">25</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第1章 概论</div><div class="thumb"><div class="no">2</div>1.1 一个真问题：股市的传言</div><div class="thumb"><div class="no">3</div>先把问题抽象掉</div><div class="thumb"><div class="no">4</div>用什么存这张图</div><div class="thumb"><div class="no">5</div>算法：Floyd</div><div class="thumb"><div class="no">6</div>实现：两件事在一个函数里</div><div class="thumb"><div class="no">7</div>1.2 数据结构：三个层次</div><div class="thumb"><div class="no">8</div>逻辑结构的三分</div><div class="thumb"><div class="no">9</div>四种存储方法</div><div class="thumb"><div class="no">10</div>索引：逻辑有序，物理无序</div><div class="thumb"><div class="no">11</div>1.2.3 抽象数据类型</div><div class="thumb"><div class="no">12</div>1.3.1 什么才算「一个算法」</div><div class="thumb"><div class="no">13</div>1.3.2 步骤从哪来：六种设计方法</div><div class="thumb"><div class="no">14</div>1.4 算法分析：为什么要看增长趋势</div><div class="thumb"><div class="no">15</div>大 O、Ω、Θ</div><div class="thumb"><div class="no">16</div>最好、最坏、平均</div><div class="thumb"><div class="no">17</div>1.4.3 时间与空间的折衷</div><div class="thumb"><div class="no">18</div>1.4.4 怎么挑结构：先问运算，再问规模</div><div class="thumb"><div class="no">19</div>课堂讲解卡：从问题到算法</div><div class="thumb"><div class="no">20</div>课堂例题：五个城市的最短路</div><div class="thumb"><div class="no">21</div>课堂例题答案：Floyd 的三轮更新</div><div class="thumb"><div class="no">22</div>课末自检</div><div class="thumb"><div class="no">23</div>课末自检参考答案</div><div class="thumb"><div class="no">24</div>板书演算：Floyd 一次更新</div><div class="thumb"><div class="no">25</div>反例：只看直达边</div><div class="thumb"><div class="no">26</div>课堂练习与答案</div><div class="thumb"><div class="no">27</div>本章小结</div><div class="thumb"><div class="no">28</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -466,7 +469,7 @@ n 小的时候 O(n^2) 完全可能比 O(n log n) 快，这在第 8 章讲插入�
 <b>第1章 概论</b><span>数据结构与算法：Python 讲算法，C++ 讲实现</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 25</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 28</b>
 </div>
 <script>
 (function(){

@@ -440,7 +440,10 @@ AND      : 1 0 0 0 1 0</code></pre></div>
 <li>叶子分裂复制分隔键，内部结点分裂把中间键提升到父层。</li>
 <li>排序倒排表可用双指针线性求交。</li>
 <li>选择索引要同时考虑选择性、更新成本和空间。</li>
-</ul></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
+</ul></section><section class="slide" data-notes=""><h1 id="状态演算b-树分裂"><a class="anchor" href="#状态演算b-树分裂">#</a>状态演算：B+ 树分裂</h1>
+<p>叶子 <code>[10,20,30,40]</code> 插入 25 后分成 <code>[10,20]</code>、<code>[25,30,40]</code>；把右叶最小键 25 复制为父结点分隔键，并连接叶子链。</p></section><section class="slide" data-notes=""><h1 id="反例只更新父键不接叶链"><a class="anchor" href="#反例只更新父键不接叶链">#</a>反例：只更新父键不接叶链</h1>
+<p>点查可能仍成功，但范围查询沿叶子链会跳过新叶，结果不完整。</p></section><section class="slide" data-notes=""><h1 id="课堂练习与答案"><a class="anchor" href="#课堂练习与答案">#</a>课堂练习与答案</h1>
+<p>课堂练习：为什么 B+ 树范围查询只需一次树高定位？答案：找到下界叶后沿叶子链顺序扫描，不必为每个后继键重新从根查找。</p></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
 <ul>
 <li>索引的本质：<strong>用附加空间换更少的磁盘访问</strong></li>
 <li>线性索引让主文件可以无序、变长；多级索引解决索引本身太大</li>
@@ -459,7 +462,7 @@ python3 tools/check_code.py code/ch11/inverted_index</code></pre></div>
 <blockquote><p>B+ 树的测试里有一条 <code>validate()</code>：每次插入删除后都检查 「所有叶子同层、每个结点半满、叶子链有序」这三条不变量。</p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第11章 索引技术</div><div class="thumb"><div class="no">2</div>11.1 线性索引</div><div class="thumb"><div class="no">3</div>二级索引：索引本身也放不下怎么办</div><div class="thumb"><div class="no">4</div>1000 条记录：索引为什么有四层</div><div class="thumb"><div class="no">5</div>11.2 静态索引：多分树</div><div class="thumb"><div class="no">6</div>扇出是算出来的，不是拍的</div><div class="thumb"><div class="no">7</div>11.3 倒排索引</div><div class="thumb"><div class="no">8</div>倒排表的交并</div><div class="thumb"><div class="no">9</div>倒排表求交：双指针只走一遍</div><div class="thumb"><div class="no">10</div>短语查询要位置信息</div><div class="thumb"><div class="no">11</div>11.4 B 树：为磁盘设计的树</div><div class="thumb"><div class="no">12</div>B 树的结构</div><div class="thumb"><div class="no">13</div>插入导致分裂</div><div class="thumb"><div class="no">14</div>B+ 树：数据全在叶子</div><div class="thumb"><div class="no">15</div>B+ 树插入 60：分裂传播到根</div><div class="thumb"><div class="no">16</div>范围查询：B+ 树的看家本领</div><div class="thumb"><div class="no">17</div>叶子分裂与内部分裂不一样</div><div class="thumb"><div class="no">18</div>11.4.4 静态索引还是动态索引</div><div class="thumb"><div class="no">19</div>11.5 位图索引</div><div class="thumb"><div class="no">20</div>位图的代价与压缩</div><div class="thumb"><div class="no">21</div>位图逐位查询与尾部掩码</div><div class="thumb"><div class="no">22</div>各种索引怎么选</div><div class="thumb"><div class="no">23</div>课堂讲解卡：索引是在空间与查询之间做交换</div><div class="thumb"><div class="no">24</div>课堂例题：一次范围查询的路径</div><div class="thumb"><div class="no">25</div>课堂例题答案：B+ 树范围查询</div><div class="thumb"><div class="no">26</div>课末自检</div><div class="thumb"><div class="no">27</div>课末自检参考答案</div><div class="thumb"><div class="no">28</div>本章小结</div><div class="thumb"><div class="no">29</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第11章 索引技术</div><div class="thumb"><div class="no">2</div>11.1 线性索引</div><div class="thumb"><div class="no">3</div>二级索引：索引本身也放不下怎么办</div><div class="thumb"><div class="no">4</div>1000 条记录：索引为什么有四层</div><div class="thumb"><div class="no">5</div>11.2 静态索引：多分树</div><div class="thumb"><div class="no">6</div>扇出是算出来的，不是拍的</div><div class="thumb"><div class="no">7</div>11.3 倒排索引</div><div class="thumb"><div class="no">8</div>倒排表的交并</div><div class="thumb"><div class="no">9</div>倒排表求交：双指针只走一遍</div><div class="thumb"><div class="no">10</div>短语查询要位置信息</div><div class="thumb"><div class="no">11</div>11.4 B 树：为磁盘设计的树</div><div class="thumb"><div class="no">12</div>B 树的结构</div><div class="thumb"><div class="no">13</div>插入导致分裂</div><div class="thumb"><div class="no">14</div>B+ 树：数据全在叶子</div><div class="thumb"><div class="no">15</div>B+ 树插入 60：分裂传播到根</div><div class="thumb"><div class="no">16</div>范围查询：B+ 树的看家本领</div><div class="thumb"><div class="no">17</div>叶子分裂与内部分裂不一样</div><div class="thumb"><div class="no">18</div>11.4.4 静态索引还是动态索引</div><div class="thumb"><div class="no">19</div>11.5 位图索引</div><div class="thumb"><div class="no">20</div>位图的代价与压缩</div><div class="thumb"><div class="no">21</div>位图逐位查询与尾部掩码</div><div class="thumb"><div class="no">22</div>各种索引怎么选</div><div class="thumb"><div class="no">23</div>课堂讲解卡：索引是在空间与查询之间做交换</div><div class="thumb"><div class="no">24</div>课堂例题：一次范围查询的路径</div><div class="thumb"><div class="no">25</div>课堂例题答案：B+ 树范围查询</div><div class="thumb"><div class="no">26</div>课末自检</div><div class="thumb"><div class="no">27</div>课末自检参考答案</div><div class="thumb"><div class="no">28</div>状态演算：B+ 树分裂</div><div class="thumb"><div class="no">29</div>反例：只更新父键不接叶链</div><div class="thumb"><div class="no">30</div>课堂练习与答案</div><div class="thumb"><div class="no">31</div>本章小结</div><div class="thumb"><div class="no">32</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -472,7 +475,7 @@ python3 tools/check_code.py code/ch11/inverted_index</code></pre></div>
 <b>第11章 索引技术</b><span>数据结构与算法：Python 讲算法，C++ 讲实现</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 29</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 32</b>
 </div>
 <script>
 (function(){
