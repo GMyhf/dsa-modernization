@@ -1,6 +1,6 @@
 ---
 title: 第11章 索引技术
-subtitle: 数据结构与算法：Python 讲算法，C++ 讲实现
+subtitle: 数据结构与算法：Python 讲可迁移算法，C++ 讲存储与工程实现
 ---
 
 # 第11章 索引技术
@@ -515,6 +515,27 @@ AND      : 1 0 0 0 1 0
 # 课堂练习与答案
 
 课堂练习：为什么 B+ 树范围查询只需一次树高定位？答案：找到下界叶后沿叶子链顺序扫描，不必为每个后继键重新从根查找。
+
+---
+
+---
+
+# Python 算法轨：线性、倒排与位图索引
+
+Python 版展示索引定位、倒排表交并和位图运算；B/B+ 树的页分裂和叶链仍以 C++ 实现为主，避免把磁盘布局隐藏掉。
+
+```python file=code/ch11/bitmap_index/modern.py#bitmap-ops
+def select_and(self,a,b):
+    return self._combine(a,b,lambda x,y:x&y)
+def select_or(self,a,b):
+    return self._combine(a,b,lambda x,y:x|y)
+def select_not(self,value):
+    bits = [(~word)&MASK for word in self.bitmap(value)]
+    self._ops += len(bits)
+    if bits and self._count%64:
+        bits[-1] &= (1<<(self._count%64))-1
+    return self._records(bits)
+```
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: 第1章 概论
-subtitle: 数据结构与算法：Python 讲算法，C++ 讲实现
+subtitle: 数据结构与算法：Python 讲可迁移算法，C++ 讲存储与工程实现
 ---
 
 # 第1章 概论

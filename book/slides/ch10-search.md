@@ -1,6 +1,6 @@
 ---
 title: 第10章 检索
-subtitle: 数据结构与算法：Python 讲算法，C++ 讲实现
+subtitle: 数据结构与算法：Python 讲可迁移算法，C++ 讲存储与工程实现
 ---
 
 # 第10章 检索
@@ -478,6 +478,34 @@ std::optional<std::size_t> insertion_slot(int key) const {
 # 课堂练习与答案
 
 课堂练习：装载因子从 0.5 升到 0.9 时会发生什么？答案：探测长度和聚集显著增加，应扩容重散列或改用分离链接。
+
+---
+
+---
+
+# Python 算法轨：搜索与散列
+
+顺序/二分检索、集合和散列表的算法逻辑用 Python 对照；C++ 版本展示墓碑、探测链和对象布局，不能用 `dict` 一行替代。
+
+```python file=code/ch10/search_hash/modern.py#sequential-binary
+def sequential_search(values, key):
+    for i, value in enumerate(values):
+        if value == key:
+            return i
+    return None
+
+def binary_search(values, key):
+    first, last = 0, len(values)
+    while first < last:
+        middle = first + (last - first) // 2
+        if values[middle] == key:
+            return middle
+        if values[middle] < key:
+            first = middle + 1
+        else:
+            last = middle
+    return None
+```
 
 ---
 

@@ -2339,5 +2339,15 @@
     {"page":"ch12:状态演算：标记-清扫","kind":"extra","reason":"新增状态演算","by":"Codex","date":"2026-08-22"},
     {"page":"ch12:反例：只用引用计数","kind":"extra","reason":"新增反例","by":"Codex","date":"2026-08-22"},
     {"page":"ch12:课堂练习与答案","kind":"extra","reason":"新增课堂练习及答案","by":"Codex","date":"2026-08-22"}
+    ,{"page":"ch03:Python 算法轨：背包递归与显式栈","kind":"extra","reason":"课件新增 Python 算法代码页，源码见 code/ch03/knapsack/modern.py","by":"Codex","date":"2026-08-22"}
+    ,{"page":"ch04:Python 算法轨：KMP 模式匹配","kind":"extra","reason":"课件新增 Python 算法代码页，源码见 code/ch04/pattern_matching/modern.py","by":"Codex","date":"2026-08-22"}
+    ,{"page":"ch05:语言分工：本章为什么以 C++ 为主","kind":"extra","reason":"说明本章存储与所有权教学为何不提供 Python 薄封装","by":"Codex","date":"2026-08-22"}
+    ,{"page":"ch06:语言分工：本章为什么以 C++ 为主","kind":"extra","reason":"说明本章表示法与结构不变量为何以 C++ 展示","by":"Codex","date":"2026-08-22"}
+    ,{"page":"ch07:Python 算法轨：图的遍历与最短路","kind":"extra","reason":"课件新增 Python 算法代码页，源码见 code/ch07/graph/modern.py","by":"Codex","date":"2026-08-22"}
+    ,{"page":"ch08:Python 算法轨：同一排序的可执行对照","kind":"extra","reason":"课件新增 Python 算法代码页，源码见 code/ch08/sorting/modern.py","by":"Codex","date":"2026-08-22"}
+    ,{"page":"ch09:Python 算法轨：置换选择与选择树","kind":"extra","reason":"课件新增 Python 算法代码页，源码见 code/ch09/external_sort/modern.py","by":"Codex","date":"2026-08-22"}
+    ,{"page":"ch10:Python 算法轨：搜索与散列","kind":"extra","reason":"课件新增 Python 算法代码页，源码见 code/ch10/search_hash/modern.py","by":"Codex","date":"2026-08-22"}
+    ,{"page":"ch11:Python 算法轨：线性、倒排与位图索引","kind":"extra","reason":"课件新增 Python 算法代码页，源码见 code/ch11/inverted_index/modern.py","by":"Codex","date":"2026-08-22"}
+    ,{"page":"ch12:Python 算法轨：Trie 与最佳 BST","kind":"extra","reason":"课件新增 Python 算法代码页，源码见 code/ch12/trie/modern.py","by":"Codex","date":"2026-08-22"}
   ]
 }

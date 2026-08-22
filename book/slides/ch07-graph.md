@@ -1,6 +1,6 @@
 ---
 title: 第7章 图
-subtitle: 数据结构与算法：Python 讲算法，C++ 讲实现
+subtitle: 数据结构与算法：Python 讲可迁移算法，C++ 讲存储与工程实现
 ---
 
 # 第7章 图
@@ -463,6 +463,32 @@ Dijkstra 每轮确定最小暂定距离，要求边权非负；Floyd 按中间�
 # 课堂练习与答案
 
 课堂练习：给三点图 `0→1=2,1→2=5,0→2=10`，写出最终距离。答案：`[0,2,7]`，前驱数组为 `[-,0,1]`。
+
+---
+
+---
+
+# Python 算法轨：图的遍历与最短路
+
+邻接矩阵、邻接表和十字链表的布局用 C++ 展示；DFS、BFS、Dijkstra、Floyd 和生成树算法用 Python 复现，便于把注意力放在不变量上。
+
+```python file=code/ch07/graph/modern.py#dijkstra
+def dijkstra(self, source: int) -> list[int]:
+    self._check_vertex(source)
+    distance = [self.infinity] * self.vertices
+    used = [False] * self.vertices
+    distance[source] = 0
+    for _ in range(self.vertices):
+        vertex = self._nearest(distance, used)
+        if vertex is None or distance[vertex] == self.infinity:
+            break
+        used[vertex] = True
+        for target in range(self.vertices):
+            candidate = distance[vertex] + self._adjacency[vertex][target]
+            if self._adjacency[vertex][target] < self.infinity and candidate < distance[target]:
+                distance[target] = candidate
+    return distance
+```
 
 ---
 

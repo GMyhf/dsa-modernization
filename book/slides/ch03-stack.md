@@ -1,6 +1,6 @@
 ---
 title: 第3章 栈与队列
-subtitle: 数据结构与算法：Python 讲算法，C++ 讲实现
+subtitle: 数据结构与算法：Python 讲可迁移算法，C++ 讲存储与工程实现
 ---
 
 # 第3章 栈与队列
@@ -703,6 +703,33 @@ std::optional<T> dequeue() {
 # 课堂练习与答案
 
 课堂练习：画出 `6 2 / 3 +` 每一步栈状态。答案：`[6,2]→[3]→[3,3]→[6]`。
+
+---
+
+---
+
+# Python 算法轨：背包递归与显式栈
+
+本章的 Python 例子放在背包问题：同一个状态转移先写递归，再改成显式栈；顺序栈和链式栈本身仍用 C++ 展示存储布局。
+
+```python file=code/ch03/knapsack/modern.py#recursive
+def knapsack_recursive(capacity: int, weights: list[int]) -> list[int] | None:
+    """算法3.10：两条递归规则，返回选中物品的下标。"""
+    _validate(capacity, weights)
+    chosen: list[int] = []
+
+    def solve(remaining: int, count: int) -> bool:
+        if remaining == 0:
+            return True
+        if remaining < 0 or count == 0:
+            return False
+        if solve(remaining - weights[count - 1], count - 1):
+            chosen.append(count - 1)
+            return True
+        return solve(remaining, count - 1)
+
+    return chosen if solve(capacity, len(weights)) else None
+```
 
 ---
 

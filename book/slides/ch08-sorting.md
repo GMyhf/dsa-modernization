@@ -1,6 +1,6 @@
 ---
 title: 第8章 内排序
-subtitle: 数据结构与算法：Python 讲算法，C++ 讲实现
+subtitle: 数据结构与算法：Python 讲可迁移算法，C++ 讲存储与工程实现
 ---
 
 # 第8章 内排序
@@ -481,6 +481,29 @@ $$\lceil\log_2(n!)\rceil=\Omega(n\log n)$$
 # 课堂练习与答案
 
 课堂练习：说明快排、堆排、归并的稳定性。答案：标准快排和堆排通常不稳定，归并可通过相等取左保持稳定。
+
+---
+
+---
+
+# Python 算法轨：同一排序的可执行对照
+
+插入、堆、快排、归并、计数和基数排序都有 Python 实现；固定容量桶和环形队列等存储细节仍由 C++ 版本承担。
+
+```python file=code/ch08/sorting/modern.py#insertion
+# 算法8.1：直接插入排序。相等元素不越过彼此，故稳定。
+def insertion_sort(values: list[int]) -> None:
+    for index in range(1, len(values)):
+        value = values[index]
+        hole = index
+        # `hole > 0` 这个条件在 Python 里是**承重的**，不是防御性写法：
+        # C++ 版越界会被 ASan 当场抓住，Python 的 values[-1] 却合法——
+        # 它悄悄环绕到最后一个元素，把排序结果搅乱而不报任何错。
+        while hole > 0 and value < values[hole - 1]:
+            values[hole] = values[hole - 1]
+            hole -= 1
+        values[hole] = value
+```
 
 ---
 

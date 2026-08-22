@@ -1,6 +1,6 @@
 ---
 title: 第4章 字符串
-subtitle: 数据结构与算法：Python 讲算法，C++ 讲实现
+subtitle: 数据结构与算法：Python 讲可迁移算法，C++ 讲存储与工程实现
 ---
 
 # 第4章 字符串
@@ -454,6 +454,34 @@ KMP    j = next[j]  文本指针 i 一步都不退
 # 课堂练习与答案
 
 课堂练习：写出模式 `AAAA` 的前缀表。答案：按“前缀长度”约定为 `0,1,2,3`；若实现采用回退下标，需按代码约定平移。
+
+---
+
+---
+
+# Python 算法轨：KMP 模式匹配
+
+字符串缓冲区的容量、所有权和异常安全用 C++ 展示；朴素匹配和 KMP 用 Python 对照算法步骤。
+
+```python file=code/ch04/pattern_matching/modern.py#kmp
+def kmp_search(text: str, pattern: str, next_values: list[int] | None = None) -> int | None:
+    """KMP 匹配；目标串下标只向前移动。"""
+    if not pattern:
+        return 0
+    if next_values is None:
+        next_values = build_next(pattern)
+    if len(next_values) != len(pattern):
+        raise ValueError("kmp_search: next 数组长度与模式不符")
+    i = 0
+    j = 0
+    while i < len(pattern) and j < len(text):
+        if i == -1 or text[j] == pattern[i]:
+            i += 1
+            j += 1
+        else:
+            i = next_values[i]
+    return j - len(pattern) if i == len(pattern) else None
+```
 
 ---
 

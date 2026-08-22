@@ -1,6 +1,6 @@
 ---
 title: 第12章 高级数据结构
-subtitle: 数据结构与算法：Python 讲算法，C++ 讲实现
+subtitle: 数据结构与算法：Python 讲可迁移算法，C++ 讲存储与工程实现
 ---
 
 # 第12章 高级数据结构
@@ -614,6 +614,28 @@ X、Y 的计数都为 1，互相引用使计数永不归零；没有根可达性
 # 课堂练习与答案
 
 课堂练习：选择 CSR 或 CSC 存储一个按列计算的稀疏矩阵。答案：选 CSC；若主要按行计算则选 CSR，动态双向插删才考虑十字链表。
+
+---
+
+---
+
+# Python 算法轨：Trie 与最佳 BST
+
+Trie 的前缀查询、Patricia 位分支和最佳 BST 动态规划有 Python 实现；空闲池、共享对象图和 AVL 旋转的布局细节保留在 C++。
+
+```python file=code/ch12/trie/modern.py#trie-longest-prefix
+def longest_prefix_of(self, text: str) -> str:
+    """text 的哪个前缀是树里最长的那个键。走不动就回退到最近一次的词尾。"""
+    node = self.root
+    best = 0
+    for i, c in enumerate(text):
+        if c not in node.children:
+            break
+        node = node.children[c]
+        if node.terminal:
+            best = i + 1
+    return text[:best]
+```
 
 ---
 

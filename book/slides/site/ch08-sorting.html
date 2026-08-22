@@ -435,7 +435,20 @@ d 位、每位 r 个值时是 O(d(n + r))。
 </ul></section><section class="slide" data-notes=""><h1 id="状态演算归并排序"><a class="anchor" href="#状态演算归并排序">#</a>状态演算：归并排序</h1>
 <p>序列 <code>[5,2,4,2]</code> 先分成 <code>[5,2]</code>、<code>[4,2]</code>，各自排成 <code>[2,5]</code>、<code>[2,4]</code>，再用双指针合并为 <code>[2,2,4,5]</code>。</p></section><section class="slide" data-notes=""><h1 id="反例合并时相等取右"><a class="anchor" href="#反例合并时相等取右">#</a>反例：合并时相等取右</h1>
 <p>两个键相等时若总取右边元素，带卫星数据的记录可能交换，归并排序就不再稳定。</p></section><section class="slide" data-notes=""><h1 id="课堂练习与答案"><a class="anchor" href="#课堂练习与答案">#</a>课堂练习与答案</h1>
-<p>课堂练习：说明快排、堆排、归并的稳定性。答案：标准快排和堆排通常不稳定，归并可通过相等取左保持稳定。</p></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
+<p>课堂练习：说明快排、堆排、归并的稳定性。答案：标准快排和堆排通常不稳定，归并可通过相等取左保持稳定。</p></section><section class="slide" data-notes=""><h1 id="python-算法轨同一排序的可执行对照"><a class="anchor" href="#python-算法轨同一排序的可执行对照">#</a>Python 算法轨：同一排序的可执行对照</h1>
+<p>插入、堆、快排、归并、计数和基数排序都有 Python 实现；固定容量桶和环形队列等存储细节仍由 C++ 版本承担。</p>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.py">code/ch08/sorting/modern.py#insertion</a></div><pre><code><span class="c"># 算法8.1：直接插入排序。相等元素不越过彼此，故稳定。</span>
+<span class="k">def</span> insertion_sort(values: <span class="t">list</span>[<span class="t">int</span>]) -&gt; <span class="k">None</span>:
+    <span class="k">for</span> index <span class="k">in</span> <span class="t">range</span>(<span class="n">1</span>, <span class="t">len</span>(values)):
+        value = values[index]
+        hole = index
+        <span class="c"># `hole &gt; 0` 这个条件在 Python 里是**承重的**，不是防御性写法：</span>
+        <span class="c"># C++ 版越界会被 ASan 当场抓住，Python 的 values[-1] 却合法——</span>
+        <span class="c"># 它悄悄环绕到最后一个元素，把排序结果搅乱而不报任何错。</span>
+        <span class="k">while</span> hole &gt; <span class="n">0</span> <span class="k">and</span> value &lt; values[hole - <span class="n">1</span>]:
+            values[hole] = values[hole - <span class="n">1</span>]
+            hole -= <span class="n">1</span>
+        values[hole] = value</code></pre></div></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
 <ul>
 <li>稳定性在<strong>多字段排序</strong>时是刚需，不是可有可无</li>
 <li>插入排序对近乎有序的输入是 <span class="math">O(n)</span>，所以常被用作收尾</li>
@@ -454,7 +467,7 @@ d 位、每位 r 个值时是 O(d(n + r))。
 <blockquote><p>测试里所有排序算法<strong>互相对拍</strong>：同一组输入必须给出同样的结果， 稳定的那几个还要额外验证稳定性。</p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第8章 内排序</div><div class="thumb"><div class="no">2</div>8.1 基本概念</div><div class="thumb"><div class="no">3</div>8.2 插入排序</div><div class="thumb"><div class="no">4</div>插入排序的两个优点</div><div class="thumb"><div class="no">5</div>8.2.2 Shell 排序</div><div class="thumb"><div class="no">6</div>8.3.1 直接选择排序</div><div class="thumb"><div class="no">7</div>8.3.2 堆排序</div><div class="thumb"><div class="no">8</div>8.4.1 冒泡排序</div><div class="thumb"><div class="no">9</div>8.4.2 快速排序</div><div class="thumb"><div class="no">10</div>快排的实现</div><div class="thumb"><div class="no">11</div>快排最坏情况怎么办</div><div class="thumb"><div class="no">12</div>8.5 归并排序</div><div class="thumb"><div class="no">13</div>8.6 分配排序：跳出比较模型</div><div class="thumb"><div class="no">14</div>8.6.1 桶式排序</div><div class="thumb"><div class="no">15</div>8.6.2 基数排序</div><div class="thumb"><div class="no">16</div>8.6.3 索引排序</div><div class="thumb"><div class="no">17</div>8.7.1 简单排序的时间代价</div><div class="thumb"><div class="no">18</div>8.7.2 理论时间与实测时间</div><div class="thumb"><div class="no">19</div>8.7.3 比较排序的下限</div><div class="thumb"><div class="no">20</div>怎么选</div><div class="thumb"><div class="no">21</div>课堂讲解卡：排序选择取决于约束</div><div class="thumb"><div class="no">22</div>课堂例题：同一组数据的三种路径</div><div class="thumb"><div class="no">23</div>课堂例题答案：排序路径对照</div><div class="thumb"><div class="no">24</div>课末自检</div><div class="thumb"><div class="no">25</div>课末自检参考答案</div><div class="thumb"><div class="no">26</div>状态演算：归并排序</div><div class="thumb"><div class="no">27</div>反例：合并时相等取右</div><div class="thumb"><div class="no">28</div>课堂练习与答案</div><div class="thumb"><div class="no">29</div>本章小结</div><div class="thumb"><div class="no">30</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第8章 内排序</div><div class="thumb"><div class="no">2</div>8.1 基本概念</div><div class="thumb"><div class="no">3</div>8.2 插入排序</div><div class="thumb"><div class="no">4</div>插入排序的两个优点</div><div class="thumb"><div class="no">5</div>8.2.2 Shell 排序</div><div class="thumb"><div class="no">6</div>8.3.1 直接选择排序</div><div class="thumb"><div class="no">7</div>8.3.2 堆排序</div><div class="thumb"><div class="no">8</div>8.4.1 冒泡排序</div><div class="thumb"><div class="no">9</div>8.4.2 快速排序</div><div class="thumb"><div class="no">10</div>快排的实现</div><div class="thumb"><div class="no">11</div>快排最坏情况怎么办</div><div class="thumb"><div class="no">12</div>8.5 归并排序</div><div class="thumb"><div class="no">13</div>8.6 分配排序：跳出比较模型</div><div class="thumb"><div class="no">14</div>8.6.1 桶式排序</div><div class="thumb"><div class="no">15</div>8.6.2 基数排序</div><div class="thumb"><div class="no">16</div>8.6.3 索引排序</div><div class="thumb"><div class="no">17</div>8.7.1 简单排序的时间代价</div><div class="thumb"><div class="no">18</div>8.7.2 理论时间与实测时间</div><div class="thumb"><div class="no">19</div>8.7.3 比较排序的下限</div><div class="thumb"><div class="no">20</div>怎么选</div><div class="thumb"><div class="no">21</div>课堂讲解卡：排序选择取决于约束</div><div class="thumb"><div class="no">22</div>课堂例题：同一组数据的三种路径</div><div class="thumb"><div class="no">23</div>课堂例题答案：排序路径对照</div><div class="thumb"><div class="no">24</div>课末自检</div><div class="thumb"><div class="no">25</div>课末自检参考答案</div><div class="thumb"><div class="no">26</div>状态演算：归并排序</div><div class="thumb"><div class="no">27</div>反例：合并时相等取右</div><div class="thumb"><div class="no">28</div>课堂练习与答案</div><div class="thumb"><div class="no">29</div>Python 算法轨：同一排序的可执行对照</div><div class="thumb"><div class="no">30</div>本章小结</div><div class="thumb"><div class="no">31</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -464,10 +477,10 @@ d 位、每位 r 个值时是 O(d(n + r))。
 导出 PDF：浏览器打印（Ctrl/Cmd+P），每页一张幻灯片。</p>
 </div></div>
 <div class="chrome">
-<b>第8章 内排序</b><span>数据结构与算法：Python 讲算法，C++ 讲实现</span>
+<b>第8章 内排序</b><span>数据结构与算法：Python 讲可迁移算法，C++ 讲存储与工程实现</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 30</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 31</b>
 </div>
 <script>
 (function(){

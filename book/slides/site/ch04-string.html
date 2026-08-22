@@ -347,7 +347,25 @@ KMP    j = next[j]  文本指针 i 一步都不退</code></pre></div>
 </ul></section><section class="slide" data-notes=""><h1 id="状态演算kmp-失配"><a class="anchor" href="#状态演算kmp-失配">#</a>状态演算：KMP 失配</h1>
 <p>模式 <code>ABABC</code> 已匹配 <code>ABAB</code> 后遇到 <code>C</code> 失配；模式不能退回文本，而是依据最长相等前后缀退到 <code>AB</code>，继续比较。</p></section><section class="slide" data-notes=""><h1 id="反例文本指针回退"><a class="anchor" href="#反例文本指针回退">#</a>反例：文本指针回退</h1>
 <p>朴素算法可回退文本指针，但 KMP 若也回退，就失去线性复杂度；重复字符文本会造成二次扫描。</p></section><section class="slide" data-notes=""><h1 id="课堂练习与答案"><a class="anchor" href="#课堂练习与答案">#</a>课堂练习与答案</h1>
-<p>课堂练习：写出模式 <code>AAAA</code> 的前缀表。答案：按“前缀长度”约定为 <code>0,1,2,3</code>；若实现采用回退下标，需按代码约定平移。</p></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
+<p>课堂练习：写出模式 <code>AAAA</code> 的前缀表。答案：按“前缀长度”约定为 <code>0,1,2,3</code>；若实现采用回退下标，需按代码约定平移。</p></section><section class="slide" data-notes=""><h1 id="python-算法轨kmp-模式匹配"><a class="anchor" href="#python-算法轨kmp-模式匹配">#</a>Python 算法轨：KMP 模式匹配</h1>
+<p>字符串缓冲区的容量、所有权和异常安全用 C++ 展示；朴素匹配和 KMP 用 Python 对照算法步骤。</p>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/pattern_matching/modern.py">code/ch04/pattern_matching/modern.py#kmp</a></div><pre><code><span class="k">def</span> kmp_search(text: <span class="t">str</span>, pattern: <span class="t">str</span>, next_values: <span class="t">list</span>[<span class="t">int</span>] | <span class="k">None</span> = <span class="k">None</span>) -&gt; <span class="t">int</span> | <span class="k">None</span>:
+    <span class="s">&quot;&quot;&quot;KMP 匹配；目标串下标只向前移动。&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="k">not</span> pattern:
+        <span class="k">return</span> <span class="n">0</span>
+    <span class="k">if</span> next_values <span class="k">is</span> <span class="k">None</span>:
+        next_values = build_next(pattern)
+    <span class="k">if</span> <span class="t">len</span>(next_values) != <span class="t">len</span>(pattern):
+        <span class="k">raise</span> ValueError(<span class="s">&quot;kmp_search: next 数组长度与模式不符&quot;</span>)
+    i = <span class="n">0</span>
+    j = <span class="n">0</span>
+    <span class="k">while</span> i &lt; <span class="t">len</span>(pattern) <span class="k">and</span> j &lt; <span class="t">len</span>(text):
+        <span class="k">if</span> i == -<span class="n">1</span> <span class="k">or</span> text[j] == pattern[i]:
+            i += <span class="n">1</span>
+            j += <span class="n">1</span>
+        <span class="k">else</span>:
+            i = next_values[i]
+    <span class="k">return</span> j - <span class="t">len</span>(pattern) <span class="k">if</span> i == <span class="t">len</span>(pattern) <span class="k">else</span> <span class="k">None</span></code></pre></div></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
 <ul>
 <li>字符串是元素受限的线性表；本章正题是<strong>变长存储管理</strong></li>
 <li>长度一变就要重新申请、拷贝、释放 → 追加一个字符是 O(n)</li>
@@ -365,7 +383,7 @@ KMP    j = next[j]  文本指针 i 一步都不退</code></pre></div>
 <blockquote><p>测试里有 3000 组随机对拍：朴素和 KMP 必须给出同样的答案。</p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第4章 字符串</div><div class="thumb"><div class="no">2</div>4.1 基本概念</div><div class="thumb"><div class="no">3</div>4.1.1 字符编码</div><div class="thumb"><div class="no">4</div>4.1.2 编码顺序不等于语言顺序</div><div class="thumb"><div class="no">5</div>4.2 变长存储：这一节的正题</div><div class="thumb"><div class="no">6</div>空串也要占一个字节</div><div class="thumb"><div class="no">7</div>追加：为什么是 O(n)</div><div class="thumb"><div class="no">8</div>抽取子串：原书这里会崩</div><div class="thumb"><div class="no">9</div>现代写法：越界就抛</div><div class="thumb"><div class="no">10</div>查找与比较</div><div class="thumb"><div class="no">11</div>4.3 模式匹配</div><div class="thumb"><div class="no">12</div>朴素匹配：手动走一遍</div><div class="thumb"><div class="no">13</div>原书这里算错了</div><div class="thumb"><div class="no">14</div>有没有更好的办法</div><div class="thumb"><div class="no">15</div>特征向量 next</div><div class="thumb"><div class="no">16</div>计算 next：用模式串跟自己匹配</div><div class="thumb"><div class="no">17</div>KMP：失配时模式退，文本不退</div><div class="thumb"><div class="no">18</div>朴素与 KMP：代价对照</div><div class="thumb"><div class="no">19</div>课堂讲解卡：字符串是带边界的序列</div><div class="thumb"><div class="no">20</div>课堂例题：模式 `ABABC` 在文本中的匹配</div><div class="thumb"><div class="no">21</div>课堂例题答案：`ABABC` 的回退</div><div class="thumb"><div class="no">22</div>课末自检</div><div class="thumb"><div class="no">23</div>课末自检参考答案</div><div class="thumb"><div class="no">24</div>状态演算：KMP 失配</div><div class="thumb"><div class="no">25</div>反例：文本指针回退</div><div class="thumb"><div class="no">26</div>课堂练习与答案</div><div class="thumb"><div class="no">27</div>本章小结</div><div class="thumb"><div class="no">28</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第4章 字符串</div><div class="thumb"><div class="no">2</div>4.1 基本概念</div><div class="thumb"><div class="no">3</div>4.1.1 字符编码</div><div class="thumb"><div class="no">4</div>4.1.2 编码顺序不等于语言顺序</div><div class="thumb"><div class="no">5</div>4.2 变长存储：这一节的正题</div><div class="thumb"><div class="no">6</div>空串也要占一个字节</div><div class="thumb"><div class="no">7</div>追加：为什么是 O(n)</div><div class="thumb"><div class="no">8</div>抽取子串：原书这里会崩</div><div class="thumb"><div class="no">9</div>现代写法：越界就抛</div><div class="thumb"><div class="no">10</div>查找与比较</div><div class="thumb"><div class="no">11</div>4.3 模式匹配</div><div class="thumb"><div class="no">12</div>朴素匹配：手动走一遍</div><div class="thumb"><div class="no">13</div>原书这里算错了</div><div class="thumb"><div class="no">14</div>有没有更好的办法</div><div class="thumb"><div class="no">15</div>特征向量 next</div><div class="thumb"><div class="no">16</div>计算 next：用模式串跟自己匹配</div><div class="thumb"><div class="no">17</div>KMP：失配时模式退，文本不退</div><div class="thumb"><div class="no">18</div>朴素与 KMP：代价对照</div><div class="thumb"><div class="no">19</div>课堂讲解卡：字符串是带边界的序列</div><div class="thumb"><div class="no">20</div>课堂例题：模式 `ABABC` 在文本中的匹配</div><div class="thumb"><div class="no">21</div>课堂例题答案：`ABABC` 的回退</div><div class="thumb"><div class="no">22</div>课末自检</div><div class="thumb"><div class="no">23</div>课末自检参考答案</div><div class="thumb"><div class="no">24</div>状态演算：KMP 失配</div><div class="thumb"><div class="no">25</div>反例：文本指针回退</div><div class="thumb"><div class="no">26</div>课堂练习与答案</div><div class="thumb"><div class="no">27</div>Python 算法轨：KMP 模式匹配</div><div class="thumb"><div class="no">28</div>本章小结</div><div class="thumb"><div class="no">29</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -375,10 +393,10 @@ KMP    j = next[j]  文本指针 i 一步都不退</code></pre></div>
 导出 PDF：浏览器打印（Ctrl/Cmd+P），每页一张幻灯片。</p>
 </div></div>
 <div class="chrome">
-<b>第4章 字符串</b><span>数据结构与算法：Python 讲算法，C++ 讲实现</span>
+<b>第4章 字符串</b><span>数据结构与算法：Python 讲可迁移算法，C++ 讲存储与工程实现</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 28</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 29</b>
 </div>
 <script>
 (function(){

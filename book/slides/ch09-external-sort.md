@@ -1,6 +1,6 @@
 ---
 title: 第9章 文件管理和外排序
-subtitle: 数据结构与算法：Python 讲算法，C++ 讲实现
+subtitle: 数据结构与算法：Python 讲可迁移算法，C++ 讲存储与工程实现
 ---
 
 # 第9章 文件管理和外排序
@@ -350,6 +350,45 @@ void replace(std::size_t player, int value) {
 # 课堂练习与答案
 
 课堂练习：解释为什么随机输入的顺串平均可超过 M。答案：大于当前输出的记录继续留在堆中，活跃记录不断补入，直到遇到较小记录才冻结。
+
+---
+
+---
+
+# Python 算法轨：置换选择与选择树
+
+Python 版用于演示顺串生成、多路归并和赢家/败者更新；C++ 版补足文件页、缓冲区和对象所有权等工程实现。
+
+```python file=code/ch09/external_sort/modern.py#winner-tree
+class WinnerTree(_Tournament):
+    """代码9.2：内部结点记**赢家**，根就是全局最小的那一路。
+
+    重建一个结点要看它两个孩子的赢家，所以替换选手后沿路每层各比一次。
+    """
+
+    def _winner_at(self, node: int) -> int:
+        # 叶子层不占内部结点的位置：第 j 个选手就在 _size + j 上，它自己是自己的赢家。
+        return node - self._size if node >= self._size else self._tree[node]
+
+    def _build(self) -> None:
+        for node in range(self._size - 1, 0, -1):
+            self._tree[node] = self._better(self._winner_at(node * 2),
+                                            self._winner_at(node * 2 + 1))
+
+    def winner_index(self) -> int | None:
+        if not self.players:
+            return None
+        return self._winner_at(1)
+
+    def replace(self, player: int, value: int) -> None:
+        self._check_player(player)
+        self.players[player] = value
+        node = (self._size + player) // 2
+        while node >= 1:
+            self._tree[node] = self._better(self._winner_at(node * 2),
+                                            self._winner_at(node * 2 + 1))
+            node //= 2
+```
 
 ---
 
