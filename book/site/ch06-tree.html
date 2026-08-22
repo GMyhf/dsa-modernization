@@ -188,11 +188,10 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>图 6.3　森林转换为二叉树的过程：先把兄弟连线，再切去多余的父子线，最后旋转整理方向。</p>
 <p>形式地说：森林 <span class="math">F<span class="rel">=</span>{T<sub><span class="upr">1</span></sub>,T<sub><span class="upr">2</span></sub>,…,T<sub>n</sub>}</span> 转成二叉树 <span class="math">B(F)</span>——<span class="math">F</span> 空则 <span class="math">B(F)</span> 空；否则 <span class="math">B(F)</span> 的根是 <span class="math">T<sub><span class="upr">1</span></sub></span> 的根，<span class="math">B(F)</span> 的左子树是 <span class="math">T<sub><span class="upr">1</span></sub></span> 的子树森林转成的二叉树，<span class="math">B(F)</span> 的右子树是 <span class="math">{T<sub><span class="upr">2</span></sub>,…,T<sub>n</sub>}</span> 转成的二叉树。</p>
 <p>反过来是三步的逆：逆时针旋转；若 <span class="math">x</span> 是 <span class="math">y</span> 的左孩子，就把 <span class="math">x</span> 以及 <span class="math">x</span> 右侧整条右链上的结点都补连到 <span class="math">y</span>；再删掉所有到右孩子的边。二叉树 <span class="math">B</span> 对应的森林 <span class="math">F(B)</span>：空树对应空森林；否则 <span class="math">F(B)</span> 是一棵以 <span class="math">B</span> 的根为根、以 <span class="math">F(B<sub>L</sub>)</span> 为子树森林的树，再加上 <span class="math">F(B<sub>R</sub>)</span>。这两种转换互逆。</p>
-<figure><img loading="lazy" src="../assets/902ea7ccf98f52a2.jpg" alt="图 6.4 二叉树转换为森林"><figcaption>图 6.4 二叉树转换为森林</figcaption></figure>
-<p>图 6.4　上述转换的逆过程。</p>
-<figure><img loading="lazy" src="../assets/903587cc33dc1265.jpg" alt="图 6.5(a) 森林"><figcaption>图 6.5(a) 森林</figcaption></figure>
-<figure><img loading="lazy" src="../assets/14db48b94fcee155.jpg" alt="图 6.5(b) 森林对应的二叉树"><figcaption>图 6.5(b) 森林对应的二叉树</figcaption></figure>
-<p>图 6.5　森林与对应二叉树的互相转换。</p>
+<figure><img loading="lazy" src="../assets/ch06/fig-6-4-full.png" alt="图 6.4 二叉树转换为森林"><figcaption>图 6.4 二叉树转换为森林</figcaption></figure>
+<p>图 6.4　上述转换的逆过程，完整保留二叉树和对应森林的全部子图。</p>
+<figure><img loading="lazy" src="../assets/ch06/fig-6-5-full.png" alt="图 6.5 森林和对应的二叉树"><figcaption>图 6.5 森林和对应的二叉树</figcaption></figure>
+<p>图 6.5　森林与对应二叉树的互相转换，完整保留原书的森林、二叉树和题注。</p>
 <h3 id="613-树的抽象数据类型"><a class="anchor" href="#613-树的抽象数据类型">#</a>6.1.3 树的抽象数据类型</h3>
 <p>和二叉树一样，树的 ADT 分结点类和树类。对外运算是：用一个值建根、在某结点下插入第一个孩子、在某结点旁插入下一个兄弟、问父结点、删掉一棵子树、以及先根 / 后根 / 层次三种周游。原书【代码6.1】【代码6.2】只给出声明。本书把这些运算直接写在 <code>GeneralTree</code> 上，不再另设空基类。</p>
 <h3 id="614-树的周游"><a class="anchor" href="#614-树的周游">#</a>6.1.4 树的周游</h3>
