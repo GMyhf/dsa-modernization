@@ -192,7 +192,8 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <div class="codeblock" data-lang="text"><pre><code>A = ()              空表
 B = (a, (b, c))     第二个元素是子表
 C = (a, C)          递归表!</code></pre></div>
-<p>树是广义表的特例（子表不共享、不递归）。 <strong>广义表允许共享和递归</strong>——所以它不能用简单的递归析构。</p></section><section class="slide" data-notes="&lt;p&gt;这就是 shared_ptr 的原理。但本书&lt;strong&gt;手写&lt;/strong&gt;它，因为 12.2 的教学点正是
+<p>树是广义表的特例（子表不共享、不递归）。 <strong>广义表允许共享和递归</strong>——所以它不能用简单的递归析构。</p>
+<p>现代对应物包括嵌套对象、共享 DAG、AST 和循环对象图；“广义表”主要是理解这些结构的经典术语。</p></section><section class="slide" data-notes="&lt;p&gt;这就是 shared_ptr 的原理。但本书&lt;strong&gt;手写&lt;/strong&gt;它，因为 12.2 的教学点正是
 「共享的存储怎么管」——用 shared_ptr 就把这一节删掉了。
 
 引用计数有个著名的软肋：&lt;strong&gt;收不回环&lt;/strong&gt;。C = (a, C) 这种递归表，

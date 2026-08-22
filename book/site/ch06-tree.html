@@ -604,7 +604,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <figure><img loading="lazy" src="../assets/ddf4082b075a6a12.jpg" alt="图 6.14 带右链的先根次序表示法"><figcaption>图 6.14 带右链的先根次序表示法</figcaption></figure>
 <p>图 6.14　先根序列配合右链下标还原树形。</p>
 <h3 id="632-带双标记的先根次序表示"><a class="anchor" href="#632-带双标记的先根次序表示">#</a>6.3.2 带双标记的先根次序表示</h3>
-<p>右链要用一个整型下标。若改成两个布尔标记——<code>ltag</code>「有没有孩子」、<code>rtag</code>「有没有下一个兄弟」—— 每位只占 1 bit，更省。信息量和带右链相同，只是用栈换空间。</p>
+<p>右链要用一个整型下标。若改成两个布尔标记——<code>ltag</code>「有没有孩子」、<code>rtag</code>「有没有下一个兄弟」—— 理论上只需两位信息，更省。<strong>但普通 C++ <code>bool</code> 成员通常按字节存储，并不保证每位只占 1 bit</strong>； 只有显式位压缩或位域实现才可讨论这种空间节省。它是早期教材常见的顺序编码，今天主要用于理解 树的序列化思想，不是通用工程接口。</p>
 <p>以原书图6.5(a) 那片森林为例，它的双标记先根次序表示（图6.15）是：</p>
 <figure><img loading="lazy" src="../assets/1e0ac0ff58415c62.jpg" alt="图 6.15 带双标记的先根次序表示法"><figcaption>图 6.15 带双标记的先根次序表示法</figcaption></figure>
 <p>图 6.15　双标记先根次序表示法的原书示例。</p>
@@ -696,6 +696,7 @@ rtag       0  1  0  1  1  1  0  0  1  1     0 = 有下一个兄弟</code></pre><
 <figure><img loading="lazy" src="../assets/c02b2adffb31959d.jpg" alt="图 6.17 带双标记的层次次序表示法"><figcaption>图 6.17 带双标记的层次次序表示法</figcaption></figure>
 <p>图 6.17　层次次序配合双标记记录孩子和兄弟关系。</p>
 <p>按层次周游的次序存放，标记含义与 6.3.2 相同：有没有孩子、有没有下一个兄弟。因为同一层的兄弟本来就排在一起，一层扫完再扫下一层，用队列就能还原。适合需要按层处理的外部存储。</p>
+<p><strong>现代视角：紧凑树编码。</strong> 如果目标是工程中的紧凑存储或高速导航，通常会考虑 <strong>LOUDS</strong>、平衡括号（balanced parentheses） 等 succinct tree 编码，而不是直接照搬本节的双标记结构。它们同样把树压成位串， 但会明确规定位级布局、秩/选择（rank/select）操作和随机访问边界。本节的右链、双标记、带度数表示 应视为经典编码对照，用来理解「结构信息如何随周游序列保存」即可。</p>
 <h2 id="64-k叉树"><a class="anchor" href="#64-k叉树">#</a>6.4 K叉树</h2>
 <p>有些应用里每个结点的孩子数有固定上限 <span class="math">K</span>，例如三子棋的博弈树、某些 B 树的内存模拟。这时不必走「任意度 + 兄弟链」，可以规定每个结点至多 <span class="math">K</span> 个孩子，叫做 <span class="math">K</span> 叉树。</p>
 <p>满 <span class="math">K</span> 叉树、完全 <span class="math">K</span> 叉树的定义与二叉树平行：满 <span class="math">K</span> 叉树的每个结点要么是叶，要么恰好 <span class="math">K</span> 个孩子；完全 <span class="math">K</span> 叉树只有最下两层的度可以小于 <span class="math">K</span>，且最下层靠左对齐。按层从 0 编号时，结点 <span class="math">i</span> 的孩子们是 <span class="math">Ki<span class="bin">+</span><span class="upr">1</span>,…,Ki<span class="bin">+</span>K</span>，父结点是 <span class="math">⌊(i<span class="bin">−</span><span class="upr">1</span>)/K⌋</span>。<span class="math">K<span class="rel">=</span><span class="upr">2</span></span> 就回到二叉树。</p>
