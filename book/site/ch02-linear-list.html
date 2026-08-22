@@ -1386,21 +1386,6 @@ Node* insert_before(Node* pos, U&amp;&amp; value) {
 <h2 id="24-线性表实现方法的比较"><a class="anchor" href="#24-线性表实现方法的比较">#</a>2.4 线性表实现方法的比较</h2>
 <p>顺序表按下标随机访问是 O(1)，插入删除要搬动后续元素，平均 O(n)；链表在已知前驱时插入删除是 O(1)，但按位置找前驱仍是 O(n)。顺序表局部性好、无指针开销；链表按需分配、没有预留空洞。选择取决于「按位置读」多，还是「在已知结点旁改链接」多。</p>
 <p>不要用顺序表的场合：经常在表中间插入删除，或事先不知道长度上限。不要用链表的场合：按位置读远比插入删除多，或者指针本身比结点内容还占空间。</p>
-<h2 id="原书插图补充"><a class="anchor" href="#原书插图补充">#</a>原书插图补充</h2>
-<p>本节收录原书中与本章主题对应、且已在插图目录登记的图示。</p>
-<figure><img loading="lazy" src="../assets/6e2bc11926f0ec96.jpg" alt="图 2.4 单链表示例"><figcaption>图 2.4 单链表示例</figcaption></figure>
-<figure><img loading="lazy" src="../assets/6c7f366bed4583ff.jpg" alt="图2.5具有头、尾两指针的单链表"><figcaption>图2.5具有头、尾两指针的单链表</figcaption></figure>
-<figure><img loading="lazy" src="../assets/605c79846035cdf0.jpg" alt="(a) 带有头结点的空表"><figcaption>(a) 带有头结点的空表</figcaption></figure>
-<figure><img loading="lazy" src="../assets/3c36698567f5e7c2.jpg" alt="(b) 典型的带有头结点的单链表；图 2.6 引人头结点的单链表"><figcaption>(b) 典型的带有头结点的单链表；图 2.6 引人头结点的单链表</figcaption></figure>
-<figure><img loading="lazy" src="../assets/995a8257623869d1.jpg" alt="图 2.7 插入算法示意图"><figcaption>图 2.7 插入算法示意图</figcaption></figure>
-<figure><img loading="lazy" src="../assets/8a7435561d286746.jpg" alt="(a) 删除前指针情况；(b) 删除后指针情况；图 2.8 删除示意图"><figcaption>(a) 删除前指针情况；(b) 删除后指针情况；图 2.8 删除示意图</figcaption></figure>
-<figure><img loading="lazy" src="../assets/40ab93045c34a1bf.jpg" alt="图2.9 加入表头结点的双链表；图2.9中变量head用于指向表首结点，变量tail用于指向表尾结点。图2.10给出了相应的"><figcaption>图2.9 加入表头结点的双链表；图2.9中变量head用于指向表首结点，变量tail用于指向表尾结点。图2.10给出了相应的</figcaption></figure>
-<figure><img loading="lazy" src="../assets/ebdcb0d7054cf3a9.jpg" alt="图 2.10 双链表的结点"><figcaption>图 2.10 双链表的结点</figcaption></figure>
-<figure><img loading="lazy" src="../assets/f3aa5f7a9ea65ef6.jpg" alt="图2.11 双链表的删除操作示意"><figcaption>图2.11 双链表的删除操作示意</figcaption></figure>
-<figure><img loading="lazy" src="../assets/1f4184cafed5ae83.jpg" alt="图2.12 双链表插入操作示意"><figcaption>图2.12 双链表插入操作示意</figcaption></figure>
-<figure><img loading="lazy" src="../assets/89f9ff700933f475.jpg" alt="图2.13 循环链表示意图"><figcaption>图2.13 循环链表示意图</figcaption></figure>
-<figure><img loading="lazy" src="../assets/a24d59d2527028cc.jpg" alt="图2.14 带头结点的循环链表示意图"><figcaption>图2.14 带头结点的循环链表示意图</figcaption></figure>
-<figure><img loading="lazy" src="../assets/b8866e40fb846a83.jpg" alt="图 2.15 循环双链表示意图"><figcaption>图 2.15 循环双链表示意图</figcaption></figure>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
 <p>线性结构里元素满足一对一的先后关系。线性表有顺序和链式两种主要存法。顺序表易用、可随机访问，适合静态或按位读取多的数据；链表适合长度常变、或经常在已知结点旁增删的场合。具体选哪一种，看访问统计和操作特点。</p>
 <h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
@@ -1422,7 +1407,7 @@ Node* insert_before(Node* pos, U&amp;&amp; value) {
 </ol>
 <div class="pagenav"><a href="ch01-adt.html"><span class="dir">← 上一篇</span>第1章 概论</a><a href="ch03-stack.html" style="text-align:right"><span class="dir">下一篇 →</span>第3章 栈与队列</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#21-线性表的概念">2.1 线性表的概念</a><a href="#22-顺序表">2.2 顺序表</a><a href="#为什么这一节没有-python-版" class="sub">为什么这一节没有 Python 版</a><a href="#教学版完整实现" class="sub">教学版：完整实现</a><a href="#221-顺序表的类定义" class="sub">2.2.1 顺序表的类定义</a><a href="#222-顺序表的运算实现" class="sub">2.2.2 顺序表的运算实现</a><a href="#22a-进阶选读从教学版到工程版" class="sub">2.2a 进阶（选读）：从教学版到工程版</a><a href="#与原书的对照">与原书的对照</a><a href="#23-链表">2.3 链表</a><a href="#为什么这一节没有-python-版-1" class="sub">为什么这一节没有 Python 版</a><a href="#教学版完整实现-1" class="sub">教学版：完整实现</a><a href="#231-单链表" class="sub">2.3.1 单链表</a><a href="#232-双链表" class="sub">2.3.2 双链表</a><a href="#233-循环链表" class="sub">2.3.3 循环链表</a><a href="#23a-进阶选读从教学版到工程版" class="sub">2.3a 进阶（选读）：从教学版到工程版</a><a href="#24-线性表实现方法的比较">2.4 线性表实现方法的比较</a><a href="#原书插图补充">原书插图补充</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#21-线性表的概念">2.1 线性表的概念</a><a href="#22-顺序表">2.2 顺序表</a><a href="#为什么这一节没有-python-版" class="sub">为什么这一节没有 Python 版</a><a href="#教学版完整实现" class="sub">教学版：完整实现</a><a href="#221-顺序表的类定义" class="sub">2.2.1 顺序表的类定义</a><a href="#222-顺序表的运算实现" class="sub">2.2.2 顺序表的运算实现</a><a href="#22a-进阶选读从教学版到工程版" class="sub">2.2a 进阶（选读）：从教学版到工程版</a><a href="#与原书的对照">与原书的对照</a><a href="#23-链表">2.3 链表</a><a href="#为什么这一节没有-python-版-1" class="sub">为什么这一节没有 Python 版</a><a href="#教学版完整实现-1" class="sub">教学版：完整实现</a><a href="#231-单链表" class="sub">2.3.1 单链表</a><a href="#232-双链表" class="sub">2.3.2 双链表</a><a href="#233-循环链表" class="sub">2.3.3 循环链表</a><a href="#23a-进阶选读从教学版到工程版" class="sub">2.3a 进阶（选读）：从教学版到工程版</a><a href="#24-线性表实现方法的比较">2.4 线性表实现方法的比较</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch02-linear-list.md</code> 生成

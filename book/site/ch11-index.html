@@ -758,33 +758,6 @@ AND      : 1 0 0 0 1 0</code></pre></div>
 <li>给 <code>BitmapIndex</code> 换成字对齐混合编码（WAH），和现在的字级游程比压缩率；用交替位图确认它不会像现在这样越压越大。</li>
 <li>为 <code>SignatureFile</code> 做一次参数实验：固定语料，改变每词位数，画出假阳性率随位数的变化。</li>
 </ol>
-<h2 id="原书插图补充"><a class="anchor" href="#原书插图补充">#</a>原书插图补充</h2>
-<p>本节收录原书中与本章主题对应、且已在插图目录登记的图示。</p>
-<figure><img loading="lazy" src="../assets/combined/fig-11-5.png" alt="图 11.5 3 阶 B 树"><figcaption>图 11.5 3 阶 B 树</figcaption></figure>
-<p>图 11.5　3 阶 B 树的三种表示，完整保留原书的 (a)、(b)、(c) 子图。</p>
-<figure><img loading="lazy" src="../assets/3032fa408668c89e.jpg" alt="图11.6 在图 11.5的3阶 B 树中插入关键码14、55后的结果"><figcaption>图11.6 在图 11.5的3阶 B 树中插入关键码14、55后的结果</figcaption></figure>
-<figure><img loading="lazy" src="../assets/ea9001b8f902803b.jpg" alt="图11.7 在图11.5的 3阶 B 树中插入关键码19后导致根分裂"><figcaption>图11.7 在图11.5的 3阶 B 树中插入关键码19后导致根分裂</figcaption></figure>
-<figure><img loading="lazy" src="../assets/combined/fig-11-8.png" alt="图 11.8 5 阶 B 树连续删除示意"><figcaption>图 11.8 5 阶 B 树连续删除示意</figcaption></figure>
-<p>图 11.8　5 阶 B 树连续删除关键码 120、150 的完整过程。</p>
-<figure><img loading="lazy" src="../assets/3de9f1e64abee567.jpg" alt="图11.12 混合型 B+树，内部结点阶为4,叶结点阶5"><figcaption>图11.12 混合型 B+树，内部结点阶为4,叶结点阶5</figcaption></figure>
-<figure><img loading="lazy" src="../assets/c2cacd7eba558abe.jpg" alt="图 11.13 在图11.12混合型 B +树(内部结点阶为4,叶结点阶5)中，插入22后的结果"><figcaption>图 11.13 在图11.12混合型 B +树(内部结点阶为4,叶结点阶5)中，插入22后的结果</figcaption></figure>
-<figure><img loading="lazy" src="../assets/fe716221bc3bfed5.jpg" alt="图11.14 在图11.13混合型 B +树(内部结点阶为4,叶结点阶5)中，删除40后的结果"><figcaption>图11.14 在图11.13混合型 B +树(内部结点阶为4,叶结点阶5)中，删除40后的结果</figcaption></figure>
-<figure><img loading="lazy" src="../assets/9638eba45a5abef8.jpg" alt="(a)百货销售数据库记录以及 State=NY(纽约州)的位向量"><figcaption>(a)百货销售数据库记录以及 State=NY(纽约州)的位向量</figcaption></figure>
-<figure><img loading="lazy" src="../assets/4cd9c419025ff11a.jpg" alt="图11.17 父结点是红色，叔父结点是黑色的情况，旋转解决红红冲突"><figcaption>图11.17 父结点是红色，叔父结点是黑色的情况，旋转解决红红冲突</figcaption></figure>
-<figure><img loading="lazy" src="../assets/a333f195118c2445.jpg" alt="图11.18 叔父结点为黑色，进行重构调整每个结点的阶都保持原值，调整完成"><figcaption>图11.18 叔父结点为黑色，进行重构调整每个结点的阶都保持原值，调整完成</figcaption></figure>
-<figure><img loading="lazy" src="../assets/74d9765c86b0459e.jpg" alt="图11.19 父结点、叔父结点均为红色，则父和祖换色，然后递归处理方法"><figcaption>图11.19 父结点、叔父结点均为红色，则父和祖换色，然后递归处理方法</figcaption></figure>
-<figure><img loading="lazy" src="../assets/1a24097d7b698644.jpg" alt="图 11.20 红黑树插入示例"><figcaption>图 11.20 红黑树插入示例</figcaption></figure>
-<figure><img loading="lazy" src="../assets/dc4aa499811e6130.jpg" alt="图 11.21 情况 1(a):"><figcaption>图 11.21 情况 1(a):</figcaption></figure>
-<figure><img loading="lazy" src="../assets/d8199ab1b4f48019.jpg" alt="图11.22 情况1(b):双黑结点与红色侄子同边顺"><figcaption>图11.22 情况1(b):双黑结点与红色侄子同边顺</figcaption></figure>
-<figure><img loading="lazy" src="../assets/0314fc9126687660.jpg" alt="图11.23 情况2双黑的兄弟结点为黑色，且兄弟结点有两个黑色子结点"><figcaption>图11.23 情况2双黑的兄弟结点为黑色，且兄弟结点有两个黑色子结点</figcaption></figure>
-<figure><img loading="lazy" src="../assets/ea0f0114893b0d4b.jpg" alt="图 11.24 情况3双黑的兄弟结点为红色"><figcaption>图 11.24 情况3双黑的兄弟结点为红色</figcaption></figure>
-<figure><img loading="lazy" src="../assets/96123ad82e555db6.jpg" alt="图11.25红黑树连续删除90、70、80,引起的双黑调整示例"><figcaption>图11.25红黑树连续删除90、70、80,引起的双黑调整示例</figcaption></figure>
-<figure><img loading="lazy" src="../assets/f5d4fa1ba1a664f6.jpg" alt="图 11.26 习题 8. 的 3 阶 B 树图示"><figcaption>图 11.26 习题 8. 的 3 阶 B 树图示</figcaption></figure>
-<figure><img loading="lazy" src="../assets/c2dac0e37e1b2851.jpg" alt="图 11.27 习题9. 的4阶 B树"><figcaption>图 11.27 习题9. 的4阶 B树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/722c1d1d7948e14a.jpg" alt="图 11.28 习题 10. 的 3 阶 B 树"><figcaption>图 11.28 习题 10. 的 3 阶 B 树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/ed2d545e00b57235.jpg" alt="图 11.29 2 阶 $B ^ { \star }$ 树图示"><figcaption>图 11.29 2 阶 <span class="math">B<sup>⋆</sup></span> 树图示</figcaption></figure>
-<figure><img loading="lazy" src="../assets/b03c1f52b7542c5b.jpg" alt="图 11.30 混合型 $B ^ { + }$ 树，内部结点阶为4、叶结点阶为3"><figcaption>图 11.30 混合型 <span class="math">B<sup><span class="bin">+</span></sup></span> 树，内部结点阶为4、叶结点阶为3</figcaption></figure>
-<figure><img loading="lazy" src="../assets/1a187b1fcf4e3da2.jpg" alt="图 11.31 红黑树"><figcaption>图 11.31 红黑树</figcaption></figure>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
 <h3 id="python-实现的证据链"><a class="anchor" href="#python-实现的证据链">#</a>Python 实现的证据链</h3>
 <div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/linear_index/modern.py">code/ch11/linear_index/modern.py#index-find</a></div><pre><code><span class="k">def</span> find(self,key):
@@ -879,7 +852,7 @@ AND      : 1 0 0 0 1 0</code></pre></div>
 <p>见本章末「练习路径」的四条。</p>
 <div class="pagenav"><a href="ch10-search.html"><span class="dir">← 上一篇</span>第10章 检索</a><a href="ch12-advanced.html" style="text-align:right"><span class="dir">下一篇 →</span>第12章 高级数据结构</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#111-线性索引">11.1 线性索引</a><a href="#112-静态索引多分树">11.2 静态索引——多分树</a><a href="#113-倒排索引">11.3 倒排索引</a><a href="#114-动态索引">11.4 动态索引</a><a href="#b-树与-b-树" class="sub">B 树与 B+ 树</a><a href="#1144-动态索引和静态索引性能的比较" class="sub">11.4.4 动态索引和静态索引性能的比较</a><a href="#115-位索引技术">11.5 位索引技术</a><a href="#位图签名和红黑树" class="sub">位图、签名和红黑树</a><a href="#练习路径">练习路径</a><a href="#原书插图补充">原书插图补充</a><a href="#本章小结">本章小结</a><a href="#python-实现的证据链" class="sub">Python 实现的证据链</a><a href="#习题">习题</a><a href="#补充索引题参考课程第-11-章" class="sub">补充索引题（参考课程第 11 章）</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#111-线性索引">11.1 线性索引</a><a href="#112-静态索引多分树">11.2 静态索引——多分树</a><a href="#113-倒排索引">11.3 倒排索引</a><a href="#114-动态索引">11.4 动态索引</a><a href="#b-树与-b-树" class="sub">B 树与 B+ 树</a><a href="#1144-动态索引和静态索引性能的比较" class="sub">11.4.4 动态索引和静态索引性能的比较</a><a href="#115-位索引技术">11.5 位索引技术</a><a href="#位图签名和红黑树" class="sub">位图、签名和红黑树</a><a href="#练习路径">练习路径</a><a href="#本章小结">本章小结</a><a href="#python-实现的证据链" class="sub">Python 实现的证据链</a><a href="#习题">习题</a><a href="#补充索引题参考课程第-11-章" class="sub">补充索引题（参考课程第 11 章）</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch11-index.md</code> 生成

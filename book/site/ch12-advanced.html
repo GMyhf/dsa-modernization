@@ -802,54 +802,6 @@ LR（左右，先左旋再右旋）      RL（右左，先右旋再左旋）
 <p>例如链 <code>10 -&gt; 20 -&gt; 30</code> 中访问 30，是右–右一字形：先围绕 10 左旋，再围绕 20 左旋，30 到根。若 10 的右孩子是 30、30 的左孩子是 20，则访问 20 是右–左之字形，两次旋转方向相反。两种情况都把目标提两层，但一字形还把整条同向长链明显压短，这是不能把它替换成连续「父子单旋」的原因。</p>
 <p>“均摊 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>”不等于每一次都快。访问深链末端的单次代价仍可达 <span class="math">O(n)</span>；保证的是从任意初始树开始，一串 <span class="math">m</span> 次操作的总成本为 <span class="math">O(m&thinsp;<span class="upr">log</span>&thinsp;n)</span>（另加初始势能）。因此伸展树适合热点键反复出现、又不要求单次延迟上界的场景；实时系统若要求每次查找都在确定高度内结束，更适合 AVL 或红黑树。</p>
 <p>伸展树实现简单，不必维护额外的平衡域；代价是单次操作可能仍是 <span class="math">O(n)</span>，只是摊还之后是对数。 同一实现中的 <code>SplayTree</code> 使用 <code>unique_ptr</code> 维护子树所有权，访问后按一字形/之字形规则旋至根。</p>
-<h2 id="原书插图补充"><a class="anchor" href="#原书插图补充">#</a>原书插图补充</h2>
-<p>本节收录原书中与本章主题对应、且已在插图目录登记的图示。</p>
-<figure><img loading="lazy" src="../assets/a6db78e33812566d.jpg" alt="图 12.3 纯线性结构表"><figcaption>图 12.3 纯线性结构表</figcaption></figure>
-<figure><img loading="lazy" src="../assets/bb0f924bd1bdec90.jpg" alt="图 12.4 纯表的树表示"><figcaption>图 12.4 纯表的树表示</figcaption></figure>
-<figure><img loading="lazy" src="../assets/08b834108b1ffee9.jpg" alt="图 12.7 没有头结点的广义表"><figcaption>图 12.7 没有头结点的广义表</figcaption></figure>
-<figure><img loading="lazy" src="../assets/a997a7dd44ffc121.jpg" alt="图 12.8 带头结点的广义表"><figcaption>图 12.8 带头结点的广义表</figcaption></figure>
-<figure><img loading="lazy" src="../assets/496aef5541eea022.jpg" alt="图12.9 带表头结点的循环广义表"><figcaption>图12.9 带表头结点的循环广义表</figcaption></figure>
-<p>&lt;!-- 图 12.10、图 12.11 的子图已在正文对应位置合并展示。 --&gt;</p>
-<figure><img loading="lazy" src="../assets/a71971eeeedd60de.jpg" alt="图 12.15 BST 的平衡性示意图"><figcaption>图 12.15 BST 的平衡性示意图</figcaption></figure>
-<figure><img loading="lazy" src="../assets/2f63d4427c7ba023.jpg" alt="图 12.16 一棵二叉 Trie 树"><figcaption>图 12.16 一棵二叉 Trie 树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/a08c66eba1f27251.jpg" alt="图 12.18 对 Trie 树的改进"><figcaption>图 12.18 对 Trie 树的改进</figcaption></figure>
-<figure><img loading="lazy" src="../assets/5fa442714c931b76.jpg" alt="图 12.19 x表示那个位可以为 1 或者 0"><figcaption>图 12.19 x表示那个位可以为 1 或者 0</figcaption></figure>
-<figure><img loading="lazy" src="../assets/69b4e6e2e509b6c1.jpg" alt="图 12.21 二叉搜索树"><figcaption>图 12.21 二叉搜索树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/1f30890a5d9e01a8.jpg" alt="图 12.22 关键码与图 12.21 相同的是一棵 BST"><figcaption>图 12.22 关键码与图 12.21 相同的是一棵 BST</figcaption></figure>
-<figure><img loading="lazy" src="../assets/75fcc4e3389b6567.jpg" alt="图 12.23 扩充二叉树"><figcaption>图 12.23 扩充二叉树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/1826934df94f553c.jpg" alt="图 12.24 最佳二叉搜索树"><figcaption>图 12.24 最佳二叉搜索树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/f1b118a907a2784a.jpg" alt="图12.25 退化为线性的二叉搜索树"><figcaption>图12.25 退化为线性的二叉搜索树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/6b92b3ac99984b30.jpg" alt="图12.26 具有不等权结点的二叉搜索树"><figcaption>图12.26 具有不等权结点的二叉搜索树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/ab04fde707fc0b65.jpg" alt="(a) 一棵 AVL 树"><figcaption>(a) 一棵 AVL 树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/2a466745af469534.jpg" alt="(b) 非 AVL 树的 BST；图 12.28 AVL 树与非 AVL 树"><figcaption>(b) 非 AVL 树的 BST；图 12.28 AVL 树与非 AVL 树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/3cd3a1d82f9fca27.jpg" alt="图 12.29 带平衡因子的 AVL 树"><figcaption>图 12.29 带平衡因子的 AVL 树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/f806d05fae1d193e.jpg" alt="(a) 被破坏的AVL树"><figcaption>(a) 被破坏的AVL树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/2a8101ef137dbe8c.jpg" alt="(b) 重新调整为AVL树；图 12.30 AVL 树的调整示意图"><figcaption>(b) 重新调整为AVL树；图 12.30 AVL 树的调整示意图</figcaption></figure>
-<figure><img loading="lazy" src="../assets/919794a24a6d0752.jpg" alt="(a) LL不平衡"><figcaption>(a) LL不平衡</figcaption></figure>
-<figure><img loading="lazy" src="../assets/c2ddb113697e442b.jpg" alt="(b) LR不平衡"><figcaption>(b) LR不平衡</figcaption></figure>
-<figure><img loading="lazy" src="../assets/776ff7cb34bbd95d.jpg" alt="(c) RR不平衡"><figcaption>(c) RR不平衡</figcaption></figure>
-<figure><img loading="lazy" src="../assets/15e78aea8f0613c7.jpg" alt="图12.32 LL型不平衡经过单旋转后重新变成平衡结构，RR型单旋转类似"><figcaption>图12.32 LL型不平衡经过单旋转后重新变成平衡结构，RR型单旋转类似</figcaption></figure>
-<figure><img loading="lazy" src="../assets/ad9ee439aedaf3a3.jpg" alt="(b) 中间状态平衡因子无意义"><figcaption>(b) 中间状态平衡因子无意义</figcaption></figure>
-<figure><img loading="lazy" src="../assets/83e3cdd3592325c1.jpg" alt="(c) a的平衡因子为-1或0,b的平衡因子为0或+1；图 12.33 RL 型双旋转示意图，LR 型双旋转类似；图 12. 34 是从空 AVL 树开始，顺序插入单词 {cup, cop, copy, hit, hi, his, hia}后得到的 AVL树，单词之间按照字典顺序比较。"><figcaption>(c) a的平衡因子为-1或0,b的平衡因子为0或+1；图 12.33 RL 型双旋转示意图，LR 型双旋转类似；图 12. 34 是从空 AVL 树开始，顺序插入单词 {cup, cop, copy, hit, hi, his, hia}后得到的 AVL树，单词之间按照字典顺序比较。</figcaption></figure>
-<figure><img loading="lazy" src="../assets/38fc6390b74cb59c.jpg" alt="图 12.34 AVL 树的插入过程"><figcaption>图 12.34 AVL 树的插入过程</figcaption></figure>
-<figure><img loading="lazy" src="../assets/8da27f446e82cc95.jpg" alt="图 12.35 AVL 树删除之后的平衡操作"><figcaption>图 12.35 AVL 树删除之后的平衡操作</figcaption></figure>
-<figure><img loading="lazy" src="../assets/c9d3653538f773ad.jpg" alt="(a)删除结点c,则需要使用其中序前驱m"><figcaption>(a)删除结点c,则需要使用其中序前驱m</figcaption></figure>
-<figure><img loading="lazy" src="../assets/583a306938e9a07d.jpg" alt="(b) 删除结点g"><figcaption>(b) 删除结点g</figcaption></figure>
-<figure><img loading="lazy" src="../assets/c8bfd8ef7b82b925.jpg" alt="图 12.36 AVL 树的删除过程"><figcaption>图 12.36 AVL 树的删除过程</figcaption></figure>
-<figure><img loading="lazy" src="../assets/b559c4b072af21ab.jpg" alt="图 12.37 最接近于不平衡的 AVL 树"><figcaption>图 12.37 最接近于不平衡的 AVL 树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/9886016a74483c6a.jpg" alt="第12章插图（底稿第 11540 行，原书无独立题注）"><figcaption>第12章插图（底稿第 11540 行，原书无独立题注）</figcaption></figure>
-<figure><img loading="lazy" src="../assets/edfc6e588d573c57.jpg" alt="(b) 旋转发生以后的树；图12.38 当被展开的结点是根结点的子结点时，才会发生伸展树的单旋转"><figcaption>(b) 旋转发生以后的树；图12.38 当被展开的结点是根结点的子结点时，才会发生伸展树的单旋转</figcaption></figure>
-<figure><img loading="lazy" src="../assets/d547f2b7c0b6510b.jpg" alt="(a)结点x、结点y、结点z为一字形的树结构"><figcaption>(a)结点x、结点y、结点z为一字形的树结构</figcaption></figure>
-<figure><img loading="lazy" src="../assets/f536a99730156c47.jpg" alt="(d)f、a、g之字形旋转后；(e) a、h单旋转后，a最后成为根结点；图12.41 在伸展树中完成一次检索以后再展开的例子"><figcaption>(d)f、a、g之字形旋转后；(e) a、h单旋转后，a最后成为根结点；图12.41 在伸展树中完成一次检索以后再展开的例子</figcaption></figure>
-<figure><img loading="lazy" src="../assets/851f2f30b09fa8d8.jpg" alt="图12.42 半伸展和全伸展的区别"><figcaption>图12.42 半伸展和全伸展的区别</figcaption></figure>
-<figure><img loading="lazy" src="../assets/33419334fcc58ef5.jpg" alt="图12.43 连续两次访问结点T，半伸展树的变化示例"><figcaption>图12.43 连续两次访问结点T，半伸展树的变化示例</figcaption></figure>
-<figure><img loading="lazy" src="../assets/907d63faff8d37a9.jpg" alt="图12.44 外部结点存储记录信息的半伸展树"><figcaption>图12.44 外部结点存储记录信息的半伸展树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/2103775a9dd6abc2.jpg" alt="图 12.45 对图 12.44 连续读 aabg 后，半伸展树的变化过程"><figcaption>图 12.45 对图 12.44 连续读 aabg 后，半伸展树的变化过程</figcaption></figure>
-<figure><img loading="lazy" src="../assets/b79642f077ce5f4c.jpg" alt="图 12.46 习题 17 的 AVL 树"><figcaption>图 12.46 习题 17 的 AVL 树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/2aebcb9372fe2cbf.jpg" alt="图 12.47 带路径压缩的后缀树"><figcaption>图 12.47 带路径压缩的后缀树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/167befa8eb99152f.jpg" alt="图 12.48 存储词频信息的半伸展树"><figcaption>图 12.48 存储词频信息的半伸展树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/218b97554b914895.jpg" alt="图12.49 搜索引擎基本架构"><figcaption>图12.49 搜索引擎基本架构</figcaption></figure>
-<figure><img loading="lazy" src="../assets/9bd20c464a6a63e9.jpg" alt="图 12.50 Google的 Ajax 输入提示框"><figcaption>图 12.50 Google的 Ajax 输入提示框</figcaption></figure>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
 <h3 id="python-实现的证据链"><a class="anchor" href="#python-实现的证据链">#</a>Python 实现的证据链</h3>
 <div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/trie/modern.py">code/ch12/trie/modern.py#trie</a></div><pre><code><span class="k">class</span> Trie:
@@ -1030,7 +982,7 @@ LR（左右，先左旋再右旋）      RL（右左，先右旋再左旋）
 </ol>
 <div class="pagenav"><a href="ch11-index.html"><span class="dir">← 上一篇</span>第11章 索引技术</a><a href="exercises.html" style="text-align:right"><span class="dir">下一篇 →</span>习题、上机题与参考答案</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#121-多维数组">12.1 多维数组</a><a href="#1211-多维数组的存储" class="sub">12.1.1 多维数组的存储</a><a href="#1212-特殊矩阵" class="sub">12.1.2 特殊矩阵</a><a href="#1213-稀疏矩阵" class="sub">12.1.3 稀疏矩阵</a><a href="#122-广义表和存储管理">12.2 广义表和存储管理</a><a href="#为什么这一节没有-python-版" class="sub">为什么这一节没有 Python 版</a><a href="#1221-广义表的定义和存储结构" class="sub">12.2.1 广义表的定义和存储结构</a><a href="#1222-可利用空间表" class="sub">12.2.2 可利用空间表</a><a href="#1223-存储的动态分配和回收" class="sub">12.2.3 存储的动态分配和回收</a><a href="#1224-失败处理策略和无用单元回收" class="sub">12.2.4 失败处理策略和无用单元回收</a><a href="#123-trie-结构和-patricia-树">12.3 Trie 结构和 Patricia 树</a><a href="#为什么这一节的存储侧只有-c" class="sub">为什么这一节的存储侧只有 C++</a><a href="#124-改进的二叉搜索树">12.4 改进的二叉搜索树</a><a href="#1241-最佳二叉搜索树" class="sub">12.4.1 最佳二叉搜索树</a><a href="#1242-平衡的二叉搜索树" class="sub">12.4.2 平衡的二叉搜索树</a><a href="#1243-伸展树" class="sub">12.4.3 伸展树</a><a href="#原书插图补充">原书插图补充</a><a href="#本章小结">本章小结</a><a href="#python-实现的证据链" class="sub">Python 实现的证据链</a><a href="#习题">习题</a><a href="#补充概念与上机题参考课程第-12-章" class="sub">补充概念与上机题（参考课程第 12 章）</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#121-多维数组">12.1 多维数组</a><a href="#1211-多维数组的存储" class="sub">12.1.1 多维数组的存储</a><a href="#1212-特殊矩阵" class="sub">12.1.2 特殊矩阵</a><a href="#1213-稀疏矩阵" class="sub">12.1.3 稀疏矩阵</a><a href="#122-广义表和存储管理">12.2 广义表和存储管理</a><a href="#为什么这一节没有-python-版" class="sub">为什么这一节没有 Python 版</a><a href="#1221-广义表的定义和存储结构" class="sub">12.2.1 广义表的定义和存储结构</a><a href="#1222-可利用空间表" class="sub">12.2.2 可利用空间表</a><a href="#1223-存储的动态分配和回收" class="sub">12.2.3 存储的动态分配和回收</a><a href="#1224-失败处理策略和无用单元回收" class="sub">12.2.4 失败处理策略和无用单元回收</a><a href="#123-trie-结构和-patricia-树">12.3 Trie 结构和 Patricia 树</a><a href="#为什么这一节的存储侧只有-c" class="sub">为什么这一节的存储侧只有 C++</a><a href="#124-改进的二叉搜索树">12.4 改进的二叉搜索树</a><a href="#1241-最佳二叉搜索树" class="sub">12.4.1 最佳二叉搜索树</a><a href="#1242-平衡的二叉搜索树" class="sub">12.4.2 平衡的二叉搜索树</a><a href="#1243-伸展树" class="sub">12.4.3 伸展树</a><a href="#本章小结">本章小结</a><a href="#python-实现的证据链" class="sub">Python 实现的证据链</a><a href="#习题">习题</a><a href="#补充概念与上机题参考课程第-12-章" class="sub">补充概念与上机题（参考课程第 12 章）</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch12-advanced.md</code> 生成

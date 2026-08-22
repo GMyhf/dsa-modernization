@@ -1229,39 +1229,6 @@ Direct leak of 24 byte(s) in 1 object(s) allocated from:
 <p><strong>二、<code>MinHeap</code> 对元素类型的编译期约束。</strong> 工程版类头有一条 <code>static_assert</code>，要求 <code>T</code> 的移动构造与移动赋值都 <code>noexcept</code>—— 扩容搬迁靠的就是它们，判据与 3.1.2a 说过的是同一条。</p>
 <p><strong>三、Huffman 构造的两处防御。</strong> 工程版在合并前检查 <code>left-&gt;weight + right-&gt;weight</code> 会不会溢出 <code>int</code>， 并用层层 <code>try/catch</code> 保证「中途任何一步失败，已经取出来的裸结点都被回收」。 教学版只做了参数预检查，这两处留给进阶。</p>
 <p><strong>四、其余与前几章相同</strong>：五法则、<code>[[nodiscard]]</code>、<code>noexcept</code>、copy-and-swap。</p>
-<h2 id="原书插图补充"><a class="anchor" href="#原书插图补充">#</a>原书插图补充</h2>
-<p>本节收录原书中与本章主题对应、且已在插图目录登记的图示。</p>
-<figure><img loading="lazy" src="../assets/b15c4b53d75f0514.jpg" alt="(c) 右子树为空 的二叉树"><figcaption>(c) 右子树为空 的二叉树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/36035100052aa951.jpg" alt="(d) 左子树为空 的二叉树"><figcaption>(d) 左子树为空 的二叉树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/e09b495998554e01.jpg" alt="(e) 左、右子树均非空的二叉树；图 5.1 二叉树的 5 种基本形态"><figcaption>(e) 左、右子树均非空的二叉树；图 5.1 二叉树的 5 种基本形态</figcaption></figure>
-<figure><img loading="lazy" src="../assets/18b96e9f11087ee8.jpg" alt="(a) 满二叉树"><figcaption>(a) 满二叉树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/ea5eff3e545173dc.jpg" alt="(b) 完全二叉树；图5.2 满二叉树和完全二叉树示例"><figcaption>(b) 完全二叉树；图5.2 满二叉树和完全二叉树示例</figcaption></figure>
-<figure><img loading="lazy" src="../assets/44cbdbcfda5553a1.jpg" alt="图 5.3 扩充二叉树"><figcaption>图 5.3 扩充二叉树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/2e8ea2a5a1df00a7.jpg" alt="图 5.4 二叉树的基本结构"><figcaption>图 5.4 二叉树的基本结构</figcaption></figure>
-<figure><img loading="lazy" src="../assets/12374c97891a830a.jpg" alt="图 5.7 二叉树结点的存储结构"><figcaption>图 5.7 二叉树结点的存储结构</figcaption></figure>
-<figure><img loading="lazy" src="../assets/3b20bce2ee34a2d6.jpg" alt="图 5.8 图 5.5 中二叉树的二叉链表存储结构"><figcaption>图 5.8 图 5.5 中二叉树的二叉链表存储结构</figcaption></figure>
-<figure><img loading="lazy" src="../assets/c9511e778b95abc9.jpg" alt="第5章插图（底稿第 4103 行，原书无独立题注）"><figcaption>第5章插图（底稿第 4103 行，原书无独立题注）</figcaption></figure>
-<figure><img loading="lazy" src="../assets/80797628fa510b2c.jpg" alt="图 5.9 完全二叉树的结点编号"><figcaption>图 5.9 完全二叉树的结点编号</figcaption></figure>
-<figure><img loading="lazy" src="../assets/c399e3356dac937f.jpg" alt="图 5.11 二叉搜索树"><figcaption>图 5.11 二叉搜索树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/0a48313219c39d1a.jpg" alt="(a) 没有左子树的情况"><figcaption>(a) 没有左子树的情况</figcaption></figure>
-<figure><img loading="lazy" src="../assets/7ef2452420903be5.jpg" alt="图 5.12 二叉搜索树的删除示例；(b) 有左子树的情况"><figcaption>图 5.12 二叉搜索树的删除示例；(b) 有左子树的情况</figcaption></figure>
-<figure><img loading="lazy" src="../assets/6656b628984f36ef.jpg" alt="图 5.13 改进的二叉搜索树的删除"><figcaption>图 5.13 改进的二叉搜索树的删除</figcaption></figure>
-<figure><img loading="lazy" src="../assets/28d7f967e0c2ebfa.jpg" alt="图 5.14 最小堆对应的完全二叉树"><figcaption>图 5.14 最小堆对应的完全二叉树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/7f6bb0c3af53cc2a.jpg" alt="图 5.15 在最小堆 5.14 中插入元素 13"><figcaption>图 5.15 在最小堆 5.14 中插入元素 13</figcaption></figure>
-<figure><img loading="lazy" src="../assets/ba38e1004230ab69.jpg" alt="图 5.16 在最小堆 5.14 中删除元素 14"><figcaption>图 5.16 在最小堆 5.14 中删除元素 14</figcaption></figure>
-<figure><img loading="lazy" src="../assets/d7354d550a2f5d79.jpg" alt="图 5.17 建堆过程示例"><figcaption>图 5.17 建堆过程示例</figcaption></figure>
-<figure><img loading="lazy" src="../assets/926b59674f2459f3.jpg" alt="(a) 外部路径为30"><figcaption>(a) 外部路径为30</figcaption></figure>
-<figure><img loading="lazy" src="../assets/5bf340fd02509f5d.jpg" alt="(b) 外部路径为31"><figcaption>(b) 外部路径为31</figcaption></figure>
-<figure><img loading="lazy" src="../assets/c06131477d8191a4.jpg" alt="(c) 外部路径为29；图 5.18 具有不同带权外部路径长度的二叉树"><figcaption>(c) 外部路径为29；图 5.18 具有不同带权外部路径长度的二叉树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/d91fc440e0e90baa.jpg" alt="(a) 过程 1"><figcaption>(a) 过程 1</figcaption></figure>
-<figure><img loading="lazy" src="../assets/8e540597e5d17326.jpg" alt="(b) 过程2"><figcaption>(b) 过程2</figcaption></figure>
-<figure><img loading="lazy" src="../assets/78acf6259a843351.jpg" alt="(c) 过程3；(d) 过程4"><figcaption>(c) 过程3；(d) 过程4</figcaption></figure>
-<figure><img loading="lazy" src="../assets/153c0d1c976af606.jpg" alt="图 5.19 Huffman 树的构造过程"><figcaption>图 5.19 Huffman 树的构造过程</figcaption></figure>
-<figure><img loading="lazy" src="../assets/0142058fd3aa6e04.jpg" alt="图 5.20 Huffman 编码示例"><figcaption>图 5.20 Huffman 编码示例</figcaption></figure>
-<figure><img loading="lazy" src="../assets/18f1bb0045ce3424.jpg" alt="图 5.21 习题 2 的图例"><figcaption>图 5.21 习题 2 的图例</figcaption></figure>
-<figure><img loading="lazy" src="../assets/19e3667447e93b2e.jpg" alt="(a) 原二叉树"><figcaption>(a) 原二叉树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/5f654ff0405757c9.jpg" alt="(b) 镜面映射后的新二叉树；图 5.22 习题 7 的图例"><figcaption>(b) 镜面映射后的新二叉树；图 5.22 习题 7 的图例</figcaption></figure>
-<figure><img loading="lazy" src="../assets/a8d8c140383fe73e.jpg" alt="图 5.23 中序穿线二叉树"><figcaption>图 5.23 中序穿线二叉树</figcaption></figure>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
 <p>二叉树每个结点至多两个有左右之分的孩子。满二叉树、完全二叉树和扩充二叉树是三种常用特殊形态；第 <span class="math">i</span> 层至多 <span class="math"><span class="upr">2</span><sup>i</sup></span> 个结点，<span class="math">n<sub><span class="upr">0</span></sub><span class="rel">=</span>n<sub><span class="upr">2</span></sub><span class="bin">+</span><span class="upr">1</span></span>。周游有先序、中序、后序和层次。链式存储用左右指针；完全二叉树还可以按层编号放进数组，堆就是这种用法。二叉搜索树加上左小右大，中序即排序。堆把最值放在根；Huffman 树反复合并两个最小权，得到带权路径长度最小的树。</p>
 <h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
@@ -1288,7 +1255,7 @@ Direct leak of 24 byte(s) in 1 object(s) allocated from:
 </ol>
 <div class="pagenav"><a href="ch04-string.html"><span class="dir">← 上一篇</span>第4章 字符串</a><a href="ch06-tree.html" style="text-align:right"><span class="dir">下一篇 →</span>第6章 树</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#51-二叉树的概念">5.1 二叉树的概念</a><a href="#511-二叉树的定义和基本术语" class="sub">5.1.1 二叉树的定义和基本术语</a><a href="#512-满二叉树完全二叉树扩充二叉树" class="sub">5.1.2 满二叉树、完全二叉树、扩充二叉树</a><a href="#513-二叉树的主要性质" class="sub">5.1.3 二叉树的主要性质</a><a href="#52-二叉树的周游">5.2 二叉树的周游</a><a href="#521-二叉树的抽象数据类型" class="sub">5.2.1 二叉树的抽象数据类型</a><a href="#522-深度优先周游二叉树" class="sub">5.2.2 深度优先周游二叉树</a><a href="#523-广度优先周游二叉树" class="sub">5.2.3 广度优先周游二叉树</a><a href="#53-二叉树的存储结构">5.3 二叉树的存储结构</a><a href="#为什么这一节没有-python-版" class="sub">为什么这一节没有 Python 版</a><a href="#54-二叉搜索树">5.4 二叉搜索树</a><a href="#为什么这一节没有-python-版-1" class="sub">为什么这一节没有 Python 版</a><a href="#55-堆与优先队列">5.5 堆与优先队列</a><a href="#为什么这一节没有-python-版-2" class="sub">为什么这一节没有 Python 版</a><a href="#551a-建堆为什么是-on-而不是-onlog-n" class="sub">5.5.1a 建堆为什么是 $O(n)$ 而不是 $O(n\log n)$</a><a href="#552-优先队列" class="sub">5.5.2 优先队列</a><a href="#56-huffman-树及其应用">5.6 Huffman 树及其应用</a><a href="#为什么这一节没有-python-版-3" class="sub">为什么这一节没有 Python 版</a><a href="#562-huffman-编码" class="sub">5.6.2 Huffman 编码</a><a href="#56a-进阶选读从教学版到工程版" class="sub">5.6a 进阶（选读）：从教学版到工程版</a><a href="#原书插图补充">原书插图补充</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充证明题参考课程第-5-章" class="sub">补充证明题（参考课程第 5 章）</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#51-二叉树的概念">5.1 二叉树的概念</a><a href="#511-二叉树的定义和基本术语" class="sub">5.1.1 二叉树的定义和基本术语</a><a href="#512-满二叉树完全二叉树扩充二叉树" class="sub">5.1.2 满二叉树、完全二叉树、扩充二叉树</a><a href="#513-二叉树的主要性质" class="sub">5.1.3 二叉树的主要性质</a><a href="#52-二叉树的周游">5.2 二叉树的周游</a><a href="#521-二叉树的抽象数据类型" class="sub">5.2.1 二叉树的抽象数据类型</a><a href="#522-深度优先周游二叉树" class="sub">5.2.2 深度优先周游二叉树</a><a href="#523-广度优先周游二叉树" class="sub">5.2.3 广度优先周游二叉树</a><a href="#53-二叉树的存储结构">5.3 二叉树的存储结构</a><a href="#为什么这一节没有-python-版" class="sub">为什么这一节没有 Python 版</a><a href="#54-二叉搜索树">5.4 二叉搜索树</a><a href="#为什么这一节没有-python-版-1" class="sub">为什么这一节没有 Python 版</a><a href="#55-堆与优先队列">5.5 堆与优先队列</a><a href="#为什么这一节没有-python-版-2" class="sub">为什么这一节没有 Python 版</a><a href="#551a-建堆为什么是-on-而不是-onlog-n" class="sub">5.5.1a 建堆为什么是 $O(n)$ 而不是 $O(n\log n)$</a><a href="#552-优先队列" class="sub">5.5.2 优先队列</a><a href="#56-huffman-树及其应用">5.6 Huffman 树及其应用</a><a href="#为什么这一节没有-python-版-3" class="sub">为什么这一节没有 Python 版</a><a href="#562-huffman-编码" class="sub">5.6.2 Huffman 编码</a><a href="#56a-进阶选读从教学版到工程版" class="sub">5.6a 进阶（选读）：从教学版到工程版</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充证明题参考课程第-5-章" class="sub">补充证明题（参考课程第 5 章）</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch05-binary-tree.md</code> 生成

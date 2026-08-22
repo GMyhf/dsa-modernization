@@ -53,7 +53,7 @@ jobs:
           # PDF 摆到站点根上，首页的下载卡片指向它（卡片上的页数来自 build-info.json）
           python3 tools/build_site.py --out _site \
             --assets-href assets/ \
-            --pdf-href '现代C++数据结构教程.pdf'
+            --pdf-href '数据结构与算法.pdf'
           # 课件发到 /slides/。插图仍指 _site/assets/，所以前缀退一级。
           python3 tools/build_slides.py --out _site/slides --assets-href ../assets/
           cp -r book/assets _site/assets
