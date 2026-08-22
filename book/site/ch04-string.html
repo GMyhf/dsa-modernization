@@ -753,6 +753,17 @@ std::string::find 对照         = 2</code></pre></div>
 </tbody></table></div>
 <p><strong>刻意没改的</strong>：朴素匹配仍是回溯式的；next 仍是原书的优化版（图4.11 对的是这一版）； KMP 的 next 仍由调用方传入并可跨目标复用。这三条是本节全部的教学内容。</p>
 <p>完整实现见 <code>code/ch04/pattern_matching/modern.hpp</code>，测试见同目录 <code>test.cpp</code> （56 项断言，含 3000 组随机对拍；用 <code>python3 tools/check_code.py</code> 在 <code>-Werror</code> + ASan/UBSan 与 <code>-O2</code> 两种构建下各跑一遍）。</p>
+<h2 id="原书插图补充"><a class="anchor" href="#原书插图补充">#</a>原书插图补充</h2>
+<p>本节收录原书中与本章主题对应、且已在插图目录登记的图示。</p>
+<figure><img loading="lazy" src="../assets/ac445f2352c5273d.jpg" alt="图 4.1 C + + 标准字符串的变量说明示意图"><figcaption>图 4.1 C + + 标准字符串的变量说明示意图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/3fd8da33af3abe6c.jpg" alt="图4.2 在字符串 s1 中寻找并定位给定字符o&#x27;的位置"><figcaption>图4.2 在字符串 s1 中寻找并定位给定字符o&#x27;的位置</figcaption></figure>
+<figure><img loading="lazy" src="../assets/17558c608a970971.jpg" alt="图4.3 创建字符串的示意图"><figcaption>图4.3 创建字符串的示意图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/6c085626573ab8c6.jpg" alt="图4.4 赋值运算示意图"><figcaption>图4.4 赋值运算示意图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/a01806ddff22b2f2.jpg" alt="图 4.6 朴素匹配的示例"><figcaption>图 4.6 朴素匹配的示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/142c03839eb935b2.jpg" alt="图4.7 朴素匹配的最佳情况示例"><figcaption>图4.7 朴素匹配的最佳情况示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/5c96f8b81e576c27.jpg" alt="图4.8 匹配失败的最佳情况示例"><figcaption>图4.8 匹配失败的最佳情况示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/888fd277565dca5e.jpg" alt="图4.9 朴素匹配最差情况示例"><figcaption>图4.9 朴素匹配最差情况示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/4f9aa9617b2ddc56.jpg" alt="图 4.12 KMP 匹配示例"><figcaption>图 4.12 KMP 匹配示例</figcaption></figure>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
 <p>字符串是元素为字符的线性表。存储要考虑变长：定长数组访问方便，插入删除要搬字符；动态缓冲按长度分配。常用运算是复制、求长、比较、拼接、抽子串、查找字符。模式匹配是子串在主串中的定位：朴素算法直观但会回溯，时间与 <span class="math">|P| |T|</span> 成正比；KMP 用模式自身的特征向量避免回溯，时间为 <span class="math">O(|P|<span class="bin">+</span>|T|)</span>。本书还修正了原书返回值一律差 1 的错误。</p>
 <h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
@@ -776,7 +787,7 @@ std::string::find 对照         = 2</code></pre></div>
 </ol>
 <div class="pagenav"><a href="ch03-stack.html"><span class="dir">← 上一篇</span>第3章 栈与队列</a><a href="ch05-binary-tree.html" style="text-align:right"><span class="dir">下一篇 →</span>第5章 二叉树</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#41-字符串的基本概念">4.1 字符串的基本概念</a><a href="#411-字符编码" class="sub">4.1.1 字符编码</a><a href="#412-字符的编码顺序" class="sub">4.1.2 字符的编码顺序</a><a href="#42-字符串的存储结构和实现">4.2 字符串的存储结构和实现</a><a href="#为什么这一节没有-python-版" class="sub">为什么这一节没有 Python 版</a><a href="#421-字符串的顺序存储" class="sub">4.2.1 字符串的顺序存储</a><a href="#422-字符串类-class-string-的存储结构" class="sub">4.2.2 字符串类 class String 的存储结构</a><a href="#423-字符串运算的实现" class="sub">4.2.3 字符串运算的实现</a><a href="#42a-进阶选读从教学版到工程版" class="sub">4.2a 进阶（选读）：从教学版到工程版</a><a href="#43-字符串的模式匹配">4.3 字符串的模式匹配</a><a href="#431-朴素的模式匹配算法" class="sub">4.3.1 朴素的模式匹配算法</a><a href="#432-字符串的特征向量" class="sub">4.3.2 字符串的特征向量</a><a href="#433-kmp-模式匹配算法" class="sub">4.3.3 KMP 模式匹配算法</a><a href="#与原书的对照">与原书的对照</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#41-字符串的基本概念">4.1 字符串的基本概念</a><a href="#411-字符编码" class="sub">4.1.1 字符编码</a><a href="#412-字符的编码顺序" class="sub">4.1.2 字符的编码顺序</a><a href="#42-字符串的存储结构和实现">4.2 字符串的存储结构和实现</a><a href="#为什么这一节没有-python-版" class="sub">为什么这一节没有 Python 版</a><a href="#421-字符串的顺序存储" class="sub">4.2.1 字符串的顺序存储</a><a href="#422-字符串类-class-string-的存储结构" class="sub">4.2.2 字符串类 class String 的存储结构</a><a href="#423-字符串运算的实现" class="sub">4.2.3 字符串运算的实现</a><a href="#42a-进阶选读从教学版到工程版" class="sub">4.2a 进阶（选读）：从教学版到工程版</a><a href="#43-字符串的模式匹配">4.3 字符串的模式匹配</a><a href="#431-朴素的模式匹配算法" class="sub">4.3.1 朴素的模式匹配算法</a><a href="#432-字符串的特征向量" class="sub">4.3.2 字符串的特征向量</a><a href="#433-kmp-模式匹配算法" class="sub">4.3.3 KMP 模式匹配算法</a><a href="#与原书的对照">与原书的对照</a><a href="#原书插图补充">原书插图补充</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch04-string.md</code> 生成

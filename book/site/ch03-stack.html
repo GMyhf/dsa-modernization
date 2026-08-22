@@ -1795,6 +1795,24 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
 <p>两种队列的端点操作都是常数时间。循环数组适合容量上界已知、希望局部性好的场合；链表适合长度变化大、不愿预留空洞槽位的场合。</p>
 <h3 id="333-限制存取点的表"><a class="anchor" href="#333-限制存取点的表">#</a>3.3.3 限制存取点的表</h3>
 <p>栈和队列都是限制存取点的线性表：栈只开一端，队列开两端但方向相反。双端队列同时开放两端，不在本章实现范围内。</p>
+<h2 id="原书插图补充"><a class="anchor" href="#原书插图补充">#</a>原书插图补充</h2>
+<p>本节收录原书中与本章主题对应、且已在插图目录登记的图示。</p>
+<figure><img loading="lazy" src="../assets/c8966e2bf43b41fc.jpg" alt="图 3.1 栈的示意图"><figcaption>图 3.1 栈的示意图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/68ddbf0cd26a38ce.jpg" alt="图3.2 栈的顺序存储结构示意"><figcaption>图3.2 栈的顺序存储结构示意</figcaption></figure>
+<figure><img loading="lazy" src="../assets/beaf7f838024b368.jpg" alt="第3章插图（底稿第 1898 行，原书无独立题注）"><figcaption>第3章插图（底稿第 1898 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/8ca1faecb428db01.jpg" alt="图 3.3 顺序栈的存储结构"><figcaption>图 3.3 顺序栈的存储结构</figcaption></figure>
+<figure><img loading="lazy" src="../assets/cc2722b736c01067.jpg" alt="图3.4 链式栈示意"><figcaption>图3.4 链式栈示意</figcaption></figure>
+<figure><img loading="lazy" src="../assets/9c7bc109efa7f350.jpg" alt="图3.6 运行时存储器的组织形式"><figcaption>图3.6 运行时存储器的组织形式</figcaption></figure>
+<figure><img loading="lazy" src="../assets/d573f60f354acc38.jpg" alt="图 3.7 活动记录的内容"><figcaption>图 3.7 活动记录的内容</figcaption></figure>
+<figure><img loading="lazy" src="../assets/b94046e379d40a44.jpg" alt="图3.8 递归计算factorial(4)时，内部栈的变化情况示意"><figcaption>图3.8 递归计算factorial(4)时，内部栈的变化情况示意</figcaption></figure>
+<figure><img loading="lazy" src="../assets/6a2814bcd8135888.jpg" alt="图3.9 队列的示例"><figcaption>图3.9 队列的示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/d552466644ef240e.jpg" alt="图 3.10 顺序队列的实现示意"><figcaption>图 3.10 顺序队列的实现示意</figcaption></figure>
+<figure><img loading="lazy" src="../assets/1bd12475cc238a23.jpg" alt="(a) 初始队列"><figcaption>(a) 初始队列</figcaption></figure>
+<figure><img loading="lazy" src="../assets/883f8220da76fa43.jpg" alt="(b) 新队列；图 3.11 顺序队列的一种实现方式"><figcaption>(b) 新队列；图 3.11 顺序队列的一种实现方式</figcaption></figure>
+<figure><img loading="lazy" src="../assets/c2b6f1bd82ce997a.jpg" alt="第3章插图（底稿第 2621 行，原书无独立题注）"><figcaption>第3章插图（底稿第 2621 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/35171d357a8442b0.jpg" alt="第3章插图（底稿第 2623 行，原书无独立题注）"><figcaption>第3章插图（底稿第 2623 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/b5473971d7d3f3e4.jpg" alt="图 3.12 循环队列的实现示例"><figcaption>图 3.12 循环队列的实现示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/c305cf854cc50a63.jpg" alt="图3.13 存储在同一个数组中的两个迎面增长的栈"><figcaption>图3.13 存储在同一个数组中的两个迎面增长的栈</figcaption></figure>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
 <p>栈只在一端插入删除，后进先出；队列在一端插、另一端删，先进先出。二者都可以顺序或链式实现，端点运算都是常数时间。顺序实现要处理满与空（循环队列牺牲一个槽）；链式实现按需分配，没有预先的容量上限。栈用于递归、括号和表达式；队列用于层次周游和缓冲。</p>
 <h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
@@ -1827,7 +1845,7 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
 </ol>
 <div class="pagenav"><a href="ch02-linear-list.html"><span class="dir">← 上一篇</span>第2章 线性表</a><a href="ch04-string.html" style="text-align:right"><span class="dir">下一篇 →</span>第4章 字符串</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#31-栈">3.1 栈</a><a href="#为什么顺序栈和链式栈只有-c" class="sub">为什么顺序栈和链式栈只有 C++</a><a href="#311-栈的抽象数据类型" class="sub">3.1.1 栈的抽象数据类型</a><a href="#312-顺序栈" class="sub">3.1.2 顺序栈</a><a href="#312a-进阶选读从教学版到工程版" class="sub">3.1.2a 进阶（选读）：从教学版到工程版</a><a href="#313-链式栈" class="sub">3.1.3 链式栈</a><a href="#313a-进阶选读从教学版到工程版" class="sub">3.1.3a 进阶（选读）：从教学版到工程版</a><a href="#314-表达式求值" class="sub">3.1.4 表达式求值</a><a href="#315-栈与递归" class="sub">3.1.5 栈与递归</a><a href="#运行栈有多大三个档位三种结果" class="sub">运行栈有多大：三个档位，三种结果</a><a href="#反直觉的那一条-o2-为什么不崩" class="sub">反直觉的那一条：-O2 为什么不崩</a><a href="#递归吃运行栈显式栈吃堆" class="sub">递归吃运行栈，显式栈吃堆</a><a href="#原书这三个版本共同的问题不查溢出" class="sub">原书这三个版本共同的问题：不查溢出</a><a href="#一个更复杂的例子背包问题" class="sub">一个更复杂的例子：背包问题</a><a href="#与原书的对照">与原书的对照</a><a href="#32-队列">3.2 队列</a><a href="#为什么这一节没有-python-版" class="sub">为什么这一节没有 Python 版</a><a href="#321-队列的抽象数据类型" class="sub">3.2.1 队列的抽象数据类型</a><a href="#322-顺序队列" class="sub">3.2.2 顺序队列</a><a href="#323-链式队列" class="sub">3.2.3 链式队列</a><a href="#323a-进阶选读从教学版到工程版" class="sub">3.2.3a 进阶（选读）：从教学版到工程版</a><a href="#33-栈与队列的深入讨论">3.3 栈与队列的深入讨论</a><a href="#331-顺序栈与链式栈的比较" class="sub">3.3.1 顺序栈与链式栈的比较</a><a href="#332-顺序队列与链式队列的比较" class="sub">3.3.2 顺序队列与链式队列的比较</a><a href="#333-限制存取点的表" class="sub">3.3.3 限制存取点的表</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充算法设计题参考课程第-3-章" class="sub">补充算法设计题（参考课程第 3 章）</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#31-栈">3.1 栈</a><a href="#为什么顺序栈和链式栈只有-c" class="sub">为什么顺序栈和链式栈只有 C++</a><a href="#311-栈的抽象数据类型" class="sub">3.1.1 栈的抽象数据类型</a><a href="#312-顺序栈" class="sub">3.1.2 顺序栈</a><a href="#312a-进阶选读从教学版到工程版" class="sub">3.1.2a 进阶（选读）：从教学版到工程版</a><a href="#313-链式栈" class="sub">3.1.3 链式栈</a><a href="#313a-进阶选读从教学版到工程版" class="sub">3.1.3a 进阶（选读）：从教学版到工程版</a><a href="#314-表达式求值" class="sub">3.1.4 表达式求值</a><a href="#315-栈与递归" class="sub">3.1.5 栈与递归</a><a href="#运行栈有多大三个档位三种结果" class="sub">运行栈有多大：三个档位，三种结果</a><a href="#反直觉的那一条-o2-为什么不崩" class="sub">反直觉的那一条：-O2 为什么不崩</a><a href="#递归吃运行栈显式栈吃堆" class="sub">递归吃运行栈，显式栈吃堆</a><a href="#原书这三个版本共同的问题不查溢出" class="sub">原书这三个版本共同的问题：不查溢出</a><a href="#一个更复杂的例子背包问题" class="sub">一个更复杂的例子：背包问题</a><a href="#与原书的对照">与原书的对照</a><a href="#32-队列">3.2 队列</a><a href="#为什么这一节没有-python-版" class="sub">为什么这一节没有 Python 版</a><a href="#321-队列的抽象数据类型" class="sub">3.2.1 队列的抽象数据类型</a><a href="#322-顺序队列" class="sub">3.2.2 顺序队列</a><a href="#323-链式队列" class="sub">3.2.3 链式队列</a><a href="#323a-进阶选读从教学版到工程版" class="sub">3.2.3a 进阶（选读）：从教学版到工程版</a><a href="#33-栈与队列的深入讨论">3.3 栈与队列的深入讨论</a><a href="#331-顺序栈与链式栈的比较" class="sub">3.3.1 顺序栈与链式栈的比较</a><a href="#332-顺序队列与链式队列的比较" class="sub">3.3.2 顺序队列与链式队列的比较</a><a href="#333-限制存取点的表" class="sub">3.3.3 限制存取点的表</a><a href="#原书插图补充">原书插图补充</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充算法设计题参考课程第-3-章" class="sub">补充算法设计题（参考课程第 3 章）</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch03-stack.md</code> 生成

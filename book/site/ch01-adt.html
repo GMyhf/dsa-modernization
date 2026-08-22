@@ -685,6 +685,11 @@ public:
 <h3 id="144-求解问题时数据结构的选择和评价"><a class="anchor" href="#144-求解问题时数据结构的选择和评价">#</a>1.4.4 求解问题时数据结构的选择和评价</h3>
 <p>先看运算集合：要不要按下标访问，会不会在中间频繁插入删除，要不要按关键码直接找到记录。再看规模和存储层次：数据在内存还是外存，一次磁盘 I/O 往往比一次比较贵几个数量级。</p>
 <p>1.1 节要任意两点最短路，并且只有五个经纪人，邻接矩阵加 Floyd 是合适的：实现简单，三重循环在 <span class="math">n<span class="rel">=</span><span class="upr">5</span></span> 时可以忽略。顶点很多、边很少、只问单源最短路时，就应该换成邻接表加 Dijkstra。后面每一章都会再做一次这样的取舍。</p>
+<h2 id="原书插图补充"><a class="anchor" href="#原书插图补充">#</a>原书插图补充</h2>
+<p>本节收录原书中与本章主题对应、且已在插图目录登记的图示。</p>
+<figure><img loading="lazy" src="../assets/4d3c879e7409ef1c.jpg" alt="图1.1 经纪人间的消息传递图"><figcaption>图1.1 经纪人间的消息传递图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/9c92f7de8d2fab34.jpg" alt="图1.3 经纪人间消息传递的相邻矩阵"><figcaption>图1.3 经纪人间消息传递的相邻矩阵</figcaption></figure>
+<figure><img loading="lazy" src="../assets/c33523f30da594f0.jpg" alt="图 1.5 常用函数的增长趋势"><figcaption>图 1.5 常用函数的增长趋势</figcaption></figure>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
 <p>本章从求解问题入手，引入数据结构、算法和衡量效率的方法。用计算机解题，是问题抽象、数据抽象和算法抽象：先把需求说清楚，再建成模型、选定结构和算法，最后用某种语言实现。</p>
 <p>数据结构管三件事：逻辑结构（结点之间是什么关系）、存储结构（这套关系在存储器里怎么落）、运算。逻辑结构按关系形态分成线性、树、图三类。同一种逻辑结构可以顺序、链接、索引或散列存放。ADT 把数据和运算封在一起，使用方只看见接口。</p>
@@ -739,7 +744,7 @@ for (i = 1; i &lt;= n; i++)
 </ol>
 <div class="pagenav"><a href="index.html"><span class="dir">← 上一篇</span>封面与导读</a><a href="ch02-linear-list.html" style="text-align:right"><span class="dir">下一篇 →</span>第2章 线性表</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#11-问题求解">1.1 问题求解</a><a href="#111-问题描述股市的传言" class="sub">1.1.1 问题描述：股市的传言</a><a href="#112-问题分析和抽象" class="sub">1.1.2 问题分析和抽象</a><a href="#为什么要取最慢的一项" class="sub">为什么要取“最慢的一项”</a><a href="#113-数据结构和算法设计" class="sub">1.1.3 数据结构和算法设计</a><a href="#实现导读" class="sub">实现导读</a><a href="#现代实现" class="sub">现代实现</a><a href="#12-数据结构">1.2 数据结构</a><a href="#121-数据的逻辑结构" class="sub">1.2.1 数据的逻辑结构</a><a href="#122-数据的存储结构" class="sub">1.2.2 数据的存储结构</a><a href="#123-抽象数据类型" class="sub">1.2.3 抽象数据类型</a><a href="#13-算法">1.3 算法</a><a href="#131-算法的概念" class="sub">1.3.1 算法的概念</a><a href="#132-算法设计" class="sub">1.3.2 算法设计</a><a href="#14-算法分析">1.4 算法分析</a><a href="#141-渐进分析方法" class="sub">1.4.1 渐进分析方法</a><a href="#142-最佳最差和平均情况" class="sub">1.4.2 最佳、最差和平均情况</a><a href="#143-时间和空间的折衷" class="sub">1.4.3 时间和空间的折衷</a><a href="#144-求解问题时数据结构的选择和评价" class="sub">1.4.4 求解问题时数据结构的选择和评价</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充证明练习参考课程第-1-章" class="sub">补充证明练习（参考课程第 1 章）</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#11-问题求解">1.1 问题求解</a><a href="#111-问题描述股市的传言" class="sub">1.1.1 问题描述：股市的传言</a><a href="#112-问题分析和抽象" class="sub">1.1.2 问题分析和抽象</a><a href="#为什么要取最慢的一项" class="sub">为什么要取“最慢的一项”</a><a href="#113-数据结构和算法设计" class="sub">1.1.3 数据结构和算法设计</a><a href="#实现导读" class="sub">实现导读</a><a href="#现代实现" class="sub">现代实现</a><a href="#12-数据结构">1.2 数据结构</a><a href="#121-数据的逻辑结构" class="sub">1.2.1 数据的逻辑结构</a><a href="#122-数据的存储结构" class="sub">1.2.2 数据的存储结构</a><a href="#123-抽象数据类型" class="sub">1.2.3 抽象数据类型</a><a href="#13-算法">1.3 算法</a><a href="#131-算法的概念" class="sub">1.3.1 算法的概念</a><a href="#132-算法设计" class="sub">1.3.2 算法设计</a><a href="#14-算法分析">1.4 算法分析</a><a href="#141-渐进分析方法" class="sub">1.4.1 渐进分析方法</a><a href="#142-最佳最差和平均情况" class="sub">1.4.2 最佳、最差和平均情况</a><a href="#143-时间和空间的折衷" class="sub">1.4.3 时间和空间的折衷</a><a href="#144-求解问题时数据结构的选择和评价" class="sub">1.4.4 求解问题时数据结构的选择和评价</a><a href="#原书插图补充">原书插图补充</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充证明练习参考课程第-1-章" class="sub">补充证明练习（参考课程第 1 章）</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch01-adt.md</code> 生成

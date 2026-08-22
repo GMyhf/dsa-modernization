@@ -829,6 +829,13 @@ A \ B           -&gt; 00000001 = {a}</code></pre></div>
 </tr>
 </tbody></table></div>
 <p>缓存还要处理容量淘汰，去重还要保存原始键以确认“散列值相同但键不同”的碰撞。散列值只是候选地址或摘要，不能代替关键码相等判断。</p>
+<h2 id="原书插图补充"><a class="anchor" href="#原书插图补充">#</a>原书插图补充</h2>
+<p>本节收录原书中与本章主题对应、且已在插图目录登记的图示。</p>
+<figure><img loading="lazy" src="../assets/7b7cd5373daa5ca9.jpg" alt="图10.8 散列文件组织"><figcaption>图10.8 散列文件组织</figcaption></figure>
+<figure><img loading="lazy" src="../assets/d31f80e5e4b41fa2.jpg" alt="图 10.12 双向有序表"><figcaption>图 10.12 双向有序表</figcaption></figure>
+<figure><img loading="lazy" src="../assets/e8d69df1bb8bad04.jpg" alt="图10.13 液晶七段数码管示意图"><figcaption>图10.13 液晶七段数码管示意图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/65b2b830d1a83b38.jpg" alt="第10章插图（底稿第 9825 行，原书无独立题注）"><figcaption>第10章插图（底稿第 9825 行，原书无独立题注）</figcaption></figure>
+<figure><img loading="lazy" src="../assets/6b8ed3d88fe489c1.jpg" alt="图10.14 封锁方式的相容矩阵；图10.15 封锁管理子系统示意图"><figcaption>图10.14 封锁方式的相容矩阵；图10.15 封锁管理子系统示意图</figcaption></figure>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
 <p>检索是按关键码或属性定位记录。线性表上有顺序、二分和分块：分别要求无序、有序可随机访问、块间有序。集合只关心「在不在」，插入已存在或删除不存在都是正常失败。散列用函数直接定位槽位，期望 <span class="math">O(<span class="upr">1</span>)</span>；开散列把冲突挂到链上，闭散列在表内探测。闭散列删除必须留墓碑，否则会截断探测链。装载因子过高时要扩表。</p>
 <h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
@@ -854,7 +861,7 @@ A \ B           -&gt; 00000001 = {a}</code></pre></div>
 </ol>
 <div class="pagenav"><a href="ch09-external-sort.html"><span class="dir">← 上一篇</span>第9章 文件管理与外部排序</a><a href="ch11-index.html" style="text-align:right"><span class="dir">下一篇 →</span>第11章 索引技术</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#101-基于线性表的检索">10.1 基于线性表的检索</a><a href="#1011-顺序检索" class="sub">10.1.1 顺序检索</a><a href="#1012-二分检索" class="sub">10.1.2 二分检索</a><a href="#1013-分块检索" class="sub">10.1.3 分块检索</a><a href="#教学版完整实现" class="sub">教学版：完整实现</a><a href="#102-集合的检索">10.2 集合的检索</a><a href="#1021-集合的数学特性" class="sub">10.2.1 集合的数学特性</a><a href="#1022-计算机中的集合" class="sub">10.2.2 计算机中的集合</a><a href="#103-散列方法">10.3 散列方法</a><a href="#1031-散列函数" class="sub">10.3.1 散列函数</a><a href="#1032-开散列方法拉链法" class="sub">10.3.2 开散列方法(拉链法)</a><a href="#1033-闭散列方法开地址法" class="sub">10.3.3 闭散列方法(开地址法)</a><a href="#1034-闭散列表的算法" class="sub">10.3.4 闭散列表的算法</a><a href="#1034a-进阶选读工程版差在哪" class="sub">10.3.4a 进阶（选读）：工程版差在哪</a><a href="#1035-散列方法的效率分析" class="sub">10.3.5 散列方法的效率分析</a><a href="#1036-散列方法的应用" class="sub">10.3.6 散列方法的应用</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充检索题参考课程第-10-章" class="sub">补充检索题（参考课程第 10 章）</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#101-基于线性表的检索">10.1 基于线性表的检索</a><a href="#1011-顺序检索" class="sub">10.1.1 顺序检索</a><a href="#1012-二分检索" class="sub">10.1.2 二分检索</a><a href="#1013-分块检索" class="sub">10.1.3 分块检索</a><a href="#教学版完整实现" class="sub">教学版：完整实现</a><a href="#102-集合的检索">10.2 集合的检索</a><a href="#1021-集合的数学特性" class="sub">10.2.1 集合的数学特性</a><a href="#1022-计算机中的集合" class="sub">10.2.2 计算机中的集合</a><a href="#103-散列方法">10.3 散列方法</a><a href="#1031-散列函数" class="sub">10.3.1 散列函数</a><a href="#1032-开散列方法拉链法" class="sub">10.3.2 开散列方法(拉链法)</a><a href="#1033-闭散列方法开地址法" class="sub">10.3.3 闭散列方法(开地址法)</a><a href="#1034-闭散列表的算法" class="sub">10.3.4 闭散列表的算法</a><a href="#1034a-进阶选读工程版差在哪" class="sub">10.3.4a 进阶（选读）：工程版差在哪</a><a href="#1035-散列方法的效率分析" class="sub">10.3.5 散列方法的效率分析</a><a href="#1036-散列方法的应用" class="sub">10.3.6 散列方法的应用</a><a href="#原书插图补充">原书插图补充</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充检索题参考课程第-10-章" class="sub">补充检索题（参考课程第 10 章）</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch10-search.md</code> 生成
