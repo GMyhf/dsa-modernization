@@ -417,6 +417,16 @@ ASan 当场报 double-free。教学版测试专门守着这一条。&lt;/p&gt;">
 <li>比特串走到一半就没了 → 返回空 <code>optional</code>，不吐半个字符</li>
 <li>出现既不是 0 也不是 1 的字符 → 同样返回空</li>
 <li>整棵树只有一个字符 → 从根到叶的路径是空串，本书约定给它一位 <code>&quot;0&quot;</code></li>
+</ul></section><section class="slide" data-notes=""><h1 id="课堂讲解卡树的形状决定代价"><a class="anchor" href="#课堂讲解卡树的形状决定代价">#</a>课堂讲解卡：树的形状决定代价</h1>
+<p>同样的键集合可以形成平衡树或退化链；周游、搜索、堆操作的代价都由高度和形状决定。</p>
+<div class="codeblock" data-lang="text"><pre><code>二叉搜索树：左 &lt; 根 &lt; 右
+堆：只保证根与孩子的局部次序</code></pre></div></section><section class="slide" data-notes=""><h1 id="课堂例题插入-53724"><a class="anchor" href="#课堂例题插入-53724">#</a>课堂例题：插入 5、3、7、2、4</h1>
+<p>先画 BST，再写中序序列 <code>2 3 4 5 7</code>；随后把根删除，比较“无左子树、无右子树、两个孩子”三种情况。 最后把同一组值放入堆，指出堆的中序序列没有排序保证。</p></section><section class="slide" data-notes=""><h1 id="课末自检"><a class="anchor" href="#课末自检">#</a>课末自检</h1>
+<ul>
+<li>完全二叉树为什么适合数组存储？</li>
+<li>BST 删除两个孩子时，后继来自哪棵子树？</li>
+<li>建堆为什么不是 O(n log n) 的紧确代价？</li>
+<li>Huffman 树的 WPL 与编码总长度如何对应？</li>
 </ul></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
 <ul>
 <li>二叉树是<strong>递归定义</strong>的，所以周游、释放、深拷贝都自然是递归</li>
@@ -439,7 +449,7 @@ python3 tools/check_code.py code/ch05/heap_huffman</code></pre></div>
 <blockquote><p>最后一条会让 WPL 变大——测试里那个 <code>30</code> 就是为它准备的。</p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第5章 二叉树</div><div class="thumb"><div class="no">2</div>5.1 定义与五种基本形态</div><div class="thumb"><div class="no">3</div>满二叉树与完全二叉树</div><div class="thumb"><div class="no">4</div>5.1.3 三条要用到的性质</div><div class="thumb"><div class="no">5</div>性质 5：一棵 n 结点的树里有 n+1 个空指针</div><div class="thumb"><div class="no">6</div>5.2 周游：三种深度优先</div><div class="thumb"><div class="no">7</div>三种周游的代码只差一行</div><div class="thumb"><div class="no">8</div>广度优先：一层一层来</div><div class="thumb"><div class="no">9</div>表达式树：周游的一个用途</div><div class="thumb"><div class="no">10</div>5.3 存储结构：二叉链表</div><div class="thumb"><div class="no">11</div>释放：必须后序</div><div class="thumb"><div class="no">12</div>5.3 另一种存法：完全二叉树进数组</div><div class="thumb"><div class="no">13</div>5.4 二叉搜索树</div><div class="thumb"><div class="no">14</div>插入：指向指针的指针</div><div class="thumb"><div class="no">15</div>删除：难点只有一个</div><div class="thumb"><div class="no">16</div>删除：还藏着一步</div><div class="thumb"><div class="no">17</div>5.5 堆：完全二叉树 + 数组</div><div class="thumb"><div class="no">18</div>插入：放末尾，然后上浮</div><div class="thumb"><div class="no">19</div>删除最小：搬最后一个上来，然后下沉</div><div class="thumb"><div class="no">20</div>建堆为什么是 O(n)</div><div class="thumb"><div class="no">21</div>建堆：把和算出来</div><div class="thumb"><div class="no">22</div>5.5.2 优先队列</div><div class="thumb"><div class="no">23</div>5.6 Huffman 树</div><div class="thumb"><div class="no">24</div>带权路径长度 WPL</div><div class="thumb"><div class="no">25</div>5.6.2 为什么需要前缀码</div><div class="thumb"><div class="no">26</div>Huffman 树天然给出前缀码</div><div class="thumb"><div class="no">27</div>编码总长恰好等于 WPL</div><div class="thumb"><div class="no">28</div>译码：用同一棵树</div><div class="thumb"><div class="no">29</div>本章小结</div><div class="thumb"><div class="no">30</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第5章 二叉树</div><div class="thumb"><div class="no">2</div>5.1 定义与五种基本形态</div><div class="thumb"><div class="no">3</div>满二叉树与完全二叉树</div><div class="thumb"><div class="no">4</div>5.1.3 三条要用到的性质</div><div class="thumb"><div class="no">5</div>性质 5：一棵 n 结点的树里有 n+1 个空指针</div><div class="thumb"><div class="no">6</div>5.2 周游：三种深度优先</div><div class="thumb"><div class="no">7</div>三种周游的代码只差一行</div><div class="thumb"><div class="no">8</div>广度优先：一层一层来</div><div class="thumb"><div class="no">9</div>表达式树：周游的一个用途</div><div class="thumb"><div class="no">10</div>5.3 存储结构：二叉链表</div><div class="thumb"><div class="no">11</div>释放：必须后序</div><div class="thumb"><div class="no">12</div>5.3 另一种存法：完全二叉树进数组</div><div class="thumb"><div class="no">13</div>5.4 二叉搜索树</div><div class="thumb"><div class="no">14</div>插入：指向指针的指针</div><div class="thumb"><div class="no">15</div>删除：难点只有一个</div><div class="thumb"><div class="no">16</div>删除：还藏着一步</div><div class="thumb"><div class="no">17</div>5.5 堆：完全二叉树 + 数组</div><div class="thumb"><div class="no">18</div>插入：放末尾，然后上浮</div><div class="thumb"><div class="no">19</div>删除最小：搬最后一个上来，然后下沉</div><div class="thumb"><div class="no">20</div>建堆为什么是 O(n)</div><div class="thumb"><div class="no">21</div>建堆：把和算出来</div><div class="thumb"><div class="no">22</div>5.5.2 优先队列</div><div class="thumb"><div class="no">23</div>5.6 Huffman 树</div><div class="thumb"><div class="no">24</div>带权路径长度 WPL</div><div class="thumb"><div class="no">25</div>5.6.2 为什么需要前缀码</div><div class="thumb"><div class="no">26</div>Huffman 树天然给出前缀码</div><div class="thumb"><div class="no">27</div>编码总长恰好等于 WPL</div><div class="thumb"><div class="no">28</div>译码：用同一棵树</div><div class="thumb"><div class="no">29</div>课堂讲解卡：树的形状决定代价</div><div class="thumb"><div class="no">30</div>课堂例题：插入 5、3、7、2、4</div><div class="thumb"><div class="no">31</div>课末自检</div><div class="thumb"><div class="no">32</div>本章小结</div><div class="thumb"><div class="no">33</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -452,7 +462,7 @@ python3 tools/check_code.py code/ch05/heap_huffman</code></pre></div>
 <b>第5章 二叉树</b><span>数据结构与算法：Python 讲算法，C++ 讲实现</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 30</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 33</b>
 </div>
 <script>
 (function(){
