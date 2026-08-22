@@ -158,7 +158,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 用 INT_MAX 就溢出了，而有符号溢出是未定义行为。这一处第 1 章也讲过。
 
 无向图加边要加两次，本书用 directed 参数表达。&lt;/p&gt;"><h1 id="731-相邻矩阵"><a class="anchor" href="#731-相邻矩阵">#</a>7.3.1 相邻矩阵</h1>
-<p>原书沿用“相邻矩阵”一词；现代资料通常称<strong>邻接矩阵</strong>（adjacency matrix）。</p>
+<p>“相邻矩阵”是原书沿用的<strong>历史教材称呼</strong>；现代资料通常称<strong>邻接矩阵</strong>（adjacency matrix）。</p>
 <p><code>m[i][j]</code> 是 i 到 j 一条边的权，不通就是「无穷大」。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#graph-build</a></div><pre><code><span class="k">explicit</span> Graph(std::<span class="t">size_t</span> count) : adjacency_(count, std::vector&lt;<span class="t">int</span>&gt;(count, infinity)) {
     <span class="k">for</span> (std::<span class="t">size_t</span> vertex = <span class="n">0</span>; vertex &lt; count; ++vertex) {
@@ -211,7 +211,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 </tbody></table></div>
 <p><strong>稀疏图（<span class="math">E≪V<sup><span class="upr">2</span></sup></span>）用邻接表；稠密图或频繁问「这两点之间有没有边」用矩阵。</strong></p>
 <p><strong>没有哪种总是更好</strong>——这正是本章要比较的东西。</p></section><section class="slide" data-notes=""><h1 id="733-十字链表一条弧进两条链"><a class="anchor" href="#733-十字链表一条弧进两条链">#</a>7.3.3 十字链表：一条弧进两条链</h1>
-<p>邻接表只方便沿出边走；十字链表让同一弧结点同时进入：</p>
+<p>邻接表只方便沿出边走；十字链表（<strong>经典教材表示</strong>）让同一弧结点同时进入：</p>
 <ul>
 <li>尾点的出边链：<code>tailnextarc</code></li>
 <li>头点的入边链：<code>headnextarc</code></li>

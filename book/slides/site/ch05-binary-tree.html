@@ -117,8 +117,9 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <p><strong>满二叉树定理推论</strong>：非空二叉树的<strong>空子树数目</strong> = 结点数 + 1。</p>
 <blockquote><p>证明：把所有空子树换成树叶，得到扩充二叉树 <span class="math">T&#x27;</span>。 <span class="math">T</span> 原来的每个结点在 <span class="math">T&#x27;</span> 里都成了分支结点。 由满二叉树定理，<span class="math">T&#x27;</span> 的树叶数 = 分支数 + 1 = <span class="math">T</span> 的结点数 + 1。 每片新叶恰对应 <span class="math">T</span> 的一棵空子树。</p></blockquote>
 <p><strong>这不是纸面游戏</strong>：链式存储时这些空指针占的空间和结点本身同阶。 线索二叉树、Trie 压缩、第 12 章 PATRICIA 的动机都从这里来。</p>
-<p>线索二叉树（threaded binary tree）适合低额外空间遍历的专门场景；通用库通常使用显式栈、父指针或迭代器，不把线索化作为默认表示。</p></section><section class="slide" data-notes="&lt;p&gt;让学生对着图 5.5 报三遍答案。报错的多半是把「访问」和「走进去」混了。
+<p>线索二叉树（threaded binary tree）是<strong>经典教材表示</strong>，适合低额外空间遍历的专门场景；通用库通常使用显式栈、父指针或迭代器，不把线索化作为默认表示。</p></section><section class="slide" data-notes="&lt;p&gt;让学生对着图 5.5 报三遍答案。报错的多半是把「访问」和「走进去」混了。
 可以提示：三个函数的代码一模一样，只差 visit 那一行的位置。&lt;/p&gt;"><h1 id="52-周游三种深度优先"><a class="anchor" href="#52-周游三种深度优先">#</a>5.2 周游：三种深度优先</h1>
+<p>“周游”是中文数据结构教材的传统说法，现代资料通常直接说<strong>遍历</strong>（traversal）。</p>
 <p>访问根、走左子树、走右子树——<strong>三件事的次序</strong>决定了三种周游：</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">次序</th>

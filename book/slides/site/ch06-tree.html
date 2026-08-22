@@ -360,6 +360,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <td style="text-align:left"><code>ltag</code> + <code>rtag</code>，但按层排</td>
 </tr>
 </tbody></table></div></section><section class="slide" data-notes=""><h1 id="带双标记的先根次序"><a class="anchor" href="#带双标记的先根次序">#</a>带双标记的先根次序</h1>
+<p>“带双标记”是<strong>历史编码概念</strong>：适合作为早期教材中的位级压缩案例，不是现代树库的主流接口。工程实现通常选择 LOUDS、平衡括号或其他 succinct tree 编码。</p>
 <p>这是经典顺序编码，今天主要用于理解树的序列化；工程中的紧凑树通常会考虑 LOUDS 或平衡括号编码。</p>
 <figure><img loading="lazy" src="../../assets/ddf4082b075a6a12.jpg" alt="图6.14 带右链的先根次序表示法"><figcaption>图6.14 带右链的先根次序表示法</figcaption></figure>
 <div class="codeblock" data-lang="text"><pre><code>先根次序   A  B  C  E  F  D  G  H  J  I

@@ -372,7 +372,7 @@ std::optional&lt;T&gt; pop() {
 <p>实现见 <code>code/ch03/expression_eval/modern.hpp</code>，正文 3.1.4 有完整规则表。</p></section><section class="slide" data-notes="&lt;p&gt;所以「递归会爆栈」不是玄学——运行栈是有限的（Linux 默认 8 MB）。
 下一页有实测数字。&lt;/p&gt;"><h1 id="315-栈与递归"><a class="anchor" href="#315-栈与递归">#</a>3.1.5 栈与递归</h1>
 <p><strong>递归的实现本身就是一个栈。</strong> 每次函数调用，运行栈上压入一条<strong>活动记录</strong>：</p>
-<p>现代资料通常称它为 <strong>stack frame（栈帧）</strong>，其中保存返回地址、参数和局部状态。</p>
+<p>“活动记录”是<strong>经典教材术语</strong>；现代资料通常称它为 <strong>stack frame（栈帧）</strong>，其中保存返回地址、参数和局部状态。</p>
 <figure><img loading="lazy" src="../../assets/d573f60f354acc38.jpg" alt="图 3.7 活动记录的内容"><figcaption>图 3.7 活动记录的内容</figcaption></figure>
 <ul>
 <li>返回地址、参数、局部变量、返回值</li>
