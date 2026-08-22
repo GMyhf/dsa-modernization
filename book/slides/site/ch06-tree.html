@@ -293,6 +293,19 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <li>找孩子：得扫遍全表</li>
 </ul>
 <p>看着很废——但它恰好匹配一类问题：<strong>判断两个元素在不在同一个集合里</strong>。</p></section><section class="slide" data-notes=""><h1 id="并查集等价类问题"><a class="anchor" href="#并查集等价类问题">#</a>并查集：等价类问题</h1>
+<p>关系 <span class="math">R</span> 是等价关系，当且仅当满足：</p>
+<ul>
+<li><strong>自反</strong>：<span class="math">(x,x)<span class="rel">∈</span>R</span></li>
+<li><strong>对称</strong>：<span class="math">(x,y)<span class="rel">∈</span>R<span class="rel">⇒</span>(y,x)<span class="rel">∈</span>R</span></li>
+<li><strong>传递</strong>：<span class="math">(x,y),(y,z)<span class="rel">∈</span>R<span class="rel">⇒</span>(x,z)<span class="rel">∈</span>R</span></li>
+</ul>
+<p>元素 <span class="math">x</span> 的等价类是 <span class="math">[x]<sub>R</sub><span class="rel">=</span>{y<span class="rel">∈</span>S:(x,y)<span class="rel">∈</span>R}</span>。 所有等价类互不相交，合起来正好划分全集 <span class="math">S</span>。</p>
+<p>给定若干等价偶对，处理过程只有三步：</p>
+<ol>
+<li>每个元素先是一个单独集合；</li>
+<li><code>find</code> 找到元素所在集合的代表根；</li>
+<li>两个根不同就 <code>union</code>，把两个集合归并。</li>
+</ol>
 <figure><img loading="lazy" src="../../assets/99d1200487f038c2.jpg" alt="图 6.11 集合的表示方法"><figcaption>图 6.11 集合的表示方法</figcaption></figure>
 <p>给一堆等价对 (A,B)、(C,K)、…，要能回答「x 和 y 同类吗」。</p>
 <ul>
