@@ -456,7 +456,10 @@ n 不大时 vector 往往比 list 快，哪怕理论上后者插删更优。
 <li>什么时候应优先选择连续数组而不是链表？</li>
 </ul></section><section class="slide" data-notes=""><h1 id="课末自检参考答案"><a class="anchor" href="#课末自检参考答案">#</a>课末自检参考答案</h1>
 <ul>
-<li>从后向前搬，避免尚未复制的元素被覆盖。\n- 空 optional 表示“没有找到”，比未初始化出参安全。\n- 删除要同时维护前驱、后继以及头尾指针。\n- 随机访问和缓存局部性重要时优先连续数组；已知结点位置且插删多时链表更合适。</li>
+<li>从后向前搬，避免尚未复制的元素被覆盖。</li>
+<li>空 optional 表示“没有找到”，比未初始化出参安全。</li>
+<li>删除要同时维护前驱、后继以及头尾指针。</li>
+<li>随机访问和缓存局部性重要时优先连续数组；已知结点位置且插删多时链表更合适。</li>
 </ul></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
 <ul>
 <li>同一个线性表 ADT，两种存储结构，<strong>代价互补</strong></li>

@@ -340,7 +340,10 @@ KMP    j = next[j]  文本指针 i 一步都不退</code></pre></div>
 <li>能否说明 KMP 为什么是 O(n+m)？</li>
 </ul></section><section class="slide" data-notes=""><h1 id="课末自检参考答案"><a class="anchor" href="#课末自检参考答案">#</a>课末自检参考答案</h1>
 <ul>
-<li>字节数、字符数、显示宽度是不同层次，UTF-8 下不能混用。\n- 子串越界应抛异常或返回明确错误状态。\n- <code>next</code> 的含义必须以实现约定为准。\n- KMP 预处理 O(m)，匹配 O(n)，合计 O(n+m)。</li>
+<li>字节数、字符数、显示宽度是不同层次，UTF-8 下不能混用。</li>
+<li>子串越界应抛异常或返回明确错误状态。</li>
+<li><code>next</code> 的含义必须以实现约定为准。</li>
+<li>KMP 预处理 O(m)，匹配 O(n)，合计 O(n+m)。</li>
 </ul></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
 <ul>
 <li>字符串是元素受限的线性表；本章正题是<strong>变长存储管理</strong></li>

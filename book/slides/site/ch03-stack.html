@@ -519,7 +519,10 @@ std::optional&lt;T&gt; dequeue() {
 返回     -&gt; 弹出栈帧</code></pre></div></section><section class="slide" data-notes=""><h1 id="课堂例题中缀式-1-2-3"><a class="anchor" href="#课堂例题中缀式-1-2-3">#</a>课堂例题：中缀式 <code>1 + 2 * 3</code></h1>
 <p>先把运算符按优先级放入栈，再按后缀式 <code>1 2 3 * +</code> 求值。每次弹出的顺序就是优先级规则的可视化。 让学生故意把 <code>+</code> 和 <code>*</code> 反过来，观察结果从 7 变成 9。</p></section><section class="slide" data-notes=""><h1 id="课堂例题答案1-2-3"><a class="anchor" href="#课堂例题答案1-2-3">#</a>课堂例题答案：<code>1 + 2 * 3</code></h1>
 <ol>
-<li>读入数字进入输出队列。\n2. <code>+</code> 入运算符栈，<code>*</code> 因优先级更高继续入栈。\n3. 输入结束先弹 <code>*</code> 再弹 <code>+</code>，后缀式为 <code>1 2 3 * +</code>。\n4. 求值为 7；忽略优先级会错误得到 9。</li>
+<li>读入数字进入输出队列。</li>
+<li><code>+</code> 入运算符栈，<code>*</code> 因优先级更高继续入栈。</li>
+<li>输入结束先弹 <code>*</code> 再弹 <code>+</code>，后缀式为 <code>1 2 3 * +</code>。</li>
+<li>求值为 7；忽略优先级会错误得到 9。</li>
 </ol></section><section class="slide" data-notes=""><h1 id="课末自检"><a class="anchor" href="#课末自检">#</a>课末自检</h1>
 <ul>
 <li>空栈和满队列分别如何表示？</li>
@@ -528,7 +531,10 @@ std::optional&lt;T&gt; dequeue() {
 <li>看到“没有结果”时，应该返回 optional、布尔值还是抛异常？</li>
 </ul></section><section class="slide" data-notes=""><h1 id="课末自检参考答案"><a class="anchor" href="#课末自检参考答案">#</a>课末自检参考答案</h1>
 <ul>
-<li>空栈用 <code>empty()</code> 判断；循环队列用额外槽位或计数区分空和满。\n- 递归深度大时，把待处理状态显式压入链式栈。\n- 可预期缺失通常返回 optional；违反调用契约的越界通常抛异常。\n- 队列出队要推进 front，不能只读值而不改变状态。</li>
+<li>空栈用 <code>empty()</code> 判断；循环队列用额外槽位或计数区分空和满。</li>
+<li>递归深度大时，把待处理状态显式压入链式栈。</li>
+<li>可预期缺失通常返回 optional；违反调用契约的越界通常抛异常。</li>
+<li>队列出队要推进 front，不能只读值而不改变状态。</li>
 </ul></section><section class="slide" data-notes="&lt;p&gt;留一句话收尾：这一章的两个结构都很简单，难的是「边界」——
 空、满、只剩一个、刚好摘空。本书的测试用例大半在这些地方。&lt;/p&gt;"><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
 <ul>

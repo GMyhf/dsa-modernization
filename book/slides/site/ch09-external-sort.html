@@ -323,7 +323,10 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <li>页大小、记录大小和归并路数之间如何权衡？</li>
 </ul></section><section class="slide" data-notes=""><h1 id="课末自检参考答案"><a class="anchor" href="#课末自检参考答案">#</a>课末自检参考答案</h1>
 <ul>
-<li>顺序读写能合并页访问，随机访问会频繁触发定位和换页。\n- 置换选择把不破坏当前顺序的输入继续留在堆中。\n- 选择树更新只沿一条叶到根路径，代价 O(log k)。\n- 更大页和更多路数减少轮数，但增加缓冲区成本。</li>
+<li>顺序读写能合并页访问，随机访问会频繁触发定位和换页。</li>
+<li>置换选择把不破坏当前顺序的输入继续留在堆中。</li>
+<li>选择树更新只沿一条叶到根路径，代价 O(log k)。</li>
+<li>更大页和更多路数减少轮数，但增加缓冲区成本。</li>
 </ul></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
 <ul>
 <li>外排序数的是<strong>外存访问次数</strong>，不是比较次数</li>

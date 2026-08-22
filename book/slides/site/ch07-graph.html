@@ -378,7 +378,10 @@ Dijkstra 树总权 5，MST 总权 4。&lt;/p&gt;"><h1 id="prim从点出发"><a c
 <li>十字链表的两条链是否始终描述同一组弧？</li>
 </ul></section><section class="slide" data-notes=""><h1 id="课末自检参考答案"><a class="anchor" href="#课末自检参考答案">#</a>课末自检参考答案</h1>
 <ul>
-<li>Dijkstra 的贪心前提被负边破坏。\n- DFS/BFS 入队或入栈时及时标记，避免重复加入。\n- Prim/Kruskal 生成最小生成树，最短路树优化的是源点距离。\n- 每条弧同时在出链和入链中出现，插删必须同步维护。</li>
+<li>Dijkstra 的贪心前提被负边破坏。</li>
+<li>DFS/BFS 入队或入栈时及时标记，避免重复加入。</li>
+<li>Prim/Kruskal 生成最小生成树，最短路树优化的是源点距离。</li>
+<li>每条弧同时在出链和入链中出现，插删必须同步维护。</li>
 </ul></section><section class="slide" data-notes=""><h1 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h1>
 <ul>
 <li>图的存法决定算法代价：稀疏用<strong>邻接表</strong>，稠密用<strong>相邻矩阵</strong></li>
