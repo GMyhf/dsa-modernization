@@ -405,7 +405,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 最优 BST 总成本 57，根为键 2</code></pre></div>
 <p>把 <code>optimal_bst({1,2}, {3,4})</code> 这种长度对不上的输入送进去，会抛 <code>std::invalid_argument</code>。空树对应 <code>p = {}</code>、<code>q = {某个失败权}</code>，代价为 0。</p>
 <p>池用 <code>vector&lt;optional&lt;T&gt;&gt;</code> 表示槽位占用，<code>vector&lt;size_t&gt;</code> 当空闲栈。构造时下标从大到小入栈，所以第一次 <code>acquire</code> 拿到 0。<code>release</code> 先确认该槽确实被占用，再 <code>reset</code> 并归还。</p>
-<figure><img loading="lazy" src="../assets/13aa14b9eaf0d7ed.jpg" alt="图 12.10 等长结点的可利用空间表"><figcaption>图 12.10 等长结点的可利用空间表</figcaption></figure>
+<figure><img loading="lazy" src="../assets/combined/fig-12-10.png" alt="图 12.10 等长结点的可利用空间表"><figcaption>图 12.10 等长结点的可利用空间表</figcaption></figure>
 <p>容量为 3 时，状态可以直接写成一张账：初始空闲栈顶依次是 <code>0,1,2</code>；申请 A、B 后，句柄分别是 0、1，只剩 2；归还 0 后，空闲栈是 <code>0,2</code>；再申请 C 会复用 0。旧句柄 0 在归还那一刻已经失效，数值虽然后来又出现，却代表新的占用期。真实系统若要识别「拿旧句柄误访问新对象」，还会在句柄中加入代数（generation）；本节的简化池只保证空闲槽不可读和重复释放会失败。</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">动作</th>
@@ -495,7 +495,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h3 id="1223-存储的动态分配和回收"><a class="anchor" href="#1223-存储的动态分配和回收">#</a>12.2.3 存储的动态分配和回收</h3>
 <p>程序运行中向系统要一块、用完还回去。空闲块和已分配块穿插之后，会出现两种碎片：外部碎片是空闲区被切得太碎，哪一块都装不下新请求；内部碎片是分出去的块比实际需要大，多出来的字节浪费在块内。</p>
 <p>选哪一块空闲区，有三种经典策略。首次适应从低地址扫到第一块够大的；最佳适应找刚好够用的最小块；最坏适应找当前最大的块。三者只在「挑哪一块」这一步不同，分裂与合并完全一样。</p>
-<figure><img loading="lazy" src="../assets/176675b89214b438.jpg" alt="图 12.11 已分配块与空闲块的边界信息"><figcaption>图 12.11 已分配块与空闲块的边界信息</figcaption></figure>
+<figure><img loading="lazy" src="../assets/combined/fig-12-11.png" alt="图 12.11 存储器看到的块结构"><figcaption>图 12.11 存储器看到的块结构</figcaption></figure>
 <p>差别用一个例子最清楚。设空闲区依次是 500、200、300、600 字节（中间被已分配块隔开，所以不会合并），现在要 212 字节：</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">策略</th>
@@ -808,8 +808,7 @@ LR（左右，先左旋再右旋）      RL（右左，先右旋再左旋）
 <figure><img loading="lazy" src="../assets/08b834108b1ffee9.jpg" alt="图 12.7 没有头结点的广义表"><figcaption>图 12.7 没有头结点的广义表</figcaption></figure>
 <figure><img loading="lazy" src="../assets/a997a7dd44ffc121.jpg" alt="图 12.8 带头结点的广义表"><figcaption>图 12.8 带头结点的广义表</figcaption></figure>
 <figure><img loading="lazy" src="../assets/496aef5541eea022.jpg" alt="图12.9 带表头结点的循环广义表"><figcaption>图12.9 带表头结点的循环广义表</figcaption></figure>
-<figure><img loading="lazy" src="../assets/286284e4e113c3db.jpg" alt="(a) 初始状态的可利用空间表"><figcaption>(a) 初始状态的可利用空间表</figcaption></figure>
-<figure><img loading="lazy" src="../assets/da5cde034842c482.jpg" alt="(a) 空闲块的结构"><figcaption>(a) 空闲块的结构</figcaption></figure>
+<p>&lt;!-- 图 12.10、图 12.11 的子图已在正文对应位置合并展示。 --&gt;</p>
 <figure><img loading="lazy" src="../assets/a71971eeeedd60de.jpg" alt="图 12.15 BST 的平衡性示意图"><figcaption>图 12.15 BST 的平衡性示意图</figcaption></figure>
 <figure><img loading="lazy" src="../assets/2f63d4427c7ba023.jpg" alt="图 12.16 一棵二叉 Trie 树"><figcaption>图 12.16 一棵二叉 Trie 树</figcaption></figure>
 <figure><img loading="lazy" src="../assets/a08c66eba1f27251.jpg" alt="图 12.18 对 Trie 树的改进"><figcaption>图 12.18 对 Trie 树的改进</figcaption></figure>
