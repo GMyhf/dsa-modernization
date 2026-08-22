@@ -206,7 +206,8 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>图常用两种存法。邻接矩阵用 <span class="math">n<span class="bin">×</span>n</span> 的表，<span class="math">A[i][j]</span> 表示 <span class="math">i</span> 到 <span class="math">j</span> 有没有边、权是多少，适合稠密图和需要 <span class="math">O(<span class="upr">1</span>)</span> 问「两点之间有没有边」的算法（Floyd、Prim）。邻接表为每个顶点挂一条出边表，适合稀疏图和只沿出边走的算法（DFS、BFS、Dijkstra、拓扑）。</p>
 <p>两种都有可运行实现：邻接矩阵是 <code>code/ch07/graph</code>（代码7.1–7.3），邻接表是 <code>code/ch07/adjacency_list</code>（代码7.4）。两者<strong>逐项对拍</strong>——同一张图上 DFS/BFS 序列、拓扑序、Dijkstra 距离向量必须完全相同，外加 30 轮随机图对拍。换存储方式不该换答案，只该换代价。</p>
 <h3 id="731-相邻矩阵"><a class="anchor" href="#731-相邻矩阵">#</a>7.3.1 相邻矩阵</h3>
-<p>本节沿用原书标题；现代教材通常称为<strong>邻接矩阵</strong>（adjacency matrix）。 邻接矩阵的第 <code>from</code> 行、第 <code>to</code> 列是边权。构造时对角线为 0（到自己的距离是 0），其余为 <code>infinity</code>。<code>add_edge(..., directed=false)</code> 同时写入对称位置，用来表示无向边。零权边可以表示——原书把 0 同时当成「无边」，那样权为 0 的边就存不进去。</p>
+<p>本节沿用原书标题；现代教材通常称为<strong>邻接矩阵</strong>（adjacency matrix）。 邻接矩阵是一个 <span class="math">V<span class="bin">×</span>V</span> 的二维数组；第 <code>from</code> 行、第 <code>to</code> 列保存弧 <code>from → to</code> 的权值。构造时对角线为 0（到自己的距离是 0），其余位置为 <code>infinity</code> 表示没有边。无向边要同时写入 <span class="math">(u,v)</span> 和 <span class="math">(v,u)</span> 两格；<code>add_edge(..., directed=false)</code> 正是这样做的。零权边是合法的，因此不能再用 0 表示“无边”。</p>
+<p>矩阵的空间是 <span class="math">O(V<sup><span class="upr">2</span></sup>)</span>，无论图中实际有多少条边；查询两点是否相邻为 <span class="math">O(<span class="upr">1</span>)</span>，但扫描一个顶点的全部邻居要扫完整行，遍历全图通常为 <span class="math">O(V<sup><span class="upr">2</span></sup>)</span>。所以它适合稠密图，以及 Floyd、Prim 这类需要频繁随机访问矩阵元素的算法；稀疏图用邻接表会省下大量空间。</p>
 <h3 id="732-邻接表"><a class="anchor" href="#732-邻接表">#</a>7.3.2 邻接表</h3>
 <p>邻接表为每个顶点存一张出边表，<strong>只存实际存在的边</strong>。代价随之全变：</p>
 <div class="table-wrap"><table><thead><tr>
