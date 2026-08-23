@@ -289,9 +289,143 @@ public:
 <p>两种都有可运行实现：邻接矩阵是 <code>code/ch07/graph</code>（代码7.1–7.3），邻接表是 <code>code/ch07/adjacency_list</code>（代码7.4）。两者<strong>逐项对拍</strong>——同一张图上 DFS/BFS 序列、拓扑序、Dijkstra 距离向量必须完全相同，外加 30 轮随机图对拍。换存储方式不该换答案，只该换代价。</p>
 <h3 id="731-相邻矩阵"><a class="anchor" href="#731-相邻矩阵">#</a>7.3.1 相邻矩阵</h3>
 <p>本节沿用原书标题；现代教材通常称为<strong>邻接矩阵</strong>（adjacency matrix）。 邻接矩阵是一个 <span class="math">V<span class="bin">×</span>V</span> 的二维数组；第 <code>from</code> 行、第 <code>to</code> 列保存弧 <code>from → to</code> 的权值。构造时对角线为 0（到自己的距离是 0），其余位置为 <code>infinity</code> 表示没有边。无向边要同时写入 <span class="math">(u,v)</span> 和 <span class="math">(v,u)</span> 两格；<code>add_edge(..., directed=false)</code> 正是这样做的。零权边是合法的，因此不能再用 0 表示“无边”。</p>
+<p>不带权的图只需要记「有没有边」，即 <span class="math">A[i,j]<span class="rel">=</span><span class="upr">1</span></span> 表示 <span class="math">(v<sub>i</sub>,v<sub>j</sub>)<span class="rel">∈</span>E</span>，否则为 0。图 7.2 那两张图的相邻矩阵是：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left"><span class="math">A(G<sub><span class="upr">1</span></sub>)</span></th>
+<th style="text-align:left"><span class="math">v<sub><span class="upr">0</span></sub></span></th>
+<th style="text-align:left"><span class="math">v<sub><span class="upr">1</span></sub></span></th>
+<th style="text-align:left"><span class="math">v<sub><span class="upr">2</span></sub></span></th>
+<th style="text-align:left"><span class="math">v<sub><span class="upr">3</span></sub></span></th>
+<th style="text-align:left"><span class="math">v<sub><span class="upr">4</span></sub></span></th>
+<th style="text-align:left"></th>
+<th style="text-align:left"><span class="math">A(G<sub><span class="upr">2</span></sub>)</span></th>
+<th style="text-align:left"><span class="math">v<sub><span class="upr">0</span></sub></span></th>
+<th style="text-align:left"><span class="math">v<sub><span class="upr">1</span></sub></span></th>
+<th style="text-align:left"><span class="math">v<sub><span class="upr">2</span></sub></span></th>
+<th style="text-align:left"><span class="math">v<sub><span class="upr">3</span></sub></span></th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><span class="math">v<sub><span class="upr">0</span></sub></span></td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><span class="math">v<sub><span class="upr">0</span></sub></span></td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">0</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">v<sub><span class="upr">1</span></sub></span></td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><span class="math">v<sub><span class="upr">1</span></sub></span></td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">v<sub><span class="upr">2</span></sub></span></td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><span class="math">v<sub><span class="upr">2</span></sub></span></td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">1</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">v<sub><span class="upr">3</span></sub></span></td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><span class="math">v<sub><span class="upr">3</span></sub></span></td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">v<sub><span class="upr">4</span></sub></span></td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+</tbody></table></div>
+<p>图 7.10　(a) 无向图 <span class="math">G<sub><span class="upr">1</span></sub></span> 与 (b) 有向图 <span class="math">G<sub><span class="upr">2</span></sub></span> 的相邻矩阵。<strong>无向图的矩阵一定对称</strong>，顶点 <span class="math">v<sub>i</sub></span> 的度就是第 <span class="math">i</span> 行（或第 <span class="math">i</span> 列）之和；有向图的矩阵不一定对称，第 <span class="math">i</span> 行之和是出度，第 <span class="math">i</span> 列之和是入度。</p>
+<p>带权图把 1 换成权值，没有边的位置记 <span class="math">∞</span>。图 7.8 的网络 <span class="math">G<sub><span class="upr">4</span></sub></span> 是：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left"><span class="math">A(G<sub><span class="upr">4</span></sub>)</span></th>
+<th style="text-align:right"><span class="math">v<sub><span class="upr">0</span></sub></span></th>
+<th style="text-align:right"><span class="math">v<sub><span class="upr">1</span></sub></span></th>
+<th style="text-align:right"><span class="math">v<sub><span class="upr">2</span></sub></span></th>
+<th style="text-align:right"><span class="math">v<sub><span class="upr">3</span></sub></span></th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><span class="math">v<sub><span class="upr">0</span></sub></span></td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">3</td>
+<td style="text-align:right">∞</td>
+<td style="text-align:right">15</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">v<sub><span class="upr">1</span></sub></span></td>
+<td style="text-align:right">3</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">9</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">v<sub><span class="upr">2</span></sub></span></td>
+<td style="text-align:right">∞</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">6</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">v<sub><span class="upr">3</span></sub></span></td>
+<td style="text-align:right">15</td>
+<td style="text-align:right">9</td>
+<td style="text-align:right">6</td>
+<td style="text-align:right">0</td>
+</tr>
+</tbody></table></div>
+<p>图 7.11　带权图 <span class="math">G<sub><span class="upr">4</span></sub></span> 及其相邻矩阵。对角线是 0（到自己的距离为 0）。本书的实现用 <code>infinity</code> 而不是 0 表示无边——<strong>因为权为 0 的边是合法的</strong>，用 0 兼任「无边」会把它误判掉。</p>
 <p>矩阵的空间是 <span class="math">O(V<sup><span class="upr">2</span></sup>)</span>，无论图中实际有多少条边；查询两点是否相邻为 <span class="math">O(<span class="upr">1</span>)</span>，但扫描一个顶点的全部邻居要扫完整行，遍历全图通常为 <span class="math">O(V<sup><span class="upr">2</span></sup>)</span>。所以它适合稠密图，以及 Floyd、Prim 这类需要频繁随机访问矩阵元素的算法；稀疏图用邻接表会省下大量空间。</p>
 <h3 id="732-邻接表"><a class="anchor" href="#732-邻接表">#</a>7.3.2 邻接表</h3>
-<p>邻接表为每个顶点存一张出边表，<strong>只存实际存在的边</strong>。代价随之全变：</p>
+<p>邻接表为每个顶点存一张出边表，<strong>只存实际存在的边</strong>。</p>
+<figure><img loading="lazy" src="../assets/f0f154bdefe0c6b7.jpg" alt="图 7.12 无向图 $G_1$ 的邻接表表示"><figcaption>图 7.12 无向图 <span class="math">G<sub><span class="upr">1</span></sub></span> 的邻接表表示</figcaption></figure>
+<p>图 7.12　无向图 <span class="math">G<sub><span class="upr">1</span></sub></span> 的邻接表表示。顶点数组的每一项挂一条链，链上是它的邻接点。无向图里<strong>一条边出现两次</strong>（<span class="math">(u,v)</span> 在 <span class="math">u</span> 的表里，也在 <span class="math">v</span> 的表里），所以边表结点共 <span class="math"><span class="upr">2</span>e</span> 个。</p>
+<p>有向图的一条弧只出现一次，顶点 <span class="math">v<sub>i</sub></span> 的边表长度就是它的<strong>出度</strong>——因此邻接表也叫出边表。想知道入度就得扫遍整张表，于是有了<strong>逆邻接表</strong>（入边表）：把每条弧记在弧头那一侧。</p>
+<figure><img loading="lazy" src="../assets/4f6ccd84a6ce200f.jpg" alt="图 7.13 有向图 $G_2$ 的邻接表和逆邻接表表示"><figcaption>图 7.13 有向图 <span class="math">G<sub><span class="upr">2</span></sub></span> 的邻接表和逆邻接表表示</figcaption></figure>
+<p>图 7.13　有向图 <span class="math">G<sub><span class="upr">2</span></sub></span> 的 (a) 邻接表与 (b) 逆邻接表。逆邻接表里 <span class="math">v<sub>i</sub></span> 的边表长度就是它的入度——7.4.3 节拓扑排序要的正是入度。</p>
+<p>带权图在边表结点里多存一个权：</p>
+<figure><img loading="lazy" src="../assets/2d350b61ff4f49e8.jpg" alt="图 7.14 带权图 $G_4$ 的邻接表表示"><figcaption>图 7.14 带权图 <span class="math">G<sub><span class="upr">4</span></sub></span> 的邻接表表示</figcaption></figure>
+<p>图 7.14　带权图 <span class="math">G<sub><span class="upr">4</span></sub></span> 的邻接表表示。本书 <code>GraphList</code> 的边表结点（<code>Edge</code> 结构里的 <code>to</code> 与 <code>weight</code>）就是这两个域。</p>
+<p>代价随之全变：</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left"></th>
 <th style="text-align:left">邻接矩阵</th>
@@ -525,6 +659,8 @@ public:
 <p>7.5.1 节给出的 <span class="math">O(V<sup><span class="upr">2</span></sup>)</span> 是<strong>矩阵版</strong>的结论，别把它套到邻接表上；反过来，常见教材里那个 <span class="math">O((V<span class="bin">+</span>E)&thinsp;<span class="upr">log</span>&thinsp;V)</span> 也不能套到矩阵版上。复杂度是「算法 + 存储结构」一起决定的。</p>
 <h3 id="733-十字链表"><a class="anchor" href="#733-十字链表">#</a>7.3.3 十字链表</h3>
 <p>邻接表只沿出边组织数据；如果还要频繁查询“哪些边指向这个顶点”，就得另存一份逆邻接表。十字链表把两种方向接在同一个弧结点上：<code>tailnextarc</code> 串起同一尾点的出边，<code>headnextarc</code> 串起同一头点的入边；顶点同时保存 <code>firstoutarc</code> 和 <code>firstinarc</code>。每条弧只分配一个结点，却能在 <span class="math">O(<span class="upr">deg</span><sup><span class="bin">+</span></sup>(v))</span> 或 <span class="math">O(<span class="upr">deg</span><sup><span class="bin">−</span></sup>(v))</span> 时间遍历出边或入边，空间为 <span class="math">O(V<span class="bin">+</span>E)</span>。</p>
+<figure><img loading="lazy" src="../assets/462d5cf907d0b5d5.jpg" alt="图 7.15 有向图的十字链表示例"><figcaption>图 7.15 有向图的十字链表示例</figcaption></figure>
+<p>图 7.15　有向图的十字链表示例。每条弧只有一个结点，却同时挂在「同尾」和「同头」两条链上——邻接表与逆邻接表的信息合在了一起，不必存两份。</p>
 <p>它适合需要同时维护入度和出度的有向图，例如拓扑排序、依赖图和删除一条弧后的双向更新。代价是插入、删除必须同时维护两条链，指针不变量比普通邻接表多；只沿出边遍历的程序使用邻接表更简单。实现时删除弧要从尾点的出链和头点的入链各摘除一次，不能只改其中一条，否则下一次按另一方向遍历会访问已释放结点。</p>
 <h2 id="74-图的周游"><a class="anchor" href="#74-图的周游">#</a>7.4 图的周游</h2>
 <h3 id="先跑一遍"><a class="anchor" href="#先跑一遍">#</a>先跑一遍</h3>
@@ -574,6 +710,9 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
 <p>若再加上 <code>4→0</code> 形成环，<code>topological_sort()</code> 返回 <code>nullopt</code>。</p>
 <h3 id="741-深度优先周游"><a class="anchor" href="#741-深度优先周游">#</a>7.4.1 深度优先周游</h3>
 <p>DFS 进入一个顶点就立刻标记已访问，再沿编号从小到大的出边递归。BFS 用队列按层扩展，先到的顶点先出队。</p>
+<figure><img loading="lazy" src="../assets/a693901aec12e8f2.jpg" alt="图 7.16 有向图 G"><figcaption>图 7.16 有向图 G</figcaption></figure>
+<p>图 7.16　原书用来走深度优先周游的有向图 <span class="math">G</span>。从 <span class="math">v<sub><span class="upr">0</span></sub></span> 出发：访问 <span class="math">v<sub><span class="upr">0</span></sub></span>，取它唯一的邻接点 <span class="math">v<sub><span class="upr">1</span></sub></span>；在 <span class="math">v<sub><span class="upr">1</span></sub></span> 的边表里 <span class="math">v<sub><span class="upr">2</span></sub></span> 排在 <span class="math">v<sub><span class="upr">3</span></sub></span> 前面，于是先进 <span class="math">v<sub><span class="upr">2</span></sub></span>；<span class="math">v<sub><span class="upr">2</span></sub></span> 除已访问的 <span class="math">v<sub><span class="upr">0</span></sub></span> 外没有别的邻接点，回退到 <span class="math">v<sub><span class="upr">1</span></sub></span>，再进 <span class="math">v<sub><span class="upr">3</span></sub></span>；<span class="math">v<sub><span class="upr">3</span></sub></span> 的邻接点都访问过了，一路回退到 <span class="math">v<sub><span class="upr">0</span></sub></span>。此时还有顶点没访问，<strong>再挑一个未访问顶点重新开始</strong>，依次访问 <span class="math">v<sub><span class="upr">4</span></sub></span>、<span class="math">v<sub><span class="upr">5</span></sub></span>、<span class="math">v<sub><span class="upr">6</span></sub></span>。</p>
+<p>两点值得记住：一是<strong>图不连通时一次 DFS 走不完</strong>，要在外层对每个未访问顶点再起一次；二是<strong>存储结构一旦定下、源点一旦定下，深度优先序列就是唯一的</strong>——序列不同不是算法不同，是边表次序不同。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#dfs</a></div><pre><code>[[nodiscard]] std::vector&lt;std::<span class="t">size_t</span>&gt; dfs(std::<span class="t">size_t</span> source) <span class="k">const</span> {
     check_vertex(source);
     std::vector&lt;<span class="t">bool</span>&gt; seen(vertices());
@@ -633,6 +772,9 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
                 queue.append(target)
     <span class="k">return</span> result</code></pre></div>
 <h3 id="743-拓扑排序"><a class="anchor" href="#743-拓扑排序">#</a>7.4.3 拓扑排序</h3>
+<p>原书的例子是课程先修关系：顶点是课程，弧 <span class="math">⟨c<sub>i</sub>,c<sub>j</sub>⟩</span> 表示 <span class="math">c<sub>i</sub></span> 是 <span class="math">c<sub>j</sub></span> 的先修课。</p>
+<figure><img loading="lazy" src="../assets/6db281e4c4929271.jpg" alt="图 7.17 表示课程优先关系的有向无环图"><figcaption>图 7.17 表示课程优先关系的有向无环图</figcaption></figure>
+<p>图 7.17　表示课程优先关系的有向无环图。它的拓扑序列可以是 <span class="math">(c<sub><span class="upr">0</span></sub>,c<sub><span class="upr">1</span></sub>,c<sub><span class="upr">2</span></sub>,c<sub><span class="upr">3</span></sub>,c<sub><span class="upr">4</span></sub>,c<sub><span class="upr">5</span></sub>,c<sub><span class="upr">7</span></sub>,c<sub><span class="upr">8</span></sub>,c<sub><span class="upr">6</span></sub>)</span>，也可以是 <span class="math">(c<sub><span class="upr">0</span></sub>,c<sub><span class="upr">7</span></sub>,c<sub><span class="upr">8</span></sub>,c<sub><span class="upr">1</span></sub>,c<sub><span class="upr">4</span></sub>,c<sub><span class="upr">2</span></sub>,c<sub><span class="upr">3</span></sub>,c<sub><span class="upr">6</span></sub>,c<sub><span class="upr">5</span></sub>)</span>——<strong>拓扑序不唯一</strong>，学生按其中任何一个排课都不会先修颠倒。</p>
 <p>统计每个顶点的入度，把入度为 0 的点入队；每取出一个点，就把它指出的入度减 1。若最终取出的点数少于顶点数，图里有环。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#topological</a></div><pre><code>[[nodiscard]] std::optional&lt;std::vector&lt;std::<span class="t">size_t</span>&gt;&gt; topological_sort() <span class="k">const</span> {
     std::vector&lt;std::<span class="t">size_t</span>&gt; indegree(vertices());
@@ -683,8 +825,13 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
                     queue.append(target)
     <span class="k">return</span> result <span class="k">if</span> <span class="t">len</span>(result) == self.vertices <span class="k">else</span> <span class="k">None</span></code></pre></div>
 <h2 id="75-最短路径"><a class="anchor" href="#75-最短路径">#</a>7.5 最短路径</h2>
+<p>旅客要从 A 城到 B 城，希望路程最短：顶点是城市、边是交通线、权是里程，问题就是找权值之和最小的那条路径。</p>
+<figure><img loading="lazy" src="../assets/cf80cbf19e5853bc.jpg" alt="图 7.18 最短路径的示例"><figcaption>图 7.18 最短路径的示例</figcaption></figure>
+<p>图 7.18　最短路径的示例：从 A 到 B 的最短路径是 A→C→B，<strong>并不是边数最少的那条</strong>。路径上的第一个顶点叫源点(source)，最后一个叫汇点(sink)。下面两小节分别讨论单源最短路径和每对顶点之间的最短路径。</p>
 <h3 id="751-单源最短路径"><a class="anchor" href="#751-单源最短路径">#</a>7.5.1 单源最短路径</h3>
 <p>Dijkstra 反复选出尚未确定的、当前距离最小的顶点，用它的出边松弛邻居。边权必须非负。</p>
+<figure><img loading="lazy" src="../assets/0cf0a196d127ad6b.jpg" alt="图7.19 单源最短路径的示例"><figcaption>图7.19 单源最短路径的示例</figcaption></figure>
+<p>图 7.19　单源最短路径的示例。已确定的顶点集合每轮扩大一个：从「尚未确定」的顶点里挑距离最小的那个，它的距离<strong>此后不会再变小</strong>——因为任何绕道都要先经过一个距离不更小的顶点，而边权非负。这条论证正是 Dijkstra 要求非负权的地方，本书的实现因此在 <code>add_edge</code> 就拒绝负权。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#dijkstra</a></div><pre><code>[[nodiscard]] std::vector&lt;<span class="t">int</span>&gt; dijkstra(std::<span class="t">size_t</span> source) <span class="k">const</span> {
     check_vertex(source);
     std::vector&lt;<span class="t">int</span>&gt; distance(vertices(), infinity);
@@ -722,6 +869,8 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
     <span class="k">return</span> distance</code></pre></div>
 <h3 id="752-每对顶点之间的最短路径"><a class="anchor" href="#752-每对顶点之间的最短路径">#</a>7.5.2 每对顶点之间的最短路径</h3>
 <p>Floyd 枚举中转点 <code>via</code>，比较 <code>from→to</code> 与 <code>from→via→to</code>。测试里五个源点的 Dijkstra 与 Floyd 逐项对拍。</p>
+<figure><img loading="lazy" src="../assets/bf74b7d9c75cd16a.jpg" alt="图7.20 每对顶点间的最短路径的示例"><figcaption>图7.20 每对顶点间的最短路径的示例</figcaption></figure>
+<p>图 7.20　每对顶点间最短路径的示例。Floyd 从相邻矩阵 <span class="math">adj<sup>(<span class="upr">0</span>)</sup></span> 出发，第 <span class="math">k</span> 轮允许把 <span class="math">v<sub>k</sub></span> 当中转点，得到 <span class="math">adj<sup>(k)</sup></span>；<span class="math">n</span> 轮之后每一格就是最短路径长度（原书图 7.21 逐轮列出了这个迭代过程）。三重循环的次序不能换：<strong>中转点必须在最外层</strong>，否则 <span class="math">adj<sup>(k)</sup></span> 还没算完就被拿去用了。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#floyd</a></div><pre><code>[[nodiscard]] std::vector&lt;std::vector&lt;<span class="t">int</span>&gt;&gt; floyd() <span class="k">const</span> {
     <span class="k">auto</span> distance = adjacency_;
     <span class="k">for</span> (std::<span class="t">size_t</span> via = <span class="n">0</span>; via &lt; vertices(); ++via) {
@@ -747,8 +896,17 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
     <span class="k">return</span> distance</code></pre></div>
 <h2 id="76-最小生成树"><a class="anchor" href="#76-最小生成树">#</a>7.6 最小生成树</h2>
 <p>目标不是任意两点最短，而是连通全部顶点且选中边的总权最小。</p>
+<p>Prim 和 Kruskal 都是贪心算法，都靠同一条性质站住脚，<strong>MST 性质</strong>：设 <span class="math">U</span> 是顶点集 <span class="math">V</span> 的非空真子集，若 <span class="math">(u,v)</span> 是所有一端在 <span class="math">U</span>、另一端在 <span class="math">V<span class="bin">−</span>U</span> 的边里权最小的一条，则一定存在一棵包含 <span class="math">(u,v)</span> 的最小生成树。</p>
+<p>反证：假设某棵最小生成树 <span class="math">T</span> 不含 <span class="math">(u,v)</span>。把 <span class="math">(u,v)</span> 加进 <span class="math">T</span> 必成一个回路，回路上一定另有一条边 <span class="math">(u&#x27;,v&#x27;)</span> 同样跨在 <span class="math">U</span> 与 <span class="math">V<span class="bin">−</span>U</span> 之间：</p>
+<figure><img loading="lazy" src="../assets/bd68da3780041faa.jpg" alt="图 7.22 含 (u,v) 的回路"><figcaption>图 7.22 含 (u,v) 的回路</figcaption></figure>
+<p>图 7.22　含 <span class="math">(u,v)</span> 的回路。删掉 <span class="math">(u&#x27;,v&#x27;)</span> 就消掉了回路，得到另一棵生成树 <span class="math">T&#x27;</span>；因为 <span class="math">W(u,v)<span class="rel">≤</span>W(u&#x27;,v&#x27;)</span>，<span class="math">T&#x27;</span> 的代价不比 <span class="math">T</span> 大，于是 <span class="math">T&#x27;</span> 也是最小生成树，且含 <span class="math">(u,v)</span>——与假设矛盾。</p>
+<p>这条性质就是两个算法「每一步都可以放心地取当前最小的那条跨界边」的依据。下面两小节都拿同一张带权图举例：</p>
+<figure><img loading="lazy" src="../assets/c45bf26c0fafb163.jpg" alt="图 7.23 带权图"><figcaption>图 7.23 带权图</figcaption></figure>
+<p>图 7.23　本节两个算法共用的带权图。</p>
 <h3 id="761-prim-算法"><a class="anchor" href="#761-prim-算法">#</a>7.6.1 Prim 算法</h3>
-<p>从指定源点生长，每次把离当前树最近的顶点加进来。非连通则返回 <code>nullopt</code>。</p>
+<p>从指定源点生长，每次把离当前树最近的顶点加进来。非连通则返回 <code>nullopt</code>。写成集合的语言：初始 <span class="math">U<span class="rel">=</span>{u<sub><span class="upr">0</span></sub>}</span>、<span class="math">TE<span class="rel">=</span>{}</span>；每轮在一端在 <span class="math">U</span>、另一端在 <span class="math">V<span class="bin">−</span>U</span> 的边里挑权最小的 <span class="math">(u<sub><span class="upr">0</span></sub>,v<sub><span class="upr">0</span></sub>)</span>，把它放进 <span class="math">TE</span>、把 <span class="math">v<sub><span class="upr">0</span></sub></span> 并入 <span class="math">U</span>；做 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 轮，<span class="math">U<span class="rel">=</span>V</span> 时结束。</p>
+<figure><img loading="lazy" src="../assets/combined/fig-7-24.png" alt="图7.24 Prim 算法构造图 7.23 中带权图的最小生成树的步骤"><figcaption>图7.24 Prim 算法构造图 7.23 中带权图的最小生成树的步骤</figcaption></figure>
+<p>图 7.24　Prim 算法在图 7.23 上的六个步骤。注意每一步长出来的都是<strong>一棵连着的树</strong>——这正是它与 Kruskal 的区别。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#prim</a></div><pre><code>[[nodiscard]] std::optional&lt;std::vector&lt;Edge&gt;&gt; prim(std::<span class="t">size_t</span> source) <span class="k">const</span> {
     check_vertex(source);
     std::vector&lt;<span class="t">int</span>&gt; distance(vertices(), infinity);
@@ -795,6 +953,8 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
     <span class="k">return</span> result</code></pre></div>
 <h3 id="762-kruskal-算法"><a class="anchor" href="#762-kruskal-算法">#</a>7.6.2 Kruskal 算法</h3>
 <p>把边按权排序，用并查集跳过会形成环的边。连通图上与 Prim 得到相同总权、<code>n-1</code> 条边。</p>
+<figure><img loading="lazy" src="../assets/combined/fig-7-25.png" alt="图 7.25 Kruskal 算法构造图 7.23 中带权图的最小生成树的步骤"><figcaption>图 7.25 Kruskal 算法构造图 7.23 中带权图的最小生成树的步骤</figcaption></figure>
+<p>图 7.25　Kruskal 算法在同一张图 7.23 上的步骤。中间过程是<strong>一片森林</strong>，直到最后才连成一棵树；判断「这条边会不会成环」就是判断两个端点是不是已经在同一棵树里——这正是第 6 章并查集的用处。两个算法走的路不同，得到的总权相同。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#kruskal</a></div><pre><code>[[nodiscard]] std::optional&lt;std::vector&lt;Edge&gt;&gt; kruskal() <span class="k">const</span> {
     std::vector&lt;Edge&gt; edges;
     <span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; vertices(); ++from) {
