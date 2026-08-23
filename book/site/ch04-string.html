@@ -241,6 +241,11 @@ false true     # (&quot;123&quot; &lt; &quot;1234&quot;)、(&quot;1234&quot; &lt
 <h3 id="421-字符串的顺序存储"><a class="anchor" href="#421-字符串的顺序存储">#</a>4.2.1 字符串的顺序存储</h3>
 <p>字符串用一段连续字符数组按字符的逻辑顺序存储，末尾保留 <code>\0</code> 作为 C 风格字符串的结束标志，并单独记录不含终止符的长度 <code>length</code>。因此容量至少要能容纳 <code>length + 1</code> 个字符；<code>\0</code> 不是字符串内容，不能计入长度。</p>
 <p>连续存储使按下标取第 <span class="math">i</span> 个字符为 <span class="math">O(<span class="upr">1</span>)</span>，但在中间插入或删除时必须移动其后的字符，拼接和抽取子串也要复制一段连续区域。若容量不足，通常重新申请更大的数组、复制旧内容、释放旧数组，再更新指针和长度；这也是后面 <code>String</code> 类需要自己维护所有权、拷贝和析构的原因。 下标访问是 O(1)，插入、拼接和抽取需要复制字符。</p>
+<figure><img loading="lazy" src="../assets/ac445f2352c5273d.jpg" alt="图 4.1 C++ 标准字符串的变量说明示意图"><figcaption>图 4.1 C++ 标准字符串的变量说明示意图</figcaption></figure>
+<p>图 4.1　C 风格字符串的变量说明示意。<code>&#x27;\0&#x27;</code> 是 ASCII 里 8 位全 0 的 NULL 符，只作结束标记用，不算内容；说明变量时可以用字符串常量给初值，也可以不给——图中的 <code>s3</code> 没给初值，存的就是空串。</p>
+<p>C 标准库在这块内存上定位字符：<code>strchr(s1, &#x27;o&#x27;)</code> 找第一次出现，<code>strrchr(s1, &#x27;o&#x27;)</code> 找倒数第一次出现。</p>
+<figure><img loading="lazy" src="../assets/3fd8da33af3abe6c.jpg" alt="图4.2 在字符串 s1 中寻找并定位给定字符 &#x27;o&#x27; 的位置"><figcaption>图4.2 在字符串 s1 中寻找并定位给定字符 &#x27;o&#x27; 的位置</figcaption></figure>
+<p>图 4.2　在字符串 <code>s1</code> 中定位字符 <code>&#x27;o&#x27;</code>。两个函数返回的都是指针，指向找到的那个字符；找不到返回空指针。本书的 <code>String</code> 用下标和 <code>std::optional</code> 表达同一件事——「没找到」不再靠一个特殊指针值来表示。</p>
 <h3 id="422-字符串类-class-string-的存储结构"><a class="anchor" href="#422-字符串类-class-string-的存储结构">#</a>4.2.2 字符串类 class String 的存储结构</h3>
 <p>顺序存储只说了「字符放在哪」，还没说「这块内存归谁、什么时候还」。 把它包成一个类之后，这两件事才有着落：类里存一个指向字符数组的指针和一个长度， 构造时申请、析构时释放、拷贝时另开一份——本节的教学内容就是这套<strong>变长存储管理</strong>。</p>
 <h4 id="教学版完整实现"><a class="anchor" href="#教学版完整实现">#</a>教学版：完整实现</h4>
@@ -422,6 +427,12 @@ false true     # (&quot;123&quot; &lt; &quot;1234&quot;)、(&quot;1234&quot; &lt
 <p>还有一处原书没有做的检查：构造函数对 <code>s == nullptr</code> 毫无防备—— 而 4.2.3 节的 <code>Substr</code> 恰好会喂给它一个空指针（见 4.2.3 节）。</p>
 <p>原书的类里有 <code>~string()</code>，却从未把拷贝构造与拷贝赋值作为清单给出 （正文描述过赋值时&quot;必须释放 s1 的原有空间&quot;，但没有代码）。 只要有析构而没有这两个，一次 <code>String b = a;</code> 就是二次释放—— 与第 2、3 章是同一个错误。</p>
 <p>教学版按<strong>三法则</strong>补齐了这两个（析构 + 拷贝构造 + 拷贝赋值）， 拷贝赋值走的是「先备好新缓冲区，再释放旧的，最后接管」——顺序反过来， 一旦 <code>new</code> 抛异常，对象就停在「指针已释放」的破碎状态。</p>
+<p>原书用两张图说明这套变长管理。<code>String s1 = &quot;Hello&quot;;</code> 会在动态存储区开一个长度为 6 的字符数组（5 个字符加结束符），把初值顺序存进去：</p>
+<figure><img loading="lazy" src="../assets/17558c608a970971.jpg" alt="图4.3 创建字符串的示意图"><figcaption>图4.3 创建字符串的示意图</figcaption></figure>
+<p>图 4.3　创建字符串：对象里只有一个指针和一个长度，字符本体在堆上。</p>
+<p>再写 <code>String s2 = &quot;Hello world&quot;; s1 = s2;</code>，新内容比旧的长，装不下，于是必须先另开一块新数组、把内容复制过去，旧数组（图 4.4 中的灰格）释放掉，<code>str</code> 改指新数组：</p>
+<figure><img loading="lazy" src="../assets/6c085626573ab8c6.jpg" alt="图4.4 赋值运算示意图"><figcaption>图4.4 赋值运算示意图</figcaption></figure>
+<p>图 4.4　赋值运算：<code>String</code> 按当前串长动态调整空间，这就是「变长管理」的全部含义。注意图上那块灰色的旧空间——<strong>它必须释放，而且必须在新空间准备好之后再释放</strong>。原书正文说到了这一步，却没有给出拷贝赋值的代码；漏掉它，<code>String b = a;</code> 就是二次释放。</p>
 <p>工程版还多两个<strong>移动</strong>操作，见 4.2a。</p>
 <h3 id="423-字符串运算的实现"><a class="anchor" href="#423-字符串运算的实现">#</a>4.2.3 字符串运算的实现</h3>
 <h4 id="追加与拼接"><a class="anchor" href="#追加与拼接">#</a>追加与拼接</h4>
@@ -533,7 +544,20 @@ String&amp; <span class="k">operator</span>=(String&amp;&amp; other) <span class
             j = j - i + <span class="n">1</span>
             i = <span class="n">0</span>
     <span class="k">return</span> j - <span class="t">len</span>(pattern) <span class="k">if</span> i == <span class="t">len</span>(pattern) <span class="k">else</span> <span class="k">None</span></code></pre></div>
-<p>失配时 <code>j = j - i + 1</code> 把目标下标退回本趟起点的<strong>下一个</strong>位置——这一步的&quot;+1&quot;是对的， 它表示&quot;换一个起点重来&quot;。最坏情况下，每个起点都要比较到模式末尾才失配 （例如 T = &quot;aaa…a&quot;、P = &quot;aa…ab&quot;），总比较次数为 O(|T|·|P|)。</p>
+<p>失配时 <code>j = j - i + 1</code> 把目标下标退回本趟起点的<strong>下一个</strong>位置——这一步的&quot;+1&quot;是对的， 它表示&quot;换一个起点重来&quot;。</p>
+<p>原书用 T = <code>&quot;abacaabaccabacabaa&quot;</code>、P = <code>&quot;abacab&quot;</code> 走了一遍全过程：第 1 趟在目标的 <code>a</code> 与模式的 <code>b</code> 处失配，模式右移一位重来，如此直到第 11 趟在子串处配上，返回首位置 10。</p>
+<figure><img loading="lazy" src="../assets/a01806ddff22b2f2.jpg" alt="图 4.6 朴素匹配的示例"><figcaption>图 4.6 朴素匹配的示例</figcaption></figure>
+<p>图 4.6　朴素匹配的示例。加粗带下划线的是当前失配的那一对字符。可以数一数目标里有多少字符被反复比较过——这些重复比较正是 KMP 要省掉的东西。</p>
+<p>三种极端情况值得分开看。<strong>最好</strong>：目标开头那一段就是配串，比 <span class="math">|P|</span> 次就完事，<span class="math">O(|P|)</span>。</p>
+<figure><img loading="lazy" src="../assets/142c03839eb935b2.jpg" alt="图4.7 朴素匹配的最佳情况示例"><figcaption>图4.7 朴素匹配的最佳情况示例</figcaption></figure>
+<p>图 4.7　朴素匹配的最佳情况：第一趟就配上。</p>
+<p><strong>匹配失败中的最好情况</strong>：每趟都在模式首字符处就不等，右移一位再试，一共比较约 <span class="math">|T|<span class="bin">−</span>|P|<span class="bin">+</span><span class="upr">1</span></span> 次，<span class="math">O(|T|<span class="bin">−</span>|P|<span class="bin">+</span><span class="upr">1</span>)</span>。</p>
+<figure><img loading="lazy" src="../assets/5c96f8b81e576c27.jpg" alt="图4.8 匹配失败的最佳情况示例"><figcaption>图4.8 匹配失败的最佳情况示例</figcaption></figure>
+<p>图 4.8　匹配失败的最佳情况：每趟只比一次就失配。</p>
+<p><strong>最坏</strong>：目标形如 <span class="math">a<sup>n</sup></span>、模式形如 <span class="math">a<sup>m<span class="bin">−</span><span class="upr">1</span></sup>b</span>，每趟都要比到模式的最后一个字符才失配，<span class="math">|P|(|T|<span class="bin">−</span>|P|<span class="bin">+</span><span class="upr">1</span>)</span> 次比较，即 <span class="math">O(|T|<span class="bin">⋅</span>|P|)</span>。</p>
+<figure><img loading="lazy" src="../assets/888fd277565dca5e.jpg" alt="图4.9 朴素匹配最差情况示例"><figcaption>图4.9 朴素匹配最差情况示例</figcaption></figure>
+<p>图 4.9　朴素匹配的最差情况。这种输入在自然语言文本里少见，在 DNA 序列和图像数据里却很常见——这正是需要 KMP 的实际理由。</p>
+<p>平均情况依赖字符分布：字符表大小为 <span class="math">|A|</span> 时，平均比较次数约 <span class="math">(|A|<sup>|P|<span class="bin">+</span><span class="upr">1</span></sup><span class="bin">−</span>|A|)/(|A|<span class="bin">−</span><span class="upr">1</span>)</span>，两个字符的极端情形下不到 <span class="math"><span class="upr">2</span>|T|</span> 次。</p>
 <h4 id="一处必须指出的错误原书的返回值差-1"><a class="anchor" href="#一处必须指出的错误原书的返回值差-1">#</a>一处必须指出的错误：原书的返回值差 1</h4>
 <p>原书【算法4.6】与【算法4.8】在匹配成功时都写：</p>
 <div class="codeblock" data-lang="text"><pre><code>if (i &gt;= pLen) return (j - pLen + 1);</code></pre></div>
@@ -722,6 +746,9 @@ std::string::find 对照         = 2</code></pre></div>
 <p><strong>时间代价的关键在于目标下标 <code>j</code> 只增不减。</strong> 循环体里 <code>++j</code> 至多执行 |T| 次， 与它同处一条语句的 <code>++i</code> 也不超过 |T| 次；能让 <code>i</code> 减少的只有 <code>i = next[i]</code>， 而 <code>next[i] &lt; i</code>，所以每执行一次 <code>i</code> 至少减 1；一旦减到 −1，下一步必然进入 <code>++i, ++j</code> 分支。因此 <code>i = next[i]</code> 的执行次数不超过 <code>++i, ++j</code> 的次数加 1， 整个循环体至多执行 2|T| + 1 次——<strong>与目标串长度成线性关系</strong>。</p>
 <p>加上计算 next 的 O(|P|)，KMP 整体为 O(|P| + |T|)。而同一个模式的特征向量 只需算一次即可跨多个目标复用，这一点接口里用「next 由调用方传入」显式表达。</p>
 <p>本书的测试用朴素算法的最坏情况（T = 20 万个 &#x27;a&#x27;，P = 1999 个 &#x27;a&#x27; 加一个 &#x27;b&#x27;） 验证这条线性性质：KMP 在其上瞬间完成，而失配后不按特征值回退的实现会退化成 O(|T|·|P|)，直接撞上构建闸门的超时。</p>
+<p>原书用 P = <code>&quot;abcdaabcab&quot;</code>（特征向量 <span class="math">{<span class="bin">−</span><span class="upr">1</span>,<span class="upr">0</span>,<span class="upr">0</span>,<span class="upr">0</span>,<span class="bin">−</span><span class="upr">1</span>,<span class="upr">1</span>,<span class="upr">0</span>,<span class="upr">0</span>,<span class="upr">3</span>,<span class="upr">0</span>}</span>）、T = <code>&quot;abcddabcababcdaabcababcdaabcabaa&quot;</code> 走了一遍完整过程：</p>
+<figure><img loading="lazy" src="../assets/4f9aa9617b2ddc56.jpg" alt="图 4.12 KMP 匹配示例"><figcaption>图 4.12 KMP 匹配示例</figcaption></figure>
+<p>图 4.12　KMP 匹配示例。第 1 趟比到第 5 次发现 <span class="math">P<sub><span class="upr">4</span></sub><span class="rel">≠</span>T<sub><span class="upr">4</span></sub></span>，<span class="math">P<sub><span class="upr">4</span></sub></span> 的特征值是 −1，模式右移 <span class="math"><span class="upr">4</span><span class="bin">−</span>(<span class="bin">−</span><span class="upr">1</span>)<span class="rel">=</span><span class="upr">5</span></span> 位；第 2 趟到第 9 次比较时 <span class="math">P<sub><span class="upr">3</span></sub><span class="rel">≠</span>T<sub><span class="upr">8</span></sub></span>，按特征值 0 右移 <span class="math"><span class="upr">3</span><span class="bin">−</span><span class="upr">0</span><span class="rel">=</span><span class="upr">3</span></span> 位；第 3 趟第 12 次比较时 <span class="math">P<sub><span class="upr">2</span></sub><span class="rel">≠</span>T<sub><span class="upr">10</span></sub></span>，右移 2 位；第 4 趟比到第 22 次匹配成功。<strong>整个过程中目标下标一次都没有回退</strong>——对照图 4.6 里被反复比较的那些字符，省下的就是这些。</p>
 <h2 id="与原书的对照"><a class="anchor" href="#与原书的对照">#</a>与原书的对照</h2>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">原书</th>
