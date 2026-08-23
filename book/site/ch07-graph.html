@@ -158,15 +158,32 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>源码：<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp" class="ext">图与七个算法</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/demo.cpp" class="ext">可运行示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/test.cpp" class="ext">交叉验证测试</a>。</p>
 <h2 id="71-图的定义和基本术语"><a class="anchor" href="#71-图的定义和基本术语">#</a>7.1 图的定义和基本术语</h2>
 <p>图比线性结构和树更一般：结点之间的关系可以是任意的。按第 1 章的分类——线性结构唯一前驱、唯一后继；树唯一前驱、多个后继；图对前驱和后继的个数都不加限制。线性和树都可以看成受限的图。</p>
-<p>一个典型问题：要在几个城市之间建通信网，使每两个城市都能直接或间接通话，并且总造价尽量低。用顶点代表城市，边代表线路，边旁的数代表造价，问题就变成：在带权图里找一棵连通全部顶点、边权之和最小的树。这就是后面的最小生成树。</p>
-<p>图记作 <span class="math">G<span class="rel">=</span>⟨V,E⟩</span>。<span class="math">V</span> 是顶点的有穷非空集合；<span class="math">E</span> 是边的集合，每条边是一对顶点。边没有方向时叫无向图，无序对写成 <span class="math">(v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">2</span></sub>)</span>，<span class="math">(v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">2</span></sub>)</span> 与 <span class="math">(v<sub><span class="upr">2</span></sub>,v<sub><span class="upr">1</span></sub>)</span> 是同一条边。边有方向时叫有向图，有序对写成 <span class="math">⟨v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">2</span></sub>⟩</span>，也叫弧：<span class="math">v<sub><span class="upr">1</span></sub></span> 是弧尾（起点），<span class="math">v<sub><span class="upr">2</span></sub></span> 是弧头（终点）；<span class="math">⟨v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">2</span></sub>⟩</span> 与 <span class="math">⟨v<sub><span class="upr">2</span></sub>,v<sub><span class="upr">1</span></sub>⟩</span> 是两条不同的弧。</p>
+<p>一个典型问题：要在几个城市之间建通信网，使每两个城市都能直接或间接通话，并且总造价尽量低。用顶点代表城市，边代表线路，边旁的数代表造价，问题就变成：在带权图里找一棵连通全部顶点、边权之和最小的树。这就是后面的最小生成树。 <img loading="lazy" src="../assets/bc292a79ef3d4901.jpg" alt="图 7.1 用图描述通信网络"></p>
+<p>图 7.1　用图描述通信网络。顶点是城市，边是可以架设的线路，边旁的数是造价。要求选出一组线路，把 5 个城市全连起来且总造价最小。</p>
+<p>图记作 <span class="math">G<span class="rel">=</span>⟨V,E⟩</span>。<span class="math">V</span> 是顶点的有穷非空集合；<span class="math">E</span> 是边的集合，每条边是一对顶点。边没有方向时叫无向图，无序对写成 <span class="math">(v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">2</span></sub>)</span>，<span class="math">(v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">2</span></sub>)</span> 与 <span class="math">(v<sub><span class="upr">2</span></sub>,v<sub><span class="upr">1</span></sub>)</span> 是同一条边。边有方向时叫有向图，有序对写成 <span class="math">⟨v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">2</span></sub>⟩</span>，也叫弧：<span class="math">v<sub><span class="upr">1</span></sub></span> 是弧尾（起点），<span class="math">v<sub><span class="upr">2</span></sub></span> 是弧头（终点）；<span class="math">⟨v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">2</span></sub>⟩</span> 与 <span class="math">⟨v<sub><span class="upr">2</span></sub>,v<sub><span class="upr">1</span></sub>⟩</span> 是两条不同的弧。 图 7.2 给出两个例子。(a) 是无向图 <span class="math">G<sub><span class="upr">1</span></sub></span>，(b) 是有向图 <span class="math">G<sub><span class="upr">2</span></sub></span>，写成集合就是</p>
+<div class="math math-display">G<sub><span class="upr">1</span></sub><span class="rel">=</span>⟨V(G<sub><span class="upr">1</span></sub>),E(G<sub><span class="upr">1</span></sub>)⟩, V(G<sub><span class="upr">1</span></sub>)<span class="rel">=</span>{v<sub><span class="upr">0</span></sub>,v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">2</span></sub>,v<sub><span class="upr">3</span></sub>,v<sub><span class="upr">4</span></sub>}, E(G<sub><span class="upr">1</span></sub>)<span class="rel">=</span>{(v<sub><span class="upr">0</span></sub>,v<sub><span class="upr">2</span></sub>),(v<sub><span class="upr">0</span></sub>,v<sub><span class="upr">3</span></sub>),(v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">3</span></sub>),(v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">4</span></sub>),(v<sub><span class="upr">2</span></sub>,v<sub><span class="upr">3</span></sub>),(v<sub><span class="upr">2</span></sub>,v<sub><span class="upr">4</span></sub>)}</div>
+<div class="math math-display">G<sub><span class="upr">2</span></sub><span class="rel">=</span>⟨V(G<sub><span class="upr">2</span></sub>),E(G<sub><span class="upr">2</span></sub>)⟩, V(G<sub><span class="upr">2</span></sub>)<span class="rel">=</span>{v<sub><span class="upr">0</span></sub>,v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">2</span></sub>,v<sub><span class="upr">3</span></sub>}, E(G<sub><span class="upr">2</span></sub>)<span class="rel">=</span>{⟨v<sub><span class="upr">0</span></sub>,v<sub><span class="upr">1</span></sub>⟩,⟨v<sub><span class="upr">0</span></sub>,v<sub><span class="upr">2</span></sub>⟩,⟨v<sub><span class="upr">2</span></sub>,v<sub><span class="upr">3</span></sub>⟩,⟨v<sub><span class="upr">3</span></sub>,v<sub><span class="upr">0</span></sub>⟩}</div>
+<figure><img loading="lazy" src="../assets/combined/fig-7-2.png" alt="图 7.2 图的示例"><figcaption>图 7.2 图的示例</figcaption></figure>
+<p>图 7.2　图的示例：(a) 无向图 <span class="math">G<sub><span class="upr">1</span></sub></span>，(b) 有向图 <span class="math">G<sub><span class="upr">2</span></sub></span>。本章后面反复拿这两张图举例。</p>
 <p>边或弧上可以附带权，表示距离、时间或代价。每条边都带权的图叫带权图。本书不考虑多重边（同一对顶点之间多于一条边）和自环（顶点到自己的边）。</p>
-<p>用 <span class="math">n</span> 表示顶点数，<span class="math">e</span> 表示边数。无向图 <span class="math">e</span> 的范围是 <span class="math"><span class="upr">0</span><span class="rel">∼</span>n(n<span class="bin">−</span><span class="upr">1</span>)/<span class="upr">2</span></span>，有向图是 <span class="math"><span class="upr">0</span><span class="rel">∼</span>n(n<span class="bin">−</span><span class="upr">1</span>)</span>。边相对少的叫稀疏图，相对多的叫稠密图。任意两个顶点之间都有边的图叫完全图，它取到边数的上限。</p>
-<p>若 <span class="math">V&#x27;</span> 是 <span class="math">V</span> 的子集，<span class="math">E&#x27;</span> 是 <span class="math">E</span> 的子集，且 <span class="math">E&#x27;</span> 里的边只连 <span class="math">V&#x27;</span> 里的顶点，则 <span class="math">G&#x27;<span class="rel">=</span>⟨V&#x27;,E&#x27;⟩</span> 是 <span class="math">G</span> 的子图。一条边所连的两个顶点互为邻接点；这条边与这两个顶点相关联。有向图里还要分清「邻接到」和「邻接自」。</p>
+<p>用 <span class="math">n</span> 表示顶点数，<span class="math">e</span> 表示边数。无向图 <span class="math">e</span> 的范围是 <span class="math"><span class="upr">0</span><span class="rel">∼</span>n(n<span class="bin">−</span><span class="upr">1</span>)/<span class="upr">2</span></span>，有向图是 <span class="math"><span class="upr">0</span><span class="rel">∼</span>n(n<span class="bin">−</span><span class="upr">1</span>)</span>。边相对少的叫稀疏图，相对多的叫稠密图。任意两个顶点之间都有边的图叫完全图，它取到边数的上限。 <img loading="lazy" src="../assets/combined/fig-7-3.png" alt="图 7.3 完全图"></p>
+<p>图 7.3　完全图：左两幅是 3 个和 4 个顶点的 (a) 无向完全图，右两幅是对应的 (b) 有向完全图。无向完全图每对顶点之间一条边，有向完全图每对之间两条方向相反的弧。</p>
+<p>若 <span class="math">V&#x27;</span> 是 <span class="math">V</span> 的子集，<span class="math">E&#x27;</span> 是 <span class="math">E</span> 的子集，且 <span class="math">E&#x27;</span> 里的边只连 <span class="math">V&#x27;</span> 里的顶点，则 <span class="math">G&#x27;<span class="rel">=</span>⟨V&#x27;,E&#x27;⟩</span> 是 <span class="math">G</span> 的子图。一条边所连的两个顶点互为邻接点；这条边与这两个顶点相关联。有向图里还要分清「邻接到」和「邻接自」。 <img loading="lazy" src="../assets/combined/fig-7-4.png" alt="图 7.4 图 7.2 的若干子图"></p>
+<p>图 7.4　图 7.2 的若干子图：左边两幅取自无向图 <span class="math">G<sub><span class="upr">1</span></sub></span>，右边两幅取自有向图 <span class="math">G<sub><span class="upr">2</span></sub></span>。只保留一部分顶点和一部分边，剩下的仍是原图的子图。</p>
 <p>顶点的度是与它相关联的边数。有向图再分成入度（指进来的弧）和出度（指出去的弧）。度为 0 的顶点是孤立点。</p>
 <p>从 <span class="math">u</span> 出发、沿边走到 <span class="math">v</span> 的顶点序列叫路径；边数是路径长度。有向图必须顺着弧走。起点和终点相同、且至少含一条边的路径叫回路（环）。除端点外没有重复顶点的路径叫简单路径。</p>
-<p>无向图中，若任意两点之间都有路径，称图连通；极大的连通子图叫连通分量。有向图中，若任意两点 <span class="math">u</span>、<span class="math">v</span> 都存在 <span class="math">u</span> 到 <span class="math">v</span> 和 <span class="math">v</span> 到 <span class="math">u</span> 的有向路径，称强连通；只要求把有向边看成无向边后连通，叫弱连通。</p>
-<p>无向连通图的生成树，是包含全部顶点、有 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 条边、因而没有环的连通子图。带权连通图里边权之和最小的生成树，就是最小生成树。最短路的「短」是边权总和最小，不一定是经过的边数最少。</p>
+<p>无向图中，若任意两点之间都有路径，称图连通；极大的连通子图叫连通分量。有向图中，若任意两点 <span class="math">u</span>、<span class="math">v</span> 都存在 <span class="math">u</span> 到 <span class="math">v</span> 和 <span class="math">v</span> 到 <span class="math">u</span> 的有向路径，称强连通；只要求把有向边看成无向边后连通，叫弱连通。 <img loading="lazy" src="../assets/combined/fig-7-5.png" alt="图 7.5 非连通无向图的连通分量"></p>
+<p>图 7.5　(a) 非连通的无向图 <span class="math">G<sub><span class="upr">3</span></sub></span>；(b) <span class="math">G<sub><span class="upr">3</span></sub></span> 的两个连通分量。「极大」是指再添任何一个顶点，子图就不连通了。</p>
+<figure><img loading="lazy" src="../assets/68c8cdd24e9e933e.jpg" alt="图 7.6 有向图 $G_2$ 的两个强连通分量"><figcaption>图 7.6 有向图 <span class="math">G<sub><span class="upr">2</span></sub></span> 的两个强连通分量</figcaption></figure>
+<p>图 7.6　图 7.2(b) 中 <span class="math">G<sub><span class="upr">2</span></sub></span> 的两个强连通分量。<span class="math">G<sub><span class="upr">2</span></sub></span> 本身不是强连通的——从 <span class="math">v<sub><span class="upr">1</span></sub></span> 到 <span class="math">v<sub><span class="upr">3</span></sub></span> 没有有向路径。</p>
+<p>无向连通图的生成树，是包含全部顶点、有 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 条边、因而没有环的连通子图。带权连通图里边权之和最小的生成树，就是最小生成树。最短路的「短」是边权总和最小，不一定是经过的边数最少。 <img loading="lazy" src="../assets/combined/fig-7-7.png" alt="图 7.7 图 7.2 中无向图和有向图的生成树"></p>
+<p>图 7.7　图 7.2 中 (a) 无向图 <span class="math">G<sub><span class="upr">1</span></sub></span> 和 (b) 有向图 <span class="math">G<sub><span class="upr">2</span></sub></span> 的一棵生成树。生成树上再加一条边必成环；边数少于 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 则必不连通。</p>
+<p>不带简单回路的连通无向图叫自由树，它同样有 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 条边。带权的连通图叫网络，图 7.8 的 <span class="math">G<sub><span class="upr">4</span></sub></span> 就是一个网络——7.5 节的最短路径和 7.6 节的最小生成树都在网络上讨论。</p>
+<figure><img loading="lazy" src="../assets/5271d0e099d91472.jpg" alt="图 7.8 网络实例 $G_4$"><figcaption>图 7.8 网络实例 <span class="math">G<sub><span class="upr">4</span></sub></span></figcaption></figure>
+<p>图 7.8　网络实例 <span class="math">G<sub><span class="upr">4</span></sub></span>：带权的连通图。</p>
+<p>有向图里也有对应的说法：只有一个顶点入度为 0、其余顶点入度均为 1 的有向图叫有向树；若干棵有向树，弧互不相交、顶点合起来正好是原图的全部顶点，就构成一个生成森林。图 7.9 是一个例子。</p>
+<figure><img loading="lazy" src="../assets/combined/fig-7-9.png" alt="图 7.9 有向图及其生成森林"><figcaption>图 7.9 有向图及其生成森林</figcaption></figure>
+<p>图 7.9　(a) 一个有向图；(b) 它的生成森林——两棵有向树，弧互不相交，顶点合起来是原图的全部顶点。</p>
 <p>选算法之前，先分清题目：</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">题目</th>
@@ -201,7 +218,65 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 </tbody></table></div>
 <p>本单元用邻接矩阵。没有边记为 <code>infinity</code>（<code>int</code> 最大值的四分之一，给加法留余量）。环、非连通等正常失败用 <code>optional</code> 表达。DFS 仍是递归，深图有栈溢出风险。</p>
 <h2 id="72-图的抽象数据类型"><a class="anchor" href="#72-图的抽象数据类型">#</a>7.2 图的抽象数据类型</h2>
-<p>图的对外运算是：指定顶点数构造、加一条边、问有多少个顶点，以及后面各节的周游、拓扑、最短路和最小生成树。原书【代码7.1】【代码7.2】的 ADT 声明残缺，标识符还被 OCR 空格切断。本书直接定义在 <code>Graph</code> 上。</p>
+<p>和线性表、树一样，先说清楚图对外提供哪些运算，再谈怎么存。</p>
+<p>原书 7.2 节先强调了一件容易被忽略的事：<strong>图的顶点之间本来没有次序</strong>。从逻辑结构看，任何一个顶点都可以当作「第一个」顶点，一个顶点的若干邻接点之间也没有先后。可是一旦按某种存储结构把图建起来，次序就被存储结构定死了——邻接矩阵里的次序是列号，邻接表里的次序是链表的插入次序。所以下文所有「第一条边」「下一条边」说的都是存储结构给出的次序，不是图本身的性质；同一张图换个存法，DFS 的访问序列就可能不同。7.3 节把两种存储结构逐项对拍，正是把这点不确定性钉死：同一张图、同样的建图次序，两种实现必须给出同一个序列。</p>
+<p>原书用【代码7.1】把运算列成一个抽象类（下面是修掉 OCR 断字、补齐花括号后的样子，运算和注释照原书）：</p>
+<div class="codeblock" data-lang="text"><pre><code>class Graph {                       // 图的抽象数据类型
+public:
+  int VerticesNum();                // 返回图的顶点个数
+  int EdgesNum();                   // 返回图的边数
+  Edge FirstEdge(int oneVertex);    // 返回依附于顶点 oneVertex 的第一条边
+  Edge NextEdge(Edge preEdge);      // 返回与 preEdge 有相同顶点的下一条边
+  bool setEdge(int fromVertex, int toVertex, int weight);  // 添加边
+  bool delEdge(int fromVertex, int toVertex);              // 删除边
+  bool IsEdge(Edge oneEdge);        // oneEdge 是否是边
+  int FromVertex(Edge oneEdge);     // 返回 oneEdge 的始点
+  int ToVertex(Edge oneEdge);       // 返回 oneEdge 的终点
+  int Weight(Edge oneEdge);         // 返回 oneEdge 的权
+};</code></pre></div>
+<p>这份清单里真正的设计决定是 <code>Edge</code>：原书不把「顶点 <span class="math">v</span> 的邻居」整个交出去，而是给一对游标运算，让上层算法写成</p>
+<div class="codeblock" data-lang="text"><pre><code>for (Edge e = G.FirstEdge(v); G.IsEdge(e); e = G.NextEdge(e)) { /* 处理 e */ }</code></pre></div>
+<p>于是 DFS、拓扑、Dijkstra 都只依赖这四个运算，不依赖矩阵还是链表——这是原书用一套算法讲两种存储结构的办法。代价有两处：换一种存法就要重写这对游标；<code>IsEdge</code> 同时兼任「这是不是一条边」和「游标是否走到头」两种含义。</p>
+<p>原书代码7.2 给出这个类的基类实现，它的可复核问题记在 <code>code/ch07/graph/legacy.md</code> 里：<code>Mark</code>、<code>Indegree</code> 两个裸数组在构造里 <code>new</code>、只在析构里 <code>delete[]</code>，没有拷贝构造和赋值运算符，按值传一次图就会二次释放；<code>numVertex</code>、<code>numEdge</code> 是 public 数据成员，谁都能改坏；<code>IsEdge</code> 用 <code>oneEdge.weight &gt; 0</code> 判断边是否存在，于是<strong>权为 0 的合法边被判成不存在</strong>。加上标识符被 OCR 空格切断（<code>num Vertex = num Vert</code>），这两段清单都不能照抄。</p>
+<p>本书因此不复刻这个抽象基类，直接把运算定义在两个可运行的类上：<code>Graph</code>（邻接矩阵，<code>code/ch07/graph</code>）和 <code>GraphList</code>（邻接表，<code>code/ch07/adjacency_list</code>）。对应关系如下。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">原书运算</th>
+<th style="text-align:left">干什么</th>
+<th style="text-align:left">本书写法</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><code>Graph(int numVert)</code></td>
+<td style="text-align:left">指定顶点数建一张空图</td>
+<td style="text-align:left"><code>Graph::Graph</code>、<code>GraphList::GraphList</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>VerticesNum()</code></td>
+<td style="text-align:left">返回顶点个数</td>
+<td style="text-align:left"><code>Graph::vertices</code>、<code>GraphList::vertices</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>setEdge(f, t, w)</code></td>
+<td style="text-align:left">添加一条边</td>
+<td style="text-align:left"><code>Graph::add_edge</code>、<code>GraphList::add_edge</code>（末参选有向/无向）</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>IsEdge(e)</code> / <code>Weight(e)</code></td>
+<td style="text-align:left">问某条边在不在、权多少</td>
+<td style="text-align:left">矩阵直接读 <code>adjacency_</code>；邻接表用 <code>GraphList::weight</code>，无边返回空</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>FirstEdge</code> / <code>NextEdge</code></td>
+<td style="text-align:left">逐条走一个顶点的出边</td>
+<td style="text-align:left">矩阵扫一行；邻接表用 <code>GraphList::neighbors</code> 返回该顶点的边表</td>
+</tr>
+<tr>
+<td style="text-align:left">—</td>
+<td style="text-align:left">周游、拓扑、最短路、最小生成树</td>
+<td style="text-align:left"><code>Graph::dfs</code>、<code>Graph::bfs</code>、<code>Graph::topological_sort</code>、<code>Graph::dijkstra</code>、<code>Graph::floyd</code>、<code>Graph::prim</code>、<code>Graph::kruskal</code></td>
+</tr>
+</tbody></table></div>
+<p><code>delEdge</code> 本书没有实现：后面七个算法都不删边，凭空加一个没有测试覆盖的运算，只会多一处无人验证的代码。需要时按 D-001 的规矩补，连测试一起补。</p>
+<p>接口上还有一条贯穿全章的约定：<strong>「有环」「不连通」不是异常，是可预期的结果</strong>。所以 <code>topological_sort</code>（图里有环）、<code>prim</code> 和 <code>kruskal</code>（图不连通）返回 <code>std::optional</code>，空值本身就是答案；<code>GraphList::weight</code> 在两点之间没有边时同样返回空。真正的用法错误才抛异常——顶点下标越界抛 <code>std::out_of_range</code>，负权边抛 <code>std::invalid_argument</code>（Dijkstra 在负权上不成立，见 7.5.1 节）。原书把这些情况打印到 <code>cout</code>，容器里做输出，调用者既拿不到结果也没法测试。</p>
 <h2 id="73-图的存储结构"><a class="anchor" href="#73-图的存储结构">#</a>7.3 图的存储结构</h2>
 <p>图常用两种存法。邻接矩阵用 <span class="math">n<span class="bin">×</span>n</span> 的表，<span class="math">A[i][j]</span> 表示 <span class="math">i</span> 到 <span class="math">j</span> 有没有边、权是多少，适合稠密图和需要 <span class="math">O(<span class="upr">1</span>)</span> 问「两点之间有没有边」的算法（Floyd、Prim）。邻接表为每个顶点挂一条出边表，适合稀疏图和只沿出边走的算法（DFS、BFS、Dijkstra、拓扑）。</p>
 <p>两种都有可运行实现：邻接矩阵是 <code>code/ch07/graph</code>（代码7.1–7.3），邻接表是 <code>code/ch07/adjacency_list</code>（代码7.4）。两者<strong>逐项对拍</strong>——同一张图上 DFS/BFS 序列、拓扑序、Dijkstra 距离向量必须完全相同，外加 30 轮随机图对拍。换存储方式不该换答案，只该换代价。</p>
