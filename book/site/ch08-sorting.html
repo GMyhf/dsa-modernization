@@ -286,7 +286,10 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
         values[hole] = value</code></pre></div>
 <p><code>hole &gt; 0</code> 这个条件在 Python 里是<strong>承重的</strong>，不是防御性写法。C++ 版写漏了， 下标越界会被 AddressSanitizer 当场抓住；Python 的 <code>values[-1]</code> 却完全合法—— 它环绕到最后一个元素，把结果悄悄排错而不报任何错。同一处笔误， 一种语言当场崩，另一种语言交出一个看起来正常的错答案。</p>
 <h3 id="822-shell-排序"><a class="anchor" href="#822-shell-排序">#</a>8.2.2 Shell 排序</h3>
-<p>直接插入的代价几乎全花在「一次只能挪一格」上：一个很小的元素落在末尾，就得一路挪回 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 次。Shell 排序（D. L. Shell，1959）先用较大的增量粗排一遍——把相隔 <code>gap</code> 个位置的 元素看成一个子序列，各自做插入排序——让远处的元素先大步靠近自己该在的位置；然后缩小增量， 重复；最后一趟增量为 1，就是一次普通的直接插入排序，但此时序列已经<strong>基本有序</strong>， 插入排序在这种输入上接近 <span class="math">Θ(n)</span>。</p>
+<p>直接插入的代价几乎全花在「一次只能挪一格」上：一个很小的元素落在末尾，就得一路挪回 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 次。</p>
+<figure><img loading="lazy" src="../assets/9d5229db93db8c45.jpg" alt="图 8.2 Shell 排序"><figcaption>图 8.2 Shell 排序</figcaption></figure>
+<p>图 8.2　Shell 排序。同一种底纹标出的是同一个子序列。</p>
+<p>Shell 排序（D. L. Shell，1959）先用较大的增量粗排一遍——把相隔 <code>gap</code> 个位置的 元素看成一个子序列，各自做插入排序——让远处的元素先大步靠近自己该在的位置；然后缩小增量， 重复；最后一趟增量为 1，就是一次普通的直接插入排序，但此时序列已经<strong>基本有序</strong>， 插入排序在这种输入上接近 <span class="math">Θ(n)</span>。</p>
 <p>本书按原书取「增量每次减半」。仍用上面那个序列，两个 34 用 34 和 34′ 区分：</p>
 <div class="codeblock" data-lang="text"><pre><code>初始       45  34  78  12 34′  32  29  64
 gap=4     34′  32  29  12  45  34  78  64
@@ -338,6 +341,8 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 <p>但它有一个别人没有的优点：<strong>交换次数最多只有 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 次</strong>。当记录很大（比如每条记录几百字节） 而比较很便宜时，移动开销才是主导，这时选择排序反而合适。想把移动降到更低， 见 8.6.3 节的索引排序。空间代价 <span class="math">Θ(<span class="upr">1</span>)</span>。</p>
 <h3 id="832-堆排序"><a class="anchor" href="#832-堆排序">#</a>8.3.2 堆排序</h3>
 <p>先把数组建成最大堆，再反复把堆顶与堆尾交换并缩小堆。<code>sift_down</code> 必须比较左右两个孩子。</p>
+<figure><img loading="lazy" src="../assets/combined/fig-8-4.png" alt="图 8.4 堆排序"><figcaption>图 8.4 堆排序</figcaption></figure>
+<p>图 8.4　堆排序：(a) 待排序列建成最大堆；(b) 取走最大值 78，用末尾的 32 填上；(c) 重新筛选后又是一个堆；(d) 重复下去，每取一次就把一个最大值放到已排好的那一段。建堆是 <span class="math">O(n)</span>（5.5.1a 证过），此后 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 次筛选各 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>，合计 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>——<strong>而且不需要额外数组</strong>。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#heap</a></div><pre><code><span class="c">// 算法8.4：手写最大堆筛选与堆排序，不委托 std::make_heap/sort_heap。</span>
 <span class="k">inline</span> <span class="t">void</span> sift_down(std::vector&lt;<span class="t">int</span>&gt;&amp; values, std::<span class="t">size_t</span> root, std::<span class="t">size_t</span> count) {
     <span class="k">while</span> (root * <span class="n">2</span> + <span class="n">1</span> &lt; count) {
@@ -382,7 +387,10 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 <p><code>heapq.heapify</code> 加 <code>heappop</code> 三行就能排完一个表，但那三行就是 5.5 节全节。 本书的闸门有一条规则专查这件事——Python 实现文件里出现 <code>heapq</code>、<code>bisect</code>、 <code>sorted</code>、<code>list.sort</code> 一律判红，要豁免得在 <code>unit.json</code> 里写明理由（D-025）。</p>
 <h2 id="84-交换排序"><a class="anchor" href="#84-交换排序">#</a>8.4 交换排序</h2>
 <h3 id="841-冒泡排序"><a class="anchor" href="#841-冒泡排序">#</a>8.4.1 冒泡排序</h3>
-<p>冒泡排序不停地比较<strong>相邻</strong>两个记录，逆序就交换；一趟走完，最大（或最小）的那个必然被顶到 一端，就像气泡浮出水面。原书是从数组末端往前比，每趟把最小的推到最左；本书从前往后比， 每趟把最大的顶到最右——原书自己也写了「算法的具体实现取决于编程人员的个人喜好」， 两种写法对称等价。</p>
+<p>冒泡排序不停地比较<strong>相邻</strong>两个记录，逆序就交换；一趟走完，最大（或最小）的那个必然被顶到 一端，就像气泡浮出水面。</p>
+<figure><img loading="lazy" src="../assets/7409006cccb82bee.jpg" alt="图 8.5 冒泡排序"><figcaption>图 8.5 冒泡排序</figcaption></figure>
+<p>图 8.5　冒泡排序。每一行是一趟之后的序列，带箭头的是本轮交换过的相邻记录。</p>
+<p>原书是从数组末端往前比，每趟把最小的推到最左；本书从前往后比， 每趟把最大的顶到最右——原书自己也写了「算法的具体实现取决于编程人员的个人喜好」， 两种写法对称等价。</p>
 <p>关键的一处优化在原书算法8.5 里已经有了：<strong>记一个「本趟有没有发生过交换」的标志， 没有就说明整个序列已经有序，立刻结束</strong>。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#fn:bubble_sort</a></div><pre><code><span class="c">// 算法8.5：带“本趟无交换即结束”优化的冒泡排序。</span>
 <span class="k">inline</span> <span class="t">void</span> bubble_sort(std::vector&lt;<span class="t">int</span>&gt;&amp; values) {
@@ -413,7 +421,10 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 <p>需要提醒的是：<span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span> 相同不代表快慢相同。8.7.2 节的实测里，同样 5 万个随机数， 冒泡 5822 毫秒、插入 214 毫秒，<strong>差 27 倍</strong>——都是 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>，差在常数上： 冒泡每次逆序都要做一次三步交换，插入排序只做一次赋值搬移。</p>
 <h3 id="842-快速排序"><a class="anchor" href="#842-快速排序">#</a>8.4.2 快速排序</h3>
 <figure><img loading="lazy" src="../assets/8585d3b42b280664.jpg" alt="图 8.6 快速排序图示"><figcaption>图 8.6 快速排序图示</figcaption></figure>
+<p>图 8.6　快速排序：选一个枢轴把序列分成「都不大于它」和「都不小于它」两段，枢轴落到它最终的位置上，再对两段各自递归。</p>
 <p>选区间末元素为枢轴，把更小的元素换到左侧，再递归两边。全相等的输入必须也能结束。</p>
+<figure><img loading="lazy" src="../assets/05b1ac3a282e906b.jpg" alt="图 8.7 分割过程"><figcaption>图 8.7 分割过程</figcaption></figure>
+<p>图 8.7　一趟分割的过程。分割是快排的全部工作量所在：它是 <span class="math">O(n)</span> 的一次线性扫描，而<strong>分得均不均匀决定了递归有多深</strong>——每次都平分是 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，每次只切下一个元素就退化成 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#quick</a></div><pre><code><span class="k">inline</span> std::<span class="t">size_t</span> partition(std::vector&lt;<span class="t">int</span>&gt;&amp; values, std::<span class="t">size_t</span> first, std::<span class="t">size_t</span> last) {
     <span class="k">const</span> <span class="t">int</span> pivot = values[last - <span class="n">1</span>];
     std::<span class="t">size_t</span> boundary = first;
@@ -482,6 +493,8 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 <h2 id="85-归并排序"><a class="anchor" href="#85-归并排序">#</a>8.5 归并排序</h2>
 <p>归并排序采用分治法：先把区间二分，递归地排好左右两个子区间，再用一次线性扫描把两个 有序区间合并。区间长度小于 2 时已经有序，因此递归可以停止。每一层合并总共扫描 <code>n</code> 个元素，递推式为</p>
 <div class="math math-display">T(n)<span class="rel">=</span><span class="upr">2</span>T(n/<span class="upr">2</span>)<span class="bin">+</span>Θ(n)<span class="rel">=</span>Θ(n&thinsp;<span class="upr">log</span>&thinsp;n).</div>
+<figure><img loading="lazy" src="../assets/3599737381e2502e.jpg" alt="图 8.8 归并排序"><figcaption>图 8.8 归并排序</figcaption></figure>
+<p>图 8.8　归并排序。<strong>归并与快排正好相反</strong>：快排把力气花在分（分割）上，合的时候什么都不用做；归并分得很随意（对半切），力气全花在合上。</p>
 <p>实现只分配一个与输入等长的缓冲区，并在所有递归层复用它；因此辅助空间为 <code>O(n)</code>，递归 调用栈另占 <code>O(log n)</code>。合并时使用“右侧严格更小才取右侧”的判断：相等元素先取左侧， 从而保持稳定性。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#merge</a></div><pre><code><span class="k">inline</span> <span class="t">void</span> merge_ranges(std::vector&lt;<span class="t">int</span>&gt;&amp; values, std::vector&lt;<span class="t">int</span>&gt;&amp; buffer,
                          std::<span class="t">size_t</span> first, std::<span class="t">size_t</span> middle, std::<span class="t">size_t</span> last) {
@@ -561,6 +574,8 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 <h3 id="861-桶式排序"><a class="anchor" href="#861-桶式排序">#</a>8.6.1 桶式排序</h3>
 <p>前面每一种排序都靠<strong>元素之间的比较</strong>决定次序，而比较排序最坏至少要 <span class="math">Ω(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 次比较（证明见 8.7.3）。要突破这个下界，只能不再比较——转而利用关键码本身的数字结构， 直接算出每个元素该去哪儿。这类方法叫<strong>分配排序</strong>。</p>
 <p>桶式排序是其中最简单的一种：已知所有取值落在 <span class="math">[<span class="upr">0</span>,m)</span> 之间时，准备 <span class="math">m</span> 个计数器， 扫一遍序列数出每个取值出现几次，再把计数<strong>累加</strong>成「小于等于 <span class="math">i</span> 的元素共有几个」， 这就直接给出了每个取值在结果里的位置区间。</p>
+<figure><img loading="lazy" src="../assets/bd0ba2ed5f871998.jpg" alt="图8.9 桶式排序示意图"><figcaption>图8.9 桶式排序示意图</figcaption></figure>
+<p>图 8.9　桶式排序示意图。值相同的记录进同一个桶，再按桶号依次收集。先数一遍、把计数累加成起始位置，就能预先给每个桶留出恰好够用的一段——这样只需要一个长度为 <span class="math">n</span> 的辅助数组，而不是 <span class="math">m</span> 条变长的链。</p>
 <p>用原书的例子，<span class="math">m<span class="rel">=</span><span class="upr">10</span></span>，序列 <code>{7, 3, 8, 9, 6, 1, 8′, 1′, 2}</code>：</p>
 <div class="codeblock" data-lang="text"><pre><code>取值 i        0   1   2   3   4   5   6   7   8   9
 出现次数      0   2   1   1   0   0   1   1   2   1
@@ -612,7 +627,15 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 <p>第二，<strong>值域太稀疏时直接抛异常</strong>。桶式排序的时间与空间都是 <span class="math">Θ(m<span class="bin">+</span>n)</span>： <span class="math">m</span> 是值域长度，不是元素个数。排 10 个数、值域却是 <span class="math">[<span class="upr">0</span>,<span class="upr">10</span><sup><span class="upr">9</span></sup>)</span> 时，它会试图分配十亿个计数器。 原书没有防线，本书在 <span class="math">m&gt;<span class="upr">10</span><sup><span class="upr">7</span></sup></span> 时抛 <code>std::invalid_argument</code>——<strong>让它当场失败， 好过让它把机器拖垮</strong>。判断能不能用桶式排序，靠的正是这个 <span class="math">m</span> 与 <span class="math">n</span> 的比值： <span class="math">m<span class="rel">=</span>Θ(n)</span> 时总代价 <span class="math">Θ(n)</span>，是相对比较排序的一次飞跃； <span class="math">m</span> 涨到 <span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 或 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>，优势立刻消失，还倒贴 <span class="math">Θ(m<span class="bin">+</span>n)</span> 的空间。</p>
 <p>还有一处要说清楚：本书实现按计数<strong>重建取值</strong>（<code>values[output++] = bucket + low</code>）， 而不是像原书那样把原记录搬进结果数组。对纯整数，两者的输出完全一样，稳定性无从区分； 但只要记录带上了卫星数据（学号、姓名），就必须回到原书的写法——<strong>倒序扫描 + 搬移原记录</strong>。 这一点在把本节代码推广到真实记录时是个坑。</p>
 <h3 id="862-基数排序"><a class="anchor" href="#862-基数排序">#</a>8.6.2 基数排序</h3>
-<p>把有符号 <code>int</code> 的符号位翻转后，按字节做 4 趟计数收集。否则负数会按无符号序排到最大。</p>
+<p>基数排序把关键码拆成 <span class="math">d</span> 位，每一位的取值只有 <span class="math">r</span> 种（十进制数 <span class="math">r<span class="rel">=</span><span class="upr">10</span></span>，字符串 <span class="math">r<span class="rel">=</span><span class="upr">26</span></span>），于是可以逐位做桶式排序。</p>
+<figure><img loading="lazy" src="../assets/916c1027b215b0e1.jpg" alt="图 8.10 基数排序（低位优先）"><figcaption>图 8.10 基数排序（低位优先）</figcaption></figure>
+<p>图 8.10　两位数的基数排序，(b) 低位优先：先按个位分成 10 个桶、收集，再按十位分桶、收集，两趟之后整个序列有序。(a) 高位优先则要先按十位分桶，再对<strong>每个桶</strong>分别按个位细分，两位数一共 100 个子桶——桶数随位数指数增长，所以实用的是低位优先。低位优先能成立的前提是每一趟都<strong>稳定</strong>：后一趟不能打乱前一趟已经排好的相对次序。</p>
+<figure><img loading="lazy" src="../assets/949a5a9d80c71e8a.jpg" alt="图 8.11 基于顺序存储和桶排序的基数排序"><figcaption>图 8.11 基于顺序存储和桶排序的基数排序</figcaption></figure>
+<p>图 8.11　基于顺序存储的基数排序：每一趟用桶式排序把记录搬进辅助数组，再搬回来。</p>
+<p>搬记录太贵时，可以改用静态链：不动记录，只改 <code>next</code> 索引，每趟只重排链。</p>
+<figure><img loading="lazy" src="../assets/combined/fig-8-12.png" alt="图8.12 基于静态链的基数排序"><figcaption>图8.12 基于静态链的基数排序</figcaption></figure>
+<p>图 8.12　基于静态链的基数排序的两趟分配结果（原书图 8.12 的 (b) 第一趟与 (d) 第二趟）。两趟分配和收集之后，静态链已经串成有序次序，再顺链整理一遍（原书的 <code>AddrSort()</code>，<span class="math">Θ(n)</span>）就得到按下标有序的数组。</p>
+<p>本书的实现把有符号 <code>int</code> 的符号位翻转后，按字节做 4 趟计数收集。否则负数会按无符号序排到最大。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#radix</a></div><pre><code><span class="c">// 算法8.11：LSD 基数排序。翻转符号位使二补码有符号 int 按无符号序排序。</span>
 <span class="k">inline</span> <span class="t">void</span> radix_sort(std::vector&lt;<span class="t">int</span>&gt;&amp; values) {
     std::vector&lt;<span class="t">int</span>&gt; buffer(values.size());
@@ -735,6 +758,8 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 <p>两种写法排出来的结果逐字节相同，测试对拍了这一点。<strong>分配排序天然稳定</strong>： 同一个桶里的记录按进桶顺序出桶，从头到尾没有任何一次比较能打乱它们。</p>
 <h3 id="863-索引排序"><a class="anchor" href="#863-索引排序">#</a>8.6.3 索引排序</h3>
 <p>前面所有算法都在<strong>搬记录</strong>。当记录很大——一条学籍记录几百字节，一张图片几兆——搬移的代价 就压过了比较的代价。索引排序（也叫地址排序）的办法是：<strong>只排下标，不动记录</strong>。</p>
+<figure><img loading="lazy" src="../assets/combined/fig-8-13.png" alt="图8.13 索引排序示意图"><figcaption>图8.13 索引排序示意图</figcaption></figure>
+<p>图 8.13　索引排序示意：(a) 待排序记录及索引；(b) 排序后——<strong>记录一个都没动，动的是索引</strong>。</p>
 <p>排完之后手上有一个索引数组。原书表8.1 给了两种约定，本节按第二种： <code>index[i]</code> 存的是「结果数组第 <span class="math">i</span> 个位置应该从原数组的哪个下标取值」， 也就是 <code>结果[i] == 原数组[index[i]]</code>。仍用原书那组数据：</p>
 <div class="codeblock" data-lang="text"><pre><code>原下标 i        0    1    2    3    4    5    6    7
 排序码        29   25   34   64  34′   12   32   45
