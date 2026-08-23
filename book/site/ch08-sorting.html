@@ -633,8 +633,88 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 <figure><img loading="lazy" src="../assets/949a5a9d80c71e8a.jpg" alt="图 8.11 基于顺序存储和桶排序的基数排序"><figcaption>图 8.11 基于顺序存储和桶排序的基数排序</figcaption></figure>
 <p>图 8.11　基于顺序存储的基数排序：每一趟用桶式排序把记录搬进辅助数组，再搬回来。</p>
 <p>搬记录太贵时，可以改用静态链：不动记录，只改 <code>next</code> 索引，每趟只重排链。</p>
-<figure><img loading="lazy" src="../assets/combined/fig-8-12.png" alt="图8.12 基于静态链的基数排序"><figcaption>图8.12 基于静态链的基数排序</figcaption></figure>
-<p>图 8.12　基于静态链的基数排序的两趟分配结果（原书图 8.12 的 (b) 第一趟与 (d) 第二趟）。两趟分配和收集之后，静态链已经串成有序次序，再顺链整理一遍（原书的 <code>AddrSort()</code>，<span class="math">Θ(n)</span>）就得到按下标有序的数组。</p>
+<p>原书图 8.12 用 <span class="math">{<span class="upr">97</span>,<span class="upr">53</span>,<span class="upr">88</span>,<span class="upr">59</span>,<span class="upr">26</span>,<span class="upr">41</span>,<span class="upr">88</span>&#x27;,<span class="upr">31</span>,<span class="upr">22</span>}</span>（<span class="math">n<span class="rel">=</span><span class="upr">9</span></span>、<span class="math">d<span class="rel">=</span><span class="upr">2</span></span>、<span class="math">r<span class="rel">=</span><span class="upr">10</span></span>）走了一遍，五个分图依次是：</p>
+<p>(a) 初始链表内容</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">下标</th>
+<th style="text-align:left">0</th>
+<th style="text-align:left">1</th>
+<th style="text-align:left">2</th>
+<th style="text-align:left">3</th>
+<th style="text-align:left">4</th>
+<th style="text-align:left">5</th>
+<th style="text-align:left">6</th>
+<th style="text-align:left">7</th>
+<th style="text-align:left">8</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">关键码</td>
+<td style="text-align:left">97</td>
+<td style="text-align:left">53</td>
+<td style="text-align:left">88</td>
+<td style="text-align:left">59</td>
+<td style="text-align:left">26</td>
+<td style="text-align:left">41</td>
+<td style="text-align:left">88&#x27;</td>
+<td style="text-align:left">31</td>
+<td style="text-align:left">22</td>
+</tr>
+</tbody></table></div>
+<figure><img loading="lazy" src="../assets/combined/fig-8-12-b.png" alt="图 8.12(b) 第一趟分配结果：按个位把 9 个关键码挂到 10 条静态链上"><figcaption>图 8.12(b) 第一趟分配结果：按个位把 9 个关键码挂到 10 条静态链上</figcaption></figure>
+<p>(c) 第一趟收集结果</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">下标</th>
+<th style="text-align:left">0</th>
+<th style="text-align:left">1</th>
+<th style="text-align:left">2</th>
+<th style="text-align:left">3</th>
+<th style="text-align:left">4</th>
+<th style="text-align:left">5</th>
+<th style="text-align:left">6</th>
+<th style="text-align:left">7</th>
+<th style="text-align:left">8</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">关键码</td>
+<td style="text-align:left">41</td>
+<td style="text-align:left">31</td>
+<td style="text-align:left">22</td>
+<td style="text-align:left">53</td>
+<td style="text-align:left">26</td>
+<td style="text-align:left">97</td>
+<td style="text-align:left">88</td>
+<td style="text-align:left">88&#x27;</td>
+<td style="text-align:left">59</td>
+</tr>
+</tbody></table></div>
+<figure><img loading="lazy" src="../assets/combined/fig-8-12-d.png" alt="图 8.12(d) 第二趟分配结果：按十位再分配一次"><figcaption>图 8.12(d) 第二趟分配结果：按十位再分配一次</figcaption></figure>
+<p>(e) 第二趟收集结果</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">下标</th>
+<th style="text-align:left">0</th>
+<th style="text-align:left">1</th>
+<th style="text-align:left">2</th>
+<th style="text-align:left">3</th>
+<th style="text-align:left">4</th>
+<th style="text-align:left">5</th>
+<th style="text-align:left">6</th>
+<th style="text-align:left">7</th>
+<th style="text-align:left">8</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">关键码</td>
+<td style="text-align:left">22</td>
+<td style="text-align:left">26</td>
+<td style="text-align:left">31</td>
+<td style="text-align:left">41</td>
+<td style="text-align:left">53</td>
+<td style="text-align:left">59</td>
+<td style="text-align:left">88</td>
+<td style="text-align:left">88&#x27;</td>
+<td style="text-align:left">97</td>
+</tr>
+</tbody></table></div>
+<p>图 8.12　基于静态链的基数排序。两趟分配和收集之后，静态链已经串成有序次序，再顺链整理一遍（原书的 <code>AddrSort()</code>，<span class="math">Θ(n)</span>）就得到按下标有序的数组。注意 88 和 88&#x27; 在 (e) 里仍保持原来的先后——基数排序的每一趟都必须稳定，否则低位排好的次序会被高位那趟打乱。</p>
 <p>本书的实现把有符号 <code>int</code> 的符号位翻转后，按字节做 4 趟计数收集。否则负数会按无符号序排到最大。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#radix</a></div><pre><code><span class="c">// 算法8.11：LSD 基数排序。翻转符号位使二补码有符号 int 按无符号序排序。</span>
 <span class="k">inline</span> <span class="t">void</span> radix_sort(std::vector&lt;<span class="t">int</span>&gt;&amp; values) {

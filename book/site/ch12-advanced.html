@@ -828,7 +828,7 @@ Patricia : 4 个词，3 个内部结点
 <p>图 12.29　带平衡因子的 AVL 树。实现时结点里存的不是高度而是这个因子，只要两位。插入或删除使某个祖先的因子变成 <span class="math"><span class="bin">±</span><span class="upr">2</span></span> 时，按「哪边沉、沉在内侧还是外侧」分成四种情形。外侧失衡一次单旋转就能拉平；内侧失衡要先把孙子转到孩子、再把孩子转到祖先，即双旋转。旋转是局部的，不改变中序次序。查找、插入、删除最坏都是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>。</p>
 <figure><img loading="lazy" src="../assets/combined/fig-12-30.png" alt="图 12.30 AVL 树的调整示意图"><figcaption>图 12.30 AVL 树的调整示意图</figcaption></figure>
 <p>图 12.30　(a) 插入之后被破坏的 AVL 树；(b) 旋转之后重新变成 AVL 树。旋转只动局部几根指针，<strong>中序次序保持不变</strong>——这是所有平衡树旋转的共同前提。</p>
-<figure><img loading="lazy" src="../assets/177187ec2696e070.jpg" alt="图 12.31 AVL 树的 LL、LR、RR、RL 四种失衡"><figcaption>图 12.31 AVL 树的 LL、LR、RR、RL 四种失衡</figcaption></figure>
+<figure><img loading="lazy" src="../assets/combined/fig-12-31.png" alt="图 12.31 AVL 树的 LL、LR、RR、RL 四种失衡"><figcaption>图 12.31 AVL 树的 LL、LR、RR、RL 四种失衡</figcaption></figure>
 <p>图 12.31　AVL 树的四种失衡类型：(a) LL、(b) LR、(c) RR、(d) RL。圆圈是结点，椭圆是子树，里面的符号是它的高度。</p>
 <p>四种情形用中序仍保持 <span class="math">A&lt;B&lt;C</span> 来记（圆括号里是子树）：</p>
 <div class="codeblock" data-lang="text"><pre><code>LL（左左，一次右旋）          RR（右右，一次左旋）
@@ -854,7 +854,7 @@ LR（左右，先左旋再右旋）      RL（右左，先右旋再左旋）
 <figure><img loading="lazy" src="../assets/8da27f446e82cc95.jpg" alt="图 12.35 AVL 树删除之后的平衡操作"><figcaption>图 12.35 AVL 树删除之后的平衡操作</figcaption></figure>
 <p>图 12.35　删除之后的调整。<strong>删除比插入麻烦</strong>：插入最多转一次就结束，删除可能一路向上每层都要转。</p>
 <figure><img loading="lazy" src="../assets/combined/fig-12-36.png" alt="图 12.36 AVL 树的删除过程"><figcaption>图 12.36 AVL 树的删除过程</figcaption></figure>
-<p>图 12.36　删除的两个例子：(a) 删有两个孩子的结点 c，先用它的中序前驱 m 顶替，再删到叶那一层；(b) 删结点 g。</p>
+<p>图 12.36　删除的例子：(a) 删有两个孩子的结点 c，先用它的中序前驱 m 顶替，再删到叶那一层；(b) 删结点 g 之后 m 失衡；(c) 需要对 m 作 LL 旋转；(d) 转完 m 之后回溯，父结点 a 又失衡，再以 a 为根作一次 LL 旋转；(e) 调整完毕，整棵树重新平衡。<strong>一次删除可能引发从被删结点一路到根的多次旋转</strong>，这是它与插入最大的不同。</p>
 <figure><img loading="lazy" src="../assets/b559c4b072af21ab.jpg" alt="图 12.37 最接近于不平衡的 AVL 树"><figcaption>图 12.37 最接近于不平衡的 AVL 树</figcaption></figure>
 <p>图 12.37　「最瘦」的 AVL 树——每个结点的左右高度差都取到允许的极限。设高度为 <span class="math">h</span> 的这种树最少有 <span class="math">N(h)</span> 个结点，则 <span class="math">N(h)<span class="rel">=</span>N(h<span class="bin">−</span><span class="upr">1</span>)<span class="bin">+</span>N(h<span class="bin">−</span><span class="upr">2</span>)<span class="bin">+</span><span class="upr">1</span></span>（Fibonacci 递推），由此可推出 AVL 树的高度不超过约 <span class="math"><span class="upr">1.44</span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>n</span>：<strong>AVL 的平衡不是完美平衡，但足以保证 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span></strong>。</p>
 <p>四组最小输入正好能当旋转单元测试：<code>3,2,1 -&gt; LL</code>，<code>1,2,3 -&gt; RR</code>，<code>3,1,2 -&gt; LR</code>，<code>1,3,2 -&gt; RL</code>，结果都应以 2 为根，中序都为 <code>1,2,3</code>。只测中序不够，因为一棵退化链的中序也正确；还要查根、高度和平衡因子，才能证明旋转真的发生。</p>

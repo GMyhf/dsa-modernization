@@ -236,9 +236,8 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h3 id="623-动态表示法"><a class="anchor" href="#623-动态表示法">#</a>6.2.3 动态表示法</h3>
 <p>树的结点数和各结点的孩子数都可能随时变化。若预先限定树的最大度数，就可以给每个结点分配固定数量的指针，但度数较小时会浪费空间，超过上限时又必须改动整个表示法，插入新孩子也不灵活。</p>
 <p>另一种办法是为每个结点动态分配空间，并在结点中保存一张可变长度的孩子指针表（必要时还可保存孩子数）。孩子增加或删除时，只需调整这一结点的表。这种表示法本质上仍是“子结点表”，区别在于结点不再集中放在一个数组中，而是逐个从堆上分配；因此树的大小事先未知、会频繁长出新结点时更合适。图 6.9(a) 是树形结构，图 6.9(b) 展开了每个结点的动态孩子表。</p>
-<figure><img loading="lazy" src="../assets/2a4100d926809182.jpg" alt="图 6.9(a) 树"><figcaption>图 6.9(a) 树</figcaption></figure>
-<figure><img loading="lazy" src="../assets/4fa7d442aa8cc526.jpg" alt="图 6.9(b) 树的实现"><figcaption>图 6.9(b) 树的实现</figcaption></figure>
-<p>图 6.9　树的动态表示法。</p>
+<figure><img loading="lazy" src="../assets/combined/fig-6-9.png" alt="图 6.9 树的动态表示法：(a) 树；(b) 树的实现"><figcaption>图 6.9 树的动态表示法：(a) 树；(b) 树的实现</figcaption></figure>
+<p>图 6.9　树的动态表示法：(a) 的每个结点在 (b) 里都是一块单独分配的空间，里面存着孩子数和一张长度可变的孩子指针表。</p>
 <h3 id="624-动态左子右兄二叉链表表示法"><a class="anchor" href="#624-动态左子右兄二叉链表表示法">#</a>6.2.4 动态“左子/右兄”二叉链表表示法</h3>
 <p>这是本章的主实现。任意度的树只需两个指针域：<code>child</code> 指向第一个孩子，<code>sibling</code> 指向下一个兄弟。再加一个 <code>parent</code> 便于向上走。代价是取第 <span class="math">k</span> 个孩子必须沿兄弟链走 <span class="math">k</span> 步。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/demo.cpp">code/ch06/general_tree/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
@@ -538,18 +537,15 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>用父指针表示时，把每个子集看成一棵树，森林中的每棵树代表一个子集，树根就是该集合的标识符。<code>find</code> 沿父链找到根，<code>union</code> 只需把一棵树的根指向另一棵树的根；因此不必搬动集合中的所有元素。</p>
 <figure><img loading="lazy" src="../assets/444a429faef0f9ad.jpg" alt="图 6.10 父指针表示法"><figcaption>图 6.10 父指针表示法</figcaption></figure>
 <p>图 6.10　用每个结点的父指针表示树。</p>
-<figure><img loading="lazy" src="../assets/0eb44c9da6f987ca.jpg" alt="图 6.11(a) 子集 $S_1$"><figcaption>图 6.11(a) 子集 <span class="math">S<sub><span class="upr">1</span></sub></span></figcaption></figure>
-<figure><img loading="lazy" src="../assets/465d256552667e43.jpg" alt="图 6.11(b) 子集 $S_2$"><figcaption>图 6.11(b) 子集 <span class="math">S<sub><span class="upr">2</span></sub></span></figcaption></figure>
-<figure><img loading="lazy" src="../assets/99d1200487f038c2.jpg" alt="图 6.11(c) 并集 $S_3$"><figcaption>图 6.11(c) 并集 <span class="math">S<sub><span class="upr">3</span></sub></span></figcaption></figure>
-<p>图 6.11　集合的父指针表示与并集。</p>
+<figure><img loading="lazy" src="../assets/combined/fig-6-11.png" alt="图 6.11 集合的表示方法：(a) 子集 $S_1$；(b) 子集 $S_2$；(c) 并集 $S_3$"><figcaption>图 6.11 集合的表示方法：(a) 子集 <span class="math">S<sub><span class="upr">1</span></sub></span>；(b) 子集 <span class="math">S<sub><span class="upr">2</span></sub></span>；(c) 并集 <span class="math">S<sub><span class="upr">3</span></sub></span></figcaption></figure>
+<p>图 6.11　集合的父指针表示与并集：(a) 子集 <span class="math">S<sub><span class="upr">1</span></sub></span>、(b) 子集 <span class="math">S<sub><span class="upr">2</span></sub></span> 各是一棵树，(c) 合并后 <span class="math">S<sub><span class="upr">1</span></sub></span> 的根挂到了 <span class="math">S<sub><span class="upr">2</span></sub></span> 的根下。</p>
 <p><strong>第一条是【重量权衡合并规则】</strong>(weighted union rule)：合并时看两个集合的<strong>元素个数</strong>， 「令含元素少的子集的树根指向含元素多的子集的根」。原书【代码6.8】的结点里那个 <code>int nCount; //子树元素数目</code> 就是为它准备的。小树挂到大树下，能把整体深度限制在 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>—— 理由是每次合并树高最多加 1，而元素个数至少翻倍，所以任何结点的深度最多增加 <span class="math"><span class="upr">log</span>&thinsp;n</span> 次。</p>
 <blockquote><p><strong>注意别和「按秩合并」混了。</strong> 按秩比的是<strong>树高</strong>，按重量比的是<strong>元素个数</strong>。 两者复杂度同阶，但在同一组等价对上会长出<strong>形状不同</strong>的树。本书按原书口径用重量， 课程第 6 章习题 8 要求「使用重量权衡合并规则与路径压缩」并画出父指针数组， 换成按秩就对不上答案。并列时本书让<strong>值大的根挂到值小的根下</strong>—— 原书没规定这一条，这个口径取自那道习题的原话，好让书里的实现能直接用来核对。</p></blockquote>
-<figure><img loading="lazy" src="../assets/ed46ae90acc3311f.jpg" alt="图 6.12(a) $n$ 个集合"><figcaption>图 6.12(a) <span class="math">n</span> 个集合</figcaption></figure>
-<figure><img loading="lazy" src="../assets/63aeef5dd1c932ae.jpg" alt="图 6.12(b) 合并操作"><figcaption>图 6.12(b) 合并操作</figcaption></figure>
-<p>图 6.12　不采用重量权衡时，反复合并可能形成极端退化的树。</p>
+<figure><img loading="lazy" src="../assets/combined/fig-6-12.png" alt="图 6.12 合并操作的一个极端情况：(a) $n$ 个集合；(b) 合并操作"><figcaption>图 6.12 合并操作的一个极端情况：(a) <span class="math">n</span> 个集合；(b) 合并操作</figcaption></figure>
+<p>图 6.12　不采用重量权衡时，反复合并可能形成极端退化的树：(a) 起初是 <span class="math">n</span> 个单元素集合，(b) 每次都把大树挂到小树下，最后退化成一条长链。</p>
 <p><strong>第二条是路径压缩</strong>：<code>find</code> 在返回根之前，把沿途每个结点的父指针都直接改成根。</p>
-<figure><img loading="lazy" src="../assets/79da0aca1750084c.jpg" alt="图 6.13 路径压缩示例"><figcaption>图 6.13 路径压缩示例</figcaption></figure>
-<p>图 6.13　查找根结点时把沿途父指针直接改到根。</p>
+<figure><img loading="lazy" src="../assets/combined/fig-6-13.png" alt="图 6.13 路径压缩示例：(a) 路径压缩之前；(b) 路径压缩之后"><figcaption>图 6.13 路径压缩示例：(a) 路径压缩之前；(b) 路径压缩之后</figcaption></figure>
+<p>图 6.13　查找根结点时把沿途父指针直接改到根：(a) 是压缩之前的树，(b) 是对结点 7 调用一次 <code>find</code> 之后的样子——路径 7→5→2 上的结点都被直接改挂到根 1 下，而 9、10 仍留在 7 下面。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp">code/ch06/general_tree/modern.hpp#disjoint-set</a></div><pre><code><span class="c">/// 【代码6.8】树的父指针表示与 union/find。</span>
 <span class="c">///</span>
 <span class="c">/// 合并用原书的**重量权衡合并规则**(weighted union rule)：</span>

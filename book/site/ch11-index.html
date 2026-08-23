@@ -665,8 +665,53 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h2 id="115-位索引技术"><a class="anchor" href="#115-位索引技术">#</a>11.5 位索引技术</h2>
 <h3 id="位图签名和红黑树"><a class="anchor" href="#位图签名和红黑树">#</a>位图、签名和红黑树</h3>
 <p>位图索引适合取值很少的属性，例如性别、省份、是否及格。每个属性值对应一个位串，第 <span class="math">i</span> 位表示第 <span class="math">i</span> 条记录有没有这个值。AND、OR、NOT 查询变成机器字上的按位运算，一次可以处理几十上百条记录。属性取值一多，位图会变得很宽，需要压缩（游程、字对齐混合等）。</p>
-<figure><img loading="lazy" src="../assets/combined/fig-11-15.png" alt="图11.15 百货销售数据库记录的位图索引示意"><figcaption>图11.15 百货销售数据库记录的位图索引示意</figcaption></figure>
-<p>图 11.15　百货销售数据库记录的位图索引：左边是记录与 <code>State=NY</code> 的位向量，右边是数据域 <code>Class</code> 的位向量集合。<strong>一个属性值一条位串</strong>，查询就变成位串之间的按位运算。</p>
+<figure><img loading="lazy" src="../assets/combined/fig-11-15-a.png" alt="图 11.15(a) 百货销售数据库记录以及 State=NY（纽约州）的位向量"><figcaption>图 11.15(a) 百货销售数据库记录以及 State=NY（纽约州）的位向量</figcaption></figure>
+<p>(b) 数据域 State 的位向量集合</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">State=AK</th>
+<th style="text-align:left">State=AL</th>
+<th style="text-align:left">…</th>
+<th style="text-align:left">State=NY</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">1</td>
+</tr>
+<tr>
+<td style="text-align:left">0</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">0</td>
+</tr>
+<tr>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">1</td>
+</tr>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">0</td>
+</tr>
+<tr>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">1</td>
+</tr>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">0</td>
+</tr>
+</tbody></table></div>
+<figure><img loading="lazy" src="../assets/combined/fig-11-15-c.png" alt="图 11.15(c) 数据域 Class 的位向量集合"><figcaption>图 11.15(c) 数据域 Class 的位向量集合</figcaption></figure>
+<p>图 11.15　百货销售数据库记录的位图索引。<strong>一个属性值一条位串</strong>：State 有多少个取值，(b) 就有多少列，每列长度都是记录条数；查询于是变成位串之间的按位运算。属性取值越多，位图越宽——这正是位图索引只适合低基数属性的原因。</p>
 <p>设 6 条记录的州属性和等级属性形成两条位图：</p>
 <div class="codeblock" data-lang="text"><pre><code>State=NY : 1 0 1 0 1 0
 Class=A  : 1 1 0 1 1 0
