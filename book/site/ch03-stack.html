@@ -84,7 +84,9 @@ li{margin:6px 0}
 hr{border:0;border-top:1px solid var(--line);margin:34px 0}
 figure{margin:0 0 22px;padding:12px;background:var(--panel);border:1px solid var(--line);
   border-radius:9px}
-figure img{max-width:100%;display:block;margin:0 auto;border-radius:4px;background:#fff}
+img{max-width:100%;height:auto}
+figure img{max-width:min(100%,760px);display:block;margin:0 auto;border-radius:4px;
+  background:#fff}
 figcaption{margin-top:9px;color:var(--muted);font-size:13.5px;text-align:center}
 .gallery-page{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
   gap:18px;align-items:start}
@@ -222,6 +224,8 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p><strong>这条只管存储侧。</strong> 本节 3.1.5 的背包问题是算法侧，两种语言各有一份，Python 版就印在那一小节里——同一节里两种做法并存，正是 D-025 那条分工线的样子。</p>
 <h3 id="311-栈的抽象数据类型"><a class="anchor" href="#311-栈的抽象数据类型">#</a>3.1.1 栈的抽象数据类型</h3>
 <p>栈(stack)是限定仅在一端进行插入和删除运算的线性表，该端称为<strong>栈顶</strong>(top)， 另一端称为<strong>栈底</strong>(bottom)。栈的元素按后进先出(LIFO, last in first out)的次序访问： 最后压入的元素最先弹出。</p>
+<figure><img loading="lazy" src="../assets/c8966e2bf43b41fc.jpg" alt="图 3.1 栈的示意图"><figcaption>图 3.1 栈的示意图</figcaption></figure>
+<p>图 3.1　栈的示意图。进和出都在栈顶这一端，栈底不动。</p>
 <p>基于栈的特性，栈的抽象数据类型包含进栈 push、出栈 pop、读栈顶 top 等常用操作， 以及判断栈是否为空的边界操作。根据抽象和封装的原则，只可通过抽象数据类型 定义的运算来操作栈。</p>
 <p>原书【代码3.1】用一个成员函数既非纯虚、析构函数也非 virtual 的空基类 <code>Stack&lt;T&gt;</code> 来表达这层抽象。那样的基类给不了任何多态能力：成员函数既不是纯虚的、也没有定义， 派生类&quot;实现&quot;它们并不构成覆盖；反而埋下了「通过 <code>Stack&lt;T&gt;*</code> 删除派生对象」 这一未定义行为。</p>
 <p><strong>抽象数据类型描述的是「一组运算」，不是「一个基类」。</strong> 在 C++ 里， 模板本身已经承担了这层抽象——<code>ArrayStack&lt;T&gt;</code> 提供哪些运算，由它的接口决定， 不需要继承任何东西。我们不关心它是否继承自某个 <code>Stack&lt;T&gt;</code>，只关心它有没有 <code>push</code>、<code>pop</code>、<code>top</code> 这几个运算。所以这一节要定下来的是<strong>这张表</strong>：</p>
@@ -265,11 +269,17 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h3 id="312-顺序栈"><a class="anchor" href="#312-顺序栈">#</a>3.1.2 顺序栈</h3>
 <p>采用顺序存储结构的栈称为顺序栈(array-based stack)，需要一块连续的区域存储栈中元素。</p>
 <p>对元素数目为 n 的栈，首先要确定数组的哪一端表示栈顶。如果把数组的第 0 个位置作为栈顶， 所有的插入和删除都在第 0 个位置进行，每次 push 或 pop 都要把栈中所有元素后移或前移 一个位置，时间代价为 O(n)。反之，把最后一个元素的位置作为栈顶，新元素添加在表尾、 出栈也只删除表尾元素，每次操作的时间代价仅为 O(1)。图3.2 所示为按后一种方案实现的栈。</p>
-<p>图3.2 顺序栈：下标 0 是栈底，<code>size_</code> 是元素个数，也是下一个空位。</p>
+<figure><img loading="lazy" src="../assets/68ddbf0cd26a38ce.jpg" alt="图3.2 栈的顺序存储结构示意"><figcaption>图3.2 栈的顺序存储结构示意</figcaption></figure>
+<p>图 3.2　栈的顺序存储结构示意：一块连续空间，栈顶在元素多的那一端。</p>
+<p>用本书的记法写出来是这样——下标 0 是栈底，<code>size_</code> 是元素个数，也是下一个空位：</p>
 <div class="codeblock" data-lang="text"><pre><code>下标     0     1     2     3     4     …
 内容    [A]   [B]   [C]    ?     ?     …
                ▲
             size_ = 3   （栈顶是 C，下一个 push 写到 3）</code></pre></div>
+<p>原书用的是另一种记法：成员 <code>top</code> 直接存<strong>栈顶元素所在的位置</strong>，空栈时 <code>top = -1</code>，<code>push</code> 先加一再写、<code>pop</code> 先取再减一。图 3.3 画的就是 <code>mSize</code> 为 6 的顺序栈的四个瞬间。</p>
+<figure><img loading="lazy" src="../assets/8ca1faecb428db01.jpg" alt="图 3.3 顺序栈的存储结构"><figcaption>图 3.3 顺序栈的存储结构</figcaption></figure>
+<p>图 3.3　顺序栈的存储结构：(a) 空栈，<code>s.top = -1</code>；(b) 栈中有一个元素，<code>s.top = 0</code>；(c) 栈满，<code>s.top = mSize - 1</code>；(d) 在 (c) 上连续出栈两次之后。</p>
+<p>两种记法只差一个常数：<code>top == size_ - 1</code>。本书选 <code>size_</code>，因为它同时就是长度，<code>empty()</code> 与 <code>size()</code> 都不必再换算，也避开了「−1 是合法下标吗」这种要靠约定记住的事。栈里已有 <code>mSize</code> 个元素还要 <code>push</code> 叫<strong>上溢</strong>(overflow)，空栈上 <code>pop</code> 叫<strong>下溢</strong>(underflow)：前者本书用扩容化解，后者是可预期状态，返回 <code>std::nullopt</code>。</p>
 <h4 id="教学版完整实现"><a class="anchor" href="#教学版完整实现">#</a>教学版：完整实现</h4>
 <p>下面是一份<strong>完整的、能直接编译运行的</strong>顺序栈。一个文件、一个类，没有省略号， 没有「此处略去若干行」。它保留原书【代码3.2】【算法3.3】要教的全部内容—— 连续数组、栈顶在表尾、满了就把容量翻倍——只把原书那几处会崩的写法换掉。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/array_stack/teaching.hpp">code/ch03/array_stack/teaching.hpp</a></div><pre><code><span class="c">// 顺序栈 ArrayStack —— 教学版。</span>
@@ -629,6 +639,8 @@ clear() 之后：存活 1024 个，仍持有 204800 字节（逻辑长度已经�
 <p>这四条写在类里而不是文档里，是因为<strong>编译期报错永远比运行期谜案便宜</strong>。 教学版没有它们：<code>T</code> 不合格时报错会发生在模板实例化的深处，信息难看，但同样报错。 这是可读性与报错质量之间的一次交换，教学版选了前者。</p>
 <h3 id="313-链式栈"><a class="anchor" href="#313-链式栈">#</a>3.1.3 链式栈</h3>
 <p>采用链式存储结构的栈称为链式栈。结点分散在堆上，压栈只是接一个新结点， <strong>不需要连续空间，也没有&quot;栈满&quot;这回事</strong>——这正是它与顺序栈的核心差别。</p>
+<figure><img loading="lazy" src="../assets/cc2722b736c01067.jpg" alt="图3.4 链式栈示意"><figcaption>图3.4 链式栈示意</figcaption></figure>
+<p>图 3.4　链式栈示意。栈顶就是链表的第一个结点，<code>push</code> 在链头插入、<code>pop</code> 删链头，两者都是 O(1)；把栈顶放在链尾就得从头走到尾，退化成 O(n)。</p>
 <h4 id="教学版完整实现-1"><a class="anchor" href="#教学版完整实现-1">#</a>教学版：完整实现</h4>
 <p>接口形状和 3.1.2 的 <code>ArrayStack</code> 刻意保持一致——同一个抽象数据类型， 换一种存储结构，两者才好拿来对比。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/linked_stack/teaching.hpp">code/ch03/linked_stack/teaching.hpp</a></div><pre><code><span class="c">// 链式栈 LinkedStack —— 教学版。</span>
@@ -828,6 +840,87 @@ LinkedStack&amp; <span class="k">operator</span>=(LinkedStack&amp;&amp; other) <
 <p><strong>两版共同的一处取舍</strong>：<code>clear()</code> 与析构都写成<strong>迭代</strong>而非递归。 链式结构最自然的写法是递归释放，但深链会耗尽运行栈——本机实测， 把 <code>clear()</code> 换成递归后 40 万结点仍能过、80 万结点 ASan 报 <code>stack-overflow</code>； 迭代版在 200 万结点下无恙。教学版的测试就把门槛定在 80 万。</p>
 <h3 id="314-表达式求值"><a class="anchor" href="#314-表达式求值">#</a>3.1.4 表达式求值</h3>
 <p>后缀（逆波兰）表达式不需要括号，也不需要优先级规则：求值时<strong>遇操作数压栈， 遇操作符弹出两个算完再压回</strong>，读到末尾时栈里剩下的唯一元素就是结果。 这条主线本书一字未改，用的还是本章自己的 <code>ArrayStack&lt;double&gt;</code>。</p>
+<p>原书用 <code>23 + (34 \times 45) / (5 + 6 + 7)</code> 举例，它的后缀式是 <code>23 34 45 * 5 6 + 7 + / +</code>，求值过程如图 3.5。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:right">步骤</th>
+<th style="text-align:left">待处理的后缀表达式（左→右）</th>
+<th style="text-align:left">栈的状态（底→顶）</th>
+<th style="text-align:left">进行的运算</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:right">1</td>
+<td style="text-align:left"><code>23 34 45 * 5 6 + 7 + / +</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:right">2</td>
+<td style="text-align:left"><code>34 45 * 5 6 + 7 + / +</code></td>
+<td style="text-align:left">23</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:right">3</td>
+<td style="text-align:left"><code>45 * 5 6 + 7 + / +</code></td>
+<td style="text-align:left">23 34</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:right">4</td>
+<td style="text-align:left"><code>* 5 6 + 7 + / +</code></td>
+<td style="text-align:left">23 34 45</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:right">5</td>
+<td style="text-align:left"><code>5 6 + 7 + / +</code></td>
+<td style="text-align:left">23 1530</td>
+<td style="text-align:left">34 × 45 = 1530 入栈</td>
+</tr>
+<tr>
+<td style="text-align:right">6</td>
+<td style="text-align:left"><code>6 + 7 + / +</code></td>
+<td style="text-align:left">23 1530 5</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:right">7</td>
+<td style="text-align:left"><code>+ 7 + / +</code></td>
+<td style="text-align:left">23 1530 5 6</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:right">8</td>
+<td style="text-align:left"><code>7 + / +</code></td>
+<td style="text-align:left">23 1530 11</td>
+<td style="text-align:left">5 + 6 = 11 入栈</td>
+</tr>
+<tr>
+<td style="text-align:right">9</td>
+<td style="text-align:left"><code>+ / +</code></td>
+<td style="text-align:left">23 1530 11 7</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:right">10</td>
+<td style="text-align:left"><code>/ +</code></td>
+<td style="text-align:left">23 1530 18</td>
+<td style="text-align:left">11 + 7 = 18 入栈</td>
+</tr>
+<tr>
+<td style="text-align:right">11</td>
+<td style="text-align:left"><code>+</code></td>
+<td style="text-align:left">23 85</td>
+<td style="text-align:left">1530 / 18 = 85 入栈</td>
+</tr>
+<tr>
+<td style="text-align:right">12</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">108</td>
+<td style="text-align:left">23 + 85 = 108 入栈</td>
+</tr>
+</tbody></table></div>
+<p>图 3.5　后缀表达式的计算过程。第 11 步要留意次序：先弹出的是<strong>右</strong>操作数（18），后弹出的才是左操作数（1530），所以算的是 1530 / 18 而不是 18 / 1530。减法和除法都不可交换，弹出次序写反，结果就错。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/expression_eval/modern.hpp">code/ch03/expression_eval/modern.hpp#evaluate</a></div><pre><code><span class="c">/// 对后缀（逆波兰）表达式求值。记号之间用空白分隔，例如 &quot;3 4 + 2 *&quot; → 14。</span>
 <span class="c">///</span>
 <span class="c">/// 与原书 `class Calculator` 的差别，逐条对应它的三个问题：</span>
@@ -1073,6 +1166,16 @@ LinkedStack&amp; <span class="k">operator</span>=(LinkedStack&amp;&amp; other) <
 <p>括号不匹配的两种情形（右括号多了、左括号多了）分别对应规则表里的第三条和第五条， 各有一条用例；两者都抛 <code>std::invalid_argument</code>，不打印任何东西。</p>
 <h3 id="315-栈与递归"><a class="anchor" href="#315-栈与递归">#</a>3.1.5 栈与递归</h3>
 <p>原书所说的“活动记录”在现代编译器与运行时资料中通常称为<strong>栈帧</strong>（stack frame）：其中保存返回地址、参数、局部变量及必要的保存寄存器。名称不同，描述的是同一类调用栈记录。</p>
+<p>递归为什么非要有栈？因为被调函数的局部变量不能静态地占一块固定单元——每调用一次就得有一份，返回时随即释放。这种「执行到调用时才分配」叫动态分配，它需要内存里有一块足够大的<strong>运行栈</strong>(runtime stack)。运行时存储通常这样划分：</p>
+<figure><img loading="lazy" src="../assets/9c7bc109efa7f350.jpg" alt="图3.6 运行时存储器的组织形式"><figcaption>图3.6 运行时存储器的组织形式</figcaption></figure>
+<p>图 3.6　运行时存储器的组织形式：栈区放具有后进先出特征的数据（函数调用），堆区放不符合 LIFO 的动态分配（例如 <code>new</code> 出来的对象）。</p>
+<p>栈区里一格一格压着的就是活动记录，它至少包含这些内容：</p>
+<figure><img loading="lazy" src="../assets/d573f60f354acc38.jpg" alt="图 3.7 活动记录的内容"><figcaption>图 3.7 活动记录的内容</figcaption></figure>
+<p>图 3.7　活动记录的内容。调用一次压一格，返回一次弹一格；被调函数里的变量地址因此都是相对于栈顶的相对地址。运行栈也因此又叫活动记录栈或调用栈(call stack)。</p>
+<p>同一个函数可以在栈上同时有很多活动记录，每个代表一次不同的调用——对递归函数来说，<strong>递归深度就是它在运行栈里活动记录的个数</strong>，同一个局部变量在不同层次被分到不同的存储空间。以 <code>factorial(4)</code> 为例：</p>
+<figure><img loading="lazy" src="../assets/b94046e379d40a44.jpg" alt="图3.8 递归计算factorial(4)时，内部栈的变化情况示意"><figcaption>图3.8 递归计算factorial(4)时，内部栈的变化情况示意</figcaption></figure>
+<p>图 3.8　计算 <code>factorial(4)</code> 时运行栈的变化：(a) 逐层调用，<code>factorial(4)</code>→<code>factorial(3)</code>→…→<code>factorial(0)</code> 依次压栈；(b) <code>factorial(0)</code> 满足出口条件直接返回，随后按压栈的反序逐层弹出，把结果和控制权一层层交回去，最后 <code>factorial(4)</code> 把 24 交还给 <code>main()</code>。</p>
+<p>这张图也解释了下面那组实测数字：每深一层就多一格活动记录，深度一旦超过栈区的大小，程序不是「变慢」，而是直接崩。</p>
 <blockquote><p><strong>本节开篇先摆一组实测数字。</strong> 原书正文说递归「需要在内存中开辟一个称为 运行栈(runtime stack)的<strong>足够大</strong>的动态区」。多大算足够大？这是可以量的， 而量出来的结果里有一条相当反直觉。</p></blockquote>
 <h3 id="运行栈有多大三个档位三种结果"><a class="anchor" href="#运行栈有多大三个档位三种结果">#</a>运行栈有多大：三个档位，三种结果</h3>
 <p>同一份递归源码（每层做一次加法后返回），在一台 Linux 机器上 （gcc 13.3，<code>ulimit -s</code> 为默认的 8 MB）逐档加深度：</p>
@@ -1474,11 +1577,20 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
 <h3 id="为什么这一节没有-python-版"><a class="anchor" href="#为什么这一节没有-python-版">#</a>为什么这一节没有 Python 版</h3>
 <p>循环队列和链式队列的教学重点是环形下标、结点所有权以及空/满状态的表示，而不是调用一个现成队列。Python 的 <code>list</code> 或 <code>collections.deque</code> 会替调用方管理容量和对象寿命，既看不到环形存储的约束，也无法对应 C++ 的析构与异常安全；因此这里用 C++ 把存储不变量讲完整，算法章节再用 Python 展示队列的使用。</p>
 <p>队列只允许在一端插入、在另一端删除，元素按先进先出(FIFO)访问。插入端是队尾，删除端是队头。空队列上的提取是可预期状态，返回 <code>std::nullopt</code>。</p>
+<figure><img loading="lazy" src="../assets/6a2814bcd8135888.jpg" alt="图3.9 队列的示例"><figcaption>图3.9 队列的示例</figcaption></figure>
+<p>图 3.9　队列的示例。删除的一端叫队头(front)，删除操作叫出队(dequeue)；插入的一端叫队尾(rear)，插入操作叫入队(enqueue)。售票窗口前排队买票就是日常版的队列。</p>
 <h3 id="321-队列的抽象数据类型"><a class="anchor" href="#321-队列的抽象数据类型">#</a>3.2.1 队列的抽象数据类型</h3>
 <p>常用运算是入队 <code>enqueue</code>、出队 <code>dequeue</code>、读队头，以及判空。顺序实现还需要判满。原书【代码3.13】同样把这些运算写成一个假抽象基类；本书直接定义在 <code>ArrayQueue</code> 与 <code>LinkedQueue</code> 上。</p>
 <h3 id="322-顺序队列"><a class="anchor" href="#322-顺序队列">#</a>3.2.2 顺序队列</h3>
-<p>队列两头都要动：入队动队尾，出队动队头。如果队头固定在下标 0，每次出队都要把后面 所有元素前移一位，O(n)。所以真正的做法是<strong>让队头也往后走</strong>——走到数组末尾就绕回 下标 0，整块数组被当成一个圈来用，这就是<strong>循环队列</strong>。</p>
-<p>绕回之后有个麻烦：<code>front == rear</code> 既可能是空、也可能是满，分不开。原书的办法是 <strong>牺牲一个槽位</strong>：约定「rear 的下一格就是 front」时算满，于是 n+1 个槽位最多装 n 个元素，两种状态就分得开了。这正是章首 demo 里「容量 3 时第 4 个入不进去」的原因。</p>
+<p>队列两头都要动：入队动队尾，出队动队头。如果队头固定在下标 0，每次出队都要把后面 所有元素前移一位，O(n)；反过来把队尾固定在末尾，入队 O(1) 而出队要搬 n−1 个元素。 两头都别固定，让 <code>front</code> 和 <code>rear</code> 都在数组里往后走，两个操作就都是 O(1)：</p>
+<figure><img loading="lazy" src="../assets/d552466644ef240e.jpg" alt="图 3.10 顺序队列的实现示意"><figcaption>图 3.10 顺序队列的实现示意</figcaption></figure>
+<p>图 3.10　顺序队列的实现示意。出队让 <code>front</code> 后移，入队让 <code>rear</code> 后移；元素本身一个都不搬。</p>
+<p>这样做会遇到<strong>假溢出</strong>：整个队列不断向数组尾部漂移，<code>rear</code> 一旦到了 <code>mSize - 1</code>，即使数组前端还空着一片，入队也会报满。解决办法是把数组在逻辑上看成一个环——下标 0 是下标 <code>mSize - 1</code> 的直接后继，位置 <code>x</code> 的后继是 <code>(x + 1) % mSize</code>，这就是<strong>循环队列</strong>（也叫环形队列）。</p>
+<figure><img loading="lazy" src="../assets/combined/fig-3-11.png" alt="图 3.11 顺序队列的一种实现方式"><figcaption>图 3.11 顺序队列的一种实现方式</figcaption></figure>
+<p>图 3.11　把数组看成环之后的样子：(a) 初始队列里有 12、17、8、20 四个元素；(b) 两次出队、三次入队之后，队列变成 8、20、15、9、6。入队增加 <code>rear</code>，出队增加 <code>front</code>，两者都在环上顺时针走。</p>
+<p>绕回之后有个麻烦：<code>front == rear</code> 既可能是空、也可能是满，分不开。数一数就明白为什么：<span class="math">n</span> 个位置的数组，队列有「空、1 个、2 个……<span class="math">n</span> 个」共 <span class="math">n<span class="bin">+</span><span class="upr">1</span></span> 种状态，而固定 <code>front</code> 后 <code>rear</code> 只有 <span class="math">n</span> 种取值，必有两种状态撞在一起。一种办法是另记一个计数或布尔量；顺序队列更常用的是原书的办法——<strong>牺牲一个槽位</strong>：数组开 <span class="math">n<span class="bin">+</span><span class="upr">1</span></span> 格却只装 <span class="math">n</span> 个元素，约定「rear 的下一格就是 front」时算满，于是两种状态就分得开了。这正是章首 demo 里「容量 3 时第 4 个入不进去」的原因。</p>
+<figure><img loading="lazy" src="../assets/combined/fig-3-12.png" alt="图 3.12 循环队列的实现示例"><figcaption>图 3.12 循环队列的实现示例</figcaption></figure>
+<p>图 3.12　牺牲一格的循环队列（8 格数组最多放 7 个元素）：(a) 空，<code>front == rear</code>；(b) 一般状态；(c) 满，<code>(rear + 1) % (n + 1) == front</code>。</p>
 <h3 id="323-链式队列"><a class="anchor" href="#323-链式队列">#</a>3.2.3 链式队列</h3>
 <p>链式队列的结点分散在堆上，<strong>没有「队满」这回事</strong>。除了队头指针，还要一个<strong>队尾指针</strong>： 没有它，每次入队都得从队头走到尾，O(n)；有了它，入队和出队都是 O(1)。</p>
 <p>一处容易漏的地方：<strong>出队把队列摘空时，队尾指针必须一起置空</strong>， 否则它就成了一根指向已释放结点的野指针，下一次入队会写进已释放的内存。 教学版的测试里有一条专门盯着它——去掉那两行，AddressSanitizer 立刻报 <code>heap-use-after-free</code>。</p>
@@ -1792,6 +1904,9 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
 <h2 id="33-栈与队列的深入讨论"><a class="anchor" href="#33-栈与队列的深入讨论">#</a>3.3 栈与队列的深入讨论</h2>
 <h3 id="331-顺序栈与链式栈的比较"><a class="anchor" href="#331-顺序栈与链式栈的比较">#</a>3.3.1 顺序栈与链式栈的比较</h3>
 <p>顺序栈预分配连续缓冲区，扩容要搬迁；链式栈按需分配，没有「栈满」，但每个结点多一个指针。两者的 <code>push</code>/<code>pop</code> 都是 O(1)。</p>
+<p>顺序栈还有一个链式栈没有的用法：<strong>两个栈共享一个数组</strong>。编译系统这类同时管着多个栈的场合会用到它——把数组两端分别当作两个栈的栈底，各自向中间迎面增长：</p>
+<figure><img loading="lazy" src="../assets/c305cf854cc50a63.jpg" alt="图3.13 存储在同一个数组中的两个迎面增长的栈"><figcaption>图3.13 存储在同一个数组中的两个迎面增长的栈</figcaption></figure>
+<p>图3.13　存储在同一个数组中的两个迎面增长的栈。两个栈的空间需求恰好相反（一个涨、另一个缩）时，这种做法很省空间；两个同时涨，中间那点余量很快就没了。队列做不到这件事——除非总有元素从一个队列转入另一个队列。</p>
 <h3 id="332-顺序队列与链式队列的比较"><a class="anchor" href="#332-顺序队列与链式队列的比较">#</a>3.3.2 顺序队列与链式队列的比较</h3>
 <p>两种队列的端点操作都是常数时间。循环数组适合容量上界已知、希望局部性好的场合；链表适合长度变化大、不愿预留空洞槽位的场合。</p>
 <h3 id="333-限制存取点的表"><a class="anchor" href="#333-限制存取点的表">#</a>3.3.3 限制存取点的表</h3>

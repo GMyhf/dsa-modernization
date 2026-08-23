@@ -22,6 +22,7 @@ void test_rumor_network() {
     dsa::adt::RumorNetwork network(5);
     network.add_route(0, 3, 4);   // B1 → B4
     network.add_route(0, 4, 3);   // B1 → B5
+    network.add_route(0, 1, 8);   // B1 → B2（表1.1 的 (2,8)，图1.3 第 1 行第 2 列印的也是 8）
     network.add_route(1, 4, 8);   // B2 → B5
     network.add_route(2, 0, 6);   // B3 → B1
     network.add_route(2, 1, 7);   // B3 → B2

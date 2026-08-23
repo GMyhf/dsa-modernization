@@ -84,7 +84,9 @@ li{margin:6px 0}
 hr{border:0;border-top:1px solid var(--line);margin:34px 0}
 figure{margin:0 0 22px;padding:12px;background:var(--panel);border:1px solid var(--line);
   border-radius:9px}
-figure img{max-width:100%;display:block;margin:0 auto;border-radius:4px;background:#fff}
+img{max-width:100%;height:auto}
+figure img{max-width:min(100%,760px);display:block;margin:0 auto;border-radius:4px;
+  background:#fff}
 figcaption{margin-top:9px;color:var(--muted);font-size:13.5px;text-align:center}
 .gallery-page{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
   gap:18px;align-items:start}
@@ -765,6 +767,12 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 <h3 id="为什么这一节没有-python-版-1"><a class="anchor" href="#为什么这一节没有-python-版-1">#</a>为什么这一节没有 Python 版</h3>
 <p>链表这一节要看的是结点所有权：谁负责 <code>new</code> 出来的结点、拷贝时是否深复制、异常和析构时怎样沿链释放。Python 的 <code>list</code> 既不是这条链，也不要求读者实现拷贝构造、拷贝赋值、移动构造和析构；即便手写 Python 结点，垃圾回收仍会把所有权边界变得不可观察。因此这里保留 C++ 的裸指针与五法则，Python 版只会成为另一种容器写法。</p>
 <p>顺序表用物理相邻表示逻辑相邻，所以按下标读取是 O(1)，但中间插入和删除需要搬动 后续元素。链表把逻辑相邻写进结点的链接域：结点可以散落在内存中；给定一个前驱结点后， 插入或删除只改常数条指针。代价也必须如实保留：要按位置找到那个前驱，仍须从表头循链， 所以按位置访问、查找、插入和删除的总时间仍是 O(n)。</p>
+<p>每个结点只存一根指向后继的指针时，叫单链表(singly linked list)。</p>
+<figure><img loading="lazy" src="../assets/6e2bc11926f0ec96.jpg" alt="图 2.4 单链表示例"><figcaption>图 2.4 单链表示例</figcaption></figure>
+<p>图 2.4　单链表示例。结点分成两部分：<code>data</code> 域存真正的数据（图中的 10、8、50、16），<code>next</code> 域存后继结点的地址。终止结点没有后继，<code>next</code> 是空指针，图里用「\」表示。结点在内存中不必两两相邻——这正是链表能以常数条指针完成插入删除的原因。</p>
+<p>访问只能从表头开始顺着 <code>next</code> 走：图 2.4 里 <code>head-&gt;next-&gt;data</code> 是 8，<code>head-&gt;next-&gt;next-&gt;data</code> 是 50。表越长，这条链越长。为了让「在表尾追加」不必每次走到底，另设一个指向尾结点的变量 <code>tail</code>：</p>
+<figure><img loading="lazy" src="../assets/6c7f366bed4583ff.jpg" alt="图2.5 具有头、尾两指针的单链表"><figcaption>图2.5 具有头、尾两指针的单链表</figcaption></figure>
+<p>图 2.5　具有头、尾两指针的单链表。有了 <code>tail</code>，<code>append()</code> 是 O(1)。</p>
 <h3 id="教学版完整实现-1"><a class="anchor" href="#教学版完整实现-1">#</a>教学版：完整实现</h3>
 <p>下面是一份<strong>完整的、能直接编译运行的</strong>单链表。一个文件、一个类。 后面 2.3.1、2.3.2 两节就是把它拆开逐段讲。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/teaching.hpp">code/ch02/linked_list/teaching.hpp</a></div><pre><code><span class="c">// 单链表 LinkedList —— 教学版。原书【代码2.6】【代码2.7】【算法2.8】–【算法2.11】。</span>
@@ -960,6 +968,8 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 <p>结点(node)就是上面那个 <code>Node</code>：<strong>一个数据域，加一根指向后继的链接域</strong>。 原书把它写成独立的 <code>Link&lt;T&gt;</code>；这里放在 <code>LinkedList</code> 的 private 区里， 因为调用方拿不到结点指针，就没法改坏链。</p>
 <p>【代码2.6结束】</p>
 <p><code>LinkedList&lt;T&gt;</code> 还有一个<strong>头结点</strong>(head node)：一个不存放数据的哨兵， 永远排在第一个真元素前面。它等价于原书的&quot;第 -1 个结点&quot;。 有了它，表头插入和删除都变成&quot;修改某个前驱的 <code>next</code>&quot;，空表也不必另写一套分支—— 这就是 <code>predecessor_at(0)</code> 能直接返回头结点的原因。</p>
+<figure><img loading="lazy" src="../assets/combined/fig-2-6.png" alt="图 2.6 引入头结点的单链表"><figcaption>图 2.6 引入头结点的单链表</figcaption></figure>
+<p>图 2.6　引入头结点的单链表：(a) 带头结点的空表，(b) 一个典型的带头结点的单链表。带阴影的那个结点就是头结点，它的数据域不算表中元素，只是为了让空表和表头不再是特例。</p>
 <p>尾指针 <code>tail_</code> 指向最后一个实际结点，空表时回指头结点， 所以 <code>append</code> 不需要从头寻找末尾，是 O(1)。</p>
 <p>【代码2.7】单链表的类型定义。</p>
 <p>见上面教学版清单的类头：三个成员——头结点、尾指针、长度。</p>
@@ -1083,6 +1093,8 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 <p>教学版的 <code>insert(pos, value)</code> 分两步：① 循链找到 pos 的<strong>前驱</strong>，O(n)； ② 改两条链接，O(1)。</p>
 <p><strong>这就是链表与顺序表的分工</strong>：顺序表的 <code>insert</code> 不用找（下标直接算）， 但要搬 O(n) 个元素；链表不搬任何元素，但要走 O(n) 步去找。 两者的 O(n) 是不同的东西——一个在搬数据，一个在走指针。</p>
 <p><code>append</code> 单列一个函数而不是转调 <code>insert(size_)</code>，正是因为有 <code>tail_</code>： 尾插不需要定位，直接接在 <code>tail_</code> 后面，<strong>O(1)</strong>。转调 <code>insert</code> 就白白退化成 O(n) 了。 插在表尾时 <code>tail_</code> 必须跟着往后挪，教学版的测试有一条专门验它。</p>
+<figure><img loading="lazy" src="../assets/995a8257623869d1.jpg" alt="图 2.7 插入算法示意图"><figcaption>图 2.7 插入算法示意图</figcaption></figure>
+<p>图 2.7　插入示意：新结点的 <code>next</code> 先接上前驱原来的后继（图中的 ①），再把前驱的 <code>next</code> 改指向新结点（②）。两步的次序不能反——先改前驱就再也找不到原来的后继了。</p>
 <p>【算法2.10结束】</p>
 <p>【算法2.11】单链表的删除算法。</p>
 <p>删除同样是「定位前驱 → 改一条链接」，但有两件事不能漏：</p>
@@ -1091,12 +1103,18 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 <li><strong>删的若是尾结点，<code>tail_</code> 必须回退到前驱</strong>。不回退，下一次 <code>append</code> 就写进已释放的内存——教学版的测试用「删到空表再 append」把这条钉死了， 去掉那两行，AddressSanitizer 立刻报 <code>heap-use-after-free</code>。</li>
 </ol>
 <p>位置不合法统一抛 <code>std::out_of_range</code>，容器不打印任何提示。</p>
+<figure><img loading="lazy" src="../assets/8a7435561d286746.jpg" alt="图 2.8 删除示意图"><figcaption>图 2.8 删除示意图</figcaption></figure>
+<p>图 2.8　删除示意：左边是删除前，<code>p</code> 是前驱、<code>q</code> 是待删结点；右边是把 <code>p-&gt;next</code> 跨过 <code>q</code> 之后的样子。<code>q</code> 这时已经脱链，但内存还在，必须 <code>delete</code> 掉。</p>
 <p>【算法2.11结束】</p>
 <h3 id="232-双链表"><a class="anchor" href="#232-双链表">#</a>2.3.2 双链表</h3>
 <h4 id="双链结点"><a class="anchor" href="#双链结点">#</a>双链结点</h4>
 <p>【代码2.12】双链表的结点定义和实现。</p>
 <p>双链结点比单链结点多一根 <code>prev</code>。多出来的那个指针（64 位机上 8 字节） 只买到一件事，但这件事很值：<strong>已知一个结点时，删除它是 O(1)</strong>。 单链表要做同一件事得先从头走到它的前驱，O(n)——因为单链表从一个结点走不回前一个。</p>
 <p>原书在此只给出结点定义，没有给出完整的双链表算法。</p>
+<figure><img loading="lazy" src="../assets/40ab93045c34a1bf.jpg" alt="图2.9 加入表头结点的双链表"><figcaption>图2.9 加入表头结点的双链表</figcaption></figure>
+<p>图 2.9　加入表头结点的双链表。带斜线阴影的是头结点；<code>head</code> 指向表首，<code>tail</code> 指向表尾。</p>
+<figure><img loading="lazy" src="../assets/ebdcb0d7054cf3a9.jpg" alt="图 2.10 双链表的结点"><figcaption>图 2.10 双链表的结点</figcaption></figure>
+<p>图 2.10　双链表的结点：一个数据域，两根指针——<code>prev</code> 指前驱，<code>next</code> 指后继。</p>
 <p>【代码2.12结束】</p>
 <p>【本书补充实现】完整的双链表。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/doubly_linked_list/teaching.hpp">code/ch02/doubly_linked_list/teaching.hpp</a></div><pre><code><span class="c">// 双链表 DoublyLinkedList —— 教学版。原书【代码2.12】的双链结点。</span>
@@ -1305,9 +1323,30 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 <li><strong>首尾是特例，但只有两个</strong>：插入时若新结点成了表头/表尾，<code>head_</code>/<code>tail_</code> 要跟着改； 删除时若删掉的是表头/表尾，同样要改。四个分支写清楚就没有别的坑了。</li>
 <li><strong>迭代器可以 <code>--</code></strong>。单链表的不行。这也是那根 <code>prev</code> 买到的东西。</li>
 </ul>
+<p>原书用两幅图讲清了这四根指针怎么改。删除 <code>p</code> 所指结点，要同时接好前驱和后继两条链：</p>
+<div class="codeblock" data-lang="text"><pre><code>p-&gt;prev-&gt;next = p-&gt;next;
+p-&gt;next-&gt;prev = p-&gt;prev;
+p-&gt;next = NULL; p-&gt;prev = NULL; delete p;</code></pre></div>
+<figure><img loading="lazy" src="../assets/f3aa5f7a9ea65ef6.jpg" alt="图2.11 双链表的删除操作示意"><figcaption>图2.11 双链表的删除操作示意</figcaption></figure>
+<p>图 2.11　双链表的删除操作示意。摘链之后把 <code>p</code> 自己的两根指针置空再释放，是为了让「已删除的结点还被别人拿着」这种错误尽早暴露。</p>
+<p>在 <code>p</code> 之后插入新结点 <code>q</code>，先让 <code>q</code> 认好左右邻居，再让邻居认 <code>q</code>：</p>
+<div class="codeblock" data-lang="text"><pre><code>q-&gt;prev = p;  q-&gt;next = p-&gt;next;
+p-&gt;next = q;  q-&gt;next-&gt;prev = q;</code></pre></div>
+<figure><img loading="lazy" src="../assets/1f4184cafed5ae83.jpg" alt="图2.12 双链表插入操作示意"><figcaption>图2.12 双链表插入操作示意</figcaption></figure>
+<p>图 2.12　双链表插入操作示意。四条赋值的次序可以变，但「先让新结点指向两侧、再改两侧指向新结点」这个方向不能反——否则改到一半就丢了原来的后继。</p>
+<p>双链表比单链表多一根指针的空间开销，换来的是给定元素时能在 <span class="math">O(<span class="upr">1</span>)</span> 时间内找到它的前驱。</p>
 <p>【本书补充实现结束】</p>
 <h3 id="233-循环链表"><a class="anchor" href="#233-循环链表">#</a>2.3.3 循环链表</h3>
 <p>循环链表把尾结点的 <code>next</code> 接回首结点，因而没有 <code>nullptr</code> 作为终点。它适合轮转调度、循环缓冲区等“处理完最后一个又回到第一个”的场景。空表仍用 <code>tail == nullptr</code> 表示；非空时首结点是 <code>tail-&gt;next</code>。</p>
+<p>原书举的例子是进程轮转：多个进程在一段时间内访问同一个资源，为了让每个进程公平分享，把它们串成一个环，用一个 <code>current</code> 指针指向下一个要激活的进程，指针往前走一步就轮到下一个。</p>
+<figure><img loading="lazy" src="../assets/89f9ff700933f475.jpg" alt="图2.13 循环链表示意图"><figcaption>图2.13 循环链表示意图</figcaption></figure>
+<p>图 2.13　循环链表示意图。<code>current</code> 指向将要激活的结点，走一圈回到自己。</p>
+<p>只要把单链表最后一个结点的 <code>next</code> 指回表首，就得到循环链表；不多花任何存储，却让「从任一结点都能访问到其余全部结点」成为可能。</p>
+<figure><img loading="lazy" src="../assets/a24d59d2527028cc.jpg" alt="图2.14 带头结点的循环链表示意图"><figcaption>图2.14 带头结点的循环链表示意图</figcaption></figure>
+<p>图 2.14　带头结点的循环链表示意图。</p>
+<p>把双链表的首尾也接起来，就是循环双链表，反向遍历同样闭合。</p>
+<figure><img loading="lazy" src="../assets/b8866e40fb846a83.jpg" alt="图 2.15 循环双链表示意图"><figcaption>图 2.15 循环双链表示意图</figcaption></figure>
+<p>图 2.15　循环双链表示意图。</p>
 <p>只保存 <code>tail</code> 就够了：取首结点是 <code>tail-&gt;next</code>，尾插只需改两根链接，均为 <span class="math">O(<span class="upr">1</span>)</span>。从任意结点开始遍历时必须保存起点，并在再次遇到起点时停止，不能写成“走到 <code>nullptr</code> 为止”。删除最后一个结点后要把 <code>tail</code> 清空；删除首结点则把 <code>tail-&gt;next</code> 跳过被删结点。循环双链表再把首结点的 <code>prev</code> 接到尾结点，反向遍历同样闭合。</p>
 <p>循环链表的代价是边界更容易写错：空表、单结点表和多结点表的链接规则不同。测试至少应覆盖三种长度，并验证从每个结点出发恰好走一整圈；否则漏接或误接都可能表现为无限循环。</p>
 <h3 id="23a-进阶选读从教学版到工程版"><a class="anchor" href="#23a-进阶选读从教学版到工程版">#</a>2.3a 进阶（选读）：从教学版到工程版</h3>
