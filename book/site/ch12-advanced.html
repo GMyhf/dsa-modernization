@@ -329,7 +329,22 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h3 id="1221-广义表的定义和存储结构"><a class="anchor" href="#1221-广义表的定义和存储结构">#</a>12.2.1 广义表的定义和存储结构</h3>
 <p>表头是第一个元素，表尾是去掉表头后剩下的那个表。空表既没有头也没有尾。任何一个非空广义表都可以唯一地拆成「头 + 尾」，所以递归算法写成「先处理头、再处理尾」就和定义对上了。</p>
 <p>对 <span class="math">L<span class="rel">=</span>(a,(b,c),d)</span> 连续拆解：<code>head(L)=a</code>，<code>tail(L)=((b,c),d)</code>；对子表 <code>(b,c)</code>，头是 <code>b</code>、尾是 <code>(c)</code>。长度只数最外层的三个元素，得到 3；深度要进入子表，得到 2；原子数则遍历所有层，得到 4。三个指标回答不同问题，不能从括号或逗号数机械推出。</p>
-<p>结点通常有一个标记位，区分原子和子表：原子结点存值，子表结点存指向另一个表的指针。再加表头结点，可以把空表和共享关系表示得更干净。原书图 12.7–12.9 画的就是无头结点、带头结点、以及带循环的几种。</p>
+<p>按子表允许的形式，广义表分成几个层次。最简单的是<strong>线性表</strong>——所有元素都是原子：</p>
+<figure><img loading="lazy" src="../assets/a6db78e33812566d.jpg" alt="图 12.3 纯线性结构表"><figcaption>图 12.3 纯线性结构表</figcaption></figure>
+<p>图 12.3　纯线性结构表。</p>
+<p><strong>纯表</strong>(pure list)对应一棵树：从根到任何叶只有一条路径，每个元素只出现一次；每对括号是一个内部结点，原子是叶。</p>
+<figure><img loading="lazy" src="../assets/bb0f924bd1bdec90.jpg" alt="图 12.4 纯表的树表示"><figcaption>图 12.4 纯表的树表示</figcaption></figure>
+<p>图 12.4　纯表的树表示。</p>
+<p><strong>再入表</strong>允许共享：某些结点可以从多条路径到达，无回路时对应一个 DAG（见前面的图 12.5）。<strong>循环表</strong>允许某个子表直接或间接把自己当成表目，对应有回路的有向图（图 12.6）。四者的包含关系是：</p>
+<div class="math math-display"><span class="upr">循环表</span>⊇<span class="upr">再入表</span>⊇<span class="upr">纯表</span>⊇<span class="upr">线性表</span></div>
+<p>「深度」是展开后括号的层数：线性表深度为 1，循环表深度为无穷大。</p>
+<p>结点通常有一个标记位，区分原子和子表：原子结点存值，子表结点存指向另一个表的指针。再加表头结点，可以把空表和共享关系表示得更干净。</p>
+<figure><img loading="lazy" src="../assets/08b834108b1ffee9.jpg" alt="图 12.7 没有头结点的广义表"><figcaption>图 12.7 没有头结点的广义表</figcaption></figure>
+<p>图 12.7　没有头结点的广义表。</p>
+<figure><img loading="lazy" src="../assets/a997a7dd44ffc121.jpg" alt="图 12.8 带头结点的广义表"><figcaption>图 12.8 带头结点的广义表</figcaption></figure>
+<p>图 12.8　带头结点的广义表：多一个不存数据的表头结点，空表和非空表就不必分两套写法——与第 2 章链表引入头结点是同一个理由。</p>
+<figure><img loading="lazy" src="../assets/496aef5541eea022.jpg" alt="图12.9 带表头结点的循环广义表"><figcaption>图12.9 带表头结点的循环广义表</figcaption></figure>
+<p>图 12.9　带表头结点的循环广义表。</p>
 <p>先跑一遍：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/gen_list/demo.cpp">code/ch12/gen_list/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
 
@@ -578,6 +593,9 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h3 id="为什么这一节的存储侧只有-c"><a class="anchor" href="#为什么这一节的存储侧只有-c">#</a>为什么这一节的存储侧只有 C++</h3>
 <p>本节的 C++ 版本属于存储侧：它把 Trie 结点、Patricia 内部结点布局、共享前缀回收和按位分支不变量都变成可观察的对象。Python 版本保留，是为了对照查找、前缀计数等算法行为；它不是 C++ 所有权和布局的逐行替代，Python <code>dict</code> 或垃圾回收会把那部分教学内容隐藏掉。因此两种语言在这里承担的不是同一层任务：算法结果可对拍，存储管理仍以 C++ 为准。</p>
 <p>二叉搜索树按整个关键码比较，树的形状依赖插入次序。Trie 换一种切法：按关键码的字符（或二进制位）一层一层分支，第 <span class="math">i</span> 层对应第 <span class="math">i</span> 个字符。公共前缀在树里只存一次，所以它特别适合字典、IP 路由这种「按前缀分类」的问题。查找沿着字符走，时间与关键码长度成正比，与表里有多少个词关系不大。</p>
+<p>最简单的形式是<strong>二叉 Trie</strong>：按关键码所在的数值区间对半分，左枝标 0、右枝标 1。</p>
+<figure><img loading="lazy" src="../assets/2f63d4427c7ba023.jpg" alt="图 12.16 一棵二叉 Trie 树"><figcaption>图 12.16 一棵二叉 Trie 树</figcaption></figure>
+<p>图 12.16　二叉 Trie 树。最大元素 63，所以关键码范围取 <span class="math">[<span class="upr">0</span>,<span class="upr">64</span>)</span>；根把范围劈成 <span class="math">[<span class="upr">0</span>,<span class="upr">32</span>)</span> 和 <span class="math">[<span class="upr">32</span>,<span class="upr">64</span>)</span>，于是 2、5、9、17 进左子树，41、45、63 进右子树；再往下继续对半分，直到每个元素单独落在一个叶上。同一棵子树下的关键码共享父结点代表的前缀——第 5 章的 Huffman 编码树也有这个性质，<strong>Huffman 树就是一种二叉 Trie</strong>。</p>
 <p>把 <code>can</code>、<code>car</code>、<code>cat</code>、<code>do</code> 插进一棵字母 Trie，公共前缀 <code>ca</code> 只出现一次：</p>
 <figure><img loading="lazy" src="../assets/31bf5d17531c99f5.jpg" alt="图 12.17 按字符分支存放单词的 Trie"><figcaption>图 12.17 按字符分支存放单词的 Trie</figcaption></figure>
 <div class="codeblock" data-lang="text"><pre><code>        ·
@@ -636,6 +654,9 @@ Patricia : 4 个词，3 个内部结点
     }
     <span class="k">return</span> std::string(text.substr(<span class="n">0</span>, best));
 }</code></pre></div>
+<p>字母 Trie 的每个内部结点原则上要留 26 条分支，大部分是空的——空间是它的主要代价。原书给出的一种改进是把内部结点上那张定长的分支表换掉：</p>
+<figure><img loading="lazy" src="../assets/a08c66eba1f27251.jpg" alt="图 12.18 对 Trie 树的改进"><figcaption>图 12.18 对 Trie 树的改进</figcaption></figure>
+<p>图 12.18　对 Trie 树的改进：只保存实际用到的分支，代价是查一层要在表里找一次，不再是直接下标。</p>
 <p>纯 Trie 在「只有一个孩子」的内部结点上仍然分支，路径偏长。Patricia 树把这种单孩子结点压缩掉，边上记下「跳过几位再比」。查找时按记下的位位置取关键码的那一位，决定走左还是走右。路径更短，结点更少，仍然保持前缀共享——同样四个词，Patricia 只要 3 个内部结点。</p>
 <p>按位取值和「两个关键码第一次不同在第几位」是 Patricia 的两块基石：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/trie/modern.hpp">code/ch12/trie/modern.hpp#patricia-bits</a></div><pre><code><span class="k">static</span> <span class="t">bool</span> bit_of(std::string_view key, std::<span class="t">size_t</span> index) <span class="k">noexcept</span> {
@@ -658,11 +679,30 @@ Patricia : 4 个词，3 个内部结点
     <span class="k">return</span> {};
 }</code></pre></div>
 <p>越过关键码长度的位一律读作 0，这样「一个关键码是另一个的前缀」（<code>a</code> 与 <code>ab</code>）也能分开，代价是关键码里不能出现 <code>&#x27;\0&#x27;</code>。还有一处不能省：沿位下降到叶之后，<strong>必须和叶上的完整关键码再比一次</strong>——路上只看了少数几位，不比就会把 <code>ca</code>、<code>cars</code> 这种根本不在表里的串判成命中。</p>
+<figure><img loading="lazy" src="../assets/5fa442714c931b76.jpg" alt="图 12.19 x 表示那个位可以为 1 或者 0"><figcaption>图 12.19 x 表示那个位可以为 1 或者 0</figcaption></figure>
+<p>图 12.19　压缩的依据：<code>x</code> 表示该位取 0 取 1 都落在同一枝里，也就是这一位<strong>不需要用来分支</strong>——把这样的层去掉就是 Patricia。</p>
 <figure><img loading="lazy" src="../assets/27144b83e26fc2eb.jpg" alt="图 12.20 压缩后的 Patricia Trie"><figcaption>图 12.20 压缩后的 Patricia Trie</figcaption></figure>
+<p>图 12.20　压缩后的 PATRICIA Trie。内部结点不再逐位下降，而是各自记住「该比第几位」。</p>
 <p>以单字节 <code>&#x27;a&#x27;</code> 与 <code>&#x27;c&#x27;</code> 为例，ASCII 分别是 <code>01100001</code> 和 <code>01100011</code>，第一次不同在从 0 起算的第 6 位。Patricia 内部结点只记这个分歧位：该位为 0 走一边，为 1 走另一边；前面六个相同位不再各占一层。再插入键时，先走到叶并找出首个不同位，再把新分支插到位号仍保持递增的位置，否则查找路径会跳过应比较的位。</p>
 <h2 id="124-改进的二叉搜索树"><a class="anchor" href="#124-改进的二叉搜索树">#</a>12.4 改进的二叉搜索树</h2>
 <h3 id="1241-最佳二叉搜索树"><a class="anchor" href="#1241-最佳二叉搜索树">#</a>12.4.1 最佳二叉搜索树</h3>
+<p>同一个关键码集合，插入次序不同，长出来的二叉搜索树就不同。原书拿 <span class="math">K<span class="rel">=</span>{</span> xal, wan, wil, zol, yo, xul, yum, wen, wim, zi, yon, xem, wul, zom <span class="math">}</span> 举例：</p>
+<figure><img loading="lazy" src="../assets/69b4e6e2e509b6c1.jpg" alt="图 12.21 二叉搜索树"><figcaption>图 12.21 二叉搜索树</figcaption></figure>
+<p>图 12.21　按 <span class="math">K</span> 的给定次序插入得到的二叉搜索树。</p>
+<figure><img loading="lazy" src="../assets/1f30890a5d9e01a8.jpg" alt="图 12.22 关键码与图 12.21 相同的另一棵 BST"><figcaption>图 12.22 关键码与图 12.21 相同的另一棵 BST</figcaption></figure>
+<p>图 12.22　同一批关键码倒着插入得到的另一棵 BST。<span class="math">n</span> 个关键码有 <span class="math">n!</span> 种插入次序，但不同次序可能长出同一棵树，真正不同的形状只有 <span class="math">C<sub><span class="upr">2</span>n</sub><sup>n</sup>/(n<span class="bin">+</span><span class="upr">1</span>)</span> 棵（组合数学里的 Catalan 数）。问题因此变成：这些形状里哪一棵检索效率最好？</p>
+<p>衡量的办法是把树扩充成满二叉树（5.1.2 节），空子树补成外部结点：</p>
+<figure><img loading="lazy" src="../assets/75fcc4e3389b6567.jpg" alt="图 12.23 扩充二叉树"><figcaption>图 12.23 扩充二叉树</figcaption></figure>
+<p>图 12.23　图 12.21 的扩充二叉树，小方框是外部结点。<strong>每个外部结点代表一类检索失败</strong>——例如图中的 A 代表所有取值落在 wim 与 wul 之间的关键码。于是「检索成功的代价」落在内部结点上，「检索失败的代价」落在外部结点上，两者可以一起算进同一个目标函数。</p>
+<p>各关键码被检索的概率通常不等，把概率（或频次）当权，目标就是<strong>带权路径长度最小</strong>：</p>
+<figure><img loading="lazy" src="../assets/1826934df94f553c.jpg" alt="图 12.24 最佳二叉搜索树"><figcaption>图 12.24 最佳二叉搜索树</figcaption></figure>
+<p>图 12.24　等权时的最佳二叉搜索树——形状尽量平衡。</p>
+<figure><img loading="lazy" src="../assets/f1b118a907a2784a.jpg" alt="图12.25 退化为线性的二叉搜索树"><figcaption>图12.25 退化为线性的二叉搜索树</figcaption></figure>
+<p>图 12.25　最坏的形状：退化成一条链，检索代价 <span class="math">O(n)</span>。</p>
+<figure><img loading="lazy" src="../assets/6b92b3ac99984b30.jpg" alt="图12.26 具有不等权结点的二叉搜索树"><figcaption>图12.26 具有不等权结点的二叉搜索树</figcaption></figure>
+<p>图 12.26　结点权不等时，<strong>最佳的形状未必最平衡</strong>：权大的关键码要往根靠，哪怕整棵树因此歪一些。这正是需要动态规划、而不是简单「取中位数当根」的原因。</p>
 <figure><img loading="lazy" src="../assets/e543a817bd675673.jpg" alt="图 12.27 按区间由短到长构造最佳二叉搜索树"><figcaption>图 12.27 按区间由短到长构造最佳二叉搜索树</figcaption></figure>
+<p>图 12.27　构造最佳二叉搜索树的过程：按区间由短到长填表，每个区间枚举根。</p>
 <p>最优 BST 先校验 <code>q.size() == p.size() + 1</code>。空区间的 <code>cost[i][i] = 0</code>，<code>weight[i][i] = q[i]</code>。长度从 1 扩到 n，对每个区间 <code>[first, last]</code> 枚举根 <code>r</code>，候选代价是 <code>cost[first][r-1] + cost[r][last] + weight[first][last]</code>。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/optimal_bst/modern.hpp">code/ch12/optimal_bst/modern.hpp#optimal-bst</a></div><pre><code><span class="k">struct</span> OptimalBstResult {
     std::vector&lt;std::vector&lt;<span class="t">long</span> <span class="t">long</span>&gt;&gt; cost;
@@ -779,8 +819,17 @@ Patricia : 4 个词，3 个内部结点
 <p>最后一格选根 2 时，候选值是 <code>c[0][1] + c[2][4] + w[0][4] = 10 + 19 + 28 = 57</code>。这既复算了演示程序的输出，也能抓住把 <code>weight</code> 漏加或多加一次的实现错误。</p>
 <h3 id="1242-平衡的二叉搜索树"><a class="anchor" href="#1242-平衡的二叉搜索树">#</a>12.4.2 平衡的二叉搜索树</h3>
 <p>普通 BST 按插入次序生长，若键已经有序，会退化成一条链，查找变成 <span class="math">O(n)</span>。平衡二叉搜索树在每次插入、删除之后做少量旋转，把左右子树的高度差限制住，从而保证树高 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>。</p>
-<p>AVL 树给每个结点记一个平衡因子：右子树高度减左子树高度，只允许 <span class="math"><span class="bin">−</span><span class="upr">1</span></span>、<span class="math"><span class="upr">0</span></span>、<span class="math"><span class="upr">1</span></span>。插入或删除使某个祖先的因子变成 <span class="math"><span class="bin">±</span><span class="upr">2</span></span> 时，按「哪边沉、沉在内侧还是外侧」分成四种情形。外侧失衡一次单旋转就能拉平；内侧失衡要先把孙子转到孩子、再把孩子转到祖先，即双旋转。旋转是局部的，不改变中序次序。查找、插入、删除最坏都是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>。</p>
+<figure><img loading="lazy" src="../assets/a71971eeeedd60de.jpg" alt="图 12.15 BST 的平衡性示意图"><figcaption>图 12.15 BST 的平衡性示意图</figcaption></figure>
+<p>图 12.15　同一批关键码，形状可以从「接近完全二叉树」一直退化到「一条链」——检索代价随之从 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span> 变成 <span class="math">O(n)</span>。</p>
+<p>AVL 树给每个结点记一个平衡因子：右子树高度减左子树高度，只允许 <span class="math"><span class="bin">−</span><span class="upr">1</span></span>、<span class="math"><span class="upr">0</span></span>、<span class="math"><span class="upr">1</span></span>。</p>
+<figure><img loading="lazy" src="../assets/combined/fig-12-28.png" alt="图 12.28 AVL 树与非 AVL 树"><figcaption>图 12.28 AVL 树与非 AVL 树</figcaption></figure>
+<p>图 12.28　(a) 一棵 AVL 树；(b) 关键码相同但不是 AVL 树的 BST——某个结点的左右子树高度差到了 2。</p>
+<figure><img loading="lazy" src="../assets/3cd3a1d82f9fca27.jpg" alt="图 12.29 带平衡因子的 AVL 树"><figcaption>图 12.29 带平衡因子的 AVL 树</figcaption></figure>
+<p>图 12.29　带平衡因子的 AVL 树。实现时结点里存的不是高度而是这个因子，只要两位。插入或删除使某个祖先的因子变成 <span class="math"><span class="bin">±</span><span class="upr">2</span></span> 时，按「哪边沉、沉在内侧还是外侧」分成四种情形。外侧失衡一次单旋转就能拉平；内侧失衡要先把孙子转到孩子、再把孩子转到祖先，即双旋转。旋转是局部的，不改变中序次序。查找、插入、删除最坏都是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>。</p>
+<figure><img loading="lazy" src="../assets/combined/fig-12-30.png" alt="图 12.30 AVL 树的调整示意图"><figcaption>图 12.30 AVL 树的调整示意图</figcaption></figure>
+<p>图 12.30　(a) 插入之后被破坏的 AVL 树；(b) 旋转之后重新变成 AVL 树。旋转只动局部几根指针，<strong>中序次序保持不变</strong>——这是所有平衡树旋转的共同前提。</p>
 <figure><img loading="lazy" src="../assets/177187ec2696e070.jpg" alt="图 12.31 AVL 树的 LL、LR、RR、RL 四种失衡"><figcaption>图 12.31 AVL 树的 LL、LR、RR、RL 四种失衡</figcaption></figure>
+<p>图 12.31　AVL 树的四种失衡类型：(a) LL、(b) LR、(c) RR、(d) RL。圆圈是结点，椭圆是子树，里面的符号是它的高度。</p>
 <p>四种情形用中序仍保持 <span class="math">A&lt;B&lt;C</span> 来记（圆括号里是子树）：</p>
 <div class="codeblock" data-lang="text"><pre><code>LL（左左，一次右旋）          RR（右右，一次左旋）
       C                           A
@@ -796,15 +845,42 @@ LR（左右，先左旋再右旋）      RL（右左，先右旋再左旋）
      \                             / \
       B                           A   C</code></pre></div>
 <p>插入 1、2、3 会走出 RR：先得到右链 <code>1-2-3</code>，在 1 上左旋变成以 2 为根的平衡树。插入 3、2、1 是对称的 LL。插入 1、3、2 是 RL：先在 3 上右旋，再在 1 上左旋。删除一个结点后，从被删处向上检查，哪一层变成 <span class="math"><span class="bin">±</span><span class="upr">2</span></span> 就在那一层做同样的旋转；有时旋转一次还不够，要继续向上走。</p>
+<figure><img loading="lazy" src="../assets/15e78aea8f0613c7.jpg" alt="图12.32 LL 型不平衡经过单旋转后重新变成平衡结构"><figcaption>图12.32 LL 型不平衡经过单旋转后重新变成平衡结构</figcaption></figure>
+<p>图 12.32　LL 型失衡的单旋转，RR 型对称。</p>
+<figure><img loading="lazy" src="../assets/combined/fig-12-33.png" alt="图 12.33 RL 型双旋转示意图"><figcaption>图 12.33 RL 型双旋转示意图</figcaption></figure>
+<p>图 12.33　RL 型的双旋转，LR 型对称。中间那步的平衡因子没有意义（图中的 (b)）；转完之后 <span class="math">a</span> 的因子是 <span class="math"><span class="bin">−</span><span class="upr">1</span></span> 或 <span class="math"><span class="upr">0</span></span>、<span class="math">b</span> 的因子是 <span class="math"><span class="upr">0</span></span> 或 <span class="math"><span class="bin">+</span><span class="upr">1</span></span>，取决于被提上来的那棵子树原来偏哪边。</p>
+<figure><img loading="lazy" src="../assets/38fc6390b74cb59c.jpg" alt="图 12.34 AVL 树的插入过程"><figcaption>图 12.34 AVL 树的插入过程</figcaption></figure>
+<p>图 12.34　从空树开始依次插入一组单词，AVL 树的生长过程。</p>
+<figure><img loading="lazy" src="../assets/8da27f446e82cc95.jpg" alt="图 12.35 AVL 树删除之后的平衡操作"><figcaption>图 12.35 AVL 树删除之后的平衡操作</figcaption></figure>
+<p>图 12.35　删除之后的调整。<strong>删除比插入麻烦</strong>：插入最多转一次就结束，删除可能一路向上每层都要转。</p>
+<figure><img loading="lazy" src="../assets/combined/fig-12-36.png" alt="图 12.36 AVL 树的删除过程"><figcaption>图 12.36 AVL 树的删除过程</figcaption></figure>
+<p>图 12.36　删除的两个例子：(a) 删有两个孩子的结点 c，先用它的中序前驱 m 顶替，再删到叶那一层；(b) 删结点 g。</p>
+<figure><img loading="lazy" src="../assets/b559c4b072af21ab.jpg" alt="图 12.37 最接近于不平衡的 AVL 树"><figcaption>图 12.37 最接近于不平衡的 AVL 树</figcaption></figure>
+<p>图 12.37　「最瘦」的 AVL 树——每个结点的左右高度差都取到允许的极限。设高度为 <span class="math">h</span> 的这种树最少有 <span class="math">N(h)</span> 个结点，则 <span class="math">N(h)<span class="rel">=</span>N(h<span class="bin">−</span><span class="upr">1</span>)<span class="bin">+</span>N(h<span class="bin">−</span><span class="upr">2</span>)<span class="bin">+</span><span class="upr">1</span></span>（Fibonacci 递推），由此可推出 AVL 树的高度不超过约 <span class="math"><span class="upr">1.44</span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>n</span>：<strong>AVL 的平衡不是完美平衡，但足以保证 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span></strong>。</p>
 <p>四组最小输入正好能当旋转单元测试：<code>3,2,1 -&gt; LL</code>，<code>1,2,3 -&gt; RR</code>，<code>3,1,2 -&gt; LR</code>，<code>1,3,2 -&gt; RL</code>，结果都应以 2 为根，中序都为 <code>1,2,3</code>。只测中序不够，因为一棵退化链的中序也正确；还要查根、高度和平衡因子，才能证明旋转真的发生。</p>
 <p>红黑树是另一种近似平衡，用颜色规则保证最长路径不超过最短路径的两倍，旋转次数有常数上限，见第 11.5 节。 可运行的 AVL 四旋转实现见 <code>code/ch12/balanced_trees/modern.hpp</code>，测试检查中序有序、查找、删除和高度边界。</p>
 <h3 id="1243-伸展树"><a class="anchor" href="#1243-伸展树">#</a>12.4.3 伸展树</h3>
 <p>伸展树不在结点上存平衡因子。每次访问（查找、插入、删除）一个结点之后，用旋转把它搬到根附近：最近被用到的键下次更容易先碰到。这是一种自调整，均摊 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>。</p>
 <p>从被访问结点走到根，每次看它、父结点和祖父结点的形状。一字形（连续两次同向）先转祖父、再转父；之字形（先左后右，或先右后左）先转父、再转祖父。两种双旋都把目标提升两层，但对其余结点的重排不同。目标只差一层到根时，再做一次单旋转即可。半伸展不会每次都把目标送到根，旋转更少，但保证也与全伸展不同。</p>
-<figure><img loading="lazy" src="../assets/4de16efb6c7a8e8d.jpg" alt="图 12.39 伸展树的一字形旋转"><figcaption>图 12.39 伸展树的一字形旋转</figcaption></figure>
+<figure><img loading="lazy" src="../assets/combined/fig-12-38.png" alt="图12.38 被展开的结点是根结点的子结点时的单旋转"><figcaption>图12.38 被展开的结点是根结点的子结点时的单旋转</figcaption></figure>
+<p>图 12.38　只有当被展开的结点已经是根的孩子时，才做单旋转：左边是旋转前，右边是旋转后。</p>
+<figure><img loading="lazy" src="../assets/combined/fig-12-39.png" alt="图 12.39 伸展树的一字形旋转"><figcaption>图 12.39 伸展树的一字形旋转</figcaption></figure>
+<p>图 12.39　一字形旋转：<span class="math">x</span>、<span class="math">y</span>、<span class="math">z</span> 在一条同向的链上（左），旋转之后（右）。一字形一般不会降低树高，但会把整条同向长链压短。</p>
 <figure><img loading="lazy" src="../assets/391e13f1809c09bf.jpg" alt="图 12.40 伸展树的之字形旋转"><figcaption>图 12.40 伸展树的之字形旋转</figcaption></figure>
+<p>图 12.40　之字形旋转：<span class="math">x</span>、<span class="math">y</span>、<span class="math">z</span> 拐了个弯。之字形<strong>倾向于让树更平衡</strong>——子树 B、C 上升一层，D 下降一层。</p>
+<figure><img loading="lazy" src="../assets/f536a99730156c47.jpg" alt="图12.41 在伸展树中完成一次检索以后再展开的例子"><figcaption>图12.41 在伸展树中完成一次检索以后再展开的例子</figcaption></figure>
+<p>图 12.41　检索 a 之后把它展开到根：先 c、b、a 一字形，再 d、a、e 之字形，再 f、a、g 之字形，最后一次单旋转让 a 成为根。四次旋转下来，整棵树的层次明显变浅了。（图中内部结点只是索引代号，记录都在外部叶上，所以内部结点的字母不必满足中序有序。）</p>
 <p>例如链 <code>10 -&gt; 20 -&gt; 30</code> 中访问 30，是右–右一字形：先围绕 10 左旋，再围绕 20 左旋，30 到根。若 10 的右孩子是 30、30 的左孩子是 20，则访问 20 是右–左之字形，两次旋转方向相反。两种情况都把目标提两层，但一字形还把整条同向长链明显压短，这是不能把它替换成连续「父子单旋」的原因。</p>
 <p>“均摊 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>”不等于每一次都快。访问深链末端的单次代价仍可达 <span class="math">O(n)</span>；保证的是从任意初始树开始，一串 <span class="math">m</span> 次操作的总成本为 <span class="math">O(m&thinsp;<span class="upr">log</span>&thinsp;n)</span>（另加初始势能）。因此伸展树适合热点键反复出现、又不要求单次延迟上界的场景；实时系统若要求每次查找都在确定高度内结束，更适合 AVL 或红黑树。</p>
+<p><strong>半伸展</strong>是一种折中：不必每次都把目标送到根，旋转次数更少。</p>
+<figure><img loading="lazy" src="../assets/851f2f30b09fa8d8.jpg" alt="图12.42 半伸展和全伸展的区别"><figcaption>图12.42 半伸展和全伸展的区别</figcaption></figure>
+<p>图 12.42　半伸展与全伸展的区别。</p>
+<figure><img loading="lazy" src="../assets/33419334fcc58ef5.jpg" alt="图12.43 连续两次访问结点 T，半伸展树的变化示例"><figcaption>图12.43 连续两次访问结点 T，半伸展树的变化示例</figcaption></figure>
+<p>图 12.43　连续两次访问同一个结点 T 时，半伸展树的变化。</p>
+<figure><img loading="lazy" src="../assets/907d63faff8d37a9.jpg" alt="图12.44 外部结点存储记录信息的半伸展树"><figcaption>图12.44 外部结点存储记录信息的半伸展树</figcaption></figure>
+<p>图 12.44　记录存在外部结点上的半伸展树。</p>
+<figure><img loading="lazy" src="../assets/2103775a9dd6abc2.jpg" alt="图 12.45 对图 12.44 连续读 aabg 后半伸展树的变化过程"><figcaption>图 12.45 对图 12.44 连续读 aabg 后半伸展树的变化过程</figcaption></figure>
+<p>图 12.45　在图 12.44 上连续读 a、a、b、g 之后的变化过程。<strong>重复访问的键会一路浮到靠近根的位置</strong>——这正是伸展树在「热点键反复出现」时占便宜的地方。</p>
 <p>伸展树实现简单，不必维护额外的平衡域；代价是单次操作可能仍是 <span class="math">O(n)</span>，只是摊还之后是对数。 同一实现中的 <code>SplayTree</code> 使用 <code>unique_ptr</code> 维护子树所有权，访问后按一字形/之字形规则旋至根。</p>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
 <h3 id="python-实现的证据链"><a class="anchor" href="#python-实现的证据链">#</a>Python 实现的证据链</h3>
