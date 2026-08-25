@@ -199,6 +199,61 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <li><strong>散列文件</strong>：用散列函数把关键码映射到桶或块。第 10 章的闭散列思想可以搬到外存，但冲突处理要按块设计。</li>
 </ol>
 <p>本章不实现页缓存和文件句柄，只抽出外排序里两件与文件组织无关、却决定 I/O 次数的事：如何生成更长的初始顺串，以及如何在 <span class="math">k</span> 路归并里选出当前最小。</p>
+<h3 id="921-文件组织"><a class="anchor" href="#921-文件组织">#</a>9.2.1 文件组织</h3>
+<p>原书区分了逻辑文件和物理文件，这个区分仍然重要：前者是应用看见的记录顺序与字段，后者是 系统实际读写的页、块和地址。顺序、散列、索引、倒排四种组织方式也仍是本书第 9–11 章的共同 骨架，只是今天通常由文件系统、数据库或对象存储系统实现，而不是由业务程序直接搬动磁盘扇区。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">组织方式</th>
+<th style="text-align:left">保留的核心取舍</th>
+<th style="text-align:left">当代说明</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">顺序文件</td>
+<td style="text-align:left">连续扫描快，按中间位置更新贵</td>
+<td style="text-align:left">日志、列式批处理和外排序的顺串都利用这种顺序 I/O。机械磁带是历史例子，原则仍适用于顺序读写 SSD、云对象和网络流。</td>
+</tr>
+<tr>
+<td style="text-align:left">散列文件</td>
+<td style="text-align:left">按键定位快，范围扫描与有序输出差</td>
+<td style="text-align:left">不直接把内存散列表搬到磁盘；冲突、页满和缓存未命中都必须按页处理，相关基本思想见第 10 章。</td>
+</tr>
+<tr>
+<td style="text-align:left">索引文件</td>
+<td style="text-align:left">用较小目录把键映射到记录位置</td>
+<td style="text-align:left">现代数据库常用 B+ 树、LSM 等页级索引；本书第 11 章用页模拟讲 B+ 树。</td>
+</tr>
+<tr>
+<td style="text-align:left">倒排文件</td>
+<td style="text-align:left">用属性值反查记录集合</td>
+<td style="text-align:left">搜索系统仍以它为核心，只是词典、压缩和分片比原书时代复杂得多。</td>
+</tr>
+</tbody></table></div>
+<p>顺序文件的“物理顺序与逻辑顺序一致”不能理解成文件一定连续占用磁盘扇区。现代文件系统可能重排 块位置、使用写时复制或远端对象存储；对本章而言真正要守的是<strong>读者可以顺序消费页，写者可以批量 产生页</strong>。这正是归并比大量随机交换更适合外排序的原因。</p>
+<p>定长记录能用“第 <span class="math">i</span> 条在第几页”直接定位；变长记录通常需要槽目录，把稳定的槽号映射到会移动的 页内偏移。删除时立即压紧能让扫描紧凑，留下墓碑写入更快但会积累空洞。原书把这几种选择列为 文件组织；今天仍要做同一种权衡，只是实现者多半是数据库或存储引擎，而不是调用 <code>seekg</code> 的应用代码。</p>
+<h3 id="922-c的流文件"><a class="anchor" href="#922-c的流文件">#</a>9.2.2 C++的流文件</h3>
+<p>原书的关键概念仍然成立：<strong>文件</strong>是持久化的数据对象，<strong>流</strong>是程序在某一时刻对它进行顺序读写的 通道；流通常配有用户态缓冲，读写位置决定下一次操作从哪里开始。外排序把输入、工作区和输出缓冲 分开（图 9.1），正是利用了这层抽象。</p>
+<p>但原书的接口已是历史写法。<code>&lt;fstream.h&gt;</code> 不是标准 C++17 头文件；现在使用 <code>&lt;fstream&gt;</code> 中的 <code>std::ifstream</code>、<code>std::ofstream</code> 与 <code>std::fstream</code>。文件名应通过 <code>std::string</code> 或 <code>std::filesystem::path</code> 表达，位置使用 <code>std::streamoff</code> / <code>std::streampos</code>，而不是 <code>char*</code> 和 <code>int</code>。流对象离开作用域会自动关闭，显式 <code>close()</code> 只在需要尽早检查关闭或复用同一对象时才有意义。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">原书操作</th>
+<th style="text-align:left">今天仍保留的意思</th>
+<th style="text-align:left">现代接口与边界</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><code>open</code> / <code>close</code></td>
+<td style="text-align:left">取得或结束文件访问</td>
+<td style="text-align:left">构造时打开或调用 <code>open()</code>；用流状态检查失败，RAII 负责通常的关闭。</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>read</code> / <code>write</code></td>
+<td style="text-align:left">在当前位置传输字节</td>
+<td style="text-align:left">二进制块 I/O 仍可用，但不能把含指针、虚函数表或依赖字节序的 C++ 对象直接写入文件。定义稳定的字段格式或序列化协议。</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>seekg</code> / <code>seekp</code></td>
+<td style="text-align:left">移动读/写位置</td>
+<td style="text-align:left">只适用于支持随机访问的底层对象；管道、终端和许多网络流不能任意定位。</td>
+</tr>
+</tbody></table></div>
+<p>本章的 <code>external_sort</code> 实现故意以容器模拟输入与输出，不假装一段未测试的文件 I/O 就是外排序。 它验证的是顺串、归并与选择树的算法不变量；真正连接文件时，调用方还必须处理打开失败、短读短写、 编码/字节序、临时文件原子替换和崩溃恢复。它们是重要的工程课题，但不是把原书算法换成错误 I/O 示例的理由。</p>
 <h3 id="记录怎样装进页"><a class="anchor" href="#记录怎样装进页">#</a>记录怎样装进页</h3>
 <p>定长记录最容易计算：页大小为 <span class="math">P</span> 字节、记录长 <span class="math">R</span> 字节时，一页最多装 <span class="math">⌊P/R⌋</span> 条，剩余空间是内部碎片。不定长记录通常在页尾保存槽目录，槽里记录每条记录的偏移和长度；记录在页内移动时，外部引用仍可通过“页号 + 槽号”找到它。</p>
 <p>删除记录也有两种代价模型。立即压紧能保持扫描紧凑，却可能搬动大量记录；留下墓碑写入便宜，但查询必须跳过空洞，积累到一定程度仍要重组。第 10 章闭散列里的墓碑解决的是同一种矛盾，只是这里的搬动单位从数组槽变成了页块。</p>
@@ -809,7 +864,7 @@ R3:  6  8 30</code></pre></div>
 </ol>
 <div class="pagenav"><a href="ch08-sorting.html"><span class="dir">← 上一篇</span>第8章 内部排序</a><a href="ch10-search.html" style="text-align:right"><span class="dir">下一篇 →</span>第10章 检索</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#91-主存储器和外存储器">9.1 主存储器和外存储器</a><a href="#先建立成本模型" class="sub">先建立成本模型</a><a href="#92-文件的组织和管理">9.2 文件的组织和管理</a><a href="#记录怎样装进页" class="sub">记录怎样装进页</a><a href="#93-外排序">9.3 外排序</a><a href="#931-置换选择排序" class="sub">9.3.1 置换选择排序</a><a href="#932-二路外排序" class="sub">9.3.2 二路外排序</a><a href="#933-多路归并选择树" class="sub">9.3.3 多路归并——选择树</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充外排序题参考课程第-9-章" class="sub">补充外排序题（参考课程第 9 章）</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#91-主存储器和外存储器">9.1 主存储器和外存储器</a><a href="#先建立成本模型" class="sub">先建立成本模型</a><a href="#92-文件的组织和管理">9.2 文件的组织和管理</a><a href="#921-文件组织" class="sub">9.2.1 文件组织</a><a href="#922-c的流文件" class="sub">9.2.2 C++的流文件</a><a href="#记录怎样装进页" class="sub">记录怎样装进页</a><a href="#93-外排序">9.3 外排序</a><a href="#931-置换选择排序" class="sub">9.3.1 置换选择排序</a><a href="#932-二路外排序" class="sub">9.3.2 二路外排序</a><a href="#933-多路归并选择树" class="sub">9.3.3 多路归并——选择树</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充外排序题参考课程第-9-章" class="sub">补充外排序题（参考课程第 9 章）</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch09-external-sort.md</code> 生成

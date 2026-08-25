@@ -155,7 +155,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <div class="layout">
 <nav class="book"><b>导读</b><a href="index.html" class="here">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a></nav>
 <main>
-<a class="download" href="../pdf/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95.pdf" download><span class="dl-badge">PDF</span><span class="dl-body"><b>下载完整教程</b><span class="dl-meta">B5 开本，带书签目录 · 546 页 · 14.5 MB · 334 张插图 · 含 12 章正文、习题与参考答案、原书插图与勘误</span></span><span class="dl-arrow">↓</span></a>
+<a class="download" href="../pdf/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95.pdf" download><span class="dl-badge">PDF</span><span class="dl-body"><b>下载完整教程</b><span class="dl-meta">B5 开本，带书签目录 · 558 页 · 14.6 MB · 335 张插图 · 含 12 章正文、习题与参考答案、原书插图与勘误</span></span><span class="dl-arrow">↓</span></a>
 <h2 id="如何使用本教程"><a class="anchor" href="#如何使用本教程">#</a>如何使用本教程</h2>
 <h3 id="两条阅读路径"><a class="anchor" href="#两条阅读路径">#</a>两条阅读路径</h3>
 <p>这本书的每个数据结构都有<strong>两份实现</strong>，写给两种不同的读者：</p>
@@ -297,6 +297,9 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h3 id="文件组织"><a class="anchor" href="#文件组织">#</a>文件组织</h3>
 <p>每章正文位于本目录的独立 Markdown 文件。这样做有两个好处：阅读器能快速跳转，且每一段 C++ 都能与 <code>code/</code> 下通过测试的源码逐字同步。代码块中的 <code>file=</code> 标注就是其来源。</p>
 <p>想在浏览器里读，用 <code>python3 tools/build_site.py</code> 生成的网页版：打开 <code>book/site/index.html</code> 即可，左侧是全书目录、右侧是本章小节，代码块可一键复制。网页由这些 Markdown 渲染而来， 不是另一份稿子。离线阅读还有 <code>book/pdf/数据结构与算法.pdf</code>。</p>
+<h3 id="怎样保留原书"><a class="anchor" href="#怎样保留原书">#</a>怎样保留原书</h3>
+<p>这不是把 2008 年的文字逐段删掉再换一套新名词。原书中定义、推导、例题、图和算法策略只要 仍然正确，就优先保留在同号章节；原始的 292 张图也完整保存在<a href="figures.html">原书插图</a>中。OCR 把一幅带 <code>(a)</code>、<code>(b)</code> 面板的<strong>同一原图</strong>错切成多张时，正文可以把这些裁块还原为一个完整图号， 但不会把原本独立的整图切开后再拼作新图。</p>
+<p>遇到历史材料，取舍会写在相应位置，而不是悄悄删去：经典方法保留并说明今天的适用边界；接口、 设备或实现已经变化的内容，保留其要解决的问题，换成当前写法并标出差异；不属于数据结构教学目标 或没有继续保留价值的内容，在 <code>collab/section_gaps.json</code> 留下理由、负责人和日期。第 9.2.2 节的 C++ 文件流就是一个例子：流、缓冲和定位仍然要讲，<code>&lt;fstream.h&gt;</code>、裸字节对象读写和手工 <code>close()</code> 则明确作为历史写法说明，不作为正文方案。</p>
 <p>建议的学习顺序是第 1 至第 10 章；第 11 章把索引技术做成可运行的页模拟（线性索引、倒排、B+ 树、位图）；第 12 章收束广义表的共享回收、前缀树与动态规划。 每章先理解抽象模型，再阅读实现，最后运行对应单元的测试。所有提取操作（例如 <code>pop</code>、 <code>dequeue</code>）都用 <code>std::optional</code> 表达正常的空状态；参数、容量或权重不合法则抛标准异常。</p>
 <div class="codeblock" data-lang="bash"><pre><code># 编译并运行全书的现代实现与测试
 python3 tools/check_code.py --allow-degraded
@@ -483,7 +486,7 @@ python3 tools/check_doc.py</code></pre></div>
 <p>本教程采用 C++17，侧重数据结构的实现与算法语义。它不提供文件系统、数据库页缓存、并发控制 或跨平台性能承诺；这些属于使用数据结构的系统层设计。</p>
 <div class="pagenav"><span></span><a href="ch01-adt.html" style="text-align:right"><span class="dir">下一篇 →</span>第1章 概论</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#如何使用本教程">如何使用本教程</a><a href="#两条阅读路径" class="sub">两条阅读路径</a><a href="#两种语言" class="sub">两种语言</a><a href="#文件组织" class="sub">文件组织</a><a href="#语言版本与实现状态" class="sub">语言版本与实现状态</a><a href="#现代-c-能力地图" class="sub">现代 C++ 能力地图</a><a href="#术语速查" class="sub">术语速查</a><a href="#属性和接口约定" class="sub">属性和接口约定</a><a href="#各章实现状态" class="sub">各章实现状态</a><a href="#每章验证边界" class="sub">每章验证边界</a><a href="#目录">目录</a><a href="#阅读约定">阅读约定</a><a href="#验证与边界">验证与边界</a></nav>
+<nav class="page"><b>本页</b><a href="#如何使用本教程">如何使用本教程</a><a href="#两条阅读路径" class="sub">两条阅读路径</a><a href="#两种语言" class="sub">两种语言</a><a href="#文件组织" class="sub">文件组织</a><a href="#怎样保留原书" class="sub">怎样保留原书</a><a href="#语言版本与实现状态" class="sub">语言版本与实现状态</a><a href="#现代-c-能力地图" class="sub">现代 C++ 能力地图</a><a href="#术语速查" class="sub">术语速查</a><a href="#属性和接口约定" class="sub">属性和接口约定</a><a href="#各章实现状态" class="sub">各章实现状态</a><a href="#每章验证边界" class="sub">每章验证边界</a><a href="#目录">目录</a><a href="#阅读约定">阅读约定</a><a href="#验证与边界">验证与边界</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/数据结构与算法.md</code> 生成

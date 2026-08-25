@@ -1210,6 +1210,24 @@
       "date": "2026-08-18"
     },
     {
+      "section": "9.2.1",
+      "kind": "covered",
+      "slides": [
+        "ch09:9.2.1 文件组织：四种取舍仍在"
+      ],
+      "by": "Codex",
+      "date": "2026-08-25"
+    },
+    {
+      "section": "9.2.2",
+      "kind": "covered",
+      "slides": [
+        "ch09:9.2.2 文件流：概念保留，接口更新"
+      ],
+      "by": "Codex",
+      "date": "2026-08-25"
+    },
+    {
       "section": "9.3",
       "kind": "covered",
       "slides": [
