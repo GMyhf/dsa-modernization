@@ -1,0 +1,13 @@
+{
+  "id": "orthogonal_graph",
+  "title": "十字链表：一条弧进入两条链",
+  "listings": [],
+  "beyond_book": "原书 7.3.3 只有十字链表定义与图 7.15，没有独立【算法】/【代码】清单；本单元按读者要求把传统 ArcBox/VexNode 教学表示与现代实现并列，不认领原书清单。",
+  "standard": "c++17",
+  "owner": "codex",
+  "notes": "teaching.hpp 保留原书式裸链接和表头插入，但析构沿出边链释放；modern.hpp 用 vector<unique_ptr<Arc>> 集中拥有弧结点，出入两条链只保存非拥有指针，删除先双摘链再自动释放。",
+  "d001_exceptions": {
+    "#include<vector>": "顶点头指针表、查询结果和 Arc 的唯一所有者表；十字链表的两条交叉链接仍逐指针维护。",
+    "#include<memory>": "现代版本用 unique_ptr 集中表达每个弧结点唯一的所有权；它不替代出链和入链。"
+  }
+}

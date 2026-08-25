@@ -161,6 +161,67 @@ v.firstinarc  -> 同一个结点  -- headnextarc --> 下一条指向 v 的弧
 
 ---
 
+# 原书式教学实现：两次挂接
+
+原书 7.3.3 只有图和字段说明；这里保留截图所用的 `ArcBox` / `VexNode` 传统表示，
+并补析构和禁用浅拷贝，使教学版可以运行。
+
+```cpp file=code/ch07/orthogonal_graph/teaching.hpp#orthogonal-teaching-add
+void add_edge(std::size_t tail, std::size_t head, int info = 1) {
+    check_vertex(tail);
+    check_vertex(head);
+    auto* arc = new ArcBox{tail, head, vertices_[tail].firstout,
+                           vertices_[head].firstin, info};
+    vertices_[tail].firstout = arc;  // 接进 tail 的出边链
+    vertices_[head].firstin = arc;   // 同一结点接进 head 的入边链
+    ++arc_count_;
+}
+```
+
+- `new` 的是**一个** `ArcBox`，不是入边、出边各建一个
+- 先接 `tailnextarc` 再更新 `firstout`：挂到尾点出链
+- 再接 `headnextarc` 并更新 `firstin`：同一结点挂到头点入链
+- 表头插入，因此同一顶点的边按“后插先见”遍历
+
+---
+
+# 现代实现：谁拥有弧结点？
+
+`arcs_` 里的 `unique_ptr` 是每条弧的唯一所有者；两条交叉链仍是裸的非拥有链接。
+
+```cpp file=code/ch07/orthogonal_graph/modern.hpp#orthogonal-modern-remove
+bool remove_edge(std::size_t tail, std::size_t head) {
+    check_vertex(tail);
+    check_vertex(head);
+    Arc** out_link = &vertices_[tail].firstout;
+    while (*out_link && (*out_link)->head != head) {
+        out_link = &(*out_link)->tailnextarc;
+    }
+    if (!*out_link) {
+        return false;
+    }
+
+    Arc* victim = *out_link;
+    *out_link = victim->tailnextarc;
+    Arc** in_link = &vertices_[head].firstin;
+    while (*in_link != victim) {
+        in_link = &(*in_link)->headnextarc;
+    }
+    *in_link = victim->headnextarc;
+    arcs_.erase(std::remove_if(arcs_.begin(), arcs_.end(),
+                               [victim](const std::unique_ptr<Arc>& owned) {
+                                   return owned.get() == victim;
+                               }),
+                arcs_.end());
+    return true;
+}
+```
+
+删除顺序不能颠倒：出链摘一次，入链摘一次，最后让唯一所有者释放。只摘一条链时，
+另一方向的遍历会读到已删除的弧。
+
+---
+
 # 7.4 深度优先周游
 
 ```cpp file=code/ch07/graph/modern.hpp#dfs

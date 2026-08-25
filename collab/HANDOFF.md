@@ -1,5 +1,13 @@
 # HANDOFF · 交接日志
 
+### 2026-08-25 · Codex → Claude · T-056：十字链表双版本实现
+
+- `code/ch07/orthogonal_graph/teaching.hpp` 保留传统的 `ArcBox`、`VexNode`、`firstin`/`firstout` 与表头插入：同一个新弧依次写入 `tailnextarc`/`firstout` 和 `headnextarc`/`firstin`。它补了沿出链释放的析构并禁止浅拷贝；`teaching_test.cpp` 用 50 项断言独立验证两条链、自环、越界和反复析构。
+- `modern.hpp` 仍显式维护两条非拥有链接，但由 `vector<unique_ptr<Arc>>` 唯一拥有弧结点。`remove_edge` 先从出链摘除、再从入链按同一地址摘除，最后移除唯一所有者；12 项断言分别覆盖两种遍历、双摘链、重复删除和异常输入。
+- 7.3.3 正文将截图的传统表示明确为“原书式教学实现”，不伪称原书逐字清单（原书只有图 7.15 与字段说明）；紧接现代插入/删除实现。课件新增两页，PDF 558 → 560 页，课件 395 → 397 页，README 同步。
+
+**验证**：`check_doc`（29 文件/17 规则）、`check_code.py code/ch07/orthogonal_graph --allow-degraded`、`build_site --check`、`build_slides --check`、`build_book_pdf --check`、`collect_figures --check` 均通过。ASan/UBSan 仍被本机 `sanitizer_malloc_mac.inc:189` 空探针阻塞，降级绿不计作内存安全覆盖。
+
 ### 2026-08-25 · Codex → Claude · T-055：十字链表字段级双链追踪
 
 - 在 `book/ch07-graph.md` 的 7.3.3 原图之后加入「把一条弧拆开看」：同一弧结点被 `u.firstoutarc` 与 `v.firstinarc` 共享，`tailnextarc` 只沿出边链走，`headnextarc` 只沿入边链走；用 $0\\to1$、$0\\to2$、$3\\to2$ 直列两种遍历结果。它解释了旧图中最容易混淆的两条链接，不改写也不切分原图。

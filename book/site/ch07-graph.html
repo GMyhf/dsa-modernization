@@ -663,6 +663,76 @@ public:
 <p>邻接表只沿出边组织数据；如果还要频繁查询“哪些边指向这个顶点”，就得另存一份逆邻接表。十字链表把两种方向接在同一个弧结点上：<code>tailnextarc</code> 串起同一尾点的出边，<code>headnextarc</code> 串起同一头点的入边；顶点同时保存 <code>firstoutarc</code> 和 <code>firstinarc</code>。每条弧只分配一个结点，却能在 <span class="math">O(<span class="upr">deg</span><sup><span class="bin">+</span></sup>(v))</span> 或 <span class="math">O(<span class="upr">deg</span><sup><span class="bin">−</span></sup>(v))</span> 时间遍历出边或入边，空间为 <span class="math">O(V<span class="bin">+</span>E)</span>。</p>
 <figure><img loading="lazy" src="../assets/462d5cf907d0b5d5.jpg" alt="图 7.15 有向图的十字链表示例"><figcaption>图 7.15 有向图的十字链表示例</figcaption></figure>
 <p>图 7.15　有向图的十字链表示例。每条弧只有一个结点，却同时挂在「同尾」和「同头」两条链上——邻接表与逆邻接表的信息合在了一起，不必存两份。</p>
+<h4 id="原书式教学实现把两次挂接写在眼前"><a class="anchor" href="#原书式教学实现把两次挂接写在眼前">#</a>原书式教学实现：把两次挂接写在眼前</h4>
+<p>原书 7.3.3 本身只有图和字段说明，没有独立代码清单。这里保留截图所用的传统教材写法： <code>ArcBox</code>、<code>VexNode</code>、裸链接和表头插入。它不是把截图伪称为原书逐字代码，而是把图 7.15 的 表示法写成一份可以运行的教学版；为使其能安全结束生命周期，补上了析构并禁止浅拷贝。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/orthogonal_graph/teaching.hpp">code/ch07/orthogonal_graph/teaching.hpp#orthogonal-arcbox</a></div><pre><code><span class="k">struct</span> ArcBox {
+    std::<span class="t">size_t</span> tailvex;       <span class="c">// 弧尾 u</span>
+    std::<span class="t">size_t</span> headvex;       <span class="c">// 弧头 v</span>
+    ArcBox* tailnextarc;       <span class="c">// 下一条同尾弧</span>
+    ArcBox* headnextarc;       <span class="c">// 下一条同头弧</span>
+    <span class="t">int</span> info;                  <span class="c">// 权值或其他边属性</span>
+};
+
+<span class="k">struct</span> VexNode {
+    ArcBox* firstin = <span class="k">nullptr</span>;   <span class="c">// 第一条指向本顶点的弧</span>
+    ArcBox* firstout = <span class="k">nullptr</span>;  <span class="c">// 第一条从本顶点出发的弧</span>
+};</code></pre></div>
+<p>先读这两种结点。<code>ArcBox</code> 的前两个域说明“哪条弧”，后两个域说明“这条弧在两条链中各接向哪里”； <code>VexNode</code> 的两个表头则分别给出入链和出链的入口。重点是 <code>firstin</code> 与 <code>firstout</code> 指向的可以是 同一个 <code>ArcBox</code>，并没有第二份边结点。</p>
+<p>下面六行就是传统写法最值得保留的地方。先 <code>new</code> 出<strong>一个</strong>弧结点；<code>tailnextarc</code> 接住旧出链表头， 再改 <code>firstout</code>；<code>headnextarc</code> 接住旧入链表头，再改 <code>firstin</code>。表头插入所以最新插入的弧先被遍历到。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/orthogonal_graph/teaching.hpp">code/ch07/orthogonal_graph/teaching.hpp#orthogonal-teaching-add</a></div><pre><code><span class="t">void</span> add_edge(std::<span class="t">size_t</span> tail, std::<span class="t">size_t</span> head, <span class="t">int</span> info = <span class="n">1</span>) {
+    check_vertex(tail);
+    check_vertex(head);
+    <span class="k">auto</span>* arc = <span class="k">new</span> ArcBox{tail, head, vertices_[tail].firstout,
+                           vertices_[head].firstin, info};
+    vertices_[tail].firstout = arc;  <span class="c">// 接进 tail 的出边链</span>
+    vertices_[head].firstin = arc;   <span class="c">// 同一结点接进 head 的入边链</span>
+    ++arc_count_;
+}</code></pre></div>
+<p><code>clear()</code> 沿每个顶点的<strong>出链</strong>释放一次即可，因为每条弧恰好属于一个尾点；绝不能再沿入链释放。 教学版删除复制构造和复制赋值，防止两个图对象析构同一批 <code>ArcBox</code>。这些资源边界不改变“一个结点、 两条链”的教学结构，只把短例中通常省略的收尾补齐。</p>
+<h4 id="现代实现所有权集中双链仍显式"><a class="anchor" href="#现代实现所有权集中双链仍显式">#</a>现代实现：所有权集中，双链仍显式</h4>
+<p>完整可编译类型在 <code>code/ch07/orthogonal_graph/modern.hpp</code>。它用 <code>std::vector&lt;std::unique_ptr&lt;Arc&gt;&gt; arcs_</code> 集中拥有每个弧结点；<code>firstin</code>、<code>firstout</code>、 <code>tailnextarc</code>、<code>headnextarc</code> 仍是裸的<strong>非拥有</strong>链接，因此双链的形状没有被智能指针藏掉。</p>
+<p>插入仍是与教学版相同的两次挂接，只是 <code>owned</code> 最后移入唯一所有者表：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/orthogonal_graph/modern.hpp">code/ch07/orthogonal_graph/modern.hpp#orthogonal-modern-add</a></div><pre><code><span class="t">void</span> add_edge(std::<span class="t">size_t</span> tail, std::<span class="t">size_t</span> head, <span class="t">int</span> info = <span class="n">1</span>) {
+    check_vertex(tail);
+    check_vertex(head);
+    <span class="k">if</span> (find_arc(tail, head)) {
+        <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;duplicate edge&quot;</span>);
+    }
+
+    <span class="k">auto</span> owned = std::make_unique&lt;Arc&gt;(tail, head, info);
+    Arc* arc = owned.get();
+    arc-&gt;tailnextarc = vertices_[tail].firstout;
+    vertices_[tail].firstout = arc;
+    arc-&gt;headnextarc = vertices_[head].firstin;
+    vertices_[head].firstin = arc;
+    arcs_.push_back(std::move(owned));
+}</code></pre></div>
+<p>删除最能检验两条链是否真的独立维护：先在尾点出链找到并摘下 <code>victim</code>，再在头点入链找到<strong>同一地址</strong> 并摘下，最后从 <code>arcs_</code> 移除唯一所有者，析构自动释放结点。若少掉任一次摘链，测试会分别在出边或入边 查询处失败。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/orthogonal_graph/modern.hpp">code/ch07/orthogonal_graph/modern.hpp#orthogonal-modern-remove</a></div><pre><code><span class="t">bool</span> remove_edge(std::<span class="t">size_t</span> tail, std::<span class="t">size_t</span> head) {
+    check_vertex(tail);
+    check_vertex(head);
+    Arc** out_link = &amp;vertices_[tail].firstout;
+    <span class="k">while</span> (*out_link &amp;&amp; (*out_link)-&gt;head != head) {
+        out_link = &amp;(*out_link)-&gt;tailnextarc;
+    }
+    <span class="k">if</span> (!*out_link) {
+        <span class="k">return</span> <span class="k">false</span>;
+    }
+
+    Arc* victim = *out_link;
+    *out_link = victim-&gt;tailnextarc;
+    Arc** in_link = &amp;vertices_[head].firstin;
+    <span class="k">while</span> (*in_link != victim) {
+        in_link = &amp;(*in_link)-&gt;headnextarc;
+    }
+    *in_link = victim-&gt;headnextarc;
+    arcs_.erase(std::remove_if(arcs_.begin(), arcs_.end(),
+                               [victim](<span class="k">const</span> std::unique_ptr&lt;Arc&gt;&amp; owned) {
+                                   <span class="k">return</span> owned.get() == victim;
+                               }),
+                arcs_.end());
+    <span class="k">return</span> <span class="k">true</span>;
+}</code></pre></div>
 <h4 id="把一条弧拆开看"><a class="anchor" href="#把一条弧拆开看">#</a>把一条弧拆开看</h4>
 <p>先只看一条弧 <span class="math">u<span class="rel">→</span>v</span>。它不是“出边结点复制一份、入边结点再复制一份”，而是<strong>同一个</strong> 弧结点带着两根不同用途的链接：</p>
 <div class="codeblock" data-lang="text"><pre><code>顶点 u 的 firstoutarc  -&gt;  [tailvex=u | headvex=v | tailnextarc=...]  -&gt;  下一条从 u 出发的弧

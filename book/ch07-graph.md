@@ -443,6 +443,108 @@ $O((V+E)\log V)$ 也不能套到矩阵版上。复杂度是「算法 + 存储结
 
 图 7.15　有向图的十字链表示例。每条弧只有一个结点，却同时挂在「同尾」和「同头」两条链上——邻接表与逆邻接表的信息合在了一起，不必存两份。
 
+#### 原书式教学实现：把两次挂接写在眼前
+
+原书 7.3.3 本身只有图和字段说明，没有独立代码清单。这里保留截图所用的传统教材写法：
+`ArcBox`、`VexNode`、裸链接和表头插入。它不是把截图伪称为原书逐字代码，而是把图 7.15 的
+表示法写成一份可以运行的教学版；为使其能安全结束生命周期，补上了析构并禁止浅拷贝。
+
+```cpp file=code/ch07/orthogonal_graph/teaching.hpp#orthogonal-arcbox
+struct ArcBox {
+    std::size_t tailvex;       // 弧尾 u
+    std::size_t headvex;       // 弧头 v
+    ArcBox* tailnextarc;       // 下一条同尾弧
+    ArcBox* headnextarc;       // 下一条同头弧
+    int info;                  // 权值或其他边属性
+};
+
+struct VexNode {
+    ArcBox* firstin = nullptr;   // 第一条指向本顶点的弧
+    ArcBox* firstout = nullptr;  // 第一条从本顶点出发的弧
+};
+```
+
+先读这两种结点。`ArcBox` 的前两个域说明“哪条弧”，后两个域说明“这条弧在两条链中各接向哪里”；
+`VexNode` 的两个表头则分别给出入链和出链的入口。重点是 `firstin` 与 `firstout` 指向的可以是
+同一个 `ArcBox`，并没有第二份边结点。
+
+下面六行就是传统写法最值得保留的地方。先 `new` 出**一个**弧结点；`tailnextarc` 接住旧出链表头，
+再改 `firstout`；`headnextarc` 接住旧入链表头，再改 `firstin`。表头插入所以最新插入的弧先被遍历到。
+
+```cpp file=code/ch07/orthogonal_graph/teaching.hpp#orthogonal-teaching-add
+void add_edge(std::size_t tail, std::size_t head, int info = 1) {
+    check_vertex(tail);
+    check_vertex(head);
+    auto* arc = new ArcBox{tail, head, vertices_[tail].firstout,
+                           vertices_[head].firstin, info};
+    vertices_[tail].firstout = arc;  // 接进 tail 的出边链
+    vertices_[head].firstin = arc;   // 同一结点接进 head 的入边链
+    ++arc_count_;
+}
+```
+
+`clear()` 沿每个顶点的**出链**释放一次即可，因为每条弧恰好属于一个尾点；绝不能再沿入链释放。
+教学版删除复制构造和复制赋值，防止两个图对象析构同一批 `ArcBox`。这些资源边界不改变“一个结点、
+两条链”的教学结构，只把短例中通常省略的收尾补齐。
+
+#### 现代实现：所有权集中，双链仍显式
+
+完整可编译类型在 `code/ch07/orthogonal_graph/modern.hpp`。它用
+`std::vector<std::unique_ptr<Arc>> arcs_` 集中拥有每个弧结点；`firstin`、`firstout`、
+`tailnextarc`、`headnextarc` 仍是裸的**非拥有**链接，因此双链的形状没有被智能指针藏掉。
+
+插入仍是与教学版相同的两次挂接，只是 `owned` 最后移入唯一所有者表：
+
+```cpp file=code/ch07/orthogonal_graph/modern.hpp#orthogonal-modern-add
+void add_edge(std::size_t tail, std::size_t head, int info = 1) {
+    check_vertex(tail);
+    check_vertex(head);
+    if (find_arc(tail, head)) {
+        throw std::invalid_argument("duplicate edge");
+    }
+
+    auto owned = std::make_unique<Arc>(tail, head, info);
+    Arc* arc = owned.get();
+    arc->tailnextarc = vertices_[tail].firstout;
+    vertices_[tail].firstout = arc;
+    arc->headnextarc = vertices_[head].firstin;
+    vertices_[head].firstin = arc;
+    arcs_.push_back(std::move(owned));
+}
+```
+
+删除最能检验两条链是否真的独立维护：先在尾点出链找到并摘下 `victim`，再在头点入链找到**同一地址**
+并摘下，最后从 `arcs_` 移除唯一所有者，析构自动释放结点。若少掉任一次摘链，测试会分别在出边或入边
+查询处失败。
+
+```cpp file=code/ch07/orthogonal_graph/modern.hpp#orthogonal-modern-remove
+bool remove_edge(std::size_t tail, std::size_t head) {
+    check_vertex(tail);
+    check_vertex(head);
+    Arc** out_link = &vertices_[tail].firstout;
+    while (*out_link && (*out_link)->head != head) {
+        out_link = &(*out_link)->tailnextarc;
+    }
+    if (!*out_link) {
+        return false;
+    }
+
+    Arc* victim = *out_link;
+    *out_link = victim->tailnextarc;
+    Arc** in_link = &vertices_[head].firstin;
+    while (*in_link != victim) {
+        in_link = &(*in_link)->headnextarc;
+    }
+    *in_link = victim->headnextarc;
+    arcs_.erase(std::remove_if(arcs_.begin(), arcs_.end(),
+                               [victim](const std::unique_ptr<Arc>& owned) {
+                                   return owned.get() == victim;
+                               }),
+                arcs_.end());
+    return true;
+}
+```
+
 #### 把一条弧拆开看
 
 先只看一条弧 $u\to v$。它不是“出边结点复制一份、入边结点再复制一份”，而是**同一个**
