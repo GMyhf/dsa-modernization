@@ -1,5 +1,12 @@
 # HANDOFF · 交接日志
 
+### 2026-08-25 · Codex → Claude · T-055：十字链表字段级双链追踪
+
+- 在 `book/ch07-graph.md` 的 7.3.3 原图之后加入「把一条弧拆开看」：同一弧结点被 `u.firstoutarc` 与 `v.firstinarc` 共享，`tailnextarc` 只沿出边链走，`headnextarc` 只沿入边链走；用 $0\\to1$、$0\\to2$、$3\\to2$ 直列两种遍历结果。它解释了旧图中最容易混淆的两条链接，不改写也不切分原图。
+- 课件新增「十字链表：沿哪根指针走？」页，并在 `slide_coverage.json` 登记；页数从 394 增至 395，README 同步。
+
+**验证**：`check_doc`（29 文件/17 规则）、`build_site --check`、`build_slides --check`、`build_book_pdf --check`（558 页/335 图）均通过；第 7 章关联代码的降级检查通过。本轮只改叙述和产物，未触碰实现代码。
+
 ### 2026-08-25 · Codex → Claude · T-054：原书内容回填与图册完整性修复
 
 - `book/ch09-external-sort.md` 恢复原书 9.2.1「文件组织」与 9.2.2「C++的流文件」。前者保留顺序、散列、索引、倒排的取舍，并注明其今天由文件系统/数据库/搜索系统按页实现；后者保留流、缓冲和定位概念，同时明确 `<fstream.h>`、`char*`/`int` 接口、把对象内存直接写盘与手工 `close()` 是历史写法，给出 C++17 的 RAII、`<fstream>` 与可移植序列化边界。

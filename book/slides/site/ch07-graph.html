@@ -220,7 +220,31 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <li>顶点保存：<code>firstoutarc</code> 与 <code>firstinarc</code></li>
 </ul>
 <p>因此遍历顶点 <span class="math">v</span> 的出边是 <span class="math">O(<span class="upr">deg</span><sup><span class="bin">+</span></sup>(v))</span>， 遍历入边是 <span class="math">O(<span class="upr">deg</span><sup><span class="bin">−</span></sup>(v))</span>，总空间仍是 <span class="math">O(V<span class="bin">+</span>E)</span>。</p>
-<p><strong>更新不变量</strong>：删除弧必须从出链、入链各摘一次； 只改一边，另一方向会留下指向已释放结点的悬空链接。</p></section><section class="slide" data-notes="&lt;p&gt;树的周游不需要 seen，因为树没有回路。这是图与树的第一个实质差别。
+<p><strong>更新不变量</strong>：删除弧必须从出链、入链各摘一次； 只改一边，另一方向会留下指向已释放结点的悬空链接。</p></section><section class="slide" data-notes=""><h1 id="十字链表沿哪根指针走"><a class="anchor" href="#十字链表沿哪根指针走">#</a>十字链表：沿哪根指针走？</h1>
+<p>对一条弧 <span class="math">u<span class="rel">→</span>v</span>，只有<strong>一个</strong>弧结点：</p>
+<div class="codeblock" data-lang="text"><pre><code>u.firstoutarc -&gt; [tailvex=u | headvex=v | tailnextarc=...] -&gt; 下一条从 u 出发的弧
+                       ^
+v.firstinarc  -&gt; 同一个结点  -- headnextarc --&gt; 下一条指向 v 的弧</code></pre></div>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">想问什么</th>
+<th style="text-align:left">从哪里开始</th>
+<th style="text-align:left">读什么</th>
+<th style="text-align:left">下一步</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><span class="math">u</span> 能去哪里</td>
+<td style="text-align:left"><code>firstoutarc[u]</code></td>
+<td style="text-align:left"><code>headvex</code></td>
+<td style="text-align:left"><code>tailnextarc</code></td>
+</tr>
+<tr>
+<td style="text-align:left">谁能到 <span class="math">v</span></td>
+<td style="text-align:left"><code>firstinarc[v]</code></td>
+<td style="text-align:left"><code>tailvex</code></td>
+<td style="text-align:left"><code>headnextarc</code></td>
+</tr>
+</tbody></table></div>
+<p>例：插入 <span class="math"><span class="upr">0</span><span class="rel">→</span><span class="upr">1</span></span>、<span class="math"><span class="upr">0</span><span class="rel">→</span><span class="upr">2</span></span>、<span class="math"><span class="upr">3</span><span class="rel">→</span><span class="upr">2</span></span> 后，走 0 的出链得到 1、2；走 2 的入链得到 0、3。</p></section><section class="slide" data-notes="&lt;p&gt;树的周游不需要 seen，因为树没有回路。这是图与树的第一个实质差别。
 DFS 递归写法的深度是路径长度，极端图上仍有爆栈风险——第 3 章那张表适用。&lt;/p&gt;"><h1 id="74-深度优先周游"><a class="anchor" href="#74-深度优先周游">#</a>7.4 深度优先周游</h1>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#dfs</a></div><pre><code>[[nodiscard]] std::vector&lt;std::<span class="t">size_t</span>&gt; dfs(std::<span class="t">size_t</span> source) <span class="k">const</span> {
     check_vertex(source);
@@ -423,7 +447,7 @@ python3 tools/check_code.py code/ch07/adjacency_list</code></pre></div>
 <blockquote><p>邻接表和邻接矩阵两套实现在测试里<strong>逐项对拍</strong>： 同一张图上，所有算法必须给出同样的答案。</p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第7章 图</div><div class="thumb"><div class="no">2</div>7.1 基本术语</div><div class="thumb"><div class="no">3</div>连通与强连通</div><div class="thumb"><div class="no">4</div>7.2 图的 ADT：对外有哪些运算</div><div class="thumb"><div class="no">5</div>7.3.1 相邻矩阵</div><div class="thumb"><div class="no">6</div>7.3.2 邻接表</div><div class="thumb"><div class="no">7</div>两种存法的代价对照</div><div class="thumb"><div class="no">8</div>7.3.3 十字链表：一条弧进两条链</div><div class="thumb"><div class="no">9</div>7.4 深度优先周游</div><div class="thumb"><div class="no">10</div>广度优先周游</div><div class="thumb"><div class="no">11</div>7.4.3 拓扑排序</div><div class="thumb"><div class="no">12</div>拓扑排序：不断摘入度为 0 的点</div><div class="thumb"><div class="no">13</div>7.5.1 单源最短路：Dijkstra</div><div class="thumb"><div class="no">14</div>Dijkstra 的实现</div><div class="thumb"><div class="no">15</div>7.5.2 每对顶点：Floyd</div><div class="thumb"><div class="no">16</div>7.6 最小生成树</div><div class="thumb"><div class="no">17</div>Prim：从点出发</div><div class="thumb"><div class="no">18</div>Kruskal：从边出发</div><div class="thumb"><div class="no">19</div>最短路树 ≠ 最小生成树</div><div class="thumb"><div class="no">20</div>课堂讲解卡：图算法先看存储和不变量</div><div class="thumb"><div class="no">21</div>课堂例题：从 0 出发的带权图</div><div class="thumb"><div class="no">22</div>课堂例题答案：三个算法的结果</div><div class="thumb"><div class="no">23</div>课末自检</div><div class="thumb"><div class="no">24</div>课末自检参考答案</div><div class="thumb"><div class="no">25</div>状态演算：Dijkstra 松弛</div><div class="thumb"><div class="no">26</div>反例：负边</div><div class="thumb"><div class="no">27</div>课堂练习与答案</div><div class="thumb"><div class="no">28</div>Python 算法轨：图的遍历与最短路</div><div class="thumb"><div class="no">29</div>本章小结</div><div class="thumb"><div class="no">30</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第7章 图</div><div class="thumb"><div class="no">2</div>7.1 基本术语</div><div class="thumb"><div class="no">3</div>连通与强连通</div><div class="thumb"><div class="no">4</div>7.2 图的 ADT：对外有哪些运算</div><div class="thumb"><div class="no">5</div>7.3.1 相邻矩阵</div><div class="thumb"><div class="no">6</div>7.3.2 邻接表</div><div class="thumb"><div class="no">7</div>两种存法的代价对照</div><div class="thumb"><div class="no">8</div>7.3.3 十字链表：一条弧进两条链</div><div class="thumb"><div class="no">9</div>十字链表：沿哪根指针走？</div><div class="thumb"><div class="no">10</div>7.4 深度优先周游</div><div class="thumb"><div class="no">11</div>广度优先周游</div><div class="thumb"><div class="no">12</div>7.4.3 拓扑排序</div><div class="thumb"><div class="no">13</div>拓扑排序：不断摘入度为 0 的点</div><div class="thumb"><div class="no">14</div>7.5.1 单源最短路：Dijkstra</div><div class="thumb"><div class="no">15</div>Dijkstra 的实现</div><div class="thumb"><div class="no">16</div>7.5.2 每对顶点：Floyd</div><div class="thumb"><div class="no">17</div>7.6 最小生成树</div><div class="thumb"><div class="no">18</div>Prim：从点出发</div><div class="thumb"><div class="no">19</div>Kruskal：从边出发</div><div class="thumb"><div class="no">20</div>最短路树 ≠ 最小生成树</div><div class="thumb"><div class="no">21</div>课堂讲解卡：图算法先看存储和不变量</div><div class="thumb"><div class="no">22</div>课堂例题：从 0 出发的带权图</div><div class="thumb"><div class="no">23</div>课堂例题答案：三个算法的结果</div><div class="thumb"><div class="no">24</div>课末自检</div><div class="thumb"><div class="no">25</div>课末自检参考答案</div><div class="thumb"><div class="no">26</div>状态演算：Dijkstra 松弛</div><div class="thumb"><div class="no">27</div>反例：负边</div><div class="thumb"><div class="no">28</div>课堂练习与答案</div><div class="thumb"><div class="no">29</div>Python 算法轨：图的遍历与最短路</div><div class="thumb"><div class="no">30</div>本章小结</div><div class="thumb"><div class="no">31</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -436,7 +460,7 @@ python3 tools/check_code.py code/ch07/adjacency_list</code></pre></div>
 <b>第7章 图</b><span>数据结构与算法：Python 讲可迁移算法，C++ 讲存储与工程实现</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 30</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 31</b>
 </div>
 <script>
 (function(){

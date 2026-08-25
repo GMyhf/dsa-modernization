@@ -22,7 +22,7 @@
 台账   104 已现代化 / 1 退场 / 0 待办  = 105 条清单
 书稿   29 个文件（12 章正文 + 总目录 + 习题 + 勘误 + 插图，加 13 套课件），17 条规则通过
 成品   PDF（book/pdf/，558 页）、网页版（book/site/，双击 index.html 即可读）
-       与课件（book/slides/，394 页幻灯片）
+       与课件（book/slides/，395 页幻灯片）
 代码   34 个单元 × 2 种构建（Debug+ASan/UBSan、Release-O2）
        其中 1 个单元另有 Python 实现，再跑 2 档（默认、-X dev -W error）
 自测   365 项（闸门自己的单元测试）

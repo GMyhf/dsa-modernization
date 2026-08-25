@@ -142,6 +142,25 @@ infinity 取 INT_MAX/4 而不是 INT_MAX——Floyd 里两个 infinity 会相加
 
 ---
 
+# 十字链表：沿哪根指针走？
+
+对一条弧 $u\to v$，只有**一个**弧结点：
+
+```text
+u.firstoutarc -> [tailvex=u | headvex=v | tailnextarc=...] -> 下一条从 u 出发的弧
+                       ^
+v.firstinarc  -> 同一个结点  -- headnextarc --> 下一条指向 v 的弧
+```
+
+| 想问什么 | 从哪里开始 | 读什么 | 下一步 |
+| --- | --- | --- | --- |
+| $u$ 能去哪里 | `firstoutarc[u]` | `headvex` | `tailnextarc` |
+| 谁能到 $v$ | `firstinarc[v]` | `tailvex` | `headnextarc` |
+
+例：插入 $0\to1$、$0\to2$、$3\to2$ 后，走 0 的出链得到 1、2；走 2 的入链得到 0、3。
+
+---
+
 # 7.4 深度优先周游
 
 ```cpp file=code/ch07/graph/modern.hpp#dfs
