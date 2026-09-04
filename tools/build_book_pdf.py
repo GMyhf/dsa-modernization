@@ -42,9 +42,12 @@ CHAPTERS = [
     BOOK / "ch12-advanced.md",
     BOOK / "习题与参考答案.md",
     ROOT / "DSA_MOOC_solution.md",
-    BOOK / "插图.md",
     BOOK / "勘误.md",
 ]
+
+# `book/插图.md` **有意不在这张表里**（2026-09-04）。它是上游 OCR 图库那 292 张的记录，
+# 归 `collect_figures.py --check` 核；正文用的图现在全是 `assets/scan/` 下的扫描件裁图。
+# 两者同时进 PDF，等于每张图印两遍——学生版因此白涨 4MB。图册留在仓库与网页版里。
 
 FRONT_MATTER = """---
 title: 数据结构与算法：Python 讲算法，C++ 讲实现

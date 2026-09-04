@@ -224,11 +224,23 @@ class TestPdfFreshness(unittest.TestCase):
                 build_book_pdf.CHAPTERS = original
 
     def test_committed_pdf_hash_covers_every_referenced_figure(self):
-        """入库书稿当锚：292 张图一张不落地进摘要。"""
+        """入库书稿当锚：进 PDF 的每一张图都要落进摘要。"""
         assets = build_book_pdf.referenced_assets()
         self.assertGreater(len(assets), 200, "正文引用的插图数不该突然掉下来")
         self.assertTrue(all(path.is_file() for path in assets))
         self.assertTrue(all("assets" in path.parts for path in assets))
+
+    def test_the_ocr_album_is_not_in_the_student_pdf(self):
+        """`book/插图.md` 是上游 OCR 图库的记录，不进学生 PDF。
+
+        正文用的图现在全是扫描件裁图，图册再进来就等于每张图印两遍。
+        这条钉住的是那个决定本身——把图册加回 CHAPTERS 会让它红。
+        """
+        names = [path.name for path in build_book_pdf.CHAPTERS]
+        self.assertNotIn("插图.md", names)
+        assets = {path.name for path in build_book_pdf.referenced_assets()}
+        self.assertFalse({name for name in assets if name.endswith(".jpg")},
+                         "进 PDF 的图应当全是 assets/scan/ 下的裁图")
 
     def test_one_character_source_change_is_caught(self):
         with tempfile.TemporaryDirectory() as tmp:
