@@ -25,7 +25,7 @@
        与课件（book/slides/，397 页幻灯片）
 代码   35 个单元 × 2 种构建（Debug+ASan/UBSan、Release-O2）
        其中 1 个单元另有 Python 实现，再跑 2 档（默认、-X dev -W error）
-自测   365 项（闸门自己的单元测试）
+自测   376 项（闸门自己的单元测试）
 ```
 
 `python3 tools/handoff.py --verify` 退出码 0。
@@ -101,11 +101,11 @@ git add -A && git commit -m "..." && git push
 | `book/` | 现代化后的书稿：12 章正文 + [总目录](book/数据结构与算法.md) + [原书勘误](book/勘误.md) + [插图](book/插图.md)。292 张图在 `book/assets/`。发给学生的带书签 PDF：[`book/pdf/数据结构与算法.pdf`](book/pdf/数据结构与算法.pdf)（`python3 tools/build_book_pdf.py` 重编）；浏览器版：[`book/site/index.html`](book/site/index.html)（`python3 tools/build_site.py` 重编） |
 | `code/<章>/<单元>/` | 一个清单单元：`unit.json`（认领哪几条清单）、`legacy.md`（原书写法→缺陷证据→现代写法）、`modern.hpp`、`test.cpp` |
 | `code/support/` | 各章测试共用的故障注入探针（只放探针，不放任何数据结构实现） |
-| `tools/` | 闸门与脚手架，纯标准库 |
-| `tests/` | 闸门自身的单元测试，365 项 |
+| `tools/` | 闸门与脚手架，纯标准库。其中 `pdfref.py` 按节号把原版扫描件渲染成书页图，`fidelity.py` 量正文保全度 |
+| `tests/` | 闸门自身的单元测试，376 项 |
 | `collab/` | 协作事实源：PLAN / DECISION_LOG / HANDOFF / 双向 NOTES / 退场记录 |
 
-## 四条闸门
+## 五条闸门
 
 1. **台账**（`ledger.py`）——原书 105 条清单，每条要么被某个 `code/` 单元认领，
    要么在 `collab/exclusions.json` 里带理由退场。**没有第三种状态**，
@@ -116,11 +116,16 @@ git add -A && git commit -m "..." && git push
 3. **代码**（`check_code.py`）——每个单元在 `-Wall -Wextra -Wpedantic -Werror` 下
    编译两遍：Debug + ASan/UBSan，以及 Release -O2。两遍都要真跑起来、断言全过。
    （实测：同一段越界 UB 在 `-O2` 那档是**静默通过**的——这就是为什么要跑两种构建。）
-4. **实质性检查**（`check_code.py` 的 `check_substance`）——每条清单至少 3 项断言，
+4. **正文保全度**（`fidelity.py`）——按节比较「原书正文汉字数」与「新书正文汉字数」。
+   第 2 条只问「同号的节在不在」，答案永远是「在」；这一条问的是**原书的话还在不在**。
+   2026-09-04 第一次量：全书 48%。判据是**棘轮**而非及格线——`collab/fidelity.json`
+   记下每节当前值，掉下去才红；有意压缩要签字。原书逐字怎么写，以扫描件为准
+   （`tools/pdfref.py`，见 D-034）。
+5. **实质性检查**（`check_code.py` 的 `check_substance`）——每条清单至少 3 项断言，
    `legacy.md` 至少 20 行且含可复现证据。**没有豁免字段**，这是有意的：
    一旦开了逃生口，最先用它的就是最该被拦下的那类提交。
 
-> 这四条不是设计出来的，是被真事逼出来的。第 4 条来自一次**结构合规、内容近乎为空**
+> 这五条不是设计出来的，是被真事逼出来的。第 5 条来自一次**结构合规、内容近乎为空**
 > 的提交：542 行覆盖 61 条清单，第 8 章 17 条排序清单只有 11 项断言，
 > 而 `quick()` 是 `std::sort`、`heap()` 是 `std::make_heap`。
 > 详见 `collab/DECISION_LOG.md` 的 D-007。

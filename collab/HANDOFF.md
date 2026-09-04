@@ -1,5 +1,46 @@
 # HANDOFF · 交接日志
 
+### 2026-09-04 · Claude → Codex · T-057：扫描件进项目 + 正文保全度棘轮 + 第 1 章回填（D-034）
+
+- 人放进 2008 年原版扫描 PDF（396 页，纯图像，`pdftotext` 输出全空），并给出方针：
+  **尽量保留原书正确的内容和文字**。新增两把工具：
+  `tools/pdfref.py` 把「节号 / 清单号 → 书页 → PNG」串起来（书页 = PDF 页 − 14，
+  目录索引 190 条由 `dsa_raw.md` 的点线目录解析得到，不是手抄）；
+  `tools/fidelity.py` 按节比较正文汉字数（两侧剥掉代码块）。
+- **第一次量出来的数字：全书正文只保全了原书的 48%。** 11.6 红黑树 0.00、
+  8.7 排序时间代价 0.15、10.3 散列 0.23、12.4 改进的二叉搜索树 0.22。
+  R10 全程是绿的——它问「同号的节在不在」，而丢的是节里的内容。
+- 保全度做成**棘轮**接进闸门第 3a 步：`collab/fidelity.json` 记基线，只升不降，
+  掉下去判红（容差 0.02）；有意压缩要在 `waivers` 里签字（reason/by/date）。
+  `tests/test_fidelity.py` 11 项自测钉住三个真踩过的切分坑：围栏极性要全局算、
+  `## 本章小结` 要断开当前节、节内无编号小标题要算进这一节。
+- 按扫描件回填第 1 章 1.2 / 1.3 / 1.4：0.63 → 1.02、0.46 → 1.05、0.25 → 1.05，
+  全章 0.50 → 1.01。补回的包括逻辑结构三分类的完整定义、存储映射 $K \to M$、
+  存储密度、索引函数 $Y : Z \to D$、散列函数的两条性质、算法四性质、六种设计方法、
+  大 $O$ 的定义 1 与六条性质、$\Omega$ 定义 2、$\Theta$ 例子、**原书表 1.2「各个量级的实例」
+  （20 行，此前整张丢失）**、平均情况的加权公式与不等概率推导、时空折衷原理。
+- 扫描件当天抓到三处**原书自身**的问题（正文就地说明，不进 `勘误.md`——那张表只收清单级）：
+  p.19「最长有序子数组」例程判断与赋值差 2（用原书自己的例子跑出 2 而非 3）；
+  p.13 把二分检索说成第 8、9 章（实为第 10 章）；p.14 两位作者姓名拼错。
+
+**验证**：`python3 tools/handoff.py --verify` 退出码 0，12 步全绿。
+
+```text
+$ python3 -m unittest discover -s tests             376 项自测通过（新增 11 项）
+$ python3 tools/ledger.py --check                   104/105 已现代化，1 退场，0 待办
+$ python3 tools/errata.py --check                   40 条，15 条有回归测试
+$ python3 tools/check_doc.py                        29 个文件，17 条规则
+$ python3 tools/fidelity.py --check                 53 节未回退，整体 53%，28 节仍不足一半
+$ python3 tools/build_site.py --check               16 个页面一致
+$ python3 tools/build_slides.py --check             13 个页面一致
+$ python3 tools/build_book_pdf.py --check           560 页、17 章、335 图，sha256 d12f3d428b3a
+$ python3 tools/collect_figures.py --check          292 张图逐项相符
+$ python3 tools/check_code.py                       35/35 单元 × 2 档（13 个另跑 Python 2 档）
+```
+
+**想请你重点看的三件事**（写在 `NOTES-claude.md`）：保全度这个判据本身是否成立、
+第 1 章回填有没有把原书的话抄错或抄成似是而非、以及剩下 83 768 汉字的缺口按什么顺序还。
+
 ### 2026-08-25 · Codex → Claude · T-056：十字链表双版本实现
 
 - `code/ch07/orthogonal_graph/teaching.hpp` 保留传统的 `ArcBox`、`VexNode`、`firstin`/`firstout` 与表头插入：同一个新弧依次写入 `tailnextarc`/`firstout` 和 `headnextarc`/`firstin`。它补了沿出链释放的析构并禁止浅拷贝；`teaching_test.cpp` 用 50 项断言独立验证两条链、自环、越界和反复析构。

@@ -29,6 +29,9 @@ decisions live only in DECISION_LOG so the two can't drift apart.
 python3 tools/handoff.py --verify      # the gate: self-tests → ledger → book → compile+run
 python3 tools/ledger.py                # coverage over the book's 105 listings
 python3 tools/ledger.py --pending      # listings nobody has claimed yet
+python3 tools/fidelity.py              # prose-preservation ledger: how much of the original's text survives
+python3 tools/fidelity.py --check      # ratchet: a section thinned below its baseline turns the gate red
+python3 tools/pdfref.py --section 8.4  # render the original scan's pages for that section (needs the PDF)
 python3 tools/errata.py                # errata → the assertion that goes red if it regresses
 python3 tools/errata.py --check        # same, verify only (non-zero exit on gaps)
 python3 tools/check_code.py [unit]     # -Werror + ASan/UBSan and -O2, both must run green
@@ -64,7 +67,7 @@ Full text in `collab/DECISION_LOG.md`; the four load-bearing rules:
 
 ## How the pieces fit
 
-The gate is the architecture. Four arbiters, each answering a question documents cannot:
+The gate is the architecture. Five arbiters, each answering a question documents cannot:
 
 - **`tools/ledger.py`** — derives coverage instead of tracking it by hand. Inventory comes
   from parsing `【算法X.Y】`/`【代码X.Y】` out of `dsa_raw.md` (105 listings); "covered" is
@@ -86,6 +89,15 @@ The gate is the architecture. Four arbiters, each answering a question documents
   (`勘误R10`) appears in some `code/**/test.cpp` assertion, so "we fixed that" is a grep
   result rather than a claim. `compile` entries instead need a `legacy.md` containing real
   `error:` output; `prose`/`na` entries need reason + owner + date, like `exclusions.json`.
+- **`tools/fidelity.py`** — the prose-preservation ratchet (D-034). Per section, it compares the
+  original's Chinese-character count in `dsa_raw.md` against the new book's, code blocks stripped
+  from both. R10 only asks whether a same-numbered section exists; this asks whether the original's
+  *text* is still there. First measurement (2026-09-04): the whole book preserved **48%**.
+  There is no pass mark — `collab/fidelity.json` records each section's current ratio and
+  `--check` goes red only when one **drops**, so thinning a section has to be a signed decision.
+  When you need to know what the original actually said, the scan is the authority, not the OCR:
+  `tools/pdfref.py --section X.Y` renders those printed pages (printed page = PDF page − 14).
+  The 26MB scan is gitignored; the tool degrades to a hint when it is absent.
 - **`tools/check_code.py`** — compiles every unit twice (`-Werror` + ASan/UBSan, and
   `-O2`) and runs it. Both profiles matter: a heap overflow that UBSan aborts on in the
   debug build passes *silently* under `-O2`.
