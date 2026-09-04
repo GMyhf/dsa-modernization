@@ -156,6 +156,9 @@ def run_verify():
         ["python3", "tools/errata.py", "--check"],
         # 3. 书稿：OCR 残留、编号、插图、以及「书上代码 == code/ 里的代码」。
         ["python3", "tools/check_doc.py"],
+        # 3a. 正文保全度棘轮：R10 只问「同号的节在不在」，这一步问「原书的话还在不在」。
+        #     任何一节被改薄到基线以下就红（D-034）。
+        ["python3", "tools/fidelity.py", "--check"],
         # 3b. 网页版：book/site/ 是 book/*.md 的产物，改了书稿不重新构建就会脱节。
         ["python3", "tools/build_site.py", "--check"],
         # 3c. 课件：同理，book/slides/site/ 是 book/slides/*.md 的产物。
