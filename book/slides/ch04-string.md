@@ -76,7 +76,7 @@ ASCII 中数字、大写字母、小写字母各自连续递增，
 
 字符串长度会变。所以要**动态分配、按新长度重新开辟、拷贝、释放**。
 
-![图4.3 创建字符串的示意图](../assets/17558c608a970971.jpg)
+![图4.3 创建字符串的示意图](../assets/scan/fig-4-3.png)
 
 所以这里是手写的 `char*` 缓冲区，**不是** `std::string`——
 换成 `std::string`，这一节就没了。
@@ -248,7 +248,7 @@ std::optional<size_type> find(char c, size_type start = 0) const {
 
 在正文 T 里找模式 P 第一次出现的位置。
 
-![图 4.6 朴素匹配的示例](../assets/a01806ddff22b2f2.jpg)
+![图 4.6 朴素匹配的示例](../assets/scan/fig-4-6.png)
 
 **朴素做法**：把 P 对齐到 T 的每个位置试一遍，
 失配就把 P 整体右移一位，从头再比。
@@ -364,7 +364,7 @@ next  -1  0  0  1  2
 
 # KMP：失配时模式退，文本不退
 
-![图 4.12 KMP 匹配示例](../assets/4f9aa9617b2ddc56.jpg)
+![图 4.12 KMP 匹配示例](../assets/scan/fig-4-12.png)
 
 失配在模式的第 j 位时：
 

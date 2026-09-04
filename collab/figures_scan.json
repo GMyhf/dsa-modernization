@@ -9,6 +9,108 @@
   ],
   "figures": [
     {
+      "id": "图1.1",
+      "file": "fig-1-1.png",
+      "page": 3,
+      "box": [
+        842,
+        438,
+        510,
+        480
+      ],
+      "dpi": 200,
+      "sha256": "cc1d57f22a73a43a224e1da6754a4ec876069e47552ef7d9af4a6cac515a9d57",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "4d3c879e7409ef1c.jpg",
+      "match": 0.924
+    },
+    {
+      "id": "图1.3",
+      "file": "fig-1-3.png",
+      "page": 5,
+      "box": [
+        928,
+        1258,
+        292,
+        224
+      ],
+      "dpi": 200,
+      "sha256": "4b2929f33168f703276d8bdccd55eb0381a4b4592c831579d41c14b91482e51e",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "9c92f7de8d2fab34.jpg",
+      "match": 0.918
+    },
+    {
+      "id": "图1.4",
+      "file": "fig-1-4.png",
+      "page": 9,
+      "box": [
+        338,
+        228,
+        780,
+        216
+      ],
+      "dpi": 200,
+      "sha256": "9cc827ea9bf206ddf43d1f77afe77489700949f54e670f3400e9928b1d646534",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "40916b3631d4d819.jpg",
+      "match": 0.898
+    },
+    {
+      "id": "图1.5",
+      "file": "fig-1-5.png",
+      "page": 17,
+      "box": [
+        446,
+        1146,
+        526,
+        456
+      ],
+      "dpi": 200,
+      "sha256": "addeed2062c81d71b4d1d4e0eda68d1b4af63a60f3c6f3d49580338c6c05d1d4",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "c33523f30da594f0.jpg",
+      "match": 0.915
+    },
+    {
+      "id": "图2.4",
+      "file": "fig-2-4.png",
+      "page": 34,
+      "box": [
+        372,
+        1258,
+        648,
+        66
+      ],
+      "dpi": 200,
+      "sha256": "ed64f18ea4a1a3d39809b57a96595f7cea007a9ef6d9e9f581869add95c8b27c",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "6e2bc11926f0ec96.jpg",
+      "match": 0.957
+    },
+    {
+      "id": "图2.5",
+      "file": "fig-2-5.png",
+      "page": 35,
+      "box": [
+        260,
+        1164,
+        912,
+        68
+      ],
+      "dpi": 200,
+      "sha256": "ab82bd3caa556d3da7b9409f2b9819e238a5f43acaeacc5070cef341f920271a",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "6c7f366bed4583ff.jpg",
+      "match": 0.862
+    },
+    {
       "id": "图2.6",
       "file": "fig-2-6.png",
       "page": 36,
@@ -22,6 +124,312 @@
       "sha256": "4d32a1507e1d724ff3ee1e187dabd2fe7002e2269fe26dfe6806dac4cb992b1c",
       "by": "Claude",
       "date": "2026-09-04"
+    },
+    {
+      "id": "图2.7",
+      "file": "fig-2-7.png",
+      "page": 39,
+      "box": [
+        220,
+        160,
+        1020,
+        282
+      ],
+      "dpi": 200,
+      "sha256": "320ddbd8b848b1671c025d1e640b4308fcb635d92301b31eb11b08d9e02dbc61",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "995a8257623869d1.jpg",
+      "match": 0.914
+    },
+    {
+      "id": "图2.8",
+      "file": "fig-2-8.png",
+      "page": 40,
+      "box": [
+        146,
+        266,
+        1068,
+        220
+      ],
+      "dpi": 200,
+      "sha256": "a547b146934c507c06a71bec140bb2a606299b04568ce96a009bbe2034a5b890",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "8a7435561d286746.jpg",
+      "match": 0.9
+    },
+    {
+      "id": "图2.9",
+      "file": "fig-2-9.png",
+      "page": 40,
+      "box": [
+        182,
+        932,
+        1018,
+        194
+      ],
+      "dpi": 200,
+      "sha256": "621383bc51564db92d9078ee4c01b7972ffc300ff744425637cd4b8869408ff5",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "40ab93045c34a1bf.jpg",
+      "match": 0.92
+    },
+    {
+      "id": "图2.10",
+      "file": "fig-2-10.png",
+      "page": 40,
+      "box": [
+        936,
+        1232,
+        252,
+        88
+      ],
+      "dpi": 200,
+      "sha256": "a0fccb4d42569176a558954e4b6faf9096b2a86f96732d7d96a7678a3a1c7295",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "ebdcb0d7054cf3a9.jpg",
+      "match": 0.98
+    },
+    {
+      "id": "图2.11",
+      "file": "fig-2-11.png",
+      "page": 42,
+      "box": [
+        244,
+        172,
+        920,
+        884
+      ],
+      "dpi": 200,
+      "sha256": "ea0a8f2fcf2406ad146a6f2bf46abc4d3a9ae58258e906546d84ad820b8e57e9",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "f3aa5f7a9ea65ef6.jpg",
+      "match": 0.936
+    },
+    {
+      "id": "图2.12",
+      "file": "fig-2-12.png",
+      "page": 43,
+      "box": [
+        200,
+        230,
+        1046,
+        910
+      ],
+      "dpi": 200,
+      "sha256": "d1f8e26f7789e1e442973ca6914668023789b258fd0ef9d059ef889390062d69",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "1f4184cafed5ae83.jpg",
+      "match": 0.949
+    },
+    {
+      "id": "图2.13",
+      "file": "fig-2-13.png",
+      "page": 43,
+      "box": [
+        302,
+        1196,
+        824,
+        148
+      ],
+      "dpi": 200,
+      "sha256": "5a341d9f0e3db9b4fc65100e60787c3be2a560be6d6dba3f9d5659104713a252",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "89f9ff700933f475.jpg",
+      "match": 0.872
+    },
+    {
+      "id": "图2.14",
+      "file": "fig-2-14.png",
+      "page": 43,
+      "box": [
+        222,
+        1410,
+        984,
+        198
+      ],
+      "dpi": 200,
+      "sha256": "84c4de481b25d0ed478016d4d0a3b27a6a15e6febf6326e3c61d872ec074ee53",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "a24d59d2527028cc.jpg",
+      "match": 0.851
+    },
+    {
+      "id": "图2.15",
+      "file": "fig-2-15.png",
+      "page": 44,
+      "box": [
+        202,
+        170,
+        996,
+        242
+      ],
+      "dpi": 200,
+      "sha256": "2f87a57d4eb368e5844e7c83820782e89b09f9a08dfb3e67acd630d380e36f51",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "b8866e40fb846a83.jpg",
+      "match": 0.974
+    },
+    {
+      "id": "图3.1",
+      "file": "fig-3-1.png",
+      "page": 46,
+      "box": [
+        952,
+        1206,
+        338,
+        324
+      ],
+      "dpi": 200,
+      "sha256": "65a038e4bd4efe39d2a13233187b02e1b8b2581fdc52d7e3649b2e94b60d840f",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "c8966e2bf43b41fc.jpg",
+      "match": 0.945
+    },
+    {
+      "id": "图3.2",
+      "file": "fig-3-2.png",
+      "page": 48,
+      "box": [
+        374,
+        170,
+        660,
+        98
+      ],
+      "dpi": 200,
+      "sha256": "9782411b2011b3b0c17757c1e3a6ad4942b237a5ff87d6d0e696b43192f83861",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "68ddbf0cd26a38ce.jpg",
+      "match": 0.989
+    },
+    {
+      "id": "图3.3",
+      "file": "fig-3-3.png",
+      "page": 50,
+      "box": [
+        232,
+        170,
+        966,
+        398
+      ],
+      "dpi": 200,
+      "sha256": "7512bec377588058e1ee888fed1217bd54a82a8abbb0de1bf774bf753755c6d3",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "8ca1faecb428db01.jpg",
+      "match": 0.961
+    },
+    {
+      "id": "图3.4",
+      "file": "fig-3-4.png",
+      "page": 51,
+      "box": [
+        366,
+        228,
+        710,
+        138
+      ],
+      "dpi": 200,
+      "sha256": "bb0181fc05dac3a4c066852e96947dec759bdb0bfe1949026e67ee34e97bae66",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "cc2722b736c01067.jpg",
+      "match": 0.906
+    },
+    {
+      "id": "图3.6",
+      "file": "fig-3-6.png",
+      "page": 59,
+      "box": [
+        274,
+        880,
+        260,
+        282
+      ],
+      "dpi": 200,
+      "sha256": "8bd95bddb99927e6f794c6f31d172026c22a0139aa9e176590007589248afdd4",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "9c7bc109efa7f350.jpg",
+      "match": 0.982
+    },
+    {
+      "id": "图3.7",
+      "file": "fig-3-7.png",
+      "page": 59,
+      "box": [
+        886,
+        882,
+        262,
+        290
+      ],
+      "dpi": 200,
+      "sha256": "7b6680fd59f9dff712e1d682829c9de20854e6a67505500c88d8144fec5e7d94",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "d573f60f354acc38.jpg",
+      "match": 0.882
+    },
+    {
+      "id": "图3.8",
+      "file": "fig-3-8.png",
+      "page": 61,
+      "box": [
+        120,
+        228,
+        1182,
+        802
+      ],
+      "dpi": 200,
+      "sha256": "bf0433ee44f86859857616f781c89cc77b4fa9f91b914bd2491e10016589747f",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "b94046e379d40a44.jpg",
+      "match": 0.884
+    },
+    {
+      "id": "图3.9",
+      "file": "fig-3-9.png",
+      "page": 68,
+      "box": [
+        228,
+        1020,
+        904,
+        86
+      ],
+      "dpi": 200,
+      "sha256": "a81cfa8aa6c5a57b13a7befee68d869028981e15975513fdd093ddf376420e67",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "6a2814bcd8135888.jpg",
+      "match": 0.905
+    },
+    {
+      "id": "图3.10",
+      "file": "fig-3-10.png",
+      "page": 69,
+      "box": [
+        396,
+        1370,
+        680,
+        256
+      ],
+      "dpi": 200,
+      "sha256": "5e4037618dcb58dbb4a98c58e2158dcda7cde68380c2dd2aa2af915cd5d2265c",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "d552466644ef240e.jpg",
+      "match": 0.969
     },
     {
       "id": "图3.11",
@@ -54,6 +462,177 @@
       "date": "2026-09-04"
     },
     {
+      "id": "图3.13",
+      "file": "fig-3-13.png",
+      "page": 75,
+      "box": [
+        382,
+        364,
+        632,
+        124
+      ],
+      "dpi": 200,
+      "sha256": "20201b7b99dfa00a8876d2bb56baa111d9fe73069c9a38c28142bba56eeaebfd",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "c305cf854cc50a63.jpg",
+      "match": 0.88
+    },
+    {
+      "id": "图4.1",
+      "file": "fig-4-1.png",
+      "page": 83,
+      "box": [
+        444,
+        752,
+        556,
+        278
+      ],
+      "dpi": 200,
+      "sha256": "ec4c0f2334b5267042987763fba1d651b05f2e9380064fe96456bd26bf68c227",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "ac445f2352c5273d.jpg",
+      "match": 0.861
+    },
+    {
+      "id": "图4.2",
+      "file": "fig-4-2.png",
+      "page": 84,
+      "box": [
+        302,
+        670,
+        778,
+        186
+      ],
+      "dpi": 200,
+      "sha256": "00cd922ff7a0e76301006cd8b6bb54a1a34be4e36f76617cc6c4d302285bfdd3",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "3fd8da33af3abe6c.jpg",
+      "match": 0.874
+    },
+    {
+      "id": "图4.3",
+      "file": "fig-4-3.png",
+      "page": 87,
+      "box": [
+        438,
+        320,
+        560,
+        162
+      ],
+      "dpi": 200,
+      "sha256": "488fb327fd7b6ffa56c08e08a3c01de4b9bc30dac1cb3b4d90d213f2a524f97f",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "17558c608a970971.jpg",
+      "match": 0.915
+    },
+    {
+      "id": "图4.4",
+      "file": "fig-4-4.png",
+      "page": 87,
+      "box": [
+        264,
+        950,
+        898,
+        210
+      ],
+      "dpi": 200,
+      "sha256": "e5838e40c5316a4d95b2639a8eabf97cbab536c6419e741f6befeb91d6b62884",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "6c085626573ab8c6.jpg",
+      "match": 0.959
+    },
+    {
+      "id": "图4.6",
+      "file": "fig-4-6.png",
+      "page": 92,
+      "box": [
+        116,
+        410,
+        578,
+        360
+      ],
+      "dpi": 200,
+      "sha256": "bc4c0ff68e588774ba6cff52f722e1749b8193edf5e7351fdeb86efe8b0ceeeb",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "a01806ddff22b2f2.jpg",
+      "match": 0.885
+    },
+    {
+      "id": "图4.7",
+      "file": "fig-4-7.png",
+      "page": 92,
+      "box": [
+        728,
+        681,
+        590,
+        84
+      ],
+      "dpi": 200,
+      "sha256": "895a2df56c26730ce0f52b237f3c61ca83360e072e6f8119e5473dd8e73c7d79",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "142c03839eb935b2.jpg",
+      "match": 0.966,
+      "note": "上游模板带着 图4.6 那么高的空白；框按印刷页上的实际墨迹收紧"
+    },
+    {
+      "id": "图4.8",
+      "file": "fig-4-8.png",
+      "page": 92,
+      "box": [
+        382,
+        996,
+        654,
+        260
+      ],
+      "dpi": 200,
+      "sha256": "eedb9478e25dc819b1c54cef22fd36ae6881e63316131f9f8457aaee996ff561",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "5c96f8b81e576c27.jpg",
+      "match": 0.903
+    },
+    {
+      "id": "图4.9",
+      "file": "fig-4-9.png",
+      "page": 93,
+      "box": [
+        380,
+        324,
+        650,
+        256
+      ],
+      "dpi": 200,
+      "sha256": "036ee2a2effaae3a990231f8340c2df4187debd8ebf5505538cad7e7395aec29",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "888fd277565dca5e.jpg",
+      "match": 0.859
+    },
+    {
+      "id": "图4.12",
+      "file": "fig-4-12.png",
+      "page": 97,
+      "box": [
+        222,
+        1132,
+        980,
+        248
+      ],
+      "dpi": 200,
+      "sha256": "85e25c803715f9ad5ba32ae7ac017ffc209142bb83c9eb19f300292d81fae224",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "4f9aa9617b2ddc56.jpg",
+      "match": 0.842
+    },
+    {
       "id": "图5.1",
       "file": "fig-5-1.png",
       "page": 100,
@@ -84,6 +663,142 @@
       "date": "2026-09-04"
     },
     {
+      "id": "图5.3",
+      "file": "fig-5-3.png",
+      "page": 102,
+      "box": [
+        758,
+        642,
+        538,
+        310
+      ],
+      "dpi": 200,
+      "sha256": "bc91181885f48c5ce01f042308ca2d8c325e48f9295f345fce7697154cb913b0",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "44cbdbcfda5553a1.jpg",
+      "match": 0.895
+    },
+    {
+      "id": "图5.4",
+      "file": "fig-5-4.png",
+      "page": 106,
+      "box": [
+        1036,
+        1002,
+        120,
+        132
+      ],
+      "dpi": 200,
+      "sha256": "aa6b380bf3db2a902b96f3cd357e6091f487c60f9dac580f7aa66eeddd16e56b",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "2e8ea2a5a1df00a7.jpg",
+      "match": 0.949
+    },
+    {
+      "id": "图5.5",
+      "file": "fig-5-5.png",
+      "page": 107,
+      "box": [
+        322,
+        666,
+        344,
+        264
+      ],
+      "dpi": 200,
+      "sha256": "0542fe9b72eaec0c497244b5a6a70574f58e3d6f2b0ad97b8f9dc4dd4b92b806",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "7c6579b015042738.jpg",
+      "match": 0.855
+    },
+    {
+      "id": "图5.6",
+      "file": "fig-5-6.png",
+      "page": 107,
+      "box": [
+        820,
+        670,
+        296,
+        264
+      ],
+      "dpi": 200,
+      "sha256": "03923d16464c329d4810cc2df4d49100160c5a0a38f30cde6fc41ab5b4fefd97",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "b3d4ed61cc80d7d7.jpg",
+      "match": 0.93
+    },
+    {
+      "id": "图5.7",
+      "file": "fig-5-7.png",
+      "page": 113,
+      "box": [
+        264,
+        436,
+        892,
+        126
+      ],
+      "dpi": 200,
+      "sha256": "8195a38583577b9695a933b8734716029020f57917c2eddcf091e8c94c155e38",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "12374c97891a830a.jpg",
+      "match": 0.95
+    },
+    {
+      "id": "图5.8",
+      "file": "fig-5-8.png",
+      "page": 113,
+      "box": [
+        794,
+        872,
+        500,
+        344
+      ],
+      "dpi": 200,
+      "sha256": "10ff5cf13ab694826d5c3c7d48494faf578efc3f3999b4fd3e99303ea3e2e6bd",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "3b20bce2ee34a2d6.jpg",
+      "match": 0.877
+    },
+    {
+      "id": "图5.9",
+      "file": "fig-5-9.png",
+      "page": 115,
+      "box": [
+        956,
+        732,
+        370,
+        298
+      ],
+      "dpi": 200,
+      "sha256": "fdd1990399298b156dc6ed237d9dc2cd2bb21368912de52c98b785e7bd30c9d2",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "80797628fa510b2c.jpg",
+      "match": 0.902
+    },
+    {
+      "id": "图5.11",
+      "file": "fig-5-11.png",
+      "page": 116,
+      "box": [
+        978,
+        970,
+        304,
+        332
+      ],
+      "dpi": 200,
+      "sha256": "d3bf8bd06ef60c9be42d58aa418592ffa7199adae497f85df9f37e93100eb2f7",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "c399e3356dac937f.jpg",
+      "match": 0.884
+    },
+    {
       "id": "图5.12",
       "file": "fig-5-12.png",
       "page": 118,
@@ -97,6 +812,90 @@
       "sha256": "165ed23f1fe7a1694c4ac1237ab8c7d01f7e124d890b8c471eecaa15e67b5dd1",
       "by": "Claude",
       "date": "2026-09-04"
+    },
+    {
+      "id": "图5.13",
+      "file": "fig-5-13.png",
+      "page": 118,
+      "box": [
+        866,
+        1242,
+        392,
+        350
+      ],
+      "dpi": 200,
+      "sha256": "08eab96f39316a9e68f2a795c247423ac9d93bc483fc2d2c1b16f9e251d8b542",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "note": "模板匹配把它错认成了 图5.12(a)（两棵树只差一层）；框按印刷页重新量过"
+    },
+    {
+      "id": "图5.14",
+      "file": "fig-5-14.png",
+      "page": 120,
+      "box": [
+        958,
+        878,
+        340,
+        276
+      ],
+      "dpi": 200,
+      "sha256": "5f291cd5db4d67590e88fe3399a906426740c4fef8a45af3e6023858ee32ee9a",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "28d7f967e0c2ebfa.jpg",
+      "match": 0.966
+    },
+    {
+      "id": "图5.15",
+      "file": "fig-5-15.png",
+      "page": 121,
+      "box": [
+        206,
+        228,
+        1038,
+        270
+      ],
+      "dpi": 200,
+      "sha256": "6e2e0cedb6efd3f1acceb129611c9c5dfe70d9662c86dbacf48be96451c0233a",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "7f6bb0c3af53cc2a.jpg",
+      "match": 0.928
+    },
+    {
+      "id": "图5.16",
+      "file": "fig-5-16.png",
+      "page": 121,
+      "box": [
+        200,
+        832,
+        1038,
+        268
+      ],
+      "dpi": 200,
+      "sha256": "1fca71cf74943b13d4b312f6d6e519b749d5f28ed57c639098431b2140a4673b",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "ba38e1004230ab69.jpg",
+      "match": 0.876
+    },
+    {
+      "id": "图5.17",
+      "file": "fig-5-17.png",
+      "page": 122,
+      "box": [
+        206,
+        274,
+        954,
+        1138
+      ],
+      "dpi": 200,
+      "sha256": "d0851317c80606b67ce6472fed0e0275aac7566c927545a4e7597435efb4345a",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "d7354d550a2f5d79.jpg",
+      "match": 0.933
     },
     {
       "id": "图5.18",
@@ -127,6 +926,89 @@
       "sha256": "13eaf3ac47d5ceb20a67ce733bfaf7e7bf6e94edc1f856b71fd89946330a0315",
       "by": "Claude",
       "date": "2026-09-04"
+    },
+    {
+      "id": "图5.20",
+      "file": "fig-5-20.png",
+      "page": 130,
+      "box": [
+        888,
+        828,
+        412,
+        488
+      ],
+      "dpi": 200,
+      "sha256": "a69ea0d6264efb57e88edab7d8492e68cde29dbfed7e2bb7842e691831b57d1b",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "0142058fd3aa6e04.jpg",
+      "match": 0.846
+    },
+    {
+      "id": "图5.21",
+      "file": "fig-5-21.png",
+      "page": 132,
+      "box": [
+        858,
+        176,
+        486,
+        300
+      ],
+      "dpi": 200,
+      "sha256": "c4708c0924e635431172e017d9a08f4a632ca1804afe5404625858dd756aeea3",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "note": "习题2的图例"
+    },
+    {
+      "id": "图5.22",
+      "file": "fig-5-22.png",
+      "page": 132,
+      "box": [
+        220,
+        780,
+        1060,
+        350
+      ],
+      "dpi": 200,
+      "sha256": "4fa1207a74d727f95f95c923f77a3eb0b2f56f94e5a55122b7d9b0a14f66fe16",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "note": "习题7的图例"
+    },
+    {
+      "id": "图5.23",
+      "file": "fig-5-23.png",
+      "page": 133,
+      "box": [
+        908,
+        430,
+        416,
+        404
+      ],
+      "dpi": 200,
+      "sha256": "3cca111c78ab168a6cf5878370c60098b38de3233ffcff523da0e49224abdd45",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "a8d8c140383fe73e.jpg",
+      "match": 0.93
+    },
+    {
+      "id": "图6.1",
+      "file": "fig-6-1.png",
+      "page": 135,
+      "box": [
+        952,
+        1360,
+        340,
+        268
+      ],
+      "dpi": 200,
+      "sha256": "e36d61f59b8023ce2f96134939033a43adc81d85d4f5ce7e6c69efb3233bbf28",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "42cd7ad7ac4d0fbe.jpg",
+      "match": 0.821
     },
     {
       "id": "图6.2",
@@ -189,6 +1071,57 @@
       "date": "2026-09-04"
     },
     {
+      "id": "图6.6",
+      "file": "fig-6-6.png",
+      "page": 143,
+      "box": [
+        258,
+        1070,
+        918,
+        546
+      ],
+      "dpi": 200,
+      "sha256": "87be671d16c41155b4992eb2ed729581e3d03a4e590aa3636feadb0df016f8a2",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "503a0fd264bb9231.jpg",
+      "match": 0.914
+    },
+    {
+      "id": "图6.7",
+      "file": "fig-6-7.png",
+      "page": 144,
+      "box": [
+        656,
+        660,
+        638,
+        402
+      ],
+      "dpi": 200,
+      "sha256": "54fabd4b0ac79004984ea6b08822022d04a988e3da5bae98d703910cb34505c4",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "8bf52bea5e1deae9.jpg",
+      "match": 0.918
+    },
+    {
+      "id": "图6.8",
+      "file": "fig-6-8.png",
+      "page": 144,
+      "box": [
+        388,
+        1182,
+        618,
+        404
+      ],
+      "dpi": 200,
+      "sha256": "10dc45e7ed06f871f34f8602640bf5262c353f774bc152c2301f57c4d341a7bf",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "d4fafa1c3b802b3f.jpg",
+      "match": 0.871
+    },
+    {
       "id": "图6.9",
       "file": "fig-6-9.png",
       "page": 145,
@@ -202,6 +1135,23 @@
       "sha256": "0a1480418b4c37be0b70bae6ae9343e33722171a25c739f5f999f7dc20ab07b8",
       "by": "Claude",
       "date": "2026-09-04"
+    },
+    {
+      "id": "图6.10",
+      "file": "fig-6-10.png",
+      "page": 148,
+      "box": [
+        746,
+        1166,
+        540,
+        110
+      ],
+      "dpi": 200,
+      "sha256": "e9c47c07920592facd8f7f5c175961f12b2277c8630d02e521d40206e237d7cb",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "444a429faef0f9ad.jpg",
+      "match": 0.874
     },
     {
       "id": "图6.11",
@@ -249,6 +1199,73 @@
       "date": "2026-09-04"
     },
     {
+      "id": "图6.14",
+      "file": "fig-6-14.png",
+      "page": 153,
+      "box": [
+        930,
+        1408,
+        376,
+        140
+      ],
+      "dpi": 200,
+      "sha256": "6726dd68223b218d7474d5214120ebc4c90be208db208b4eea68f17528684352",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "ddf4082b075a6a12.jpg",
+      "match": 0.951
+    },
+    {
+      "id": "图6.15",
+      "file": "fig-6-15.png",
+      "page": 154,
+      "box": [
+        896,
+        796,
+        410,
+        100
+      ],
+      "dpi": 200,
+      "sha256": "aa2be04e63109c72f267ee9b526cc112e8b9d66624b3fdc228ea6bd24cdd612a",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "note": "模板匹配把它错认成了 图6.13(a)；框按印刷页重新量过"
+    },
+    {
+      "id": "图6.16",
+      "file": "fig-6-16.png",
+      "page": 156,
+      "box": [
+        922,
+        232,
+        384,
+        80
+      ],
+      "dpi": 200,
+      "sha256": "380ff690c2d3b119b242b2b94edb692190a87b0cbea4bb4b756973ee9533fac5",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "59700ca6ca89690d.jpg",
+      "match": 0.96
+    },
+    {
+      "id": "图6.17",
+      "file": "fig-6-17.png",
+      "page": 156,
+      "box": [
+        964,
+        1210,
+        342,
+        110
+      ],
+      "dpi": 200,
+      "sha256": "0830a9fd5a07d8948f52d889f7f6a6d42b525eae7c0c6891de536c4284702b98",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "c02b2adffb31959d.jpg",
+      "match": 0.953
+    },
+    {
       "id": "图6.18",
       "file": "fig-6-18.png",
       "page": 157,
@@ -262,6 +1279,87 @@
       "sha256": "e5c6fe96e1f9a5458357dbdab52c67b28d6711896708beacc4a008591d69c7b7",
       "by": "Claude",
       "date": "2026-09-04"
+    },
+    {
+      "id": "图6.19",
+      "file": "fig-6-19.png",
+      "page": 159,
+      "box": [
+        936,
+        396,
+        392,
+        312
+      ],
+      "dpi": 200,
+      "sha256": "f82be4ec4e0e98d2da9739c8f7eeba50e60235d00a2d4d6370fb97cd6fa00579",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "note": "习题3的图示"
+    },
+    {
+      "id": "图6.20",
+      "file": "fig-6-20.png",
+      "page": 159,
+      "box": [
+        936,
+        985,
+        392,
+        265
+      ],
+      "dpi": 200,
+      "sha256": "b2f3b389ff4955f7dbd7da9200720bda055cf3bbb36933793399e629d9b5e9ef",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "note": "习题10的图示"
+    },
+    {
+      "id": "图6.21",
+      "file": "fig-6-21.png",
+      "page": 160,
+      "box": [
+        340,
+        178,
+        1120,
+        160
+      ],
+      "dpi": 200,
+      "sha256": "646fb50bee07fec54830e39452ff11fc42a6a7bf42579afde4ba53c2e7ac0d8e",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "note": "上机题3的图示"
+    },
+    {
+      "id": "图6.22",
+      "file": "fig-6-22.png",
+      "page": 160,
+      "box": [
+        1030,
+        535,
+        275,
+        190
+      ],
+      "dpi": 200,
+      "sha256": "28963dff4ab36b8edc2e5794da455546bdd3fccf392ac800c63b2d1773fd2ff7",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "note": "上机题4的图示"
+    },
+    {
+      "id": "图7.1",
+      "file": "fig-7-1.png",
+      "page": 161,
+      "box": [
+        978,
+        1086,
+        338,
+        330
+      ],
+      "dpi": 200,
+      "sha256": "3e4ad828c8421e8da2e6a47a32669d4b1397ef58c147e0cea901217f278ef250",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "bc292a79ef3d4901.jpg",
+      "match": 0.875
     },
     {
       "id": "图7.2",
@@ -354,6 +1452,23 @@
       "date": "2026-09-04"
     },
     {
+      "id": "图7.8",
+      "file": "fig-7-8.png",
+      "page": 165,
+      "box": [
+        188,
+        352,
+        242,
+        320
+      ],
+      "dpi": 200,
+      "sha256": "5d54143d68881bcd26dd88744d23cb5a09c29872f7b9beb76ed770e4d79afdee",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "5271d0e099d91472.jpg",
+      "match": 0.851
+    },
+    {
       "id": "图7.9",
       "file": "fig-7-9.png",
       "page": 165,
@@ -367,6 +1482,193 @@
       "sha256": "6bc797ab5162df31a451bc647d72b4989aaa7a231c3f866d738164114abd9b6d",
       "by": "Claude",
       "date": "2026-09-04"
+    },
+    {
+      "id": "图7.12",
+      "file": "fig-7-12.png",
+      "page": 170,
+      "box": [
+        388,
+        760,
+        624,
+        208
+      ],
+      "dpi": 200,
+      "sha256": "90abc0054117fe18e77365ba3a789d709753e17a63c1d55214a7633377286d1b",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "f0f154bdefe0c6b7.jpg",
+      "match": 0.945
+    },
+    {
+      "id": "图7.13",
+      "file": "fig-7-13.png",
+      "page": 170,
+      "box": [
+        232,
+        1288,
+        932,
+        216
+      ],
+      "dpi": 200,
+      "sha256": "4d0f9642cc349666ad63aed6e9c6c77fe1da3d631c3603667c64b395d4f226f2",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "4f6ccd84a6ce200f.jpg",
+      "match": 0.877
+    },
+    {
+      "id": "图7.14",
+      "file": "fig-7-14.png",
+      "page": 171,
+      "box": [
+        286,
+        270,
+        860,
+        170
+      ],
+      "dpi": 200,
+      "sha256": "62f7c2c7bafdb7c9d575038eda63aed1793afb631668e79648d9568121301df9",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "2d350b61ff4f49e8.jpg",
+      "match": 0.907
+    },
+    {
+      "id": "图7.15",
+      "file": "fig-7-15.png",
+      "page": 174,
+      "box": [
+        460,
+        724,
+        484,
+        248
+      ],
+      "dpi": 200,
+      "sha256": "89958c57324c2b8360c388b229f6fea0a04ab686ff3791338e0f11e76707241a",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "462d5cf907d0b5d5.jpg",
+      "match": 0.798
+    },
+    {
+      "id": "图7.16",
+      "file": "fig-7-16.png",
+      "page": 175,
+      "box": [
+        896,
+        828,
+        426,
+        204
+      ],
+      "dpi": 200,
+      "sha256": "26a6fca806b6633598edfde16937ebbcc46323b8820fa8184c428ab950185000",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "a693901aec12e8f2.jpg",
+      "match": 0.882
+    },
+    {
+      "id": "图7.17",
+      "file": "fig-7-17.png",
+      "page": 178,
+      "box": [
+        1014,
+        570,
+        252,
+        278
+      ],
+      "dpi": 200,
+      "sha256": "c5487f82245bbffcffbd09b1bf559dae6867f484649d719137ba9471752488fe",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "6db281e4c4929271.jpg",
+      "match": 0.894
+    },
+    {
+      "id": "图7.18",
+      "file": "fig-7-18.png",
+      "page": 179,
+      "box": [
+        1014,
+        1374,
+        288,
+        152
+      ],
+      "dpi": 200,
+      "sha256": "a0863cf7323e5c6b927af89f137da079a234c0b79394cfc0d5f7bcc75acae30c",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "cf80cbf19e5853bc.jpg",
+      "match": 0.916
+    },
+    {
+      "id": "图7.19",
+      "file": "fig-7-19.png",
+      "page": 180,
+      "box": [
+        952,
+        344,
+        326,
+        312
+      ],
+      "dpi": 200,
+      "sha256": "4356a6e7969ec69a839236a0d90d3ff14a7d33058ff0cc90760eea2c195b2726",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "0cf0a196d127ad6b.jpg",
+      "match": 0.879
+    },
+    {
+      "id": "图7.20",
+      "file": "fig-7-20.png",
+      "page": 183,
+      "box": [
+        256,
+        1208,
+        242,
+        212
+      ],
+      "dpi": 200,
+      "sha256": "a5af9383cc6f4bc7914e7f725cd9b3489b4b4735349fefc48dfef89063586f1c",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "bf74b7d9c75cd16a.jpg",
+      "match": 0.968
+    },
+    {
+      "id": "图7.22",
+      "file": "fig-7-22.png",
+      "page": 185,
+      "box": [
+        978,
+        446,
+        356,
+        244
+      ],
+      "dpi": 200,
+      "sha256": "b6a2beb4a9b1b7d9688025aaa201623114c649cce3e65a18dbd287632f20ddb2",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "bd68da3780041faa.jpg",
+      "match": 0.961
+    },
+    {
+      "id": "图7.23",
+      "file": "fig-7-23.png",
+      "page": 185,
+      "box": [
+        1024,
+        1006,
+        306,
+        270
+      ],
+      "dpi": 200,
+      "sha256": "3f9d64c176ba58d4ea62c55ce39268f0ffc6f1d404463396f92ca7c4fb48a95e",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "c45bf26c0fafb163.jpg",
+      "match": 0.879
     },
     {
       "id": "图7.24abc",
@@ -429,6 +1731,104 @@
       "date": "2026-09-04"
     },
     {
+      "id": "图7.26",
+      "file": "fig-7-26.png",
+      "page": 190,
+      "box": [
+        530,
+        550,
+        430,
+        420
+      ],
+      "dpi": 200,
+      "sha256": "5115763079861b3c8bb22220d869a55a00f1a97632e24d14a6265bd4e21f2580",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "note": "习题1的图例"
+    },
+    {
+      "id": "图7.27",
+      "file": "fig-7-27.png",
+      "page": 190,
+      "box": [
+        250,
+        1355,
+        420,
+        250
+      ],
+      "dpi": 200,
+      "sha256": "9ae6869203891b8f75508513159cadd9bbc240113d15e02f798d2aca571ed46c",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "note": "习题2的图例"
+    },
+    {
+      "id": "图7.28",
+      "file": "fig-7-28.png",
+      "page": 190,
+      "box": [
+        765,
+        1385,
+        445,
+        215
+      ],
+      "dpi": 200,
+      "sha256": "fb77ba69a72339af59b332c64dae93e488c9cd60bfb109876f5d821ac7f8d919",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "note": "习题3的图例"
+    },
+    {
+      "id": "图7.29",
+      "file": "fig-7-29.png",
+      "page": 191,
+      "box": [
+        545,
+        265,
+        340,
+        375
+      ],
+      "dpi": 200,
+      "sha256": "a52abe17955b98d68db60ed0290f48de1d1f52c83a114496a09d4f7967f878fe",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "note": "习题4的图例"
+    },
+    {
+      "id": "图8.1",
+      "file": "fig-8-1.png",
+      "page": 197,
+      "box": [
+        430,
+        452,
+        564,
+        602
+      ],
+      "dpi": 200,
+      "sha256": "577e01cf0c0303192edee301d0f51af43daa8fa2404ff8c95b7aa21b42822b01",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "5493e0dcc0da4096.jpg",
+      "match": 0.881
+    },
+    {
+      "id": "图8.2",
+      "file": "fig-8-2.png",
+      "page": 198,
+      "box": [
+        838,
+        1232,
+        470,
+        382
+      ],
+      "dpi": 200,
+      "sha256": "fec3225fe9587028ce277cba7267724ea85c8f57f97adf931530bd51438b37ed",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "9d5229db93db8c45.jpg",
+      "match": 0.806
+    },
+    {
       "id": "图8.4",
       "file": "fig-8-4.png",
       "page": 203,
@@ -442,6 +1842,125 @@
       "sha256": "c5b1b19304ae45d7a4e32af253d135c3535b4c8cb5cf235eabfe3adcd2e9ee06",
       "by": "Claude",
       "date": "2026-09-04"
+    },
+    {
+      "id": "图8.5",
+      "file": "fig-8-5.png",
+      "page": 204,
+      "box": [
+        460,
+        1222,
+        496,
+        422
+      ],
+      "dpi": 200,
+      "sha256": "603947b7eb14c861242c0904f13d18cb81ce130370e97f4f87028875f32cdc0f",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "7409006cccb82bee.jpg",
+      "match": 0.919
+    },
+    {
+      "id": "图8.6",
+      "file": "fig-8-6.png",
+      "page": 206,
+      "box": [
+        380,
+        1158,
+        660,
+        424
+      ],
+      "dpi": 200,
+      "sha256": "c39d2b287104902185f2dbc1630000ce73c2f2118117f1fbacfe950c1931fe3d",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "8585d3b42b280664.jpg",
+      "match": 0.919
+    },
+    {
+      "id": "图8.7",
+      "file": "fig-8-7.png",
+      "page": 207,
+      "box": [
+        456,
+        830,
+        504,
+        704
+      ],
+      "dpi": 200,
+      "sha256": "9acc71ca7f1a8e96af2969fe75cac6cf8d8dba26de60f9d39af713382c51d406",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "05b1ac3a282e906b.jpg",
+      "match": 0.934
+    },
+    {
+      "id": "图8.8",
+      "file": "fig-8-8.png",
+      "page": 213,
+      "box": [
+        450,
+        446,
+        510,
+        352
+      ],
+      "dpi": 200,
+      "sha256": "b4af258bb4b1f3f55fe8b00ce581274852cc14575261f4d464eda8a1bf496f11",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "3599737381e2502e.jpg",
+      "match": 0.91
+    },
+    {
+      "id": "图8.9",
+      "file": "fig-8-9.png",
+      "page": 216,
+      "box": [
+        408,
+        616,
+        602,
+        304
+      ],
+      "dpi": 200,
+      "sha256": "8490b77966b975e91fcabf17c4e103a895b5badd8c538e6cf179a9272e08a5f5",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "bd0ba2ed5f871998.jpg",
+      "match": 0.942
+    },
+    {
+      "id": "图8.10",
+      "file": "fig-8-10.png",
+      "page": 219,
+      "box": [
+        352,
+        486,
+        712,
+        668
+      ],
+      "dpi": 200,
+      "sha256": "62e8a06a2cf382ac4207bb4dc24d12edd1efad782be4b0ac8e9f8e0b14b50ed9",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "916c1027b215b0e1.jpg",
+      "match": 0.911
+    },
+    {
+      "id": "图8.11",
+      "file": "fig-8-11.png",
+      "page": 221,
+      "box": [
+        358,
+        322,
+        704,
+        682
+      ],
+      "dpi": 200,
+      "sha256": "57e395503ab82928ca108f22f929cb24fc0c02eaa491546fed4d309a98d51977",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "949a5a9d80c71e8a.jpg",
+      "match": 0.958
     },
     {
       "id": "图8.12b",
@@ -489,6 +2008,345 @@
       "date": "2026-09-04"
     },
     {
+      "id": "图8.14",
+      "file": "fig-8-14.png",
+      "page": 233,
+      "box": [
+        296,
+        358,
+        830,
+        668
+      ],
+      "dpi": 200,
+      "sha256": "3e369b7aa4a321b0cad5636f67097f92fd552240275ce77143fde1716667a8af",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "2f6a20c1eb3f2d13.jpg",
+      "match": 0.967
+    },
+    {
+      "id": "图9.1",
+      "file": "fig-9-1.png",
+      "page": 246,
+      "box": [
+        322,
+        346,
+        758,
+        134
+      ],
+      "dpi": 200,
+      "sha256": "21f62114b37bce6c57f4718f1bd8e1f4492e9bed1d4eeb929c01c3fa94e40cb8",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "f23f55c21cffd0b7.jpg",
+      "match": 0.859
+    },
+    {
+      "id": "图9.3",
+      "file": "fig-9-3.png",
+      "page": 249,
+      "box": [
+        146,
+        820,
+        1126,
+        434
+      ],
+      "dpi": 200,
+      "sha256": "6388b5a534014a6c903b865f14d451c152675220b252bf66c1b2c1959a8ea9bc",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "7486004c6161789b.jpg",
+      "match": 0.865
+    },
+    {
+      "id": "图9.4",
+      "file": "fig-9-4.png",
+      "page": 250,
+      "box": [
+        896,
+        1186,
+        388,
+        384
+      ],
+      "dpi": 200,
+      "sha256": "bc94805ebf8b6287cf1d9b83999968ac49fe1cd341665cba00610be054ffb5e0",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "dffb7316183b2881.jpg",
+      "match": 0.967
+    },
+    {
+      "id": "图9.5",
+      "file": "fig-9-5.png",
+      "page": 252,
+      "box": [
+        280,
+        645,
+        880,
+        520
+      ],
+      "dpi": 200,
+      "sha256": "5f5d91016b06033a43dca7bbbc902c5edf0429066144200c576571f4339ee9e8",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "note": "模板匹配把它错认成了下一页的 图9.6（同一棵树，只差重构后的几个值）；框按印刷页重新量过"
+    },
+    {
+      "id": "图9.6",
+      "file": "fig-9-6.png",
+      "page": 253,
+      "box": [
+        282,
+        166,
+        852,
+        534
+      ],
+      "dpi": 200,
+      "sha256": "605ddc474bd3eea3d50c3d3080417921058c9193cc3d447fca2cbb83776ec301",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "bb27070d9ac01f78.jpg",
+      "match": 0.898
+    },
+    {
+      "id": "图9.7",
+      "file": "fig-9-7.png",
+      "page": 253,
+      "box": [
+        278,
+        760,
+        856,
+        620
+      ],
+      "dpi": 200,
+      "sha256": "33af0a572a856e555c0f5caab1fce60fbb53237c134227b5352704690e6a640e",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "93f3de38d2a0ccc4.jpg",
+      "match": 0.907
+    },
+    {
+      "id": "图9.8",
+      "file": "fig-9-8.png",
+      "page": 254,
+      "box": [
+        286,
+        444,
+        854,
+        618
+      ],
+      "dpi": 200,
+      "sha256": "44ae6ec58de2d46ba2334e37b250d0d694e71a27f209657e6bdb171c700eb9b3",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "732bc1737a8dec83.jpg",
+      "match": 0.967
+    },
+    {
+      "id": "图10.1",
+      "file": "fig-10-1.png",
+      "page": 265,
+      "box": [
+        196,
+        724,
+        1038,
+        320
+      ],
+      "dpi": 200,
+      "sha256": "5fea7686f8cb65af27d4b7e6bfbeac40c4e9361c39fe5e9ff283f7a52d41aade",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "0792c8837fab4a44.jpg",
+      "match": 0.901
+    },
+    {
+      "id": "图10.2",
+      "file": "fig-10-2.png",
+      "page": 265,
+      "box": [
+        860,
+        1172,
+        444,
+        312
+      ],
+      "dpi": 200,
+      "sha256": "d925eb27292764ae5463ae7c7bb45554ee2c1ce9dbc24d383641467b4013ef42",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "5f0f882d1e9ec27f.jpg",
+      "match": 0.965
+    },
+    {
+      "id": "图10.3",
+      "file": "fig-10-3.png",
+      "page": 267,
+      "box": [
+        314,
+        1008,
+        798,
+        290
+      ],
+      "dpi": 200,
+      "sha256": "936f8d8adb5436fc0521122992d64d2daaacdb3badea7facd63ee78504e68da5",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "980c030f1f50d7f9.jpg",
+      "match": 0.948
+    },
+    {
+      "id": "图10.5",
+      "file": "fig-10-5.png",
+      "page": 275,
+      "box": [
+        460,
+        842,
+        504,
+        476
+      ],
+      "dpi": 200,
+      "sha256": "6b4651642bcec0612d83dbf41d8a69e6246f44e4c9f324ae5b0b912f84f143e6",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "55bc014a79d6a905.jpg",
+      "match": 0.861
+    },
+    {
+      "id": "图10.6",
+      "file": "fig-10-6.png",
+      "page": 279,
+      "box": [
+        494,
+        200,
+        454,
+        204
+      ],
+      "dpi": 200,
+      "sha256": "8dd05b8d2396282bac9d46a49524f34def6a734e11dafd9720c40efc6f36402e",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "fe1490af9bcca8c0.jpg",
+      "match": 0.957
+    },
+    {
+      "id": "图10.7",
+      "file": "fig-10-7.png",
+      "page": 280,
+      "box": [
+        472,
+        1220,
+        468,
+        396
+      ],
+      "dpi": 200,
+      "sha256": "743fd41ea547484de3ed3adcbc54100eb5d4473c98d09ca68e0a9de96bffcc41",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "70ba08a893dc9d64.jpg",
+      "match": 0.925
+    },
+    {
+      "id": "图10.8",
+      "file": "fig-10-8.png",
+      "page": 281,
+      "box": [
+        360,
+        1124,
+        684,
+        306
+      ],
+      "dpi": 200,
+      "sha256": "f2171aea738c84008850d764be2be53f06f1854a79a9deac1ccdfbce3a16cc6f",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "7b7cd5373daa5ca9.jpg",
+      "match": 0.859
+    },
+    {
+      "id": "图10.11",
+      "file": "fig-10-11.png",
+      "page": 291,
+      "box": [
+        394,
+        1120,
+        606,
+        514
+      ],
+      "dpi": 200,
+      "sha256": "880bc4f37a8dc6af98bf47943f1ccb74618682b24f944c2f7d1f73580b332ab0",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "df08b72b2ef34643.jpg",
+      "match": 0.939
+    },
+    {
+      "id": "图11.1",
+      "file": "fig-11-1.png",
+      "page": 301,
+      "box": [
+        350,
+        828,
+        718,
+        228
+      ],
+      "dpi": 200,
+      "sha256": "8313a0cdd567d1de2b9cf5d3e1c45a3163a8ee67e115e507c328163c6fec3e6f",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "6e8a0ef3ed26c107.jpg",
+      "match": 0.958
+    },
+    {
+      "id": "图11.2",
+      "file": "fig-11-2.png",
+      "page": 302,
+      "box": [
+        256,
+        400,
+        896,
+        240
+      ],
+      "dpi": 200,
+      "sha256": "e1774f785444391bfd1ee2a755b764b68c8397da7cf7da0cded796dac8e6b9d7",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "0c75a3db9929b61e.jpg",
+      "match": 0.943
+    },
+    {
+      "id": "图11.3",
+      "file": "fig-11-3.png",
+      "page": 303,
+      "box": [
+        346,
+        170,
+        732,
+        426
+      ],
+      "dpi": 200,
+      "sha256": "71d322faf35831308d45ad5b63fd7b1ff5d5ea0e21df1da712906900548b13cf",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "879fc43030b02cb8.jpg",
+      "match": 0.842
+    },
+    {
+      "id": "图11.4",
+      "file": "fig-11-4.png",
+      "page": 309,
+      "box": [
+        360,
+        338,
+        726,
+        106
+      ],
+      "dpi": 200,
+      "sha256": "9d0a0a7742efd8e5a90e5422c80f558fa3bd8f508a4ce47e14c3321928240cd3",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "97a7189d3ea9584c.jpg",
+      "match": 0.854
+    },
+    {
       "id": "图11.5",
       "file": "fig-11-5.png",
       "page": 310,
@@ -504,6 +2362,40 @@
       "date": "2026-09-04"
     },
     {
+      "id": "图11.6",
+      "file": "fig-11-6.png",
+      "page": 311,
+      "box": [
+        308,
+        350,
+        802,
+        252
+      ],
+      "dpi": 200,
+      "sha256": "c1e28bda818c1de12cb7f7952a874b4a1a84072b534eccfa61aa9fcee2adf1cb",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "3032fa408668c89e.jpg",
+      "match": 0.909
+    },
+    {
+      "id": "图11.7",
+      "file": "fig-11-7.png",
+      "page": 311,
+      "box": [
+        270,
+        1164,
+        884,
+        330
+      ],
+      "dpi": 200,
+      "sha256": "191443aff443fea78f4e437f9e695230f087fe24a1d6f3cc63ba9a4c3206887e",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "ea9001b8f902803b.jpg",
+      "match": 0.911
+    },
+    {
       "id": "图11.8",
       "file": "fig-11-8.png",
       "page": 313,
@@ -517,6 +2409,124 @@
       "sha256": "2a043d9eefae409f5670a515fc232b78ddb148762a1f0d55f3981b999cb3b1fc",
       "by": "Claude",
       "date": "2026-09-04"
+    },
+    {
+      "id": "图11.9",
+      "file": "fig-11-9.png",
+      "page": 314,
+      "box": [
+        164,
+        1356,
+        1080,
+        256
+      ],
+      "dpi": 200,
+      "sha256": "f666043cebb8281bbd2eb1560b9d2bf4e8a3c9c76ee3ad05cebdb089a2ae78a2",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "8573da94ca956749.jpg",
+      "match": 0.947
+    },
+    {
+      "id": "图11.10",
+      "file": "fig-11-10.png",
+      "page": 315,
+      "box": [
+        200,
+        1130,
+        974,
+        342
+      ],
+      "dpi": 200,
+      "sha256": "a252560bcaffcce2906407433781d807c68b187904fc91f3d10fbdf636f9b643",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "bcafc0a9de581967.jpg",
+      "match": 0.829
+    },
+    {
+      "id": "图11.11",
+      "file": "fig-11-11.png",
+      "page": 316,
+      "box": [
+        222,
+        586,
+        990,
+        270
+      ],
+      "dpi": 200,
+      "sha256": "3f25ac2130dc94903d876803ceb02fe4ec8da52448b66897efc52938eee1257e",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "ffef69f4b64e2e43.jpg",
+      "match": 0.97
+    },
+    {
+      "id": "图11.12",
+      "file": "fig-11-12.png",
+      "page": 316,
+      "box": [
+        280,
+        1194,
+        878,
+        260
+      ],
+      "dpi": 200,
+      "sha256": "7117bf44398a569bb21c7a3395c27a8e76b5e1a8cd5105a73cec0a8de18829d2",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "3de9f1e64abee567.jpg",
+      "match": 0.927
+    },
+    {
+      "id": "图11.13",
+      "file": "fig-11-13.png",
+      "page": 317,
+      "box": [
+        192,
+        486,
+        992,
+        260
+      ],
+      "dpi": 200,
+      "sha256": "5c9c274cefc7e1d669d881666760895a5f94103acfbbabc621ed9617f3ab4a38",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "c2cacd7eba558abe.jpg",
+      "match": 0.912
+    },
+    {
+      "id": "图11.14",
+      "file": "fig-11-14.png",
+      "page": 317,
+      "box": [
+        238,
+        1078,
+        896,
+        262
+      ],
+      "dpi": 200,
+      "sha256": "d5d5db16d68b2db9c7f73cd1d70237958eaafe3bb996ecbead944213b97a7560",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "fe716221bc3bfed5.jpg",
+      "match": 0.958
+    },
+    {
+      "id": "图11.15",
+      "file": "fig-11-15.png",
+      "page": 320,
+      "box": [
+        265,
+        1105,
+        1045,
+        575
+      ],
+      "dpi": 200,
+      "sha256": "ca3e5f233fb20822a19d83fa030ef4141553dcdc5ec44ccb866842c4173ab21e",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "note": "幻灯片用整张三联图；书稿正文用 图11.15a/图11.15c 两块，(b) 改排成表格"
     },
     {
       "id": "图11.15a",
@@ -549,6 +2559,425 @@
       "date": "2026-09-04"
     },
     {
+      "id": "图11.16",
+      "file": "fig-11-16.png",
+      "page": 322,
+      "box": [
+        452,
+        1352,
+        556,
+        262
+      ],
+      "dpi": 200,
+      "sha256": "a9b23d76b3e4c78c90b6b0ffcb6da0509e2618ed30ef0759dc94618c37686f94",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "32c09de96383c4de.jpg",
+      "match": 0.963
+    },
+    {
+      "id": "图11.17",
+      "file": "fig-11-17.png",
+      "page": 324,
+      "box": [
+        370,
+        352,
+        764,
+        268
+      ],
+      "dpi": 200,
+      "sha256": "9d37c6182c047a047279743bedd9f17c4b12c9a9ae1c6ef1c85da1deb7c61391",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "4cd9c419025ff11a.jpg",
+      "match": 0.983
+    },
+    {
+      "id": "图11.18",
+      "file": "fig-11-18.png",
+      "page": 324,
+      "box": [
+        282,
+        1052,
+        932,
+        424
+      ],
+      "dpi": 200,
+      "sha256": "ae5f7dd7a1039429b825b135824a8cb423a7310f4ca6fcd951e5a6287511ff2f",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "a333f195118c2445.jpg",
+      "match": 0.949
+    },
+    {
+      "id": "图11.19",
+      "file": "fig-11-19.png",
+      "page": 325,
+      "box": [
+        324,
+        174,
+        752,
+        234
+      ],
+      "dpi": 200,
+      "sha256": "8d3553ff9188db3e78cd6c1af4ca0ea704179408d202ec697720889ab9e5cecd",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "74d9765c86b0459e.jpg",
+      "match": 0.962
+    },
+    {
+      "id": "图11.20",
+      "file": "fig-11-20.png",
+      "page": 325,
+      "box": [
+        270,
+        714,
+        868,
+        598
+      ],
+      "dpi": 200,
+      "sha256": "46315f2902533c3c08270bdb2174904c4fdba9dac55e2a290e90b43b07a07b52",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "1a24097d7b698644.jpg",
+      "match": 0.978
+    },
+    {
+      "id": "图11.21",
+      "file": "fig-11-21.png",
+      "page": 326,
+      "box": [
+        792,
+        696,
+        512,
+        260
+      ],
+      "dpi": 200,
+      "sha256": "6a3022d69634fc6be44c3132398c8f81e410180957ae48bb396e6b31a4c743be",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "dc4aa499811e6130.jpg",
+      "match": 0.979
+    },
+    {
+      "id": "图11.22",
+      "file": "fig-11-22.png",
+      "page": 326,
+      "box": [
+        394,
+        1152,
+        662,
+        324
+      ],
+      "dpi": 200,
+      "sha256": "74f551adcf31bfd1cfe4a4d9556620c7bb866eea87e3f7bdc808f55dcaad98a4",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "d8199ab1b4f48019.jpg",
+      "match": 0.981
+    },
+    {
+      "id": "图11.23",
+      "file": "fig-11-23.png",
+      "page": 327,
+      "box": [
+        420,
+        170,
+        598,
+        204
+      ],
+      "dpi": 200,
+      "sha256": "f0fc974fbaf88aed6ef9e85754c5ef0bb92baa8f7f5feef7fa88e624a4305d12",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "0314fc9126687660.jpg",
+      "match": 0.981
+    },
+    {
+      "id": "图11.24",
+      "file": "fig-11-24.png",
+      "page": 327,
+      "box": [
+        364,
+        602,
+        756,
+        274
+      ],
+      "dpi": 200,
+      "sha256": "e8c8229722161d0ee8d334683a0ee3423487c7ef4b8153e93f02c72eb51c4a26",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "ea0f0114893b0d4b.jpg",
+      "match": 0.981
+    },
+    {
+      "id": "图11.25",
+      "file": "fig-11-25.png",
+      "page": 328,
+      "box": [
+        174,
+        172,
+        970,
+        922
+      ],
+      "dpi": 200,
+      "sha256": "cc2d1273072d45bc3258e86186e112c0096b40875f67ea4584c7bfddf3e4da3e",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "96123ad82e555db6.jpg",
+      "match": 0.952
+    },
+    {
+      "id": "图11.26",
+      "file": "fig-11-26.png",
+      "page": 331,
+      "box": [
+        390,
+        910,
+        660,
+        190
+      ],
+      "dpi": 200,
+      "sha256": "769cac7a60601784643628363d0854658b6e2464b21bbc1040ba656ddf9edd2c",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "note": "习题8的3阶B树图示"
+    },
+    {
+      "id": "图11.27",
+      "file": "fig-11-27.png",
+      "page": 331,
+      "box": [
+        255,
+        1325,
+        960,
+        215
+      ],
+      "dpi": 200,
+      "sha256": "ae66a4f372716dec5d8d190a34fd5c163061bf5978bea23c7515fe1575c554de",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "note": "习题9的4阶B树"
+    },
+    {
+      "id": "图11.28",
+      "file": "fig-11-28.png",
+      "page": 332,
+      "box": [
+        395,
+        275,
+        620,
+        195
+      ],
+      "dpi": 200,
+      "sha256": "b7ecff8e0276f1f1f08555558f13bdd749508e097ebc0128432d34b0eb84f43b",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "note": "习题10的3阶B树"
+    },
+    {
+      "id": "图11.29",
+      "file": "fig-11-29.png",
+      "page": 333,
+      "box": [
+        515,
+        455,
+        400,
+        180
+      ],
+      "dpi": 200,
+      "sha256": "da77e7c8fb905eca6e75fb8b2a83ed77b78bf63edce0cccd35a0433d3ef4ba5d",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "note": "2阶B+树图示"
+    },
+    {
+      "id": "图11.30",
+      "file": "fig-11-30.png",
+      "page": 333,
+      "box": [
+        205,
+        845,
+        1060,
+        280
+      ],
+      "dpi": 200,
+      "sha256": "86c1eb9cf5965d807974aaff976223fa9b51528a3ac1b7be0d8a1e444b33fcfd",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "note": "混合型B+树"
+    },
+    {
+      "id": "图11.31",
+      "file": "fig-11-31.png",
+      "page": 334,
+      "box": [
+        435,
+        175,
+        520,
+        240
+      ],
+      "dpi": 200,
+      "sha256": "9b1a6fee9d34b43617060c7766a4b92ae68540b6f84bbe0c1c3ba8a7e1349eb9",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "note": "红黑树"
+    },
+    {
+      "id": "图12.1",
+      "file": "fig-12-1.png",
+      "page": 337,
+      "box": [
+        402,
+        170,
+        616,
+        228
+      ],
+      "dpi": 200,
+      "sha256": "7f2057c49e2b7e309fe8ca880ff2c854b8ff4c57541c50b3b57354a3e5e47adf",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "ff4a0e68418ad4b3.jpg",
+      "match": 0.953
+    },
+    {
+      "id": "图12.2",
+      "file": "fig-12-2.png",
+      "page": 338,
+      "box": [
+        458,
+        232,
+        504,
+        332
+      ],
+      "dpi": 200,
+      "sha256": "e48f4355d15ac0a22d38f61768df9e8dee8f996e4a1d8beb9c86529fda01234c",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "7243968f87b4e75b.jpg",
+      "match": 0.892
+    },
+    {
+      "id": "图12.3",
+      "file": "fig-12-3.png",
+      "page": 340,
+      "box": [
+        260,
+        270,
+        290,
+        150
+      ],
+      "dpi": 200,
+      "sha256": "922767385f01a1912fa571696bdcd03de43230f245b7b79b7ba27a8477a3c892",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "a6db78e33812566d.jpg",
+      "match": 0.896
+    },
+    {
+      "id": "图12.4",
+      "file": "fig-12-4.png",
+      "page": 340,
+      "box": [
+        788,
+        160,
+        474,
+        254
+      ],
+      "dpi": 200,
+      "sha256": "d2092df2761f12530dfe289a1768eaff016b867eba475aee2cb139bd7b21f007",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "bb0f924bd1bdec90.jpg",
+      "match": 0.902
+    },
+    {
+      "id": "图12.5",
+      "file": "fig-12-5.png",
+      "page": 340,
+      "box": [
+        220,
+        656,
+        746,
+        288
+      ],
+      "dpi": 200,
+      "sha256": "f82cd9e6250e62544afd230bdff9cee4b1eccd751cda139a4ec60829b4f40d43",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "77d1f64d0f2aad44.jpg",
+      "match": 0.872
+    },
+    {
+      "id": "图12.6",
+      "file": "fig-12-6.png",
+      "page": 340,
+      "box": [
+        480,
+        1136,
+        470,
+        246
+      ],
+      "dpi": 200,
+      "sha256": "d263e1740417aa2049587b0937e9d55f8ada75cb24ac89a5bd70fea2b5eb3199",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "9056eec6ba40c942.jpg",
+      "match": 0.857
+    },
+    {
+      "id": "图12.7",
+      "file": "fig-12-7.png",
+      "page": 341,
+      "box": [
+        410,
+        956,
+        582,
+        228
+      ],
+      "dpi": 200,
+      "sha256": "e187a282e8e1ec6e6f822c01e940f4f4862eabbacdd9c2a9cf8a8ed2463f10b0",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "08b834108b1ffee9.jpg",
+      "match": 0.925
+    },
+    {
+      "id": "图12.8",
+      "file": "fig-12-8.png",
+      "page": 341,
+      "box": [
+        242,
+        1380,
+        948,
+        256
+      ],
+      "dpi": 200,
+      "sha256": "24f9f3a0e004e6a8f6be8356468a446a164e853a21711367fa58386213ce79e6",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "a997a7dd44ffc121.jpg",
+      "match": 0.925
+    },
+    {
+      "id": "图12.9",
+      "file": "fig-12-9.png",
+      "page": 342,
+      "box": [
+        156,
+        266,
+        1126,
+        526
+      ],
+      "dpi": 200,
+      "sha256": "8516265745780bf6d0e8f8cc52c6aff8d66e66454318db827b334775a3fd5368",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "496aef5541eea022.jpg",
+      "match": 0.894
+    },
+    {
       "id": "图12.10",
       "file": "fig-12-10.png",
       "page": 343,
@@ -579,6 +3008,276 @@
       "date": "2026-09-04"
     },
     {
+      "id": "图12.12",
+      "file": "fig-12-12.png",
+      "page": 345,
+      "box": [
+        364,
+        942,
+        670,
+        132
+      ],
+      "dpi": 200,
+      "sha256": "528382e4b796c2b5b3751d64983fe6d96feab6e87f5cdf391d85c0ae1fe7ee38",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "42591c39779d3b6f.jpg",
+      "match": 0.905
+    },
+    {
+      "id": "图12.13",
+      "file": "fig-12-13.png",
+      "page": 346,
+      "box": [
+        414,
+        1352,
+        606,
+        184
+      ],
+      "dpi": 200,
+      "sha256": "ad24a78c33d93e16ae06a9aae786b7618963e42da79975bf2d608be955165234",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "330b8aba58c19e68.jpg",
+      "match": 0.865
+    },
+    {
+      "id": "图12.14",
+      "file": "fig-12-14.png",
+      "page": 348,
+      "box": [
+        550,
+        450,
+        318,
+        102
+      ],
+      "dpi": 200,
+      "sha256": "001e0320e52c0ed312e63727a7dbc39e92e33e14da0708c5f036cec009f5a6e5",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "7fecd7778cd2b26e.jpg",
+      "match": 0.861
+    },
+    {
+      "id": "图12.15",
+      "file": "fig-12-15.png",
+      "page": 349,
+      "box": [
+        386,
+        224,
+        660,
+        346
+      ],
+      "dpi": 200,
+      "sha256": "7f8aa1afc3ff2f36c8c5962d88fc515e87daccf21432fa07619fc30734790ae5",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "a71971eeeedd60de.jpg",
+      "match": 0.922
+    },
+    {
+      "id": "图12.16",
+      "file": "fig-12-16.png",
+      "page": 350,
+      "box": [
+        452,
+        492,
+        512,
+        312
+      ],
+      "dpi": 200,
+      "sha256": "4c5864acf5264f8c765a39e0d6e2d08c4eac1c6f3367ae0bf12896fd54c3f58a",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "2f63d4427c7ba023.jpg",
+      "match": 0.87
+    },
+    {
+      "id": "图12.17",
+      "file": "fig-12-17.png",
+      "page": 350,
+      "box": [
+        266,
+        1182,
+        874,
+        348
+      ],
+      "dpi": 200,
+      "sha256": "3f9bf35af7d452a12389c9fd33fa12d55382ea59c065bf1e955d65c102ae5d2f",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "31bf5d17531c99f5.jpg",
+      "match": 0.936
+    },
+    {
+      "id": "图12.18",
+      "file": "fig-12-18.png",
+      "page": 351,
+      "box": [
+        920,
+        962,
+        314,
+        212
+      ],
+      "dpi": 200,
+      "sha256": "94b7c781059eeeb7d8c43a6c76b493ead5b0dfb47c86b63595af65df67fbbce4",
+      "by": "Claude",
+      "date": "2026-09-04"
+    },
+    {
+      "id": "图12.19",
+      "file": "fig-12-19.png",
+      "page": 352,
+      "box": [
+        146,
+        350,
+        512,
+        348
+      ],
+      "dpi": 200,
+      "sha256": "50efc7d0a091aa02ad2f43e8e134c48b84b47bb1962ea100949c2ecbde0bb3c9",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "5fa442714c931b76.jpg",
+      "match": 0.87
+    },
+    {
+      "id": "图12.20",
+      "file": "fig-12-20.png",
+      "page": 352,
+      "box": [
+        764,
+        370,
+        518,
+        326
+      ],
+      "dpi": 200,
+      "sha256": "f3d8c80fcdf78ad994fbaac312951576ca827a724071b3210d3deca377ec31a2",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "27144b83e26fc2eb.jpg",
+      "match": 0.878
+    },
+    {
+      "id": "图12.21",
+      "file": "fig-12-21.png",
+      "page": 353,
+      "box": [
+        424,
+        572,
+        570,
+        260
+      ],
+      "dpi": 200,
+      "sha256": "e96dfbe6bd9f502f3d45d2c3dfea93a5d8393d628ef7aaa1855cafec9fd71b7f",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "69b4e6e2e509b6c1.jpg",
+      "match": 0.922
+    },
+    {
+      "id": "图12.22",
+      "file": "fig-12-22.png",
+      "page": 353,
+      "box": [
+        424,
+        1030,
+        562,
+        376
+      ],
+      "dpi": 200,
+      "sha256": "d0feaa27bbaf046fcfcb3b5546b486c44cc2bb8390fd9906c6cf511423c8e83e",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "1f30890a5d9e01a8.jpg",
+      "match": 0.936
+    },
+    {
+      "id": "图12.23",
+      "file": "fig-12-23.png",
+      "page": 354,
+      "box": [
+        380,
+        608,
+        646,
+        302
+      ],
+      "dpi": 200,
+      "sha256": "04c41f06fca243e7f511f014f1fd3dd705ebd8bbe981ee1ced624965fb1eebe5",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "75fcc4e3389b6567.jpg",
+      "match": 0.94
+    },
+    {
+      "id": "图12.24",
+      "file": "fig-12-24.png",
+      "page": 356,
+      "box": [
+        296,
+        228,
+        824,
+        234
+      ],
+      "dpi": 200,
+      "sha256": "855b6452184ff3a47760ee6425ca1593eba728d5f06f2c5369b5690f3864a6b3",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "1826934df94f553c.jpg",
+      "match": 0.974
+    },
+    {
+      "id": "图12.25",
+      "file": "fig-12-25.png",
+      "page": 356,
+      "box": [
+        324,
+        660,
+        766,
+        444
+      ],
+      "dpi": 200,
+      "sha256": "0cedda36949b5b3f80abbc3040d86019c034ee35d0b133c712e95c99382c0287",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "f1b118a907a2784a.jpg",
+      "match": 0.983
+    },
+    {
+      "id": "图12.26",
+      "file": "fig-12-26.png",
+      "page": 357,
+      "box": [
+        486,
+        172,
+        446,
+        252
+      ],
+      "dpi": 200,
+      "sha256": "3e09d736a02d41bc7fc6dca4d2e49b1918b5fb55331bb6a2e8c5810d6eebbee7",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "6b92b3ac99984b30.jpg",
+      "match": 0.908
+    },
+    {
+      "id": "图12.27",
+      "file": "fig-12-27.png",
+      "page": 360,
+      "box": [
+        132,
+        166,
+        1126,
+        1452
+      ],
+      "dpi": 200,
+      "sha256": "d2ba5668f7f16615b4e406959026db7da61b9cbffd0a6edb13b3c476312a0f9b",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "e543a817bd675673.jpg",
+      "match": 0.907
+    },
+    {
       "id": "图12.28",
       "file": "fig-12-28.png",
       "page": 361,
@@ -592,6 +3291,23 @@
       "sha256": "f7ff8c3e4a78e7d7efda6657c0a2781106cd36627a051de3e85e3abb33169f64",
       "by": "Claude",
       "date": "2026-09-04"
+    },
+    {
+      "id": "图12.29",
+      "file": "fig-12-29.png",
+      "page": 361,
+      "box": [
+        806,
+        1082,
+        400,
+        308
+      ],
+      "dpi": 200,
+      "sha256": "6ecf8413c64d66495fd268c307654b157f8def92fd641ced07a5380098b7c965",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "3cd3a1d82f9fca27.jpg",
+      "match": 0.965
     },
     {
       "id": "图12.30",
@@ -624,6 +3340,23 @@
       "date": "2026-09-04"
     },
     {
+      "id": "图12.32",
+      "file": "fig-12-32.png",
+      "page": 363,
+      "box": [
+        328,
+        792,
+        760,
+        342
+      ],
+      "dpi": 200,
+      "sha256": "0d56e74b936ca2848fb4fade8811932349e326ef6f4fb4606a109cc0fa0f8191",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "15e78aea8f0613c7.jpg",
+      "match": 0.921
+    },
+    {
       "id": "图12.33",
       "file": "fig-12-33.png",
       "page": 364,
@@ -637,6 +3370,40 @@
       "sha256": "15625e39f5e7622cad2944dc83241555f539d6aa0455b44f74af0594885de447",
       "by": "Claude",
       "date": "2026-09-04"
+    },
+    {
+      "id": "图12.34",
+      "file": "fig-12-34.png",
+      "page": 364,
+      "box": [
+        110,
+        1044,
+        1188,
+        610
+      ],
+      "dpi": 200,
+      "sha256": "7819f615eb496f544dc7b49d1e4e4f99b41ac570ce34b698f1c4c19a1ca8fe51",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "38fc6390b74cb59c.jpg",
+      "match": 0.96
+    },
+    {
+      "id": "图12.35",
+      "file": "fig-12-35.png",
+      "page": 365,
+      "box": [
+        94,
+        394,
+        1212,
+        1186
+      ],
+      "dpi": 200,
+      "sha256": "77777db6f7e90155dff84affe5411cafce97ddc13ba0e2d632b6ed9c5a639363",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "8da27f446e82cc95.jpg",
+      "match": 0.915
     },
     {
       "id": "图12.36ab",
@@ -669,6 +3436,23 @@
       "date": "2026-09-04"
     },
     {
+      "id": "图12.37",
+      "file": "fig-12-37.png",
+      "page": 368,
+      "box": [
+        338,
+        216,
+        760,
+        468
+      ],
+      "dpi": 200,
+      "sha256": "7d9a8ea59de722c7a0e48696bda325ddfeea9e74893c2075eaed45154f161476",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "b559c4b072af21ab.jpg",
+      "match": 0.959
+    },
+    {
       "id": "图12.38",
       "file": "fig-12-38.png",
       "page": 369,
@@ -697,6 +3481,124 @@
       "sha256": "cf040da170486eb6ad1b3f9826accb60b5f38598ddc59ae5d7bdffdf9026a88b",
       "by": "Claude",
       "date": "2026-09-04"
+    },
+    {
+      "id": "图12.40",
+      "file": "fig-12-40.png",
+      "page": 370,
+      "box": [
+        420,
+        1158,
+        648,
+        254
+      ],
+      "dpi": 200,
+      "sha256": "337f9043a818d2b4b6a3ba90b5352eeed1f2b43bb0c3dffb2dec5d9d5a5b0853",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "391e13f1809c09bf.jpg",
+      "match": 0.968
+    },
+    {
+      "id": "图12.41",
+      "file": "fig-12-41.png",
+      "page": 371,
+      "box": [
+        256,
+        400,
+        928,
+        970
+      ],
+      "dpi": 200,
+      "sha256": "81588dad0b6f005dce1637ba61ce8df5d47395dc752e0cefa9d2fa82991bba8e",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "f536a99730156c47.jpg",
+      "match": 0.966
+    },
+    {
+      "id": "图12.42",
+      "file": "fig-12-42.png",
+      "page": 372,
+      "box": [
+        302,
+        444,
+        788,
+        240
+      ],
+      "dpi": 200,
+      "sha256": "87789073a19a9703ba23b4df3be744ad6c79769224234f78b52020dc8cb71235",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "851f2f30b09fa8d8.jpg",
+      "match": 0.948
+    },
+    {
+      "id": "图12.43",
+      "file": "fig-12-43.png",
+      "page": 372,
+      "box": [
+        350,
+        738,
+        684,
+        592
+      ],
+      "dpi": 200,
+      "sha256": "748eb29e936a444f2201ec84fdf8e3551032dce0c99f3fac2d609c25280a4af3",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "33419334fcc58ef5.jpg",
+      "match": 0.88
+    },
+    {
+      "id": "图12.44",
+      "file": "fig-12-44.png",
+      "page": 373,
+      "box": [
+        500,
+        170,
+        456,
+        228
+      ],
+      "dpi": 200,
+      "sha256": "4daf75869afb6b9ded6c16031588491187ab689707f729125aa721a045c93971",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "907d63faff8d37a9.jpg",
+      "match": 0.969
+    },
+    {
+      "id": "图12.45",
+      "file": "fig-12-45.png",
+      "page": 373,
+      "box": [
+        182,
+        452,
+        1090,
+        776
+      ],
+      "dpi": 200,
+      "sha256": "cb5b83cd9a05ab8b1eb1e1dfaa93f22eefd62d764751990744eddc5e18a5dda7",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "from": "2103775a9dd6abc2.jpg",
+      "match": 0.836
+    },
+    {
+      "id": "图12.46",
+      "file": "fig-12-46.png",
+      "page": 376,
+      "box": [
+        975,
+        845,
+        360,
+        265
+      ],
+      "dpi": 200,
+      "sha256": "7d0fb015b93b03acbcfecc4b9d55432d85b3821cdd463037a1c0c7e262869358",
+      "by": "Claude",
+      "date": "2026-09-04",
+      "note": "原书题注写作「习题17的AVL树」，但正文在习题16里引用它"
     }
   ]
 }

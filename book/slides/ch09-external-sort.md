@@ -112,7 +112,7 @@ subtitle: 数据结构与算法：Python 讲可迁移算法，C++ 讲存储与�
 
 **置换选择能让顺串平均长到 2M。**
 
-![图9.1 置换选择算法流程](../assets/f23f55c21cffd0b7.jpg)
+![图9.1 置换选择算法流程](../assets/scan/fig-9-1.png)
 
 ---
 
@@ -160,7 +160,7 @@ subtitle: 数据结构与算法：Python 讲可迁移算法，C++ 讲存储与�
 
 # 9.3.2 二路外排序
 
-![图 9.3 二路归并过程](../assets/7486004c6161789b.jpg)
+![图 9.3 二路归并过程](../assets/scan/fig-9-3.png)
 
 每轮把顺串两两归并，顺串数减半。m 个顺串要 $\lceil\log_2 m\rceil$ 轮。
 
@@ -207,7 +207,7 @@ k 路归并时，每输出一个记录都要在 k 个候选里挑最小的。
 
 # 赢者树
 
-![图9.4 含有5 个选手的赢者树](../assets/dffb7316183b2881.jpg)
+![图9.4 含有5 个选手的赢者树](../assets/scan/fig-9-4.png)
 
 - 叶子是 k 个候选（各归并段的当前记录）
 - 每个内部结点记**两个孩子里的赢家**（较小者）
@@ -223,7 +223,7 @@ k 路归并时，每输出一个记录都要在 k 个候选里挑最小的。
 
 # 赢者树的重构
 
-![图 9.6 图 9.5 重构后的 8 路归并赢者树](../assets/bb27070d9ac01f78.jpg)
+![图 9.6 图 9.5 重构后的 8 路归并赢者树](../assets/scan/fig-9-6.png)
 
 ```cpp file=code/ch09/external_sort/modern.hpp#fn:replace
 void replace(std::size_t player, int value) {
@@ -281,7 +281,7 @@ void replace(std::size_t player, int value) {
 
 # 败者树：省掉「看兄弟」
 
-![图9.7 8路归并的败者树示例](../assets/93f3de38d2a0ccc4.jpg)
+![图9.7 8路归并的败者树示例](../assets/scan/fig-9-7.png)
 
 内部结点记的是**输家**，赢家继续往上比。
 

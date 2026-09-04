@@ -100,14 +100,14 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <li>11.5 位图与签名</li>
 </ul>
 <p>一条主线：<strong>每一种索引都在换同一件东西——用附加空间少读几次盘。</strong></p></section><section class="slide" data-notes=""><h1 id="111-线性索引"><a class="anchor" href="#111-线性索引">#</a>11.1 线性索引</h1>
-<figure><img loading="lazy" src="../../assets/6e8a0ef3ed26c107.jpg" alt="图11.1 线性索引，图中的数据库记录不等长"><figcaption>图11.1 线性索引，图中的数据库记录不等长</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-11-1.png" alt="图11.1 线性索引，图中的数据库记录不等长"><figcaption>图11.1 线性索引，图中的数据库记录不等长</figcaption></figure>
 <ul>
 <li><strong>主文件</strong>：记录物理无序、长度可以不等</li>
 <li><strong>索引</strong>：按关键码<strong>排好序</strong>，每项是 (关键码, 存储位置)</li>
 </ul>
 <p>索引小得多，可以整个读进内存二分；数据只在确定位置后读<strong>一次</strong>。</p></section><section class="slide" data-notes="&lt;p&gt;本书的实现里埋了一个 page_reads() 计数器，把「读了几页」量出来，
 上机题就用它。实现见 code/ch11/linear_index/modern.hpp。&lt;/p&gt;"><h1 id="二级索引索引本身也放不下怎么办"><a class="anchor" href="#二级索引索引本身也放不下怎么办">#</a>二级索引：索引本身也放不下怎么办</h1>
-<figure><img loading="lazy" src="../../assets/0c75a3db9929b61e.jpg" alt="图 11.2 二级索引文件"><figcaption>图 11.2 二级索引文件</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-11-2.png" alt="图 11.2 二级索引文件"><figcaption>图 11.2 二级索引文件</figcaption></figure>
 <p>再给索引建一层索引。二级索引常驻内存，一级索引在盘上。</p>
 <div class="codeblock" data-lang="text"><pre><code>稠密 2 层索引:
     查不到 -&gt; 读 1 页  (只读了索引页)
@@ -146,7 +146,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 </tr>
 </tbody></table></div>
 <p>一次查询沿“顶层 → 三级 → 二级 → 一级 → 数据页”下降。 层数由<strong>页扇出</strong>决定，不是由二叉树高度决定。</p></section><section class="slide" data-notes=""><h1 id="112-静态索引多分树"><a class="anchor" href="#112-静态索引多分树">#</a>11.2 静态索引：多分树</h1>
-<figure><img loading="lazy" src="../../assets/879fc43030b02cb8.jpg" alt="图 11.3 多分树"><figcaption>图 11.3 多分树</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-11-3.png" alt="图 11.3 多分树"><figcaption>图 11.3 多分树</figcaption></figure>
 <p>磁盘按页读写，所以<strong>一个索引结点就设计成恰好装满一页</strong>。 二叉树每个结点只有两个孩子，同样多的 key 会把树撑得很高。</p>
 <p>覆盖一百万个叶页：二叉树约 <strong>20</strong> 层，100 路树只要 <strong>3</strong> 层。 页内要多比较几个分界 key，但<strong>整页已经在内存里</strong>——比多读一次外存页便宜得多。</p></section><section class="slide" data-notes="&lt;p&gt;接下一节的话头：B+ 树把「重组」换成了「就地分裂与合并」。
 批量装入这件事本身没被淘汰——&lt;code&gt;code/ch11/bplus_tree&lt;/code&gt; 的 &lt;code&gt;bulk_load&lt;/code&gt; 做的正是
@@ -260,7 +260,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <p><span class="math">n<span class="rel">=</span><span class="upr">10</span><sup><span class="upr">6</span></sup></span> 时 <span class="math"><span class="upr">log</span><sub><span class="upr">2</span></sub>n<span class="rel">≈</span><span class="upr">20</span></span> 次。</p>
 <p><strong>B 树的想法</strong>：把结点做大，让一个结点正好装满一页。</p>
 <p><span class="math">m</span> 阶 B 树的高度是 <span class="math"><span class="upr">log</span><sub>m</sub>n</span>——<span class="math">m<span class="rel">=</span><span class="upr">100</span></span> 时只要 3 层。</p></section><section class="slide" data-notes=""><h1 id="b-树的结构"><a class="anchor" href="#b-树的结构">#</a>B 树的结构</h1>
-<figure><img loading="lazy" src="../../assets/97a7189d3ea9584c.jpg" alt="图 11.4 B 树结点的一般形式"><figcaption>图 11.4 B 树结点的一般形式</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-11-4.png" alt="图 11.4 B 树结点的一般形式"><figcaption>图 11.4 B 树结点的一般形式</figcaption></figure>
 <p><span class="math">m</span> 阶 B 树：</p>
 <ul>
 <li>每个结点至多 <span class="math">m</span> 个孩子、<span class="math">m<span class="bin">−</span><span class="upr">1</span></span> 个关键码</li>
@@ -268,11 +268,11 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <li>所有叶子在<strong>同一层</strong></li>
 </ul>
 <p>「半满」和「叶子同层」这两条一起保证了树高是 <span class="math">O(<span class="upr">log</span><sub>m</sub>n)</span>。</p></section><section class="slide" data-notes=""><h1 id="插入导致分裂"><a class="anchor" href="#插入导致分裂">#</a>插入导致分裂</h1>
-<figure><img loading="lazy" src="../../assets/ea9001b8f902803b.jpg" alt="图11.7 在3阶 B 树中插入关键码19后导致根分裂"><figcaption>图11.7 在3阶 B 树中插入关键码19后导致根分裂</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-11-7.png" alt="图11.7 在3阶 B 树中插入关键码19后导致根分裂"><figcaption>图11.7 在3阶 B 树中插入关键码19后导致根分裂</figcaption></figure>
 <p>结点满了就<strong>从中间劈开</strong>，中间那个关键码升到父结点。</p>
 <p>父结点也满就继续往上劈——<strong>根分裂时树才长高一层</strong>。</p>
 <p><strong>B 树是从叶子往上长的</strong>，这是它始终平衡的原因。</p></section><section class="slide" data-notes=""><h1 id="b-树数据全在叶子"><a class="anchor" href="#b-树数据全在叶子">#</a>B+ 树：数据全在叶子</h1>
-<figure><img loading="lazy" src="../../assets/8573da94ca956749.jpg" alt="图 11.9 3 阶 B +树"><figcaption>图 11.9 3 阶 B +树</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-11-9.png" alt="图 11.9 3 阶 B +树"><figcaption>图 11.9 3 阶 B +树</figcaption></figure>
 <ul>
 <li>内部结点<strong>只存关键码</strong>（当路标），不存数据</li>
 <li>数据全部在叶子，叶子之间用指针<strong>串成一条链</strong></li>
@@ -358,7 +358,7 @@ B 树做同样的事要反复中序周游，跨结点时得回到父亲——这
 <li>动态索引把成本摊到每次分裂、借位与合并</li>
 </ul>
 <p>选择的是<strong>由谁、在什么时候支付更新成本</strong>。</p></section><section class="slide" data-notes=""><h1 id="115-位图索引"><a class="anchor" href="#115-位图索引">#</a>11.5 位图索引</h1>
-<figure><img loading="lazy" src="../../assets/012aa9549249f6c8.jpg" alt="图11.15 百货销售数据库记录的位图索引示意"><figcaption>图11.15 百货销售数据库记录的位图索引示意</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-11-15.png" alt="图11.15 百货销售数据库记录的位图索引示意"><figcaption>图11.15 百货销售数据库记录的位图索引示意</figcaption></figure>
 <p>对<strong>取值很少</strong>的字段（性别、州、类别）， 给每个取值造一个位向量：第 i 位表示「第 i 条记录是不是这个值」。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/bitmap_index/modern.hpp">code/ch11/bitmap_index/modern.hpp#fn:select_and</a></div><pre><code><span class="c">// &gt;&gt;&gt; bitmap-ops</span>
     <span class="c">/// 「与」：逐字 `&amp;`。`word_ops()` 数的就是这里做了几次字运算。</span>

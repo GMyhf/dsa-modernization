@@ -178,7 +178,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>自然界中树的子结点次序没有必要加以区别，称为<strong>无序树</strong>；但计算机的存储是有序的，为方便计算机 处理，往往把子结点按从左到右的次序顺序编号，即把树作为<strong>有序树</strong>（ordered tree）看待。</p>
 <p><strong>注意：度为 2 的有序树并不是二叉树。</strong> 因为有序树中在第一子结点被删除后，第二子结点自然顶替 成为第一子结点；<strong>因此，度为 2 并且严格区分左右两个子结点的有序树才是二叉树</strong>——二叉树必须能 表示「左空、右不空」这种左右不对称。</p>
 <p><strong>森林</strong>（forest）是零棵或多棵不相交的树的集合（通常是有序集合）。对于树中的每个结点，其子树 组成的集合就是森林；而加入一个结点作为根，森林就可以转化成一棵树。</p>
-<figure><img loading="lazy" src="../assets/42cd7ad7ac4d0fbe.jpg" alt="图 6.1 树形表示法"><figcaption>图 6.1 树形表示法</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-6-1.png" alt="图 6.1 树形表示法"><figcaption>图 6.1 树形表示法</figcaption></figure>
 <p>图 6.1　一般树的树形表示。</p>
 <p>树形结构在客观世界中大量存在，有多种逻辑表示方法。<strong>树形表示法</strong>其实是根在上的倒挂树：用圆圈 结点表示树的数据元素，用连接两个结点的边表示数据元素的关系；尽管树中的边没有标明方向，但是 一般默认上面的结点表示前驱、下面的数据元素表示该结点的后继。<strong>凹入表示法</strong>表示出根结点及各个 子树的层次关系，线条表示各结点：树根结点对应的线条最长，各子结点对应的线条短于其父结点并置 于父结点线条的下方，各兄弟结点对应的线条长度相同——这种表示法类似于图书的目录表。<strong>文氏图 表示法</strong>用嵌套的圆表示树：每棵树对应于一个圆，树的根结点及其子树画在同一个圆内，同一个根结点 的任意两棵子树对应的圆互不相交。<strong>嵌套括号表示法</strong>是类似于广义表的一种表示方法：括号表示层次 关系，每棵树对应于一个以根结点作为表名的表，根结点写在左边，表由子树森林对应的表组成，各个 子树对应的表用逗号隔开，例如 <code>A(B(D(I,J),E), C(F,G(K,L),H))</code>。表示法多样，说明树在建模里用得广。</p>
 <figure><img loading="lazy" src="../assets/scan/fig-6-2.png" alt="图 6.2 树形结构的凹入表、文氏图和嵌套括号表示"><figcaption>图 6.2 树形结构的凹入表、文氏图和嵌套括号表示</figcaption></figure>
@@ -245,15 +245,15 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>「子结点表」（list of children）表示方法，是指每个分支结点的子结点按照从左至右的顺序形成一个 链表存储在该分支结点中，其<strong>主体是一个存储了树中各结点信息的数组</strong>。数组中的每个元素包括 3 个域，分别用来存放结点信息的值、其父结点指针以及指向其子结点表的指针——为了简明，这些 「指针」实际上使用数组的下标值；最后一列存储的子结点链表中，子结点的顺序由左至右，且每个表项 均存储着指向下一个子结点的指针。</p>
 <p>在这种表示法中，<strong>最左子结点可由子结点链表的第一个表项直接找到，顺链可以找到所有子结点</strong>。 取第 <span class="math">k</span> 个孩子若表用数组可为 <span class="math">O(<span class="upr">1</span>)</span>，若用链表则要沿表走 <span class="math">k</span> 步。</p>
 <p>这种表示法的代价是：度不固定时数组表需要扩容，孩子序列中间插入还要搬动后面的指针；空间上，度为 <span class="math">d</span> 的结点要留 <span class="math">d</span> 个指针槽，孩子很少时会浪费。本章随后用“左子/右兄”把每个结点的链接数固定为两个。</p>
-<figure><img loading="lazy" src="../assets/503a0fd264bb9231.jpg" alt="图 6.6 以“子结点表”表示法实现图 6.1 中的树"><figcaption>图 6.6 以“子结点表”表示法实现图 6.1 中的树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-6-6.png" alt="图 6.6 以“子结点表”表示法实现图 6.1 中的树"><figcaption>图 6.6 以“子结点表”表示法实现图 6.1 中的树</figcaption></figure>
 <p>图 6.6　每个结点单独保存孩子表的表示法。</p>
 <h3 id="622-静态左子右兄表示法"><a class="anchor" href="#622-静态左子右兄表示法">#</a>6.2.2 静态“左子/右兄”表示法</h3>
 <p>下面介绍上述表示方法的一个改进——静态「左子/右兄」（也称「左子结点/右兄弟结点」，left child / right sibling）表示法，<strong>使得访问结点的右侧兄弟结点更加方便</strong>。</p>
 <p>图 6.7 所示为静态「左子/右兄」的一个实例，该方法仍然使用数组存储树中的各结点，数组下标代替 指针。每个结点元素包括 4 个域，分别用于存储结点的值、指向其父结点、以及指向最左子结点和右侧 兄弟结点的指针。<strong>这种表示法比「子结点表」表示法的空间效率更高，而且每个结点的存储空间大小 固定。</strong></p>
-<figure><img loading="lazy" src="../assets/8bf52bea5e1deae9.jpg" alt="图 6.7 “左子/右兄”表示两棵树"><figcaption>图 6.7 “左子/右兄”表示两棵树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-6-7.png" alt="图 6.7 “左子/右兄”表示两棵树"><figcaption>图 6.7 “左子/右兄”表示两棵树</figcaption></figure>
 <p>图 6.7　左孩子—右兄弟表示法把任意度的树压成两个链接域。</p>
 <p>如果两棵树存储在同一个数组中，把其中一棵树添加为另一棵树的子树就很简单。把图 6.7 中以 A 为根的树变成 H 的最左子树，合并结果如图 6.8 所示。结点数组中只需调整 3 个链接：将 H 的最左子结点指向 A，将 A 的父结点指向 H，再将 A 的右侧兄弟指向 J。其余结点的值和链接都不变。</p>
-<figure><img loading="lazy" src="../assets/d4fafa1c3b802b3f.jpg" alt="图 6.8 使用静态“左子/右兄”实现对树的归并"><figcaption>图 6.8 使用静态“左子/右兄”实现对树的归并</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-6-8.png" alt="图 6.8 使用静态“左子/右兄”实现对树的归并"><figcaption>图 6.8 使用静态“左子/右兄”实现对树的归并</figcaption></figure>
 <p>图 6.8　静态数组中的左子、右兄链接和树的归并。</p>
 <h3 id="623-动态表示法"><a class="anchor" href="#623-动态表示法">#</a>6.2.3 动态表示法</h3>
 <p><strong>问题的根子在于「度不固定」。</strong> 树中的结点可以有任意的度数，并且各结点的子结点数随时可能发生 变化，这种动态性给树的实现带来了困难。当然，可以采取一种不太灵活的方式，即限定树的度数， 在实现树的时候只需要给树的每一个结点分配确定数目的指针域即可；很明显，<strong>这种存储方法对度数 小的结点会浪费存储空间，而超过限制时增加结点会非常不方便</strong>。</p>
@@ -558,7 +558,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>所有等价类互不相交，它们的并正好是 <span class="math">S</span>，因此等价关系就是对 <span class="math">S</span> 的一种划分。</p>
 <p>给定 <span class="math">n</span> 个元素和若干等价偶对 <span class="math">(x,y)</span>，划分过程从 <span class="math">n</span> 个单元素集合开始。依次读入每个偶对，先查找 <span class="math">x</span>、<span class="math">y</span> 所在子集；若两个根不同，就把这两个子集合并成一个。最后剩下的非空子集就是由这些偶对确定的等价类。实现这一过程需要三种操作：为每个元素建立独立集合；找到元素所在子集的标识（根）；把两个子集归并。</p>
 <p>用父指针表示时，把每个子集看成一棵树，森林中的每棵树代表一个子集，树根就是该集合的标识符。<code>find</code> 沿父链找到根，<code>union</code> 只需把一棵树的根指向另一棵树的根；因此不必搬动集合中的所有元素。</p>
-<figure><img loading="lazy" src="../assets/444a429faef0f9ad.jpg" alt="图 6.10 父指针表示法"><figcaption>图 6.10 父指针表示法</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-6-10.png" alt="图 6.10 父指针表示法"><figcaption>图 6.10 父指针表示法</figcaption></figure>
 <p>图 6.10　用每个结点的父指针表示树。</p>
 <figure><img loading="lazy" src="../assets/scan/fig-6-11.png" alt="图 6.11 集合的表示方法：(a) 子集 $S_1$；(b) 子集 $S_2$；(c) 并集 $S_3$"><figcaption>图 6.11 集合的表示方法：(a) 子集 <span class="math">S<sub><span class="upr">1</span></sub></span>；(b) 子集 <span class="math">S<sub><span class="upr">2</span></sub></span>；(c) 并集 <span class="math">S<sub><span class="upr">3</span></sub></span></figcaption></figure>
 <p>图 6.11　集合的父指针表示与并集：(a) 子集 <span class="math">S<sub><span class="upr">1</span></sub></span>、(b) 子集 <span class="math">S<sub><span class="upr">2</span></sub></span> 各是一棵树，(c) 合并后 <span class="math">S<sub><span class="upr">1</span></sub></span> 的根挂到了 <span class="math">S<sub><span class="upr">2</span></sub></span> 的根下。</p>
@@ -636,12 +636,12 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>图 6.5(a) 所示森林的先根次序序列是 <code>A B C E F D G H J I</code>。<strong>在先根序列中，任何结点的子树的所有 结点都直接跟在该结点之后，任何一个分支结点后面紧跟的是其第一个子结点</strong>——这条性质是下面几种 表示法共同的基础。</p>
 <p>在「带右链的先根次序表示」中，每个结点包括结点本身数据以及附加的两个表示结构信息的域 <code>ltag</code> 和 <code>rlink</code>，结点的形式为 <code>[ltag | info | rlink]</code>。其中 <code>info</code> 是结点的数据；<code>rlink</code> 是右指针， 指向结点的下一个兄弟，即树或森林所对应的二叉树中结点的右子结点；<code>ltag</code> 是一个标记位， 当结点是叶结点（即对应的二叉树中没有左子结点）时 <code>ltag</code> 为 1，否则为 0。</p>
 <p><strong>为什么用 <code>ltag</code> 而不是再存一个左链？</strong> 为了节省存储单元，「带右链的先根次序表示」用 <code>ltag</code> 代替 了 <code>llink</code>：从结点的次序和 <code>ltag</code> 的值完全可以推知 <code>llink</code>——<code>ltag</code> 为 0 的结点有左子结点，其 <code>llink</code> 就指向存储区中该结点的下一个结点；<code>ltag</code> 为 1 的结点没有左子结点，<code>llink</code> 为空。 所以顺着数组往下走、再靠右链跳过整棵子树，就能还原所有父子和兄弟关系。</p>
-<figure><img loading="lazy" src="../assets/ddf4082b075a6a12.jpg" alt="图 6.14 带右链的先根次序表示法"><figcaption>图 6.14 带右链的先根次序表示法</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-6-14.png" alt="图 6.14 带右链的先根次序表示法"><figcaption>图 6.14 带右链的先根次序表示法</figcaption></figure>
 <p>图 6.14　先根序列配合右链下标还原树形。</p>
 <h3 id="632-带双标记的先根次序表示"><a class="anchor" href="#632-带双标记的先根次序表示">#</a>6.3.2 带双标记的先根次序表示</h3>
 <p>右链要用一个整型下标。若改成两个布尔标记——<code>ltag</code>「有没有孩子」、<code>rtag</code>「有没有下一个兄弟」—— 理论上只需两位信息，更省。<strong>但普通 C++ <code>bool</code> 成员通常按字节存储，并不保证每位只占 1 bit</strong>； 只有显式位压缩或位域实现才可讨论这种空间节省。它是早期教材常见的顺序编码，今天主要用于理解 树的序列化思想，不是通用工程接口。</p>
 <p>以原书图6.5(a) 那片森林为例，它的双标记先根次序表示（图6.15）是：</p>
-<figure><img loading="lazy" src="../assets/1e0ac0ff58415c62.jpg" alt="图 6.15 带双标记的先根次序表示法"><figcaption>图 6.15 带双标记的先根次序表示法</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-6-15.png" alt="图 6.15 带双标记的先根次序表示法"><figcaption>图 6.15 带双标记的先根次序表示法</figcaption></figure>
 <p>图 6.15　双标记先根次序表示法的原书示例。</p>
 <div class="codeblock" data-lang="text"><pre><code>先根次序   A  B  C  E  F  D  G  H  J  I
 ltag       0  0  0  0  1  1  1  0  1  1     0 = 有孩子
@@ -726,10 +726,10 @@ rtag       0  1  0  1  1  1  0  0  1  1     0 = 有下一个兄弟</code></pre><
 <h3 id="633-带度数的后根次序表示"><a class="anchor" href="#633-带度数的后根次序表示">#</a>6.3.3 带度数的后根次序表示</h3>
 <p>图 6.5(a) 森林的后根次序序列是 <code>B E F C D A J H I G</code>。<strong>在后根次序序列中，任何一棵子树的所有 结点都聚集在一起，并且以该子树的根作为最后一个结点。</strong> 在「带度数的后根次序表示」中，每个结点 有两个域：<code>info</code> 存放结点的数据，<code>degree</code> 存储结点的度数，结点形式为 <code>[info | degree]</code>。</p>
 <p><strong>这种表示法不包括指针，但它仍能反映树的结构</strong>，因此把它转化成森林的逻辑结构时，只需要从左至 右进行扫描：度数为零的结点是叶子结点（也可以看做是一棵子树的根）；当遇到度数非零（设为 <span class="math">k</span>）的 结点时，则排在该结点之前且离它最近的 <span class="math">k</span> 个子树的根就是该结点的 <span class="math">k</span> 个子结点。例如上述森林中 结点 <span class="math">C</span> 的度数为 2，那么排在 <span class="math">C</span> 之前的两个结点 <span class="math">E</span> 和 <span class="math">F</span> 就是 <span class="math">C</span> 子树的根结点，从而结点 <span class="math">C</span>、 <span class="math">E</span> 以及 <span class="math">F</span> 就构成了一棵树，<span class="math">C</span> 是这棵子树的根；同理，<span class="math">A</span> 的度数为 3，则排在 <span class="math">A</span> 之前且离 <span class="math">A</span> 最近的三棵子树的根结点就是 <span class="math">A</span> 的子结点，即 <span class="math">B</span>、<span class="math">C</span> 和 <span class="math">D</span>。如此进行下去，就可以得到原来的 森林。实现时同样需要用到栈：每读到一个度数为 <span class="math">d</span> 的结点，就从栈顶弹出 <span class="math">d</span> 棵子树做它的孩子， 再把这棵新树压回去；扫完数组，栈里剩下的就是整棵树（或森林）。</p>
-<figure><img loading="lazy" src="../assets/59700ca6ca89690d.jpg" alt="图 6.16 带度数的后根次序表示法"><figcaption>图 6.16 带度数的后根次序表示法</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-6-16.png" alt="图 6.16 带度数的后根次序表示法"><figcaption>图 6.16 带度数的后根次序表示法</figcaption></figure>
 <p>图 6.16　结点度数随后根次序一起保存。</p>
 <h3 id="634-带双标记的层次次序表示"><a class="anchor" href="#634-带双标记的层次次序表示">#</a>6.3.4 带双标记的层次次序表示</h3>
-<figure><img loading="lazy" src="../assets/c02b2adffb31959d.jpg" alt="图 6.17 带双标记的层次次序表示法"><figcaption>图 6.17 带双标记的层次次序表示法</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-6-17.png" alt="图 6.17 带双标记的层次次序表示法"><figcaption>图 6.17 带双标记的层次次序表示法</figcaption></figure>
 <p>图 6.17　层次次序配合双标记记录孩子和兄弟关系。</p>
 <p>图 6.5(a) 所示森林的层次次序序列为 <code>A G B C D H I E F J</code>。<strong>这种层次次序的序列也同样表现了森林 的一些结构信息</strong>：森林中处于同一层的结点在序列中都聚集在一起，任何一个结点只要它有右兄弟， 那么在序列中它的右兄弟就排在该结点后面。</p>
 <p>类似于带双标记的先根次序表示，引入带双标记的层次次序表示法，结点形式为 <code>[ltag | info | rtag]</code>： 当结点没有左子结点时 <code>ltag</code> 为 1，否则为 0；当结点没有下一个兄弟时 <code>rtag</code> 为 1，否则为 0。</p>
@@ -768,6 +768,10 @@ rtag       0  1  0  1  1  1  0  0  1  1     0 = 有下一个兄弟</code></pre><
 <li>给出一棵树的逻辑结构 <span class="math">T<span class="rel">=</span>(K,R)</span>，其中 <span class="math">K<span class="rel">=</span>{A,B,C,D,E,F,G,H,I,J,K,L,M}</span>， <span class="math">R<span class="rel">=</span>{⟨A,B⟩,⟨A,C⟩,⟨A,D⟩,⟨B,E⟩,⟨B,F⟩,⟨B,G⟩,⟨C,H⟩,⟨D,I⟩,⟨D,J⟩,⟨F,K⟩,⟨F,L⟩,⟨I,J⟩}</span>。 试用树形表示法画出此树，并按照递归定义将树划分为子树，指出哪些结点是根、哪些结点是树叶， 确定各结点的层数、度数，并将该树转化为对应的二叉树。</li>
 <li>3 个结点可以构造出多少个不同的有序树？试将其画出来。</li>
 <li>将图 6.19 中的二叉树转换为对应的森林，分别按照先根次序、后根次序列出其结点。</li>
+</ol>
+<figure><img loading="lazy" src="../assets/scan/fig-6-19.png" alt="图 6.19 习题 3 的图示"><figcaption>图 6.19 习题 3 的图示</figcaption></figure>
+<p>图 6.19　习题 3 的图示</p>
+<ol>
 <li>编写出一个算法来判断两棵树是否相同。<strong>尽可能提高算法效率</strong>，并分析算法的运行时间代价。</li>
 <li>编写出一个算法来判断两棵树在<strong>不考虑子树顺序</strong>的前提下是否相等。尽可能提高算法效率， 分析算法的运行时间代价。</li>
 <li>编写一个函数，以一棵树为输入，返回树的结点数目。</li>
@@ -776,6 +780,10 @@ rtag       0  1  0  1  1  1  0  0  1  1     0 = 有下一个兄弟</code></pre><
 <li>编写函数，以一棵树的根为输入，返回一棵对应的二叉树。</li>
 <li>一个高度为 <span class="math">L</span> 的 <span class="math">K</span> 叉树，如果按层次顺序对树中所有结点从 1 开始编号，问：(1) 编号为 <span class="math">N</span> 的 结点的父结点（若存在）编号是多少？(2) 编号为 <span class="math">N</span> 的结点的第 <span class="math">i</span> 个子结点（若存在）编号是多少？ (3) 编号为 <span class="math">N</span> 的结点有右兄弟的条件是什么，其编号是多少？</li>
 <li>画出图 6.20 所示二叉树对应森林的左子/右兄法存储表示、带右链的先根次序存储表示、带左链的 层次次序存储表示和带度数的后根次序存储表示。</li>
+</ol>
+<figure><img loading="lazy" src="../assets/scan/fig-6-20.png" alt="图 6.20 习题 10 的图示"><figcaption>图 6.20 习题 10 的图示</figcaption></figure>
+<p>图 6.20　习题 10 的图示</p>
+<ol>
 <li>设计一个算法，将一个用带度数的后根次序法表示的森林转换为左子/右兄法表示。</li>
 <li>设计一个算法，将一个用带右链的先根次序法表示的森林转换为用带度数的后根次序法表示。</li>
 </ol>
@@ -791,8 +799,15 @@ rtag       0  1  0  1  1  1  0  0  1  1     0 = 有下一个兄弟</code></pre><
 <li>使用带子结点指针数组的树的链接表示法，实现 6.1.3 节中定义的树类。<strong>此实现必须能支持结点的 子结点数目的变化</strong>：在生成时，结点应该只被分配只够存储其初始子结点集的空间；当一个新的子结点 添加到结点上以致于数组溢出时，则从可利用空间中分配一个为原来数组两倍大的数组。</li>
 <li>使用父指针表示法，实现 6.1.3 节中定义的树类。</li>
 <li>若用大写字母标识树的结点，则可用<strong>带标号的广义表形式</strong>表示一棵树，其语法为 「树 → 大写字母 [ <code>(</code> 树 { <code>,</code> 树 } <code>)</code> ]」（图 6.21）。编写递归算法：(1) 将这种表示方法的字符序列 转化成树的左子/右兄表示法；(2) 将用左子/右兄表示法表示的树转化为这种表示法的字符序列。</li>
-<li>另一种表示二维数组的方法是 <strong>4 叉树表示法</strong>，其中一个结点的 4 个儿子分别表示数组的 NE、SE、SW、NW 4 个分块（图 6.22）。这种表示二维数组的 4 叉树称为<strong>金字塔</strong>。 (1) 设计一个基于金字塔表示法的矩阵乘法算法；(2) 对于给定的 <span class="math"><span class="upr">2</span><sup>p</sup><span class="bin">×</span><span class="upr">2</span><sup>p</sup></span> 矩阵，设计一个构造 表示这个矩阵的二叉树算法，并将这个算法推广到可表示任意 <span class="math">M<span class="bin">×</span>N</span> 矩阵的情形，算法效率如何？</li>
 </ol>
+<figure><img loading="lazy" src="../assets/scan/fig-6-21.png" alt="图 6.21 上机题 3 的图示"><figcaption>图 6.21 上机题 3 的图示</figcaption></figure>
+<p>图 6.21　上机题 3 的图示：广义表形式的语法图</p>
+<ol>
+<li>另一种表示二维数组的方法是 <strong>4 叉树表示法</strong>，其中一个结点的 4 个儿子分别表示数组的 NE、SE、SW、NW 4 个分块（图 6.22）。这种表示二维数组的 4 叉树称为<strong>金字塔</strong>。</li>
+</ol>
+<figure><img loading="lazy" src="../assets/scan/fig-6-22.png" alt="图 6.22 上机题 4 的图示"><figcaption>图 6.22 上机题 4 的图示</figcaption></figure>
+<p>图 6.22　上机题 4 的图示：一个结点的 4 个子结点对应数组的 4 个分块</p>
+<p>(1) 设计一个基于金字塔表示法的矩阵乘法算法；(2) 对于给定的 <span class="math"><span class="upr">2</span><sup>p</sup><span class="bin">×</span><span class="upr">2</span><sup>p</sup></span> 矩阵，设计一个构造 表示这个矩阵的二叉树算法，并将这个算法推广到可表示任意 <span class="math">M<span class="bin">×</span>N</span> 矩阵的情形，算法效率如何？</p>
 <div class="pagenav"><a href="ch05-binary-tree.html"><span class="dir">← 上一篇</span>第5章 二叉树</a><a href="ch07-graph.html" style="text-align:right"><span class="dir">下一篇 →</span>第7章 图</a></div>
 </main>
 <nav class="page"><b>本页</b><a href="#61-树的定义和基本术语">6.1 树的定义和基本术语</a><a href="#611-树和森林" class="sub">6.1.1 树和森林</a><a href="#612-森林与二叉树的等价转换" class="sub">6.1.2 森林与二叉树的等价转换</a><a href="#613-树的抽象数据类型" class="sub">6.1.3 树的抽象数据类型</a><a href="#614-树的周游" class="sub">6.1.4 树的周游</a><a href="#62-树的链式存储结构">6.2 树的链式存储结构</a><a href="#621-子结点表表示方法" class="sub">6.2.1 “子结点表”表示方法</a><a href="#622-静态左子右兄表示法" class="sub">6.2.2 静态“左子/右兄”表示法</a><a href="#623-动态表示法" class="sub">6.2.3 动态表示法</a><a href="#624-动态左子右兄二叉链表表示法" class="sub">6.2.4 动态“左子/右兄”二叉链表表示法</a><a href="#625-父指针表示法和在并查集中的应用" class="sub">6.2.5 父指针表示法和在并查集中的应用</a><a href="#63-树的顺序存储结构">6.3 树的顺序存储结构</a><a href="#631-带右链的先根次序表示" class="sub">6.3.1 带右链的先根次序表示</a><a href="#632-带双标记的先根次序表示" class="sub">6.3.2 带双标记的先根次序表示</a><a href="#633-带度数的后根次序表示" class="sub">6.3.3 带度数的后根次序表示</a><a href="#634-带双标记的层次次序表示" class="sub">6.3.4 带双标记的层次次序表示</a><a href="#64-k叉树">6.4 K叉树</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充证明与算法题参考课程第-6-章" class="sub">补充证明与算法题（参考课程第 6 章）</a><a href="#原书习题" class="sub">原书习题</a><a href="#上机题">上机题</a><a href="#原书上机题" class="sub">原书上机题</a></nav>

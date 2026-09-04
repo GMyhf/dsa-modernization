@@ -197,7 +197,7 @@ std::optional&lt;size_type&gt; find(<span class="k">const</span> T&amp; value) <
 <p><strong>取值必须先开盒</strong>，而开盒这一步绕不过去。</p></section><section class="slide" data-notes="&lt;p&gt;循环&lt;strong&gt;倒着走&lt;/strong&gt;是考点：若改成从 pos 起递增地 data_[i+1] = data_[i]，
 第一次搬完就把 data_[pos+1] 覆盖掉了，后面搬的全是同一个值。
 现场改一下演示，效果很好。&lt;/p&gt;"><h1 id="插入搬-on-个元素"><a class="anchor" href="#插入搬-on-个元素">#</a>插入：搬 O(n) 个元素</h1>
-<figure><img loading="lazy" src="../../assets/995a8257623869d1.jpg" alt="图 2.7 插入算法示意图"><figcaption>图 2.7 插入算法示意图</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-2-7.png" alt="图 2.7 插入算法示意图"><figcaption>图 2.7 插入算法示意图</figcaption></figure>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/teaching.hpp">code/ch02/array_list/teaching.hpp#fn:insert</a></div><pre><code><span class="c">// 在位置 pos 插入，pos 可以等于 size()（追加到表尾）。</span>
 <span class="c">// 代价 O(n)：pos 之后的元素都要右移一位。这正是顺序表与链表要对比的地方。</span>
 <span class="t">void</span> insert(size_type pos, <span class="k">const</span> T&amp; value) {
@@ -231,7 +231,7 @@ std::optional&lt;size_type&gt; find(<span class="k">const</span> T&amp; value) <
 </ul>
 <p><code>delete[]</code> 必须在搬完之后——顺序反了就是读已释放的内存。</p></section><section class="slide" data-notes="&lt;p&gt;这次循环&lt;strong&gt;正着走&lt;/strong&gt;。另外它多做一件事：把被删的元素返回给调用方。
 原书的 delete 返回 bool，被删的值就此丢失，调用方得先 getValue 再 delete 两步走。&lt;/p&gt;"><h1 id="删除插入的镜像"><a class="anchor" href="#删除插入的镜像">#</a>删除：插入的镜像</h1>
-<figure><img loading="lazy" src="../../assets/8a7435561d286746.jpg" alt="图 2.8 删除示意图"><figcaption>图 2.8 删除示意图</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-2-8.png" alt="图 2.8 删除示意图"><figcaption>图 2.8 删除示意图</figcaption></figure>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/teaching.hpp">code/ch02/array_list/teaching.hpp#fn:remove</a></div><pre><code><span class="c">// 删除 pos 上的元素并返回它。代价同样是 O(n)：后面的元素都要左移一位。</span>
 T remove(size_type pos) {
     <span class="k">if</span> (pos &gt;= size_) {
@@ -270,7 +270,7 @@ ArrayList(<span class="k">const</span> ArrayList&amp; other)
 <li>嵌套遍历直接互相踩</li>
 </ul>
 <p>本书删掉它，改为提供 <code>begin() / end()</code>——<code>range-for</code> 因此可以直接用。</p></section><section class="slide" data-notes=""><h1 id="23-链表换一种存储"><a class="anchor" href="#23-链表换一种存储">#</a>2.3 链表：换一种存储</h1>
-<figure><img loading="lazy" src="../../assets/6e2bc11926f0ec96.jpg" alt="图 2.4 单链表示例"><figcaption>图 2.4 单链表示例</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-2-4.png" alt="图 2.4 单链表示例"><figcaption>图 2.4 单链表示例</figcaption></figure>
 <ul>
 <li>结点可以<strong>散落</strong>在内存里，靠链接域表示「谁在谁后面」</li>
 <li>给定前驱结点后，插入或删除只改<strong>常数条</strong>指针</li>
@@ -278,7 +278,7 @@ ArrayList(<span class="k">const</span> ArrayList&amp; other)
 </ul></section><section class="slide" data-notes="&lt;p&gt;这就是原书 setPos(-1) 那个技巧的实质。现代接口不暴露 -1 这个特殊位置，
 predecessor_at(0) 直接返回头结点。
 可以让学生自己写一遍不带头结点的插入，感受一下多出来的那个 if。&lt;/p&gt;"><h1 id="头结点让表头不再是特例"><a class="anchor" href="#头结点让表头不再是特例">#</a>头结点：让表头不再是特例</h1>
-<figure><img loading="lazy" src="../../assets/3c36698567f5e7c2.jpg" alt="图 2.6 引人头结点的单链表"><figcaption>图 2.6 引人头结点的单链表</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-2-6.png" alt="图 2.6 引人头结点的单链表"><figcaption>图 2.6 引人头结点的单链表</figcaption></figure>
 <p><strong>头结点是一个不存放数据的哨兵</strong>，永远排在第一个真元素前面。</p>
 <p>有了它，「在表头插入」和「在中间插入」变成同一句话： <strong>找到前驱，改它的 next</strong>。空表也不必另写一套分支。</p></section><section class="slide" data-notes=""><h1 id="尾指针让-append-变成-o1"><a class="anchor" href="#尾指针让-append-变成-o1">#</a>尾指针：让 append 变成 O(1)</h1>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/teaching.hpp">code/ch02/linked_list/teaching.hpp#fn:append</a></div><pre><code><span class="c">// 在表尾追加。**因为存了 tail_，这里是 O(1)**；没有它就得每次从头走到尾。</span>
@@ -328,12 +328,12 @@ T remove(size_type pos) {
 <li><strong>被删结点必须 <code>delete</code></strong>，只摘链不释放就是内存泄漏</li>
 <li><strong>删的若是尾结点，<code>tail_</code> 必须回退</strong>——不回退，下一次 <code>append</code> 就写进已释放的内存</li>
 </ol></section><section class="slide" data-notes=""><h1 id="232-双链表多一根指针买什么"><a class="anchor" href="#232-双链表多一根指针买什么">#</a>2.3.2 双链表：多一根指针买什么</h1>
-<figure><img loading="lazy" src="../../assets/ebdcb0d7054cf3a9.jpg" alt="图 2.10 双链表的结点"><figcaption>图 2.10 双链表的结点</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-2-10.png" alt="图 2.10 双链表的结点"><figcaption>图 2.10 双链表的结点</figcaption></figure>
 <p>多出来的 <code>prev</code>（64 位机上 8 字节）只买到一件事，但很值：</p>
 <p><strong>已知一个结点时，删除它是 O(1)。</strong></p>
 <p>单链表要做同一件事，得先从头走到它的前驱——O(n)， 因为单链表从一个结点走不回前一个。</p></section><section class="slide" data-notes="&lt;p&gt;少改一根，表在&lt;strong&gt;正向&lt;/strong&gt;遍历时看起来完全正常，只有反着走或者删中间结点时才炸。
 教学版的测试因此正着走一遍、倒着走一遍，断言两个结果互为逆序。&lt;/p&gt;"><h1 id="双链表的删除两侧都要改"><a class="anchor" href="#双链表的删除两侧都要改">#</a>双链表的删除：两侧都要改</h1>
-<figure><img loading="lazy" src="../../assets/f3aa5f7a9ea65ef6.jpg" alt="图2.11 双链表的删除操作示意"><figcaption>图2.11 双链表的删除操作示意</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-2-11.png" alt="图2.11 双链表的删除操作示意"><figcaption>图2.11 双链表的删除操作示意</figcaption></figure>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/doubly_linked_list/teaching.hpp">code/ch02/doubly_linked_list/teaching.hpp#fn:erase_node</a></div><pre><code><span class="c">// 摘掉一个已知的结点，O(1)。**这是双链表的看家本领**：</span>
 <span class="c">// 单链表要做同一件事，得先从头走到它的前驱，O(n)。</span>
 T erase_node(Node* node) {

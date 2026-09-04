@@ -137,7 +137,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 </tbody></table></div>
 <p>若 <code>int</code> 占 4 字节，字节偏移是 <span class="math"><span class="upr">23</span><span class="bin">×</span><span class="upr">4</span><span class="rel">=</span><span class="upr">92</span></span>。</p>
 <p>霍纳写法：<code>((1 * 3 + 2) * 4 + 3) * 4</code>。 定位前仍要逐维检查边界；公式不会替程序发现越界。</p></section><section class="slide" data-notes=""><h1 id="1212-特殊矩阵只存有用的"><a class="anchor" href="#1212-特殊矩阵只存有用的">#</a>12.1.2 特殊矩阵：只存有用的</h1>
-<figure><img loading="lazy" src="../../assets/ff4a0e68418ad4b3.jpg" alt="图 12.1 上三角矩阵和下三角矩阵"><figcaption>图 12.1 上三角矩阵和下三角矩阵</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-12-1.png" alt="图 12.1 上三角矩阵和下三角矩阵"><figcaption>图 12.1 上三角矩阵和下三角矩阵</figcaption></figure>
 <p>对称矩阵、三角矩阵有大量重复或恒为常数的元素。 只存一半，用一个下标映射函数找回来：</p>
 <div class="codeblock" data-lang="text"><pre><code>下三角 (i &gt;= j):   偏移 = i*(i+1)/2 + j</code></pre></div>
 <p>空间从 <span class="math">n<sup><span class="upr">2</span></sup></span> 降到 <span class="math">n(n<span class="bin">+</span><span class="upr">1</span>)/<span class="upr">2</span></span>，<strong>代价是每次访问多算一次下标</strong>。</p></section><section class="slide" data-notes="&lt;p&gt;「十字」就是指每个结点有两根指针：右指针连同一行的下一个，
@@ -145,7 +145,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 
 代价：按行遍历和按列遍历都是 O(该行/列的非零数)，很快；
 但随机访问 a[i][j] 要沿链走，不再是 O(1)。&lt;/p&gt;"><h1 id="1213-稀疏矩阵十字链表"><a class="anchor" href="#1213-稀疏矩阵十字链表">#</a>12.1.3 稀疏矩阵：十字链表</h1>
-<figure><img loading="lazy" src="../../assets/7243968f87b4e75b.jpg" alt="图 12.2 稀疏矩阵的十字链表"><figcaption>图 12.2 稀疏矩阵的十字链表</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-12-2.png" alt="图 12.2 稀疏矩阵的十字链表"><figcaption>图 12.2 稀疏矩阵的十字链表</figcaption></figure>
 <p>非零元素极少时，只存非零元。每个结点同时挂在<strong>行链</strong>和<strong>列链</strong>上。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch12/sparse_matrix/modern.hpp">code/ch12/sparse_matrix/modern.hpp#fn:get</a></div><pre><code>[[nodiscard]] <span class="t">int</span> get(std::<span class="t">size_t</span> row, std::<span class="t">size_t</span> col) <span class="k">const</span> {
     check(row, col);

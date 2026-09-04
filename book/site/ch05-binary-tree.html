@@ -223,7 +223,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <figure><img loading="lazy" src="../assets/scan/fig-5-2.png" alt="图5.2 满二叉树和完全二叉树示例"><figcaption>图5.2 满二叉树和完全二叉树示例</figcaption></figure>
 <p>图 5.2　(a) 满二叉树；(b) 完全二叉树。</p>
 <p>把普通二叉树的每个空子树位置都补成一个“外部叶”，所得树叫扩充二叉树（extended binary tree），原来的结点叫内部结点。若原树有 <span class="math">n</span> 个内部结点，则扩充树有 <span class="math">n<span class="bin">+</span><span class="upr">1</span></span> 个外部叶。</p>
-<figure><img loading="lazy" src="../assets/44cbdbcfda5553a1.jpg" alt="图 5.3 扩充二叉树"><figcaption>图 5.3 扩充二叉树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-5-3.png" alt="图 5.3 扩充二叉树"><figcaption>图 5.3 扩充二叉树</figcaption></figure>
 <p>图 5.3　扩充二叉树：方框是补出来的外部叶，圆圈是原有的内部结点。补完之后每个内部结点都恰好有两个孩子，所以扩充二叉树一定是满二叉树——5.6 节算带权外部路径长度时用的就是这张图的形状。设内部路径长度 <span class="math">I</span> 为根到所有内部结点的边数之和，外部路径长度 <span class="math">E</span> 为根到所有外部叶的边数之和，则</p>
 <div class="math math-display">E<span class="rel">=</span>I<span class="bin">+</span><span class="upr">2</span>n.</div>
 <p>证明很直接：每个内部结点向下增加的两条分支，分别把一条路径贡献给外部叶；沿着原树的每条边，路径长度同时在内部路径和外部路径中各增加一次。等价地，对内部结点按度数计边，可得外部叶数为 <span class="math">n<span class="bin">+</span><span class="upr">1</span></span>，再逐层计数即得上式。这个关系是最优二叉树和 Huffman 树计算带权路径长度的基础。</p>
@@ -238,7 +238,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <blockquote><p><strong>证明.</strong> 设二叉树为 <span class="math">T</span>，把它所有的空子树都换成树叶，得到的扩充二叉树记为 <span class="math">T&#x27;</span>。 <span class="math">T&#x27;</span> 是满二叉树，而 <span class="math">T</span> 原来的每个结点在 <span class="math">T&#x27;</span> 里都成了分支结点。 由满二叉树定理，<span class="math">T&#x27;</span> 的树叶数 = 分支结点数 + 1 = <span class="math">T</span> 的结点数 + 1。 而每片新添的树叶恰好对应 <span class="math">T</span> 的一棵空子树，所以 <span class="math">T</span> 的空子树数目等于它的结点数加 1。∎</p></blockquote>
 <p>性质 5 不是纸面游戏：它说明<strong>一棵 <span class="math">n</span> 个结点的二叉树里有 <span class="math">n<span class="bin">+</span><span class="upr">1</span></span> 个空指针</strong>。 链式存储时这些空指针占的空间和结点本身同阶——线索二叉树、Trie 的压缩、 第 12 章 PATRICIA 的动机都从这里来。</p>
 <p>线索二叉树（threaded binary tree）通过复用空指针保存遍历前驱或后继，适合教学和 需要低额外空间遍历的专门场景；现代通用库通常直接使用显式栈、父指针或迭代器， 因此不应把线索化当作默认的树表示。原书把它放在习题里，图是这样的：</p>
-<figure><img loading="lazy" src="../assets/a8d8c140383fe73e.jpg" alt="图 5.23 中序穿线二叉树"><figcaption>图 5.23 中序穿线二叉树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-5-23.png" alt="图 5.23 中序穿线二叉树"><figcaption>图 5.23 中序穿线二叉树</figcaption></figure>
 <p>图 5.23　中序穿线（线索）二叉树。虚线是借空指针存下的中序前驱/后继，结点里另加一位标志区分「这根指针是孩子还是线索」。有了它，中序遍历不用栈也不用递归。</p>
 <h2 id="52-二叉树的周游"><a class="anchor" href="#52-二叉树的周游">#</a>5.2 二叉树的周游</h2>
 <p>5.1 节介绍了二叉树的逻辑结构，本节讨论二叉树的抽象数据类型和几种周游算法。</p>
@@ -298,7 +298,7 @@ BST 中序: 1 3 4 6 7 8 10 14
 <p><code>create_tree(value, left, right)</code> 接管两棵子树。参数是右值，表示所有权被移走；<code>left_leaf</code> 在 <code>std::move</code> 之后变空，不会和 <code>left</code> 抢着析构同一结点。</p>
 <h3 id="522-深度优先周游二叉树"><a class="anchor" href="#522-深度优先周游二叉树">#</a>5.2.2 深度优先周游二叉树</h3>
 <p>二叉树的逻辑结构只有三个基本单元：根结点、左子树、右子树。</p>
-<figure><img loading="lazy" src="../assets/2e8ea2a5a1df00a7.jpg" alt="图 5.4 二叉树的基本结构"><figcaption>图 5.4 二叉树的基本结构</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-5-4.png" alt="图 5.4 二叉树的基本结构"><figcaption>图 5.4 二叉树的基本结构</figcaption></figure>
 <p>图 5.4　二叉树的基本结构。周游一棵树就是安排这三件事的先后：记访问当前结点为 <span class="math">t</span>、周游左子树为 <span class="math">L</span>、周游右子树为 <span class="math">R</span>，六种排列里约定「先左后右」，剩下的就是前序 <span class="math">tLR</span>、中序 <span class="math">LtR</span>、后序 <span class="math">LRt</span> 三种。</p>
 <p>深度优先周游的思路是尽量往深处走：沿左链一路下降，遇到左子树为空就退回最近的、右子树尚未访问的分支结点，转向它的右孩子，再继续尽量往左。重复到没有结点可退为止，每个结点恰好被访问一次。</p>
 <p>周游一棵二叉树就是做三件事：访问当前结点（记作 t）、周游左子树（L）、周游右子树（R）。三件事共有 6 种排列，习惯上总是先左后右，于是只剩三种——就是本节的三种深度优先周游：</p>
@@ -323,7 +323,7 @@ BST 中序: 1 3 4 6 7 8 10 14
 <td style="text-align:left">后序周游左子树 → 后序周游右子树 → 访问根</td>
 </tr>
 </tbody></table></div>
-<figure><img loading="lazy" src="../assets/7c6579b015042738.jpg" alt="图 5.5 二叉树示例：根 A；左子树的根 B 有孩子 D 和 E，E 有左孩子 G；右子树的根 C 有右孩子 F，F 有孩子 H 和 I"><figcaption>图 5.5 二叉树示例：根 A；左子树的根 B 有孩子 D 和 E，E 有左孩子 G；右子树的根 C 有右孩子 F，F 有孩子 H 和 I</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-5-5.png" alt="图 5.5 二叉树示例：根 A；左子树的根 B 有孩子 D 和 E，E 有左孩子 G；右子树的根 C 有右孩子 F，F 有孩子 H 和 I"><figcaption>图 5.5 二叉树示例：根 A；左子树的根 B 有孩子 D 和 E，E 有左孩子 G；右子树的根 C 有右孩子 F，F 有孩子 H 和 I</figcaption></figure>
 <p>前序（中序、后序）周游二叉树得到二叉树结点的一个有序序列，称为二叉树的前序（中序、后序） <strong>序列</strong>。对于图 5.5 所示的二叉树：</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">周游</th>
@@ -388,7 +388,7 @@ BST 中序: 1 3 4 6 7 8 10 14
 <p>每个结点进出各一次，三种周游的时间代价都是 <span class="math">O(n)</span>。空间代价是递归深度，等于树高：平衡时约 <span class="math"><span class="upr">log</span><sub><span class="upr">2</span></sub>n</span>，退化成一条链时是 <span class="math">n</span>，5.1.1 说的「压穿运行栈」就是这种树。工程版另给了三个用手写链式栈显式模拟调用栈的迭代版（<code>preorder_iterative</code>、<code>inorder_iterative</code>、<code>postorder_iterative</code>），按 D-001 §3d 只作补充，不替换递归主实现，见 5.6a。</p>
 <h4 id="表达式树周游的一个用途"><a class="anchor" href="#表达式树周游的一个用途">#</a>表达式树：周游的一个用途</h4>
 <p>三种周游次序不是三种口味，它们各自对应一种实用的表达式写法。图 5.6 是表达式 <span class="math">A<span class="bin">+</span>B<span class="bin">×</span>(C<span class="bin">+</span>D)</span> 的二叉树表示：运算符落在内部结点，运算对象落在叶结点，括号一个都不出现——树的形状已经把运算次序记下来了。</p>
-<figure><img loading="lazy" src="../assets/b3d4ed61cc80d7d7.jpg" alt="图 5.6 表达式树：根是加号，左孩子是 A，右孩子是乘号；乘号的左孩子是 B，右孩子是加号，其孩子为 C 和 D"><figcaption>图 5.6 表达式树：根是加号，左孩子是 A，右孩子是乘号；乘号的左孩子是 B，右孩子是加号，其孩子为 C 和 D</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-5-6.png" alt="图 5.6 表达式树：根是加号，左孩子是 A，右孩子是乘号；乘号的左孩子是 B，右孩子是加号，其孩子为 C 和 D"><figcaption>图 5.6 表达式树：根是加号，左孩子是 A，右孩子是乘号；乘号的左孩子是 B，右孩子是加号，其孩子为 C 和 D</figcaption></figure>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">周游</th>
 <th style="text-align:left">得到</th>
@@ -466,14 +466,14 @@ BST 中序: 1 3 4 6 7 8 10 14
 <p>本节讲的是结点的动态存储和树的所有权：析构要遍历并释放每个结点，拷贝要深复制，移动要转移根指针，还要考虑递归实现的栈边界。Python 的对象引用和垃圾回收不会给出 C++ 五法则或强异常保证的对应练习；用嵌套 <code>list</code> 表示树更会把结点布局抹掉。因此这里的教学实现只提供 C++，算法层的周游和搜索才适合做双语言对照。</p>
 <p>前面几节讨论的二叉树逻辑结构和抽象数据类型，都<strong>不依赖于二叉树的物理存储方式</strong>。二叉树的存储 实现方法有多种：既可以用链接存储结构实现，又可以用顺序存储结构实现；这些方法各有其特点和 适用范围，在应用中要根据情况决定采用哪种。</p>
 <p><strong>链式存储</strong>把二叉树的各结点随机地存储在内存空间，结点之间的关系用指针表示。由二叉树的定义 可知，每一个结点由一个数据元素和指向其左右子树的分支组成，所以表示二叉树的链表结点包含 3 个域：数据域和左、右指针域——用 <code>info</code> 域存储结点的数据元素，另外再设置两个指针域 <code>left</code> 和 <code>right</code>，分别指向结点的左子结点和右子结点；当结点的某个子结点为空时，相应的指针为空指针。</p>
-<figure><img loading="lazy" src="../assets/12374c97891a830a.jpg" alt="图 5.7 二叉树结点的存储结构"><figcaption>图 5.7 二叉树结点的存储结构</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-5-7.png" alt="图 5.7 二叉树结点的存储结构"><figcaption>图 5.7 二叉树结点的存储结构</figcaption></figure>
 <p>图 5.7　二叉树结点的两种存储结构：(a) 数据域 + 左右指针，用它得到的是<strong>二叉链表</strong>（也叫 left-right 存储法）；(b) 再加一根指向父结点的 <code>parent</code>，得到的是<strong>三叉链表</strong>。二叉链表里找父结点得从根重新走一趟，三叉链表顺着 <code>parent</code> 一步就到——多一根指针买到的就是这件事。</p>
-<figure><img loading="lazy" src="../assets/3b20bce2ee34a2d6.jpg" alt="图 5.8 图 5.5 中二叉树的二叉链表存储结构"><figcaption>图 5.8 图 5.5 中二叉树的二叉链表存储结构</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-5-8.png" alt="图 5.8 图 5.5 中二叉树的二叉链表存储结构"><figcaption>图 5.8 图 5.5 中二叉树的二叉链表存储结构</figcaption></figure>
 <p>图 5.8　图 5.5 那棵树的二叉链表存储结构。数一数图里的空指针：<span class="math">n</span> 个结点的二叉链表恰有 <span class="math">n<span class="bin">+</span><span class="upr">1</span></span> 个空链域（5.1.3 的性质 5），线索二叉树就是把它们利用起来。</p>
 <p>本章的教学版用的正是二叉链表。<code>create_tree</code> 先 <code>new</code> 出新根，再把两棵子树的根指针挪过来，最后才清空自己原来的树。这样即使 <code>new</code> 抛异常，调用方的两棵子树也不动。</p>
 <p><strong>顺序存储</strong>是指按照一定次序，用一组地址连续的存储单元存储二叉树上的各个结点元素。由于二叉树 是一种非线性结构，因此必须将结点排成一个线性序列，使得通过结点在这个序列中的相对位置就能 确定结点之间的逻辑关系；<strong>但通常情况下，只通过相应位置不足以刻画整个树形结构</strong>。</p>
 <p>而对于一棵具有 <span class="math">n</span> 个结点的<strong>完全二叉树</strong>，可以从根结点起自上而下、从左至右地把所有结点编号， 得到一个足以反映整个二叉树结构的线性序列——采用这种方式，线性序列里存储的结点就是按照层次 周游二叉树得到的排列。按层次顺序把结点从 <span class="math"><span class="upr">0</span></span> 到 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 编号，编号 <span class="math">i</span> 的结点就放在数组下标 <span class="math">i</span>。</p>
-<figure><img loading="lazy" src="../assets/80797628fa510b2c.jpg" alt="图 5.9 完全二叉树的结点编号"><figcaption>图 5.9 完全二叉树的结点编号</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-5-9.png" alt="图 5.9 完全二叉树的结点编号"><figcaption>图 5.9 完全二叉树的结点编号</figcaption></figure>
 <p>图 5.9　完全二叉树的结点编号。</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">下标</th>
@@ -838,7 +838,7 @@ BST 中序: 1 3 4 6 7 8 10 14
 <p>二叉搜索树的查找算法可以用 Python 讲，但本章这一实现还要展示结点的拥有关系、删除时子树指针的转移、深拷贝和析构。Python 容器会替我们保管这些资源，无法让读者观察“删除一个结点后谁负责释放它”或强异常保证如何维持，所以存储实现不另写 Python 包装。</p>
 <p>在实际应用中，经常会碰到这样的操作：在一组记录中检索一个记录，向其中插入一个记录，或者删除 一个记录。对于一个<strong>无序线性表</strong>，插入记录时只需要把该记录放在表的末端，但在表中查找一个特定 记录的检索时间却相对较慢；对于<strong>有序线性表</strong>，如果用二分查找法检索特定的记录，检索效率较高， 但是遇到动态增减变化的情况（如插入或删除一个元素）时需要移动大量的元素。很多应用都需要一种 <strong>插入、删除和检索记录效率都较高</strong>的数据组织方法——二叉搜索树（binary search tree，BST，也称 二叉排序树、二叉查找树）就是这样一种高效的数据结构。</p>
 <p>二叉搜索树是一类满足以下属性的特殊二叉树：树中的每个非空结点表示一个记录；若某结点左子树 不为空，则<strong>左子树上所有结点的值均小于该结点的关键码值</strong>；若其右子树不为空，则<strong>右子树上所有 结点的值均大于该结点的关键码值</strong>。二叉搜索树可以是一棵空树，且<strong>任何结点的左右子树都是二叉 搜索树</strong>。按照中序周游整个二叉树，可得到一个由小到大的有序排列；这个定义也表明<strong>树中各结点的 关键码必须是唯一的</strong>。原书用关键码集合 <span class="math">K<span class="rel">=</span>{<span class="upr">50</span>,<span class="upr">19</span>,<span class="upr">35</span>,<span class="upr">55</span>,<span class="upr">20</span>,<span class="upr">5</span>,<span class="upr">100</span>,<span class="upr">52</span>,<span class="upr">88</span>,<span class="upr">53</span>,<span class="upr">92</span>}</span> 建的树是这样的：</p>
-<figure><img loading="lazy" src="../assets/c399e3356dac937f.jpg" alt="图 5.11 二叉搜索树"><figcaption>图 5.11 二叉搜索树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-5-11.png" alt="图 5.11 二叉搜索树"><figcaption>图 5.11 二叉搜索树</figcaption></figure>
 <p>图 5.11　二叉搜索树。检索 <code>key</code> 时把它与根比较：小于就只找左子树，大于就只找右子树，每一步都能扔掉一整棵子树——这就是它比无序线性表快的原因。走到空子树还没找到，就说明 <code>key</code> 不在树里。</p>
 <p><strong>插入</strong>要先运用检索方法，查找待插入关键码是否在树中：如果存在则不允许插入重复关键码；如果 直到找到叶结点还没有发现重复关键码，则把新结点插入到待插入方向作为新的叶结点。它<strong>不像在 有序线性表中插入元素那样要移动大量的数据</strong>，只需改动某个结点的空指针；与查找一样，插入一个 新结点的时间复杂度是根到插入位置的路径长度，因此<strong>在树形比较平衡时二叉搜索树的效率相当高</strong>。 对于给定的关键码集合，可以从一棵空的二叉搜索树开始，按照检索路径逐个插入到相应的叶结点位置， 从而动态生成二叉搜索树。</p>
 <p><strong>删除比较复杂</strong>：要保持二叉搜索树的性质，就不能在树中留下一个空位置，因此需要用另一个结点来 填充这个位置并且保持性质。插入重复键、删除不存在的键都是可预期状态，返回 <code>false</code>，不抛异常。 删除有左右孩子的结点时，用左子树里最右的前驱替换它：先把前驱从原位置摘下，再让它继承被删 结点的两棵子树，最后只 <code>delete</code> 被删结点一次。漏掉「先脱离原父」会形成环或二次释放。</p>
@@ -853,7 +853,7 @@ BST 中序: 1 3 4 6 7 8 10 14
 <p>图 5.12　二叉搜索树的删除：(a) 被删结点没有左子树时，直接让右子树顶上；(b) 有左子树时，要先找一个合适的结点来顶替，不能一删了之。</p>
 <p><strong>原书在这里给了两个算法，本书实现的是后一个。</strong> 基本方案（原书【算法5.9】）是：若被删结点 <code>pointer</code> 有左子树，就在左子树里找到按中序周游的最后一个结点 <code>temppointer</code>，把 <code>temppointer</code> 的右指针置成指向 <code>pointer</code> 右子树的根，然后用 <code>pointer</code> 左子树的根代替被删结点。它是对的， 但从图 5.12(b) 可以看到，<strong>把 <code>pointer</code> 的右子树整个下降为 <code>temppointer</code> 的右子树后，树的高度 可能会增加</strong>——删了一个结点，树反而更瘦长了。</p>
 <p>改进方案（原书【算法5.10】）换一个顺序：若 <code>pointer</code> 有左子树，先在左子树中找到中序周游的 最后一个结点 <code>temppointer</code>（即左子树中的最大结点），<strong>并将其从二叉搜索树中删除</strong>；由于 <code>temppointer</code> 没有右子树，删除它只需用它的左子树代替它；然后用 <code>temppointer</code> 结点代替待删除 的结点 <code>pointer</code>。这样接上去的是同一层的邻居，高度不会凭空长高。上面教学版实现里那三句 <code>*predecessor_link = replacement-&gt;left;</code> / <code>replacement-&gt;left = ...</code> / <code>replacement-&gt;right = ...</code>， 逐句对应的就是这个改进方案。</p>
-<figure><img loading="lazy" src="../assets/6656b628984f36ef.jpg" alt="图 5.13 改进的二叉搜索树的删除"><figcaption>图 5.13 改进的二叉搜索树的删除</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-5-13.png" alt="图 5.13 改进的二叉搜索树的删除"><figcaption>图 5.13 改进的二叉搜索树的删除</figcaption></figure>
 <p>图 5.13　改进的删除办法：用左子树里最右的那个结点（中序前驱）顶替被删结点。它比左子树其余全部都大、比右子树全部都小，顶上来之后「左小右大」原封不动，树也不会因为整棵子树搬家而变高。</p>
 <h2 id="55-堆与优先队列"><a class="anchor" href="#55-堆与优先队列">#</a>5.5 堆与优先队列</h2>
 <h3 id="为什么这一节没有-python-版-2"><a class="anchor" href="#为什么这一节没有-python-版-2">#</a>为什么这一节没有 Python 版</h3>
@@ -867,7 +867,7 @@ BST 中序: 1 3 4 6 7 8 10 14
 <p><strong>建堆。</strong> 把所有关键码放到一维数组中，此时形成的完全二叉树并不具备最小堆的特性，但是<strong>仅包含 叶子结点的子树已经是堆</strong>——在有 <span class="math">n</span> 个结点的完全二叉树中，当 <span class="math">i&gt;⌊n/<span class="upr">2</span>⌋<span class="bin">−</span><span class="upr">1</span></span> 时，以 关键码 <span class="math">K<sub>i</sub></span> 为根的子树已经是堆。这时，从含有内部结点数最少的子树（这种子树在完全二叉树的 倒数第二层，此时 <span class="math">i<span class="rel">=</span>⌊n/<span class="upr">2</span>⌋<span class="bin">−</span><span class="upr">1</span></span>）开始，从右至左依次进行调整；对这一层调整完成之后， 继续对上一层进行同样的工作，直到整个过程到达树根时，整棵完全二叉树就成为一个堆。</p>
 <p>对当前结点 <span class="math">K<sub>i</sub></span>，调整过程是从 <span class="math">K<sub>i</sub></span> 开始向下筛选的过程：如果 <span class="math">K<sub>i</sub><span class="rel">≤</span>K<sub><span class="upr">2</span>i<span class="bin">+</span><span class="upr">1</span></sub></span> 且 <span class="math">K<sub>i</sub><span class="rel">≤</span>K<sub><span class="upr">2</span>i<span class="bin">+</span><span class="upr">2</span></sub></span>，则以 <span class="math">K<sub>i</sub></span> 为根的子树就已经是堆，不需要调整结点的位置；否则将 <span class="math">K<sub>i</sub></span> 的值与 其子结点中关键码小的一个进行交换，交换后继续对以该子结点为根的子树进行重建，这样在最坏 情况下向下调整到树叶，然后依次调整以 <span class="math">K<sub>i<span class="bin">−</span><span class="upr">1</span></sub>,K<sub>i<span class="bin">−</span><span class="upr">2</span></sub>,⋯,K<sub><span class="upr">0</span></sub></span> 为根的子树。完成了以 <span class="math">K<sub><span class="upr">0</span></sub></span> 为根的树的筛选，就完成了建堆的过程。</p>
 <p><strong>最后一句提醒</strong>：最小堆只适合于查找最小值，<strong>查找任意值的效率不高</strong>——它没有二叉搜索树那样的 全序，找一个中间大小的关键码只能线性扫描。类似地也可以定义最大堆，第 8.3.2 节的堆排序用的 就是最大堆。</p>
-<figure><img loading="lazy" src="../assets/28d7f967e0c2ebfa.jpg" alt="图 5.14 最小堆对应的完全二叉树"><figcaption>图 5.14 最小堆对应的完全二叉树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-5-14.png" alt="图 5.14 最小堆对应的完全二叉树"><figcaption>图 5.14 最小堆对应的完全二叉树</figcaption></figure>
 <p>图 5.14　关键码序列 <span class="math">K<span class="rel">=</span>{<span class="upr">12</span>,<span class="upr">14</span>,<span class="upr">15</span>,<span class="upr">19</span>,<span class="upr">20</span>,<span class="upr">17</span>,<span class="upr">18</span>,<span class="upr">24</span>,<span class="upr">22</span>,<span class="upr">26</span>}</span> 对应的最小堆。堆序是<strong>局部有序</strong>：只有父子之间才能断定大小，兄弟之间没有任何关系——这一点和二叉搜索树完全不同，也正是建堆能比排序更快的原因。根一定是最小的那个。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/heap_huffman/demo.cpp">code/ch05/heap_huffman/demo.cpp</a></div><pre><code><span class="c">// 第 5 章「先跑一遍」：用教学版 MinHeap 与 HuffmanTree。</span>
 <span class="c">// 编译运行：</span>
@@ -1243,14 +1243,14 @@ BST 中序: 1 3 4 6 7 8 10 14
     Node* root_;
 };</code></pre></div>
 <p>插入的手法也是固定的：<strong>新元素先放在末尾</strong>（这样仍是完全二叉树），再沿着祖先一路向上比较交换，直到父结点比它小、或者它升到了根。这个上升过程叫<strong>筛选</strong>。</p>
-<figure><img loading="lazy" src="../assets/7f6bb0c3af53cc2a.jpg" alt="图 5.15 在最小堆 5.14 中插入元素 13"><figcaption>图 5.15 在最小堆 5.14 中插入元素 13</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-5-15.png" alt="图 5.15 在最小堆 5.14 中插入元素 13"><figcaption>图 5.15 在最小堆 5.14 中插入元素 13</figcaption></figure>
 <p>图 5.15　在图 5.14 的最小堆里插入 13：13 从末尾一路上浮，停在父结点比它小的地方。</p>
 <p><code>remove_min</code> 的手法是固定的：<strong>把最后一个元素搬到根上，长度减一，再让它下沉</strong>。 为什么是最后一个？因为只有拿掉最后一个位置，剩下的才仍然是一棵完全二叉树。 下沉时<strong>必须和两个孩子里较小的那个交换</strong>——跟较大的换会破坏「父亲不大于两个孩子」。</p>
-<figure><img loading="lazy" src="../assets/ba38e1004230ab69.jpg" alt="图 5.16 在最小堆 5.14 中删除元素 14"><figcaption>图 5.16 在最小堆 5.14 中删除元素 14</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-5-16.png" alt="图 5.16 在最小堆 5.14 中删除元素 14"><figcaption>图 5.16 在最小堆 5.14 中删除元素 14</figcaption></figure>
 <p>图 5.16　在图 5.14 的最小堆里删除 14：末端元素填进空出来的位置，再与较小的那个孩子逐层交换下沉，直到它不大于自己的孩子。</p>
 <h3 id="551a-建堆为什么是-on-而不是-onlog-n"><a class="anchor" href="#551a-建堆为什么是-on-而不是-onlog-n">#</a>5.5.1a 建堆为什么是 <span class="math">O(n)</span> 而不是 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span></h3>
 <p>把一个无序序列变成堆，做法是<strong>从最后一个非叶结点起，倒着对每个结点做一次下沉</strong>：</p>
-<figure><img loading="lazy" src="../assets/d7354d550a2f5d79.jpg" alt="图5.17 建堆过程示例"><figcaption>图5.17 建堆过程示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-5-17.png" alt="图5.17 建堆过程示例"><figcaption>图5.17 建堆过程示例</figcaption></figure>
 <p>图 5.17　建堆过程示例（原书图 5.17 的筛选法）。倒着做的理由是：对某个结点下沉时，它的两棵子树必须已经是堆——从最后一个非叶结点往前扫，正好保证这一点。叶结点本身就是堆，所以后一半结点一次都不用碰。</p>
 <p>粗看这是 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>：<code>sift_down</code> 一次最多走一条树高那么长的路，是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>； 非叶结点大约 <span class="math">n/<span class="upr">2</span></span> 个，乘起来就是 <span class="math">n/<span class="upr">2</span><span class="bin">⋅</span>&thinsp;<span class="upr">log</span>&thinsp;n</span>。<strong>原书特意说这只是一个粗略的上界。</strong></p>
 <p>细算要用到一件事：<strong>下沉的代价不是 <span class="math"><span class="upr">log</span>&thinsp;n</span>，而是「这个结点到最底层还有多远」</strong>。 越靠近底层的结点越多，而它们能下沉的距离越短——两者正好互相抵消。</p>
@@ -1293,7 +1293,7 @@ Direct leak of 24 byte(s) in 1 object(s) allocated from:
 <p><strong>症结是「前缀」。</strong> <code>0</code> 是 <code>01</code> 的前缀，所以读到 <code>0</code> 时无法判断该停还是该再读一位。 解决办法是要求任何字符的编码都不是另一个字符编码的前缀——这种编码叫<strong>前缀码</strong>。</p>
 <p><strong>Huffman 树天然给出前缀码。</strong> 规则：从每个结点引向<strong>左</strong>孩子的边标 0、引向<strong>右</strong>孩子的边标 1， 从根走到某个叶子，一路的 0/1 连起来就是那个字符的编码。 为什么一定无前缀冲突？因为<strong>字符只住在叶子上</strong>，而一个叶子不可能出现在另一个叶子的路径上。</p>
 <p>原书的编码示例是这样一棵树：</p>
-<figure><img loading="lazy" src="../assets/0142058fd3aa6e04.jpg" alt="图 5.20 Huffman 编码示例"><figcaption>图 5.20 Huffman 编码示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-5-20.png" alt="图 5.20 Huffman 编码示例"><figcaption>图 5.20 Huffman 编码示例</figcaption></figure>
 <p>图 5.20　Huffman 编码示例：左边的边标 0、右边的边标 1，从根到叶一路读下来就是那个字符的编码。字符只住在叶子上，所以没有一个编码会是另一个的前缀。</p>
 <p>以 <code>abbaaadc</code> 为例，四个字符的频率是 a×4、b×2、c×1、d×1，建出的 Huffman 树给出</p>
 <div class="table-wrap"><table><thead><tr>
@@ -1393,7 +1393,11 @@ Direct leak of 24 byte(s) in 1 object(s) allocated from:
 <blockquote><p>以下是原书第 5 章的习题，本轮按扫描件补回题面；<strong>参考答案尚未写出</strong>，已逐题登记在 <code>collab/answer_gaps.json</code>。</p></blockquote>
 <ol>
 <li>对于 3 个结点 <span class="math">A</span>、<span class="math">B</span>、<span class="math">C</span>，有多少棵不同的二叉树？试将其画出来。</li>
-<li>分别按前序、后序、中序列出图 5.21 所示二叉树的结点。（图 5.21：根 <span class="math">A</span>；<span class="math">A</span> 的左孩子 <span class="math">B</span>， <span class="math">B</span> 的左孩子 <span class="math">D</span>；<span class="math">A</span> 的右孩子 <span class="math">C</span>，<span class="math">C</span> 的左孩子 <span class="math">E</span>、右孩子 <span class="math">F</span>，<span class="math">E</span> 的右孩子 <span class="math">G</span>， <span class="math">F</span> 的孩子为 <span class="math">H</span>、<span class="math">I</span>。）</li>
+<li>分别按前序、后序、中序列出图 5.21 所示二叉树的结点。</li>
+</ol>
+<figure><img loading="lazy" src="../assets/scan/fig-5-21.png" alt="图 5.21 习题 2 的图例"><figcaption>图 5.21 习题 2 的图例</figcaption></figure>
+<p>图 5.21　习题 2 的图例</p>
+<ol>
 <li>以下命题是否为真？若真请证明之：<strong>一棵二叉树的所有终端结点（叶结点），在前序序列、中序序列 以及后序序列中都按相同的相对位置出现。</strong></li>
 <li>找出所有这样的二叉树，其结点在下列两种次序之下恰好都以同样的顺序出现：(1) 前序和中序； (2) 前序和后序；(3) 中序和后序。</li>
 <li>写一个递归函数计算二叉树的叶结点个数。</li>
@@ -1401,6 +1405,10 @@ Direct leak of 24 byte(s) in 1 object(s) allocated from:
 <li>设计一个镜面映射算法，将一棵二叉树的每个结点的左、右子结点交换位置。</li>
 <li>给定结点类型为 <code>BinaryTreeNode</code> 的 3 个指针 <span class="math">p</span>、<span class="math">q</span>、<span class="math">rt</span>，假设 <span class="math">rt</span> 为根结点，求距离结点 <span class="math">p</span> 和结点 <span class="math">q</span> 最近的这两个结点的<strong>共同祖先结点</strong>。</li>
 <li>画出图 5.22(a) 所示二叉树的二叉链表存储表示图。</li>
+</ol>
+<figure><img loading="lazy" src="../assets/scan/fig-5-22.png" alt="图 5.22 习题 7 的图例"><figcaption>图 5.22 习题 7 的图例</figcaption></figure>
+<p>图 5.22　习题 7 的图例：(a) 原二叉树，(b) 镜面映射后的新二叉树</p>
+<ol>
 <li>对于 3 个关键码值 <span class="math">A</span>、<span class="math">B</span>、<span class="math">C</span>，有多少个不同的二叉搜索树？试将其画出来。</li>
 <li>试证明：二叉搜索树结点的中序序列就是二叉搜索树结点按关键码值排序的序列。</li>
 <li>写出从二叉搜索树中删除一个关键码的递归算法。</li>

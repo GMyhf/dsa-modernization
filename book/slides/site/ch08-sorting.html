@@ -111,7 +111,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 最好情况：输入已有序，每张牌比一次就位，&lt;strong&gt;O(n)&lt;/strong&gt;。
 最坏情况：输入逆序，第 i 张要比 i 次，O(n^2)。
 所以说「插入排序是 O(n^2)」对，说「是 Θ(n^2)」就错了。&lt;/p&gt;"><h1 id="82-插入排序"><a class="anchor" href="#82-插入排序">#</a>8.2 插入排序</h1>
-<figure><img loading="lazy" src="../../assets/5493e0dcc0da4096.jpg" alt="图 8.1 插入排序"><figcaption>图 8.1 插入排序</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-8-1.png" alt="图 8.1 插入排序"><figcaption>图 8.1 插入排序</figcaption></figure>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#insertion</a></div><pre><code><span class="c">// 算法8.1：直接插入排序。相等元素不越过彼此，故稳定。</span>
 <span class="k">inline</span> <span class="t">void</span> insertion_sort(std::vector&lt;<span class="t">int</span>&gt;&amp; values) {
     <span class="k">for</span> (std::<span class="t">size_t</span> index = <span class="n">1</span>; index &lt; values.size(); ++index) {
@@ -131,7 +131,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 </ul>
 <p>所以它常被用作<strong>其它算法的收尾</strong>——快排/归并递归到小区间时改用插入排序。</p>
 <p><strong>n 小的时候 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span> 完全可能比 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 快</strong>：常数小、没有递归开销、缓存友好。</p></section><section class="slide" data-notes=""><h1 id="822-shell-排序"><a class="anchor" href="#822-shell-排序">#</a>8.2.2 Shell 排序</h1>
-<figure><img loading="lazy" src="../../assets/9d5229db93db8c45.jpg" alt="图 8.2 Shell 排序"><figcaption>图 8.2 Shell 排序</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-8-2.png" alt="图 8.2 Shell 排序"><figcaption>图 8.2 Shell 排序</figcaption></figure>
 <p>先按<strong>大增量</strong>分组做插入排序，再逐步缩小增量，最后增量为 1。</p>
 <p><strong>为什么快</strong>：大增量时每组元素少、几乎有序； 小增量时整体已经接近有序，而插入排序恰好对这种输入极快。</p>
 <p>代价与增量序列有关，「每次除以 2」约 <span class="math">O(n<sup><span class="upr">1.5</span></sup>)</span>。<strong>不稳定</strong>。</p></section><section class="slide" data-notes=""><h1 id="831-直接选择排序"><a class="anchor" href="#831-直接选择排序">#</a>8.3.1 直接选择排序</h1>
@@ -152,7 +152,7 @@ i=2    12 29 32 45 34&#x27; 78 34 64</code></pre></div>
 
 优点：就地、最坏也是 O(n log n)。缺点：不稳定，而且缓存局部性差
 （下标跳来跳去），实际常数往往比快排大。&lt;/p&gt;"><h1 id="832-堆排序"><a class="anchor" href="#832-堆排序">#</a>8.3.2 堆排序</h1>
-<figure><img loading="lazy" src="../../assets/7f0370f58c7602be.jpg" alt="图 8.4 堆排序"><figcaption>图 8.4 堆排序</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-8-4.png" alt="图 8.4 堆排序"><figcaption>图 8.4 堆排序</figcaption></figure>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#heap</a></div><pre><code><span class="c">// 算法8.4：手写最大堆筛选与堆排序，不委托 std::make_heap/sort_heap。</span>
 <span class="k">inline</span> <span class="t">void</span> sift_down(std::vector&lt;<span class="t">int</span>&gt;&amp; values, std::<span class="t">size_t</span> root, std::<span class="t">size_t</span> count) {
     <span class="k">while</span> (root * <span class="n">2</span> + <span class="n">1</span> &lt; count) {
@@ -185,7 +185,7 @@ i=2    12 29 32 45 34&#x27; 78 34 64</code></pre></div>
 <li>逆序时仍需 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span> 次比较和交换</li>
 </ul>
 <p>优化只改变最好情况，不改变最坏时间。</p></section><section class="slide" data-notes=""><h1 id="842-快速排序"><a class="anchor" href="#842-快速排序">#</a>8.4.2 快速排序</h1>
-<figure><img loading="lazy" src="../../assets/8585d3b42b280664.jpg" alt="图 8.6 快速排序图示"><figcaption>图 8.6 快速排序图示</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-8-6.png" alt="图 8.6 快速排序图示"><figcaption>图 8.6 快速排序图示</figcaption></figure>
 <p>选一个<strong>轴值</strong>，把序列分成「小于它的」和「大于它的」两段，再各自递归。</p></section><section class="slide" data-notes="&lt;p&gt;分割（partition）是全部难点。这里用的是最直白的写法：
 boundary 左边全是小于轴值的，扫一遍把小的换过去，最后把轴值换到分界点。
 
@@ -245,7 +245,7 @@ boundary 左边全是小于轴值的，扫一遍把小的换过去，最后把�
 
 归并还有一个别处没有的好处：它天然适合&lt;strong&gt;外排序&lt;/strong&gt;，因为只需要顺序读写。
 第 9 章全靠它。&lt;/p&gt;"><h1 id="85-归并排序"><a class="anchor" href="#85-归并排序">#</a>8.5 归并排序</h1>
-<figure><img loading="lazy" src="../../assets/3599737381e2502e.jpg" alt="图 8.8 归并排序"><figcaption>图 8.8 归并排序</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-8-8.png" alt="图 8.8 归并排序"><figcaption>图 8.8 归并排序</figcaption></figure>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#merge</a></div><pre><code><span class="k">inline</span> <span class="t">void</span> merge_ranges(std::vector&lt;<span class="t">int</span>&gt;&amp; values, std::vector&lt;<span class="t">int</span>&gt;&amp; buffer,
                          std::<span class="t">size_t</span> first, std::<span class="t">size_t</span> middle, std::<span class="t">size_t</span> last) {
     std::<span class="t">size_t</span> left = first;
@@ -289,7 +289,7 @@ d 位、每位 r 个值时是 O(d(n + r))。
 为什么必须从低位开始？因为每一轮的桶式排序必须是&lt;strong&gt;稳定&lt;/strong&gt;的，
 低位的结果才能被高位的排序保留下来。反过来做会把低位的功夫全废掉。
 这一点值得当场问学生。&lt;/p&gt;"><h1 id="862-基数排序"><a class="anchor" href="#862-基数排序">#</a>8.6.2 基数排序</h1>
-<figure><img loading="lazy" src="../../assets/916c1027b215b0e1.jpg" alt="图 8.10 基数排序"><figcaption>图 8.10 基数排序</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-8-10.png" alt="图 8.10 基数排序"><figcaption>图 8.10 基数排序</figcaption></figure>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#radix</a></div><pre><code><span class="c">// 算法8.11：LSD 基数排序。翻转符号位使二补码有符号 int 按无符号序排序。</span>
 <span class="k">inline</span> <span class="t">void</span> radix_sort(std::vector&lt;<span class="t">int</span>&gt;&amp; values) {
     std::vector&lt;<span class="t">int</span>&gt; buffer(values.size());
@@ -404,7 +404,7 @@ d 位、每位 r 个值时是 O(d(n + r))。
 </tbody></table></div>
 <p>同为 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span> 可以差 27 倍；近乎有序时，插入甚至胜过退化快排。</p>
 <p>渐进阶先排除不合格算法，实测再决定常数与工作负载。</p></section><section class="slide" data-notes=""><h1 id="873-比较排序的下限"><a class="anchor" href="#873-比较排序的下限">#</a>8.7.3 比较排序的下限</h1>
-<figure><img loading="lazy" src="../../assets/2f6a20c1eb3f2d13.jpg" alt="图 8.14 用判定树模拟基于比较的排序"><figcaption>图 8.14 用判定树模拟基于比较的排序</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-8-14.png" alt="图 8.14 用判定树模拟基于比较的排序"><figcaption>图 8.14 用判定树模拟基于比较的排序</figcaption></figure>
 <p><span class="math">n</span> 个互异元素有 <span class="math">n!</span> 种排列；一次二元比较最多把候选情况分成两半。</p>
 <p>判定树至少有 <span class="math">n!</span> 个叶子，因此高度至少：</p>
 <div class="math math-display">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>(n!)⌉<span class="rel">=</span>Ω(n&thinsp;<span class="upr">log</span>&thinsp;n)</div>

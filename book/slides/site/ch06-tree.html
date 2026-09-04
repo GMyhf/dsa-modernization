@@ -101,7 +101,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <li>6.4 K 叉树</li>
 </ul>
 <p>一条主线：<strong>同一棵树，存法不同，能高效做的运算就不同</strong>。</p></section><section class="slide" data-notes=""><h1 id="611-树与森林"><a class="anchor" href="#611-树与森林">#</a>6.1.1 树与森林</h1>
-<figure><img loading="lazy" src="../../assets/42cd7ad7ac4d0fbe.jpg" alt="图 6.1 树形表示法"><figcaption>图 6.1 树形表示法</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-6-1.png" alt="图 6.1 树形表示法"><figcaption>图 6.1 树形表示法</figcaption></figure>
 <ul>
 <li><strong>树</strong>：n 个结点的有限集合，有一个根，其余分成互不相交的子树</li>
 <li><strong>森林</strong>：m 棵互不相交的树的集合</li>
@@ -237,7 +237,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 </tr>
 </tbody></table></div>
 <p><strong>没有哪种都快</strong>——最后两行是本章要展开的两个。</p></section><section class="slide" data-notes=""><h1 id="子结点表为什么不够用"><a class="anchor" href="#子结点表为什么不够用">#</a>子结点表：为什么不够用</h1>
-<figure><img loading="lazy" src="../../assets/503a0fd264bb9231.jpg" alt="图6.6 以「子结点表」表示法实现图6.1中的树"><figcaption>图6.6 以「子结点表」表示法实现图6.1中的树</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-6-6.png" alt="图6.6 以「子结点表」表示法实现图6.1中的树"><figcaption>图6.6 以「子结点表」表示法实现图6.1中的树</figcaption></figure>
 <p>每个结点挂一条孩子链表。找孩子很快。</p>
 <p><strong>但找父亲要扫遍全表</strong>——而且每个结点的孩子数不定， 数组要么浪费要么不够。</p></section><section class="slide" data-notes="&lt;p&gt;两个函数都要同步维护三条链接：parent、child、sibling。
 少维护一条，父树里就留下悬垂指针。
@@ -286,7 +286,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
     node-&gt;sibling = <span class="k">nullptr</span>;
     destroy(node);
 }</code></pre></div></section><section class="slide" data-notes=""><h1 id="625-父指针表示法"><a class="anchor" href="#625-父指针表示法">#</a>6.2.5 父指针表示法</h1>
-<figure><img loading="lazy" src="../../assets/444a429faef0f9ad.jpg" alt="图 6.10 父指针表示法"><figcaption>图 6.10 父指针表示法</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-6-10.png" alt="图 6.10 父指针表示法"><figcaption>图 6.10 父指针表示法</figcaption></figure>
 <p>每个结点只存<strong>一根指向父亲的指针</strong>。</p>
 <ul>
 <li>找父亲、找祖先：<strong>快</strong></li>
@@ -306,14 +306,14 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <li><code>find</code> 找到元素所在集合的代表根；</li>
 <li>两个根不同就 <code>union</code>，把两个集合归并。</li>
 </ol>
-<figure><img loading="lazy" src="../../assets/99d1200487f038c2.jpg" alt="图 6.11 集合的表示方法"><figcaption>图 6.11 集合的表示方法</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-6-11.png" alt="图 6.11 集合的表示方法"><figcaption>图 6.11 集合的表示方法</figcaption></figure>
 <p>给一堆等价对 (A,B)、(C,K)、…，要能回答「x 和 y 同类吗」。</p>
 <ul>
 <li><strong>find(x)</strong>：沿父指针一路走到根，根就是这个集合的代表</li>
 <li><strong>unite(x, y)</strong>：把一棵树的根挂到另一棵的根下</li>
 </ul>
 <p>只用到「往上走」，所以父指针表示法正好。</p></section><section class="slide" data-notes=""><h1 id="朴素做法会退化成一条链"><a class="anchor" href="#朴素做法会退化成一条链">#</a>朴素做法会退化成一条链</h1>
-<figure><img loading="lazy" src="../../assets/63aeef5dd1c932ae.jpg" alt="图 6.12 合并操作的一个极端情况"><figcaption>图 6.12 合并操作的一个极端情况</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-6-12.png" alt="图 6.12 合并操作的一个极端情况"><figcaption>图 6.12 合并操作的一个极端情况</figcaption></figure>
 <p>每次都把 B 挂到 A 下面，n 次合并之后树高 n， <code>find</code> 退化成 <strong>O(n)</strong>。</p>
 <p>原书给了两条改进，本书都实现了。</p></section><section class="slide" data-notes="&lt;p&gt;为什么能把深度限制在 O(log n)：每次合并树高最多加 1，
 而元素个数&lt;strong&gt;至少翻倍&lt;/strong&gt;，所以任何结点的深度最多增加 log n 次。
@@ -339,7 +339,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
     size_[left] += size_[right];
     <span class="k">return</span> <span class="k">true</span>;
 }</code></pre></div></section><section class="slide" data-notes=""><h1 id="改进二路径压缩"><a class="anchor" href="#改进二路径压缩">#</a>改进二：路径压缩</h1>
-<figure><img loading="lazy" src="../../assets/79da0aca1750084c.jpg" alt="图 6.13 路径压缩示例"><figcaption>图 6.13 路径压缩示例</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-6-13.png" alt="图 6.13 路径压缩示例"><figcaption>图 6.13 路径压缩示例</figcaption></figure>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp">code/ch06/general_tree/modern.hpp#fn:find</a></div><pre><code>std::<span class="t">size_t</span> find(std::<span class="t">size_t</span> index) {
     <span class="k">if</span> (index &gt;= parent_.size()) {
         <span class="k">throw</span> std::out_of_range(<span class="s">&quot;disjoint-set index&quot;</span>);
@@ -375,7 +375,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 </tbody></table></div></section><section class="slide" data-notes=""><h1 id="带双标记的先根次序"><a class="anchor" href="#带双标记的先根次序">#</a>带双标记的先根次序</h1>
 <p>“带双标记”是<strong>历史编码概念</strong>：适合作为早期教材中的位级压缩案例，不是现代树库的主流接口。工程实现通常选择 LOUDS、平衡括号或其他 succinct tree 编码。</p>
 <p>这是经典顺序编码，今天主要用于理解树的序列化；工程中的紧凑树通常会考虑 LOUDS 或平衡括号编码。</p>
-<figure><img loading="lazy" src="../../assets/ddf4082b075a6a12.jpg" alt="图6.14 带右链的先根次序表示法"><figcaption>图6.14 带右链的先根次序表示法</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-6-14.png" alt="图6.14 带右链的先根次序表示法"><figcaption>图6.14 带右链的先根次序表示法</figcaption></figure>
 <div class="codeblock" data-lang="text"><pre><code>先根次序   A  B  C  E  F  D  G  H  J  I
 ltag       0  0  0  0  1  1  1  0  1  1     0 = 有孩子
 rtag       0  1  0  1  1  1  0  0  1  1     0 = 有下一个兄弟</code></pre></div>
@@ -391,7 +391,7 @@ rtag       0  1  0  1  1  1  0  0  1  1     0 = 有下一个兄弟</code></pre><
     ltag == 0 (有孩子)          -&gt;  新结点就是它的长子
     ltag == 1 (没孩子, 子树到头) -&gt;  弹一个出来, 新结点是那个的右兄弟</code></pre></div>
 <p>完整实现是原书【算法6.10】，见 <code>code/ch06/general_tree/modern.hpp</code>。</p></section><section class="slide" data-notes=""><h1 id="64-k-叉树"><a class="anchor" href="#64-k-叉树">#</a>6.4 K 叉树</h1>
-<figure><img loading="lazy" src="../../assets/70c77f3dc176052a.jpg" alt="图 6.18 满 3 叉树与完全 3 叉树"><figcaption>图 6.18 满 3 叉树与完全 3 叉树</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-6-18.png" alt="图 6.18 满 3 叉树与完全 3 叉树"><figcaption>图 6.18 满 3 叉树与完全 3 叉树</figcaption></figure>
 <p>二叉树的自然推广：每个结点最多 K 个孩子，<strong>而且孩子的位置有区分</strong>。</p>
 <p>完全 K 叉树同样可以按层次编号进数组：</p>
 <div class="codeblock" data-lang="text"><pre><code>下标 i 的第 j 个孩子   K*i + j + 1      (j = 0 .. K-1)

@@ -108,7 +108,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <li><strong>度</strong>：无向图看关联的边数；有向图分<strong>入度</strong>和<strong>出度</strong></li>
 <li><strong>路径</strong>、<strong>回路</strong>、<strong>连通</strong>、<strong>连通分量</strong></li>
 </ul></section><section class="slide" data-notes=""><h1 id="连通与强连通"><a class="anchor" href="#连通与强连通">#</a>连通与强连通</h1>
-<figure><img loading="lazy" src="../../assets/9aeb77db24a803d1.jpg" alt="图7.5 非连通无向图的连通分量"><figcaption>图7.5 非连通无向图的连通分量</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-7-5.png" alt="图7.5 非连通无向图的连通分量"><figcaption>图7.5 非连通无向图的连通分量</figcaption></figure>
 <ul>
 <li>无向图：任意两点有路径 → <strong>连通</strong>；极大连通子图 → <strong>连通分量</strong></li>
 <li>有向图：任意两点<strong>互相</strong>可达 → <strong>强连通</strong>；极大者 → <strong>强连通分量</strong></li>
@@ -181,7 +181,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
         adjacency_[to][from] = weight;
     }
 }</code></pre></div></section><section class="slide" data-notes=""><h1 id="732-邻接表"><a class="anchor" href="#732-邻接表">#</a>7.3.2 邻接表</h1>
-<figure><img loading="lazy" src="../../assets/f0f154bdefe0c6b7.jpg" alt="图 7.12 无向图的邻接表表示"><figcaption>图 7.12 无向图的邻接表表示</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-7-12.png" alt="图 7.12 无向图的邻接表表示"><figcaption>图 7.12 无向图的邻接表表示</figcaption></figure>
 <p>每个顶点挂一条<strong>边表</strong>，只存<strong>实际存在</strong>的边。</p></section><section class="slide" data-notes="&lt;p&gt;本书的 GraphList 里埋了一个教学计数器 scan_steps()，
 可以把「扫过多少条边」量出来，让 O(V+E) 和 O(V^2) 的差别不是纸上说说。
 上机题就用它。&lt;/p&gt;"><h1 id="两种存法的代价对照"><a class="anchor" href="#两种存法的代价对照">#</a>两种存法的代价对照</h1>
@@ -320,7 +320,7 @@ Dijkstra 可以看成 BFS 在带权图上的推广，把队列换成了优先队
     }
     <span class="k">return</span> result;
 }</code></pre></div></section><section class="slide" data-notes=""><h1 id="743-拓扑排序"><a class="anchor" href="#743-拓扑排序">#</a>7.4.3 拓扑排序</h1>
-<figure><img loading="lazy" src="../../assets/6db281e4c4929271.jpg" alt="图 7.17 表示课程优先关系的有向无环图"><figcaption>图 7.17 表示课程优先关系的有向无环图</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-7-17.png" alt="图 7.17 表示课程优先关系的有向无环图"><figcaption>图 7.17 表示课程优先关系的有向无环图</figcaption></figure>
 <p>给有向无环图（DAG）排一个线性次序，使<strong>每条边都从前指向后</strong>。</p>
 <p>「先修课」就是典型场景。</p></section><section class="slide" data-notes=""><h1 id="拓扑排序不断摘入度为-0-的点"><a class="anchor" href="#拓扑排序不断摘入度为-0-的点">#</a>拓扑排序：不断摘入度为 0 的点</h1>
 <div class="codeblock" data-lang="text"><pre><code>算出每个顶点的入度
@@ -335,7 +335,7 @@ Dijkstra 可以看成 BFS 在带权图上的推广，把队列换成了优先队
 </ul>
 <p><strong>所以拓扑排序顺带就是一个环检测算法。</strong></p>
 <p>实现见 <code>code/ch07/graph/modern.hpp</code> 的 <code>topological_sort</code>。</p></section><section class="slide" data-notes=""><h1 id="751-单源最短路dijkstra"><a class="anchor" href="#751-单源最短路dijkstra">#</a>7.5.1 单源最短路：Dijkstra</h1>
-<figure><img loading="lazy" src="../../assets/0cf0a196d127ad6b.jpg" alt="图7.19 单源最短路径的示例"><figcaption>图7.19 单源最短路径的示例</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-7-19.png" alt="图7.19 单源最短路径的示例"><figcaption>图7.19 单源最短路径的示例</figcaption></figure>
 <p>每一轮：在<strong>还没确定</strong>的顶点里挑一个当前距离最小的， 把它标为确定，然后用它去松弛邻居。</p></section><section class="slide" data-notes="&lt;p&gt;常见误解：把所有边权统一加一个常数就能处理负权。&lt;strong&gt;不行&lt;/strong&gt;——
 加常数会按路径的&lt;strong&gt;边数&lt;/strong&gt;增加不同的总量，边多的路径被罚得更重，
 最短路的次序因此会变。这是课程习题里的一道题。
@@ -378,7 +378,7 @@ Dijkstra 可以看成 BFS 在带权图上的推广，把队列换成了优先队
 }</code></pre></div>
 <p>递推的含义：<strong>允许经过前 k 个顶点中转时的最短路</strong>。</p>
 <p><strong>k 必须在最外层</strong>——它是「允许中转的集合」，放到里层递推就不成立了。</p></section><section class="slide" data-notes=""><h1 id="76-最小生成树"><a class="anchor" href="#76-最小生成树">#</a>7.6 最小生成树</h1>
-<figure><img loading="lazy" src="../../assets/5271d0e099d91472.jpg" alt="图 7.8 网络实例"><figcaption>图 7.8 网络实例</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-7-8.png" alt="图 7.8 网络实例"><figcaption>图 7.8 网络实例</figcaption></figure>
 <p>连通带权无向图的<strong>生成树</strong>里，边权总和最小的那一棵。</p>
 <p>两个经典算法，思路完全不同：</p>
 <ul>

@@ -224,7 +224,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p><strong>这条只管存储侧。</strong> 本节 3.1.5 的背包问题是算法侧，两种语言各有一份，Python 版就印在那一小节里——同一节里两种做法并存，正是 D-025 那条分工线的样子。</p>
 <h3 id="311-栈的抽象数据类型"><a class="anchor" href="#311-栈的抽象数据类型">#</a>3.1.1 栈的抽象数据类型</h3>
 <p>栈(stack)是限定仅在一端进行插入和删除运算的线性表，该端称为<strong>栈顶</strong>(top)， 另一端称为<strong>栈底</strong>(bottom)。栈的元素按后进先出(LIFO, last in first out)的次序访问： 最后压入的元素最先弹出。</p>
-<figure><img loading="lazy" src="../assets/c8966e2bf43b41fc.jpg" alt="图 3.1 栈的示意图"><figcaption>图 3.1 栈的示意图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-3-1.png" alt="图 3.1 栈的示意图"><figcaption>图 3.1 栈的示意图</figcaption></figure>
 <p>图 3.1　栈的示意图。进和出都在栈顶这一端，栈底不动。</p>
 <p>基于栈的特性，栈的抽象数据类型包含进栈 push、出栈 pop、读栈顶 top 等常用操作， 以及判断栈是否为空的边界操作。根据抽象和封装的原则，只可通过抽象数据类型 定义的运算来操作栈。</p>
 <p>原书【代码3.1】用一个成员函数既非纯虚、析构函数也非 virtual 的空基类 <code>Stack&lt;T&gt;</code> 来表达这层抽象。那样的基类给不了任何多态能力：成员函数既不是纯虚的、也没有定义， 派生类&quot;实现&quot;它们并不构成覆盖；反而埋下了「通过 <code>Stack&lt;T&gt;*</code> 删除派生对象」 这一未定义行为。</p>
@@ -269,7 +269,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h3 id="312-顺序栈"><a class="anchor" href="#312-顺序栈">#</a>3.1.2 顺序栈</h3>
 <p>采用顺序存储结构的栈称为顺序栈(array-based stack)，需要一块连续的区域存储栈中元素。</p>
 <p>对元素数目为 n 的栈，首先要确定数组的哪一端表示栈顶。如果把数组的第 0 个位置作为栈顶， 所有的插入和删除都在第 0 个位置进行，每次 push 或 pop 都要把栈中所有元素后移或前移 一个位置，时间代价为 O(n)。反之，把最后一个元素的位置作为栈顶，新元素添加在表尾、 出栈也只删除表尾元素，每次操作的时间代价仅为 O(1)。图3.2 所示为按后一种方案实现的栈。</p>
-<figure><img loading="lazy" src="../assets/68ddbf0cd26a38ce.jpg" alt="图3.2 栈的顺序存储结构示意"><figcaption>图3.2 栈的顺序存储结构示意</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-3-2.png" alt="图3.2 栈的顺序存储结构示意"><figcaption>图3.2 栈的顺序存储结构示意</figcaption></figure>
 <p>图 3.2　栈的顺序存储结构示意：一块连续空间，栈顶在元素多的那一端。</p>
 <p>用本书的记法写出来是这样——下标 0 是栈底，<code>size_</code> 是元素个数，也是下一个空位：</p>
 <div class="codeblock" data-lang="text"><pre><code>下标     0     1     2     3     4     …
@@ -277,7 +277,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
                ▲
             size_ = 3   （栈顶是 C，下一个 push 写到 3）</code></pre></div>
 <p>原书用的是另一种记法：成员 <code>top</code> 直接存<strong>栈顶元素所在的位置</strong>，空栈时 <code>top = -1</code>，<code>push</code> 先加一再写、<code>pop</code> 先取再减一。图 3.3 画的就是 <code>mSize</code> 为 6 的顺序栈的四个瞬间。</p>
-<figure><img loading="lazy" src="../assets/8ca1faecb428db01.jpg" alt="图 3.3 顺序栈的存储结构"><figcaption>图 3.3 顺序栈的存储结构</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-3-3.png" alt="图 3.3 顺序栈的存储结构"><figcaption>图 3.3 顺序栈的存储结构</figcaption></figure>
 <p>图 3.3　顺序栈的存储结构：(a) 空栈，<code>s.top = -1</code>；(b) 栈中有一个元素，<code>s.top = 0</code>；(c) 栈满，<code>s.top = mSize - 1</code>；(d) 在 (c) 上连续出栈两次之后。</p>
 <p>两种记法只差一个常数：<code>top == size_ - 1</code>。本书选 <code>size_</code>，因为它同时就是长度，<code>empty()</code> 与 <code>size()</code> 都不必再换算，也避开了「−1 是合法下标吗」这种要靠约定记住的事。栈里已有 <code>mSize</code> 个元素还要 <code>push</code> 叫<strong>上溢</strong>(overflow)，空栈上 <code>pop</code> 叫<strong>下溢</strong>(underflow)：前者本书用扩容化解，后者是可预期状态，返回 <code>std::nullopt</code>。</p>
 <h4 id="教学版完整实现"><a class="anchor" href="#教学版完整实现">#</a>教学版：完整实现</h4>
@@ -639,7 +639,7 @@ clear() 之后：存活 1024 个，仍持有 204800 字节（逻辑长度已经�
 <p>这四条写在类里而不是文档里，是因为<strong>编译期报错永远比运行期谜案便宜</strong>。 教学版没有它们：<code>T</code> 不合格时报错会发生在模板实例化的深处，信息难看，但同样报错。 这是可读性与报错质量之间的一次交换，教学版选了前者。</p>
 <h3 id="313-链式栈"><a class="anchor" href="#313-链式栈">#</a>3.1.3 链式栈</h3>
 <p>采用链式存储结构的栈称为链式栈。结点分散在堆上，压栈只是接一个新结点， <strong>不需要连续空间，也没有&quot;栈满&quot;这回事</strong>——这正是它与顺序栈的核心差别。</p>
-<figure><img loading="lazy" src="../assets/cc2722b736c01067.jpg" alt="图3.4 链式栈示意"><figcaption>图3.4 链式栈示意</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-3-4.png" alt="图3.4 链式栈示意"><figcaption>图3.4 链式栈示意</figcaption></figure>
 <p>图 3.4　链式栈示意。栈顶就是链表的第一个结点，<code>push</code> 在链头插入、<code>pop</code> 删链头，两者都是 O(1)；把栈顶放在链尾就得从头走到尾，退化成 O(n)。</p>
 <h4 id="教学版完整实现-1"><a class="anchor" href="#教学版完整实现-1">#</a>教学版：完整实现</h4>
 <p>接口形状和 3.1.2 的 <code>ArrayStack</code> 刻意保持一致——同一个抽象数据类型， 换一种存储结构，两者才好拿来对比。</p>
@@ -1167,13 +1167,13 @@ LinkedStack&amp; <span class="k">operator</span>=(LinkedStack&amp;&amp; other) <
 <h3 id="315-栈与递归"><a class="anchor" href="#315-栈与递归">#</a>3.1.5 栈与递归</h3>
 <p>原书所说的“活动记录”在现代编译器与运行时资料中通常称为<strong>栈帧</strong>（stack frame）：其中保存返回地址、参数、局部变量及必要的保存寄存器。名称不同，描述的是同一类调用栈记录。</p>
 <p>递归为什么非要有栈？因为被调函数的局部变量不能静态地占一块固定单元——每调用一次就得有一份，返回时随即释放。这种「执行到调用时才分配」叫动态分配，它需要内存里有一块足够大的<strong>运行栈</strong>(runtime stack)。运行时存储通常这样划分：</p>
-<figure><img loading="lazy" src="../assets/9c7bc109efa7f350.jpg" alt="图3.6 运行时存储器的组织形式"><figcaption>图3.6 运行时存储器的组织形式</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-3-6.png" alt="图3.6 运行时存储器的组织形式"><figcaption>图3.6 运行时存储器的组织形式</figcaption></figure>
 <p>图 3.6　运行时存储器的组织形式：栈区放具有后进先出特征的数据（函数调用），堆区放不符合 LIFO 的动态分配（例如 <code>new</code> 出来的对象）。</p>
 <p>栈区里一格一格压着的就是活动记录，它至少包含这些内容：</p>
-<figure><img loading="lazy" src="../assets/d573f60f354acc38.jpg" alt="图 3.7 活动记录的内容"><figcaption>图 3.7 活动记录的内容</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-3-7.png" alt="图 3.7 活动记录的内容"><figcaption>图 3.7 活动记录的内容</figcaption></figure>
 <p>图 3.7　活动记录的内容。调用一次压一格，返回一次弹一格；被调函数里的变量地址因此都是相对于栈顶的相对地址。运行栈也因此又叫活动记录栈或调用栈(call stack)。</p>
 <p>同一个函数可以在栈上同时有很多活动记录，每个代表一次不同的调用——对递归函数来说，<strong>递归深度就是它在运行栈里活动记录的个数</strong>，同一个局部变量在不同层次被分到不同的存储空间。以 <code>factorial(4)</code> 为例：</p>
-<figure><img loading="lazy" src="../assets/b94046e379d40a44.jpg" alt="图3.8 递归计算factorial(4)时，内部栈的变化情况示意"><figcaption>图3.8 递归计算factorial(4)时，内部栈的变化情况示意</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-3-8.png" alt="图3.8 递归计算factorial(4)时，内部栈的变化情况示意"><figcaption>图3.8 递归计算factorial(4)时，内部栈的变化情况示意</figcaption></figure>
 <p>图 3.8　计算 <code>factorial(4)</code> 时运行栈的变化：(a) 逐层调用，<code>factorial(4)</code>→<code>factorial(3)</code>→…→<code>factorial(0)</code> 依次压栈；(b) <code>factorial(0)</code> 满足出口条件直接返回，随后按压栈的反序逐层弹出，把结果和控制权一层层交回去，最后 <code>factorial(4)</code> 把 24 交还给 <code>main()</code>。</p>
 <p>这张图也解释了下面那组实测数字：每深一层就多一格活动记录，深度一旦超过栈区的大小，程序不是「变慢」，而是直接崩。</p>
 <blockquote><p><strong>本节开篇先摆一组实测数字。</strong> 原书正文说递归「需要在内存中开辟一个称为 运行栈(runtime stack)的<strong>足够大</strong>的动态区」。多大算足够大？这是可以量的， 而量出来的结果里有一条相当反直觉。</p></blockquote>
@@ -1577,7 +1577,7 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
 <h3 id="为什么这一节没有-python-版"><a class="anchor" href="#为什么这一节没有-python-版">#</a>为什么这一节没有 Python 版</h3>
 <p>循环队列和链式队列的教学重点是环形下标、结点所有权以及空/满状态的表示，而不是调用一个现成队列。Python 的 <code>list</code> 或 <code>collections.deque</code> 会替调用方管理容量和对象寿命，既看不到环形存储的约束，也无法对应 C++ 的析构与异常安全；因此这里用 C++ 把存储不变量讲完整，算法章节再用 Python 展示队列的使用。</p>
 <p>与栈类似，队列（queue）也是一种<strong>限制访问点的线性表</strong>：元素只能从表的一端插入，另一端删除。 按照习惯，把只允许删除的一端称为队列的头，简称<strong>队头</strong>（front），删除操作本身称为<strong>出队</strong> （dequeue）；表的另一端为队列的尾，简称<strong>队尾</strong>（rear），这一端只能进行插入操作，称为<strong>入队</strong> （enqueue）。如同现实生活中的队列一样，在没有人为破坏的前提下，队列是按照到达的顺序来释放 元素的——先进入队列的元素会先离开，因此队列通常也被称为<strong>先进先出</strong>（first in first out）表， 简称 FIFO 表。空队列上的提取是可预期状态，返回 <code>std::nullopt</code>。</p>
-<figure><img loading="lazy" src="../assets/6a2814bcd8135888.jpg" alt="图3.9 队列的示例"><figcaption>图3.9 队列的示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-3-9.png" alt="图3.9 队列的示例"><figcaption>图3.9 队列的示例</figcaption></figure>
 <p>图 3.9　队列的示例。删除的一端叫队头(front)，删除操作叫出队(dequeue)；插入的一端叫队尾(rear)，插入操作叫入队(enqueue)。售票窗口前排队买票就是日常版的队列。</p>
 <h3 id="321-队列的抽象数据类型"><a class="anchor" href="#321-队列的抽象数据类型">#</a>3.2.1 队列的抽象数据类型</h3>
 <p>根据数据抽象和封装的原则，对队列的操作只能通过队列的抽象数据类型所定义的运算来进行。 原书【代码3.13】用一个 C++ 类模板给出这组运算：</p>
@@ -1622,7 +1622,7 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
 <p>用顺序存储结构来实现队列就形成了<strong>顺序队列</strong>（array-based queue）。与顺序表一样，顺序队列 需要分配一块连续的区域来存储队列的元素，<strong>需要事先知道或估算队列的大小</strong>。与栈类似，顺序 队列也存在溢出问题：队列满时入队会产生<strong>上溢</strong>，而队列为空时出队则会产生<strong>下溢</strong>；出现上溢时， 如果需要，也可以考虑对队列进行适当的扩容。</p>
 <p>队列两头都要动：入队动队尾，出队动队头。如果只是沿用顺序表的实现方法，就很难取得良好的 效率——假设队列中有 <span class="math">n</span> 个元素、顺序表的实现要求它们都存在数组的前 <span class="math">n</span> 个位置上：把队尾放在 位置 0，则出队是 <span class="math">O(<span class="upr">1</span>)</span>（队列最前面的元素就是数组最后面的元素），而入队是 <span class="math">O(n)</span>，因为必须把 当前所有元素都向后移动一个位置；反之把队尾放在位置 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span>，入队只需在最后添加，<span class="math">O(<span class="upr">1</span>)</span>， 而出队要移动剩余 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 个元素以确保它们在表的前 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 个位置，代价 <span class="math">O(n)</span>。</p>
 <p><strong>两头都别固定</strong>：在保证队列元素连续性的同时允许队列的首尾位置在数组中移动，让 <code>front</code> 和 <code>rear</code> 都在数组里往后走，两个操作就都是 <span class="math">O(<span class="upr">1</span>)</span>：</p>
-<figure><img loading="lazy" src="../assets/d552466644ef240e.jpg" alt="图 3.10 顺序队列的实现示意"><figcaption>图 3.10 顺序队列的实现示意</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-3-10.png" alt="图 3.10 顺序队列的实现示意"><figcaption>图 3.10 顺序队列的实现示意</figcaption></figure>
 <p>图 3.10　顺序队列的实现示意。出队让 <code>front</code> 后移，入队让 <code>rear</code> 后移；元素本身一个都不搬。</p>
 <p>这样做会遇到<strong>假溢出</strong>：整个队列不断向数组尾部漂移，<code>rear</code> 一旦到了 <code>mSize - 1</code>，即使数组前端还空着一片，入队也会报满。解决办法是把数组在逻辑上看成一个环——下标 0 是下标 <code>mSize - 1</code> 的直接后继，位置 <code>x</code> 的后继是 <code>(x + 1) % mSize</code>，这就是<strong>循环队列</strong>（也叫环形队列）。</p>
 <figure><img loading="lazy" src="../assets/scan/fig-3-11.png" alt="图 3.11 顺序队列的一种实现方式"><figcaption>图 3.11 顺序队列的一种实现方式</figcaption></figure>
@@ -1948,7 +1948,7 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
 <p><strong>时间上难分伯仲，空间上各有代价。</strong> 顺序栈和链式栈的基本操作都只需要常数时间，<code>push</code>/<code>pop</code> 都是 <span class="math">O(<span class="upr">1</span>)</span>。从空间角度看：初始时顺序栈必须说明一个固定的长度，当栈不够满时，势必浪费一些 空间；链式栈的长度可根据需要而增减，但每个元素都需要一个指针域，从而产生<strong>结构性开销</strong>。</p>
 <p><strong>还有一处差别常被忽略：访问栈的内部元素。</strong> 顺序栈可以根据元素与栈顶的相对位置快速定位并 读取内部元素，而链式栈则需要沿着指针链遍历才能访问内部元素。鉴于上述原因，顺序栈在实际中 更为常用一些。</p>
 <p><strong>多栈管理。</strong> 在编译系统等计算机系统软件中，往往同时使用和管理多个栈，这时可充分利用顺序 栈单向延伸的特性：用一个数组来存储两个栈，让它们共享同一存储空间——把数组的两端设置为 两者各自的栈底，从两端开始向中间迎面延伸，这样浪费的空间相对少一些：</p>
-<figure><img loading="lazy" src="../assets/c305cf854cc50a63.jpg" alt="图3.13 存储在同一个数组中的两个迎面增长的栈"><figcaption>图3.13 存储在同一个数组中的两个迎面增长的栈</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-3-13.png" alt="图3.13 存储在同一个数组中的两个迎面增长的栈"><figcaption>图3.13 存储在同一个数组中的两个迎面增长的栈</figcaption></figure>
 <p>图3.13　存储在同一个数组中的两个迎面增长的栈。两个栈的空间需求恰好相反（一个涨、另一个缩）时，这种做法很省空间；两个同时涨，中间那点余量很快就没了。队列做不到这件事——除非总有元素从一个队列转入另一个队列。</p>
 <h3 id="332-顺序队列与链式队列的比较"><a class="anchor" href="#332-顺序队列与链式队列的比较">#</a>3.3.2 顺序队列与链式队列的比较</h3>
 <p>由于存储空间固定，顺序队列无法满足队列规模变化很大且最大规模无法预测的情况，而链式队列则 可以轻松应对这种类型的应用。另一方面，顺序队列在存取访问上很简单，可以适用那些对队列内部 元素（不仅限于队列的两端）有访问需求的应用；如果可以预测浪涌的统计特性，就可以大致估算出 缓冲队列的长度。</p>

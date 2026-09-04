@@ -113,7 +113,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <li>那一端叫<strong>栈顶</strong>(top)，另一端叫<strong>栈底</strong>(bottom)</li>
 <li>元素按<strong>后进先出</strong>(LIFO, last in first out)访问</li>
 </ul>
-<figure><img loading="lazy" src="../../assets/c8966e2bf43b41fc.jpg" alt="图 3.1 栈的示意图"><figcaption>图 3.1 栈的示意图</figcaption></figure></section><section class="slide" data-notes="&lt;p&gt;先不说 optional，让学生自己想「没有」怎么表达。
+<figure><img loading="lazy" src="../../assets/scan/fig-3-1.png" alt="图 3.1 栈的示意图"><figcaption>图 3.1 栈的示意图</figcaption></figure></section><section class="slide" data-notes="&lt;p&gt;先不说 optional，让学生自己想「没有」怎么表达。
 常见答案：返回 -1、返回 bool + 出参、抛异常。
 这三个都有问题，下面逐个拆。&lt;/p&gt;"><h1 id="栈的抽象数据类型"><a class="anchor" href="#栈的抽象数据类型">#</a>栈的抽象数据类型</h1>
 <div class="table-wrap"><table><thead><tr>
@@ -245,7 +245,7 @@ ArrayStack(<span class="k">const</span> ArrayStack&amp; other)
     }
 }</code></pre></div></section><section class="slide" data-notes=""><h1 id="313-链式栈"><a class="anchor" href="#313-链式栈">#</a>3.1.3 链式栈</h1>
 <p>结点分散在堆上，压栈只是<strong>接一个新结点</strong>。</p>
-<figure><img loading="lazy" src="../../assets/cc2722b736c01067.jpg" alt="图3.4 链式栈示意"><figcaption>图3.4 链式栈示意</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-3-4.png" alt="图3.4 链式栈示意"><figcaption>图3.4 链式栈示意</figcaption></figure>
 <p><strong>没有「栈满」这回事</strong>——这是它与顺序栈最大的差别。</p></section><section class="slide" data-notes="&lt;p&gt;push 三步：造新结点、让它指向原栈顶、栈顶指向它。顺序不能乱。
 pop 四步：摘下栈顶、取值、栈顶后移、释放结点。
 注意释放必须在取值之后。&lt;/p&gt;"><h1 id="链式栈的入栈与出栈"><a class="anchor" href="#链式栈的入栈与出栈">#</a>链式栈的入栈与出栈</h1>
@@ -373,7 +373,7 @@ std::optional&lt;T&gt; pop() {
 下一页有实测数字。&lt;/p&gt;"><h1 id="315-栈与递归"><a class="anchor" href="#315-栈与递归">#</a>3.1.5 栈与递归</h1>
 <p><strong>递归的实现本身就是一个栈。</strong> 每次函数调用，运行栈上压入一条<strong>活动记录</strong>：</p>
 <p>“活动记录”是<strong>经典教材术语</strong>；现代资料通常称它为 <strong>stack frame（栈帧）</strong>，其中保存返回地址、参数和局部状态。</p>
-<figure><img loading="lazy" src="../../assets/d573f60f354acc38.jpg" alt="图 3.7 活动记录的内容"><figcaption>图 3.7 活动记录的内容</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-3-7.png" alt="图 3.7 活动记录的内容"><figcaption>图 3.7 活动记录的内容</figcaption></figure>
 <ul>
 <li>返回地址、参数、局部变量、返回值</li>
 <li>函数返回时弹出这条记录</li>
@@ -409,7 +409,7 @@ std::optional&lt;T&gt; pop() {
 </tbody></table></div>
 <p>改成显式栈（数据压进 <code>ArrayStack</code>，也就是放到<strong>堆</strong>上）： 三档在 <strong>1000 万层</strong>都通过。</p></section><section class="slide" data-notes=""><h1 id="32-队列"><a class="anchor" href="#32-队列">#</a>3.2 队列</h1>
 <p>一端进、另一端出，<strong>先进先出</strong>(FIFO)。</p>
-<figure><img loading="lazy" src="../../assets/6a2814bcd8135888.jpg" alt="图3.9 队列的示例"><figcaption>图3.9 队列的示例</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-3-9.png" alt="图3.9 队列的示例"><figcaption>图3.9 队列的示例</figcaption></figure>
 <ul>
 <li>插入端叫<strong>队尾</strong>(rear)，删除端叫<strong>队头</strong>(front)</li>
 <li>空队列上取元素是<strong>可预期状态</strong>，返回空 <code>optional</code></li>
@@ -417,7 +417,7 @@ std::optional&lt;T&gt; pop() {
 漏了取模就是数组越界，ASan 当场报 heap-buffer-overflow。&lt;/p&gt;"><h1 id="顺序队列为什么要循环"><a class="anchor" href="#顺序队列为什么要循环">#</a>顺序队列：为什么要「循环」</h1>
 <p>队列两头都要动。若队头固定在下标 0，每次出队都要把后面全部前移，<strong>O(n)</strong>。</p>
 <p><strong>让队头也往后走</strong>——走到数组末尾就绕回下标 0，整块数组当成一个圈用。</p>
-<figure><img loading="lazy" src="../../assets/b5473971d7d3f3e4.jpg" alt="图 3.12 循环队列的实现示例"><figcaption>图 3.12 循环队列的实现示例</figcaption></figure></section><section class="slide" data-notes="&lt;p&gt;也可以另存一个 count 变量来区分，那样不浪费槽位但多一个要维护的状态。
+<figure><img loading="lazy" src="../../assets/scan/fig-3-12.png" alt="图 3.12 循环队列的实现示例"><figcaption>图 3.12 循环队列的实现示例</figcaption></figure></section><section class="slide" data-notes="&lt;p&gt;也可以另存一个 count 变量来区分，那样不浪费槽位但多一个要维护的状态。
 原书选了前者，本书照办——教材的选择要和教材一致，学生才对得上。&lt;/p&gt;"><h1 id="空和满怎么分"><a class="anchor" href="#空和满怎么分">#</a>空和满怎么分</h1>
 <p>绕回之后有个麻烦：<code>front == rear</code> <strong>既可能是空、也可能是满</strong>。</p>
 <p>原书的办法：<strong>牺牲一个槽位</strong>。</p>

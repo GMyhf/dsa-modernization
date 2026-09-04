@@ -21,7 +21,7 @@ subtitle: 数据结构与算法：Python 讲可迁移算法，C++ 讲存储与�
 二叉树由结点的有限集合构成：**或者为空**，
 或者由一个根结点和两棵**不相交**的左、右子树组成。
 
-![图 5.1 二叉树的 5 种基本形态](../assets/e09b495998554e01.jpg)
+![图 5.1 二叉树的 5 种基本形态](../assets/scan/fig-5-1.png)
 
 这是一个**递归定义**——后面几乎所有算法都直接照着它写。
 
@@ -34,7 +34,7 @@ subtitle: 数据结构与算法：Python 讲可迁移算法，C++ 讲存储与�
 
 # 满二叉树与完全二叉树
 
-![图5.2 满二叉树和完全二叉树示例](../assets/ea5eff3e545173dc.jpg)
+![图5.2 满二叉树和完全二叉树示例](../assets/scan/fig-5-2.png)
 
 - **满二叉树**：每个结点的度非 0 即 2（没有只有一个孩子的结点）
 - **完全二叉树**：除最下两层外每层排满，最下层结点集中在**左边连续**位置
@@ -91,7 +91,7 @@ subtitle: 数据结构与算法：Python 讲可迁移算法，C++ 讲存储与�
 | 左 根 右 | **中序**(inorder) |
 | 左 右 根 | **后序**(postorder) |
 
-![图 5.5 二叉树示例](../assets/7c6579b015042738.jpg)
+![图 5.5 二叉树示例](../assets/scan/fig-5-5.png)
 
 <!-- 备注
 让学生对着图 5.5 报三遍答案。报错的多半是把「访问」和「走进去」混了。
@@ -152,7 +152,7 @@ static void inorder_impl(const Node* node, Visitor& visit) {
 
 # 表达式树：周游的一个用途
 
-![图 5.6 表达式树](../assets/b3d4ed61cc80d7d7.jpg)
+![图 5.6 表达式树](../assets/scan/fig-5-6.png)
 
 | 周游 | 得到 |
 | --- | --- |
@@ -166,7 +166,7 @@ static void inorder_impl(const Node* node, Visitor& visit) {
 
 # 5.3 存储结构：二叉链表
 
-![图 5.7 二叉树结点的存储结构](../assets/12374c97891a830a.jpg)
+![图 5.7 二叉树结点的存储结构](../assets/scan/fig-5-7.png)
 
 一个数据域、两根链接。没有孩子就是 `nullptr`——
 比原书用一个「空结点」表示要省事得多。
@@ -228,7 +228,7 @@ static void destroy(Node* node) {
 
 # 5.3 另一种存法：完全二叉树进数组
 
-![图 5.9 完全二叉树的结点编号](../assets/80797628fa510b2c.jpg)
+![图 5.9 完全二叉树的结点编号](../assets/scan/fig-5-9.png)
 
 按层次次序编号后，父子关系变成**下标算术**：
 
@@ -245,7 +245,7 @@ static void destroy(Node* node) {
 
 # 5.4 二叉搜索树
 
-![图 5.11 二叉搜索树](../assets/c399e3356dac937f.jpg)
+![图 5.11 二叉搜索树](../assets/scan/fig-5-11.png)
 
 约束只有一条：**左子树的键都小于根，右子树的都大于根**。
 
@@ -292,7 +292,7 @@ bool insert(const T& value) {
 
 # 删除：难点只有一个
 
-![图 5.13 改进的二叉搜索树的删除](../assets/6656b628984f36ef.jpg)
+![图 5.13 改进的二叉搜索树的删除](../assets/scan/fig-5-13.png)
 
 被删结点有**两个孩子**时，谁来顶替？
 
@@ -328,7 +328,7 @@ bool insert(const T& value) {
 
 # 5.5 堆：完全二叉树 + 数组
 
-![图 5.14 最小堆对应的完全二叉树](../assets/28d7f967e0c2ebfa.jpg)
+![图 5.14 最小堆对应的完全二叉树](../assets/scan/fig-5-14.png)
 
 - 是一棵**完全二叉树**
 - 每个结点都**不大于**它的孩子（最小堆）
@@ -340,7 +340,7 @@ bool insert(const T& value) {
 
 # 插入：放末尾，然后上浮
 
-![图 5.15 在最小堆 5.14 中插入元素 13](../assets/7f6bb0c3af53cc2a.jpg)
+![图 5.15 在最小堆 5.14 中插入元素 13](../assets/scan/fig-5-15.png)
 
 ```cpp file=code/ch05/heap_huffman/teaching.hpp#fn:sift_up
 // 上浮：只要比父亲小就换上去。
@@ -364,7 +364,7 @@ void sift_up(size_type index) {
 
 # 删除最小：搬最后一个上来，然后下沉
 
-![图 5.16 在最小堆 5.14 中删除元素 14](../assets/ba38e1004230ab69.jpg)
+![图 5.16 在最小堆 5.14 中删除元素 14](../assets/scan/fig-5-16.png)
 
 ```cpp file=code/ch05/heap_huffman/teaching.hpp#fn:sift_down
 // 下沉：和两个孩子里较小的那个比，比它大就换下去。
@@ -402,7 +402,7 @@ void sift_down(size_type index) {
 
 # 建堆为什么是 O(n)
 
-![图 5.17 建堆过程示例](../assets/d7354d550a2f5d79.jpg)
+![图 5.17 建堆过程示例](../assets/scan/fig-5-17.png)
 
 粗算：$n/2$ 次 `sift_down` $\times\ O(\log n) = O(n\log n)$。**原书说这只是粗略上界。**
 

@@ -198,7 +198,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h2 id="111-线性索引"><a class="anchor" href="#111-线性索引">#</a>11.1 线性索引</h2>
 <p>第 1 章和第 9 章已经说过：外存上逐条扫描主文件太贵，应该先查一张较小的表，再按位置读记录。线性索引就是这张表：项是 <code>(key, location)</code>，按 key 排序，可以在内存里二分。</p>
 <p>稠密索引为每条记录建一项，主文件可以无序，查到索引项就直接得到记录位置。稀疏索引只为每个有序数据块建一项，通常记下该块的最小 key；查到块之后还要在块内再找一次。稀疏索引更省空间，但要求主文件按 key 分块有序。</p>
-<figure><img loading="lazy" src="../assets/6e8a0ef3ed26c107.jpg" alt="图11.1 线性索引与不等长记录"><figcaption>图11.1 线性索引与不等长记录</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-1.png" alt="图11.1 线性索引与不等长记录"><figcaption>图11.1 线性索引与不等长记录</figcaption></figure>
 <p>图11.1中记录长度不同，不能用“基地址 + 下标 × 固定长度”直接计算位置。索引项保存关键码和记录地址，把逻辑顺序与物理布局分开；主文件移动后要更新地址，索引本身不保存完整记录。</p>
 <p>第一层索引太大、内存放不下时，再为它建一层，成为多级索引。一次查询的路径是：内存里的顶层 → 读一个索引页 → 读数据页。这时的关键指标不是 CPU 比较次数，而是磁盘页访问次数。变长记录尤其适合「索引 + 位置」，因为主文件无法按下标直接算出地址。</p>
 <p>先跑一遍：</p>
@@ -286,7 +286,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 </tr>
 </tbody></table></div>
 <p>一次命中从顶层定位后，要读三级、二级、一级索引中的各一页，再读数据页，共 4 页。把每个索引页容量从 4 提高到 64 后，250 项只占 4 页，再用 1 个顶层页索引它们；查询因此只读 1 个下层索引页和 1 个数据页。</p>
-<figure><img loading="lazy" src="../assets/0c75a3db9929b61e.jpg" alt="图 11.2 二级索引文件"><figcaption>图 11.2 二级索引文件</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-2.png" alt="图 11.2 二级索引文件"><figcaption>图 11.2 二级索引文件</figcaption></figure>
 <p>页内用顺序查还是二分查，只改变 CPU 比较次数，不改变“这一页已经读进来”这个事实。优化存储索引时先降树高和随机 I/O，再讨论页内比较，顺序不能倒过来。</p>
 <p>查找过程写出来就是「逐层读索引页，最后读一个数据页」：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/linear_index/modern.hpp">code/ch11/linear_index/modern.hpp#index-find</a></div><pre><code>[[nodiscard]] std::optional&lt;std::string&gt; find(<span class="t">int</span> key) <span class="k">const</span> {
@@ -329,7 +329,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h2 id="112-静态索引多分树"><a class="anchor" href="#112-静态索引多分树">#</a>11.2 静态索引——多分树</h2>
 <p>磁盘按页读写，一个索引结点通常设计成恰好装满一页。二叉树每个结点只有两个孩子，同样多的 key 会把树撑得很高，查询就要读很多页。多分树每个结点有许多孩子，树高低，页访问少。</p>
 <p>静态多分树在批量装入时按页填满，之后结构不再变。查找从根走到叶，每层读一页。插入、删除会破坏「一页正好满」的约定：多出来的记录只能进溢出区，少了的页会变稀，最终往往要重组整棵树。所以它适合「一次建好、很少改」的文件，不适合频繁更新的目录。</p>
-<figure><img loading="lazy" src="../assets/879fc43030b02cb8.jpg" alt="图 11.3 多分树"><figcaption>图 11.3 多分树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-3.png" alt="图 11.3 多分树"><figcaption>图 11.3 多分树</figcaption></figure>
 <p>多分树降低的是高度。若每个结点最多有 <span class="math">m</span> 个孩子、树高为 <span class="math">h</span>，理想满树可导航约 <span class="math">m<sup>h</sup></span> 个叶页；同样覆盖一百万个叶页，二叉树约需 20 层，100 路树只需 3 层。页内要比较更多分界 key，但整页已经在内存里，代价通常远小于多读一次外存页。</p>
 <p>扇出不是随意选的。页大小 4096 字节，若每个“关键码 + 孩子页号”占 16 字节，扣除页头后大约能放 250 项，扇出约 251；关键码变长或页头元数据增加，扇出就会下降。数据库索引喜欢短关键码，不只为省总空间，也为让一页容纳更多分支、压低树高。</p>
 <p>批量装入本身就是「按页填满、自底向上建层」，<code>code/ch11/bplus_tree</code> 的 <code>bulk_load</code> 实现的正是这件事——把下一节那棵 3 阶 B+ 树按这个办法装出来，得到的就是 11.4 图里的形状。区别只在后续：静态多分树靠重组，B+ 树靠分裂与合并就地维护。</p>
@@ -454,7 +454,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p><strong><span class="math">m</span> 阶 B 树的定义</strong>（五条，缺一不可）：① 每个结点至多有 <span class="math">m</span> 个子结点；② 除根结点和叶结点外， 其他每个结点至少有 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 个子结点；③ 根结点至少有两个子结点（例外情况：根可以为空， 或者独根）；④ <strong>所有的叶结点在同一层</strong>，可以有 <span class="math">⌈m/<span class="upr">2</span>⌉<span class="bin">−</span><span class="upr">1</span></span> 到 <span class="math">m<span class="bin">−</span><span class="upr">1</span></span> 个关键码； ⑤ 有 <span class="math">k</span> 个子结点的分支结点恰好包含 <span class="math">k<span class="bin">−</span><span class="upr">1</span></span> 个关键码。最底层的叶结点的指针指向空（对应于失败 检索），<strong>空指针数目正好等于树中所包含的关键码数目加 1</strong>。</p>
 <p><strong>B 树的四条性质</strong>（原书 11.4.1 末）：① B 树总是树高平衡的，所有叶结点都在同一层；② 更新和检索 操作只影响一些磁盘块，因此性能很好；③ <strong>B 树把相关的记录（即关键码具有接近的值）放在同一个磁盘 块中，从而利用了访问局部性原理</strong>；④ B 树保证树中至少有一定比例的结点是满的，这样既能保证一定 的空间利用率，又使得插入和删除不必像静态多分树那样频繁地修改结点，从而总体上减少了磁盘读取数。 <strong>阶为 3 的 B 树就是通常说的「2-3 树」。</strong></p>
 <p>B 树是保持平衡的多路搜索树，专门为磁盘页设计。一个结点里有多个有序 key，key 之间是指向孩子的指针。查找从根开始，在页内确定下一条分支，再读孩子页。树高随阶数增大而降低，一次查找的页数大约是 <span class="math"><span class="upr">log</span><sub>m</sub>n</span>。</p>
-<figure><img loading="lazy" src="../assets/97a7189d3ea9584c.jpg" alt="图 11.4 B 树结点的一般形式"><figcaption>图 11.4 B 树结点的一般形式</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-4.png" alt="图 11.4 B 树结点的一般形式"><figcaption>图 11.4 B 树结点的一般形式</figcaption></figure>
 <p>一个含 <span class="math">r</span> 个关键码的内部结点有 <span class="math">r<span class="bin">+</span><span class="upr">1</span></span> 个孩子：最左孩子的键都小于第一个关键码，相邻两个关键码之间各管一个区间，最右孩子的键都大于最后一个关键码。页内先定位区间，再沿对应页号下降；若孩子数与关键码数不满足“多一个”，结点结构已经损坏。</p>
 <figure><img loading="lazy" src="../assets/scan/fig-11-5.png" alt="图 11.5 3 阶 B 树"><figcaption>图 11.5 3 阶 B 树</figcaption></figure>
 <p>图 11.5　同一棵 3 阶 B 树的三种画法：(a) 通常的画法；(b) 把外部空结点画出来；(c) 画出隐含指针——<span class="math">a<sub><span class="upr">1</span></sub><span class="rel">∼</span>a<sub><span class="upr">16</span></sub></span> 是关键码在主文件里对应磁盘块的索引地址。<strong>B 树的关键码在内部结点上也带着数据地址</strong>，这正是它与后面 B+ 树的分水岭。</p>
@@ -466,9 +466,9 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p><strong>根结点为什么可以只有 2 个子结点？</strong> 根结点允许的子结点数目范围在 <span class="math"><span class="upr">2</span><span class="rel">∼</span>m</span> 之间，而内部结点的 子结点数目在 <span class="math">⌈m/<span class="upr">2</span>⌉<span class="rel">∼</span>m</span> 之间——<strong>这是因为插入算法分裂到根结点时会分为 2 个子结点并 产生一个新根</strong>；如果要求与其他内部结点具有同样的出度，就需要对 <span class="math">B</span> 树进行比较大的调整，这就违背了 <span class="math">B</span> 树操作的局部调整原则。而且实际运行时，<strong>根结点往往在内存中保存</strong>（当然最终它还是要写回外存， 因此也有 <span class="math">m</span> 的上限），不需要遵守内部结点的子结点数目下限约束；大部分内部结点在外存中，需要保证 存储块至少半满以折衷存储效率和操作效率，因此限制在 <span class="math">⌈m/<span class="upr">2</span>⌉<span class="rel">∼</span>m</span>。<strong>根结点也不可能只有 一个子结点，那样太浪费存储空间，而且会相应地增加检索时间。</strong></p>
 <p><strong>为什么插入时分裂而不是「送给邻居一些关键码」？</strong> 这是由于插入操作可能发生在创建阶段，分裂的结点 很快就会增加新的关键码；<strong>而送关键码涉及读和修改邻居结点，访外开销大，且操作麻烦。</strong></p>
 <p>插入使结点超过上限（溢出）时，把它分裂成两个，并把分界 key 上推到父结点；父结点也可能接着分裂，最坏会一直裂到根，树增高一层。</p>
-<figure><img loading="lazy" src="../assets/3032fa408668c89e.jpg" alt="图11.6 在图 11.5 的 3 阶 B 树中插入关键码 14、55 后的结果"><figcaption>图11.6 在图 11.5 的 3 阶 B 树中插入关键码 14、55 后的结果</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-6.png" alt="图11.6 在图 11.5 的 3 阶 B 树中插入关键码 14、55 后的结果"><figcaption>图11.6 在图 11.5 的 3 阶 B 树中插入关键码 14、55 后的结果</figcaption></figure>
 <p>图 11.6　在图 11.5 的 3 阶 B 树里插入 14、55。两次插入都能就地放下，树高不变——<strong>大多数插入就是这样结束的</strong>。</p>
-<figure><img loading="lazy" src="../assets/ea9001b8f902803b.jpg" alt="图11.7 在图11.5 的 3 阶 B 树中插入关键码 19 后导致根分裂"><figcaption>图11.7 在图11.5 的 3 阶 B 树中插入关键码 19 后导致根分裂</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-7.png" alt="图11.7 在图11.5 的 3 阶 B 树中插入关键码 19 后导致根分裂"><figcaption>图11.7 在图11.5 的 3 阶 B 树中插入关键码 19 后导致根分裂</figcaption></figure>
 <p>图 11.7　再插入 19 就不行了：叶溢出、分裂、分界 key 上推，父结点跟着溢出，一路裂到根，树<strong>增高一层</strong>。B 树只在这一种情况下长高，所以它的所有叶永远在同一层。</p>
 <p><strong>删除的完整规则。</strong> 删除的过程与插入类似，但比插入稍微复杂些。<strong>如果删除的关键码不在叶结点层， 则需要先把此关键码与其在 <span class="math">B</span> 树中的后继对换位置，然后再删除该关键码</strong>——在 <span class="math">B</span> 树中，一个关键码的 后继就是比它大的那些关键码中值最小的那一个，非叶层待删关键码的后继关键码一定处于叶层，即待删 关键码的右指针所指子树中最左结点的最小关键码。如果删除的关键码在叶结点层，则直接从叶结点中删除， <strong>这可能导致此结点所包含的关键码的个数小于 <span class="math">⌈m/<span class="upr">2</span>⌉<span class="bin">−</span><span class="upr">1</span></span>，产生下溢出。</strong></p>
 <p>这种情况下，考察该结点的直接左兄弟或右兄弟（<strong>习惯上先左后右</strong>），从兄弟结点借若干个关键码到该 结点中。实际上，<strong>往往是被删除结点和被借结点的关键码、还有父结点中的分界码一起排列，取中位数为 新分界码</strong>，尽量使得两个新兄弟结点所含关键码个数基本相同（这样可以延迟下一次删除引起的下溢出）。</p>
@@ -481,7 +481,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p><strong>B+ 树是 B 树的一种变形。</strong> 实际应用中产生了一些 B 树的变形：每个结点的「充满度」可以不同； 树在不同层上可有不同的阶；每个关键码的长度可变；<strong>把关键码全部顺序存储在叶结点上，而索引部分 是每个结点内最大（或最小）关键码的复写</strong>——最后这一种就是应用得很广泛的 B+ 树。</p>
 <p><strong><span class="math">m</span> 阶 B+ 树的结构定义</strong>：① 每个结点至多有 <span class="math">m</span> 个子结点；② 每个结点（除根外）至少有 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 个子结点；③ 根结点至少有两个子结点；④ <strong>所有的叶结点在同一层，可以有 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 到 <span class="math">m</span> 个关键码，叶结点包含全部关键码以及相应的记录信息</strong>（例如该记录在主文件中 的位置指针），<strong>叶结点之间可以用双链表顺序链接</strong>；⑤ 有 <span class="math">k</span> 个子结点的分支结点<strong>必有 <span class="math">k</span> 个关键码</strong> （注意与 B 树的 <span class="math">k<span class="bin">−</span><span class="upr">1</span></span> 个不同）。</p>
 <p>B+ 树把记录（或记录位置）全部放在叶上，内部结点只作路标，不存完整记录。叶按 key 从小到大串成一条链。点查询仍然从根走到叶；范围查询找到下限所在的叶之后，沿叶链顺序扫到上限即可，不必再回到内部结点。关系数据库的磁盘索引多用 B+ 树，正是因为范围扫描是常见操作。</p>
-<figure><img loading="lazy" src="../assets/8573da94ca956749.jpg" alt="图 11.9 3 阶 B+ 树"><figcaption>图 11.9 3 阶 B+ 树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-9.png" alt="图 11.9 3 阶 B+ 树"><figcaption>图 11.9 3 阶 B+ 树</figcaption></figure>
 <p>B 树命中内部关键码时就可能拿到记录；B+ 树内部关键码只是叶键的复写，点查询仍要走到叶。看似多走一步，换来的是内部页只放短 key 和孩子指针，扇出更大、树更矮，而且所有记录都在同一叶层，范围访问路径统一。</p>
 <p>一棵 3 阶 B+ 树可以这样看（内部结点只导航，数据全在最下一层，叶之间有横链）：</p>
 <div class="codeblock" data-lang="text"><pre><code>                [  30  |  70  ]
@@ -523,7 +523,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <td style="text-align:left">结束</td>
 </tr>
 </tbody></table></div>
-<figure><img loading="lazy" src="../assets/bcafc0a9de581967.jpg" alt="图 11.10 插入后 B+ 树增高一层"><figcaption>图 11.10 插入后 B+ 树增高一层</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-10.png" alt="图 11.10 插入后 B+ 树增高一层"><figcaption>图 11.10 插入后 B+ 树增高一层</figcaption></figure>
 <div class="codeblock" data-lang="text"><pre><code>                    [  50  ]
                  /            \
           [  30  ]            [  70  ]
@@ -643,14 +643,14 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <li>兄弟也在下限，合并两页，父结点少一个 key 和一个孩子；</li>
 <li>父结点因此下溢，向上重复；若根只剩一个孩子，让该孩子成为新根，树高减 1。</li>
 </ol>
-<figure><img loading="lazy" src="../assets/ffef69f4b64e2e43.jpg" alt="图 11.11 从 3 阶 B+ 树删除 75 后"><figcaption>图 11.11 从 3 阶 B+ 树删除 75 后</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-11.png" alt="图 11.11 从 3 阶 B+ 树删除 75 后"><figcaption>图 11.11 从 3 阶 B+ 树删除 75 后</figcaption></figure>
 <p>图 11.11　从图 11.9 的 3 阶 B+ 树里删掉 75 之后。内部结点上那份 75 的复写<strong>可以留着不动</strong>——它只是路标，不必对应一个真实存在的键。</p>
 <p>实际系统里内部结点和叶结点的容量往往不同：内部结点只放短 key 和页号，放得下的多；叶要放记录或记录地址，放得少。内外阶数不同的叫<strong>混合型 B+ 树</strong>。</p>
-<figure><img loading="lazy" src="../assets/3de9f1e64abee567.jpg" alt="图11.12 混合型 B+ 树，内部结点阶为 4，叶结点阶 5"><figcaption>图11.12 混合型 B+ 树，内部结点阶为 4，叶结点阶 5</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-12.png" alt="图11.12 混合型 B+ 树，内部结点阶为 4，叶结点阶 5"><figcaption>图11.12 混合型 B+ 树，内部结点阶为 4，叶结点阶 5</figcaption></figure>
 <p>图 11.12　混合型 B+ 树：内部结点阶为 4，叶结点阶为 5。</p>
-<figure><img loading="lazy" src="../assets/c2cacd7eba558abe.jpg" alt="图 11.13 在图11.12 混合型 B+ 树中插入 22 后的结果"><figcaption>图 11.13 在图11.12 混合型 B+ 树中插入 22 后的结果</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-13.png" alt="图 11.13 在图11.12 混合型 B+ 树中插入 22 后的结果"><figcaption>图 11.13 在图11.12 混合型 B+ 树中插入 22 后的结果</figcaption></figure>
 <p>图 11.13　在图 11.12 的混合型 B+ 树里插入 22 之后。</p>
-<figure><img loading="lazy" src="../assets/fe716221bc3bfed5.jpg" alt="图11.14 在图11.13 混合型 B+ 树中删除 40 后的结果"><figcaption>图11.14 在图11.13 混合型 B+ 树中删除 40 后的结果</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-14.png" alt="图11.14 在图11.13 混合型 B+ 树中删除 40 后的结果"><figcaption>图11.14 在图11.13 混合型 B+ 树中删除 40 后的结果</figcaption></figure>
 <p>图 11.14　在图 11.13 上删除 40 之后。分裂与合并的规则不变，只是内外两层各按各自的阶判断溢出和下溢。</p>
 <p>分裂与合并要同时维护叶链。只修父子指针而漏掉 <code>next</code>，点查询仍可能全绿，范围查询却会跨不过断链；所以测试既要逐键 <code>find</code>，也要把全范围扫描结果与排序后的记录全集对拍。</p>
 <p>B 树与 B+ 树可以记成三句话：记录在不在内部结点；叶有没有横向链接；范围扫描要不要反复爬树。</p>
@@ -752,35 +752,35 @@ AND      : 1 0 0 0 1 0</code></pre></div>
 <p>位图总空间约为“记录数 × 属性不同取值数”位。低基数列很合算：一百万条记录的“是否及格”只有两张约 122 KiB 的位图；若把几乎每人不同的学号做位图，就会生成近一百万张位图，完全失去意义。</p>
 <p>签名文件把一篇文档的特征散列成较短的位串。查询时先用签名快速丢掉不可能匹配的文档，再回到原文确认。签名可能产生假阳性（签名说可能有、原文里没有），不能有假阴性。它适合「先粗筛、再精查」的全文检索，不替代倒排。</p>
 <p>红黑树是内存里的近似平衡二叉搜索树：每个结点带一种颜色，通过几条局部规则保证从根到叶的黑结点数相同，最长路径不超过最短路径的两倍。查找、插入、删除都是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>，旋转次数有常数上限。它适合进程地址空间里的有序映射，不替代按页组织的 B+ 树。本书不另写红黑树实现，只作对照讨论。</p>
-<figure><img loading="lazy" src="../assets/32c09de96383c4de.jpg" alt="图 11.16 红黑树示意图"><figcaption>图 11.16 红黑树示意图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-16.png" alt="图 11.16 红黑树示意图"><figcaption>图 11.16 红黑树示意图</figcaption></figure>
 <p>图 11.16　红黑树示意图。</p>
 <p>红黑树的“平衡”不是要求左右子树等高，而是用颜色约束控制最长路径：根为黑、红结点不能有红孩子、从任一结点到其后代空叶的黑结点数相同。由此可得原书的四条性质，其中最有用的一条是：含 <span class="math">n</span> 个内部结点的红黑树，树高最多 <span class="math"><span class="upr">2</span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>(n<span class="bin">+</span><span class="upr">1</span>)<span class="bin">+</span><span class="upr">1</span></span>——<strong>最长路径不超过最短路径的两倍</strong>，检索因此是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>。</p>
 <p>本章的外存主线是 B+ 树，红黑树只作对照，所以下面按原书把调整规则列一遍、不另写实现。</p>
 <p><strong>插入。</strong> 先按普通二叉搜索树找到位置，把新结点着成<strong>红色</strong>。父结点是黑的就结束；父子都红就要调整，分两种情况看<strong>叔父结点</strong>的颜色。</p>
 <p>情况 1：叔父是黑色。这时靠旋转解决。</p>
-<figure><img loading="lazy" src="../assets/4cd9c419025ff11a.jpg" alt="图11.17 父结点是红色、叔父结点是黑色的情况"><figcaption>图11.17 父结点是红色、叔父结点是黑色的情况</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-17.png" alt="图11.17 父结点是红色、叔父结点是黑色的情况"><figcaption>图11.17 父结点是红色、叔父结点是黑色的情况</figcaption></figure>
 <p>图 11.17　父结点红、叔父黑：旋转一次解决红红冲突。图中新增结点 X 是父结点 A 的左孩子；X 是右孩子时先把 X 与 A 换位，就化归成同一种形状。</p>
-<figure><img loading="lazy" src="../assets/a333f195118c2445.jpg" alt="图11.18 叔父结点为黑色时的四种重构"><figcaption>图11.18 叔父结点为黑色时的四种重构</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-18.png" alt="图11.18 叔父结点为黑色时的四种重构"><figcaption>图11.18 叔父结点为黑色时的四种重构</figcaption></figure>
 <p>图 11.18　叔父为黑时一共四种子结构（LL、LR、RL、RR）。四种的实质是同一件事：<strong>取「双红结点 + 祖父」这三个键的中位数当新的子根、着黑，另外两个当它的孩子、着红</strong>。每个结点的阶（黑高）都不变，调整到此结束。</p>
 <p>情况 2：叔父也是红色。这时不必旋转，只要换色。</p>
-<figure><img loading="lazy" src="../assets/74d9765c86b0459e.jpg" alt="图11.19 父结点、叔父结点均为红色"><figcaption>图11.19 父结点、叔父结点均为红色</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-19.png" alt="图11.19 父结点、叔父结点均为红色"><figcaption>图11.19 父结点、叔父结点均为红色</figcaption></figure>
 <p>图 11.19　父与叔父都红：把父 A 和叔父 C 都改成黑、祖父 B 改成红。A 以下的冲突解决了，但 B 可能与它的父结点再冲突，于是<strong>把 B 当成新的 X 递归上去</strong>。最坏一路推到根，把根改回黑色即可——这是红黑树唯一会长高（阶加 1）的时刻。</p>
-<figure><img loading="lazy" src="../assets/1a24097d7b698644.jpg" alt="图 11.20 红黑树插入示例"><figcaption>图 11.20 红黑树插入示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-20.png" alt="图 11.20 红黑树插入示例"><figcaption>图 11.20 红黑树插入示例</figcaption></figure>
 <p>图 11.20　一次插入引发的红红冲突调整全过程。</p>
 <p><strong>删除。</strong> 先照 BST 删：待删结点若有两个非空孩子，就与右子树的最小结点交换值（颜色不动），转成「至多一个非空孩子」的情形再删。删完可能出现<strong>双黑</strong>结点，这是删除最复杂的地方，按兄弟和侄子的颜色分三种情况——下面都按「双黑是左孩子」写，右孩子左右对称。</p>
 <p>情况 1(a)：兄弟黑、红侄子与双黑呈八字形外撇。</p>
-<figure><img loading="lazy" src="../assets/dc4aa499811e6130.jpg" alt="图 11.21 情况 1(a)：双黑结点与红色侄子呈八字形对称"><figcaption>图 11.21 情况 1(a)：双黑结点与红色侄子呈八字形对称</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-21.png" alt="图 11.21 情况 1(a)：双黑结点与红色侄子呈八字形对称"><figcaption>图 11.21 情况 1(a)：双黑结点与红色侄子呈八字形对称</figcaption></figure>
 <p>图 11.21　把兄弟 C 提上去继承原父结点 B 的颜色，B 与侄子 D 都着黑。</p>
 <p>情况 1(b)：兄弟黑、红侄子与双黑同边顺。</p>
-<figure><img loading="lazy" src="../assets/d8199ab1b4f48019.jpg" alt="图11.22 情况1(b)：双黑结点与红色侄子同边顺"><figcaption>图11.22 情况1(b)：双黑结点与红色侄子同边顺</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-22.png" alt="图11.22 情况1(b)：双黑结点与红色侄子同边顺"><figcaption>图11.22 情况1(b)：双黑结点与红色侄子同边顺</figcaption></figure>
 <p>图 11.22　把侄子 D 提上去当子根、继承原子根 B 的颜色，B 着黑。也可以看成双旋转：先转一次化归成情况 1(a)，再转一次。</p>
 <p>情况 2：兄弟黑，且兄弟的两个孩子都是黑。</p>
-<figure><img loading="lazy" src="../assets/0314fc9126687660.jpg" alt="图11.23 情况2：双黑的兄弟为黑色且有两个黑孩子"><figcaption>图11.23 情况2：双黑的兄弟为黑色且有两个黑孩子</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-23.png" alt="图11.23 情况2：双黑的兄弟为黑色且有两个黑孩子"><figcaption>图11.23 情况2：双黑的兄弟为黑色且有两个黑孩子</figcaption></figure>
 <p>图 11.23　只换色：兄弟 C 着红、父 B 着黑。B 原来是红的就此结束；原来是黑的，就把 B 当成新的双黑继续往上调整。</p>
 <p>情况 3：兄弟是红色。</p>
-<figure><img loading="lazy" src="../assets/ea0f0114893b0d4b.jpg" alt="图 11.24 情况3：双黑的兄弟结点为红色"><figcaption>图 11.24 情况3：双黑的兄弟结点为红色</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-24.png" alt="图 11.24 情况3：双黑的兄弟结点为红色"><figcaption>图 11.24 情况3：双黑的兄弟结点为红色</figcaption></figure>
 <p>图 11.24　此时父结点必为黑、兄弟的两个孩子必为黑。旋转一次之后 X 仍是双黑，但已经<strong>化归成前两种情况</strong>，继续处理即可。</p>
-<figure><img loading="lazy" src="../assets/96123ad82e555db6.jpg" alt="图11.25 红黑树连续删除 90、70、80 引起的双黑调整示例"><figcaption>图11.25 红黑树连续删除 90、70、80 引起的双黑调整示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-25.png" alt="图11.25 红黑树连续删除 90、70、80 引起的双黑调整示例"><figcaption>图11.25 红黑树连续删除 90、70、80 引起的双黑调整示例</figcaption></figure>
 <p>图 11.25　连续删除 90、70、80 引起的双黑调整全过程。</p>
 <p>图 11.16 到 11.25 只用来比较「二叉、内存结点」与「多路、页结点」两种成本模型：红黑树每步只碰几个结点、适合内存里的有序映射；B+ 树每步碰一整页、适合按页读写的外存索引。</p>
 <p>先跑一遍：</p>
@@ -996,8 +996,20 @@ AND      : 1 0 0 0 1 0</code></pre></div>
 <li>求满足如下条件的序列的最短长度：按照序列顺序插入关键码能生成高度为 3 的 5 阶 <span class="math">B</span> 树。</li>
 <li>假设按如下方法修改从 <span class="math">B</span> 树中删除元素的方式：如果一个结点既有最相邻左兄弟也有最相邻右兄弟， 那么在合并前对两个兄弟都要做检查。从一棵高度为 <span class="math">h</span> 的 <span class="math">B</span> 树中删除元素时需要的最大磁盘访问 次数是多少？</li>
 <li>设有一棵阶 <span class="math">m<span class="rel">=</span><span class="upr">3</span></span> 的 <span class="math">B</span> 树（图 11.26），其中 <span class="math">a,b,⋯,g</span> 是结点的名称、结点内的整数为关键码。 若在图中插入关键码 55，画出插入后 <span class="math">B</span> 树的状况，计算完成该插入所需要的访外次数（假定一次访外 存取一个结点），并具体说明每次访外的功能。</li>
+</ol>
+<figure><img loading="lazy" src="../assets/scan/fig-11-26.png" alt="图 11.26 习题 8 的 3 阶 B 树图示"><figcaption>图 11.26 习题 8 的 3 阶 B 树图示</figcaption></figure>
+<p>图 11.26　习题 8 的 3 阶 <span class="math">B</span> 树图示</p>
+<ol>
 <li><strong>偶数阶的 <span class="math">B</span> 树插入上溢出时，中位数有两个，需要注意采用统一的策略。</strong> 例如取第二个中位数，即 分裂后左 <span class="math">⌈(m<span class="bin">−</span><span class="upr">1</span>)/<span class="upr">2</span>⌉</span> 个关键码、右 <span class="math">⌊(m<span class="bin">−</span><span class="upr">1</span>)/<span class="upr">2</span>⌋</span> 个关键码；或者取第一个中位数， 分裂后左 <span class="math">⌊(m<span class="bin">−</span><span class="upr">1</span>)/<span class="upr">2</span>⌋</span> 个关键码、右 <span class="math">⌈(m<span class="bin">−</span><span class="upr">1</span>)/<span class="upr">2</span>⌉</span> 个关键码。试画出对图 11.27 所示的 4 阶 <span class="math">B</span> 树进行下列操作后的 <span class="math">B</span> 树：(1) 分裂时采用第 2 个中位数为分界码，试画出插入关键码 113 后 的 <span class="math">B</span> 树；(2) 分裂时采用第 1 个中位数为分界码，试画出插入关键码 113 后的 <span class="math">B</span> 树； (3) 在原树中删除关键码 50。</li>
+</ol>
+<figure><img loading="lazy" src="../assets/scan/fig-11-27.png" alt="图 11.27 习题 9 的 4 阶 B 树"><figcaption>图 11.27 习题 9 的 4 阶 B 树</figcaption></figure>
+<p>图 11.27　习题 9 的 4 阶 <span class="math">B</span> 树</p>
+<ol>
 <li>分别画出在如图 11.28 所示的 3 阶 <span class="math">B</span> 树中，进行下列操作后的 <span class="math">B</span> 树：(1) 插入关键码 75； (2) 删除关键码 156。</li>
+</ol>
+<figure><img loading="lazy" src="../assets/scan/fig-11-28.png" alt="图 11.28 习题 10 的 3 阶 B 树"><figcaption>图 11.28 习题 10 的 3 阶 B 树</figcaption></figure>
+<p>图 11.28　习题 10 的 3 阶 <span class="math">B</span> 树</p>
+<ol>
 <li>在 <span class="math">B</span> 树定义中，特性 (2) 的意义是什么？如果把 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 改成 <span class="math">⌈m/<span class="upr">3</span>⌉</span> 或者 <span class="math">⌈<span class="upr">2</span>m/<span class="upr">3</span>⌉</span> 是否可以？所得到的树结构和 <span class="math">B</span> 树有何区别？</li>
 <li><span class="math">B</span> 树中的某个关键码不在叶结点中，试证明它的前驱和后继（自然顺序）必然在叶结点中。</li>
 <li>在含有 <span class="math">n</span> 个关键码的 <span class="math">m</span> 阶 <span class="math">B</span> 树中进行检索时，最多访问多少个结点？</li>
@@ -1009,10 +1021,22 @@ AND      : 1 0 0 0 1 0</code></pre></div>
 <li>已知一组关键码为 <span class="math">(<span class="upr">20</span>,<span class="upr">30</span>,<span class="upr">50</span>,<span class="upr">52</span>,<span class="upr">60</span>,<span class="upr">68</span>,<span class="upr">70</span>)</span>，试依次插入关键码：(1) 生成一棵 3 阶的 <span class="math">B</span> 树， 画出每次插入一个关键码后 <span class="math">B</span> 树的结构，并画出删除 50 和 68 后的 <span class="math">B</span> 树状态；(2) 生成一棵 3 阶的 <span class="math">B<sup><span class="bin">+</span></sup></span> 树，画出每次插入一个关键码后 <span class="math">B<sup><span class="bin">+</span></sup></span> 树的结构，并画出删除 50 和 68 后的 <span class="math">B<sup><span class="bin">+</span></sup></span> 树状态。</li>
 <li>假定一个文件由 15 个记录组成，每个记录的关键码均为整数，分别为 <span class="math"><span class="upr">1</span><sup><span class="upr">2</span></sup>,<span class="upr">2</span><sup><span class="upr">2</span></sup>,<span class="upr">3</span><sup><span class="upr">2</span></sup>,⋯,<span class="upr">15</span><sup><span class="upr">2</span></sup></span>。 每个数据页块存放 3 个记录。要求：(1) 用 <span class="math">B</span> 树组织索引，设 <span class="math">m<span class="rel">=</span><span class="upr">3</span></span>，依次将上述 15 个关键码插入 <span class="math">B</span> 树，画出插入后的 <span class="math">B</span> 树的结构图；(2) 用 <span class="math">B<sup><span class="bin">+</span></sup></span> 树组织索引，设 <span class="math">m<span class="rel">=</span><span class="upr">3</span></span>，依次将上述 15 个记录插入 文件中，画出插入后的整个文件的结构图（包括 <span class="math">B<sup><span class="bin">+</span></sup></span> 树索引）。</li>
 <li>在如图 11.29 所示的 2 阶 <span class="math">B<sup><span class="bin">+</span></sup></span> 树中，删除关键码 35。试讨论删除后应该是 2 层 <span class="math">B</span> 树，还是 3 层 <span class="math">B</span> 树。</li>
+</ol>
+<figure><img loading="lazy" src="../assets/scan/fig-11-29.png" alt="图 11.29 2 阶 B+ 树图示"><figcaption>图 11.29 2 阶 B+ 树图示</figcaption></figure>
+<p>图 11.29　2 阶 <span class="math">B<sup><span class="bin">+</span></sup></span> 树图示</p>
+<ol>
 <li>图 11.30 所示为一棵混合型 <span class="math">B<sup><span class="bin">+</span></sup></span> 树，假定内部结点的阶为 4、叶结点的阶为 3。(1) 画出插入关键码 <code>C</code> 以后的 <span class="math">B<sup><span class="bin">+</span></sup></span> 树；(2) 画出删除关键码 <code>I</code> 以后的 <span class="math">B<sup><span class="bin">+</span></sup></span> 树。</li>
+</ol>
+<figure><img loading="lazy" src="../assets/scan/fig-11-30.png" alt="图 11.30 混合型 B+ 树，内部结点阶为 4、叶结点阶为 3"><figcaption>图 11.30 混合型 B+ 树，内部结点阶为 4、叶结点阶为 3</figcaption></figure>
+<p>图 11.30　混合型 <span class="math">B<sup><span class="bin">+</span></sup></span> 树，内部结点阶为 4、叶结点阶为 3</p>
+<ol>
 <li>下面是顾客记录，格式为「顾客号：(年龄, 月收入)」：1:(25,600) 2:(45,600) 3:(50,750) 4:(50,1000) 5:(50,1200) 6:(70,1100) 7:(85,1400) 8:(30,2600) 9:(25,4000) 10:(45,3500) 11:(50,2750) 12:(60,2600)。(1) 试写出年龄位图索引向量集合；(2) 试写出月收入位图索引向量集合； (3) 找出年龄范围为 20～40 且月收入为 1000～2000 元的顾客。</li>
 <li>考虑一个具有 1000000 个记录的文件，其数据域 <span class="math">F</span> 有 <span class="math">m</span> 个不同值。(1) <span class="math">F</span> 的位图索引有多少个 字节？(2) 假定数据域 <span class="math">F</span> 的每个取值每隔 <span class="math">m</span> 个记录出现一次，试设计一种合适的压缩存储方案， 并计算该压缩索引需要多少个字节？</li>
 <li>对如图 11.31 所示的红黑树，画出下面插入和删除过程的主要变换步骤：(1) 插入结点 19； (2) 删除结点 10。</li>
+</ol>
+<figure><img loading="lazy" src="../assets/scan/fig-11-31.png" alt="图 11.31 红黑树"><figcaption>图 11.31 红黑树</figcaption></figure>
+<p>图 11.31　红黑树</p>
+<ol>
 <li>讨论采用自顶向下的红黑树插入和删除调整方法，并给出插入和删除的实例。</li>
 </ol>
 <h2 id="上机题"><a class="anchor" href="#上机题">#</a>上机题</h2>

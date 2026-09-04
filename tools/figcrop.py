@@ -84,7 +84,8 @@ def crop(pdf: Path, printed_page: int, box, out: Path, dpi=DPI):
 
 
 def book_files():
-    return sorted(BOOK.glob("*.md"))
+    """书稿正文加课件——课件也引用 assets/scan/，漏掉它会把在用的图判成没人用。"""
+    return sorted(BOOK.glob("*.md")) + sorted((BOOK / "slides").glob("*.md"))
 
 
 def used_paths(pattern):
@@ -123,8 +124,42 @@ def cmd_list(data):
     return 0
 
 
+EXERCISE_HEADS = ("## 习题", "## 上机题")
+FIG_MENTION = re.compile(r"(原书)?图\s*(\d+\.\d+)")
+
+
+def dangling_exercise_figures():
+    """习题里点名的图，本章里必须真的有一张图。
+
+    正文可以把原书的插图改排成表格或分步清单——内容没丢，形式变了，这是本项目的常态。
+    **习题不行**：题面写着「对于图 7.26 所示的带权有向图……」而书里根本没有这张图，
+    题目就做不了。所以只对 `## 习题` / `## 上机题` 两节较真，判据是「本章文件里画过它」
+    （题干常引用正文早就画过的图）。留一个出口：写成「原书图 9.2」表示这张图在原书上、
+    题面已把需要的数据抄进正文，不算欠图。
+    """
+    missing = []
+    for path in sorted(BOOK.glob("ch*.md")):
+        chapter = re.match(r"ch(\d+)", path.name).group(1).lstrip("0")
+        lines = path.read_text(encoding="utf-8").split("\n")
+        drawn = {f"图{num}" for line in lines if line.lstrip().startswith("![")
+                 for _, num in FIG_MENTION.findall(line)}
+        section, seen = None, set()
+        for lineno, line in enumerate(lines, 1):
+            if line.startswith("## "):
+                section = line[3:].strip() if line.startswith(EXERCISE_HEADS) else None
+            if section is None or line.lstrip().startswith("!["):
+                continue
+            for prefix, num in FIG_MENTION.findall(line):
+                if prefix or not num.startswith(chapter + "."):
+                    continue
+                if f"图{num}" not in drawn and f"图{num}" not in seen:
+                    seen.add(f"图{num}")
+                    missing.append((path.name, section, f"图{num}", lineno))
+    return missing
+
+
 def cmd_check(data, used=None):
-    """两件事：登记过的图字节没变；书稿引用的图都登记过。
+    """三件事：登记过的图字节没变；书稿引用的图都登记过；习题点名的图确实画在书上。
 
     `used` 只在自测里被替换掉——那时要单独检验「哈希对不对」，
     不该把真实书稿的引用一起拖进来。
@@ -148,6 +183,9 @@ def cmd_check(data, used=None):
     for name in sorted(used):
         if name not in registered:
             problems.append(f"书稿引用了 assets/scan/{name}，但它没有登记出处")
+    for name, section, fig, lineno in dangling_exercise_figures():
+        problems.append(f"{name}:{lineno} 「{section}」点名 {fig}，但这一章里没有这张图"
+                        f"（题目做不了；确实只是提及原书请写成「原书{fig}」）")
     for message in problems:
         print(f"❌ {message}")
     if problems:

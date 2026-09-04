@@ -171,7 +171,7 @@ std::optional<size_type> find(const T& value) const {
 
 # 插入：搬 O(n) 个元素
 
-![图 2.7 插入算法示意图](../assets/995a8257623869d1.jpg)
+![图 2.7 插入算法示意图](../assets/scan/fig-2-7.png)
 
 ```cpp file=code/ch02/array_list/teaching.hpp#fn:insert
 // 在位置 pos 插入，pos 可以等于 size()（追加到表尾）。
@@ -225,7 +225,7 @@ void grow() {
 
 # 删除：插入的镜像
 
-![图 2.8 删除示意图](../assets/8a7435561d286746.jpg)
+![图 2.8 删除示意图](../assets/scan/fig-2-8.png)
 
 ```cpp file=code/ch02/array_list/teaching.hpp#fn:remove
 // 删除 pos 上的元素并返回它。代价同样是 O(n)：后面的元素都要左移一位。
@@ -302,7 +302,7 @@ ArrayList(const ArrayList& other)
 
 # 2.3 链表：换一种存储
 
-![图 2.4 单链表示例](../assets/6e2bc11926f0ec96.jpg)
+![图 2.4 单链表示例](../assets/scan/fig-2-4.png)
 
 - 结点可以**散落**在内存里，靠链接域表示「谁在谁后面」
 - 给定前驱结点后，插入或删除只改**常数条**指针
@@ -312,7 +312,7 @@ ArrayList(const ArrayList& other)
 
 # 头结点：让表头不再是特例
 
-![图 2.6 引人头结点的单链表](../assets/3c36698567f5e7c2.jpg)
+![图 2.6 引人头结点的单链表](../assets/scan/fig-2-6.png)
 
 **头结点是一个不存放数据的哨兵**，永远排在第一个真元素前面。
 
@@ -407,7 +407,7 @@ T remove(size_type pos) {
 
 # 2.3.2 双链表：多一根指针买什么
 
-![图 2.10 双链表的结点](../assets/ebdcb0d7054cf3a9.jpg)
+![图 2.10 双链表的结点](../assets/scan/fig-2-10.png)
 
 多出来的 `prev`（64 位机上 8 字节）只买到一件事，但很值：
 
@@ -420,7 +420,7 @@ T remove(size_type pos) {
 
 # 双链表的删除：两侧都要改
 
-![图2.11 双链表的删除操作示意](../assets/f3aa5f7a9ea65ef6.jpg)
+![图2.11 双链表的删除操作示意](../assets/scan/fig-2-11.png)
 
 ```cpp file=code/ch02/doubly_linked_list/teaching.hpp#fn:erase_node
 // 摘掉一个已知的结点，O(1)。**这是双链表的看家本领**：

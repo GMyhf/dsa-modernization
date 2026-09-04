@@ -35,7 +35,7 @@ subtitle: 数据结构与算法：Python 讲可迁移算法，C++ 讲存储与�
 
 # 8.2 插入排序
 
-![图 8.1 插入排序](../assets/5493e0dcc0da4096.jpg)
+![图 8.1 插入排序](../assets/scan/fig-8-1.png)
 
 ```cpp file=code/ch08/sorting/modern.hpp#insertion
 // 算法8.1：直接插入排序。相等元素不越过彼此，故稳定。
@@ -80,7 +80,7 @@ inline void insertion_sort(std::vector<int>& values) {
 
 # 8.2.2 Shell 排序
 
-![图 8.2 Shell 排序](../assets/9d5229db93db8c45.jpg)
+![图 8.2 Shell 排序](../assets/scan/fig-8-2.png)
 
 先按**大增量**分组做插入排序，再逐步缩小增量，最后增量为 1。
 
@@ -112,7 +112,7 @@ i=2    12 29 32 45 34' 78 34 64
 
 # 8.3.2 堆排序
 
-![图 8.4 堆排序](../assets/7f0370f58c7602be.jpg)
+![图 8.4 堆排序](../assets/scan/fig-8-4.png)
 
 ```cpp file=code/ch08/sorting/modern.hpp#heap
 // 算法8.4：手写最大堆筛选与堆排序，不委托 std::make_heap/sort_heap。
@@ -171,7 +171,7 @@ inline void heap_sort(std::vector<int>& values) {
 
 # 8.4.2 快速排序
 
-![图 8.6 快速排序图示](../assets/8585d3b42b280664.jpg)
+![图 8.6 快速排序图示](../assets/scan/fig-8-6.png)
 
 选一个**轴值**，把序列分成「小于它的」和「大于它的」两段，再各自递归。
 
@@ -232,7 +232,7 @@ boundary 左边全是小于轴值的，扫一遍把小的换过去，最后把�
 
 # 8.5 归并排序
 
-![图 8.8 归并排序](../assets/3599737381e2502e.jpg)
+![图 8.8 归并排序](../assets/scan/fig-8-8.png)
 
 ```cpp file=code/ch08/sorting/modern.hpp#merge
 inline void merge_ranges(std::vector<int>& values, std::vector<int>& buffer,
@@ -309,7 +309,7 @@ inline void merge_sort(std::vector<int>& values) {
 
 # 8.6.2 基数排序
 
-![图 8.10 基数排序](../assets/916c1027b215b0e1.jpg)
+![图 8.10 基数排序](../assets/scan/fig-8-10.png)
 
 ```cpp file=code/ch08/sorting/modern.hpp#radix
 // 算法8.11：LSD 基数排序。翻转符号位使二补码有符号 int 按无符号序排序。
@@ -396,7 +396,7 @@ d 位、每位 r 个值时是 O(d(n + r))。
 
 # 8.7.3 比较排序的下限
 
-![图 8.14 用判定树模拟基于比较的排序](../assets/2f6a20c1eb3f2d13.jpg)
+![图 8.14 用判定树模拟基于比较的排序](../assets/scan/fig-8-14.png)
 
 $n$ 个互异元素有 $n!$ 种排列；一次二元比较最多把候选情况分成两半。
 

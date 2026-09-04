@@ -84,11 +84,48 @@ class TestBookReferences(unittest.TestCase):
         registered = {f["file"] for f in figcrop.load_registry()["figures"]}
         self.assertEqual(used - registered, set(), "书稿引用了没有登记出处的裁图")
 
+    def test_exercises_do_not_reference_missing_figures(self):
+        """习题点名的图必须真的画在书上——否则题目做不了。"""
+        self.assertEqual(figcrop.dangling_exercise_figures(), [])
+
     def test_registry_covers_the_book(self):
         """反向：登记了却没人引用的裁图，说明书稿改动时漏掉了它。"""
         used = set(figcrop.used_paths(figcrop.SCAN_RE))
         registered = {f["file"] for f in figcrop.load_registry()["figures"]}
         self.assertEqual(registered - used, set(), "有裁图登记了但书稿没用")
+
+
+class TestDanglingExerciseFigures(unittest.TestCase):
+    """判据本身：题面点名一张书里没有的图，必须被抓出来；写成「原书图」则放过。"""
+
+    def run_on(self, body):
+        with tempfile.TemporaryDirectory() as tmp:
+            book = Path(tmp)
+            (book / "ch07-graph.md").write_text(body, encoding="utf-8")
+            original = figcrop.BOOK
+            figcrop.BOOK = book
+            try:
+                return figcrop.dangling_exercise_figures()
+            finally:
+                figcrop.BOOK = original
+
+    def test_missing_figure_in_exercise_is_caught(self):
+        found = self.run_on("## 习题\n\n1. 对于图 7.26 所示的带权有向图，写出其相邻矩阵。\n")
+        self.assertEqual([f[2] for f in found], ["图7.26"])
+
+    def test_figure_drawn_anywhere_in_the_chapter_counts(self):
+        body = ("## 7.3 图的存储结构\n\n![图 7.26 图例](assets/scan/fig-7-26.png)\n\n"
+                "## 习题\n\n1. 对于图 7.26 所示的带权有向图，写出其相邻矩阵。\n")
+        self.assertEqual(self.run_on(body), [])
+
+    def test_original_book_reference_is_the_escape_hatch(self):
+        found = self.run_on("## 上机题\n\n1. 用原书图 9.2 的输入做守门测试。\n")
+        self.assertEqual(found, [])
+
+    def test_body_sections_are_not_policed(self):
+        """正文可以把插图改排成表格，这是本项目的常态，不该红。"""
+        found = self.run_on("## 7.3 图的存储结构\n\n图 7.10 的相邻矩阵改排成了表格。\n")
+        self.assertEqual(found, [])
 
 
 if __name__ == "__main__":

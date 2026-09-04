@@ -135,7 +135,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <p>前缀相同时，较短者更小。比较前必须约定编码与规范化方式。</p>
 <p><strong>C++ 陷阱</strong>：两边都是字符串字面量时，<code>&lt;</code> 比的是数组地址； 至少一边先转成 <code>std::string</code>，才是内容比较。</p></section><section class="slide" data-notes=""><h1 id="42-变长存储这一节的正题"><a class="anchor" href="#42-变长存储这一节的正题">#</a>4.2 变长存储：这一节的正题</h1>
 <p>字符串长度会变。所以要<strong>动态分配、按新长度重新开辟、拷贝、释放</strong>。</p>
-<figure><img loading="lazy" src="../../assets/17558c608a970971.jpg" alt="图4.3 创建字符串的示意图"><figcaption>图4.3 创建字符串的示意图</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-4-3.png" alt="图4.3 创建字符串的示意图"><figcaption>图4.3 创建字符串的示意图</figcaption></figure>
 <p>所以这里是手写的 <code>char*</code> 缓冲区，<strong>不是</strong> <code>std::string</code>—— 换成 <code>std::string</code>，这一节就没了。</p></section><section class="slide" data-notes="&lt;p&gt;两处要讲：
 
 1. 空串仍然申请 1 个字节放 &amp;#x27;\0&amp;#x27;——这样 c_str() 永远返回合法的 C 字符串，
@@ -244,7 +244,7 @@ std::optional&lt;size_type&gt; find(<span class="t">char</span> c, size_type sta
 }</code></pre></div>
 <p>原书用 <code>-1</code> 表示没找到——<strong>与「位置 0」只差一个符号</strong>， 调用方漏判就会把「没找到」当成「匹配在开头」。</p></section><section class="slide" data-notes=""><h1 id="43-模式匹配"><a class="anchor" href="#43-模式匹配">#</a>4.3 模式匹配</h1>
 <p>在正文 T 里找模式 P 第一次出现的位置。</p>
-<figure><img loading="lazy" src="../../assets/a01806ddff22b2f2.jpg" alt="图 4.6 朴素匹配的示例"><figcaption>图 4.6 朴素匹配的示例</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-4-6.png" alt="图 4.6 朴素匹配的示例"><figcaption>图 4.6 朴素匹配的示例</figcaption></figure>
 <p><strong>朴素做法</strong>：把 P 对齐到 T 的每个位置试一遍， 失配就把 P 整体右移一位，从头再比。</p></section><section class="slide" data-notes=""><h1 id="朴素匹配手动走一遍"><a class="anchor" href="#朴素匹配手动走一遍">#</a>朴素匹配：手动走一遍</h1>
 <div class="codeblock" data-lang="text"><pre><code>文本 T   a b a b c
 模式 P   a b c
@@ -292,7 +292,7 @@ next  -1  0  0  1  2</code></pre></div>
 <li><code>next[4] = 2</code>：<code>P[0..3] = &quot;abab&quot;</code>，前缀 ab 和后缀 ab 相同</li>
 </ul>
 <p><strong>代价 <span class="math">O(m)</span></strong>：i 只增不减，k 每次至多增 1， 所以总回退次数不超过总前进次数。</p></section><section class="slide" data-notes=""><h1 id="kmp失配时模式退文本不退"><a class="anchor" href="#kmp失配时模式退文本不退">#</a>KMP：失配时模式退，文本不退</h1>
-<figure><img loading="lazy" src="../../assets/4f9aa9617b2ddc56.jpg" alt="图 4.12 KMP 匹配示例"><figcaption>图 4.12 KMP 匹配示例</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-4-12.png" alt="图 4.12 KMP 匹配示例"><figcaption>图 4.12 KMP 匹配示例</figcaption></figure>
 <p>失配在模式的第 j 位时：</p>
 <div class="codeblock" data-lang="text"><pre><code>朴素   j = 0        文本指针 i 退回到本次对齐的下一位
 KMP    j = next[j]  文本指针 i 一步都不退</code></pre></div>

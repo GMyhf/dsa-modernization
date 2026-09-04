@@ -101,10 +101,10 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <p>一条主线：<strong>递归的结构，用递归的算法</strong>。</p></section><section class="slide" data-notes="&lt;p&gt;强调「分左右」：只有一个孩子时，它是左孩子还是右孩子是&lt;strong&gt;不同的树&lt;/strong&gt;。
 这与第 6 章的一般树不同，那里孩子之间没有左右之分（只有次序）。&lt;/p&gt;"><h1 id="51-定义与五种基本形态"><a class="anchor" href="#51-定义与五种基本形态">#</a>5.1 定义与五种基本形态</h1>
 <p>二叉树由结点的有限集合构成：<strong>或者为空</strong>， 或者由一个根结点和两棵<strong>不相交</strong>的左、右子树组成。</p>
-<figure><img loading="lazy" src="../../assets/e09b495998554e01.jpg" alt="图 5.1 二叉树的 5 种基本形态"><figcaption>图 5.1 二叉树的 5 种基本形态</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-5-1.png" alt="图 5.1 二叉树的 5 种基本形态"><figcaption>图 5.1 二叉树的 5 种基本形态</figcaption></figure>
 <p>这是一个<strong>递归定义</strong>——后面几乎所有算法都直接照着它写。</p></section><section class="slide" data-notes="&lt;p&gt;先留个悬念：完全二叉树可以按层次次序压进一个&lt;strong&gt;数组&lt;/strong&gt;，父子关系变成下标算术，
 一根指针都不用。这就是 5.5 节堆的基础。&lt;/p&gt;"><h1 id="满二叉树与完全二叉树"><a class="anchor" href="#满二叉树与完全二叉树">#</a>满二叉树与完全二叉树</h1>
-<figure><img loading="lazy" src="../../assets/ea5eff3e545173dc.jpg" alt="图5.2 满二叉树和完全二叉树示例"><figcaption>图5.2 满二叉树和完全二叉树示例</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-5-2.png" alt="图5.2 满二叉树和完全二叉树示例"><figcaption>图5.2 满二叉树和完全二叉树示例</figcaption></figure>
 <ul>
 <li><strong>满二叉树</strong>：每个结点的度非 0 即 2（没有只有一个孩子的结点）</li>
 <li><strong>完全二叉树</strong>：除最下两层外每层排满，最下层结点集中在<strong>左边连续</strong>位置</li>
@@ -138,7 +138,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <td style="text-align:left"><strong>后序</strong>(postorder)</td>
 </tr>
 </tbody></table></div>
-<figure><img loading="lazy" src="../../assets/7c6579b015042738.jpg" alt="图 5.5 二叉树示例"><figcaption>图 5.5 二叉树示例</figcaption></figure></section><section class="slide" data-notes=""><h1 id="三种周游的代码只差一行"><a class="anchor" href="#三种周游的代码只差一行">#</a>三种周游的代码只差一行</h1>
+<figure><img loading="lazy" src="../../assets/scan/fig-5-5.png" alt="图 5.5 二叉树示例"><figcaption>图 5.5 二叉树示例</figcaption></figure></section><section class="slide" data-notes=""><h1 id="三种周游的代码只差一行"><a class="anchor" href="#三种周游的代码只差一行">#</a>三种周游的代码只差一行</h1>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/teaching.hpp">code/ch05/binary_tree/teaching.hpp#fn:BinaryTree::preorder_impl</a></div><pre><code><span class="k">template</span> &lt;<span class="k">typename</span> Visitor&gt;
 <span class="k">static</span> <span class="t">void</span> preorder_impl(<span class="k">const</span> Node* node, Visitor&amp; visit) {
     <span class="k">if</span> (node == <span class="k">nullptr</span>) <span class="k">return</span>;
@@ -163,7 +163,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
     它的右孩子入队</code></pre></div>
 <p>对图 5.5 那棵树，得到的次序是<strong>逐层从左到右</strong>。</p>
 <p>完整实现在 <code>code/ch05/binary_tree/teaching.hpp</code> 的 <code>level_order</code>—— 里面那条极简链式队列是现写的，因为第 3 章讲过了。</p></section><section class="slide" data-notes=""><h1 id="表达式树周游的一个用途"><a class="anchor" href="#表达式树周游的一个用途">#</a>表达式树：周游的一个用途</h1>
-<figure><img loading="lazy" src="../../assets/b3d4ed61cc80d7d7.jpg" alt="图 5.6 表达式树"><figcaption>图 5.6 表达式树</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-5-6.png" alt="图 5.6 表达式树"><figcaption>图 5.6 表达式树</figcaption></figure>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">周游</th>
 <th style="text-align:left">得到</th>
@@ -184,7 +184,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <p>第 3 章那个后缀求值器，吃的就是这棵树后序周游的结果。</p></section><section class="slide" data-notes="&lt;p&gt;create_tree 里那两句置空是考点：两棵子树的所有权&lt;strong&gt;转移&lt;/strong&gt;给新树，
 传进来的那两棵随即变空。不置空的话同一批结点会被两棵树各删一次，
 ASan 当场报 double-free。教学版测试专门守着这一条。&lt;/p&gt;"><h1 id="53-存储结构二叉链表"><a class="anchor" href="#53-存储结构二叉链表">#</a>5.3 存储结构：二叉链表</h1>
-<figure><img loading="lazy" src="../../assets/12374c97891a830a.jpg" alt="图 5.7 二叉树结点的存储结构"><figcaption>图 5.7 二叉树结点的存储结构</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-5-7.png" alt="图 5.7 二叉树结点的存储结构"><figcaption>图 5.7 二叉树结点的存储结构</figcaption></figure>
 <p>一个数据域、两根链接。没有孩子就是 <code>nullptr</code>—— 比原书用一个「空结点」表示要省事得多。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/teaching.hpp">code/ch05/binary_tree/teaching.hpp#fn:create_tree</a></div><pre><code><span class="c">// 造一棵新树：一个根，接上左右两棵子树。</span>
 <span class="c">// 两棵子树的所有权**转移**给新树——传进来的那两棵随即变空，</span>
@@ -217,13 +217,13 @@ ASan 当场报 double-free。教学版测试专门守着这一条。&lt;/p&gt;">
     <span class="k">delete</span> node;
 }</code></pre></div>
 <p><strong>先删两个孩子，再删自己。</strong> 反过来先 <code>delete node</code>， <code>node-&gt;left</code> 就成了读已释放的内存。</p></section><section class="slide" data-notes=""><h1 id="53-另一种存法完全二叉树进数组"><a class="anchor" href="#53-另一种存法完全二叉树进数组">#</a>5.3 另一种存法：完全二叉树进数组</h1>
-<figure><img loading="lazy" src="../../assets/80797628fa510b2c.jpg" alt="图 5.9 完全二叉树的结点编号"><figcaption>图 5.9 完全二叉树的结点编号</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-5-9.png" alt="图 5.9 完全二叉树的结点编号"><figcaption>图 5.9 完全二叉树的结点编号</figcaption></figure>
 <p>按层次次序编号后，父子关系变成<strong>下标算术</strong>：</p>
 <div class="codeblock" data-lang="text"><pre><code>下标 i 的左孩子   2i + 1
 下标 i 的右孩子   2i + 2
 下标 i 的父亲     (i - 1) / 2      (i &gt; 0)</code></pre></div>
 <p><strong>一根指针都不用。</strong> 但只对完全二叉树成立—— 非完全二叉树这么存会留下大量空洞。</p></section><section class="slide" data-notes=""><h1 id="54-二叉搜索树"><a class="anchor" href="#54-二叉搜索树">#</a>5.4 二叉搜索树</h1>
-<figure><img loading="lazy" src="../../assets/c399e3356dac937f.jpg" alt="图 5.11 二叉搜索树"><figcaption>图 5.11 二叉搜索树</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-5-11.png" alt="图 5.11 二叉搜索树"><figcaption>图 5.11 二叉搜索树</figcaption></figure>
 <p>约束只有一条：<strong>左子树的键都小于根，右子树的都大于根</strong>。</p>
 <p>有了它，查找不必遍历全树——每比较一次就砍掉一半（前提是树平衡）。</p>
 <p><strong>中序周游一棵 BST，得到的正是升序</strong>——这是「左小右大」的直接推论。</p></section><section class="slide" data-notes="&lt;p&gt;这个手法在 C 系语言里很经典，值得单独讲两分钟。
@@ -248,7 +248,7 @@ ASan 当场报 double-free。教学版测试专门守着这一条。&lt;/p&gt;">
 }</code></pre></div>
 <p><code>Node** link</code> 指向「新结点该挂在哪根指针上」， 于是「挂到根」和「挂到某个孩子」写成<strong>同一句</strong> <code>*link = new Node{...}</code>。</p>
 <p>空树不必另开一个分支。</p></section><section class="slide" data-notes=""><h1 id="删除难点只有一个"><a class="anchor" href="#删除难点只有一个">#</a>删除：难点只有一个</h1>
-<figure><img loading="lazy" src="../../assets/6656b628984f36ef.jpg" alt="图 5.13 改进的二叉搜索树的删除"><figcaption>图 5.13 改进的二叉搜索树的删除</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-5-13.png" alt="图 5.13 改进的二叉搜索树的删除"><figcaption>图 5.13 改进的二叉搜索树的删除</figcaption></figure>
 <p>被删结点有<strong>两个孩子</strong>时，谁来顶替？</p>
 <p><strong>中序前驱</strong>——左子树里最大的那个。它比左子树其余的都大、 比右子树全部都小，顶上来之后「左小右大」仍然成立。</p></section><section class="slide" data-notes="&lt;p&gt;这一条我第一版的测试没盖到：前一步已经把 20 删了，
 被删的 30 反而落进「无左孩子」分支，根本没走到这一路。
@@ -261,13 +261,13 @@ ASan 当场报 double-free。教学版测试专门守着这一条。&lt;/p&gt;">
 顶替之前必须先把 42 接走:
     *predecessor_link = replacement-&gt;left;</code></pre></div>
 <p>漏了这一句，40 的右链仍指向 45，而 45 已经成了根——<strong>树上出现环</strong>。 中序周游立刻无限递归，ASan 报栈溢出。</p></section><section class="slide" data-notes=""><h1 id="55-堆完全二叉树-数组"><a class="anchor" href="#55-堆完全二叉树-数组">#</a>5.5 堆：完全二叉树 + 数组</h1>
-<figure><img loading="lazy" src="../../assets/28d7f967e0c2ebfa.jpg" alt="图 5.14 最小堆对应的完全二叉树"><figcaption>图 5.14 最小堆对应的完全二叉树</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-5-14.png" alt="图 5.14 最小堆对应的完全二叉树"><figcaption>图 5.14 最小堆对应的完全二叉树</figcaption></figure>
 <ul>
 <li>是一棵<strong>完全二叉树</strong></li>
 <li>每个结点都<strong>不大于</strong>它的孩子（最小堆）</li>
 </ul>
 <p>因为完全，可以压进数组；因为堆序，根就是最小值。 <strong>堆序只管父子，不管兄弟</strong>——这是它比 BST 弱、也比 BST 便宜的地方。</p></section><section class="slide" data-notes=""><h1 id="插入放末尾然后上浮"><a class="anchor" href="#插入放末尾然后上浮">#</a>插入：放末尾，然后上浮</h1>
-<figure><img loading="lazy" src="../../assets/7f6bb0c3af53cc2a.jpg" alt="图 5.15 在最小堆 5.14 中插入元素 13"><figcaption>图 5.15 在最小堆 5.14 中插入元素 13</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-5-15.png" alt="图 5.15 在最小堆 5.14 中插入元素 13"><figcaption>图 5.15 在最小堆 5.14 中插入元素 13</figcaption></figure>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/heap_huffman/teaching.hpp">code/ch05/heap_huffman/teaching.hpp#fn:sift_up</a></div><pre><code><span class="c">// 上浮：只要比父亲小就换上去。</span>
 <span class="t">void</span> sift_up(size_type index) {
     <span class="k">while</span> (index &gt; <span class="n">0</span>) {
@@ -283,7 +283,7 @@ ASan 当场报 double-free。教学版测试专门守着这一条。&lt;/p&gt;">
 }</code></pre></div>
 <p>只要比父亲小就换上去。树高 <span class="math"><span class="upr">log</span>&thinsp;n</span>，所以代价 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>。</p></section><section class="slide" data-notes="&lt;p&gt;为什么搬&lt;strong&gt;最后一个&lt;/strong&gt;上来？因为只有拿掉最后一个位置，
 剩下的才仍然是一棵完全二叉树。这是「完全」这个条件在还债。&lt;/p&gt;"><h1 id="删除最小搬最后一个上来然后下沉"><a class="anchor" href="#删除最小搬最后一个上来然后下沉">#</a>删除最小：搬最后一个上来，然后下沉</h1>
-<figure><img loading="lazy" src="../../assets/ba38e1004230ab69.jpg" alt="图 5.16 在最小堆 5.14 中删除元素 14"><figcaption>图 5.16 在最小堆 5.14 中删除元素 14</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-5-16.png" alt="图 5.16 在最小堆 5.14 中删除元素 14"><figcaption>图 5.16 在最小堆 5.14 中删除元素 14</figcaption></figure>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/heap_huffman/teaching.hpp">code/ch05/heap_huffman/teaching.hpp#fn:sift_down</a></div><pre><code><span class="c">// 下沉：和两个孩子里较小的那个比，比它大就换下去。</span>
 <span class="c">// **必须和较小的那个换**——跟较大的换会破坏「父亲不大于两个孩子」。</span>
 <span class="t">void</span> sift_down(size_type index) {
@@ -307,7 +307,7 @@ ASan 当场报 double-free。教学版测试专门守着这一条。&lt;/p&gt;">
     }
 }</code></pre></div>
 <p><strong>必须和两个孩子里较小的那个交换</strong>——跟较大的换会破坏堆序。</p></section><section class="slide" data-notes=""><h1 id="建堆为什么是-on"><a class="anchor" href="#建堆为什么是-on">#</a>建堆为什么是 O(n)</h1>
-<figure><img loading="lazy" src="../../assets/d7354d550a2f5d79.jpg" alt="图 5.17 建堆过程示例"><figcaption>图 5.17 建堆过程示例</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-5-17.png" alt="图 5.17 建堆过程示例"><figcaption>图 5.17 建堆过程示例</figcaption></figure>
 <p>粗算：<span class="math">n/<span class="upr">2</span></span> 次 <code>sift_down</code> <span class="math"><span class="bin">×</span> O(<span class="upr">log</span>&thinsp;n)<span class="rel">=</span>O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>。<strong>原书说这只是粗略上界。</strong></p>
 <p>细算的关键：<strong>下沉距离不是 <span class="math"><span class="upr">log</span>&thinsp;n</span>，是「离底层还有多远」</strong>。 越靠底层的结点越多，能沉的距离越短——两者正好抵消。</p></section><section class="slide" data-notes="&lt;p&gt;实际后果：第 8 章堆排序总代价 O(n log n)，那个 log n 全部来自后面 n 次取最小值，
 建堆那一步是白送的。

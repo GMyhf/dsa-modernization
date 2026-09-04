@@ -24,7 +24,7 @@ subtitle: 数据结构与算法：Python 讲可迁移算法，C++ 讲存储与�
 
 # 6.1.1 树与森林
 
-![图 6.1 树形表示法](../assets/42cd7ad7ac4d0fbe.jpg)
+![图 6.1 树形表示法](../assets/scan/fig-6-1.png)
 
 - **树**：n 个结点的有限集合，有一个根，其余分成互不相交的子树
 - **森林**：m 棵互不相交的树的集合
@@ -154,7 +154,7 @@ static void post(Node* node, Visitor& visitor) {
 
 # 子结点表：为什么不够用
 
-![图6.6 以「子结点表」表示法实现图6.1中的树](../assets/503a0fd264bb9231.jpg)
+![图6.6 以「子结点表」表示法实现图6.1中的树](../assets/scan/fig-6-6.png)
 
 每个结点挂一条孩子链表。找孩子很快。
 
@@ -237,7 +237,7 @@ void delete_subtree(Node* node) {
 
 # 6.2.5 父指针表示法
 
-![图 6.10 父指针表示法](../assets/444a429faef0f9ad.jpg)
+![图 6.10 父指针表示法](../assets/scan/fig-6-10.png)
 
 每个结点只存**一根指向父亲的指针**。
 
@@ -265,7 +265,7 @@ void delete_subtree(Node* node) {
 2. `find` 找到元素所在集合的代表根；
 3. 两个根不同就 `union`，把两个集合归并。
 
-![图 6.11 集合的表示方法](../assets/99d1200487f038c2.jpg)
+![图 6.11 集合的表示方法](../assets/scan/fig-6-11.png)
 
 给一堆等价对 (A,B)、(C,K)、…，要能回答「x 和 y 同类吗」。
 
@@ -278,7 +278,7 @@ void delete_subtree(Node* node) {
 
 # 朴素做法会退化成一条链
 
-![图 6.12 合并操作的一个极端情况](../assets/63aeef5dd1c932ae.jpg)
+![图 6.12 合并操作的一个极端情况](../assets/scan/fig-6-12.png)
 
 每次都把 B 挂到 A 下面，n 次合并之后树高 n，
 `find` 退化成 **O(n)**。
@@ -324,7 +324,7 @@ bool unite(std::size_t left, std::size_t right) {
 
 # 改进二：路径压缩
 
-![图 6.13 路径压缩示例](../assets/79da0aca1750084c.jpg)
+![图 6.13 路径压缩示例](../assets/scan/fig-6-13.png)
 
 ```cpp file=code/ch06/general_tree/modern.hpp#fn:find
 std::size_t find(std::size_t index) {
@@ -365,7 +365,7 @@ $\alpha$ 是反 Ackermann 函数，实际中不超过 5。
 
 这是经典顺序编码，今天主要用于理解树的序列化；工程中的紧凑树通常会考虑 LOUDS 或平衡括号编码。
 
-![图6.14 带右链的先根次序表示法](../assets/ddf4082b075a6a12.jpg)
+![图6.14 带右链的先根次序表示法](../assets/scan/fig-6-14.png)
 
 ```text
 先根次序   A  B  C  E  F  D  G  H  J  I
@@ -403,7 +403,7 @@ rtag       0  1  0  1  1  1  0  0  1  1     0 = 有下一个兄弟
 
 # 6.4 K 叉树
 
-![图 6.18 满 3 叉树与完全 3 叉树](../assets/70c77f3dc176052a.jpg)
+![图 6.18 满 3 叉树与完全 3 叉树](../assets/scan/fig-6-18.png)
 
 二叉树的自然推广：每个结点最多 K 个孩子，**而且孩子的位置有区分**。
 

@@ -36,7 +36,7 @@ subtitle: 数据结构与算法：Python 讲可迁移算法，C++ 讲存储与�
 
 # 10.1.2 二分检索
 
-![图 10.1 二分检索 K = 18 的过程](../assets/0792c8837fab4a44.jpg)
+![图 10.1 二分检索 K = 18 的过程](../assets/scan/fig-10-1.png)
 
 **要求已排好序**，每比较一次砍掉一半，$O(\log n)$。
 
@@ -107,7 +107,7 @@ inline std::optional<std::size_t> binary_search(const std::vector<int>& sorted_v
 
 # 决策树：二分为什么是 $\log n$
 
-![图10.2 二分检索的决策树](../assets/5f0f882d1e9ec27f.jpg)
+![图10.2 二分检索的决策树](../assets/scan/fig-10-2.png)
 
 每次比较对应树上下降一层，树高就是最坏比较次数。
 
@@ -118,7 +118,7 @@ n 个元素的判定树高度是 $\lceil\log_2(n+1)\rceil$——
 
 # 10.1.3 分块检索
 
-![图 10.3 分块检索的存储表示](../assets/980c030f1f50d7f9.jpg)
+![图 10.3 分块检索的存储表示](../assets/scan/fig-10-3.png)
 
 把 n 个元素分成 b 块：**块间有序，块内可以无序**。
 另造一张块索引记下每块的最大关键码。
@@ -240,7 +240,7 @@ inline std::size_t elf_hash(const std::string& text) {
 
 “开散列”是**经典教材术语**，现代资料通常称 **separate chaining（分离链接）**；“开”指冲突元素放到槽外的链或桶中。
 
-![图 10.7 开散列方法的图示](../assets/70ba08a893dc9d64.jpg)
+![图 10.7 开散列方法的图示](../assets/scan/fig-10-7.png)
 
 冲突的元素挂成一条链。
 
