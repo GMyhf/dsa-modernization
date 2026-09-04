@@ -1049,9 +1049,9 @@ class TestR14ExerciseAnswers(unittest.TestCase):
         2026-08-19：136 → 137。第 5 章补回原书上机题第 2 题「表达式二叉树」（新书第 5 题），
         附录同步加了同号答案。数字变了必须来这里改一次——这就是这条锚的用处。
 
-        2026-09-04：137 → 256。按扫描件回填原书章末题目（先补题面、答案登记为欠着）：
-        第 2 章上机题 +2，第 5～9 章各新增「原书习题」与「原书上机题」两组
-        （22+5、13+4、26+2、33+4、6+2 道）。
+        2026-09-04：137 → 345。按扫描件回填原书章末题目（先补题面、答案登记为欠着）：
+        第 2 章上机题 +2，第 5～12 章各新增「原书习题」与「原书上机题」两组
+        （22+5、13+4、26+2、33+4、6+2、19+5、26+5、18+16 道）。
         """
         gaps, problems = check_doc.load_answer_gaps()
         self.assertEqual(problems, [])
@@ -1059,7 +1059,7 @@ class TestR14ExerciseAnswers(unittest.TestCase):
             sorted(check_doc.BOOK.glob("ch*.md")), gaps)
         self.assertEqual(found, [])
         answered = sum(check_doc.answered_exercises().values())
-        self.assertEqual(answered + len(gaps), 256, "正文题总数变了就要重新盘一遍")
+        self.assertEqual(answered + len(gaps), 345, "正文题总数变了就要重新盘一遍")
 
 
 class TestR9Formulas(unittest.TestCase):
