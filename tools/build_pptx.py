@@ -102,7 +102,7 @@ MACROS = {
     "min": "min", "bmod": " mod ", "mod": " mod ", "deg": "deg", "gcd": "gcd",
     "quad": "  ", "qquad": "    ", ",": " ", ";": " ", "!": "", " ": " ",
     "left": "", "right": "", "cong": "≅", "sim": "∼", "propto": "∝",
-    "land": "∧", "lor": "∨", "lnot": "¬", "oplus": "⊕",
+    "land": "∧", "lor": "∨", "lnot": "¬", "oplus": "⊕", "ll": "≪",
     "leftrightarrow": "↔", "mapsto": "↦", "ast": "*", "star": "⋆",
     # 转义出来的普通字符：`\{` 在 TeX 里就是一个花括号。
     "{": "{", "}": "}", "%": "%", "&": "&", "#": "#", "$": "$", "_": "_",
@@ -136,7 +136,7 @@ def _group(tex, index):
 
 
 # 关系与二元运算符两侧该有空隙，这是 TeX 的排版规则；直接拼字符会挤成「a≤b」。
-RELATIONS = "＝=≤≥≠≈≡∈∉⊆⊂∪∩→←⇒↔↦∼∝≅⊕±×·∧∨"
+RELATIONS = "＝=≤≥≠≈≡∈∉⊆⊂∪∩→←⇒↔↦∼∝≅⊕±×·∧∨≪"
 _SPACED = re.compile(f"\\s*([{RELATIONS}])\\s*")
 
 

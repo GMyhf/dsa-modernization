@@ -225,6 +225,10 @@ k 路归并时，每输出一个记录都要在 k 个候选里挑最小的。
 
 ![图 9.6 图 9.5 重构后的 8 路归并赢者树](../assets/scan/fig-9-6.png)
 
+---
+
+# 赢者树的重构
+
 ```cpp file=code/ch09/external_sort/modern.hpp#fn:replace
 void replace(std::size_t player, int value) {
     if (player >= players_.size()) {
@@ -282,6 +286,10 @@ void replace(std::size_t player, int value) {
 # 败者树：省掉「看兄弟」
 
 ![图9.7 8路归并的败者树示例](../assets/scan/fig-9-7.png)
+
+---
+
+# 败者树：省掉「看兄弟」
 
 内部结点记的是**输家**，赢家继续往上比。
 

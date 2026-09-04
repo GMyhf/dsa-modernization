@@ -277,10 +277,10 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <li>叶子是 k 个候选（各归并段的当前记录）</li>
 <li>每个内部结点记<strong>两个孩子里的赢家</strong>（较小者）</li>
 <li>根就是全局最小</li>
-</ul></section><section class="slide" data-notes="&lt;p&gt;换掉一片叶子后，沿着它到根的路径逐层重赛。
+</ul></section><section class="slide" data-notes=""><h1 id="赢者树的重构"><a class="anchor" href="#赢者树的重构">#</a>赢者树的重构</h1>
+<figure><img loading="lazy" src="../../assets/scan/fig-9-6.png" alt="图 9.6 图 9.5 重构后的 8 路归并赢者树"><figcaption>图 9.6 图 9.5 重构后的 8 路归并赢者树</figcaption></figure></section><section class="slide" data-notes="&lt;p&gt;换掉一片叶子后，沿着它到根的路径逐层重赛。
 每层要看&lt;strong&gt;兄弟&lt;/strong&gt;是谁——所以赢者树重构时要访问兄弟结点。
 下一页的败者树就是为了省掉这一步。&lt;/p&gt;"><h1 id="赢者树的重构"><a class="anchor" href="#赢者树的重构">#</a>赢者树的重构</h1>
-<figure><img loading="lazy" src="../../assets/scan/fig-9-6.png" alt="图 9.6 图 9.5 重构后的 8 路归并赢者树"><figcaption>图 9.6 图 9.5 重构后的 8 路归并赢者树</figcaption></figure>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch09/external_sort/modern.hpp">code/ch09/external_sort/modern.hpp#fn:replace</a></div><pre><code><span class="t">void</span> replace(std::<span class="t">size_t</span> player, <span class="t">int</span> value) {
     <span class="k">if</span> (player &gt;= players_.size()) {
         <span class="k">throw</span> std::out_of_range(<span class="s">&quot;tournament player&quot;</span>);
@@ -313,12 +313,12 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 重赛: 只重算“第 2 路叶子 → 根”的两场
 结果: 新冠军为 4</code></pre></div>
 <p>建树 <span class="math">O(k)</span>；每输出一条只更新一条高为 <span class="math"><span class="upr">log</span>&thinsp;k</span> 的路径。</p>
-<p>线性扫描要每次检查全部 <span class="math">k</span> 路，选择树只做 <span class="math">O(<span class="upr">log</span>&thinsp;k)</span> 次比较。</p></section><section class="slide" data-notes="&lt;p&gt;两种树的信息量是等价的，只是把「谁输了」记在哪里不同。
+<p>线性扫描要每次检查全部 <span class="math">k</span> 路，选择树只做 <span class="math">O(<span class="upr">log</span>&thinsp;k)</span> 次比较。</p></section><section class="slide" data-notes=""><h1 id="败者树省掉看兄弟"><a class="anchor" href="#败者树省掉看兄弟">#</a>败者树：省掉「看兄弟」</h1>
+<figure><img loading="lazy" src="../../assets/scan/fig-9-7.png" alt="图9.7 8路归并的败者树示例"><figcaption>图9.7 8路归并的败者树示例</figcaption></figure></section><section class="slide" data-notes="&lt;p&gt;两种树的信息量是等价的，只是把「谁输了」记在哪里不同。
 败者树多一个「冠军」槽（下标 0）存全局赢家。
 
 这是本章最容易讲糊的地方，建议对着图 9.7 和图 9.8 走一遍完整的重构过程。
 实现见 code/ch09/external_sort/modern.hpp。&lt;/p&gt;"><h1 id="败者树省掉看兄弟"><a class="anchor" href="#败者树省掉看兄弟">#</a>败者树：省掉「看兄弟」</h1>
-<figure><img loading="lazy" src="../../assets/scan/fig-9-7.png" alt="图9.7 8路归并的败者树示例"><figcaption>图9.7 8路归并的败者树示例</figcaption></figure>
 <p>内部结点记的是<strong>输家</strong>，赢家继续往上比。</p>
 <ul>
 <li>赢者树重构：每层要<strong>读兄弟结点</strong>才知道跟谁比</li>
@@ -412,7 +412,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <blockquote><p>测试里赢者树和败者树<strong>逐项对拍</strong>：同一组输入，输出序列必须完全相同。</p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第9章 文件管理和外排序</div><div class="thumb"><div class="no">2</div>9.1 一次磁盘访问有多贵</div><div class="thumb"><div class="no">3</div>页 I/O 成本模型</div><div class="thumb"><div class="no">4</div>9.2 记录怎样装进页</div><div class="thumb"><div class="no">5</div>9.2.1 文件组织：四种取舍仍在</div><div class="thumb"><div class="no">6</div>9.2.2 文件流：概念保留，接口更新</div><div class="thumb"><div class="no">7</div>外排序的基本套路</div><div class="thumb"><div class="no">8</div>9.3.1 置换选择：让顺串更长</div><div class="thumb"><div class="no">9</div>置换选择：怎么做到的</div><div class="thumb"><div class="no">10</div>置换选择：原书序列逐步走</div><div class="thumb"><div class="no">11</div>9.3.2 二路外排序</div><div class="thumb"><div class="no">12</div>3000 条记录：二路归并要几趟</div><div class="thumb"><div class="no">13</div>9.3.3 多路归并：瓶颈在哪</div><div class="thumb"><div class="no">14</div>赢者树</div><div class="thumb"><div class="no">15</div>赢者树的重构</div><div class="thumb"><div class="no">16</div>四路归并：赢家路径怎样更新</div><div class="thumb"><div class="no">17</div>败者树：省掉「看兄弟」</div><div class="thumb"><div class="no">18</div>代价小结</div><div class="thumb"><div class="no">19</div>课堂讲解卡：外排序先算 I/O</div><div class="thumb"><div class="no">20</div>课堂例题：M=3 的置换选择</div><div class="thumb"><div class="no">21</div>课堂例题答案：M=3</div><div class="thumb"><div class="no">22</div>课末自检</div><div class="thumb"><div class="no">23</div>课末自检参考答案</div><div class="thumb"><div class="no">24</div>状态演算：冻结记录</div><div class="thumb"><div class="no">25</div>反例：把冻结记录立即放回堆</div><div class="thumb"><div class="no">26</div>课堂练习与答案</div><div class="thumb"><div class="no">27</div>Python 算法轨：置换选择与选择树</div><div class="thumb"><div class="no">28</div>本章小结</div><div class="thumb"><div class="no">29</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第9章 文件管理和外排序</div><div class="thumb"><div class="no">2</div>9.1 一次磁盘访问有多贵</div><div class="thumb"><div class="no">3</div>页 I/O 成本模型</div><div class="thumb"><div class="no">4</div>9.2 记录怎样装进页</div><div class="thumb"><div class="no">5</div>9.2.1 文件组织：四种取舍仍在</div><div class="thumb"><div class="no">6</div>9.2.2 文件流：概念保留，接口更新</div><div class="thumb"><div class="no">7</div>外排序的基本套路</div><div class="thumb"><div class="no">8</div>9.3.1 置换选择：让顺串更长</div><div class="thumb"><div class="no">9</div>置换选择：怎么做到的</div><div class="thumb"><div class="no">10</div>置换选择：原书序列逐步走</div><div class="thumb"><div class="no">11</div>9.3.2 二路外排序</div><div class="thumb"><div class="no">12</div>3000 条记录：二路归并要几趟</div><div class="thumb"><div class="no">13</div>9.3.3 多路归并：瓶颈在哪</div><div class="thumb"><div class="no">14</div>赢者树</div><div class="thumb"><div class="no">15</div>赢者树的重构</div><div class="thumb"><div class="no">16</div>赢者树的重构</div><div class="thumb"><div class="no">17</div>四路归并：赢家路径怎样更新</div><div class="thumb"><div class="no">18</div>败者树：省掉「看兄弟」</div><div class="thumb"><div class="no">19</div>败者树：省掉「看兄弟」</div><div class="thumb"><div class="no">20</div>代价小结</div><div class="thumb"><div class="no">21</div>课堂讲解卡：外排序先算 I/O</div><div class="thumb"><div class="no">22</div>课堂例题：M=3 的置换选择</div><div class="thumb"><div class="no">23</div>课堂例题答案：M=3</div><div class="thumb"><div class="no">24</div>课末自检</div><div class="thumb"><div class="no">25</div>课末自检参考答案</div><div class="thumb"><div class="no">26</div>状态演算：冻结记录</div><div class="thumb"><div class="no">27</div>反例：把冻结记录立即放回堆</div><div class="thumb"><div class="no">28</div>课堂练习与答案</div><div class="thumb"><div class="no">29</div>Python 算法轨：置换选择与选择树</div><div class="thumb"><div class="no">30</div>本章小结</div><div class="thumb"><div class="no">31</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -425,7 +425,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <b>第9章 文件管理和外排序</b><span>数据结构与算法：Python 讲可迁移算法，C++ 讲存储与工程实现</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 29</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 31</b>
 </div>
 <script>
 (function(){

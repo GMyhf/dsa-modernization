@@ -422,6 +422,10 @@ T remove(size_type pos) {
 
 ![图2.11 双链表的删除操作示意](../assets/scan/fig-2-11.png)
 
+---
+
+# 双链表的删除：两侧都要改
+
 ```cpp file=code/ch02/doubly_linked_list/teaching.hpp#fn:erase_node
 // 摘掉一个已知的结点，O(1)。**这是双链表的看家本领**：
 // 单链表要做同一件事，得先从头走到它的前驱，O(n)。

@@ -366,6 +366,10 @@ void sift_up(size_type index) {
 
 ![图 5.16 在最小堆 5.14 中删除元素 14](../assets/scan/fig-5-16.png)
 
+---
+
+# 删除最小：搬最后一个上来，然后下沉
+
 ```cpp file=code/ch05/heap_huffman/teaching.hpp#fn:sift_down
 // 下沉：和两个孩子里较小的那个比，比它大就换下去。
 // **必须和较小的那个换**——跟较大的换会破坏「父亲不大于两个孩子」。
@@ -403,6 +407,10 @@ void sift_down(size_type index) {
 # 建堆为什么是 O(n)
 
 ![图 5.17 建堆过程示例](../assets/scan/fig-5-17.png)
+
+---
+
+# 建堆为什么是 O(n)
 
 粗算：$n/2$ 次 `sift_down` $\times\ O(\log n) = O(n\log n)$。**原书说这只是粗略上界。**
 

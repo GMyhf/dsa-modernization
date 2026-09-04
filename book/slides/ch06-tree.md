@@ -267,6 +267,10 @@ void delete_subtree(Node* node) {
 
 ![图 6.11 集合的表示方法](../assets/scan/fig-6-11.png)
 
+---
+
+# 并查集：等价类问题
+
 给一堆等价对 (A,B)、(C,K)、…，要能回答「x 和 y 同类吗」。
 
 - **find(x)**：沿父指针一路走到根，根就是这个集合的代表
@@ -325,6 +329,10 @@ bool unite(std::size_t left, std::size_t right) {
 # 改进二：路径压缩
 
 ![图 6.13 路径压缩示例](../assets/scan/fig-6-13.png)
+
+---
+
+# 改进二：路径压缩
 
 ```cpp file=code/ch06/general_tree/modern.hpp#fn:find
 std::size_t find(std::size_t index) {
