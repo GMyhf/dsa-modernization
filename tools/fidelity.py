@@ -33,6 +33,7 @@ import argparse
 import json
 import re
 import sys
+import unicodedata
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -45,6 +46,11 @@ STATE = ROOT / "collab" / "fidelity.json"
 
 HEAD_RE = re.compile(r"^(#{1,6})\s+(.*)$")
 SECTION_RE = re.compile(r"^(#{1,6})\s+(\d+(?:\.\d+)+)\s*(.*)$")
+CHAPTER_RE = re.compile(r"^#\s*第\s*(\d+)\s*章")
+# 每章末尾这三节不带编号，因此第一版的 fidelity 完全没量过它们。
+# 2026-09-04 补量：小结 17%、习题 23%、上机题 12%——**三块都比正文更空**，
+# 而在此之前没有任何闸门在看。键写成「8.本章小结」，与「8.4」并列排序。
+TAIL_SECTIONS = ("本章小结", "习题", "上机题")
 CJK_RE = re.compile(r"[一-鿿]")
 FENCE_RE = re.compile(r"^\s*(```|~~~)")
 # 棘轮容差：汉字数会因为一次措辞微调抖动一两个字，不该因此判红。
@@ -78,22 +84,24 @@ def cjk_count(lines, mask=None):
 
 
 def section_volumes(lines):
-    """把一份 Markdown 按节切开，返回 {'8.4': 汉字数}（三级节并进所属的二级节）。
+    """把一份 Markdown 按节切开，返回 {'8.4': 汉字数, '8.习题': 汉字数}。
 
-    两条切分规则，都是被真实文稿逼出来的：
+    三条切分规则，都是被真实文稿逼出来的：
 
-    * 带编号的标题（`## 8.4` / `### 8.4.2`）开一个新桶；
-    * 不带编号的标题，只有二级（`## 本章小结`、`## 习题`、`## 练习路径`）才结束当前节；
-      三级及更深的（`### 为什么这一节没有 Python 版`、`#### 教学版：完整实现`）
+    * 带编号的标题（`## 8.4` / `### 8.4.2`）开一个新桶，三级节并进二级节；
+    * 二级的 `## 本章小结` / `## 习题` / `## 上机题` 各开一个桶，键是「章号.标题」；
+    * 其余不带编号的标题，二级（`## 练习路径`）结束当前节，三级及更深的
+      （`### 为什么这一节没有 Python 版`、`#### 教学版：完整实现`）
       是新书在节内加的教学小标题，正文继续算在这一节头上。
 
-    少了第二条的前半句，10.3 会一路吞掉本章小结、习题、上机题直到下一个带编号的
-    标题（第一次量出 18127 汉字）；少了后半句，新书自己补的讲解全被漏掉。
+    少了第二条，章末三节会被算进最后一个带编号的节（10.3 第一次量出 18127 汉字），
+    而且它们自己永远不会被量；少了第三条的后半句，新书自己补的讲解全被漏掉。
     """
     mask = prose_mask(lines)
     volumes = {}
     key = None
     start = 0
+    chapter = None
 
     def flush(end):
         if key is not None:
@@ -103,16 +111,32 @@ def section_volumes(lines):
         head = HEAD_RE.match(line)
         if not head or not mask[i]:
             continue
+        found = CHAPTER_RE.match(line)
+        if found:
+            chapter = int(found.group(1))
         numbered = SECTION_RE.match(line)
+        title = head.group(2).strip()
         if numbered:
             flush(i)
             key = ".".join(numbered.group(2).split(".")[:2])
+            start = i
+        elif len(head.group(1)) == 2 and title in TAIL_SECTIONS and chapter is not None:
+            flush(i)
+            key = f"{chapter}.{title}"
             start = i
         elif len(head.group(1)) <= 2:
             flush(i)
             key = None
     flush(len(lines))
     return volumes
+
+
+def sort_key(key):
+    """「8.4」排在「8.本章小结」前面；章末三节按小结 → 习题 → 上机题。"""
+    chapter, _, rest = key.partition(".")
+    if rest in TAIL_SECTIONS:
+        return (int(chapter), 1, TAIL_SECTIONS.index(rest))
+    return (int(chapter), 0, int(rest) if rest.isdigit() else 0)
 
 
 def collect():
@@ -124,12 +148,12 @@ def collect():
         for key, value in section_volumes(path.read_text(encoding="utf-8").splitlines()).items():
             book[key] = book.get(key, 0) + value
     rows = []
-    for key in sorted(raw, key=lambda k: [int(x) for x in k.split(".")]):
+    for key in sorted(raw, key=sort_key):
         rc = raw[key]
         bc = book.get(key, 0)
         rows.append({
             "section": key,
-            "chapter": int(key.split(".")[0]),
+            "chapter": int(key.partition(".")[0]),
             "raw": rc,
             "book": bc,
             "ratio": round(bc / rc, 3) if rc else 0.0,
@@ -151,13 +175,19 @@ def waived(state):
     return {w["section"] for w in state.get("waivers", [])}
 
 
+def pad(text, width):
+    """按显示宽度左对齐——章末三节的键含汉字，用 len() 会把整列排歪。"""
+    shown = sum(2 if unicodedata.east_asian_width(ch) in "WF" else 1 for ch in text)
+    return text + " " * max(0, width - shown)
+
+
 def report(rows, chapter=None):
     rows = [r for r in rows if chapter is None or r["chapter"] == chapter]
-    print(f"{'节':<7}{'原书':>7}{'新书':>7}{'保全':>7}  {'缺口':>6}")
+    print(f"{pad('节', 12)}{'原书':>7}{'新书':>7}{'保全':>7}  {'缺口':>6}")
     for r in sorted(rows, key=lambda r: r["book"] - r["raw"]):
         gap = r["raw"] - r["book"]
         mark = "  ⚠️" if r["ratio"] < 0.5 else ""
-        print(f"{r['section']:<7}{r['raw']:>7}{r['book']:>7}{r['ratio']:>7.2f}  {gap:>6}{mark}")
+        print(f"{pad(r['section'], 12)}{r['raw']:>7}{r['book']:>7}{r['ratio']:>7.2f}  {gap:>6}{mark}")
     total_raw = sum(r["raw"] for r in rows)
     total_book = sum(r["book"] for r in rows)
     if total_raw:
@@ -200,7 +230,7 @@ def update(rows, state):
         if old is None or r["ratio"] > old:
             baseline[r["section"]] = r["ratio"]
             raised += 1
-    state["baseline"] = {k: baseline[k] for k in sorted(baseline, key=lambda k: [int(x) for x in k.split(".")])}
+    state["baseline"] = {k: baseline[k] for k in sorted(baseline, key=sort_key)}
     save_state(state)
     print(f"✅ 基线已更新：{raised} 节抬高或新登记，共 {len(baseline)} 节")
     return 0

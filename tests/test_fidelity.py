@@ -60,6 +60,32 @@ class TestSectionVolumes(unittest.TestCase):
             len("二叉树的存储结构引子为什么这一节没有版理由一句教学版完整实现再一句"),
         )
 
+    def test_chapter_tails_get_their_own_buckets(self):
+        """章末三节不带编号，第一版完全没量过它们——现在各自成桶。"""
+        v = self.volumes(
+            "# 第8章 内排序\n"
+            "## 8.1 排序问题的基本概念\n正文。\n"
+            "## 本章小结\n小结两句。\n"
+            "## 习题\n题目一道。\n"
+            "## 上机题\n上机一道。\n"
+        )
+        self.assertEqual(v["8.1"], len("排序问题的基本概念正文"))
+        self.assertEqual(v["8.本章小结"], len("本章小结小结两句"))
+        self.assertEqual(v["8.习题"], len("习题题目一道"))
+        self.assertEqual(v["8.上机题"], len("上机题上机一道"))
+
+    def test_tail_bucket_needs_a_chapter(self):
+        """没有章标题时不硬造键——附录里也有 `## 习题` 这种标题。"""
+        v = self.volumes("## 习题\n题目一道。\n")
+        self.assertEqual(v, {})
+
+    def test_sort_key_puts_tails_after_numbered_sections(self):
+        keys = ["8.上机题", "8.4", "8.本章小结", "8.1", "8.习题", "9.1"]
+        self.assertEqual(
+            sorted(keys, key=fidelity.sort_key),
+            ["8.1", "8.4", "8.本章小结", "8.习题", "8.上机题", "9.1"],
+        )
+
     def test_fence_polarity_is_global(self):
         """节的起点落在代码块中间时，不能从「不在围栏内」重新起步。"""
         text = (

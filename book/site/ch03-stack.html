@@ -1964,21 +1964,27 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
 </ol>
 <p>由此可见，这几种限制存取点的表都是某种受限的双端队列。C++ 标准库的基本序列中就有双端队列 <code>std::deque</code>，<code>std::stack</code> 与 <code>std::queue</code> 默认都是通过它实现的——<strong>但那是使用者的视角</strong>； 本章手写这两种结构，是因为「存储怎么落、边界怎么守」本身就是这一章的教学内容。</p>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
-<p>栈只在一端插入删除，后进先出；队列在一端插、另一端删，先进先出。二者都可以顺序或链式实现，端点运算都是常数时间。顺序实现要处理满与空（循环队列牺牲一个槽）；链式实现按需分配，没有预先的容量上限。栈用于递归、括号和表达式；队列用于层次周游和缓冲。</p>
+<p><strong>栈是一种限制访问端口的线性表，常被称为后进先出（LIFO）表。</strong> 其元素的插入和删除都只能在表的 一端进行，该端称为栈的栈顶，另一端则叫做栈底。栈的特点是：每次取出（并被删除）的元素总是当前 栈内元素中最后压入的，而最先压入的元素则被放在栈的底部、要到最后才能取出。</p>
+<p>栈的运算包括压栈、出栈、返回栈顶元素、判断栈是否为空等，<strong>运算的时间代价均为常数时间</strong>。 栈的实现通常有顺序栈和链式栈两种：顺序栈用数组实现；链式栈则用单链表方式存储，其中的指针方向 是从栈顶向下链接。<strong>在实际中，顺序栈比链式栈使用得更为广泛。</strong></p>
+<p>栈是一种很重要、应用非常广泛的数据结构，常见的应用包括表达式转换和求值、函数调用和递归实现、 深度优先搜索等。<strong>栈的一个很重要的应用在于对函数调用机制和递归实现的支持</strong>——本章通过递归函数 的实现机制和递归算法到非递归算法的转换，揭示了递归的本质以及栈与递归的内在联系。</p>
+<p><strong>队列也是一种限制访问端口的特殊线性表。</strong> 其元素的删除只限于队列头一端进行，而元素的插入则被 限制于队列尾一端。队列的特点是新来的成员总是加入到队的末尾，而每次取出的元素总是来自队列的 前端，通常称为先进先出（FIFO）表。队列的运算主要包括进队列、出队列、取队头元素、判断队列是否为 空、判断队列是否已满等，运算的时间代价均为常数时间。</p>
+<p>队列的存储结构和实现方法主要分为顺序和链式两种。<strong>顺序队列是比较普遍的一种实现方式</strong>，采用环状 顺序表来存放队列元素，并用两个变量分别指向队列的头和尾，往队列中加入元素或取出元素时分别改变 队头和队尾这两个变量的计数；链式队列一般用单链表方式存储，其中链接指针的方向是从队列的前端向 尾端链接。</p>
+<p>顺序队列采用固定的存储空间，一方面在读访问时非常简单、在特殊应用中需要访问内部元素时也很方便； 但另一方面，在某些无法事先估计其大小的情况下会出现溢出现象。<strong>链式队列可以通过动态申请空间来 满足队列长度的大幅变动。</strong></p>
+<p>队列也是一种应用很广泛的数据结构，常见的应用包括广度优先搜索、消息缓冲器、操作系统的各种资源 管理等——只要符合先进先出特性的应用均可运用队列。</p>
 <h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
 <h3 id="补充算法设计题参考课程第-3-章"><a class="anchor" href="#补充算法设计题参考课程第-3-章">#</a>补充算法设计题（参考课程第 3 章）</h3>
 <ol>
 <li>只使用两个栈的 <code>push</code>、<code>pop</code>、<code>empty</code>，设计队列的 <code>enqueue</code>、<code>dequeue</code> 和 <code>empty</code>，并分析摊还复杂度。</li>
 <li>编号为 <code>1..n</code> 的车辆依次进栈，求所有合法出栈序列的数量并证明其为 Catalan 数。</li>
 <li>用两个栈设计编辑器的撤销和恢复；说明新操作、撤销、恢复时两个栈如何变化。</li>
-<li>循环队列两端都允许插入删除。给出类型定义，以及「从队尾删除」「从队头插入」的算法。</li>
-<li>用循环数组表示队列，只设头指针 <code>front</code> 和计数器 <code>count</code>，不设尾指针。实现判空、入队、出队。</li>
-<li>把栈 <span class="math">S</span> 中的元素逆置：分别使用两个额外栈；一个额外队列；一个额外栈加若干非数组变量。</li>
-<li>用栈定义队列。</li>
-<li>带头结点的循环链表表示队列，只设一个指向队尾的指针。写出初始化、入队、出队。</li>
-<li>在长度为 <span class="math">n</span> 的数组里实现两个栈，元素总数不到 <span class="math">n</span> 时都不溢出，且 <code>push</code>/<code>pop</code> 为 <span class="math">O(<span class="upr">1</span>)</span>。</li>
-<li>编号 1 到 5 的列车顺序进栈式站台，出站顺序有多少种？</li>
-<li>证明：用一个栈把 <span class="math"><span class="upr">1</span>,<span class="upr">2</span>,…,n</span> 变成 <span class="math">p<sub><span class="upr">1</span></sub>,…,p<sub>n</sub></span> 的充要条件是不存在 <span class="math">i&lt;j&lt;k</span> 使 <span class="math">p<sub>j</sub>&lt;p<sub>k</sub>&lt;p<sub>i</sub></span>。</li>
+<li>如果允许在循环队列的两端都可以进行插入和删除操作，要求：(1) 写出循环队列的类型定义； (2) 写出「从队尾删除」和「从队头插入」的算法。</li>
+<li>如果用一个循环数组 <span class="math">q[<span class="upr">0</span>…m<span class="bin">−</span><span class="upr">1</span>]</span> 表示队列时，该队列只有一个队列头指针 <code>front</code>、不设队列尾 指针 <code>rear</code>，而设置计数器 <code>count</code> 用以记录队列中结点的个数。试编写算法实现队列的 3 个基本 运算：判空、入队、出队。</li>
+<li>试按以下的要求把栈 <span class="math">S</span> 中的元素逆置：(1) 使用额外的两个栈；(2) 使用额外的一个队列； (3) 使用额外的一个栈，外加一些非数组的变量。</li>
+<li>试给出用栈所定义的队列。</li>
+<li>假设以带头结点的循环链表表示队列，并且只设一个指针指向队尾元素结点（<strong>注意不设头指针</strong>）， 试编写相应的队列初始化、入队列和出队列的算法。</li>
+<li>试在一个长度为 <span class="math">n</span> 的数组中实现两个栈，使得二者在元素的总数目为 <span class="math">n</span> 之前都不溢出，并且保证 <code>push</code> 和 <code>pop</code> 操作的时间代价为 <span class="math">O(<span class="upr">1</span>)</span>。</li>
+<li>编号为 1、2、3、4、5 的 5 辆列车顺序开进栈式结构的站台，试问开出车站的顺序有多少种可能， 并予以解释。</li>
+<li>证明：从初始输入序列 <span class="math"><span class="upr">1</span>,<span class="upr">2</span>,⋯,n</span> 可以利用一个栈得到输出序列 <span class="math">p<sub><span class="upr">1</span></sub>,p<sub><span class="upr">2</span></sub>,⋯,p<sub>n</sub></span>（它是 <span class="math"><span class="upr">1</span>,<span class="upr">2</span>,⋯,n</span> 的一种排列）的充分必要条件是：<strong>不存在下标 <span class="math">i&lt;j&lt;k</span>，满足 <span class="math">p<sub>j</sub>&lt;p<sub>k</sub>&lt;p<sub>i</sub></span></strong>。</li>
 <li>用栈计算后缀表达式 <span class="math"><span class="upr">12</span> <span class="upr">8</span> <span class="upr">9</span> * <span class="bin">+</span></span>，写出每一步的栈。</li>
 <li>用栈把中缀 <span class="math">a*(b*c<span class="bin">−</span>d)<span class="bin">+</span>e</span> 转成后缀，写出每一步的栈。</li>
 <li>按 <span class="math">GCD(n,m)</span> 的递归定义写算法。</li>
@@ -1986,12 +1992,12 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
 </ol>
 <h2 id="上机题"><a class="anchor" href="#上机题">#</a>上机题</h2>
 <ol>
-<li>用两个栈模拟队列，实现 <code>enqueue</code>、<code>dequeue</code>、<code>queue_empty</code>。</li>
-<li>用数组实现双端队列，两端插入删除都是常数时间。</li>
-<li>用辅助队列（两个或一个）使队列元素有序。</li>
-<li>把栈 <span class="math">s<sub><span class="upr">1</span></sub></span> 的元素转到 <span class="math">s<sub><span class="upr">2</span></sub></span> 并保持原顺序：分别用一个辅助栈；只用非数组变量。</li>
-<li>写计算 <span class="math">fib(n)</span> 的递归过程，再用栈改成非递归。</li>
-<li>按定义计算 <span class="math">Ack(m,n)</span>：写出 <span class="math">Ack(<span class="upr">2</span>,<span class="upr">1</span>)</span> 的过程，以及非递归算法。</li>
+<li>利用两个栈 <span class="math">s<sub><span class="upr">1</span></sub></span>、<span class="math">s<sub><span class="upr">2</span></sub></span> 模拟一个队列时，如何用栈的运算来实现该队列的运算？ (1) <code>enqueue</code>：插入一个元素；(2) <code>dequeue</code>：删除一个元素；(3) <code>queue_empty</code>：判定队列为空。</li>
+<li>双端队列 deque 是一种插入和删除操作在线性表的两端进行的数据结构，试给出利用数组实现的 deque 两端的插入、删除操作，<strong>要求这 4 个操作的时间代价均为常数</strong>。</li>
+<li>试利用非数组变量，按下述条件各设计一个相应的算法以使队列中的元素有序： (1) 使用两个辅助的队列；(2) 使用一个辅助的队列。</li>
+<li>试按下述条件各设计一个算法，把栈 <span class="math">s<sub><span class="upr">1</span></sub></span> 中的元素转移到栈 <span class="math">s<sub><span class="upr">2</span></sub></span> 中，<strong>并保持栈中元素原来的顺序</strong>： (1) 使用一个辅助栈；(2) 只使用一些辅助的非数组变量。</li>
+<li>Fibonacci 序列 <span class="math"><span class="upr">0</span>,<span class="upr">1</span>,<span class="upr">1</span>,<span class="upr">2</span>,<span class="upr">3</span>,<span class="upr">5</span>,<span class="upr">8</span>,<span class="upr">13</span>,<span class="upr">21</span>,<span class="upr">34</span>,⋯</span> 中每个元素是前两个元素之和，可递归定义为 <span class="math">fib(n)<span class="rel">=</span>n</span>（<span class="math">n<span class="rel">=</span><span class="upr">0</span>,<span class="upr">1</span></span>）、<span class="math">fib(n)<span class="rel">=</span>fib(n<span class="bin">−</span><span class="upr">2</span>)<span class="bin">+</span>fib(n<span class="bin">−</span><span class="upr">1</span>)</span>（<span class="math">n<span class="rel">≥</span><span class="upr">2</span></span>）。试设计一个计算 <span class="math">fib(n)</span> 的 递归过程，并利用栈来模拟递归调用，将递归过程改写成一个非递归过程。</li>
+<li>已知 Ackermann 函数定义为：<span class="math">Ack(m,n)<span class="rel">=</span>n<span class="bin">+</span><span class="upr">1</span></span>（<span class="math">m<span class="rel">=</span><span class="upr">0</span></span>）；<span class="math">Ack(m,n)<span class="rel">=</span>Ack(m<span class="bin">−</span><span class="upr">1</span>,<span class="upr">1</span>)</span> （<span class="math">m<span class="rel">≠</span><span class="upr">0</span>,n<span class="rel">=</span><span class="upr">0</span></span>）；<span class="math">Ack(m,n)<span class="rel">=</span>Ack(m<span class="bin">−</span><span class="upr">1</span>,Ack(m,n<span class="bin">−</span><span class="upr">1</span>))</span>（<span class="math">m<span class="rel">≠</span><span class="upr">0</span>,n<span class="rel">≠</span><span class="upr">0</span></span>）。 (1) 写出 <span class="math">Ack(<span class="upr">2</span>,<span class="upr">1</span>)</span> 的计算过程；(2) 写出计算 <span class="math">Ack(m,n)</span> 的非递归算法。</li>
 </ol>
 <div class="pagenav"><a href="ch02-linear-list.html"><span class="dir">← 上一篇</span>第2章 线性表</a><a href="ch04-string.html" style="text-align:right"><span class="dir">下一篇 →</span>第4章 字符串</a></div>
 </main>

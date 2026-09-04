@@ -1157,7 +1157,16 @@ def check_qualified_names(path, index):
 # **只验存在与同号，不验答案对不对**——那是人工复核项（与 D-014 同一条边界）。
 ANSWER_GAPS = ROOT / "collab" / "answer_gaps.json"
 ANSWER_GAP_KINDS = ("pending", "exercise-only")
-EXERCISE_GROUPS = {"习题": "正文习题答案", "上机题": "正文上机题参考"}
+# 章末两节，每节里可能有两组题：新书自己的（正文题）和从原书回填的（原书题）。
+EXERCISE_SECTIONS = ("习题", "上机题")
+# 组名 → 附录里对应的答案小节标题。原书题的两条 2026-09-04 才加：
+# 回填原书题目时答案先欠着，靠 answer_gaps.json 逐题登记，而不是让它们无人看管。
+EXERCISE_GROUPS = {
+    "习题": "正文习题答案",
+    "上机题": "正文上机题参考",
+    "原书习题": "原书习题答案",
+    "原书上机题": "原书上机题参考",
+}
 
 
 def numbered_groups(text):
@@ -1175,21 +1184,39 @@ def numbered_groups(text):
 
 
 def chapter_exercises(path: Path):
-    """返回 {('习题'|'上机题'): 题数}。
+    """返回 {组名: 题数}，组名取自 EXERCISE_GROUPS。
 
-    `## 习题` 下面可能有两组编号：先是 `### 补充…（参考课程第 N 章）` 那一组，
-    然后才是正文自己的题。**补充题不算在内**——它们与附录的「补充题参考答案」
-    早已一一对应，不是这条规则要管的缺口。
+    `## 习题` 底下可能有三种编号列表：
+
+    * `### 补充…（参考课程第 N 章）` 那一组——**不算在内**，它们与附录的
+      「补充题参考答案」早已一一对应，不是这条规则要管的缺口；
+    * 新书自己的正文题——按今天的写法，它紧跟在补充小节的后面、自己没有标题，
+      所以判据只能是「非原书小节里的最后一组编号」；
+    * `### 原书习题` 小节里的那一组——2026-09-04 回填原书题目时新增，单独成组，
+      这样它的答案欠账不会被正文题的答案数遮住。
     """
     text = path.read_text(encoding="utf-8", errors="replace")
-    counts = {}
-    for name in EXERCISE_GROUPS:
+    counts = {name: 0 for name in EXERCISE_GROUPS}
+    for name in EXERCISE_SECTIONS:
         found = re.search(rf"^## {name}.*?(?=^## |\Z)", text, re.S | re.M)
         if not found:
-            counts[name] = 0
             continue
-        groups = numbered_groups(found.group(0))
-        counts[name] = len(groups[-1]) if groups else 0
+        block = found.group(0)
+        # 按三级标题切段：第一段是 `## 习题` 到第一个 `###` 之间的引子。
+        pieces = re.split(r"^(###\s+.*)$", block, flags=re.M)
+        segments = [(None, pieces[0])]
+        for heading, body in zip(pieces[1::2], pieces[2::2]):
+            segments.append((heading, body))
+        legacy = []
+        for heading, body in segments:
+            groups = numbered_groups(body)
+            if not groups:
+                continue
+            if heading and "原书" in heading:
+                counts[f"原书{name}"] += sum(len(g) for g in groups)
+            else:
+                legacy.extend(groups)
+        counts[name] = len(legacy[-1]) if legacy else 0
     return counts
 
 

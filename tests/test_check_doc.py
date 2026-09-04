@@ -962,7 +962,29 @@ class TestR14ExerciseAnswers(unittest.TestCase):
                 counts = check_doc.chapter_exercises(path)
             finally:
                 path.unlink()
-        self.assertEqual(counts, {"习题": 3, "上机题": 1})
+        self.assertEqual(counts, {"习题": 3, "上机题": 1, "原书习题": 0, "原书上机题": 0})
+
+    def test_original_exercises_are_a_separate_group(self):
+        """回填的原书题单独成组：正文题的答案数不该把原书题的欠账遮住。"""
+        text = ("# 第9章\n\n## 习题\n\n### 补充题（参考课程第 9 章）\n\n"
+                "1. 补充第一题\n2. 补充第二题\n\n"
+                "1. 正文第一题\n2. 正文第二题\n3. 正文第三题\n\n"
+                "### 原书习题\n\n1. 原书第一题\n2. 原书第二题\n\n"
+                "## 上机题\n\n1. 上机第一题\n\n"
+                "### 原书上机题\n\n1. 原书上机第一题\n")
+        path = self.chapter(None, text)
+        try:
+            counts = check_doc.chapter_exercises(path)
+            problems = check_doc.check_exercise_answers(
+                [path], set(), covered={(9, "习题"): 3, (9, "上机题"): 1})
+        finally:
+            path.unlink()
+        self.assertEqual(counts["习题"], 3, "正文题仍按老规矩数：非原书小节里的最后一组")
+        self.assertEqual(counts["原书习题"], 2)
+        self.assertEqual(counts["原书上机题"], 1)
+        # 正文题都答过了，红的只剩 3 道原书题
+        self.assertEqual(len(problems), 3, problems)
+        self.assertTrue(all("原书" in p for p in problems), problems)
 
     def test_unanswered_exercise_is_reported(self):
         path = self.chapter(None)
@@ -1022,10 +1044,13 @@ class TestR14ExerciseAnswers(unittest.TestCase):
         self.assertTrue(any("kind" in p for p in problems), problems)
 
     def test_committed_book_has_every_exercise_accounted_for(self):
-        """入库当锚：137 道正文题，要么有同号答案，要么登记在案。
+        """入库当锚：正文题要么有同号答案，要么登记在案。
 
         2026-08-19：136 → 137。第 5 章补回原书上机题第 2 题「表达式二叉树」（新书第 5 题），
         附录同步加了同号答案。数字变了必须来这里改一次——这就是这条锚的用处。
+
+        2026-09-04：137 → 166。按扫描件回填原书章末题目（先补题面、答案登记为欠着），
+        第 2 章上机题 +2、第 5 章新增「原书习题」22 道与「原书上机题」5 道。
         """
         gaps, problems = check_doc.load_answer_gaps()
         self.assertEqual(problems, [])
@@ -1033,7 +1058,7 @@ class TestR14ExerciseAnswers(unittest.TestCase):
             sorted(check_doc.BOOK.glob("ch*.md")), gaps)
         self.assertEqual(found, [])
         answered = sum(check_doc.answered_exercises().values())
-        self.assertEqual(answered + len(gaps), 137, "正文题总数变了就要重新盘一遍")
+        self.assertEqual(answered + len(gaps), 166, "正文题总数变了就要重新盘一遍")
 
 
 class TestR9Formulas(unittest.TestCase):

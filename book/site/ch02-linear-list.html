@@ -1440,23 +1440,27 @@ Node* insert_before(Node* pos, U&amp;&amp; value) {
 <p><strong>1. 不要使用顺序表的场合。</strong> 线性表中经常要插入/删除内部元素时，不宜使用顺序表，因为顺序 表的插入/删除操作平均情况下需要移动表中一半的元素。此外，无法确定线性表长度的最大值时， 也不宜采用顺序表。</p>
 <p><strong>2. 不要使用链表的场合。</strong> 经常对线性表进行按位置的访问，而且按位读操作比插入/删除操作 频繁时，不宜使用链表，因为顺链表扫描浏览比按顺序表下标读元素要费时。此外，<strong>指针本身的 存储开销也需要考虑</strong>：如果与结点内容所占空间相比，指针所占的比例较大（超过 1:1），应该慎重 选择。</p>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
-<p>线性结构里元素满足一对一的先后关系。线性表有顺序和链式两种主要存法。顺序表易用、可随机访问，适合静态或按位读取多的数据；链表适合长度常变、或经常在已知结点旁增删的场合。具体选哪一种，看访问统计和操作特点。</p>
+<p>本章在介绍线性表基本概念和抽象数据类型的基础上，描述了线性表的两种实现方法。</p>
+<p><strong>线性结构是最简单且最常用的一种数据结构</strong>，其基本特点是结构中的元素之间满足线性关系，按这个 关系可以把所有元素排成一个线性序列。线性表是由若干数据元素组成的有限序列，是一种比较简单的 数据结构；线性表通常有顺序和链式两种存储方式，<strong>在两种存储结构上，线性表各运算的实现效率各有 千秋</strong>。</p>
+<p><strong>顺序表是组织数据的最简单方法</strong>，具有易用、空间开销较小以及对元素随机访问等特点，是存储静态 数据的理想选择。<strong>而链表不仅可以适用于那些频繁增删结点的应用，还适用于处理事先无法确定长度的 线性表。</strong> 具体选哪一种，看访问统计和操作特点。</p>
 <h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
 <ol>
-<li>顺序表 <span class="math">a</span> 中元素递增有序。设计算法把 <span class="math">x</span> 插到适当位置，保持有序。</li>
-<li>顺序表 <span class="math">A<span class="rel">=</span>(a<sub><span class="upr">1</span></sub>,…,a<sub>m</sub>)</span>、<span class="math">B<span class="rel">=</span>(b<sub><span class="upr">1</span></sub>,…,b<sub>n</sub>)</span>。去掉最长公共前缀后比较剩余子表，写出比较 <span class="math">A</span>、<span class="math">B</span> 大小的算法。</li>
-<li>递增单链表中删除所有大于 <span class="math"><span class="upr">min</span>&thinsp;</span> 且小于 <span class="math"><span class="upr">max</span>&thinsp;</span> 的元素，释放结点，并分析时间。</li>
-<li>两个递增单链表归并成一个递减表，要求占用原结点空间。</li>
-<li>含字母、数字和其他字符的单链表，拆成三个循环链表，每表只含一类字符。</li>
-<li>删除顺序表中从第 <span class="math">i</span> 个起的 <span class="math">k</span> 个元素。</li>
-<li>递增单链表中删掉值相同的多余元素，释放结点。</li>
-<li>两个值递增、表内无重复的顺序表 <span class="math">A</span>、<span class="math">B</span>，构造它们的交集 <span class="math">C</span>，仍递增。</li>
-<li>第 8 题在单链表上重做。</li>
-<li>表达式已存入字符数组并以 <code>#</code> 结束，判断括号是否配对。</li>
+<li>设顺序表 <span class="math">a</span> 中的数据元素递增有序，试设计一个算法，将 <span class="math">x</span> 插入到顺序表的适当位置，以保持该 表的有序性。</li>
+<li>设 <span class="math">A<span class="rel">=</span>(a<sub><span class="upr">1</span></sub>,⋯,a<sub>m</sub>)</span> 和 <span class="math">B<span class="rel">=</span>(b<sub><span class="upr">1</span></sub>,⋯,b<sub>n</sub>)</span> 均为顺序表，<span class="math">A&#x27;</span> 和 <span class="math">B&#x27;</span> 分别为 <span class="math">A</span> 和 <span class="math">B</span> 中 除去最大共同前缀后的子表。若 <span class="math">A&#x27;<span class="rel">=</span>B&#x27;<span class="rel">=</span></span> 空表，则 <span class="math">A<span class="rel">=</span>B</span>；若 <span class="math">A&#x27;<span class="rel">=</span></span> 空表而 <span class="math">B&#x27;<span class="rel">≠</span></span> 空表，或者 两者均不为空表且 <span class="math">A&#x27;</span> 的表首元素小于 <span class="math">B&#x27;</span> 的表首元素，则 <span class="math">A&lt;B</span>；否则 <span class="math">A&gt;B</span>。试写一个比较 <span class="math">A</span>、<span class="math">B</span> 大小的算法。</li>
+<li>设线性表中的数据元素以值递增排列，并以单链表作为存储结构。设计一个高效的算法，删除表中 所有值大于 <span class="math"><span class="upr">min</span>&thinsp;</span> 且小于 <span class="math"><span class="upr">max</span>&thinsp;</span> 的元素，同时释放被删除结点的空间，并分析算法的时间复杂度。</li>
+<li>假设有两个按元素值递增有序排列的线性表 <span class="math">A</span> 和 <span class="math">B</span>，均以单链表作为其存储结构。试设计一个 算法，将 <span class="math">A</span> 和 <span class="math">B</span> 归并成一个按元素值递减有序排列的线性表 <span class="math">C</span>，<strong>并要求利用原表（即表 <span class="math">A</span> 和 表 <span class="math">B</span>）的结点空间构造表 <span class="math">C</span></strong>。</li>
+<li>已知由一个链表表示的线性表中含有三类字符的数据元素（字母字符、数字字符和其他字符），试设计 一个算法，将该线性链表分割为 3 个循环链表，其中每个循环链表中均只含一类字符。</li>
+<li>试设计一个算法，删除一个顺序表中从第 <span class="math">i</span> 个元素开始的 <span class="math">k</span> 个元素。</li>
+<li>已知线性表中元素以值递增有序排列，并以单链表作为存储结构。试设计一个算法，删除表中值相同 的多余元素，使得操作后表中的所有元素值均不相同，同时释放被删除的结点空间。</li>
+<li>已知两个元素按值递增有序排列的线性表 <span class="math">A</span> 和 <span class="math">B</span>，且同一表中的元素值各不相同。试构造一个 线性表 <span class="math">C</span>，其元素为 <span class="math">A</span> 和 <span class="math">B</span> 中元素的交集，且表 <span class="math">C</span> 中的元素也按值递增有序排列。设计对 <span class="math">A</span>、<span class="math">B</span>、<span class="math">C</span> 都是顺序表时的算法。</li>
+<li>要求同第 8 题。设计当 <span class="math">A</span>、<span class="math">B</span>、<span class="math">C</span> 都是单链表时的算法。</li>
+<li>设表达式以字符形式已存入数组 <span class="math">E[n]</span> 中，<code>#</code> 为表达式的结束符，试设计判断表达式中括号 <code>(</code> 和 <code>)</code> 是否配对的算法。</li>
 </ol>
 <h2 id="上机题"><a class="anchor" href="#上机题">#</a>上机题</h2>
 <ol>
-<li>设计非递归算法，在 <span class="math">O(n)</span> 时间和常数辅助空间内把含 <span class="math">n</span> 个元素的单链表逆置。</li>
+<li>试设计一个非递归算法，在 <span class="math">O(n)</span> 时间内将一个含有 <span class="math">n</span> 个元素的单链表逆置，要求其辅助空间为 常量。</li>
+<li>给定一个单向链表，试设计一个既节省时间又节省空间的算法来找出该链表的倒数第 <span class="math">m</span> 个元素。 实现这个算法，并对可能出现的特殊情况做相应处理。自行设计链表的数据结构。（「倒数第 <span class="math">m</span> 个 元素」的含义：当 <span class="math">m<span class="rel">=</span><span class="upr">0</span></span> 时，链表的最后一个元素将被返回。）</li>
+<li>设有 <span class="math">n</span> 个人围坐在一个圆桌周围，现从第 <span class="math">s</span> 个人开始报数，数到第 <span class="math">m</span> 的人出列，然后从出列的 下一个人重新开始报数，数到第 <span class="math">m</span> 的人又出列，如此反复直到所有的人全部出列为止。<strong>Josephus 问题</strong>是：对于任意给定的 <span class="math">n</span>、<span class="math">s</span>、<span class="math">m</span>，求出按出列次序得到的 <span class="math">n</span> 个人员的序列。试在计算机上 模拟 Josephus 问题的求解过程。</li>
 </ol>
 <div class="pagenav"><a href="ch01-adt.html"><span class="dir">← 上一篇</span>第1章 概论</a><a href="ch03-stack.html" style="text-align:right"><span class="dir">下一篇 →</span>第3章 栈与队列</a></div>
 </main>

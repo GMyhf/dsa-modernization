@@ -1368,7 +1368,13 @@ Direct leak of 24 byte(s) in 1 object(s) allocated from:
 <p><strong>三、Huffman 构造的两处防御。</strong> 工程版在合并前检查 <code>left-&gt;weight + right-&gt;weight</code> 会不会溢出 <code>int</code>， 并用层层 <code>try/catch</code> 保证「中途任何一步失败，已经取出来的裸结点都被回收」。 教学版只做了参数预检查，这两处留给进阶。</p>
 <p><strong>四、其余与前几章相同</strong>：五法则、<code>[[nodiscard]]</code>、<code>noexcept</code>、copy-and-swap。</p>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
-<p>二叉树每个结点至多两个有左右之分的孩子。满二叉树、完全二叉树和扩充二叉树是三种常用特殊形态；第 <span class="math">i</span> 层至多 <span class="math"><span class="upr">2</span><sup>i</sup></span> 个结点，<span class="math">n<sub><span class="upr">0</span></sub><span class="rel">=</span>n<sub><span class="upr">2</span></sub><span class="bin">+</span><span class="upr">1</span></span>。周游有先序、中序、后序和层次。链式存储用左右指针；完全二叉树还可以按层编号放进数组，堆就是这种用法。二叉搜索树加上左小右大，中序即排序。堆把最值放在根；Huffman 树反复合并两个最小权，得到带权路径长度最小的树。</p>
+<p>本章介绍了二叉树的概念。与线性表、栈、队列一样，二叉树也是一种重要的数据结构，而且应用十分广泛。</p>
+<p><strong>在二叉树中，每个结点最多有两个子结点。</strong> 由二叉树的逻辑结构给出了二叉树的递归定义：二叉树若不 为空，则由根结点和两棵互不相交的子树构成，其左右子树也是二叉树。随后给出了几种特殊的二叉树 结构，例如满二叉树、完全二叉树和扩充二叉树。</p>
+<p><strong>二叉树周游是指按照一定顺序依次访问树中的所有结点，且使得每一个结点仅被访问一次。</strong> 根据访问 结点和左右子树的次序不同，周游算法可以分为深度优先周游和广度优先周游；深度优先周游算法有前序、 中序和后序 3 种，本章给出了它们的递归和非递归实现。</p>
+<p>二叉树抽象数据类型的各个成员函数的实现，需要参考具体的存储结构和应用。<strong>二叉树有两种主要的实现 方式：链式存储结构和顺序存储结构。</strong> 用指针实现二叉树是常用的方法，其中每个结点包含数据域和左、 右指针域，分别用来存储结点本身的信息和指向左、右子结点的指针，这种存储方式称为<strong>二叉链表</strong>； 顺序存储方式主要介绍了用数组实现完全二叉树，即一棵具有 <span class="math">n</span> 个结点的完全二叉树按层次顺序把所有 结点从 0 到 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 编号，按编号的次序将所有结点元素存储在一维数组中。</p>
+<p><strong>二叉搜索树（BST）是一种重要的索引结构，可以用于快速检索。</strong> BST 每个结点关键码的值大于其左子树 上所有结点的关键码值，而小于其右子树上所有结点的值，且其左右子树分别为一棵二叉搜索树；因此， <strong>按中序周游二叉搜索树可以得到关键码的正序序列</strong>。在二叉搜索树中进行检索可以得到较高的效率， 动态插入和删除结点时需要保持二叉搜索树的性质。</p>
+<p><strong>堆是一种特殊的完全二叉树，常用于实现优先队列。</strong> 其特殊性主要体现为局部有序性，即最小堆对应的 完全二叉树中所有内部结点的值均不大于其左右子结点的关键码值，而一个结点与其兄弟之间没有必然的 联系。堆的插入和删除操作必须保持最小堆的堆序性质不变，因此在堆中插入和删除一个元素时需要调整 父子结点的位置关系；<strong>建堆过程是一个从下至上不断筛选的过程</strong>。</p>
+<p><strong>结点的带权路径长度是指从根结点到该结点的路径长度与结点权值的乘积。</strong> Huffman 树采用贪心法 构造带权外部路径长度最小的二叉树，在信息编码中有广泛的应用。</p>
 <h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
 <h3 id="补充证明题参考课程第-5-章"><a class="anchor" href="#补充证明题参考课程第-5-章">#</a>补充证明题（参考课程第 5 章）</h3>
 <ol>
@@ -1383,17 +1389,51 @@ Direct leak of 24 byte(s) in 1 object(s) allocated from:
 <li>在二叉搜索树中插入序列 50, 30, 70, 20, 40, 60, 80，画出结果；再删除 50，画出删除后的树。</li>
 <li>对权 2, 3, 4, 7, 8 构造一棵 Huffman 树，计算带权路径长度，并给出一组前缀编码。</li>
 </ol>
+<h3 id="原书习题"><a class="anchor" href="#原书习题">#</a>原书习题</h3>
+<blockquote><p>以下是原书第 5 章的习题，本轮按扫描件补回题面；<strong>参考答案尚未写出</strong>，已逐题登记在 <code>collab/answer_gaps.json</code>。</p></blockquote>
+<ol>
+<li>对于 3 个结点 <span class="math">A</span>、<span class="math">B</span>、<span class="math">C</span>，有多少棵不同的二叉树？试将其画出来。</li>
+<li>分别按前序、后序、中序列出图 5.21 所示二叉树的结点。（图 5.21：根 <span class="math">A</span>；<span class="math">A</span> 的左孩子 <span class="math">B</span>， <span class="math">B</span> 的左孩子 <span class="math">D</span>；<span class="math">A</span> 的右孩子 <span class="math">C</span>，<span class="math">C</span> 的左孩子 <span class="math">E</span>、右孩子 <span class="math">F</span>，<span class="math">E</span> 的右孩子 <span class="math">G</span>， <span class="math">F</span> 的孩子为 <span class="math">H</span>、<span class="math">I</span>。）</li>
+<li>以下命题是否为真？若真请证明之：<strong>一棵二叉树的所有终端结点（叶结点），在前序序列、中序序列 以及后序序列中都按相同的相对位置出现。</strong></li>
+<li>找出所有这样的二叉树，其结点在下列两种次序之下恰好都以同样的顺序出现：(1) 前序和中序； (2) 前序和后序；(3) 中序和后序。</li>
+<li>写一个递归函数计算二叉树的叶结点个数。</li>
+<li>写一个递归函数计算二叉树的高度（只有一个根结点的二叉树高为 1）。</li>
+<li>设计一个镜面映射算法，将一棵二叉树的每个结点的左、右子结点交换位置。</li>
+<li>给定结点类型为 <code>BinaryTreeNode</code> 的 3 个指针 <span class="math">p</span>、<span class="math">q</span>、<span class="math">rt</span>，假设 <span class="math">rt</span> 为根结点，求距离结点 <span class="math">p</span> 和结点 <span class="math">q</span> 最近的这两个结点的<strong>共同祖先结点</strong>。</li>
+<li>画出图 5.22(a) 所示二叉树的二叉链表存储表示图。</li>
+<li>对于 3 个关键码值 <span class="math">A</span>、<span class="math">B</span>、<span class="math">C</span>，有多少个不同的二叉搜索树？试将其画出来。</li>
+<li>试证明：二叉搜索树结点的中序序列就是二叉搜索树结点按关键码值排序的序列。</li>
+<li>写出从二叉搜索树中删除一个关键码的递归算法。</li>
+<li>给出关键码序列 <span class="math">{</span>wxw, wxz, wzw, wzy, wzz, yww, yyx, zww, zwx, zwy, zyw, zyx, zyy, zyz<span class="math">}</span>。 从空二叉搜索树开始，按照上述关键码出现的顺序依次插入，画出插入所有结点后的 BST。</li>
+<li>编写一个递归函数 <code>search()</code>，传入参数为一棵二叉树（不是二叉搜索树）和一个值 <span class="math">K</span>，如果值 <span class="math">K</span> 出现在树中则返回 <code>true</code>，否则返回 <code>false</code>。相应地，写出一个等价的非递归函数 <code>search()</code>。</li>
+<li>编写一个递归函数 <code>smallcount()</code>，传入一棵二叉搜索树的根和值 <span class="math">K</span>，返回值小于或等于 <span class="math">K</span> 的 结点数目。<strong>函数应尽可能少地访问 BST 的结点</strong>。相应地写出一个等价的非递归函数。</li>
+<li>编写一个递归函数 <code>printRange()</code>，传入一个 BST、一个较小的值和一个较大的值，按照顺序打印出 介于两个值之间的所有结点。函数应尽可能少地访问 BST 的结点。</li>
+<li>编写一个函数 <code>IsBST</code>，传入参数为一棵二叉树，如果这棵二叉树是 BST 则返回 <code>true</code>，否则返回 <code>false</code>。</li>
+<li>编写一个函数 <code>IsMinHeap()</code>，传入参数为一个数组，如果该数组中的值满足最小堆的定义则返回 <code>true</code>，否则返回 <code>false</code>。</li>
+<li>初始关键码序列为 <span class="math">{E,D,X,K,H,L,M,C,P}</span>，试给出用筛选法所建的最小堆，并写出其相应的 序列。在建堆过程中，移位次数是多少？（提示：一次移位就是对关键码的一次赋值操作；例如交换 <code>Arr[i]</code> 与 <code>Arr[j]</code> 是 3 次移位。不考虑下标变量的赋值。）</li>
+<li>对于给出的一组权 <span class="math">W<span class="rel">=</span>{<span class="upr">1</span>,<span class="upr">4</span>,<span class="upr">9</span>,<span class="upr">16</span>,<span class="upr">25</span>,<span class="upr">36</span>,<span class="upr">49</span>,<span class="upr">64</span>,<span class="upr">81</span>,<span class="upr">100</span>}</span>，构造具有最小带权外部路径长度的 扩充二叉树，并求出它的带权外部路径长度。</li>
+<li>给定一组权 <span class="math">W<sub><span class="upr">0</span></sub>,W<sub><span class="upr">1</span></sub>,⋯,W<sub>n<span class="bin">−</span><span class="upr">1</span></sub></span>，说明怎样构造一个具有最小带权外部路径长度的扩充的 <span class="math">k</span> 叉树。试对权集 1, 4, 9, 16, 25, 36, 49, 64, 81, 100 来具体构造一个这样的扩充三叉树。</li>
+<li>任何包括 <span class="math">n</span> 个结点的二叉树的二叉链表表示中，<span class="math"><span class="upr">2</span>n</span> 个指针中都只有 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 个用来指示结点的左右 子结点，而另外 <span class="math">n<span class="bin">+</span><span class="upr">1</span></span> 个为空。可以用指向结点按某种次序周游的前驱和后继的指针来代替这些空的 指针，这种附加的指针称做「<strong>线索</strong>」，加进了线索的二叉链表称做<strong>穿线二叉树</strong>（thread binary tree）。在穿线树中，如果结点有左子树，那么它的左指针 <code>left</code> 就指向其左孩子，否则 <code>left</code> 指向其 前驱结点；如果结点有右子树，那么它的右指针 <code>right</code> 就指向其右孩子，否则 <code>right</code> 就指向其后继 结点。为区分指针和线索，需要在每个结点中增加两个标志位，分别指示左右指针位置中存的是指针 还是线索，结点结构为 <code>[left | ltag | info | rtag | right]</code>。<strong>试给出将二叉树以中序遍历使其变成 穿线树的线索化算法。</strong></li>
+</ol>
 <h2 id="上机题"><a class="anchor" href="#上机题">#</a>上机题</h2>
 <ol>
 <li>由先序和中序序列重建二叉树，再输出后序。</li>
 <li>实现二叉搜索树的插入、按键删除和中序输出，并用有序插入验证会退化成链。</li>
 <li>用最小堆对 <span class="math">n</span> 个整数排序，并与直接插入比较运行时间。</li>
 <li>根据一组权值建 Huffman 树，输出每个权的编码。</li>
-<li>表达式二叉树（原书上机题第 2 题）。对简单的四则运算表达式：（1）读入任意一个不带括号的前缀表达式、可带括号的中缀表达式或不带括号的后缀表达式，在机内建出对应的表达式二叉树，并以字符图显示；（2）对建好的树，按要求输出前缀表达式（不带括号）、中缀表达式（可带括号但不许冗余）或后缀表达式（不带括号）。所谓冗余括号，就是去掉它不影响计算顺序的括号。</li>
+</ol>
+<h3 id="原书上机题"><a class="anchor" href="#原书上机题">#</a>原书上机题</h3>
+<blockquote><p>同上，本轮只补题面，参考答案登记在 <code>collab/answer_gaps.json</code>。</p></blockquote>
+<ol>
+<li><strong>二叉树两个结点间的最小距离。</strong> 定义二叉树两个结点间的最小距离为：这两个结点的最近公共祖先 结点分别到这两个结点的路径长度之和。试设计一种方法，找出给定二叉树中任意两个结点之间的最小 距离，可以考虑以图形显示。</li>
+<li><strong>表达式二叉树。</strong> 表达式可以用表达式二叉树来表示。对于简单的四则运算表达式，请实现以下功能： (1) 对于任意给出的前缀表达式（不带括号）、中缀表达式（可以带括号）或后缀表达式（不带括号）， 能够在计算机内部构造出一棵表达式二叉树，并且以图示显示出来（字符图或图形的形式）； (2) 对于构造好的内部表达式二叉树，按照用户的要求，输出相应的前缀表达式（不带括号）、中缀表达式 （可以带括号，但不允许冗余括号）或后缀表达式（不带括号）。<strong>所谓中缀表达式中的冗余括号，就是去掉 该括号不影响表达式的计算顺序</strong>——例如 <code>(c + b) + a</code> 中的括号是冗余的，可以表示成 <code>c + b + a</code>。</li>
+<li><strong>逻辑表达式推演。</strong> 一个逻辑表达式如果对于其变元的任一种取值都为真，则称为重言式；反之，如果 对于其变元的任一种取值都为假，则称矛盾式；否则既非重言式也非矛盾式。编写程序通过真值表判断 一个逻辑表达式属于哪一类。(1) 逻辑运算符包括 <code>|</code>、<code>&amp;</code>、<code>~</code>，分别标识逻辑或、与、非，表达式可包含 括号；(2) 如果是既非重言式也非矛盾式，试按照用户给定变元的取值（可选）显示逻辑表达式的值； (3) 按照用户的要求可以打印真值表。</li>
+<li><strong>Huffman 编码。</strong> 完成根据代码5.12 建立 Huffman 编码树的源代码，包括计算各个字母对应代码的 函数以及对信息进行编码与解码的函数。这个对象可以进一步扩展以支持对文件的压缩，为此必须增加 两个步骤：(1) 扫描整个文件以生成文件中各个字母的实际使用频率；(2) 在编码文件的开头存储 Huffman 树，以便解码函数使用。</li>
+<li><strong>优先队列。</strong> 利用最大堆实现一个优先队列。对于队列的操作应该至少支持下列几种指令： <code>void enqueue(int ObjectID, int Priority)</code> 向优先队列中插入一个 ID 号为 <code>ObjectID</code>、优先级为 <code>Priority</code> 的新对象；<code>int dequeue()</code> 从优先队列中删除优先级最高的对象并返回该对象的 ID 号； <code>void changeweight(int ObjectID, int newPriority)</code> 将 ID 号为 <code>ObjectID</code> 的对象的优先级改为 <code>newPriority</code>。<strong>需要建立一种机制来获取所需对象在堆中的位置</strong>，还需要对堆的实现进行修改， 以存储对象在数组中的位置，以便在辅助数组结构中记录针对堆中对象的修改。</li>
 </ol>
 <div class="pagenav"><a href="ch04-string.html"><span class="dir">← 上一篇</span>第4章 字符串</a><a href="ch06-tree.html" style="text-align:right"><span class="dir">下一篇 →</span>第6章 树</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#51-二叉树的概念">5.1 二叉树的概念</a><a href="#511-二叉树的定义和基本术语" class="sub">5.1.1 二叉树的定义和基本术语</a><a href="#512-满二叉树完全二叉树扩充二叉树" class="sub">5.1.2 满二叉树、完全二叉树、扩充二叉树</a><a href="#513-二叉树的主要性质" class="sub">5.1.3 二叉树的主要性质</a><a href="#52-二叉树的周游">5.2 二叉树的周游</a><a href="#521-二叉树的抽象数据类型" class="sub">5.2.1 二叉树的抽象数据类型</a><a href="#522-深度优先周游二叉树" class="sub">5.2.2 深度优先周游二叉树</a><a href="#523-广度优先周游二叉树" class="sub">5.2.3 广度优先周游二叉树</a><a href="#53-二叉树的存储结构">5.3 二叉树的存储结构</a><a href="#为什么这一节没有-python-版" class="sub">为什么这一节没有 Python 版</a><a href="#54-二叉搜索树">5.4 二叉搜索树</a><a href="#为什么这一节没有-python-版-1" class="sub">为什么这一节没有 Python 版</a><a href="#55-堆与优先队列">5.5 堆与优先队列</a><a href="#为什么这一节没有-python-版-2" class="sub">为什么这一节没有 Python 版</a><a href="#551a-建堆为什么是-on-而不是-onlog-n" class="sub">5.5.1a 建堆为什么是 $O(n)$ 而不是 $O(n\log n)$</a><a href="#552-优先队列" class="sub">5.5.2 优先队列</a><a href="#56-huffman-树及其应用">5.6 Huffman 树及其应用</a><a href="#为什么这一节没有-python-版-3" class="sub">为什么这一节没有 Python 版</a><a href="#562-huffman-编码" class="sub">5.6.2 Huffman 编码</a><a href="#56a-进阶选读从教学版到工程版" class="sub">5.6a 进阶（选读）：从教学版到工程版</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充证明题参考课程第-5-章" class="sub">补充证明题（参考课程第 5 章）</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#51-二叉树的概念">5.1 二叉树的概念</a><a href="#511-二叉树的定义和基本术语" class="sub">5.1.1 二叉树的定义和基本术语</a><a href="#512-满二叉树完全二叉树扩充二叉树" class="sub">5.1.2 满二叉树、完全二叉树、扩充二叉树</a><a href="#513-二叉树的主要性质" class="sub">5.1.3 二叉树的主要性质</a><a href="#52-二叉树的周游">5.2 二叉树的周游</a><a href="#521-二叉树的抽象数据类型" class="sub">5.2.1 二叉树的抽象数据类型</a><a href="#522-深度优先周游二叉树" class="sub">5.2.2 深度优先周游二叉树</a><a href="#523-广度优先周游二叉树" class="sub">5.2.3 广度优先周游二叉树</a><a href="#53-二叉树的存储结构">5.3 二叉树的存储结构</a><a href="#为什么这一节没有-python-版" class="sub">为什么这一节没有 Python 版</a><a href="#54-二叉搜索树">5.4 二叉搜索树</a><a href="#为什么这一节没有-python-版-1" class="sub">为什么这一节没有 Python 版</a><a href="#55-堆与优先队列">5.5 堆与优先队列</a><a href="#为什么这一节没有-python-版-2" class="sub">为什么这一节没有 Python 版</a><a href="#551a-建堆为什么是-on-而不是-onlog-n" class="sub">5.5.1a 建堆为什么是 $O(n)$ 而不是 $O(n\log n)$</a><a href="#552-优先队列" class="sub">5.5.2 优先队列</a><a href="#56-huffman-树及其应用">5.6 Huffman 树及其应用</a><a href="#为什么这一节没有-python-版-3" class="sub">为什么这一节没有 Python 版</a><a href="#562-huffman-编码" class="sub">5.6.2 Huffman 编码</a><a href="#56a-进阶选读从教学版到工程版" class="sub">5.6a 进阶（选读）：从教学版到工程版</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充证明题参考课程第-5-章" class="sub">补充证明题（参考课程第 5 章）</a><a href="#原书习题" class="sub">原书习题</a><a href="#上机题">上机题</a><a href="#原书上机题" class="sub">原书上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch05-binary-tree.md</code> 生成
