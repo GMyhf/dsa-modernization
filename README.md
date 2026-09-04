@@ -64,7 +64,7 @@ python3 tools/build_slides.py         # 把 book/slides/*.md 渲染成课件 boo
 ```
 
 网页版在线可读：**<https://gmyhf.github.io/dsa-modernization/>**，
-首页顶上有整本 PDF 的下载卡片（576 页 / 14.6 MB，卡片上的数字由构建器读文件得出，不是手写的）。
+首页顶上有整本 PDF 的下载卡片（576 页 / 14.7 MB，卡片上的数字由构建器读文件得出，不是手写的）。
 本地读就双击 `book/site/index.html`，或 `python3 -m http.server -d book` 后打开
 `http://localhost:8000/site/`。它是 `book/*.md` 的产物，闸门里有一条
 `build_site.py --check` 盯着两者不许脱节。
