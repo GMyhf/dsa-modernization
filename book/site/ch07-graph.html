@@ -1175,7 +1175,19 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
             result.append(edge)
     <span class="k">return</span> result <span class="k">if</span> <span class="t">len</span>(result) + <span class="n">1</span> == self.vertices <span class="k">else</span> <span class="k">None</span></code></pre></div>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
-<p>图对前驱和后继的个数都不加限制。边可以无向或有向、可以带权。存储常用邻接矩阵（稠密、问边 <span class="math">O(<span class="upr">1</span>)</span>）和邻接表（稀疏、沿出边走）。周游有深度优先和广度优先。有向无环图可以拓扑排序；有环则无解。非负权单源最短路用 Dijkstra，任意两点用 Floyd。无向连通图的最小生成树可用 Prim 或 Kruskal，二者总权相同。</p>
+<p>本章介绍了图的基本概念以及图的重要运算，<strong>重点是图的存储结构、图的周游、拓扑排序、最短路径、 最小生成树等相关算法</strong>。</p>
+<p>首先介绍了图的相关定义和抽象数据类型。图可以分为无向图和有向图，这两种图中含有一些对应的 概念，例如边和弧、度和出度/入度、连通分量和强连通分量等；在图的定义中还给出了子图、带权图等概念。</p>
+<p><strong>图有 3 种主要存储结构：相邻矩阵表示法、邻接表表示法和十字链表表示法。</strong> 相邻矩阵用数组表示顶点 间相邻关系的矩阵；图的邻接表由顶点表和边表组成，把依附于同一个顶点的边（或弧）存放在同一个边表 中；十字链表是有向图的另一种链式存储结构，可以看做有向图的邻接表和逆邻接表的结合。相邻矩阵 表示法与邻接表表示法有以下差异：</p>
+<ol>
+<li><strong>相邻矩阵适合存储稠密图，邻接表适合存储稀疏图；</strong></li>
+<li>求无向图顶点的度时采用这两种存储结构都比较容易，求有向图顶点的出度时采用相邻矩阵更方便；</li>
+<li>判断是否是图中的边，相邻矩阵更容易；</li>
+<li>求边数 <span class="math">e</span>，相邻矩阵耗时为 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>、与 <span class="math">e</span> 无关，邻接表的耗时为 <span class="math">O(n<span class="bin">+</span>e)</span>。</li>
+</ol>
+<p>图的周游是指从图中的某一个顶点出发，按照一定的策略访问图中的每一个顶点，使得每一个顶点被访问 且只被访问一次。<strong>图的深度优先搜索（DFS）类似于树的先根次序周游</strong>，采用的搜索方法的特点是尽可能 先对纵深方向进行搜索；<strong>广度优先搜索（BFS）的基本思想是「先被访问的顶点的邻接点」先于「后被访问 的顶点的邻接点」被访问</strong>。</p>
+<p>对一个有向无环图进行拓扑排序，是将图中所有顶点排成一个线性序列，使得弧尾在弧头之前出现。 算法的实现思想是：反复选择入度为 0 的顶点输出并删除该顶点涉及的所有边。</p>
+<p><strong>单源最短路径和所有顶点对之间的最短路径是两类在带权图上寻找最短路径的问题。</strong> 解决单源最短路径 问题的常用算法是 Dijkstra 算法，求所有顶点对之间的最短路径使用 Floyd 算法；<strong>其中 Floyd 算法是 比较典型的动态规划，而 Dijkstra 算法是贪心算法</strong>。</p>
+<p>构造最小生成树的算法有 Prim 算法和 Kruskal 算法。Prim 算法与 Dijkstra 算法类似，具体操作是从 图中的一个顶点开始，把这个顶点包括在 MST 中，然后反复寻找一个顶点已在 MST 中而另一个顶点还不 在 MST 中的最小权边，把新边和新结点加入到生成树中，<strong>Prim 算法适合于稠密图</strong>；Kruskal 算法的 构造思想是将 <span class="math">G</span> 中的 <span class="math">n</span> 个顶点看成是独立的 <span class="math">n</span> 个连通分量，然后在边集中选择代价最小且依附于 不同连通分支的边加入到生成树中，<strong>Kruskal 算法较适合于稀疏图</strong>。</p>
 <p>本章实现使用邻接矩阵，因此当前 Dijkstra 和 Prim 的直接实现是 <span class="math">O(V<sup><span class="upr">2</span></sup>)</span>，Floyd 是 <span class="math">O(V<sup><span class="upr">3</span></sup>)</span>，空间是 <span class="math">O(V<sup><span class="upr">2</span></sup>)</span>。改用邻接表并配合二叉堆之后，稀疏图上的 Dijkstra 达到 <span class="math">O((V<span class="bin">+</span>E)&thinsp;<span class="upr">log</span>&thinsp;V)</span>—— 这一条现在有实现和实测支撑，见 7.3.2 与 <code>code/ch07/adjacency_list</code>。两个结论各自对应 各自的存储结构，不能互相套用。</p>
 <h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
 <h3 id="补充算法设计题参考课程第-7-章"><a class="anchor" href="#补充算法设计题参考课程第-7-章">#</a>补充算法设计题（参考课程第 7 章）</h3>
@@ -1191,6 +1203,36 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
 <li>对同一张无向带权连通图分别做 Prim 和 Kruskal，验证边集可以不同、总权必须相同。</li>
 <li>邻接矩阵和邻接表各适合什么图、什么运算？给出空间代价。</li>
 </ol>
+<h3 id="原书习题"><a class="anchor" href="#原书习题">#</a>原书习题</h3>
+<blockquote><p>以下是原书第 7 章的习题，本轮按扫描件补回题面；<strong>参考答案尚未写出</strong>，已逐题登记在 <code>collab/answer_gaps.json</code>。图 7.26～图 7.29 见原书。</p></blockquote>
+<ol>
+<li>对于图 7.26 所示的带权有向图：(1) 写出其相邻矩阵；(2) 画出其邻接表表示；(3) 计算每个顶点的 入度和出度；(4) 如果每个指针需要 4 个字节、每个顶点的标号需要 2 个字节、每条边的权需要 2 个 字节，则此图采用哪种表示法所需要的空间较少？</li>
+<li>对于图 7.27 所示的有向图，从顶点 <span class="math">v<sub><span class="upr">1</span></sub></span> 出发分别画出其深度优先搜索（DFS）和广度优先搜索（BFS） 的生成森林。</li>
+<li>求图 7.28 所示的有向图中从顶点 <span class="math">v<sub><span class="upr">4</span></sub></span> 到其他各顶点的全部最短路径及长度。</li>
+<li><strong>拓扑排序的结果不是唯一的</strong>，对于图 7.29 所示有向图的顶点进行拓扑排序，能够得到多少个不同的 拓扑序列？试输出得到的所有拓扑序列。</li>
+<li>证明：只要适当排列顶点的次序，就能够使有向无环图的相邻矩阵中对角线以下元素全为 0。</li>
+<li>证明：(1) 一个没有简单回路的连通无向图 <span class="math">G<span class="rel">=</span>⟨V,E⟩</span> 有 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 条边； (2) 一个有 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 条边的无环图一定是连通的。</li>
+<li>有向图 <span class="math">G<span class="rel">=</span>⟨V,E⟩</span> 的<strong>转置</strong>是图 <span class="math">G<sup>T</sup><span class="rel">=</span>⟨V,E<sup>T</sup>⟩</span>，其中边 <span class="math">⟨u,v⟩<span class="rel">∈</span>E<sup>T</sup></span> 当且仅当 <span class="math">⟨v,u⟩<span class="rel">∈</span>E</span>，即 <span class="math">G<sup>T</sup></span> 就是逆转 <span class="math">G</span> 中所有的方向而 得到的图。试按照相邻矩阵和邻接表两种表示法写出从 <span class="math">G</span> 计算 <span class="math">G<sup>T</sup></span> 的有效算法，并确定算法的时间 复杂度。</li>
+<li>有向图 <span class="math">G<span class="rel">=</span>⟨V,E⟩</span> 的<strong>平方图</strong>是图 <span class="math">G<sup><span class="upr">2</span></sup><span class="rel">=</span>⟨V,E<sup><span class="upr">2</span></sup>⟩</span>，其中边 <span class="math">⟨u,v⟩<span class="rel">∈</span>E<sup><span class="upr">2</span></sup></span> 当且仅当存在一个顶点 <span class="math">x<span class="rel">∈</span>V</span> 使得 <span class="math">⟨u,x⟩<span class="rel">∈</span>E</span> 且 <span class="math">⟨x,v⟩<span class="rel">∈</span>E</span>。试按照相邻矩阵和邻接表两种表示法写出从 <span class="math">G</span> 产生 <span class="math">G<sup><span class="upr">2</span></sup></span> 的有效算法， 并确定算法的时间复杂度。</li>
+<li>写出一个算法确定一个有 <span class="math">n</span> 个顶点 <span class="math">e</span> 条边的图（有向图或者无向图）是否包含回路，所设计的算法 时间复杂度应该是 <span class="math">O(n<span class="bin">+</span>e)</span>。</li>
+<li>说明并验证你所认为的每对顶点间最短路径问题的<strong>最大可能下限</strong>。</li>
+<li>证明：如果图 <span class="math">G</span> 所有边的权值不相等时，它只存在一棵最小生成树（MST）。</li>
+<li>Dijkstra 最短路径算法是否给出一棵生成树？是否给出一棵最小生成树（MST）？并证明你的结论。</li>
+<li>设计算法找图（有向图或无向图）的所有连通分量（对于有向图则是强连通分量）。提示：第一个连通 分量的所有顶点使用第一分量的标记，第二个连通分量的所有顶点使用第二分量的标记，依次类推。</li>
+<li>证明：对于一个无向图 <span class="math">G<span class="rel">=</span>⟨V,E⟩</span>，若 <span class="math">G</span> 中各顶点的度均大于或等于 2，则 <span class="math">G</span> 中必有 回路。</li>
+<li>设有一个含 <span class="math">n</span> 个顶点的有向无环连通图 <span class="math">G</span>，试问 <span class="math">G</span> 有多少条边？</li>
+<li>在有向图中，<strong>源</strong>是一个入度为 0 的顶点，试证明每个有向无环图（DAG）至少有一个源。</li>
+<li>什么样的有向无环图（DAG）具有唯一的拓扑排序？</li>
+<li>采用相邻矩阵表示一个有向图 <span class="math">G</span>，写出一个算法确定 <span class="math">G</span> 是否含有一个<strong>漏</strong>（即入度为 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span>、出度 为 0 的顶点），要求该算法的时间复杂度是 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>。</li>
+<li>对于一个具有 <span class="math">n</span> 个顶点和 <span class="math">e</span> 条边的有向图 <span class="math">G<span class="rel">=</span>⟨V,E⟩</span>，证明：求其强连通分量的 算法所需的时间复杂度是 <span class="math">O(n<span class="bin">+</span>e)</span>。</li>
+<li>设计一个算法，在图（有向图或者无向图）的邻接表表示的基础上实现边的插入和删除。</li>
+<li>只要图中不存在权值为负数的边，Dijkstra 算法就可以使用。<strong>如果一个图存在权值为负数的边， Dijkstra 算法是否继续可用？</strong> 如果你认为不可用，是否有办法改进 Dijkstra 算法使其可用？试证明 你的结论；如果你改进了 Dijkstra 算法，也请证明所做改进的正确性。</li>
+<li>设一个带权有向图 <span class="math">G<span class="rel">=</span>⟨V,E⟩</span>，<span class="math">v</span> 是 <span class="math">G</span> 的一个顶点，<span class="math">v</span> 的<strong>偏心距</strong>定义为 <span class="math"><span class="upr">max</span>&thinsp;{</span> 从 <span class="math">u</span> 到 <span class="math">v</span> 的最短路径的长度 <span class="math">}</span>，其中 <span class="math">u<span class="rel">∈</span>V</span>（<strong>最短路径的长度不是指边数，而是指 路径上的边所带的权的总和</strong>）。将 <span class="math">G</span> 中偏心距最小的顶点称为 <span class="math">G</span> 的<strong>中心</strong>，试设计一个算法求 带权有向图的中心，并确定算法的时间复杂度。</li>
+<li>每棵树是一个有向无环图（DAG），但并不是所有 DAG 就是树。试设计一个程序以判断 DAG 是否 是树，并确定程序所采用算法的时间复杂度。</li>
+<li>设计算法找有向图的<strong>根</strong>：以一个有向图作为输入，如果它有根，则输出它的所有的根；如果没有， 则输出空。试分析算法的时间复杂度。</li>
+<li>设计算法找有向无环图（DAG）每对顶点间的「<strong>最长简单路径</strong>」（所谓最长简单路径，是指该简单路径 包含的边数最多）。以一个有向无环图作为输入，对于每对顶点，如果它们之间存在简单路径，则输出 其中路径长度最长（边数最多）的简单路径，否则输出空。试分析算法的时间复杂度。</li>
+<li>设计一个程序，输入一个图（有向图或者是无向图）<span class="math">G<span class="rel">=</span>⟨V,E⟩</span> 以及一对顶点 <span class="math">v<sub>i</sub>,v<sub>j</sub><span class="rel">∈</span>V</span>，输出的结果是：如果从 <span class="math">v<sub>i</sub></span> 到 <span class="math">v<sub>j</sub></span> 存在一条简单路径，则输出从 <span class="math">v<sub>i</sub></span> 到 <span class="math">v<sub>j</sub></span> 的 所有简单路径；如果不存在，则输出空。</li>
+</ol>
 <h2 id="上机题"><a class="anchor" href="#上机题">#</a>上机题</h2>
 <ol>
 <li>读入一个有向图，输出一种拓扑序；有环则报告。</li>
@@ -1198,9 +1240,19 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
 <li>实现 Prim 与 Kruskal，对同一组随机连通图比较总权。</li>
 <li><code>code/ch07/adjacency_list</code> 已经用邻接表重做了 DFS/BFS 并与矩阵版对拍。再往前一步：给它加一个删边接口，并说明为什么删边在邻接表上是 <span class="math">O(<span class="upr">deg</span>&thinsp;u)</span>、在矩阵上是 <span class="math">O(<span class="upr">1</span>)</span>。</li>
 </ol>
+<h3 id="原书上机题"><a class="anchor" href="#原书上机题">#</a>原书上机题</h3>
+<blockquote><p>同上，本轮只补题面，参考答案登记在 <code>collab/answer_gaps.json</code>。</p></blockquote>
+<ol>
+<li><strong>套汇</strong>是指利用汇率差异将一个单位的货币转换为大于一个单位的同种货币。例如，假设 1 美元兑换 7.51 人民币，1 元人民币兑换 0.07 英镑，1 英镑兑换 2.03 美元，那么如果一个人拿 1 美元先兑换成 人民币，再把人民币兑换成英镑，最后把英镑兑换成美元，则他最后能够得到 <span class="math"><span class="upr">1</span><span class="bin">×</span><span class="upr">7.51</span><span class="bin">×</span><span class="upr">0.07</span><span class="bin">×</span><span class="upr">2.03</span><span class="rel">=</span><span class="upr">1.07</span></span> 美元，从而获得 <span class="math"><span class="upr">1.07</span><span class="bin">−</span><span class="upr">1</span><span class="rel">=</span><span class="upr">0.07</span></span> 美元的利润，这就是套汇。 假设有 <span class="math">n</span> 种货币 <span class="math">v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">2</span></sub>,⋯,v<sub>n</sub></span> 和有关汇率的 <span class="math">n<span class="bin">×</span>n</span> 矩阵，其中 <span class="math">A[i,j]</span> 是一单位货币 <span class="math">v<sub>i</sub></span> 兑换成货币 <span class="math">v<sub>j</sub></span> 的单位数，要求设计一个程序判断是否存在一个货币序列 <span class="math">v<sub>i<span class="upr">1</span></sub>,v<sub>i<span class="upr">2</span></sub>,⋯,v<sub>ik</sub></span> 使得 <span class="math">A[i<sub><span class="upr">1</span></sub>,i<sub><span class="upr">2</span></sub>]<span class="bin">×</span>A[i<sub><span class="upr">2</span></sub>,i<sub><span class="upr">3</span></sub>]<span class="bin">×</span>⋯<span class="bin">×</span>A[i<sub>k</sub>,i<sub><span class="upr">1</span></sub>]&gt;<span class="upr">1</span></span>； 如果存在则输出所有这样的货币序列，如果不存在则输出空，并确定算法的时间复杂度。</li>
+<li><strong>AOE 网络与关键路径。</strong> 有向无环图在工程计划和管理系统中具有广泛的应用，是描述一项工程或 系统进行过程的有效工具。如果用一个带权的有向无环图表示这种结构，其中顶点表示事件、有向边 表示活动、弧上的权值表示活动进行的时间，这样的有向图称做 <strong>AOE（activity on edge）网络</strong>。</li>
+</ol>
+<p>利用 AOE 网络可以对工程进行估算，分析完成整个工程至少需要的时间以及哪些活动是影响工程进度 的关键等问题。完成工程的最短时间是从开始点到结束点的最长路径长度，具有最长路径长度的路径 称为<strong>关键路径</strong>（critical path），关键路径上的活动称为<strong>关键活动</strong>：如果不按期完成关键活动就会 影响整个工程的完成时间，<strong>而提前完成那些不在关键路径上的活动也不能加快整个工程的进度</strong>。</p>
+<p>用 <span class="math">e(i)</span> 表示活动 <span class="math">a<sub>i</sub></span> 的最早发生时间，即从开始结点 <span class="math">v<sub><span class="upr">1</span></sub></span> 到结点 <span class="math">v<sub>i</sub></span> 的最长路径长度；用 <span class="math">l(i)</span> 表示活动 <span class="math">a<sub>i</sub></span> 的最迟发生时间，即在保证结点 <span class="math">v<sub>n</sub></span> 在 <span class="math">e(n)</span> 时刻发生的前提下、活动 <span class="math">a<sub>i</sub></span> 允许发生的 最迟时间。可见 <span class="math">Δt<span class="rel">=</span>l(i)<span class="bin">−</span>e(i)</span> 表示完成事件 <span class="math">v<sub>i</sub></span> 的时间余量，<strong>所谓关键活动就是那些 <span class="math">l(i)<span class="rel">=</span>e(i)</span> 的活动</strong>。</p>
+<p>为了求 AOE 网络中活动的 <span class="math">l(i)</span> 和 <span class="math">e(i)</span>，定义 <span class="math">ee(i)</span> 为事件 <span class="math">v<sub>i</sub></span> 的最早发生时间、<span class="math">le(i)</span> 为事件 <span class="math">v<sub>i</sub></span> 允许发生的最晚时间。如果 AOE 网络中的活动 <span class="math">a<sub>i</sub></span> 由弧 <span class="math">⟨j,k⟩</span> 给出、其时间用权值 <span class="math">W(⟨v<sub>j</sub>,v<sub>k</sub>⟩)</span> 表示，则有 <span class="math">e(i)<span class="rel">=</span>ee(j)</span>、<span class="math">l(i)<span class="rel">=</span>le(k)<span class="bin">−</span>W(⟨j,k⟩)</span>。 计算 <span class="math">ee(i)</span> 和 <span class="math">le(i)</span> 的过程是：(1) 令 <span class="math">ee(<span class="upr">0</span>)<span class="rel">=</span><span class="upr">0</span></span>，然后向前推进求 <span class="math">ee(j)</span>； (2) 令 <span class="math">le(n)<span class="rel">=</span>ee(n)</span>，然后向后退求 <span class="math">le(i)</span>。<strong>第 (1) 步求 <span class="math">ee(j)</span> 必须在结点 <span class="math">v<sub>j</sub></span> 的所有前驱结点 的最早发生时间都已求得的前提下进行；第 (2) 步求 <span class="math">le(i)</span> 必须在结点 <span class="math">v<sub>i</sub></span> 的所有后继结点的最晚 发生时间都已求得的前提下进行，因此结点序列 <span class="math">v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">2</span></sub>,⋯,v<sub>n</sub></span> 必须是一个拓扑序列。</strong></p>
+<p>了解了上面的知识后，试设计一个以文件方式存储事件结点网络的格式，从而实现从一个文件中读入一个 事件结点网络，并求出各活动可能的最早开始时间和允许的最晚完成时间、整个工程的最短完成时间、 哪些活动是关键活动、提高哪些活动的速度能够使整个工程提前完成等，并将求出的结果写入到另一个 文件。</p>
 <div class="pagenav"><a href="ch06-tree.html"><span class="dir">← 上一篇</span>第6章 树</a><a href="ch08-sorting.html" style="text-align:right"><span class="dir">下一篇 →</span>第8章 内部排序</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#71-图的定义和基本术语">7.1 图的定义和基本术语</a><a href="#72-图的抽象数据类型">7.2 图的抽象数据类型</a><a href="#73-图的存储结构">7.3 图的存储结构</a><a href="#731-相邻矩阵" class="sub">7.3.1 相邻矩阵</a><a href="#732-邻接表" class="sub">7.3.2 邻接表</a><a href="#733-十字链表" class="sub">7.3.3 十字链表</a><a href="#74-图的周游">7.4 图的周游</a><a href="#先跑一遍" class="sub">先跑一遍</a><a href="#741-深度优先周游" class="sub">7.4.1 深度优先周游</a><a href="#742-广度优先周游" class="sub">7.4.2 广度优先周游</a><a href="#743-拓扑排序" class="sub">7.4.3 拓扑排序</a><a href="#75-最短路径">7.5 最短路径</a><a href="#751-单源最短路径" class="sub">7.5.1 单源最短路径</a><a href="#752-每对顶点之间的最短路径" class="sub">7.5.2 每对顶点之间的最短路径</a><a href="#76-最小生成树">7.6 最小生成树</a><a href="#761-prim-算法" class="sub">7.6.1 Prim 算法</a><a href="#762-kruskal-算法" class="sub">7.6.2 Kruskal 算法</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充算法设计题参考课程第-7-章" class="sub">补充算法设计题（参考课程第 7 章）</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#71-图的定义和基本术语">7.1 图的定义和基本术语</a><a href="#72-图的抽象数据类型">7.2 图的抽象数据类型</a><a href="#73-图的存储结构">7.3 图的存储结构</a><a href="#731-相邻矩阵" class="sub">7.3.1 相邻矩阵</a><a href="#732-邻接表" class="sub">7.3.2 邻接表</a><a href="#733-十字链表" class="sub">7.3.3 十字链表</a><a href="#74-图的周游">7.4 图的周游</a><a href="#先跑一遍" class="sub">先跑一遍</a><a href="#741-深度优先周游" class="sub">7.4.1 深度优先周游</a><a href="#742-广度优先周游" class="sub">7.4.2 广度优先周游</a><a href="#743-拓扑排序" class="sub">7.4.3 拓扑排序</a><a href="#75-最短路径">7.5 最短路径</a><a href="#751-单源最短路径" class="sub">7.5.1 单源最短路径</a><a href="#752-每对顶点之间的最短路径" class="sub">7.5.2 每对顶点之间的最短路径</a><a href="#76-最小生成树">7.6 最小生成树</a><a href="#761-prim-算法" class="sub">7.6.1 Prim 算法</a><a href="#762-kruskal-算法" class="sub">7.6.2 Kruskal 算法</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充算法设计题参考课程第-7-章" class="sub">补充算法设计题（参考课程第 7 章）</a><a href="#原书习题" class="sub">原书习题</a><a href="#上机题">上机题</a><a href="#原书上机题" class="sub">原书上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch07-graph.md</code> 生成
