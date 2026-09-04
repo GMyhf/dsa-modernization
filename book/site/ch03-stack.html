@@ -1625,10 +1625,10 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
 <figure><img loading="lazy" src="../assets/d552466644ef240e.jpg" alt="图 3.10 顺序队列的实现示意"><figcaption>图 3.10 顺序队列的实现示意</figcaption></figure>
 <p>图 3.10　顺序队列的实现示意。出队让 <code>front</code> 后移，入队让 <code>rear</code> 后移；元素本身一个都不搬。</p>
 <p>这样做会遇到<strong>假溢出</strong>：整个队列不断向数组尾部漂移，<code>rear</code> 一旦到了 <code>mSize - 1</code>，即使数组前端还空着一片，入队也会报满。解决办法是把数组在逻辑上看成一个环——下标 0 是下标 <code>mSize - 1</code> 的直接后继，位置 <code>x</code> 的后继是 <code>(x + 1) % mSize</code>，这就是<strong>循环队列</strong>（也叫环形队列）。</p>
-<figure><img loading="lazy" src="../assets/combined/fig-3-11.png" alt="图 3.11 顺序队列的一种实现方式"><figcaption>图 3.11 顺序队列的一种实现方式</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-3-11.png" alt="图 3.11 顺序队列的一种实现方式"><figcaption>图 3.11 顺序队列的一种实现方式</figcaption></figure>
 <p>图 3.11　把数组看成环之后的样子：(a) 初始队列里有 12、17、8、20 四个元素；(b) 两次出队、三次入队之后，队列变成 8、20、15、9、6。入队增加 <code>rear</code>，出队增加 <code>front</code>，两者都在环上顺时针走。</p>
 <p>绕回之后有个麻烦：<code>front == rear</code> 既可能是空、也可能是满，分不开。数一数就明白为什么：<span class="math">n</span> 个位置的数组，队列有「空、1 个、2 个……<span class="math">n</span> 个」共 <span class="math">n<span class="bin">+</span><span class="upr">1</span></span> 种状态，而固定 <code>front</code> 后 <code>rear</code> 只有 <span class="math">n</span> 种取值，必有两种状态撞在一起。一种办法是另记一个计数或布尔量；顺序队列更常用的是原书的办法——<strong>牺牲一个槽位</strong>：数组开 <span class="math">n<span class="bin">+</span><span class="upr">1</span></span> 格却只装 <span class="math">n</span> 个元素，约定「rear 的下一格就是 front」时算满，于是两种状态就分得开了。这正是章首 demo 里「容量 3 时第 4 个入不进去」的原因。</p>
-<figure><img loading="lazy" src="../assets/combined/fig-3-12.png" alt="图 3.12 循环队列的实现示例"><figcaption>图 3.12 循环队列的实现示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-3-12.png" alt="图 3.12 循环队列的实现示例"><figcaption>图 3.12 循环队列的实现示例</figcaption></figure>
 <p>图 3.12　牺牲一格的循环队列（8 格数组最多放 7 个元素）：(a) 空，<code>front == rear</code>；(b) 一般状态；(c) 满，<code>(rear + 1) % (n + 1) == front</code>。</p>
 <h3 id="323-链式队列"><a class="anchor" href="#323-链式队列">#</a>3.2.3 链式队列</h3>
 <p><strong>链式队列</strong>（linked queue）是队列的链式实现，本质上是对链表的简化：链接的方向从队列的前端 指向队列的尾端，成员 <code>front</code> 和 <code>rear</code> 分别指向队首和队尾。入队只是把新元素放到链表的尾部 并修改 <code>rear</code> 使其指向新的结点；出队只是删除表中最前面的那个结点并修改 <code>front</code> 使其指向新的 队首。结点分散在堆上，所以<strong>没有「队满」这回事</strong>。</p>

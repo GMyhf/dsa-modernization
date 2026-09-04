@@ -979,7 +979,7 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 <p>结点(node)就是上面那个 <code>Node</code>：<strong>一个数据域，加一根指向后继的链接域</strong>。 原书把它写成独立的 <code>Link&lt;T&gt;</code>；这里放在 <code>LinkedList</code> 的 private 区里， 因为调用方拿不到结点指针，就没法改坏链。</p>
 <p>【代码2.6结束】</p>
 <p><code>LinkedList&lt;T&gt;</code> 还有一个<strong>头结点</strong>(head node)：一个不存放数据的哨兵， 永远排在第一个真元素前面。它等价于原书的&quot;第 -1 个结点&quot;。 有了它，表头插入和删除都变成&quot;修改某个前驱的 <code>next</code>&quot;，空表也不必另写一套分支—— 这就是 <code>predecessor_at(0)</code> 能直接返回头结点的原因。</p>
-<figure><img loading="lazy" src="../assets/combined/fig-2-6.png" alt="图 2.6 引入头结点的单链表"><figcaption>图 2.6 引入头结点的单链表</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-2-6.png" alt="图 2.6 引入头结点的单链表"><figcaption>图 2.6 引入头结点的单链表</figcaption></figure>
 <p>图 2.6　引入头结点的单链表：(a) 带头结点的空表，(b) 一个典型的带头结点的单链表。带阴影的那个结点就是头结点，它的数据域不算表中元素，只是为了让空表和表头不再是特例。</p>
 <p>尾指针 <code>tail_</code> 指向最后一个实际结点，空表时回指头结点， 所以 <code>append</code> 不需要从头寻找末尾，是 O(1)。</p>
 <p>【代码2.7】单链表的类型定义。</p>

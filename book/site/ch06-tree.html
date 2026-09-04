@@ -181,7 +181,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <figure><img loading="lazy" src="../assets/42cd7ad7ac4d0fbe.jpg" alt="图 6.1 树形表示法"><figcaption>图 6.1 树形表示法</figcaption></figure>
 <p>图 6.1　一般树的树形表示。</p>
 <p>树形结构在客观世界中大量存在，有多种逻辑表示方法。<strong>树形表示法</strong>其实是根在上的倒挂树：用圆圈 结点表示树的数据元素，用连接两个结点的边表示数据元素的关系；尽管树中的边没有标明方向，但是 一般默认上面的结点表示前驱、下面的数据元素表示该结点的后继。<strong>凹入表示法</strong>表示出根结点及各个 子树的层次关系，线条表示各结点：树根结点对应的线条最长，各子结点对应的线条短于其父结点并置 于父结点线条的下方，各兄弟结点对应的线条长度相同——这种表示法类似于图书的目录表。<strong>文氏图 表示法</strong>用嵌套的圆表示树：每棵树对应于一个圆，树的根结点及其子树画在同一个圆内，同一个根结点 的任意两棵子树对应的圆互不相交。<strong>嵌套括号表示法</strong>是类似于广义表的一种表示方法：括号表示层次 关系，每棵树对应于一个以根结点作为表名的表，根结点写在左边，表由子树森林对应的表组成，各个 子树对应的表用逗号隔开，例如 <code>A(B(D(I,J),E), C(F,G(K,L),H))</code>。表示法多样，说明树在建模里用得广。</p>
-<figure><img loading="lazy" src="../assets/ch06/fig-6-2.png" alt="图 6.2 树形结构的凹入表、文氏图和嵌套括号表示"><figcaption>图 6.2 树形结构的凹入表、文氏图和嵌套括号表示</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-6-2.png" alt="图 6.2 树形结构的凹入表、文氏图和嵌套括号表示"><figcaption>图 6.2 树形结构的凹入表、文氏图和嵌套括号表示</figcaption></figure>
 <p>图 6.2　同一棵树的三种等价表示。凹入表适合按层次阅读，文氏图突出包含关系，嵌套括号则便于作为文本编码或输入。</p>
 <p>例如 A 的孩子是 B、C、D，B 的孩子是 E、F。用左孩子 / 右兄弟画出来：</p>
 <div class="codeblock" data-lang="text"><pre><code>A
@@ -196,14 +196,14 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <li><strong>旋转</strong>：以根为轴顺时针转一下，画面才像通常的二叉树。</li>
 </ol>
 <p>转换后，一个结点的左孩子是它在原树（或森林）里的第一个孩子，右孩子是原来的下一个兄弟。左枝上是父子关系，右枝上是兄弟关系。单棵树的根没有兄弟，所以转成二叉树后根的右孩子一定为空。</p>
-<figure><img loading="lazy" src="../assets/ch06/fig-6-3.png" alt="图 6.3 森林经过连线、切线、旋转转换为二叉树"><figcaption>图 6.3 森林经过连线、切线、旋转转换为二叉树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-6-3.png" alt="图 6.3 森林经过连线、切线、旋转转换为二叉树"><figcaption>图 6.3 森林经过连线、切线、旋转转换为二叉树</figcaption></figure>
 <p>图 6.3　森林转换为二叉树的过程：先把兄弟连线，再切去多余的父子线，最后旋转整理方向。</p>
 <p>形式地说：森林 <span class="math">F<span class="rel">=</span>{T<sub><span class="upr">1</span></sub>,T<sub><span class="upr">2</span></sub>,…,T<sub>n</sub>}</span> 转成二叉树 <span class="math">B(F)</span>——<span class="math">F</span> 空则 <span class="math">B(F)</span> 空；否则 <span class="math">B(F)</span> 的根是 <span class="math">T<sub><span class="upr">1</span></sub></span> 的根，<span class="math">B(F)</span> 的左子树是 <span class="math">T<sub><span class="upr">1</span></sub></span> 的子树森林转成的二叉树，<span class="math">B(F)</span> 的右子树是 <span class="math">{T<sub><span class="upr">2</span></sub>,…,T<sub>n</sub>}</span> 转成的二叉树。</p>
 <p>反过来是三步的逆：逆时针旋转；若 <span class="math">x</span> 是 <span class="math">y</span> 的左孩子，就把 <span class="math">x</span> 以及 <span class="math">x</span> 右侧整条右链上的结点都补连到 <span class="math">y</span>；再删掉所有到右孩子的边。二叉树 <span class="math">B</span> 对应的森林 <span class="math">F(B)</span>：空树对应空森林；否则 <span class="math">F(B)</span> 是一棵以 <span class="math">B</span> 的根为根、以 <span class="math">F(B<sub>L</sub>)</span> 为子树森林的树，再加上 <span class="math">F(B<sub>R</sub>)</span>。这两种转换互逆。</p>
-<figure><img loading="lazy" src="../assets/ch06/fig-6-4-full.png" alt="图 6.4 二叉树转换为森林"><figcaption>图 6.4 二叉树转换为森林</figcaption></figure>
-<p>图 6.4　上述转换的逆过程，完整保留二叉树和对应森林的全部子图。</p>
-<figure><img loading="lazy" src="../assets/ch06/fig-6-5-full.png" alt="图 6.5 森林和对应的二叉树"><figcaption>图 6.5 森林和对应的二叉树</figcaption></figure>
-<p>图 6.5　森林与对应二叉树的互相转换，完整保留原书的森林、二叉树和题注。</p>
+<figure><img loading="lazy" src="../assets/scan/fig-6-4.png" alt="图 6.4 二叉树转换为森林"><figcaption>图 6.4 二叉树转换为森林</figcaption></figure>
+<p>图 6.4　上述转换的逆过程：(a) 二叉树；(b) 它对应的森林。</p>
+<figure><img loading="lazy" src="../assets/scan/fig-6-5.png" alt="图 6.5 森林和对应的二叉树"><figcaption>图 6.5 森林和对应的二叉树</figcaption></figure>
+<p>图 6.5　森林与对应二叉树的互相转换：(a) 森林；(b) 森林对应的二叉树。</p>
 <h3 id="613-树的抽象数据类型"><a class="anchor" href="#613-树的抽象数据类型">#</a>6.1.3 树的抽象数据类型</h3>
 <p>和二叉树一样，树的 ADT 分结点类和树类。结点保存自身值，以及指向最左孩子、下一个兄弟和父结点的链接；树类保存根（森林时根还可以沿兄弟链相连）。对外运算包括：用一个值建立根；在某结点下插入第一个孩子；在某结点旁插入下一个兄弟；查询父结点；删除一棵子树；以及先根、后根、层次三种周游。插入和删除必须同时维护父链、孩子链和兄弟链，不能只改其中一条。原书【代码6.1】【代码6.2】只给出声明，本书把这些运算直接写在 <code>GeneralTree</code> 上，不再另设空基类。</p>
 <h3 id="614-树的周游"><a class="anchor" href="#614-树的周游">#</a>6.1.4 树的周游</h3>
@@ -258,7 +258,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h3 id="623-动态表示法"><a class="anchor" href="#623-动态表示法">#</a>6.2.3 动态表示法</h3>
 <p><strong>问题的根子在于「度不固定」。</strong> 树中的结点可以有任意的度数，并且各结点的子结点数随时可能发生 变化，这种动态性给树的实现带来了困难。当然，可以采取一种不太灵活的方式，即限定树的度数， 在实现树的时候只需要给树的每一个结点分配确定数目的指针域即可；很明显，<strong>这种存储方法对度数 小的结点会浪费存储空间，而超过限制时增加结点会非常不方便</strong>。</p>
 <p>另外一种实现方法是<strong>为每个结点分配可变的存储空间</strong>：每一个结点都存储一个子结点指针表，其子 结点的数目也存储在该结点中。使用这样的存储方式可以避免上述不足——即使子结点数目发生变化， 也只需给该结点重新分配一个大小合适的存储空间即可，因此这种途径更具有灵活性。这种表示法 <strong>本质上与「子结点表」表示法相同，但是它可以动态地分配结点空间，而不是把所有结点分配在同一个 数组中</strong>；树的大小事先未知、会频繁长出新结点时更合适。图 6.9(a) 是树形结构，图 6.9(b) 展开了 每个结点的动态孩子表。</p>
-<figure><img loading="lazy" src="../assets/combined/fig-6-9.png" alt="图 6.9 树的动态表示法：(a) 树；(b) 树的实现"><figcaption>图 6.9 树的动态表示法：(a) 树；(b) 树的实现</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-6-9.png" alt="图 6.9 树的动态表示法：(a) 树；(b) 树的实现"><figcaption>图 6.9 树的动态表示法：(a) 树；(b) 树的实现</figcaption></figure>
 <p>图 6.9　树的动态表示法：(a) 的每个结点在 (b) 里都是一块单独分配的空间，里面存着孩子数和一张长度可变的孩子指针表。</p>
 <h3 id="624-动态左子右兄二叉链表表示法"><a class="anchor" href="#624-动态左子右兄二叉链表表示法">#</a>6.2.4 动态“左子/右兄”二叉链表表示法</h3>
 <p>6.1.2 节介绍了森林和树的等价转换，6.2.2 节的静态「左子/右兄」可以看成是这种方法的<strong>静态链表 实现</strong>。既然如此，就可以直接采用第 5 章二叉树链式存储的做法，实现<strong>动态的「左子/右兄」二叉链表 表示法</strong>（dynamic &quot;left child / right sibling&quot;，往往简称为「左子/右兄」表示法，或二叉链表表示法）： 左子结点在树中是结点的最左子结点，右子结点是结点原来的右侧兄弟结点，而<strong>根的右链就是森林中 每棵树的根结点</strong>。这种方法应用最广泛，也是本章的主实现。</p>
@@ -560,14 +560,14 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>用父指针表示时，把每个子集看成一棵树，森林中的每棵树代表一个子集，树根就是该集合的标识符。<code>find</code> 沿父链找到根，<code>union</code> 只需把一棵树的根指向另一棵树的根；因此不必搬动集合中的所有元素。</p>
 <figure><img loading="lazy" src="../assets/444a429faef0f9ad.jpg" alt="图 6.10 父指针表示法"><figcaption>图 6.10 父指针表示法</figcaption></figure>
 <p>图 6.10　用每个结点的父指针表示树。</p>
-<figure><img loading="lazy" src="../assets/combined/fig-6-11.png" alt="图 6.11 集合的表示方法：(a) 子集 $S_1$；(b) 子集 $S_2$；(c) 并集 $S_3$"><figcaption>图 6.11 集合的表示方法：(a) 子集 <span class="math">S<sub><span class="upr">1</span></sub></span>；(b) 子集 <span class="math">S<sub><span class="upr">2</span></sub></span>；(c) 并集 <span class="math">S<sub><span class="upr">3</span></sub></span></figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-6-11.png" alt="图 6.11 集合的表示方法：(a) 子集 $S_1$；(b) 子集 $S_2$；(c) 并集 $S_3$"><figcaption>图 6.11 集合的表示方法：(a) 子集 <span class="math">S<sub><span class="upr">1</span></sub></span>；(b) 子集 <span class="math">S<sub><span class="upr">2</span></sub></span>；(c) 并集 <span class="math">S<sub><span class="upr">3</span></sub></span></figcaption></figure>
 <p>图 6.11　集合的父指针表示与并集：(a) 子集 <span class="math">S<sub><span class="upr">1</span></sub></span>、(b) 子集 <span class="math">S<sub><span class="upr">2</span></sub></span> 各是一棵树，(c) 合并后 <span class="math">S<sub><span class="upr">1</span></sub></span> 的根挂到了 <span class="math">S<sub><span class="upr">2</span></sub></span> 的根下。</p>
 <p><strong>第一条是【重量权衡合并规则】</strong>(weighted union rule)：合并时看两个集合的<strong>元素个数</strong>， 「令含元素少的子集的树根指向含元素多的子集的根」。原书【代码6.8】的结点里那个 <code>int nCount; //子树元素数目</code> 就是为它准备的。小树挂到大树下，能把整体深度限制在 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>—— 理由是每次合并树高最多加 1，而元素个数至少翻倍，所以任何结点的深度最多增加 <span class="math"><span class="upr">log</span>&thinsp;n</span> 次。</p>
 <blockquote><p><strong>注意别和「按秩合并」混了。</strong> 按秩比的是<strong>树高</strong>，按重量比的是<strong>元素个数</strong>。 两者复杂度同阶，但在同一组等价对上会长出<strong>形状不同</strong>的树。本书按原书口径用重量， 课程第 6 章习题 8 要求「使用重量权衡合并规则与路径压缩」并画出父指针数组， 换成按秩就对不上答案。并列时本书让<strong>值大的根挂到值小的根下</strong>—— 原书没规定这一条，这个口径取自那道习题的原话，好让书里的实现能直接用来核对。</p></blockquote>
-<figure><img loading="lazy" src="../assets/combined/fig-6-12.png" alt="图 6.12 合并操作的一个极端情况：(a) $n$ 个集合；(b) 合并操作"><figcaption>图 6.12 合并操作的一个极端情况：(a) <span class="math">n</span> 个集合；(b) 合并操作</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-6-12.png" alt="图 6.12 合并操作的一个极端情况：(a) $n$ 个集合；(b) 合并操作"><figcaption>图 6.12 合并操作的一个极端情况：(a) <span class="math">n</span> 个集合；(b) 合并操作</figcaption></figure>
 <p>图 6.12　不采用重量权衡时，反复合并可能形成极端退化的树：(a) 起初是 <span class="math">n</span> 个单元素集合，(b) 每次都把大树挂到小树下，最后退化成一条长链。</p>
 <p><strong>第二条是路径压缩</strong>：<code>find</code> 在返回根之前，把沿途每个结点的父指针都直接改成根。</p>
-<figure><img loading="lazy" src="../assets/combined/fig-6-13.png" alt="图 6.13 路径压缩示例：(a) 路径压缩之前；(b) 路径压缩之后"><figcaption>图 6.13 路径压缩示例：(a) 路径压缩之前；(b) 路径压缩之后</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-6-13.png" alt="图 6.13 路径压缩示例：(a) 路径压缩之前；(b) 路径压缩之后"><figcaption>图 6.13 路径压缩示例：(a) 路径压缩之前；(b) 路径压缩之后</figcaption></figure>
 <p>图 6.13　查找根结点时把沿途父指针直接改到根：(a) 是压缩之前的树，(b) 是对结点 7 调用一次 <code>find</code> 之后的样子——路径 7→5→2 上的结点都被直接改挂到根 1 下，而 9、10 仍留在 7 下面。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp">code/ch06/general_tree/modern.hpp#disjoint-set</a></div><pre><code><span class="c">/// 【代码6.8】树的父指针表示与 union/find。</span>
 <span class="c">///</span>
@@ -738,7 +738,7 @@ rtag       0  1  0  1  1  1  0  0  1  1     0 = 有下一个兄弟</code></pre><
 <h2 id="64-k叉树"><a class="anchor" href="#64-k叉树">#</a>6.4 K叉树</h2>
 <p>有些应用里每个结点的孩子数有固定上限 <span class="math">K</span>，例如三子棋的博弈树、某些 B 树的内存模拟。这时不必走「任意度 + 兄弟链」，可以规定每个结点至多 <span class="math">K</span> 个孩子，叫做 <span class="math">K</span> 叉树。</p>
 <p>满 <span class="math">K</span> 叉树、完全 <span class="math">K</span> 叉树的定义与二叉树平行：满 <span class="math">K</span> 叉树的每个结点要么是叶，要么恰好 <span class="math">K</span> 个孩子；完全 <span class="math">K</span> 叉树只有最下两层的度可以小于 <span class="math">K</span>，且最下层靠左对齐。按层从 0 编号时，结点 <span class="math">i</span> 的孩子们是 <span class="math">Ki<span class="bin">+</span><span class="upr">1</span>,…,Ki<span class="bin">+</span>K</span>，父结点是 <span class="math">⌊(i<span class="bin">−</span><span class="upr">1</span>)/K⌋</span>。<span class="math">K<span class="rel">=</span><span class="upr">2</span></span> 就回到二叉树。</p>
-<figure><img loading="lazy" src="../assets/combined/fig-6-18.png" alt="图 6.18 满 3 叉树与完全 3 叉树"><figcaption>图 6.18 满 3 叉树与完全 3 叉树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-6-18.png" alt="图 6.18 满 3 叉树与完全 3 叉树"><figcaption>图 6.18 满 3 叉树与完全 3 叉树</figcaption></figure>
 <p>图 6.18　<span class="math">K<span class="rel">=</span><span class="upr">3</span></span> 时的 (a) 满 3 叉树与 (b) 完全 3 叉树。<span class="math">K</span> 叉树的分支结点孩子数是定死的，所以链式和顺序两种存法都好实现；完全 <span class="math">K</span> 叉树按编号存进数组，和完全二叉树是同一套办法。计算机图形学里的 4 叉树、8 叉树就是常见的应用。</p>
 <p>本章主实现仍是任意度的左子 / 右兄，不单独做一份 <span class="math">K</span> 叉数组。需要固定 <span class="math">K</span>、又想顺序存放时，用上面的编号公式即可。</p>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>

@@ -362,7 +362,7 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 <p>但它有一个别人没有的优点：<strong>交换次数最多只有 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 次</strong>。当记录很大（比如每条记录几百字节） 而比较很便宜时，移动开销才是主导，这时选择排序反而合适。想把移动降到更低， 见 8.6.3 节的索引排序。空间代价 <span class="math">Θ(<span class="upr">1</span>)</span>。</p>
 <h3 id="832-堆排序"><a class="anchor" href="#832-堆排序">#</a>8.3.2 堆排序</h3>
 <p>先把数组建成最大堆，再反复把堆顶与堆尾交换并缩小堆。<code>sift_down</code> 必须比较左右两个孩子。</p>
-<figure><img loading="lazy" src="../assets/combined/fig-8-4.png" alt="图 8.4 堆排序"><figcaption>图 8.4 堆排序</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-8-4.png" alt="图 8.4 堆排序"><figcaption>图 8.4 堆排序</figcaption></figure>
 <p>图 8.4　堆排序：(a) 待排序列建成最大堆；(b) 取走最大值 78，用末尾的 32 填上；(c) 重新筛选后又是一个堆；(d) 重复下去，每取一次就把一个最大值放到已排好的那一段。建堆是 <span class="math">O(n)</span>（5.5.1a 证过），此后 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 次筛选各 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>，合计 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>——<strong>而且不需要额外数组</strong>。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#heap</a></div><pre><code><span class="c">// 算法8.4：手写最大堆筛选与堆排序，不委托 std::make_heap/sort_heap。</span>
 <span class="k">inline</span> <span class="t">void</span> sift_down(std::vector&lt;<span class="t">int</span>&gt;&amp; values, std::<span class="t">size_t</span> root, std::<span class="t">size_t</span> count) {
@@ -719,7 +719,7 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 <td style="text-align:left">22</td>
 </tr>
 </tbody></table></div>
-<figure><img loading="lazy" src="../assets/combined/fig-8-12-b.png" alt="图 8.12(b) 第一趟分配结果：按个位把 9 个关键码挂到 10 条静态链上"><figcaption>图 8.12(b) 第一趟分配结果：按个位把 9 个关键码挂到 10 条静态链上</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-8-12-b.png" alt="图 8.12(b) 第一趟分配结果：按个位把 9 个关键码挂到 10 条静态链上"><figcaption>图 8.12(b) 第一趟分配结果：按个位把 9 个关键码挂到 10 条静态链上</figcaption></figure>
 <p>(c) 第一趟收集结果</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">下标</th>
@@ -746,7 +746,7 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 <td style="text-align:left">59</td>
 </tr>
 </tbody></table></div>
-<figure><img loading="lazy" src="../assets/combined/fig-8-12-d.png" alt="图 8.12(d) 第二趟分配结果：按十位再分配一次"><figcaption>图 8.12(d) 第二趟分配结果：按十位再分配一次</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-8-12-d.png" alt="图 8.12(d) 第二趟分配结果：按十位再分配一次"><figcaption>图 8.12(d) 第二趟分配结果：按十位再分配一次</figcaption></figure>
 <p>(e) 第二趟收集结果</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">下标</th>
@@ -902,7 +902,7 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 <h3 id="863-索引排序"><a class="anchor" href="#863-索引排序">#</a>8.6.3 索引排序</h3>
 <p>前面所有算法都在<strong>搬记录</strong>。当记录很大——一条学籍记录几百字节，一张图片几兆——搬移的代价 就压过了比较的代价。索引排序（也叫地址排序）的办法是：<strong>让数组中的每一个元素存储指向该元素 记录的指针，在需要移动记录时只移动指针值（或索引地址）而不移动记录本身</strong>。8.6.2 节中的静态链 基数排序实际上也是一种索引排序。</p>
 <p><strong>索引排序是典型的用空间换取时间的技巧</strong>：它需要一些空间来存放指针，但换来了更高的效率。 需要说明的是，索引排序并不要求在待排序数组中就给出附加空间——可以通过申请新数组、通过下标 来进行对应。排序后，需要根据辅助的索引数组来调整原始的待排数组，使其按照下标有序地存放记录， <strong>这些整理都应该在 <span class="math">O(n)</span> 时间之内完成</strong>（否则前面省下的搬移就白省了）。</p>
-<figure><img loading="lazy" src="../assets/combined/fig-8-13.png" alt="图8.13 索引排序示意图"><figcaption>图8.13 索引排序示意图</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-8-13.png" alt="图8.13 索引排序示意图"><figcaption>图8.13 索引排序示意图</figcaption></figure>
 <p>图 8.13　索引排序示意：(a) 待排序记录及索引；(b) 排序后——<strong>记录一个都没动，动的是索引</strong>。</p>
 <p>排完之后手上有一个索引数组。原书表8.1 给了两种约定，本节按第二种： <code>index[i]</code> 存的是「结果数组第 <span class="math">i</span> 个位置应该从原数组的哪个下标取值」， 也就是 <code>结果[i] == 原数组[index[i]]</code>。仍用原书那组数据：</p>
 <div class="codeblock" data-lang="text"><pre><code>原下标 i        0    1    2    3    4    5    6    7

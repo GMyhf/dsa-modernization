@@ -110,7 +110,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 第 5 章那套算法直接复用。
 一个推论：由&lt;strong&gt;一棵树&lt;/strong&gt;转出的二叉树，其右子树一定为空——
 因为根没有兄弟。森林转出来的才会有右子树。&lt;/p&gt;"><h1 id="612-森林与二叉树可以互相转换"><a class="anchor" href="#612-森林与二叉树可以互相转换">#</a>6.1.2 森林与二叉树可以互相转换</h1>
-<figure><img loading="lazy" src="../../assets/ch06/fig-6-5-full.png" alt="图 6.5 森林和对应的二叉树"><figcaption>图 6.5 森林和对应的二叉树</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-6-5.png" alt="图 6.5 森林和对应的二叉树"><figcaption>图 6.5 森林和对应的二叉树</figcaption></figure>
 <p>规则只有两条：</p>
 <ul>
 <li>结点的<strong>第一个孩子</strong> → 二叉树的<strong>左</strong>孩子</li>
@@ -118,7 +118,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 </ul>
 <p>这就是「左子/右兄」表示法。</p></section><section class="slide" data-notes="&lt;p&gt;可以给一道现场题：一棵二叉树的右子树非空，说明原来的森林至少有几棵树？
 答案：至少两棵。&lt;/p&gt;"><h1 id="转换的两个方向"><a class="anchor" href="#转换的两个方向">#</a>转换的两个方向</h1>
-<figure><img loading="lazy" src="../../assets/ch06/fig-6-3.png" alt="图6.3 森林转换为二叉树"><figcaption>图6.3 森林转换为二叉树</figcaption></figure>
+<figure><img loading="lazy" src="../../assets/scan/fig-6-3.png" alt="图6.3 森林转换为二叉树"><figcaption>图6.3 森林转换为二叉树</figcaption></figure>
 <p><strong>森林 → 二叉树</strong>：连兄弟、留长子、旋转 45 度。</p>
 <p><strong>二叉树 → 森林</strong>：反过来做。任何二叉树都能转回唯一的森林。</p></section><section class="slide" data-notes="&lt;p&gt;可以问一句：为什么 ADT 里没有「取第 k 个孩子」？
 因为那会承诺一个这套存储给不了的代价。ADT 该说的是能做什么、代价多少，

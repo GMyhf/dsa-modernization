@@ -32,6 +32,7 @@ python3 tools/ledger.py --pending      # listings nobody has claimed yet
 python3 tools/fidelity.py              # prose-preservation ledger: how much of the original's text survives
 python3 tools/fidelity.py --check      # ratchet: a section thinned below its baseline turns the gate red
 python3 tools/pdfref.py --section 8.4  # render the original scan's pages for that section (needs the PDF)
+python3 tools/figcrop.py --check       # every assets/scan/ figure still matches its recorded crop + hash
 python3 tools/errata.py                # errata → the assertion that goes red if it regresses
 python3 tools/errata.py --check        # same, verify only (non-zero exit on gaps)
 python3 tools/check_code.py [unit]     # -Werror + ASan/UBSan and -O2, both must run green
@@ -98,6 +99,12 @@ The gate is the architecture. Five arbiters, each answering a question documents
   When you need to know what the original actually said, the scan is the authority, not the OCR:
   `tools/pdfref.py --section X.Y` renders those printed pages (printed page = PDF page − 14).
   The 26MB scan is gitignored; the tool degrades to a hint when it is absent.
+- **`tools/figcrop.py`** — provenance for the figures that are *not* in the 292-image upstream set.
+  `book/assets/scan/*.png` are cropped straight out of the scan; `collab/figures_scan.json` records
+  page + crop box + dpi for each, so the image is recomputable, and `--check` verifies each file's
+  sha256 so a hand-edited figure turns the gate red. This replaced `book/assets/combined/`, whose
+  images were re-stitched from OCR fragments with the sub-captions **redrawn by a script** —
+  correct, but our typesetting, our layout, and no record of either (D-035).
 - **`tools/check_code.py`** — compiles every unit twice (`-Werror` + ASan/UBSan, and
   `-O2`) and runs it. Both profiles matter: a heap overflow that UBSan aborts on in the
   debug build passes *silently* under `-O2`.

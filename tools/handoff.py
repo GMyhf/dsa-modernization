@@ -165,6 +165,9 @@ def run_verify():
         ["python3", "tools/build_slides.py", "--check"],
         # 3d. PDF：sidecar 记录全部构建输入的内容哈希，书稿改了而 PDF 没重排就报红。
         ["python3", "tools/build_book_pdf.py", "--check"],
+        # 3d2. 扫描件裁图：书稿里每张 assets/scan/ 的图都要能说出「裁自哪一页哪一块」，
+        #      并且字节没被人手改过（D-035）。
+        ["python3", "tools/figcrop.py", "--check"],
         # 3e. 插图集：离线核对底稿 → sidecar → 图册 → 文件字节。
         #     这一步不联网：判据是「底稿现在抽出的题注与顺序」和「文件名 == 内容哈希」。
         ["python3", "tools/collect_figures.py", "--check"],

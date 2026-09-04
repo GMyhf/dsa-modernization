@@ -161,8 +161,8 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h2 id="51-二叉树的概念"><a class="anchor" href="#51-二叉树的概念">#</a>5.1 二叉树的概念</h2>
 <p>二叉树由结点的有限集合构成：或者为空，或者由一个根和两棵互不相交的左、右子树组成。左右次序不能颠倒。根没有父结点；其余每个结点恰有一个父结点，至多两个孩子。没有孩子的是叶，其余是内部结点。从根到某结点的边数是该结点的层数，根在第 0 层。</p>
 <p>按定义展开，二叉树只有 5 种基本形态：(a) 空树；(b) 只有一个根结点；(c) 右子树为空；(d) 左子树为空；(e) 左右子树均非空。</p>
-<figure><img loading="lazy" src="../assets/combined/fig-5-1.png" alt="图 5.1 二叉树的 5 种基本形态中的 (c)(d)(e)"><figcaption>图 5.1 二叉树的 5 种基本形态中的 (c)(d)(e)</figcaption></figure>
-<p>图 5.1　二叉树的基本形态（原书图 5.1 的 (c)(d)(e)；(a) 空树与 (b) 单个根结点无须作图）。<strong>(c) 和 (d) 是两棵不同的二叉树</strong>——同样是一个根加一个孩子，挂左边和挂右边不能混为一谈。第 6 章的一般树没有这个区分，这正是二叉树不是「度为 2 的树」的原因。</p>
+<figure><img loading="lazy" src="../assets/scan/fig-5-1.png" alt="图 5.1 二叉树的 5 种基本形态"><figcaption>图 5.1 二叉树的 5 种基本形态</figcaption></figure>
+<p>图 5.1　二叉树的 5 种基本形态。<strong>(c) 和 (d) 是两棵不同的二叉树</strong>——同样是一个根加一个孩子，挂左边和挂右边不能混为一谈。第 6 章的一般树没有这个区分，这正是二叉树不是「度为 2 的树」的原因。</p>
 <h3 id="511-二叉树的定义和基本术语"><a class="anchor" href="#511-二叉树的定义和基本术语">#</a>5.1.1 二叉树的定义和基本术语</h3>
 <p><strong>定义。</strong> 二叉树（binary tree）由结点的有限集合构成，这个有限集合或者为空集（empty），或者为由 一个根结点（root）及两棵互不相交、分别称做这个根的左子树（left subtree）和右子树（right subtree） 的二叉树组成的集合。这个<strong>递归定义</strong>刻画了二叉树的固有特性：二叉树既可以是一棵空树，也可以是 由一个根结点和分别为其左子树和右子树的互不相交的二叉树组成（其左、右子树也可以为空）。</p>
 <p>值得注意的是，<strong>二叉树的子树有左、右之分，其次序不能颠倒</strong>——上面图 5.1 中的 (c) 和 (d) 分别 表示两棵不同的二叉树。二叉树的结点与表的元素类似，可以表示任何一种数据类型。</p>
@@ -220,7 +220,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h3 id="512-满二叉树完全二叉树扩充二叉树"><a class="anchor" href="#512-满二叉树完全二叉树扩充二叉树">#</a>5.1.2 满二叉树、完全二叉树、扩充二叉树</h3>
 <p>任何结点或者是叶，或者左右子树都非空，叫做满二叉树（full binary tree）。深度为 <span class="math">k</span> 的满二叉树共有 <span class="math"><span class="upr">2</span><sup>k<span class="bin">+</span><span class="upr">1</span></sup><span class="bin">−</span><span class="upr">1</span></span> 个结点，叶在同一层。</p>
 <p>完全二叉树（complete binary tree）不要求每个内部结点都有两个孩子，但所有叶只出现在最下两层，且最下层的结点从左到右连续排列、没有空洞。堆正是利用这个条件按层编号存进数组：编号关系见 5.1.3。满二叉树一定完全，但完全二叉树不一定满。</p>
-<figure><img loading="lazy" src="../assets/combined/fig-5-2.png" alt="图5.2 满二叉树和完全二叉树示例"><figcaption>图5.2 满二叉树和完全二叉树示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-5-2.png" alt="图5.2 满二叉树和完全二叉树示例"><figcaption>图5.2 满二叉树和完全二叉树示例</figcaption></figure>
 <p>图 5.2　(a) 满二叉树；(b) 完全二叉树。</p>
 <p>把普通二叉树的每个空子树位置都补成一个“外部叶”，所得树叫扩充二叉树（extended binary tree），原来的结点叫内部结点。若原树有 <span class="math">n</span> 个内部结点，则扩充树有 <span class="math">n<span class="bin">+</span><span class="upr">1</span></span> 个外部叶。</p>
 <figure><img loading="lazy" src="../assets/44cbdbcfda5553a1.jpg" alt="图 5.3 扩充二叉树"><figcaption>图 5.3 扩充二叉树</figcaption></figure>
@@ -849,7 +849,7 @@ BST 中序: 1 3 4 6 7 8 10 14
 <li><strong>前驱自己可能还有一个左孩子</strong>，顶替之前必须先把它接走 （<code>*predecessor_link = replacement-&gt;left;</code>）。漏了这一句，树上会出现环—— 教学版的测试专门搭了一棵这样的树，去掉那句，中序周游立刻无限递归、ASan 报栈溢出。</li>
 </ul>
 <p>删除分几种情形，原书的图把它们摆开了：</p>
-<figure><img loading="lazy" src="../assets/combined/fig-5-12.png" alt="图 5.12 二叉搜索树的删除示例"><figcaption>图 5.12 二叉搜索树的删除示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-5-12.png" alt="图 5.12 二叉搜索树的删除示例"><figcaption>图 5.12 二叉搜索树的删除示例</figcaption></figure>
 <p>图 5.12　二叉搜索树的删除：(a) 被删结点没有左子树时，直接让右子树顶上；(b) 有左子树时，要先找一个合适的结点来顶替，不能一删了之。</p>
 <p><strong>原书在这里给了两个算法，本书实现的是后一个。</strong> 基本方案（原书【算法5.9】）是：若被删结点 <code>pointer</code> 有左子树，就在左子树里找到按中序周游的最后一个结点 <code>temppointer</code>，把 <code>temppointer</code> 的右指针置成指向 <code>pointer</code> 右子树的根，然后用 <code>pointer</code> 左子树的根代替被删结点。它是对的， 但从图 5.12(b) 可以看到，<strong>把 <code>pointer</code> 的右子树整个下降为 <code>temppointer</code> 的右子树后，树的高度 可能会增加</strong>——删了一个结点，树反而更瘦长了。</p>
 <p>改进方案（原书【算法5.10】）换一个顺序：若 <code>pointer</code> 有左子树，先在左子树中找到中序周游的 最后一个结点 <code>temppointer</code>（即左子树中的最大结点），<strong>并将其从二叉搜索树中删除</strong>；由于 <code>temppointer</code> 没有右子树，删除它只需用它的左子树代替它；然后用 <code>temppointer</code> 结点代替待删除 的结点 <code>pointer</code>。这样接上去的是同一层的邻居，高度不会凭空长高。上面教学版实现里那三句 <code>*predecessor_link = replacement-&gt;left;</code> / <code>replacement-&gt;left = ...</code> / <code>replacement-&gt;right = ...</code>， 逐句对应的就是这个改进方案。</p>
@@ -1273,10 +1273,10 @@ BST 中序: 1 3 4 6 7 8 10 14
 <h3 id="为什么这一节没有-python-版-3"><a class="anchor" href="#为什么这一节没有-python-版-3">#</a>为什么这一节没有 Python 版</h3>
 <p>本节的 Huffman 教学实现同时承担树结点的所有权、优先队列数组和异常路径的清理；例如权值校验必须在第一次 <code>new</code> 之前完成，否则中途抛异常会泄漏已经建立的结点。Python 的 <code>heapq</code> 与垃圾回收会把这两个存储问题藏掉，留下的只是一个算法结果。因此这里不提供 Python 版，避免读者误以为两种语言承担的是同一层教学内容。</p>
 <p>同样是四个权为 6、2、3、4 的外部结点，树的形状不同，带权外部路径长度就不同：</p>
-<figure><img loading="lazy" src="../assets/combined/fig-5-18.png" alt="图 5.18 具有不同带权外部路径长度的二叉树"><figcaption>图 5.18 具有不同带权外部路径长度的二叉树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-5-18.png" alt="图 5.18 具有不同带权外部路径长度的二叉树"><figcaption>图 5.18 具有不同带权外部路径长度的二叉树</figcaption></figure>
 <p>图 5.18　三棵外部结点权值同为 6、2、3、4 的扩充二叉树。(a) <span class="math"><span class="upr">6</span><span class="bin">×</span><span class="upr">2</span><span class="bin">+</span><span class="upr">2</span><span class="bin">×</span><span class="upr">2</span><span class="bin">+</span><span class="upr">3</span><span class="bin">×</span><span class="upr">2</span><span class="bin">+</span><span class="upr">4</span><span class="bin">×</span><span class="upr">2</span><span class="rel">=</span><span class="upr">30</span></span>；(b) <span class="math"><span class="upr">6</span><span class="bin">×</span><span class="upr">2</span><span class="bin">+</span><span class="upr">2</span><span class="bin">×</span><span class="upr">3</span><span class="bin">+</span><span class="upr">3</span><span class="bin">×</span><span class="upr">3</span><span class="bin">+</span><span class="upr">4</span><span class="bin">×</span><span class="upr">1</span><span class="rel">=</span><span class="upr">31</span></span>；(c) <span class="math"><span class="upr">6</span><span class="bin">×</span><span class="upr">1</span><span class="bin">+</span><span class="upr">2</span><span class="bin">×</span><span class="upr">3</span><span class="bin">+</span><span class="upr">3</span><span class="bin">×</span><span class="upr">3</span><span class="bin">+</span><span class="upr">4</span><span class="bin">×</span><span class="upr">2</span><span class="rel">=</span><span class="upr">29</span></span>。(c) 最小，它就是这组权值的 Huffman 树——<strong>权越大的叶离根越近</strong>，总长就越小。</p>
 <p>Huffman 树反复取出两个最小权，合成它们的和，直到只剩一棵——这就是前缀编码的那棵树。 根权等于全部叶子权之和。实现就在 5.5 那份教学版清单里的 <code>HuffmanTree</code>。</p>
-<figure><img loading="lazy" src="../assets/combined/fig-5-19.png" alt="图 5.19 Huffman 树的构造过程"><figcaption>图 5.19 Huffman 树的构造过程</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-5-19.png" alt="图 5.19 Huffman 树的构造过程"><figcaption>图 5.19 Huffman 树的构造过程</figcaption></figure>
 <p>图 5.19　Huffman 树的构造过程：<span class="math">n</span> 个权各自成为一棵单结点树；每次挑出根权最小的两棵，合成一棵新树、新根的权是两者之和；重复 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 次，集合里只剩一棵。</p>
 <p><strong>为什么用堆</strong>：每一轮都要「取当前最小的两棵」。用数组线性扫是 O(n) 一轮、 总共 O(n²)；用最小堆是 O(log n) 一轮、总共 O(n log n)。这是 5.5 节那个数据结构 在这里换来的东西。</p>
 <p>衡量一棵 Huffman 树好不好，用<strong>带权路径长度</strong>(WPL)：每个叶子的权重乘以它的深度再求和。 以原书的权 2、3、4、7 为例，合并过程是 2+3=5 → 4+5=9 → 7+9=16， 于是 2 和 3 落在第 3 层、4 在第 2 层、7 在第 1 层：</p>

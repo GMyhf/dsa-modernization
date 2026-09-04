@@ -456,7 +456,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>B 树是保持平衡的多路搜索树，专门为磁盘页设计。一个结点里有多个有序 key，key 之间是指向孩子的指针。查找从根开始，在页内确定下一条分支，再读孩子页。树高随阶数增大而降低，一次查找的页数大约是 <span class="math"><span class="upr">log</span><sub>m</sub>n</span>。</p>
 <figure><img loading="lazy" src="../assets/97a7189d3ea9584c.jpg" alt="图 11.4 B 树结点的一般形式"><figcaption>图 11.4 B 树结点的一般形式</figcaption></figure>
 <p>一个含 <span class="math">r</span> 个关键码的内部结点有 <span class="math">r<span class="bin">+</span><span class="upr">1</span></span> 个孩子：最左孩子的键都小于第一个关键码，相邻两个关键码之间各管一个区间，最右孩子的键都大于最后一个关键码。页内先定位区间，再沿对应页号下降；若孩子数与关键码数不满足“多一个”，结点结构已经损坏。</p>
-<figure><img loading="lazy" src="../assets/combined/fig-11-5.png" alt="图 11.5 3 阶 B 树"><figcaption>图 11.5 3 阶 B 树</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-5.png" alt="图 11.5 3 阶 B 树"><figcaption>图 11.5 3 阶 B 树</figcaption></figure>
 <p>图 11.5　同一棵 3 阶 B 树的三种画法：(a) 通常的画法；(b) 把外部空结点画出来；(c) 画出隐含指针——<span class="math">a<sub><span class="upr">1</span></sub><span class="rel">∼</span>a<sub><span class="upr">16</span></sub></span> 是关键码在主文件里对应磁盘块的索引地址。<strong>B 树的关键码在内部结点上也带着数据地址</strong>，这正是它与后面 B+ 树的分水岭。</p>
 <p><strong>检索要算访外次数。</strong> 在含 <span class="math">n</span> 个关键码的 <span class="math">m</span> 阶 <span class="math">B</span> 树上检索，从根结点到关键码所在结点的路径上 涉及的结点数不超过 <span class="math">h<span class="bin">+</span><span class="upr">1</span></span>，即最多 <span class="math">h<span class="bin">+</span><span class="upr">1</span></span> 次访外。以原书图 11.5 为例：检索关键码 31 需要 3 次访问 索引树结点（<span class="math">a</span>、<span class="math">c</span>、<span class="math">i</span>），外加 1 次读关键码 31 所在主文件的数据盘 <span class="math">a<sub><span class="upr">12</span></sub></span>，<strong>共 4 次访外</strong>； 而检索关键码 12 只需要 2 次访问索引树结点（<span class="math">a</span>、<span class="math">b</span>），外加 1 次读数据盘 <span class="math">a<sub><span class="upr">3</span></sub></span>，<strong>共 3 次访外</strong>。</p>
 <p><strong>插入的完整规则。</strong> 在 <span class="math">B</span> 树中插入一个关键码的方法也很简单，<strong>插入可能导致 <span class="math">B</span> 树朝着根的方向 生长</strong>：首先检索此关键码是否在 <span class="math">B</span> 树中，若在则拒绝插入；若不在，则最后找到的叶结点即为待插入位置。 如果插入后该叶结点中关键码个数小于 <span class="math">m</span>，则插入完成；否则关键码个数等于 <span class="math">m</span>，<strong>产生上溢出</strong>—— 这种情况下，取这 <span class="math">m</span> 个关键码的中位数为分界码，叶结点分裂为分别具有 <span class="math">⌈(m<span class="bin">−</span><span class="upr">1</span>)/<span class="upr">2</span>⌉</span> 和 <span class="math">⌊(m<span class="bin">−</span><span class="upr">1</span>)/<span class="upr">2</span>⌋</span> 个关键码的两个结点，分界码插入到父结点中；如果父结点没有发生上溢出，插入 操作结束，<strong>否则该分裂过程继续往根的方向传递，有可能一直分裂到根</strong>。</p>
@@ -475,7 +475,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>当在兄弟结点的关键码个数也很少、刚好等于 <span class="math">⌈m/<span class="upr">2</span>⌉<span class="bin">−</span><span class="upr">1</span></span> 时，不能借关键码。这种情况下， <strong>要把删除关键码的结点、它的左/右兄弟（先左后右）结点及父结点中的分界关键码合并为一个结点</strong>； 合并的情况导致父结点中减少了一个关键码，这样有可能导致进一步的合并。<strong>合并如果一直传递到根结点， 将导致根结点与两个子结点进行合并，形成新的根结点，从而使整个树减少了一层。</strong></p>
 <p>删除过程中，一般情况下出现下溢出时先看是否能借关键码，借不了再考虑合并。<strong>如果阶比较小</strong>，例如 阶为 3（关键码数在 1～2 个）、阶为 4（关键码数在 1～3 个），此时删除可能会出现空结点的情况， <strong>可以先考虑是否能合并，再考虑借关键码，这样有可能降低树的高度</strong>；实际应用中 <span class="math">B</span> 树的阶很大，不会 出现删除一个关键码使得结点变空的情况。</p>
 <p>删除使结点低于下限（下溢）时，先向左右兄弟借 key；借不到就把两个结点合并，分界 key 从父结点拿下来。借和合并都可能向上传播。</p>
-<figure><img loading="lazy" src="../assets/combined/fig-11-8.png" alt="图11.8 5 阶 B 树，连续删除关键码 120、150"><figcaption>图11.8 5 阶 B 树，连续删除关键码 120、150</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-8.png" alt="图11.8 5 阶 B 树，连续删除关键码 120、150"><figcaption>图11.8 5 阶 B 树，连续删除关键码 120、150</figcaption></figure>
 <p>图 11.8　在一棵 (a) 5 阶 B 树上连续删除：(b) 删 120——先与中序后继交换再删，删后下溢，向左邻<strong>借</strong>一个关键码；(c) 接着删 150——同样先交换，删后下溢而两侧都借不到，只能<strong>合并</strong>，合并又让父结点下溢，一路传到根。</p>
 <p>这些局部调整保证所有叶在同一层，所以 B 树始终平衡。</p>
 <p><strong>B+ 树是 B 树的一种变形。</strong> 实际应用中产生了一些 B 树的变形：每个结点的「充满度」可以不同； 树在不同层上可有不同的阶；每个关键码的长度可变；<strong>把关键码全部顺序存储在叶结点上，而索引部分 是每个结点内最大（或最小）关键码的复写</strong>——最后这一种就是应用得很广泛的 B+ 树。</p>
@@ -697,7 +697,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h2 id="115-位索引技术"><a class="anchor" href="#115-位索引技术">#</a>11.5 位索引技术</h2>
 <h3 id="位图签名和红黑树"><a class="anchor" href="#位图签名和红黑树">#</a>位图、签名和红黑树</h3>
 <p>位图索引适合取值很少的属性，例如性别、省份、是否及格。每个属性值对应一个位串，第 <span class="math">i</span> 位表示第 <span class="math">i</span> 条记录有没有这个值。AND、OR、NOT 查询变成机器字上的按位运算，一次可以处理几十上百条记录。属性取值一多，位图会变得很宽，需要压缩（游程、字对齐混合等）。</p>
-<figure><img loading="lazy" src="../assets/combined/fig-11-15-a.png" alt="图 11.15(a) 百货销售数据库记录以及 State=NY（纽约州）的位向量"><figcaption>图 11.15(a) 百货销售数据库记录以及 State=NY（纽约州）的位向量</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-15-a.png" alt="图 11.15(a) 百货销售数据库记录以及 State=NY（纽约州）的位向量"><figcaption>图 11.15(a) 百货销售数据库记录以及 State=NY（纽约州）的位向量</figcaption></figure>
 <p>(b) 数据域 State 的位向量集合</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">State=AK</th>
@@ -742,7 +742,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <td style="text-align:left">0</td>
 </tr>
 </tbody></table></div>
-<figure><img loading="lazy" src="../assets/combined/fig-11-15-c.png" alt="图 11.15(c) 数据域 Class 的位向量集合"><figcaption>图 11.15(c) 数据域 Class 的位向量集合</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-11-15-c.png" alt="图 11.15(c) 数据域 Class 的位向量集合"><figcaption>图 11.15(c) 数据域 Class 的位向量集合</figcaption></figure>
 <p>图 11.15　百货销售数据库记录的位图索引。<strong>一个属性值一条位串</strong>：State 有多少个取值，(b) 就有多少列，每列长度都是记录条数；查询于是变成位串之间的按位运算。属性取值越多，位图越宽——这正是位图索引只适合低基数属性的原因。</p>
 <p>设 6 条记录的州属性和等级属性形成两条位图：</p>
 <div class="codeblock" data-lang="text"><pre><code>State=NY : 1 0 1 0 1 0
