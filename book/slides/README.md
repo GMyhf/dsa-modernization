@@ -1,21 +1,34 @@
 # 课件
 
-`book/slides/*.md` 是课件的**唯一事实源**，`book/slides/site/` 是渲染产物。
+`book/slides/*.md` 是课件的**唯一事实源**，网页版与 .pptx 都是它的产物。
 
 ```bash
-python3 tools/build_slides.py          # 渲染到 book/slides/site/
+python3 tools/build_slides.py          # 渲染到 book/slides/site/（网页版）
+python3 tools/build_pptx.py            # 渲染到 book/slides/pptx/（PowerPoint）
 python3 tools/build_slides.py --check  # 只校验产物是否最新（闸门用）
+python3 tools/build_pptx.py --check
 ```
 
-放映：浏览器打开 `book/slides/site/index.html`（双击即可，不需要起服务）。
+放映：浏览器打开 `book/slides/site/index.html`（双击即可，不需要起服务）；
+或者用 `book/slides/pptx/*.pptx`——教室的机器常常只有 PowerPoint / WPS。
 线上：<https://gmyhf.github.io/dsa-modernization/slides/>——教室的机器打开链接就能讲。
 导出 PDF：在浏览器里打印（Ctrl/Cmd+P），每页一张幻灯片。
 
-## 为什么不是 .pptx
+## 为什么源文件不是 .pptx
 
 课件要改、要 review、要跟着书稿一起演进。二进制文件在 git 里只能看到
 「已变更」三个字——2026-08-16 之所以把 19 份旧课件抽成文本入库，就是因为这个。
 Markdown 还有一个 .pptx 给不了的好处：**幻灯片上的代码由闸门逐字核对**。
+
+**但产物可以是 .pptx**，而且 2026-09-04 起就是了（D-037）。事实源仍然只有一份，
+`.pptx` 与 `site/`、学生 PDF 一样，改了源就得重新构建，否则闸门变红。
+两件事需要知道：
+
+- **投影没有滚动条。** 网页版一页挤不下还能滚一下，.pptx 里超出画面的就是学生看不见的
+  内容。所以 `build_pptx.py` 会先整页缩字号，仍装不下就**拆成「…（续）」两页**，
+  构建时会把拆过的页列出来——那通常是课件源该拆页的信号。
+- **别直接改 .pptx。** 改了会在下次构建时被覆盖，而且改动不进 git diff。要改内容，
+  改这里的 Markdown。
 
 ## 写法
 

@@ -22,10 +22,10 @@
 台账   104 已现代化 / 1 退场 / 0 待办  = 105 条清单
 书稿   29 个文件（12 章正文 + 总目录 + 习题 + 勘误 + 插图，加 13 套课件），17 条规则通过
 成品   PDF（book/pdf/，526 页）、网页版（book/site/，双击 index.html 即可读）
-       与课件（book/slides/，397 页幻灯片）
+       与课件（book/slides/，397 页幻灯片；另出 12 份 .pptx，412 张）
 代码   35 个单元 × 2 种构建（Debug+ASan/UBSan、Release-O2）
        其中 1 个单元另有 Python 实现，再跑 2 档（默认、-X dev -W error）
-自测   394 项（闸门自己的单元测试）
+自测   419 项（闸门自己的单元测试）
 ```
 
 `python3 tools/handoff.py --verify` 退出码 0。
@@ -61,6 +61,7 @@ python3 tools/check_code.py           # 只跑 code/：-Werror + ASan/UBSan + O2
 python3 tools/check_doc.py            # 只跑 book/：OCR 残留、编号、插图、代码块一致性
 python3 tools/build_site.py           # 把书稿渲染成网页版 book/site/，入口 index.html
 python3 tools/build_slides.py         # 把 book/slides/*.md 渲染成课件 book/slides/site/
+python3 tools/build_pptx.py           # 同一份课件源，另出一份 .pptx（book/slides/pptx/）
 ```
 
 网页版在线可读：**<https://gmyhf.github.io/dsa-modernization/>**，
@@ -101,8 +102,8 @@ git add -A && git commit -m "..." && git push
 | `book/` | 现代化后的书稿：12 章正文 + [总目录](book/数据结构与算法.md) + [原书勘误](book/勘误.md) + [插图](book/插图.md)。正文与课件用的 218 张插图**全部直接裁自原版扫描件**，裁法（书页 + 裁剪框 + dpi + sha256）记在 `collab/figures_scan.json`（`book/assets/scan/`）；`book/assets/` 下那 292 张上游 OCR 图库作为底稿记录保留，见[插图](book/插图.md)——**它只在仓库与网页版里，不进学生 PDF**（正文的图已是扫描件裁图，图册再进来等于每张图印两遍）。发给学生的带书签 PDF：[`book/pdf/数据结构与算法.pdf`](book/pdf/数据结构与算法.pdf)（`python3 tools/build_book_pdf.py` 重编）；浏览器版：[`book/site/index.html`](book/site/index.html)（`python3 tools/build_site.py` 重编） |
 | `code/<章>/<单元>/` | 一个清单单元：`unit.json`（认领哪几条清单）、`legacy.md`（原书写法→缺陷证据→现代写法）、`modern.hpp`、`test.cpp` |
 | `code/support/` | 各章测试共用的故障注入探针（只放探针，不放任何数据结构实现） |
-| `tools/` | 闸门与脚手架，纯标准库。其中 `pdfref.py` 按节号把原版扫描件渲染成书页图，`fidelity.py` 量正文保全度，`figcrop.py` 从扫描件裁插图并记下裁法 |
-| `tests/` | 闸门自身的单元测试，394 项 |
+| `tools/` | 闸门与脚手架，纯标准库。其中 `pdfref.py` 按节号把原版扫描件渲染成书页图，`fidelity.py` 量正文保全度，`figcrop.py` 从扫描件裁插图并记下裁法，`pptx_writer.py` + `build_pptx.py` 只用 `zipfile` 把课件排成 .pptx |
+| `tests/` | 闸门自身的单元测试，419 项 |
 | `collab/` | 协作事实源：PLAN / DECISION_LOG / HANDOFF / 双向 NOTES / 退场记录 |
 
 ## 五条闸门
