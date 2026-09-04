@@ -39,7 +39,7 @@ subtitle: 数据结构与算法：Python 讲可迁移算法，C++ 讲存储与�
 
 ---
 
-# 8.2 插入排序
+# 8.2 插入排序（续）
 
 ```cpp file=code/ch08/sorting/modern.hpp#insertion
 // 算法8.1：直接插入排序。相等元素不越过彼此，故稳定。
@@ -120,7 +120,7 @@ i=2    12 29 32 45 34' 78 34 64
 
 ---
 
-# 8.3.2 堆排序
+# 8.3.2 堆排序（续）
 
 ```cpp file=code/ch08/sorting/modern.hpp#heap
 // 算法8.4：手写最大堆筛选与堆排序，不委托 std::make_heap/sort_heap。
@@ -244,7 +244,7 @@ boundary 左边全是小于轴值的，扫一遍把小的换过去，最后把�
 
 ---
 
-# 8.5 归并排序
+# 8.5 归并排序（续）
 
 ```cpp file=code/ch08/sorting/modern.hpp#merge
 inline void merge_ranges(std::vector<int>& values, std::vector<int>& buffer,
@@ -325,7 +325,7 @@ inline void merge_sort(std::vector<int>& values) {
 
 ---
 
-# 8.6.2 基数排序
+# 8.6.2 基数排序（续）
 
 ```cpp file=code/ch08/sorting/modern.hpp#radix
 // 算法8.11：LSD 基数排序。翻转符号位使二补码有符号 int 按无符号序排序。
@@ -416,7 +416,7 @@ d 位、每位 r 个值时是 O(d(n + r))。
 
 ---
 
-# 8.7.3 比较排序的下限
+# 8.7.3 比较排序的下限（续）
 
 $n$ 个互异元素有 $n!$ 种排列；一次二元比较最多把候选情况分成两半。
 

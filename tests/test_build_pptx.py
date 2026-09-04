@@ -245,6 +245,23 @@ class TestGate(unittest.TestCase):
     def test_check_agrees_with_the_committed_output(self):
         self.assertEqual(build_pptx.build(check_only=True), 0)
 
+    def test_a_hand_edited_deck_turns_the_gate_red(self):
+        """**产物被人动过也必须红。**
+
+        2026-09-05 的实际事故：`ch08-sorting.pptx` 被 Office 打开又存了一次，
+        包里多出 `presProps.xml`、`viewProps.xml`、`theme2.xml`，备注页重新编号——
+        而课件源一个字没动。当时的 `--check` 只比源文件摘要，照样报绿。
+        现在比字节，所以这一条能红；这个用例就是钉住它。
+        """
+        target = build_pptx.OUT_DIR / "ch03-stack.pptx"
+        original = target.read_bytes()
+        try:
+            target.write_bytes(original + b"someone opened it in PowerPoint")
+            self.assertEqual(build_pptx.build(check_only=True), 1)
+        finally:
+            target.write_bytes(original)
+        self.assertEqual(build_pptx.build(check_only=True), 0)
+
 
 if __name__ == "__main__":
     unittest.main()

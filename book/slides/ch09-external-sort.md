@@ -227,7 +227,7 @@ k 路归并时，每输出一个记录都要在 k 个候选里挑最小的。
 
 ---
 
-# 赢者树的重构
+# 赢者树的重构（续）
 
 ```cpp file=code/ch09/external_sort/modern.hpp#fn:replace
 void replace(std::size_t player, int value) {
@@ -289,7 +289,7 @@ void replace(std::size_t player, int value) {
 
 ---
 
-# 败者树：省掉「看兄弟」
+# 败者树：省掉「看兄弟」（续）
 
 内部结点记的是**输家**，赢家继续往上比。
 

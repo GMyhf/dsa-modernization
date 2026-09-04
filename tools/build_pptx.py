@@ -22,13 +22,13 @@
   python3 tools/build_pptx.py --only ch03   # 只做一章，改排版时用
 """
 import argparse
-import hashlib
 import html
 import json
 import math
 import re
 import struct
 import sys
+import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -969,54 +969,54 @@ def sources():
     return sorted(p for p in SLIDES.glob("*.md") if p.name != "README.md")
 
 
-def source_digest():
-    """源文件 + 它们引用的插图 + 两个渲染器自身。任何一样变了，产物就该重做。"""
-    digest = hashlib.sha256()
-    paths = list(sources()) + [Path(__file__).resolve(),
-                               Path(__file__).resolve().with_name("pptx_writer.py")]
-    for path in paths:
-        digest.update(rel_label(path).encode("utf-8"))
-        digest.update(path.read_bytes())
-    for path in sorted(referenced_images()):
-        digest.update(rel_label(path).encode("utf-8"))
-        digest.update(path.read_bytes())
-    return digest.hexdigest()
+def check():
+    """把每一份课件在临时目录里重排一遍，逐字节与入库的比。
 
-
-def referenced_images():
-    seen = set()
-    for path in sources():
-        for src in re.findall(r"!\[[^\]]*\]\(([^)\s]+)", path.read_text(encoding="utf-8")):
-            if src.startswith(("http://", "https://", "data:")):
-                continue
-            target = (SLIDES / src).resolve()
-            if target.is_file():
-                seen.add(target)
-    return seen
+    **为什么不是比源文件的摘要**（`build_book_pdf.py` 那一套）：2026-09-05 有人把
+    `ch08-sorting.pptx` 用 Office 打开又存了一次——包里多出 `presProps.xml`、
+    `viewProps.xml`、`theme2.xml`，备注页也被重新编号——**而源文件一个字没动**，
+    于是「源摘要一致」照样报绿。摘要能查的是「源变了产物没重排」，查不出
+    「产物被人动过」。这里的输出是可复算的（zip 时间戳固定），所以直接比字节。
+    重排全部 12 份约 0.6 秒，值这个钱。
+    """
+    if not INFO.is_file():
+        print(f"❌ 还没有生成过课件 .pptx；修法：python3 {rel_label(Path(__file__))}",
+              file=sys.stderr)
+        return 1
+    info = json.loads(INFO.read_text(encoding="utf-8"))
+    problems, pages = [], 0
+    with tempfile.TemporaryDirectory() as tmp:
+        global OUT_DIR
+        committed, OUT_DIR = OUT_DIR, Path(tmp)
+        try:
+            for path in sources():
+                name = f"{path.stem}.pptx"
+                target = committed / name
+                if not target.is_file():
+                    problems.append(f"缺文件：{name}")
+                    continue
+                fresh, count = build_deck(path, Ctx())
+                pages += count
+                if fresh.read_bytes() != target.read_bytes():
+                    problems.append(f"{name} 与课件源对不上（产物被改过，或改了源没重排）")
+        finally:
+            OUT_DIR = committed
+    extra = sorted(p.name for p in OUT_DIR.glob("*.pptx")
+                   if p.name not in {f"{s.stem}.pptx" for s in sources()})
+    problems += [f"多出无人认领的 {name}" for name in extra]
+    for message in problems:
+        print(f"❌ {message}", file=sys.stderr)
+    if problems:
+        print(f"   修法：python3 {rel_label(Path(__file__))}", file=sys.stderr)
+        return 1
+    print(f"✅ 课件 .pptx 与课件源逐字节一致：{len(info['decks'])} 份、{pages} 页")
+    return 0
 
 
 def build(check_only=False, only=None):
     ctx = Ctx()
     if check_only:
-        if not INFO.is_file():
-            print(f"❌ 还没有生成过课件 .pptx；修法：python3 {rel_label(Path(__file__))}",
-                  file=sys.stderr)
-            return 1
-        info = json.loads(INFO.read_text(encoding="utf-8"))
-        want = source_digest()
-        missing = [name for name in info.get("decks", {})
-                   if not (OUT_DIR / name).is_file()]
-        if missing:
-            print(f"❌ 课件 .pptx 缺文件：{'、'.join(missing)}", file=sys.stderr)
-            return 1
-        if info.get("source_sha256") != want:
-            print(f"❌ 课件 .pptx 已过期：源文件摘要应为 {want[:12]}，"
-                  f"sidecar 仍是 {str(info.get('source_sha256'))[:12]}", file=sys.stderr)
-            print(f"   修法：python3 {rel_label(Path(__file__))}", file=sys.stderr)
-            return 1
-        print(f"✅ 课件 .pptx 与课件源一致：{len(info['decks'])} 份、"
-              f"{sum(info['decks'].values())} 页")
-        return 0
+        return check()
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     decks = {}
@@ -1030,8 +1030,7 @@ def build(check_only=False, only=None):
         for path in stale:
             path.unlink()
         INFO.write_text(json.dumps(
-            {"decks": decks, "pages": sum(decks.values()),
-             "source_sha256": source_digest()},
+            {"decks": decks, "pages": sum(decks.values())},
             ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     for problem in ctx.problems:

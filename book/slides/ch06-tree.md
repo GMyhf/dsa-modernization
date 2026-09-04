@@ -269,7 +269,7 @@ void delete_subtree(Node* node) {
 
 ---
 
-# 并查集：等价类问题
+# 并查集：等价类问题（续）
 
 给一堆等价对 (A,B)、(C,K)、…，要能回答「x 和 y 同类吗」。
 
@@ -332,7 +332,7 @@ bool unite(std::size_t left, std::size_t right) {
 
 ---
 
-# 改进二：路径压缩
+# 改进二：路径压缩（续）
 
 ```cpp file=code/ch06/general_tree/modern.hpp#fn:find
 std::size_t find(std::size_t index) {

@@ -368,7 +368,7 @@ void sift_up(size_type index) {
 
 ---
 
-# 删除最小：搬最后一个上来，然后下沉
+# 删除最小：搬最后一个上来，然后下沉（续）
 
 ```cpp file=code/ch05/heap_huffman/teaching.hpp#fn:sift_down
 // 下沉：和两个孩子里较小的那个比，比它大就换下去。
@@ -410,7 +410,7 @@ void sift_down(size_type index) {
 
 ---
 
-# 建堆为什么是 O(n)
+# 建堆为什么是 O(n)（续）
 
 粗算：$n/2$ 次 `sift_down` $\times\ O(\log n) = O(n\log n)$。**原书说这只是粗略上界。**
 

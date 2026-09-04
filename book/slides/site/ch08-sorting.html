@@ -111,7 +111,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 
 最好情况：输入已有序，每张牌比一次就位，&lt;strong&gt;O(n)&lt;/strong&gt;。
 最坏情况：输入逆序，第 i 张要比 i 次，O(n^2)。
-所以说「插入排序是 O(n^2)」对，说「是 Θ(n^2)」就错了。&lt;/p&gt;"><h1 id="82-插入排序"><a class="anchor" href="#82-插入排序">#</a>8.2 插入排序</h1>
+所以说「插入排序是 O(n^2)」对，说「是 Θ(n^2)」就错了。&lt;/p&gt;"><h1 id="82-插入排序续"><a class="anchor" href="#82-插入排序续">#</a>8.2 插入排序（续）</h1>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#insertion</a></div><pre><code><span class="c">// 算法8.1：直接插入排序。相等元素不越过彼此，故稳定。</span>
 <span class="k">inline</span> <span class="t">void</span> insertion_sort(std::vector&lt;<span class="t">int</span>&gt;&amp; values) {
     <span class="k">for</span> (std::<span class="t">size_t</span> index = <span class="n">1</span>; index &lt; values.size(); ++index) {
@@ -152,7 +152,7 @@ i=2    12 29 32 45 34&#x27; 78 34 64</code></pre></div>
 全部来自后面 n 次取最大值。
 
 优点：就地、最坏也是 O(n log n)。缺点：不稳定，而且缓存局部性差
-（下标跳来跳去），实际常数往往比快排大。&lt;/p&gt;"><h1 id="832-堆排序"><a class="anchor" href="#832-堆排序">#</a>8.3.2 堆排序</h1>
+（下标跳来跳去），实际常数往往比快排大。&lt;/p&gt;"><h1 id="832-堆排序续"><a class="anchor" href="#832-堆排序续">#</a>8.3.2 堆排序（续）</h1>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#heap</a></div><pre><code><span class="c">// 算法8.4：手写最大堆筛选与堆排序，不委托 std::make_heap/sort_heap。</span>
 <span class="k">inline</span> <span class="t">void</span> sift_down(std::vector&lt;<span class="t">int</span>&gt;&amp; values, std::<span class="t">size_t</span> root, std::<span class="t">size_t</span> count) {
     <span class="k">while</span> (root * <span class="n">2</span> + <span class="n">1</span> &lt; count) {
@@ -245,7 +245,7 @@ boundary 左边全是小于轴值的，扫一遍把小的换过去，最后把�
 代价是需要 O(n) 的额外空间——这是它不如快排流行的主要原因。
 
 归并还有一个别处没有的好处：它天然适合&lt;strong&gt;外排序&lt;/strong&gt;，因为只需要顺序读写。
-第 9 章全靠它。&lt;/p&gt;"><h1 id="85-归并排序"><a class="anchor" href="#85-归并排序">#</a>8.5 归并排序</h1>
+第 9 章全靠它。&lt;/p&gt;"><h1 id="85-归并排序续"><a class="anchor" href="#85-归并排序续">#</a>8.5 归并排序（续）</h1>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#merge</a></div><pre><code><span class="k">inline</span> <span class="t">void</span> merge_ranges(std::vector&lt;<span class="t">int</span>&gt;&amp; values, std::vector&lt;<span class="t">int</span>&gt;&amp; buffer,
                          std::<span class="t">size_t</span> first, std::<span class="t">size_t</span> middle, std::<span class="t">size_t</span> last) {
     std::<span class="t">size_t</span> left = first;
@@ -289,7 +289,7 @@ d 位、每位 r 个值时是 O(d(n + r))。
 
 为什么必须从低位开始？因为每一轮的桶式排序必须是&lt;strong&gt;稳定&lt;/strong&gt;的，
 低位的结果才能被高位的排序保留下来。反过来做会把低位的功夫全废掉。
-这一点值得当场问学生。&lt;/p&gt;"><h1 id="862-基数排序"><a class="anchor" href="#862-基数排序">#</a>8.6.2 基数排序</h1>
+这一点值得当场问学生。&lt;/p&gt;"><h1 id="862-基数排序续"><a class="anchor" href="#862-基数排序续">#</a>8.6.2 基数排序（续）</h1>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#radix</a></div><pre><code><span class="c">// 算法8.11：LSD 基数排序。翻转符号位使二补码有符号 int 按无符号序排序。</span>
 <span class="k">inline</span> <span class="t">void</span> radix_sort(std::vector&lt;<span class="t">int</span>&gt;&amp; values) {
     std::vector&lt;<span class="t">int</span>&gt; buffer(values.size());
@@ -404,7 +404,7 @@ d 位、每位 r 个值时是 O(d(n + r))。
 </tbody></table></div>
 <p>同为 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span> 可以差 27 倍；近乎有序时，插入甚至胜过退化快排。</p>
 <p>渐进阶先排除不合格算法，实测再决定常数与工作负载。</p></section><section class="slide" data-notes=""><h1 id="873-比较排序的下限"><a class="anchor" href="#873-比较排序的下限">#</a>8.7.3 比较排序的下限</h1>
-<figure><img loading="lazy" src="../../assets/scan/fig-8-14.png" alt="图 8.14 用判定树模拟基于比较的排序"><figcaption>图 8.14 用判定树模拟基于比较的排序</figcaption></figure></section><section class="slide" data-notes=""><h1 id="873-比较排序的下限"><a class="anchor" href="#873-比较排序的下限">#</a>8.7.3 比较排序的下限</h1>
+<figure><img loading="lazy" src="../../assets/scan/fig-8-14.png" alt="图 8.14 用判定树模拟基于比较的排序"><figcaption>图 8.14 用判定树模拟基于比较的排序</figcaption></figure></section><section class="slide" data-notes=""><h1 id="873-比较排序的下限续"><a class="anchor" href="#873-比较排序的下限续">#</a>8.7.3 比较排序的下限（续）</h1>
 <p><span class="math">n</span> 个互异元素有 <span class="math">n!</span> 种排列；一次二元比较最多把候选情况分成两半。</p>
 <p>判定树至少有 <span class="math">n!</span> 个叶子，因此高度至少：</p>
 <div class="math math-display">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>(n!)⌉<span class="rel">=</span>Ω(n&thinsp;<span class="upr">log</span>&thinsp;n)</div>
@@ -467,7 +467,7 @@ d 位、每位 r 个值时是 O(d(n + r))。
 <blockquote><p>测试里所有排序算法<strong>互相对拍</strong>：同一组输入必须给出同样的结果， 稳定的那几个还要额外验证稳定性。</p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第8章 内排序</div><div class="thumb"><div class="no">2</div>8.1 基本概念</div><div class="thumb"><div class="no">3</div>8.2 插入排序</div><div class="thumb"><div class="no">4</div>8.2 插入排序</div><div class="thumb"><div class="no">5</div>插入排序的两个优点</div><div class="thumb"><div class="no">6</div>8.2.2 Shell 排序</div><div class="thumb"><div class="no">7</div>8.3.1 直接选择排序</div><div class="thumb"><div class="no">8</div>8.3.2 堆排序</div><div class="thumb"><div class="no">9</div>8.3.2 堆排序</div><div class="thumb"><div class="no">10</div>8.4.1 冒泡排序</div><div class="thumb"><div class="no">11</div>8.4.2 快速排序</div><div class="thumb"><div class="no">12</div>快排的实现</div><div class="thumb"><div class="no">13</div>快排最坏情况怎么办</div><div class="thumb"><div class="no">14</div>8.5 归并排序</div><div class="thumb"><div class="no">15</div>8.5 归并排序</div><div class="thumb"><div class="no">16</div>8.6 分配排序：跳出比较模型</div><div class="thumb"><div class="no">17</div>8.6.1 桶式排序</div><div class="thumb"><div class="no">18</div>8.6.2 基数排序</div><div class="thumb"><div class="no">19</div>8.6.2 基数排序</div><div class="thumb"><div class="no">20</div>8.6.3 索引排序</div><div class="thumb"><div class="no">21</div>8.7.1 简单排序的时间代价</div><div class="thumb"><div class="no">22</div>8.7.2 理论时间与实测时间</div><div class="thumb"><div class="no">23</div>8.7.3 比较排序的下限</div><div class="thumb"><div class="no">24</div>8.7.3 比较排序的下限</div><div class="thumb"><div class="no">25</div>怎么选</div><div class="thumb"><div class="no">26</div>课堂讲解卡：排序选择取决于约束</div><div class="thumb"><div class="no">27</div>课堂例题：同一组数据的三种路径</div><div class="thumb"><div class="no">28</div>课堂例题答案：排序路径对照</div><div class="thumb"><div class="no">29</div>课末自检</div><div class="thumb"><div class="no">30</div>课末自检参考答案</div><div class="thumb"><div class="no">31</div>状态演算：归并排序</div><div class="thumb"><div class="no">32</div>反例：合并时相等取右</div><div class="thumb"><div class="no">33</div>课堂练习与答案</div><div class="thumb"><div class="no">34</div>Python 算法轨：同一排序的可执行对照</div><div class="thumb"><div class="no">35</div>本章小结</div><div class="thumb"><div class="no">36</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第8章 内排序</div><div class="thumb"><div class="no">2</div>8.1 基本概念</div><div class="thumb"><div class="no">3</div>8.2 插入排序</div><div class="thumb"><div class="no">4</div>8.2 插入排序（续）</div><div class="thumb"><div class="no">5</div>插入排序的两个优点</div><div class="thumb"><div class="no">6</div>8.2.2 Shell 排序</div><div class="thumb"><div class="no">7</div>8.3.1 直接选择排序</div><div class="thumb"><div class="no">8</div>8.3.2 堆排序</div><div class="thumb"><div class="no">9</div>8.3.2 堆排序（续）</div><div class="thumb"><div class="no">10</div>8.4.1 冒泡排序</div><div class="thumb"><div class="no">11</div>8.4.2 快速排序</div><div class="thumb"><div class="no">12</div>快排的实现</div><div class="thumb"><div class="no">13</div>快排最坏情况怎么办</div><div class="thumb"><div class="no">14</div>8.5 归并排序</div><div class="thumb"><div class="no">15</div>8.5 归并排序（续）</div><div class="thumb"><div class="no">16</div>8.6 分配排序：跳出比较模型</div><div class="thumb"><div class="no">17</div>8.6.1 桶式排序</div><div class="thumb"><div class="no">18</div>8.6.2 基数排序</div><div class="thumb"><div class="no">19</div>8.6.2 基数排序（续）</div><div class="thumb"><div class="no">20</div>8.6.3 索引排序</div><div class="thumb"><div class="no">21</div>8.7.1 简单排序的时间代价</div><div class="thumb"><div class="no">22</div>8.7.2 理论时间与实测时间</div><div class="thumb"><div class="no">23</div>8.7.3 比较排序的下限</div><div class="thumb"><div class="no">24</div>8.7.3 比较排序的下限（续）</div><div class="thumb"><div class="no">25</div>怎么选</div><div class="thumb"><div class="no">26</div>课堂讲解卡：排序选择取决于约束</div><div class="thumb"><div class="no">27</div>课堂例题：同一组数据的三种路径</div><div class="thumb"><div class="no">28</div>课堂例题答案：排序路径对照</div><div class="thumb"><div class="no">29</div>课末自检</div><div class="thumb"><div class="no">30</div>课末自检参考答案</div><div class="thumb"><div class="no">31</div>状态演算：归并排序</div><div class="thumb"><div class="no">32</div>反例：合并时相等取右</div><div class="thumb"><div class="no">33</div>课堂练习与答案</div><div class="thumb"><div class="no">34</div>Python 算法轨：同一排序的可执行对照</div><div class="thumb"><div class="no">35</div>本章小结</div><div class="thumb"><div class="no">36</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>

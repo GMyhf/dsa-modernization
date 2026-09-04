@@ -22,10 +22,10 @@
 台账   104 已现代化 / 1 退场 / 0 待办  = 105 条清单
 书稿   29 个文件（12 章正文 + 总目录 + 习题 + 勘误 + 插图，加 13 套课件），17 条规则通过
 成品   PDF（book/pdf/，526 页）、网页版（book/site/，双击 index.html 即可读）
-       与课件（book/slides/，397 页幻灯片；另出 12 份 .pptx，412 张）
+       与课件（book/slides/，410 页幻灯片；另出 12 份 .pptx）
 代码   35 个单元 × 2 种构建（Debug+ASan/UBSan、Release-O2）
        其中 1 个单元另有 Python 实现，再跑 2 档（默认、-X dev -W error）
-自测   419 项（闸门自己的单元测试）
+自测   420 项（闸门自己的单元测试）
 ```
 
 `python3 tools/handoff.py --verify` 退出码 0。
@@ -103,7 +103,7 @@ git add -A && git commit -m "..." && git push
 | `code/<章>/<单元>/` | 一个清单单元：`unit.json`（认领哪几条清单）、`legacy.md`（原书写法→缺陷证据→现代写法）、`modern.hpp`、`test.cpp` |
 | `code/support/` | 各章测试共用的故障注入探针（只放探针，不放任何数据结构实现） |
 | `tools/` | 闸门与脚手架，纯标准库。其中 `pdfref.py` 按节号把原版扫描件渲染成书页图，`fidelity.py` 量正文保全度，`figcrop.py` 从扫描件裁插图并记下裁法，`pptx_writer.py` + `build_pptx.py` 只用 `zipfile` 把课件排成 .pptx |
-| `tests/` | 闸门自身的单元测试，419 项 |
+| `tests/` | 闸门自身的单元测试，420 项 |
 | `collab/` | 协作事实源：PLAN / DECISION_LOG / HANDOFF / 双向 NOTES / 退场记录 |
 
 ## 五条闸门
