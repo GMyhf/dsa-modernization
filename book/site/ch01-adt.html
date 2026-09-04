@@ -553,23 +553,28 @@ int smallest_eccentricity = infinity;</code></pre></div>
 <p>数据结构描述的是：按一定逻辑关系组织起来的数据，它们在计算机里怎么存放，以及定义在其上的运算。三件事要分开看——逻辑结构、存储结构、运算——后面各章都在这三层之间做选择。</p>
 <h3 id="121-数据的逻辑结构"><a class="anchor" href="#121-数据的逻辑结构">#</a>1.2.1 数据的逻辑结构</h3>
 <p>逻辑结构是从具体问题里抽出来的模型，只谈「有哪些结点、结点之间是什么关系」，不谈它们占几个字节。1.1 节经纪人之间的传播路径就是一个有向图：结点是人，关系是「消息能直接传给谁」。</p>
-<p>用集合的语言写，逻辑结构是一个二元组 <span class="math">B<span class="rel">=</span>(K,R)</span>。<span class="math">K</span> 是结点的有穷集合；关系集 <span class="math">R</span> 是定义在 <span class="math">K</span> 上的一组二元关系。若 <span class="math">&lt;k,k&#x27;&gt;<span class="rel">∈</span>r</span>，则称 <span class="math">k</span> 是 <span class="math">k&#x27;</span> 在关系 <span class="math">r</span> 上的前驱，<span class="math">k&#x27;</span> 是 <span class="math">k</span> 的后继。没有前驱的是开始结点，没有后继的是终止结点。</p>
+<p>从集合论的观点来看，数据的逻辑结构可以用一个二元组 <span class="math">B<span class="rel">=</span>(K,R)</span> 来表示。其中 <span class="math">K</span> 是数据结点（node）组成的有穷集合，每一个结点代表一个数据或一组有明确结构的数据；关系集 <span class="math">R</span> 是定义在集合 <span class="math">K</span> 上的一组二元关系（binary relation），其中每个关系 <span class="math">r<span class="rel">∈</span>R</span> 都是 <span class="math">K</span> 上的二元关系，用来描述数据结点之间的逻辑关系。<span class="math">K</span> 上的二元组是 <span class="math">K</span> 中元素的有序对，记为 <span class="math">⟨k,k&#x27;⟩</span>（<span class="math">k,k&#x27;<span class="rel">∈</span>K</span>）。<span class="math">K</span> 上的一个关系即为 <span class="math">K</span> 上的一些二元组所组成的集合，<span class="math">K</span> 上不同的二元组集合构成不同的关系。</p>
+<p>若 <span class="math">r<span class="rel">∈</span>R</span>，有 <span class="math">k,k&#x27;<span class="rel">∈</span>K</span>，<span class="math">⟨k,k&#x27;⟩<span class="rel">∈</span>r</span>，则称 <span class="math">k</span> 为 <span class="math">k&#x27;</span> 在关系 <span class="math">r</span> 上的<strong>前驱</strong>，<span class="math">k&#x27;</span> 为 <span class="math">k</span> 在关系 <span class="math">r</span> 上的<strong>后继</strong>。没有前驱的结点称为<strong>开始结点</strong>，没有后继的结点称为<strong>终止结点</strong>。</p>
 <p>教学计划是另一个常见例子。每门课是一个结点，全部必修课组成 <span class="math">K</span>；「必须先修」是 <span class="math">K</span> 上的一个关系。<code>&lt;程序设计, 数据结构&gt;</code> 表示必须先上程序设计，再上数据结构。没有先修约束的课可以并行开设。</p>
-<p>结点本身的类型可以很简单，也可以很复杂。整数、布尔、字符是基本类型；数组、结构、对象是复合类型。数据结构课关心的是结点之间的关系，所以通常把结点当作黑盒。</p>
-<p>本书讨论的结构，<span class="math">R</span> 里通常只有一个关系 <span class="math">r</span>。按 <span class="math">r</span> 的形态可以分成三类：</p>
-<ol>
-<li><strong>线性结构。</strong> 每个结点在关系上最多一个前驱、一个后继。有唯一的开始结点（无前驱）和唯一的终止结点（无后继），其余内部结点恰好一前一后。数组、链表、栈、队列都是线性结构。</li>
-<li><strong>树形结构。</strong> 有且仅有一个没有前驱的根；其余每个结点恰好一个前驱，后继数目不限。从根到任意结点都存在唯一的一条由关系元组串起来的路径。文件系统的目录就是树。</li>
-<li><strong>图结构。</strong> 前驱和后继的数目都不加限制。交通网、1.1 节的传言网都是图。</li>
-</ol>
-<p>树和图的分界是「每个结点是否至多一个直接前驱」；线和树的分界是「每个结点是否至多一个直接后继」。后面各章都建立在这三种关系上。</p>
+<p><strong>结点的类型。</strong> 数据结构重点研究的是数据间的结构关系，因此把组成结构的那些元素都视为结点；结点是数据结构中数据的基本单位。结点的数据类型既可以是基本数据类型，也可以是复合数据类型。基本数据类型是指数据结点所包含的元素被作为整体看待和处理的类型，类似于常见的程序设计语言中提供的基本数据类型，例如整数类型（integer）、实数类型（real）、布尔类型（bool）、字符类型（char）和指针类型（pointer）等。复合类型是由基本数据类型组合而成的数据结构类型，不同的组合方式形成不同的类型；像程序语言中的数组类型、结构（记录）类型、对象类型等都属于复合数据类型，而复合数据类型本身，又可以参与定义结构更为复杂的结点类型。总而言之，结点的类型不限于基本数据类型，可以根据应用的需要来灵活定义。数据结构课关心的是结点之间的关系，所以通常把结点当作黑盒。</p>
+<p><strong>结构的分类。</strong> 讨论逻辑结构 <span class="math">(K,R)</span> 的结构分类，一般以关系集 <span class="math">R</span> 的分类为主。在本书讨论的数据结构中，<span class="math">R</span> 中一般只包含一个关系。假定关系集 <span class="math">R</span> 仅含一个关系 <span class="math">r</span>，即 <span class="math">R<span class="rel">=</span>{r}</span>，此时记 <span class="math">(K,R)</span> 为 <span class="math">(K,r)</span>。根据 <span class="math">r</span> 所刻画的数据结构的性质来对逻辑结构进行分类。</p>
+<p><strong>线性结构</strong>（linear structure）中的关系 <span class="math">r</span> 称为线性关系，也称前驱关系。结点集合 <span class="math">K</span> 中的每个结点在关系 <span class="math">r</span> 上最多只有一个前驱结点和一个后继结点。具体而言，结点集合 <span class="math">K</span> 在关系 <span class="math">r</span> 上存在一个唯一的开始结点，它没有前驱、但有唯一的后继；也存在一个唯一的终止结点，具有一个唯一的前驱而没有后继；其他结点均为内部结点，在关系 <span class="math">r</span> 上既有一个唯一的前驱，也有一个唯一的后继。线性结构在程序设计中应用最多，例如数组、链表、栈和队列等。</p>
+<p><strong>树形结构</strong>（tree structure）简称树结构或层次结构，其关系 <span class="math">r</span> 一般称为层次关系。结点集合 <span class="math">K</span> 中有且仅有一个结点 <span class="math">k<sub><span class="upr">0</span></sub><span class="rel">∈</span>K</span>，在关系 <span class="math">r</span> 中没有前驱，该结点称为树根（root）。除结点 <span class="math">k<sub><span class="upr">0</span></sub></span> 外，<span class="math">K</span> 中所有结点都有且仅有一个前驱，但后继的数目不加限制。同时，<span class="math">K</span> 中除结点 <span class="math">k<sub><span class="upr">0</span></sub></span> 外的任何结点 <span class="math">k<span class="rel">∈</span>K</span>，都存在一个结点序列 <span class="math">k<sub><span class="upr">0</span></sub>,k<sub><span class="upr">1</span></sub>,⋯,k<sub>s</sub></span>，使得 <span class="math">k<sub><span class="upr">0</span></sub></span> 是树根，且 <span class="math">k<sub>s</sub><span class="rel">=</span>k</span>，有序对 <span class="math">⟨k<sub>i<span class="bin">−</span><span class="upr">1</span></sub>,k<sub>i</sub>⟩<span class="rel">∈</span>r</span>（<span class="math"><span class="upr">1</span><span class="rel">≤</span>i<span class="rel">≤</span>s</span>），这样的结点序列称为从根到结点 <span class="math">k</span> 的一条<strong>路径</strong>（path）。树形结构存在很多形态，如二叉树结构、有序树结构等，它们都有着各自独特的应用。UNIX 和 DOS 中的文件系统就是一个典型的树结构。</p>
+<p><strong>图结构</strong>（graph structure）有时也称为网络结构。图结构的关系 <span class="math">r</span> 对集合 <span class="math">K</span> 中结点的前驱和后继数目不加任何约束。例如，交通网络就是一个非常复杂的典型图结构；1.1 节的传言网也是图。</p>
+<p>从数学上看，树形结构和图结构的基本区别就是「每个结点是否仅仅从属于一个直接前驱」，而线性结构和树形结构的基本区别是「每个结点是否仅有一个直接后继」。</p>
+<p>以上这种结构分类揭示出枯燥数据之间的相互关系，给出了关系本身的一般性质。这对于理解数据结构以及正确设计算法都很重要，后面各章都建立在这三种关系上。</p>
 <h3 id="122-数据的存储结构"><a class="anchor" href="#122-数据的存储结构">#</a>1.2.2 数据的存储结构</h3>
 <p>存储结构回答的是：同一套逻辑关系，在计算机的存储器里怎么落下来。主存按字节编址，相邻单元的地址连续，并且可以按地址随机访问、访问时间基本相同。</p>
-<p>要把 <span class="math">(K,r)</span> 存进去，需要两层映射：每个结点 <span class="math">k</span> 对应存储器里一块连续区域；每个关系元组 <span class="math">&lt;k<sub>i</sub>,k<sub>j</sub>&gt;</span> 对应两块区域地址之间的某种关系——或者是地址相邻，或者是指针相指。同一种逻辑结构可以有多种映射。线性表既可以顺序存放，也可以链接存放，得到的就是顺序表和链表。</p>
+<p>计算机的主存储器具有「空间相邻」和「随机访问」的特点：基本的存储单元是字节，用非负整数对存储地址编码，提供对存储空间上相邻的单元集合的随机访问；计算机指令具有按地址随机访问存储空间内任意单元的能力，访问不同地址所需的访问时间基本相同。</p>
+<p>对于逻辑结构 <span class="math">(K,r)</span> 而言，其数据的存储结构就是建立一种由逻辑结构到物理存储空间的映射。一方面，需要建立一个从结点集合 <span class="math">K</span> 到存储器 <span class="math">M</span> 的映射 <span class="math">K<span class="rel">→</span>M</span>，其中每一个结点 <span class="math">k<span class="rel">∈</span>K</span> 都对应一个唯一的连续存储区域 <span class="math">c<span class="rel">∈</span>M</span>；另一方面，还要把每一个关系元组 <span class="math">⟨k<sub>i</sub>,k<sub>j</sub>⟩<span class="rel">∈</span>r</span>（其中 <span class="math">k<sub>i</sub>,k<sub>j</sub><span class="rel">∈</span>K</span> 是结点）映射为相应的存储单元的地址间的关系（顺序关系，或指针的地址指向关系）。</p>
+<p>同一种逻辑结构可以采用不同的表示方式，即采用不同的映射关系来建立数据的逻辑结构到存储结构的转换。例如，线性结构既可以采用顺序的方式来存储，形成顺序表；也可以采用链接的方式，得到链表。</p>
 <p>常用的四种基本方法如下。</p>
-<p><strong>顺序方法</strong>把一组结点放进一片地址相邻的单元，逻辑上的先后用地址的先后表示。按下标访问因此是 <span class="math">O(<span class="upr">1</span>)</span>。程序语言里的数组就是顺序方法。它通常也是紧凑的：除了数据本身，几乎不存附加信息。存储密度定义为「真正的数据」所占空间与整块结构所占空间之比。非线性结构有时也能顺序存放，但要额外记下一些关系信息，例如完全二叉树按层编号后，孩子下标可以用 <span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">1</span></span>、<span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">2</span></span> 算出来。</p>
+<p><strong>顺序方法</strong>把一组结点存放在一片地址相邻的存储单元中，结点间的逻辑关系用存储单元间的自然顺序关系来表达。顺序存储法为使用整数编码访问数据结点提供了便利，按下标访问因此是 <span class="math">O(<span class="upr">1</span>)</span>；程序设计语言内提供的数组就是顺序方法的一个具体实例。</p>
+<p>顺序存储结构通常也被称为<strong>紧凑存储结构</strong>：其紧凑性是指其存储空间除了存储数据本身之外，没有存储其他附加的信息。紧凑性可以用<strong>存储密度</strong>来度量——所存储的「数据」占用的存储空间，和该结构（包括附加信息）占用的整个存储空间大小之比。显然，存储密度太小的存储结构，其空间效率比较低。</p>
+<p>除线性结构外，对于部分非线性数据结构也可以采用顺序存储方法。例如树形结构也可采用顺序方式来存储，前提是同时存储一些附加信息来表示结点之间的逻辑关系：完全二叉树按层编号后，孩子下标可以用 <span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">1</span></span>、<span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">2</span></span> 算出来（第 5 章）。</p>
 <p><strong>链接方法</strong>在每个结点里附一个（或多个）指针域，专门存放后继的地址。结点因此分成数据域和指针域。需要一个结点同时挂多个后继时，就放多个指针。链接适合经常增删、长度事先不知道的结构。代价是：不知道指针时，只能从链头一个一个比下去；按位置访问不再是 <span class="math">O(<span class="upr">1</span>)</span>。</p>
-<p><strong>索引方法</strong>是顺序存储的推广。另造一张从整数下标到存储地址的表，每个表项是指向一条记录的指针。索引表的空间是<strong>附加在数据之外</strong>的。检索时先在较小的索引里定位，再按地址读记录；数据量大、一次磁盘读写很贵时，索引的意义就是少读盘。</p>
+<p><strong>索引方法</strong>是顺序存储的一种推广：通过建造一个由整数域 <span class="math">Z</span> 映射到存储地址域 <span class="math">D</span> 的索引函数 <span class="math">Y:Z<span class="rel">→</span>D</span>，把整数索引值 <span class="math">z</span> 映射到结点的存储地址 <span class="math">d<span class="rel">∈</span>D</span>，从而形成一个存储了一组指针的索引表，每个指针指向存储区域的一个数据结点。索引表的存储空间是<strong>附加在结点存储空间之外</strong>的，每一个元素就是指向相应数据结点的指针，即结点存储单元的开始地址。</p>
+<p>作为一种存储机制，索引的主要作用是提高检索的效率。当数据量很大时，对数据的检索可能涉及大量读/写磁盘的操作，会影响效率；通过索引则可以降低读/写的数据量——根据检索码确定了被检索数据的存储地址之后，再进行相应的读/写。</p>
 <p>原书特意指出，索引函数一般<strong>不是</strong>数组那样的简单线性函数——数据结点长度不等时它就不可能是线性的。图 1.4 画的正是这种情况：</p>
 <figure><img loading="lazy" src="../assets/40916b3631d4d819.jpg" alt="图 1.4 索引示例：线性索引按关键码升序，存储区的数据物理无序且每块长度不等"><figcaption>图 1.4 索引示例：线性索引按关键码升序，存储区的数据物理无序且每块长度不等</figcaption></figure>
 <p>图 1.4 索引示例</p>
@@ -587,8 +592,9 @@ int smallest_eccentricity = infinity;</code></pre></div>
 └──────┴──────┴──────┴──────┴──────┘</code></pre></div>
 <p><strong>这两行的错位就是索引的全部意义。</strong> 上面一行升序，所以可以在索引里二分；下面一行完全乱序，说明数据一块都没有搬动过。要找关键码 52，先在索引里二分定位到第 3 列，读出 <code>[2]</code>，再直接去存储区取第 2 块——<strong>只读了一块，没有扫过其余四块</strong>。</p>
 <p>顺带看一眼每块的宽度：五块长度各不相同。正因为长度不等，&quot;第 k 块在哪&quot;就没法用 <code>起始地址 + k × 块长</code> 算出来，只能查表——这才是原书说&quot;索引函数并非数组那样的简单线性函数&quot;的意思。</p>
-<p><strong>散列方法</strong>是索引的延伸：不先造一张排好序的表，而是用散列函数从关键码直接算出地址，再把结点放进对应槽位。散列函数应当算得快，并且尽量把地址均匀铺开。冲突怎么处理、装载因子多高会退化，是第 10 章的内容。</p>
-<p>具体应用里这四种方法经常组合。树的「子结点表」就是顺序加链接；选哪一种，还要看定义在结构上的运算——要不要随机访问、会不会频繁插入、数据在内存还是外存。</p>
+<p><strong>散列方法</strong>是索引法的一种延伸和扩展：散列法利用散列函数进行索引值的计算，然后通过索引表求出结点的指针地址。其主要思想是根据结点的关键码值来确定其存储地址——利用一种称为散列函数（hash function）的关系，把关键码的值映射到存储空间的地址，然后把结点存入此存储单元中。散列技术的关键问题是如何选择和设计恰当的散列函数、构造散列表、研究构造散列表时的碰撞解决方案等。</p>
+<p>一个散列函数把一个给定的关键码映射为一个小于 <span class="math">K</span> 的非负整数，<span class="math">K</span> 的大小取决于具体的应用。散列函数应该满足一些重要的散列性质：散列函数计算出的地址尽可能均匀地分布在构造的散列表地址空间；散列函数的计算应该简单化，以便提高地址计算速度。冲突怎么处理、装载因子多高会退化，是第 10 章的内容。</p>
+<p>在一个具体的应用中，可以根据需要选用以上 4 种存储方法或其组合。例如，树形结构的「子结点表」表示方法就是顺序和链接的结合（第 6 章）。另外，一个逻辑结构可以有多种不同的存储方案，因此在选择存储方法时，还要综合考虑定义在其上的运算及其算法的实现——要不要随机访问、会不会频繁插入、数据在内存还是外存。</p>
 <h3 id="123-抽象数据类型"><a class="anchor" href="#123-抽象数据类型">#</a>1.2.3 抽象数据类型</h3>
 <p>抽象意味着同一个概念可以有多种实现。一旦抽象问题被解决，许多同类问题就不必从头再来。用户自定义的类型，通常就是对「多种可能的存储和实现」做一次抽象。</p>
 <p>抽象数据类型（abstract data type，ADT）这个词是逐步形成的。二十世纪六七十年代，人们把用户自己定义的类型叫做抽象数据类型。更早的算法语言往往不提供这种机制。六十年代后期，为了把算法细节和数据的内部结构藏起来，Simula 67 引入了类，随后出现了模块：模块式给出外部看得见的运算接口，模块体存放对外不可见的私有数据和实现。接口与实现分离之后，用户才能真正自定义类型，达到数据抽象和信息隐蔽。在这个意义下，模块所定义的数据类型就叫做抽象数据类型。</p>
@@ -617,77 +623,222 @@ public:
 </ul>
 <p>所以运算直接写在实现类上。对元素类型的要求，正文里用一句话说清即可：例如顺序栈、 顺序表底层是 <code>new T[n]</code>，会把整块槽位都默认构造出来，所以 <code>T</code> 必须能默认构造。</p>
 <h2 id="13-算法"><a class="anchor" href="#13-算法">#</a>1.3 算法</h2>
-<p>算法研究可以追溯得很远。中文「算法」出自《周髀算经》；英文 algorithm 来自九世纪波斯数学家花拉子米（al-Khwarizmi）。Ada Lovelace 在 1842 年为巴贝奇分析机写过求解伯努利方程的程序，因此常被看作第一位程序员；那台机器没有建成，程序也没有真正跑过。二十世纪图灵提出图灵机，给「什么叫做可计算」一个精确模型，多数算法才可以稳定地写成交给计算机执行的程序。Knuth 在七十年代说，计算机科学就是研究算法的学问。</p>
-<p>按应用范围，算法分成数值的和非数值的；按工作方式，分成串行的和并行的。本书后面各章几乎都是非数值、串行的算法。</p>
+<p>算法的研究可以追溯到公元前 300 多年。算法的中文名称出自《周髀算经》，而英文名称 algorithm 则源于 9 世纪波斯数学家比阿勒·霍瓦里松的名字 al-Khwarizmi，他首先在数学上提出了算法这个概念。算法的第一次编写是 Ada Byron 于 1842 年为巴贝奇分析机编写求解伯努利方程的程序，因此 Ada Byron 被大多数人认为是世界上第一位程序员；由于查尔斯·巴贝奇（Charles Babbage）未能完成他的分析机，这个算法最终未能在机器上执行。20 世纪的英国数学家图灵（Turing）提出了著名的图灵论题，并提出一种假想的计算机的抽象模型，这个模型被称为图灵机。图灵机的出现解决了算法定义的难题，对算法的发展起到了重要的作用，使得大多数算法都可以转换成程序交给计算机执行，原来认为靠人力难以完成的算法也变得可行。由此也拉开了算法研究和实用的帷幕。</p>
+<p>从应用范围来看，算法可分成数值算法和非数值算法两大类；从工作方式看，算法可分成串行算法和并行算法两大类。早在 20 世纪 70 年代，D. E. Knuth 就指出，计算机科学就是研究算法的学问。本书后面各章几乎都是非数值的、串行的算法。</p>
 <h3 id="131-算法的概念"><a class="anchor" href="#131-算法的概念">#</a>1.3.1 算法的概念</h3>
-<p>算法是对特定问题求解过程的描述：为解决该问题而采取的、具体而有限的操作步骤。程序是算法的一种实现；计算机按程序一步一步做，就把问题解出来。</p>
-<p>描述一个算法，通常要说清输入是什么类型、输出应满足什么性质。辗转相除法的输入是两个正整数 <span class="math">n</span>、<span class="math">m</span>，输出是它们的最大公因子。高斯消元的输入是系数矩阵和右端常数，输出是使方程成立的一组变元取值。</p>
-<p>算法一般要满足四条性质。</p>
+<p>简单来说，算法是对特定问题求解过程的描述，是指令的有限序列，即为解决某一特定问题而采取的具体而有限的操作步骤。程序是算法的一种实现，计算机按照程序逐步执行算法，实现对问题的求解。</p>
+<p>求最大公因子的辗转相除法，以及求解联立线性方程组的主元素消除法，都是算法的典型例子。求解一个问题，通常用该问题的<strong>输入数据类型</strong>和该问题所要求解的<strong>结果（算法的输出数据）所应遵循的性质</strong>来描述。以求最大公因子算法为例，它的输入是整数类型，输入数据是任意给定的两个正整数 <span class="math">n</span> 和 <span class="math">m</span>，而算法的输出则是既能整除 <span class="math">n</span> 又能整除 <span class="math">m</span> 的所有公因子中的最大的非负整数。对于求解联立线性方程组，它的输入数据是方程的系数矩阵和方程等式右侧的常数向量，而其输出结果数据是方程变元的一组取值，它们代入方程应该满足所给的等式。</p>
+<p>算法一般具有以下性质。</p>
 <ol>
-<li><strong>通用。</strong> 凡是符合声明类型的输入，都能按同一套步骤求解，并且结果正确。不是只对书上那一组样例成立。</li>
-<li><strong>有效。</strong> 每一步都是人或机器能确切执行的动作，指令集是有限、明确的。辗转相除只用「整除取余、取商、判断余数是否为零」。每一步的结果也要有确定的类型，不能算完不知道得到的是什么。</li>
-<li><strong>确定。</strong> 做完这一步，下一步是什么必须说死：顺序往下、按条件分支、或者结束。不能停在「被锁住」的状态，也不能只写一句含糊的话。</li>
-<li><strong>有穷。</strong> 必须在有限步内停机，不能含死循环。注意：指令条数有限，并不自动保证执行步数有限——循环条件写错，有限条指令也可以转个没完。设计时要单独检查结束条件。</li>
+<li><strong>算法的通用性。</strong> 对于那些符合输入数据类型的<strong>任意</strong>输入数据，都能根据算法进行问题求解，并保证计算结果的正确性。不是只对书上那一组样例成立。</li>
+<li><strong>算法的有效性。</strong> 算法是有限条指令组成的指令序列，其中每一条指令都必须能够被人或机器所确切执行。指令的类型应该明确规定，仅限于若干明确无误的指令动作，是一个有限的指令集。例如辗转相除法，其基本动作（指令）只包括整数相除求余数和商数以及判断余数是否为 0 等几个指令。这些基本指令不仅能够被准确无误地执行，而且每一步的执行结果具有确定的类型。算法的有效性不仅指出了每一步指令能够被有效执行，而且也规定了指令的执行结果，其结果应具有确定的数据类型，是可预期的。</li>
+<li><strong>算法的确定性。</strong> 算法每执行一步之后，关于下一步怎么执行，应该有明确的指示。下一步动作可以是条件判断、分支指令、顺序执行一条指令，或者指示整个算法的结束等。算法的确定性就是要保证每一步之后都有关于下一步动作的指令，不能缺乏下一步指令（即「被锁住」状态），或仅含有模糊不清的指令。</li>
+<li><strong>算法的有穷性。</strong> 算法的执行必须在有限步内结束，换言之，算法不能含有死循环。注意，<strong>算法由有限条指令所组成这一事实本身并不能保证算法执行的有穷性</strong>：循环条件写错，有限条指令也可以转个没完。设计算法时，应该关注算法的结束条件。</li>
 </ol>
-<p>程序是算法落在某种语言里的样子。同一算法可以有许多程序；一个程序如果对某类输入会永远循环，它就不是该问题的算法。</p>
+<p>总之，了解这些基本性质有助于人们更确切地理解算法的概念。</p>
 <h3 id="132-算法设计"><a class="anchor" href="#132-算法设计">#</a>1.3.2 算法设计</h3>
-<p>算法设计要回答：面对这一类问题，步骤从哪来。常用方法有穷举、回溯、分治、递归、贪心和动态规划。</p>
-<p><strong>穷举</strong>（枚举）把问题空间里的对象按某种规则一一列出来，逐个检查是否满足条件。对象必须有限，并且有明确的列举顺序。全局穷举往往太慢，但在局部很有用。<code>switch</code> 按离散取值分支，就是一种小范围穷举。</p>
-<p><strong>回溯</strong>（试探）按某种顺序枚举候选解。发现当前候选不可能成功，就放弃它、退回上一步换下一个，这个动作叫回溯；当前候选还不够大、但局部约束都满足，就把它扩大再试，这个动作叫向前试探。第 5、6、7 章的深度优先周游，以及第 3 章的背包，都是回溯。</p>
-<p><strong>分治</strong>把一个大问题剖成若干较小的、同类的子问题，分别求解，再把子问题的解合并成原问题的解。这是自顶向下的。如果子问题仍是原问题的缩小版，反复剖下去就会自然地写成递归。分治和递归经常成对出现。第 8 章的快排、归并，第 10 章的二分检索，都是分治。</p>
-<p><strong>贪心</strong>从初始状态出发，每一步按某个局部最优标准做一个不可撤回的选择，希望这些局部最优能拼成全局最优。度量标准选得对不对，是贪心能不能用的核心。<strong>动态规划</strong>也处理最优性问题，但子问题往往互相重叠：如果直接按分治递归，同一子问题会被算很多次。办法是把已经算过的答案存进一张表，以后直接查。第 7 章的 Prim、Kruskal、Dijkstra 是贪心；Floyd 是比较典型的动态规划。第 12 章的最优二叉搜索树也是动态规划。</p>
-<p>1.1 节的传言问题要任意两点最短路，并且顶点数很小，所以选 Floyd，而不是对每个起点跑一遍 Dijkstra。</p>
-<p>这几种方法可以组合、变形，也可以只拿来处理困难问题的特殊情形。后面各章会反复回到它们。</p>
+<p>算法设计与算法分析是计算机科学的核心问题。算法设计是求解问题时必须要考虑的，其任务是对各类具体问题设计求解的方法和过程。常用的算法设计方法有穷举法（enumeration）、回溯法（backtrack）、分治法（divide and conquer）、递归法（recursion）、贪心法（greedy）和动态规划法（dynamic programming）等。下面分别就这些算法设计方法予以简单介绍。</p>
+<p><strong>1. 穷举法。</strong> 穷举法也称枚举法，其基本思想是将问题空间中的所有求解对象一一列举出来，然后逐一加以分析、处理，并验证结果是否满足给定的条件。穷举完所有对象后，问题将最终得以解决。穷举法具有以下一些特点：</p>
+<ol>
+<li>对象应该是有限的，有明显的穷举范围；</li>
+<li>有穷举规则，可按某种规则列举对象；</li>
+<li>一时找不出解决问题的更好途径。</li>
+</ol>
+<p>一般而言，对一个问题空间进行全局的穷举，往往很费时间，效率上难以满足要求，但在问题的局部采用穷举法常很有效。例如，C/C++ 语言中常用的分支语句 <code>switch</code> 就是一种穷举。</p>
+<p><strong>2. 回溯法。</strong> 回溯法也称试探法，该方法的基本思想是将问题的候选解按某种顺序逐一枚举和检验，来寻找一个满足预定条件的解。当发现当前候选解不可能是解时，就退回到上一步重新选择下一个候选解；如果当前候选解还不满足问题规模要求，但是满足所有其他要求，那么继续扩大当前候选解的规模，并继续试探；如果当前候选解满足包括问题规模在内的所有要求时，该候选解就是问题的一个解。在回溯法中，放弃当前候选解、寻找下一个候选解的过程称为<strong>回溯</strong>；扩大当前候选解的规模、以继续试探的过程称为<strong>向前试探</strong>。</p>
+<p>第 5、6、7 章将要介绍的深度优先搜索就是典型的回溯法实例；第 3 章的背包问题也是。</p>
+<p><strong>3. 分治法和递归法。</strong> 分治法的设计思想很朴素，其要点是在遇到一个难以直接解决的大问题时，将其分割成一些规模较小的子问题，以便各个击破、分而治之，然后把各个子问题的解合并起来，得出整个问题的解。分治法是一种<strong>自顶向下</strong>的设计方法。</p>
+<p>如果原问题可分割成若干个子问题，这些子问题都可解，并且可利用这些子问题的解求出原问题的解，那么这种分治法就是可行的。由分治法产生的子问题往往是原问题的较小模式，在这种情况下，反复应用分治手段，可以使问题的规模不断缩小，最终缩小到很容易直接求出其解的规模，这自然会导致递归过程的产生。<strong>分治与递归如同一对孪生兄弟</strong>，经常同时应用在算法设计之中，并由此产生许多高效算法。</p>
+<p>本书第 8 章的快速排序、归并排序，以及第 10 章的二分检索，都是分治法的应用实例。（原书此处写的是「第 8、9 章」，但二分检索讲在第 10 章，这里按本书的实际编号更正。）</p>
+<p><strong>4. 贪心法和动态规划法。</strong> 贪心法的基本思路是从问题的初始状态出发，依据某种贪心标准，通过若干次的贪心选择而得出最优值（或较优解）。贪心法并不是从整体上考虑问题，它所做出的选择只是在某种意义上的局部最优解，寄希望于由局部的最优解构建最终的全局最优解。<strong>选择能产生问题最优解的最优度量标准，是使用贪心法的核心问题。</strong></p>
+<p>比贪心法更为一般的动态规划法通常也用于求解具有某种最优性质的问题。当一个问题的解可以看成一系列判定的结果时，可以利用动态规划方法设计其求解算法。在这类问题中，可能会有许多可行解，希望从中找到具有最优值的解。动态规划法与分治法类似，其基本思想也是将待求解问题分解成若干个子问题，先求解子问题，然后从这些子问题的解得到原问题的解。<strong>与分治法不同的是</strong>，适合于用动态规划求解的问题，经分解得到的子问题往往不是相互独立的。若用分治法来解这类问题，则分解得到的子问题数目太多，有些子问题被重复计算了很多次。如果能够保存已解决的子问题答案，而在需要时利用这些已求得的答案，就可以避免大量的重复计算，节省时间。一般用一张表来记录所有已解的子问题的答案：不管该子问题以后是否被用到，只要它被计算过，就将其结果填入表中——这就是动态规划法的基本思路。</p>
+<p>第 7 章介绍的最小生成树的 Prim 算法和 Kruskal 算法、求最短路径的 Dijkstra 算法和 Floyd 算法，其中 Floyd 算法是比较典型的动态规划，而其他 3 种算法是贪心算法。第 12 章的最佳二叉搜索树也是动态规划。</p>
+<p>可以选择和组合这些基本算法设计方法，根据问题的资源约束和要求，设计出相关数据结构和算法来求解问题。运用算法的常见方式有以下 4 种：</p>
+<ol>
+<li>算法的组合；</li>
+<li>经典算法的变形与推广；</li>
+<li>研究困难问题的特殊情况；</li>
+<li>探索新的算法。</li>
+</ol>
+<p>回到 1.1 节的传言问题：它要的是任意两点之间的最短路径，并且顶点数很小，所以选 Floyd，而不是对每个起点各跑一遍 Dijkstra。后面各章会反复回到这几种方法。</p>
 <h2 id="14-算法分析"><a class="anchor" href="#14-算法分析">#</a>1.4 算法分析</h2>
-<p>同一问题往往有多种算法，各有适用场合。算法分析用数学工具讨论每种算法的代价，目的是：在已有算法里选出比较合适的一种，或者看清该往哪个方向改进。</p>
-<p>Hartmanis 和 Stearns 把这种代价叫做计算复杂性。复杂性高，意思是跑这个算法要消耗的计算机资源多。最要紧的两种资源是时间（处理器）和空间（存储器）。本书后文说的「时间代价」「空间代价」，指的就是这两项。</p>
-<p>不能用墙上的秒数来比较算法。同一段程序在巨型机和 PC 上可以差几个数量级；换一种语言、换一个编译器，数字也会变。C 写的程序曾经比同一算法的 LISP 实现快近二十倍——那是实现环境的差别，不是算法的差别。所以分析时看的是：输入规模为 <span class="math">n</span> 时，算法做了多少次与具体机器无关的<strong>基本操作</strong>。规模一般指输入量的个数，排序里就是待排元素的个数；一次基本操作耗时应当与操作数的具体数值无关，例如两个机器字整数相加。</p>
-<p>若时间与规模成线性，<span class="math">t<span class="rel">=</span>cn</span>，规模乘 5，时间也乘 5。若 <span class="math">t<span class="rel">=</span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>n</span>，规模加倍，时间只加 1。后面各章的「<span class="math">O(n)</span>」「<span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>」都按这个口径读。</p>
+<p>一般而言，同一类问题总是存在着多种解决方案，即针对一个问题可以有多个算法。这些算法也许各有其优缺点以及适用的场景。那么如何在多个算法中按照某种原则进行取舍？这就需要用到算法分析技术来评价算法的效率。</p>
+<p>算法分析的任务是利用数学工具，对每一个具体算法讨论其各种复杂度，以探讨某种具体算法适用于哪类问题，或某类问题宜采用哪种算法。其目的在于从解决同一问题的不同算法中选择出比较合适的一种，或者是对原有的算法进行改造、加工，使其更优。</p>
+<p>为比较不同算法的效率，Juris Hartmanis 和 Richard E. Stearns 提出了一种称为计算复杂性（computational complexity）的方法来度量算法的难度。计算复杂性分析显示了实施一个算法所需的努力或代价。对于一个算法而言，其复杂性的高低体现在运行该算法所需要的计算机资源的多少上：所需的资源越多，表明该算法的复杂性越高；反之越低。计算机资源中最重要的是时间资源（即处理器）和空间资源（即存储器），因而算法的复杂性通常体现为时间复杂性和空间复杂性两个指标。本书后文说的「时间代价」「空间代价」，指的就是这两项。（这两个人名在原书里印作 “Juris Hartmanishe” 与 “Richars E. Stearns”，此处按学界通行拼法更正。）</p>
+<p>不言而喻，对于任意给定的问题，设计出复杂性尽可能低的算法是人们追求的一个重要目标；另一方面，当给定的问题已有多种算法时，选择其中复杂性最低者，也是选用算法时应遵循的一个重要准则。因此，复杂性分析对算法的设计或选用有着重要的指导意义和实用价值。</p>
+<p>对于算法的复杂性，首先需要明确两个问题：</p>
+<ol>
+<li>怎样<strong>表达</strong>一个算法的复杂性；</li>
+<li>怎样<strong>计算</strong>一个算法的复杂性。</li>
+</ol>
+<p>影响程序运行时间的因素有很多。一个运行在 Cray 巨型机上的算法，放在 PC 上肯定会慢很多；反过来，一个效率较差的算法运行在 Cray 上，也可能比一个效率极好的算法运行在 PC 上还要快许多。即使运行在同样的机器上，所采用的程序语言不同，运行时间也可能不同：采用编译型的语言往往要比解释型的语言快许多——原书举的例子是，采用 C 语言编写的程序，比用 LISP 语言编写的、采用同样算法的程序快将近 20 倍。</p>
+<p>综上所述，评估算法的效率不能采用诸如微秒、纳秒这样的真实时间单位。对算法分析来说，最重要的不是具体的运行时间，而是<strong>算法与输入规模之间的关系</strong>：用一定「规模（size）」的数据作为输入时，程序运行所需的「基本操作（basic operation）」数来描述时间效率。例如，如果数据规模 <span class="math">n</span> 和运行时间 <span class="math">t</span> 之间存在线性关系 <span class="math">t<sub><span class="upr">1</span></sub><span class="rel">=</span>cn<sub><span class="upr">1</span></sub></span>，那么数据规模增加到原来的 5 倍后，运行时间也相应地增加同样的倍数，即 <span class="math">n<sub><span class="upr">2</span></sub><span class="rel">=</span><span class="upr">5</span>n<sub><span class="upr">1</span></sub></span>，则 <span class="math">t<sub><span class="upr">2</span></sub><span class="rel">=</span><span class="upr">5</span>t<sub><span class="upr">1</span></sub></span>。同理，如果 <span class="math">t<sub><span class="upr">1</span></sub><span class="rel">=</span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>n</span>，则规模加倍只意味着时间增加一个单位：<span class="math">n<sub><span class="upr">2</span></sub><span class="rel">=</span><span class="upr">2</span>n</span> 时 <span class="math">t<sub><span class="upr">2</span></sub><span class="rel">=</span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>(<span class="upr">2</span>n)<span class="rel">=</span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>n<span class="bin">+</span><span class="upr">1</span><span class="rel">=</span>t<sub><span class="upr">1</span></sub><span class="bin">+</span><span class="upr">1</span></span>。</p>
+<p>此处「规模」和「基本操作」的关系视具体的算法而定。「规模」一般指输入量的数目，例如在排序问题中，问题的规模即为待排序元素的个数；而完成一个「基本操作」所需的时间应该与被操作的具体数值无关，例如两个整数相加的操作时间，与这两个整数的具体取值没有关系。</p>
 <h3 id="141-渐进分析方法"><a class="anchor" href="#141-渐进分析方法">#</a>1.4.1 渐进分析方法</h3>
-<p>精确计数往往是一个很复杂的函数。<span class="math">n</span> 很大时，不能显著改变量级的项都可以丢掉，剩下的近似在规模足够大时会贴近原值。这种方法叫渐进分析。例如</p>
+<p>一般情况下，用来表示数据规模和时间关系的函数都相当复杂。计算这样的函数时通常只考虑大的数据，而那些不能显著改变函数量级的部分都可以忽略掉；其结果是原函数的一个近似值，这个近似值在数据规模很大时会足够接近原值。这种方法称为渐进算法分析（asymptotic algorithm analysis）方法，简称渐进分析。例如下面这个函数：</p>
 <div class="math math-display">f(n)<span class="rel">=</span>n<sup><span class="upr">2</span></sup><span class="bin">+</span><span class="upr">100</span>n<span class="bin">+</span>&thinsp;<span class="upr">log</span><sub><span class="upr">10</span></sub>n<span class="bin">+</span><span class="upr">1000</span></div>
-<p><span class="math">n<span class="rel">=</span><span class="upr">1</span></span> 时常数项 1000 最大；<span class="math">n<span class="rel">=</span><span class="upr">10</span></span> 时 <span class="math"><span class="upr">100</span>n</span> 与 1000 相当；<span class="math">n<span class="rel">=</span><span class="upr">100</span></span> 时前两项相当；<span class="math">n</span> 再大，二次项就压倒其余所有项。所以这个函数在 <span class="math">n</span> 很大时就是 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>。</p>
-<p>渐进分析是一种故意简化的模型，用来把注意力放在最重要的部分。并非任何时候都能忽略常数：只排 10 个数的算法，和排上万个数的算法，适用的实现可以完全不同。</p>
-<p><strong>大 O。</strong> 设 <span class="math">f</span>、<span class="math">g</span> 是从自然数到非负实数的函数。若存在正数 <span class="math">c</span> 和 <span class="math">N</span>，使得所有 <span class="math">n<span class="rel">≥</span>N</span> 都有 <span class="math">f(n)<span class="rel">≤</span>c g(n)</span>，则称 <span class="math">f(n)</span> 是 <span class="math">O(g(n))</span> 的。<span class="math">g</span> 是 <span class="math">f</span> 增长的一个上限：这个算法最多会差到什么程度。上限可以有很多，<span class="math">O(n)</span> 里的函数一定也在 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span> 里；习惯上取那个最小的、仍然成立的上限。</p>
-<p>几条常用性质：<span class="math">f</span> 是 <span class="math">O(g)</span>、<span class="math">g</span> 是 <span class="math">O(h)</span>，则 <span class="math">f</span> 是 <span class="math">O(h)</span>；两个 <span class="math">O(h)</span> 相加仍是 <span class="math">O(h)</span>；<span class="math">an<sup>k</sup></span> 是 <span class="math">O(n<sup>k</sup>)</span>；常数倍不改变阶；不同底的对数同阶，本书把 <span class="math"><span class="upr">log</span><sub><span class="upr">2</span></sub>n</span> 简写为 <span class="math"><span class="upr">log</span>&thinsp;n</span>。</p>
-<p>常见的上限有：</p>
+<p>在 <span class="math">n</span> 的取值很小时，例如为 1 时，最后的常数项 1000 对函数值的贡献最大；当 <span class="math">n<span class="rel">=</span><span class="upr">10</span></span> 时，第 2 项（<span class="math"><span class="upr">100</span>n</span>）和最后的 1000 具有相同的贡献；当 <span class="math">n</span> 达到 100 时，前两项的贡献相同；但当 <span class="math">n</span> 大于 100 后，第 2 项的贡献就小于第 1 项，而且 <span class="math">n</span> 越大，第 2 项对函数值而言就越微不足道。由于第 1 项是二次增长的，当 <span class="math">n</span> 取值很大时，函数的取值主要依赖于第 1 项的贡献。</p>
+<p>渐进分析是对资源开销的一种不精确的估计，它提供的是对算法所需资源开销进行评估的简化模型，以便把注意力集中在最重要的部分。应该注意的是，<strong>并非任何情况下都可以忽略常数部分</strong>：当算法要解决的问题规模很小时，各项系数和常数项就会起到举足轻重的作用，如同上面的函数所示。因此，用于上万个数的排序算法，也许并不适用于仅对 10 个数的排序。</p>
+<p><strong>大 O 表示法。</strong> 渐进分析最常用的表示方法是估计函数的增长趋势，采用由 Paul Bachmann 于 1894 年引入的大 <span class="math">O</span> 表示法。设 <span class="math">f</span> 和 <span class="math">g</span> 为从自然数到非负实数集的两个函数。</p>
+<blockquote><p><strong>定义 1</strong>　如果存在正数 <span class="math">c</span> 和 <span class="math">N</span>，使得对任意的 <span class="math">n<span class="rel">≥</span>N</span>，都有 <span class="math">f(n)<span class="rel">≤</span>c g(n)</span>，则称 <span class="math">f(n)</span> 在集合 <span class="math">O(g(n))</span> 中，或简称 <span class="math">f(n)</span> 是 <span class="math">O(g(n))</span> 的。</p></blockquote>
+<p>该定义说明了函数 <span class="math">f</span> 和 <span class="math">g</span> 之间的关系：既可以表达成函数 <span class="math">g(n)</span> 是函数 <span class="math">f(n)</span> 取值的上限（upper bound），也可以说函数 <span class="math">f</span> 的增长最终至多趋同于 <span class="math">g</span> 的增长。</p>
+<p>因此，大 <span class="math">O</span> 表示法提供了一种表达函数增长率上限的方法。换言之，若某种算法在 <span class="math">O(g(n))</span> 中，只是表明了该算法<strong>最多会差到何种程度</strong>。当然，一个函数增长率的上限可能不止一个：一个在集合 <span class="math">O(n)</span> 中的函数也一定在 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span> 中，同时也在 <span class="math">O(n<sup><span class="upr">3</span></sup>)</span> 中。大 <span class="math">O</span> 表示法给出的是所有上限中最小的那个上限。</p>
+<p>下面列出大 <span class="math">O</span> 表示法的一些有益特性，可在计算算法效率时使用（其中 <span class="math">a</span> 表示不依赖于 <span class="math">n</span> 的任意常数）：</p>
+<ol>
+<li>如果 <span class="math">f(n)</span> 是 <span class="math">O(g(n))</span> 的，<span class="math">g(n)</span> 是 <span class="math">O(h(n))</span> 的，则 <span class="math">f(n)</span> 是 <span class="math">O(h(n))</span> 的；</li>
+<li>如果 <span class="math">f(n)</span> 是 <span class="math">O(h(n))</span> 的，<span class="math">g(n)</span> 是 <span class="math">O(h(n))</span> 的，则 <span class="math">f(n)<span class="bin">+</span>g(n)</span> 是 <span class="math">O(h(n))</span> 的；</li>
+<li>函数 <span class="math">an<sup>k</sup></span> 是 <span class="math">O(n<sup>k</sup>)</span> 的；</li>
+<li>若 <span class="math">f(n)<span class="rel">=</span>c g(n)</span>，则 <span class="math">f(n)</span> 是 <span class="math">O(g(n))</span> 的；</li>
+<li>对于任何正数 <span class="math">a</span> 和 <span class="math">b</span>（<span class="math">b<span class="rel">≠</span><span class="upr">1</span></span>），函数 <span class="math"><span class="upr">log</span><sub>a</sub>n</span> 是 <span class="math">O(<span class="upr">log</span><sub>b</sub>n)</span> 的——即任何对数函数无论底数为何值，都具有相同的增长率；</li>
+<li>对任何正数 <span class="math">a<span class="rel">≠</span><span class="upr">1</span></span>，都有 <span class="math"><span class="upr">log</span><sub>a</sub>n</span> 是 <span class="math">O(<span class="upr">log</span><sub><span class="upr">2</span></sub>n)</span> 的。本书把 <span class="math"><span class="upr">log</span><sub><span class="upr">2</span></sub>n</span> 简写为 <span class="math"><span class="upr">log</span>&thinsp;n</span>。</li>
+</ol>
+<p>常见的上限 <span class="math">g(n)</span> 有以下若干种（<span class="math"><span class="upr">rate</span><sub>n<span class="rel">→</span>∞</sub>f(n)</span> 表示 <span class="math">n</span> 趋于无限大时函数 <span class="math">f(n)</span> 的增长率）：</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left"><span class="math">g(n)</span></th>
 <th style="text-align:left">名称</th>
-<th style="text-align:left">直观</th>
+<th style="text-align:left">原书给的例子</th>
 </tr></thead><tbody>
 <tr>
 <td style="text-align:left"><span class="math"><span class="upr">1</span></span></td>
-<td style="text-align:left">常数</td>
-<td style="text-align:left">与 <span class="math">n</span> 无关</td>
+<td style="text-align:left">常数函数</td>
+<td style="text-align:left">不依赖于数据规模 <span class="math">n</span></td>
 </tr>
 <tr>
 <td style="text-align:left"><span class="math"><span class="upr">log</span>&thinsp;n</span></td>
-<td style="text-align:left">对数</td>
-<td style="text-align:left">比线性慢，二分检索</td>
+<td style="text-align:left">对数函数</td>
+<td style="text-align:left">比线性函数 <span class="math">n</span> 增长慢</td>
 </tr>
 <tr>
 <td style="text-align:left"><span class="math">n</span></td>
-<td style="text-align:left">线性</td>
-<td style="text-align:left">扫一遍</td>
+<td style="text-align:left">线性增长</td>
+<td style="text-align:left"><span class="math"><span class="upr">rate</span>(n<span class="upr">个</span>a<span class="upr">相加</span>)<span class="rel">=</span><span class="upr">rate</span>(n<span class="bin">×</span>a)<span class="rel">=</span>O(n)</span></td>
 </tr>
 <tr>
 <td style="text-align:left"><span class="math">n&thinsp;<span class="upr">log</span>&thinsp;n</span></td>
-<td style="text-align:left">线性对数</td>
-<td style="text-align:left">低于平方，快排 / 归并 / 许多树算法</td>
+<td style="text-align:left">阶数低于二阶、高于一阶</td>
+<td style="text-align:left"><span class="math"><span class="upr">rate</span>∑<sub>i<span class="rel">=</span><span class="upr">1</span></sub><sup><span class="upr">log</span>&thinsp;n</sup>∑<sub>j<span class="rel">=</span><span class="upr">1</span></sub><sup>n</sup>a<span class="rel">=</span>O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，一般出现在树形结构的算法中</td>
 </tr>
 <tr>
 <td style="text-align:left"><span class="math">n<sup><span class="upr">2</span></sup></span></td>
-<td style="text-align:left">平方</td>
-<td style="text-align:left"><span class="math"><span class="upr">1</span><span class="bin">+</span><span class="upr">2</span><span class="bin">+</span>⋯<span class="bin">+</span>n</span></td>
+<td style="text-align:left">二阶增长</td>
+<td style="text-align:left"><span class="math"><span class="upr">rate</span>(<span class="upr">1</span><span class="bin">+</span><span class="upr">2</span><span class="bin">+</span>⋯<span class="bin">+</span>n)<span class="rel">=</span><span class="upr">rate</span>(n(n<span class="bin">+</span><span class="upr">1</span>)/<span class="upr">2</span>)<span class="rel">=</span>O(n<sup><span class="upr">2</span></sup>)</span></td>
 </tr>
 <tr>
 <td style="text-align:left"><span class="math">a<sup>n</sup></span></td>
-<td style="text-align:left">指数</td>
-<td style="text-align:left">比任何多项式都快，递归穷举时要小心</td>
+<td style="text-align:left">指数增长</td>
+<td style="text-align:left">往往出现在递归定义的函数计算中</td>
 </tr>
 </tbody></table></div>
-<p>令时间单位为 <span class="math"><span class="upr">1</span> μ<span class="upr">s</span></span>，<span class="math">n<span class="rel">=</span><span class="upr">1000</span></span> 时：<span class="math">T(n)<span class="rel">=</span>n</span> 是 <span class="math"><span class="upr">1</span> <span class="upr">ms</span></span>；<span class="math">T(n)<span class="rel">=</span>n<sup><span class="upr">2</span></sup></span> 是 <span class="math"><span class="upr">1</span> <span class="upr">s</span></span>；<span class="math">T(n)<span class="rel">=</span>n<sup><span class="upr">3</span></sup></span> 约 16 分钟；<span class="math">T(n)<span class="rel">=</span><span class="upr">2</span><sup>n</sup></span> 大约 <span class="math"><span class="upr">10</span><sup><span class="upr">286</span></sup></span> 年，而地球年龄不超过 <span class="math"><span class="upr">10</span><sup><span class="upr">10</span></sup></span> 年。指数爆炸型算法能不用就不用。</p>
+<p>值得注意的是，指数增长的渐进式比任何高次的多项式函数（如 <span class="math">n<sup><span class="upr">3</span></sup></span>、<span class="math">n<sup><span class="upr">4</span></sup></span>）都增长得更快。</p>
+<p>这些渐进式的函数曲线，在 <span class="math">n</span> 很大的时候其大小差别非常大。令时间单位为 <span class="math"><span class="upr">1</span> μ<span class="upr">s</span></span>，在 <span class="math">n</span> 等于 1000 时：线性增长率 <span class="math">T(n)<span class="rel">=</span>n</span> 为 <span class="math"><span class="upr">1000</span> μ<span class="upr">s</span></span>，即 1 ms；二次增长率 <span class="math">T(n)<span class="rel">=</span>n<sup><span class="upr">2</span></sup></span> 的时间开销是 <span class="math"><span class="upr">10</span><sup><span class="upr">6</span></sup> μ<span class="upr">s</span></span>，即 1 s；三次增长率 <span class="math">T(n)<span class="rel">=</span>n<sup><span class="upr">3</span></sup></span> 的时间开销就是 1000 s（约 16 分钟）；而指数型的增长率 <span class="math">T(n)<span class="rel">=</span><span class="upr">2</span><sup>n</sup></span> 所花费的时间约为 <span class="math"><span class="upr">10</span><sup><span class="upr">286</span></sup></span> 年，迄今地球的年龄还不超过 <span class="math"><span class="upr">10</span><sup><span class="upr">10</span></sup></span> 年。具有指数增长率的算法简称指数爆炸型算法，应用时需要谨慎。</p>
+<p>原书用表 1.2 把这些量级换算成现实世界里的速度，好让「差一个数量级」有一个能感知的尺度：</p>
+<p>表 1.2　各个量级的实例</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">m/s</th>
+<th style="text-align:left">英制度量衡</th>
+<th style="text-align:left">现实世界的例子</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">10</span><sup><span class="bin">−</span><span class="upr">11</span></sup></span></td>
+<td style="text-align:left">1.2 英寸/世纪</td>
+<td style="text-align:left">钟乳石的生长速度</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">10</span><sup><span class="bin">−</span><span class="upr">10</span></sup></span></td>
+<td style="text-align:left">1.2 英寸/十年</td>
+<td style="text-align:left">大陆板块的漂移速度</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">10</span><sup><span class="bin">−</span><span class="upr">9</span></sup></span></td>
+<td style="text-align:left">1.2 英寸/年</td>
+<td style="text-align:left">指甲的生长速度</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">10</span><sup><span class="bin">−</span><span class="upr">8</span></sup></span></td>
+<td style="text-align:left">1 英尺/年</td>
+<td style="text-align:left">头发的生长速度</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">10</span><sup><span class="bin">−</span><span class="upr">7</span></sup></span></td>
+<td style="text-align:left">1 英尺/月</td>
+<td style="text-align:left">杂草的生长速度</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">10</span><sup><span class="bin">−</span><span class="upr">6</span></sup></span></td>
+<td style="text-align:left">3.4 英寸/天</td>
+<td style="text-align:left">冰河的流动速度</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">10</span><sup><span class="bin">−</span><span class="upr">5</span></sup></span></td>
+<td style="text-align:left">1.4 英寸/时</td>
+<td style="text-align:left">表的分针转动速度</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">10</span><sup><span class="bin">−</span><span class="upr">4</span></sup></span></td>
+<td style="text-align:left">1.2 英尺/时</td>
+<td style="text-align:left">胃肠的蠕动速度</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">10</span><sup><span class="bin">−</span><span class="upr">3</span></sup></span></td>
+<td style="text-align:left">2 英寸/分</td>
+<td style="text-align:left">蜗牛的速度</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">10</span><sup><span class="bin">−</span><span class="upr">2</span></sup></span></td>
+<td style="text-align:left">2 英尺/分</td>
+<td style="text-align:left">蚂蚁的速度</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">10</span><sup><span class="bin">−</span><span class="upr">1</span></sup></span></td>
+<td style="text-align:left">20 英尺/分</td>
+<td style="text-align:left">巨龟的速度</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">1</span></span></td>
+<td style="text-align:left">2.2 英里/时</td>
+<td style="text-align:left">人类的散步速度</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">10</span><sup><span class="upr">1</span></sup></span></td>
+<td style="text-align:left">22 英里/时</td>
+<td style="text-align:left">人类疾跑速度</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">10</span><sup><span class="upr">2</span></sup></span></td>
+<td style="text-align:left">220 英里/时</td>
+<td style="text-align:left">螺旋桨飞机的速度</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">10</span><sup><span class="upr">3</span></sup></span></td>
+<td style="text-align:left">37 英里/分</td>
+<td style="text-align:left">喷气式飞机的速度</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">10</span><sup><span class="upr">4</span></sup></span></td>
+<td style="text-align:left">370 英里/分</td>
+<td style="text-align:left">宇宙飞船的速度</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">10</span><sup><span class="upr">5</span></sup></span></td>
+<td style="text-align:left">3700 英里/分</td>
+<td style="text-align:left">流星撞击地球的速度</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">10</span><sup><span class="upr">6</span></sup></span></td>
+<td style="text-align:left">620 英里/秒</td>
+<td style="text-align:left">地球自转速度</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">10</span><sup><span class="upr">7</span></sup></span></td>
+<td style="text-align:left">6200 英里/秒</td>
+<td style="text-align:left">卫星从洛杉矶到纽约的速度</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math"><span class="upr">10</span><sup><span class="upr">8</span></sup></span></td>
+<td style="text-align:left">62000 英里/秒</td>
+<td style="text-align:left">光速的三分之一</td>
+</tr>
+</tbody></table></div>
 <p>图 1.5 把常用函数的增长趋势画在一起——<span class="math">n</span> 稍大，曲线之间就拉开天文数字的差距：</p>
 <figure><img loading="lazy" src="../assets/c33523f30da594f0.jpg" alt="图 1.5 常用函数的增长趋势"><figcaption>图 1.5 常用函数的增长趋势</figcaption></figure>
 <p>图 1.5　常用函数的增长趋势。</p>
@@ -735,24 +886,80 @@ public:
 <td style="text-align:left">穷举子集</td>
 </tr>
 </tbody></table></div>
-<p><strong>Ω。</strong> 把大 O 定义里的不等式反过来：存在 <span class="math">c</span>、<span class="math">N</span>，使 <span class="math">n<span class="rel">≥</span>N</span> 时 <span class="math">f(n)<span class="rel">≥</span>c g(n)</span>，则 <span class="math">f</span> 是 <span class="math">Ω(g)</span> 的。这是增长的下限，习惯上取那个最大的、仍然成立的下限。</p>
-<p><strong>Θ。</strong> 若 <span class="math">f</span> 既是 <span class="math">O(g)</span> 又是 <span class="math">Ω(g)</span>，则称 <span class="math">f</span> 是 <span class="math">Θ(g)</span>：存在正常数 <span class="math">c<sub><span class="upr">1</span></sub></span>、<span class="math">c<sub><span class="upr">2</span></sub></span> 和正整数 <span class="math">N</span>，使 <span class="math">n&gt;N</span> 时</p>
+<p><strong><span class="math">Ω</span> 表示法。</strong> 大 <span class="math">O</span> 表示法给出了函数增值率的上限。与此相对，还有 <span class="math">Ω</span> 表示法（读做「欧米伽」）：</p>
+<blockquote><p><strong>定义 2</strong>　如果存在正数 <span class="math">c</span> 和 <span class="math">N</span>，使得对所有的 <span class="math">n<span class="rel">≥</span>N</span>，都有 <span class="math">f(n)<span class="rel">≥</span>c g(n)</span>，则称 <span class="math">f(n)</span> 在集合 <span class="math">Ω(g(n))</span> 中，或简称 <span class="math">f(n)</span> 是 <span class="math">Ω(g(n))</span> 的。</p></blockquote>
+<p>此定义说明了 <span class="math">c g(n)</span> 是函数 <span class="math">f(n)</span> 取值的下限（lower bound），也可以说函数 <span class="math">f(n)</span> 的增长最终至少是趋同于函数 <span class="math">g(n)</span> 的增长。大 <span class="math">O</span> 表示法和 <span class="math">Ω</span> 表示法的唯一区别在于不等式的方向不同；正如大 <span class="math">O</span> 取的是所有上限中最小的那个，<span class="math">Ω</span> 取的是所有下限中<strong>最大</strong>的那个。</p>
+<p><strong><span class="math">Θ</span> 表示法。</strong> 大 <span class="math">O</span> 和 <span class="math">Ω</span> 描述了某一函数增长的上限和下限。当上、下限相同时，则可用 <span class="math">Θ</span>（读做「希塔」）表示法：如果一个函数既在集合 <span class="math">O(g(n))</span> 中，又在集合 <span class="math">Ω(g(n))</span> 中，则称其为 <span class="math">Θ(g(n))</span>。即存在正常数 <span class="math">c<sub><span class="upr">1</span></sub></span>、<span class="math">c<sub><span class="upr">2</span></sub></span> 以及正整数 <span class="math">N</span>，使得对于任意的正整数 <span class="math">n&gt;N</span>，下列两不等式同时成立：</p>
 <div class="math math-display">c<sub><span class="upr">1</span></sub>g(n)<span class="rel">≤</span>f(n)<span class="rel">≤</span>c<sub><span class="upr">2</span></sub>g(n)</div>
-<p>例如 <span class="math">f(n)<span class="rel">=</span><span class="upr">100</span>n<sup><span class="upr">2</span></sup><span class="bin">+</span><span class="upr">5</span>n<span class="bin">+</span><span class="upr">500</span></span> 是 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>，可取 <span class="math">c<sub><span class="upr">1</span></sub><span class="rel">=</span><span class="upr">100</span></span>、<span class="math">c<sub><span class="upr">2</span></sub><span class="rel">=</span><span class="upr">105</span></span>、<span class="math">N<span class="rel">=</span><span class="upr">10</span></span>。</p>
-<p><strong>数一数基本操作。</strong> 对数组求和：</p>
+<p>此定义具体给出了下限估计和上限估计两种估计式。例如 <span class="math">f(n)<span class="rel">=</span><span class="upr">100</span><span class="bin">×</span>n<sup><span class="upr">2</span></sup><span class="bin">+</span><span class="upr">5</span><span class="bin">×</span>n<span class="bin">+</span><span class="upr">500</span></span>，令 <span class="math">g(n)<span class="rel">=</span>n<sup><span class="upr">2</span></sup></span>，此时存在常数 <span class="math">c<sub><span class="upr">1</span></sub><span class="rel">=</span><span class="upr">100</span></span>、<span class="math">c<sub><span class="upr">2</span></sub><span class="rel">=</span><span class="upr">105</span></span>、<span class="math">N<span class="rel">=</span><span class="upr">10</span></span>，当 <span class="math">n&gt;N</span> 时上式成立，因此可以说 <span class="math">f(n)</span> 为 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>。</p>
+<p><strong>渐进分析的实例。</strong> 通过对算法所需的时间和空间代价的估算，渐进分析方法可以衡量算法的复杂度。实际上，大多数情况下，算法的时间复杂度是根据算法执行过程中需要实施的赋值、比较等基本运算数目的多少来衡量的。</p>
+<p>先从一个简单的例子开始分析。下面是一段对数组中的各个元素求和的代码：</p>
 <div class="codeblock" data-lang="text"><pre><code>for (i = sum = 0; i &lt; n; i++)
     sum += a[i];</code></pre></div>
-<p>循环前两次赋值，循环 <span class="math">n</span> 次、每次两次赋值，一共 <span class="math"><span class="upr">2</span><span class="bin">+</span><span class="upr">2</span>n</span> 次，即 <span class="math">O(n)</span>。</p>
-<p>两层循环求所有前缀和：外层 <span class="math">n</span> 次，内层第 <span class="math">i</span> 趟做约 <span class="math"><span class="upr">2</span>i</span> 次赋值，总和是 <span class="math"><span class="upr">1</span><span class="bin">+</span><span class="upr">3</span>n<span class="bin">+</span>n(n<span class="bin">−</span><span class="upr">1</span>)<span class="rel">=</span>O(n<sup><span class="upr">2</span></sup>)</span>。循环嵌套通常会提高阶，但不是必然：若内层每次只处理固定的 4 个元素，总赋值次数仍是 <span class="math">O(n)</span>。</p>
-<p>排序算法的时间主要花在比较和移动上，具体见第 8 章。</p>
+<p>其中主要的操作为赋值运算，因此该算法的时间代价主要体现在赋值操作的数目上。在循环开始之前有两次赋值，分别对 <code>i</code> 和 <code>sum</code> 进行；循环进行了 <span class="math">n</span> 次，每次循环中执行两次赋值，分别对 <code>sum</code> 和 <code>i</code> 进行更新操作。总共有 <span class="math"><span class="upr">2</span><span class="bin">+</span><span class="upr">2</span>n</span> 次赋值操作，其渐进复杂度为 <span class="math">O(n)</span>。</p>
+<p>在循环中嵌套循环，其复杂度会相应增大。例如下面这段代码依次求出给定数组的所有子数组中各元素之和：</p>
+<div class="codeblock" data-lang="text"><pre><code>for (i = 0; i &lt; n; i++) {
+    for (j = 1, sum = a[0]; j &lt;= i; j++)
+        sum += a[j];
+    cout &lt;&lt; &quot;sum for subarray 0 through &quot; &lt;&lt; i &lt;&lt; &quot; is &quot; &lt;&lt; sum &lt;&lt; endl;
+}</code></pre></div>
+<p>循环开始前有一次对 <code>i</code> 的赋值操作。之后，外层循环共进行 <span class="math">n</span> 次，每个循环中包含一个内层循环以及对 <code>i</code>、<code>j</code>、<code>sum</code> 分别进行赋值的操作；每个内层循环执行 2 个赋值操作（分别更新 <code>sum</code> 和 <code>j</code>），共执行 <span class="math">i</span> 次（<span class="math">i<span class="rel">=</span><span class="upr">1</span>,<span class="upr">2</span>,⋯,n<span class="bin">−</span><span class="upr">1</span></span>）。因此，整个程序总共执行的赋值操作为</p>
+<div class="math math-display"><span class="upr">1</span><span class="bin">+</span><span class="upr">3</span>n<span class="bin">+</span>∑<sub>i<span class="rel">=</span><span class="upr">1</span></sub><sup>n<span class="bin">−</span><span class="upr">1</span></sup><span class="upr">2</span>i<span class="rel">=</span><span class="upr">1</span><span class="bin">+</span><span class="upr">3</span>n<span class="bin">+</span><span class="upr">2</span>(<span class="upr">1</span><span class="bin">+</span><span class="upr">2</span><span class="bin">+</span>⋯<span class="bin">+</span>n<span class="bin">−</span><span class="upr">1</span>)<span class="rel">=</span><span class="upr">1</span><span class="bin">+</span><span class="upr">3</span>n<span class="bin">+</span>n(n<span class="bin">−</span><span class="upr">1</span>)<span class="rel">=</span>O(n)<span class="bin">+</span>O(n<sup><span class="upr">2</span></sup>)<span class="rel">=</span>O(n<sup><span class="upr">2</span></sup>)</div>
+<p>一般情况下，循环中嵌套循环会增加算法的复杂度，但也并非总是如此。例如在上面的实例中，如果只对每个子数组的前 5 个元素求和，则相应的代码可采用下面的方式：</p>
+<div class="codeblock" data-lang="text"><pre><code>for (i = 4; i &lt; n; i++)
+    for (j = i - 3, sum = a[i - 4]; j &lt;= i; j++)
+        sum += a[j];</code></pre></div>
+<p>此时，外层循环进行 <span class="math">n<span class="bin">−</span><span class="upr">4</span></span> 次。对每个 <span class="math">i</span> 而言，内层循环只执行 4 次，每次的操作次数与 <span class="math">i</span> 的大小无关：8 次赋值操作。外加对 <code>i</code> 的初始化，整个代码总共进行 <span class="math">O(<span class="upr">1</span>)<span class="bin">+</span><span class="upr">8</span>(n<span class="bin">−</span><span class="upr">4</span>)<span class="rel">=</span>O(n)</span> 次赋值操作。<strong>尽管存在嵌套循环，但算法的整体时间复杂度依然呈线性增长。</strong></p>
+<p>另外，对于排序算法而言，其主要时间开销体现在比较和交换（或移动）等操作上，具体可参考第 8 章的各算法分析。</p>
 <h3 id="142-最佳最差和平均情况"><a class="anchor" href="#142-最佳最差和平均情况">#</a>1.4.2 最佳、最差和平均情况</h3>
-<p>即使规模相同，输入不同，有些算法的操作次数也会差很多。因为实际走哪条分支，往往取决于数据本身。所以分析时要说清是哪一种输入。</p>
-<p>顺序检索：目标在第一个位置，比较 1 次（最好）；目标不在表里，比较 <span class="math">n</span> 次（最坏）；等概率时平均 <span class="math">(n<span class="bin">+</span><span class="upr">1</span>)/<span class="upr">2</span></span>。快速排序平均 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，已经有序时退化成 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>。只报一个数字、不说针对哪种输入，这个数字没有意义。</p>
+<p>对于某些算法，即使问题规模相同，如果输入数据不同，其时间复杂度也不同。换言之，算法的渐进分析往往无法独立于输入数据的状态而进行。这是因为算法实际执行的操作往往依赖于算法中分支条件的走向，而这些分支走向又取决于输入数据的取值。为此，对算法进行渐进分析时会根据输入数据的取值分情况进行，以便确切了解各种算法所适用的情况，以及能否在规定的响应时间内完成。</p>
+<p>例如，求一个数组的所有有序子数组中最长的一个。在数组 <span class="math">[<span class="upr">1</span>,<span class="upr">8</span>,<span class="upr">1</span>,<span class="upr">2</span>,<span class="upr">5</span>,<span class="upr">0</span>,<span class="upr">11</span>,<span class="upr">9</span>]</span> 中，这个最长的有序子数组为 <span class="math">[<span class="upr">1</span>,<span class="upr">2</span>,<span class="upr">5</span>]</span>，长度为 3。可用以下代码实现：</p>
+<div class="codeblock" data-lang="text"><pre><code>for (i = 0, length = 1; i &lt; n - 1; i++) {
+    for (j1 = j2 = k = i; k &lt; n - 1 &amp;&amp; a[k] &lt; a[k + 1]; k++, j2++);
+    if (length &lt; j2 - j1 - 1)
+        length = j2 - j1 + 1;
+}</code></pre></div>
+<p>上面这段是原书印出来的样子，<strong>照抄它会算错</strong>：内层循环走完后这一段升序的长度是 <code>j2 - j1 + 1</code>，而判断条件写的却是 <code>length &lt; j2 - j1 - 1</code>，两处的常数项差了 2。用原书自己的例子 <span class="math">[<span class="upr">1</span>,<span class="upr">8</span>,<span class="upr">1</span>,<span class="upr">2</span>,<span class="upr">5</span>,<span class="upr">0</span>,<span class="upr">11</span>,<span class="upr">9</span>]</span> 跑一遍，答案会是 2 而不是 3。这里保留原样是为了让读者对照纸书，分析长度时按 <code>j2 - j1 + 1</code> 读。</p>
+<p>这段代码的时间代价和数组 <code>a</code> 中元素的实际取值状态相关。根据这些元素的初始状态可以分成以下几种情况：</p>
+<ol>
+<li>如果数组 <code>a</code> 的所有元素是以<strong>降序</strong>方式输入的，那么外层循环执行 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 次，每次内层循环只执行 1 次，整个时间开销为 <span class="math">O(n)</span>。</li>
+<li>如果数组 <code>a</code> 的所有元素是以<strong>升序</strong>方式输入的，那么外层循环执行 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 次，对每个 <span class="math">i</span>（<span class="math">i<span class="rel">=</span><span class="upr">0</span>,<span class="upr">1</span>,⋯,n<span class="bin">−</span><span class="upr">1</span></span>），内层循环需要执行 <span class="math">(n<span class="bin">−</span><span class="upr">1</span><span class="bin">−</span>i)</span> 次，整个时间开销为 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>。</li>
+<li>在大多数情况（即<strong>平均情况</strong>）下，数组的元素是无序的，既不按升序也不按降序输入。</li>
+</ol>
+<p>一般而言，计算平均情况的复杂度应该考虑算法的所有输入情况，确定针对每种输入情况算法所需的操作数目。在简单情况下，如果每种输入出现的概率相同，可把针对每种输入的操作数目依次相加，再除以输入的总数目，来得到平均的开销。但是，每种输入的出现概率并非总是相同，此时分析平均情况的复杂度就需要把每种输入出现的概率作为权值加以考虑，即</p>
+<div class="math math-display">C<sub><span class="upr">avg</span></sub><span class="rel">=</span>∑<sub>i</sub>p(<span class="upr">input</span><sub>i</sub>) <span class="upr">steps</span>(<span class="upr">input</span><sub>i</sub>)</div>
+<p>此处假设可以事先得知输入的概率分布情况。<span class="math">p(<span class="upr">input</span><sub>i</sub>)</span> 为第 <span class="math">i</span> 种输入的出现概率，<span class="math"><span class="upr">steps</span>(<span class="upr">input</span><sub>i</sub>)</span> 为算法处理第 <span class="math">i</span> 种输入时所需的操作或步骤数。所有的概率均为非负数，且满足 <span class="math">∑<sub>i</sub>p(<span class="upr">input</span><sub>i</sub>)<span class="rel">=</span><span class="upr">1</span></span>。</p>
+<p>尽管平均情况的复杂度是算法在输入规模为 <span class="math">n</span> 时的典型表现，但平均情况的分析并不总是可行的，因为这需要了解算法的实际输入在所有可能的输入集合中的分布状况。例如上面例子中获取数组元素的平均分布情况就并不很容易。</p>
+<p>以从一个规模为 <span class="math">n</span> 的一维数组中找出一个给定的 <span class="math">K</span> 值为例（假设该数组中有且仅有一个元素的值为 <span class="math">K</span>），顺序检索法将从第一个元素开始，依次检查每一个元素，直到找到 <span class="math">K</span> 为止。</p>
+<ul>
+<li><strong>最佳情况</strong>下，数组中第 1 个元素就是 <span class="math">K</span>，此时只要检查一个元素即可。</li>
+<li><strong>最差情况</strong>下，<span class="math">K</span> 是数组的最后一个元素，此时算法需要检查数组中所有的 <span class="math">n</span> 个元素才能找到。</li>
+<li><strong>平均情况</strong>下，如果 <span class="math">K</span> 出现在数组中每个位置上的概率相等，即出现在每个单元中的概率均为 <span class="math"><span class="upr">1</span>/n</span>，平均需要 <span class="math"><span class="frac"><span class="num"><span class="upr">1</span><span class="bin">+</span><span class="upr">2</span><span class="bin">+</span>⋯<span class="bin">+</span>n</span><span class="den">n</span></span><span class="rel">=</span><span class="frac"><span class="num">n<span class="bin">+</span><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span></span> 次比较才能找到。</li>
+</ul>
+<p>概率不相等时，结论会明显改变。例如出现在第 1 个位置的概率为 <span class="math"><span class="upr">1</span>/<span class="upr">2</span></span>，第 2 个位置上的概率为 <span class="math"><span class="upr">1</span>/<span class="upr">4</span></span>，而出现在其他位置的概率相等，即为 <span class="math"><span class="frac"><span class="num"><span class="upr">1</span><span class="bin">−</span><span class="upr">1</span>/<span class="upr">2</span><span class="bin">−</span><span class="upr">1</span>/<span class="upr">4</span></span><span class="den">n<span class="bin">−</span><span class="upr">2</span></span></span><span class="rel">=</span><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den"><span class="upr">4</span>(n<span class="bin">−</span><span class="upr">2</span>)</span></span></span>，则查找 <span class="math">K</span> 平均需要</p>
+<div class="math math-display"><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span><span class="bin">+</span><span class="frac"><span class="num"><span class="upr">2</span></span><span class="den"><span class="upr">4</span></span></span><span class="bin">+</span><span class="frac"><span class="num"><span class="upr">3</span><span class="bin">+</span>⋯<span class="bin">+</span>n</span><span class="den"><span class="upr">4</span>(n<span class="bin">−</span><span class="upr">2</span>)</span></span><span class="rel">=</span><span class="upr">1</span><span class="bin">+</span><span class="frac"><span class="num">n(n<span class="bin">+</span><span class="upr">1</span>)<span class="bin">−</span><span class="upr">6</span></span><span class="den"><span class="upr">8</span>(n<span class="bin">−</span><span class="upr">2</span>)</span></span><span class="rel">=</span><span class="upr">1</span><span class="bin">+</span><span class="frac"><span class="num">n<span class="bin">+</span><span class="upr">3</span></span><span class="den"><span class="upr">8</span></span></span></div>
+<p>次比较，比等概率的 <span class="math"><span class="frac"><span class="num">n<span class="bin">+</span><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span></span> 快将近 4 倍。</p>
+<p>由此可见，第 1 种情况是最佳的，所需的步骤最少；第 2 种情况所需的步骤最多，是最差的情形；第 3 种则介于最佳和最差之间。那么分析一种算法时，应该研究最佳、最差还是平均情况？</p>
+<p>一般而言，<strong>最佳情况发生的概率太小</strong>，并不能作为算法性能的代表，但它可以帮助算法设计者或使用者了解某个算法在何种情况下适用。而<strong>最差情况可以让人了解一个算法至少能做多快</strong>，这一点在实时系统中尤其重要：例如在空运处理系统中，一个绝大部分情况下能管理 <span class="math">n</span> 架飞机的算法，如果不能在规定时间内管理 <span class="math">n</span> 架飞机，则该算法是不可接受的。此外，对于多数算法而言，最坏情况和平均情况的时间开销公式虽然不同，但往往只是常数因子大小的区别，或者常数项大小的区别。</p>
+<p>上面 3 种情况的复杂度都相对比较简单，可以得到很精确的函数关系，但复杂度与数据规模之间的关系并非总是一目了然。尤其是平均情况的复杂性分析往往需要复杂的计算，此时前面介绍的大 <span class="math">O</span>、<span class="math">Ω</span> 和 <span class="math">Θ</span> 等渐进分析法便可以派上用场。</p>
+<p>只报一个数字、不说针对哪种输入，这个数字就没有意义。本书后面每讲一个算法，都会分别交代它的最佳、最差与平均情况——例如第 8 章的快速排序平均是 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，而输入已经有序时退化成 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>。</p>
 <h3 id="143-时间和空间的折衷"><a class="anchor" href="#143-时间和空间的折衷">#</a>1.4.3 时间和空间的折衷</h3>
-<p>预排序、建索引、开散列表，都是先花时间或空间，再换检索时的时间。没有免费的加速。空间紧、时间松，和空间松、时间紧，选的结构会不一样。</p>
+<p>对于空间开销，也可以采用类似的渐进分析方法。但是，很多常见算法所使用的数据结构是<strong>静态的存储结构</strong>：所谓静态，是指算法所使用的存储空间在算法执行过程中并不发生变化。一旦确定了输入数据和问题规模，其数据结构大小也就确定下来。对于这种静态数据结构，空间开销的估算比较容易，往往与所涉及的问题规模成正比（空间开销为线性增长），或者不随问题的规模而增大（空间开销为常数）。本书后续章节对这类使用静态数据结构的算法，一般将仅限于讨论其时间代价。</p>
+<p>当然，也经常会遇到一些使用<strong>动态数据结构</strong>的算法，它们的存储空间是变化的，在算法运行过程中有时会有数量级的增大或缩小。对于这种情况，空间开销的分析和估计是十分必要的。</p>
+<p>在算法设计分析中，还涉及一个「时空资源的折衷原理」。这个原理可以简述如下：对于同一个问题求解，一般会存在多种算法，而这些算法在时间和空间开销上的优劣往往表现出「时空折衷」的性质。所谓时空折衷是指，为了改善一个算法的时间开销，往往可以增大空间开销为代价；反之亦然。</p>
+<p>例如，为了从公司黄页数据表中快速查询公司电话（假设每个公司的名称、地址和电话都存储在该数据表中），可以附加一个散列式索引表，其散列函数可以将公司名称快速变换为索引值，通过这个索引值可以读出一个指针，指向存储该公司电话的存储单元。这种散列法附加了索引表的空间开销，但节省了时间：用散列函数的简单计算代替了原本耗时的在黄页中逐项进行公司名称的比较操作，时间开销从线性增长改善为常数时间，而空间开销方面则增添了一个线性增长率的存储空间。在设计算法时经常采用这种以空间开销换取时间开销的办法；为此，就需要对原有存储结构做出修改，或者想出全新的、更适合逻辑数据结构使用的存储方案。</p>
+<p>当然，有时也可以牺牲计算机的运行时间，通过增大时间开销来换取存储空间的节省，例如树的顺序存储。第 6.3 节把一棵树压成一串「带右链」「带度数」的序列，省下了全部指针域的空间，代价是恢复结构时必须重新扫描一遍；第 12 章的稀疏矩阵、Huffman 编码也都是同一个取舍的不同侧面。<strong>没有免费的加速：空间紧、时间松，和空间松、时间紧，选的结构会不一样。</strong></p>
 <h3 id="144-求解问题时数据结构的选择和评价"><a class="anchor" href="#144-求解问题时数据结构的选择和评价">#</a>1.4.4 求解问题时数据结构的选择和评价</h3>
-<p>先看运算集合：要不要按下标访问，会不会在中间频繁插入删除，要不要按关键码直接找到记录。再看规模和存储层次：数据在内存还是外存，一次磁盘 I/O 往往比一次比较贵几个数量级。</p>
-<p>1.1 节要任意两点最短路，并且只有五个经纪人，邻接矩阵加 Floyd 是合适的：实现简单，三重循环在 <span class="math">n<span class="rel">=</span><span class="upr">5</span></span> 时可以忽略。顶点很多、边很少、只问单源最短路时，就应该换成邻接表加 Dijkstra。后面每一章都会再做一次这样的取舍。</p>
+<p>如同 1.1 节所述，利用计算机求解一个给定问题时，一个关键任务是确立问题模型所采用的数据结构。一旦确定了数据结构，算法的设计便水到渠成。</p>
+<p>根据应用的具体情况，设计或选择数据结构可以遵循以下一些原则：</p>
+<ol>
+<li>仔细分析所要解决的问题，特别是求解问题所涉及的数据类型和数据间的逻辑关系。</li>
+<li>在算法设计之前往往先进行数据结构的初步设计。</li>
+<li>注意数据结构的<strong>可扩展性</strong>，包括考虑当输入数据的规模发生改变时，数据结构是否能够适应。同时，数据结构应该适应求解问题的演变和扩展。</li>
+<li>数据结构的设计和选择也要比较算法的时空开销的优劣。</li>
+</ol>
+<p>数据结构的选择和评价是复杂的，需要考虑的因素也不限于上述几条，一般要具体情况具体分析。本书会针对具体的问题进一步阐述和检验这些原则。</p>
+<p>落到本章的例子上：1.1 节要的是任意两点之间的最短路径，并且只有五个经纪人，所以相邻矩阵加 Floyd 是合适的——实现简单，三重循环在 <span class="math">n<span class="rel">=</span><span class="upr">5</span></span> 时可以忽略。如果顶点很多、边很少，而且只问单源最短路，就应该换成邻接表加 Dijkstra（第 7 章）。再往下，还要看数据在内存还是外存：一次磁盘 I/O 往往比一次比较贵几个数量级，这是第 9 章与第 11 章反复出现的分界线。后面每一章都会再做一次这样的取舍。</p>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
 <p>本章从求解问题入手，引入数据结构、算法和衡量效率的方法。用计算机解题，是问题抽象、数据抽象和算法抽象：先把需求说清楚，再建成模型、选定结构和算法，最后用某种语言实现。</p>
 <p>数据结构管三件事：逻辑结构（结点之间是什么关系）、存储结构（这套关系在存储器里怎么落）、运算。逻辑结构按关系形态分成线性、树、图三类。同一种逻辑结构可以顺序、链接、索引或散列存放。ADT 把数据和运算封在一起，使用方只看见接口。</p>
