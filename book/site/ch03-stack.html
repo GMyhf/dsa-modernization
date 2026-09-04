@@ -1576,13 +1576,52 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
 <h2 id="32-队列"><a class="anchor" href="#32-队列">#</a>3.2 队列</h2>
 <h3 id="为什么这一节没有-python-版"><a class="anchor" href="#为什么这一节没有-python-版">#</a>为什么这一节没有 Python 版</h3>
 <p>循环队列和链式队列的教学重点是环形下标、结点所有权以及空/满状态的表示，而不是调用一个现成队列。Python 的 <code>list</code> 或 <code>collections.deque</code> 会替调用方管理容量和对象寿命，既看不到环形存储的约束，也无法对应 C++ 的析构与异常安全；因此这里用 C++ 把存储不变量讲完整，算法章节再用 Python 展示队列的使用。</p>
-<p>队列只允许在一端插入、在另一端删除，元素按先进先出(FIFO)访问。插入端是队尾，删除端是队头。空队列上的提取是可预期状态，返回 <code>std::nullopt</code>。</p>
+<p>与栈类似，队列（queue）也是一种<strong>限制访问点的线性表</strong>：元素只能从表的一端插入，另一端删除。 按照习惯，把只允许删除的一端称为队列的头，简称<strong>队头</strong>（front），删除操作本身称为<strong>出队</strong> （dequeue）；表的另一端为队列的尾，简称<strong>队尾</strong>（rear），这一端只能进行插入操作，称为<strong>入队</strong> （enqueue）。如同现实生活中的队列一样，在没有人为破坏的前提下，队列是按照到达的顺序来释放 元素的——先进入队列的元素会先离开，因此队列通常也被称为<strong>先进先出</strong>（first in first out）表， 简称 FIFO 表。空队列上的提取是可预期状态，返回 <code>std::nullopt</code>。</p>
 <figure><img loading="lazy" src="../assets/6a2814bcd8135888.jpg" alt="图3.9 队列的示例"><figcaption>图3.9 队列的示例</figcaption></figure>
 <p>图 3.9　队列的示例。删除的一端叫队头(front)，删除操作叫出队(dequeue)；插入的一端叫队尾(rear)，插入操作叫入队(enqueue)。售票窗口前排队买票就是日常版的队列。</p>
 <h3 id="321-队列的抽象数据类型"><a class="anchor" href="#321-队列的抽象数据类型">#</a>3.2.1 队列的抽象数据类型</h3>
-<p>常用运算是入队 <code>enqueue</code>、出队 <code>dequeue</code>、读队头，以及判空。顺序实现还需要判满。原书【代码3.13】同样把这些运算写成一个假抽象基类；本书直接定义在 <code>ArrayQueue</code> 与 <code>LinkedQueue</code> 上。</p>
+<p>根据数据抽象和封装的原则，对队列的操作只能通过队列的抽象数据类型所定义的运算来进行。 原书【代码3.13】用一个 C++ 类模板给出这组运算：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">原书的运算</th>
+<th style="text-align:left">含义</th>
+<th style="text-align:left">本书对应</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><code>clear()</code></td>
+<td style="text-align:left">变为空队列</td>
+<td style="text-align:left"><code>clear()</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>enQueue(item)</code></td>
+<td style="text-align:left">将 item 插入队尾，成功返回真</td>
+<td style="text-align:left"><code>enqueue(item)</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>deQueue(item)</code></td>
+<td style="text-align:left">返回队头元素并把它从队列中删除</td>
+<td style="text-align:left"><code>dequeue()</code> 返回 <code>std::optional</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>getFront(item)</code></td>
+<td style="text-align:left">返回队头元素，但不删除</td>
+<td style="text-align:left"><code>front()</code> 返回 <code>std::optional</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>isEmpty()</code></td>
+<td style="text-align:left">队列已空则返回真</td>
+<td style="text-align:left"><code>empty()</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>isFull()</code></td>
+<td style="text-align:left">队列已满则返回真</td>
+<td style="text-align:left">顺序实现才有 <code>full()</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>根据具体应用的不同需要，可以适当增删抽象数据类型中所定义的运算</strong>——例如链式队列并不需要 判断队列是否满。队列抽象数据类型中运算的实现方法依赖于队列的存储结构，下面介绍常用的顺序 队列和链式队列两种。原书把这些运算写成一个假抽象基类，本书直接定义在 <code>ArrayQueue</code> 与 <code>LinkedQueue</code> 上，理由与 3.1 节相同。</p>
 <h3 id="322-顺序队列"><a class="anchor" href="#322-顺序队列">#</a>3.2.2 顺序队列</h3>
-<p>队列两头都要动：入队动队尾，出队动队头。如果队头固定在下标 0，每次出队都要把后面 所有元素前移一位，O(n)；反过来把队尾固定在末尾，入队 O(1) 而出队要搬 n−1 个元素。 两头都别固定，让 <code>front</code> 和 <code>rear</code> 都在数组里往后走，两个操作就都是 O(1)：</p>
+<p>用顺序存储结构来实现队列就形成了<strong>顺序队列</strong>（array-based queue）。与顺序表一样，顺序队列 需要分配一块连续的区域来存储队列的元素，<strong>需要事先知道或估算队列的大小</strong>。与栈类似，顺序 队列也存在溢出问题：队列满时入队会产生<strong>上溢</strong>，而队列为空时出队则会产生<strong>下溢</strong>；出现上溢时， 如果需要，也可以考虑对队列进行适当的扩容。</p>
+<p>队列两头都要动：入队动队尾，出队动队头。如果只是沿用顺序表的实现方法，就很难取得良好的 效率——假设队列中有 <span class="math">n</span> 个元素、顺序表的实现要求它们都存在数组的前 <span class="math">n</span> 个位置上：把队尾放在 位置 0，则出队是 <span class="math">O(<span class="upr">1</span>)</span>（队列最前面的元素就是数组最后面的元素），而入队是 <span class="math">O(n)</span>，因为必须把 当前所有元素都向后移动一个位置；反之把队尾放在位置 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span>，入队只需在最后添加，<span class="math">O(<span class="upr">1</span>)</span>， 而出队要移动剩余 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 个元素以确保它们在表的前 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 个位置，代价 <span class="math">O(n)</span>。</p>
+<p><strong>两头都别固定</strong>：在保证队列元素连续性的同时允许队列的首尾位置在数组中移动，让 <code>front</code> 和 <code>rear</code> 都在数组里往后走，两个操作就都是 <span class="math">O(<span class="upr">1</span>)</span>：</p>
 <figure><img loading="lazy" src="../assets/d552466644ef240e.jpg" alt="图 3.10 顺序队列的实现示意"><figcaption>图 3.10 顺序队列的实现示意</figcaption></figure>
 <p>图 3.10　顺序队列的实现示意。出队让 <code>front</code> 后移，入队让 <code>rear</code> 后移；元素本身一个都不搬。</p>
 <p>这样做会遇到<strong>假溢出</strong>：整个队列不断向数组尾部漂移，<code>rear</code> 一旦到了 <code>mSize - 1</code>，即使数组前端还空着一片，入队也会报满。解决办法是把数组在逻辑上看成一个环——下标 0 是下标 <code>mSize - 1</code> 的直接后继，位置 <code>x</code> 的后继是 <code>(x + 1) % mSize</code>，这就是<strong>循环队列</strong>（也叫环形队列）。</p>
@@ -1592,8 +1631,10 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
 <figure><img loading="lazy" src="../assets/combined/fig-3-12.png" alt="图 3.12 循环队列的实现示例"><figcaption>图 3.12 循环队列的实现示例</figcaption></figure>
 <p>图 3.12　牺牲一格的循环队列（8 格数组最多放 7 个元素）：(a) 空，<code>front == rear</code>；(b) 一般状态；(c) 满，<code>(rear + 1) % (n + 1) == front</code>。</p>
 <h3 id="323-链式队列"><a class="anchor" href="#323-链式队列">#</a>3.2.3 链式队列</h3>
-<p>链式队列的结点分散在堆上，<strong>没有「队满」这回事</strong>。除了队头指针，还要一个<strong>队尾指针</strong>： 没有它，每次入队都得从队头走到尾，O(n)；有了它，入队和出队都是 O(1)。</p>
-<p>一处容易漏的地方：<strong>出队把队列摘空时，队尾指针必须一起置空</strong>， 否则它就成了一根指向已释放结点的野指针，下一次入队会写进已释放的内存。 教学版的测试里有一条专门盯着它——去掉那两行，AddressSanitizer 立刻报 <code>heap-use-after-free</code>。</p>
+<p><strong>链式队列</strong>（linked queue）是队列的链式实现，本质上是对链表的简化：链接的方向从队列的前端 指向队列的尾端，成员 <code>front</code> 和 <code>rear</code> 分别指向队首和队尾。入队只是把新元素放到链表的尾部 并修改 <code>rear</code> 使其指向新的结点；出队只是删除表中最前面的那个结点并修改 <code>front</code> 使其指向新的 队首。结点分散在堆上，所以<strong>没有「队满」这回事</strong>。</p>
+<p>除了队头指针，队尾指针是必需的：没有它，每次入队都得从队头走到尾，<span class="math">O(n)</span>；有了它，入队和 出队都是 <span class="math">O(<span class="upr">1</span>)</span>。</p>
+<p>为了减少访问队首结点的时间代价，这种实现<strong>没有链表中的专用表头虚结点</strong>，代价是两个边界要 单独处理：<code>enqueue</code> 必须单独处理「插入到空队列」的情况（此时 <code>front</code> 和 <code>rear</code> 都要指向新结点）， <code>dequeue</code> 也需考虑「出队后队列变空」的情况。</p>
+<p>后一条正是最容易漏的地方：<strong>出队把队列摘空时，队尾指针必须一起置空</strong>， 否则它就成了一根指向已释放结点的野指针，下一次入队会写进已释放的内存。 教学版的测试里有一条专门盯着它——去掉那两行，AddressSanitizer 立刻报 <code>heap-use-after-free</code>。</p>
 <h4 id="教学版完整实现-2"><a class="anchor" href="#教学版完整实现-2">#</a>教学版：完整实现</h4>
 <p>两个类放在同一个文件里，正好对着看：同一个先进先出的抽象数据类型， 一个用固定大小的连续数组，一个用堆上的结点。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/queue/teaching.hpp">code/ch03/queue/teaching.hpp</a></div><pre><code><span class="c">// 队列 —— 教学版。原书【代码3.13】【代码3.14】【代码3.15】。</span>
@@ -1903,14 +1944,25 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
 <p>这份工程版一度把每个函数压成一行，最长的一行 239 个字符——印在书上，读者要 横向找分号才知道函数在哪结束。2026-08-16 已把它排开，逻辑一字未改。 <strong>一行一个函数省的是纸，费的是读者的眼睛</strong>，这也正是 D-012 要分层的理由之一。</p>
 <h2 id="33-栈与队列的深入讨论"><a class="anchor" href="#33-栈与队列的深入讨论">#</a>3.3 栈与队列的深入讨论</h2>
 <h3 id="331-顺序栈与链式栈的比较"><a class="anchor" href="#331-顺序栈与链式栈的比较">#</a>3.3.1 顺序栈与链式栈的比较</h3>
-<p>顺序栈预分配连续缓冲区，扩容要搬迁；链式栈按需分配，没有「栈满」，但每个结点多一个指针。两者的 <code>push</code>/<code>pop</code> 都是 O(1)。</p>
-<p>顺序栈还有一个链式栈没有的用法：<strong>两个栈共享一个数组</strong>。编译系统这类同时管着多个栈的场合会用到它——把数组两端分别当作两个栈的栈底，各自向中间迎面增长：</p>
+<p>栈的应用非常广泛，只要满足后进先出的特性都可以使用栈结构，例如函数调用和递归实现、深度 优先周游、表达式转换和求值等。</p>
+<p><strong>时间上难分伯仲，空间上各有代价。</strong> 顺序栈和链式栈的基本操作都只需要常数时间，<code>push</code>/<code>pop</code> 都是 <span class="math">O(<span class="upr">1</span>)</span>。从空间角度看：初始时顺序栈必须说明一个固定的长度，当栈不够满时，势必浪费一些 空间；链式栈的长度可根据需要而增减，但每个元素都需要一个指针域，从而产生<strong>结构性开销</strong>。</p>
+<p><strong>还有一处差别常被忽略：访问栈的内部元素。</strong> 顺序栈可以根据元素与栈顶的相对位置快速定位并 读取内部元素，而链式栈则需要沿着指针链遍历才能访问内部元素。鉴于上述原因，顺序栈在实际中 更为常用一些。</p>
+<p><strong>多栈管理。</strong> 在编译系统等计算机系统软件中，往往同时使用和管理多个栈，这时可充分利用顺序 栈单向延伸的特性：用一个数组来存储两个栈，让它们共享同一存储空间——把数组的两端设置为 两者各自的栈底，从两端开始向中间迎面延伸，这样浪费的空间相对少一些：</p>
 <figure><img loading="lazy" src="../assets/c305cf854cc50a63.jpg" alt="图3.13 存储在同一个数组中的两个迎面增长的栈"><figcaption>图3.13 存储在同一个数组中的两个迎面增长的栈</figcaption></figure>
 <p>图3.13　存储在同一个数组中的两个迎面增长的栈。两个栈的空间需求恰好相反（一个涨、另一个缩）时，这种做法很省空间；两个同时涨，中间那点余量很快就没了。队列做不到这件事——除非总有元素从一个队列转入另一个队列。</p>
 <h3 id="332-顺序队列与链式队列的比较"><a class="anchor" href="#332-顺序队列与链式队列的比较">#</a>3.3.2 顺序队列与链式队列的比较</h3>
-<p>两种队列的端点操作都是常数时间。循环数组适合容量上界已知、希望局部性好的场合；链表适合长度变化大、不愿预留空洞槽位的场合。</p>
+<p>由于存储空间固定，顺序队列无法满足队列规模变化很大且最大规模无法预测的情况，而链式队列则 可以轻松应对这种类型的应用。另一方面，顺序队列在存取访问上很简单，可以适用那些对队列内部 元素（不仅限于队列的两端）有访问需求的应用；如果可以预测浪涌的统计特性，就可以大致估算出 缓冲队列的长度。</p>
+<p>常用的入队和出队操作在两种实现里都是常数时间，<strong>二者在时间效率上没有优劣之分</strong>；空间代价上 与栈的情况类似。只是顺序队列不像顺序栈那样，<strong>不能在一个数组中存储两个队列</strong>——除非总有 数据项从一个队列转入另一个队列。</p>
+<p>队列通常作为消息或数据缓冲器在很多领域得到广泛应用，只要满足先来先服务的特性即可。例如， 计算机的硬件设备之间需要队列作为其数据通信的缓冲；操作系统中使用队列对内存、打印机等各种 资源进行管理，而且根据不同优先级别的服务请求，按优先类别把服务请求分别组织成多个不同的 队列。另外，在第 5、6、7 章中将会看到，<strong>队列是广度优先搜索中采用的主要中间数据结构</strong>。</p>
 <h3 id="333-限制存取点的表"><a class="anchor" href="#333-限制存取点的表">#</a>3.3.3 限制存取点的表</h3>
-<p>栈和队列都是限制存取点的线性表：栈只开一端，队列开两端但方向相反。双端队列同时开放两端，不在本章实现范围内。</p>
+<p>利用栈和队列的思想可以设计出一些变种的栈或队列结构。虽然它们的应用没有栈和队列那样广泛， 但在一些特定情况下具有很好的应用价值。</p>
+<ol>
+<li><strong>双端队列</strong>：限制插入和删除在线性表的两端进行。栈和队列都是特殊的双端队列，对其存取 设置了限制。</li>
+<li><strong>双栈</strong>：两个底部相连的栈。双栈是一种添加限制的双端队列，它规定从 <code>end1</code> 插入的元素只能 从 <code>end1</code> 端删除，而从 <code>end2</code> 插入的元素只能从 <code>end2</code> 端删除。</li>
+<li><strong>超队列</strong>：一种删除受限的双端队列，删除只允许在一端进行，而插入可在两端进行。</li>
+<li><strong>超栈</strong>：一种插入受限的双端队列，插入只限制在一端，而删除允许在两端进行。</li>
+</ol>
+<p>由此可见，这几种限制存取点的表都是某种受限的双端队列。C++ 标准库的基本序列中就有双端队列 <code>std::deque</code>，<code>std::stack</code> 与 <code>std::queue</code> 默认都是通过它实现的——<strong>但那是使用者的视角</strong>； 本章手写这两种结构，是因为「存储怎么落、边界怎么守」本身就是这一章的教学内容。</p>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
 <p>栈只在一端插入删除，后进先出；队列在一端插、另一端删，先进先出。二者都可以顺序或链式实现，端点运算都是常数时间。顺序实现要处理满与空（循环队列牺牲一个槽）；链式实现按需分配，没有预先的容量上限。栈用于递归、括号和表达式；队列用于层次周游和缓冲。</p>
 <h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>

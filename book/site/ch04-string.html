@@ -213,7 +213,13 @@ KMP:  10
 原书返回 11，一律差 1</code></pre></div>
 <blockquote><p><strong>本文件的地位</strong>：《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008） 第 4 章的现代化重排（4.1 字符串概念、4.2 存储结构与实现、4.3 模式匹配）。</p><p>书里印的每一段 C++ 都来自 <code>code/ch04/string_class/</code> 与 <code>code/ch04/pattern_matching/</code>， 真正编译、真正跑过（<code>tools/check_doc.py</code> 的 R3 逐字核对）。原书那份写法错在哪、 改了什么、什么刻意没改，逐条记在两个单元各自的 <code>legacy.md</code>。</p><p><strong>本章有一处不是写法问题，是算法结果错</strong>：原书两个模式匹配算法返回的位置都差 1。 详见 4.3.1 节末。</p></blockquote>
 <h2 id="41-字符串的基本概念"><a class="anchor" href="#41-字符串的基本概念">#</a>4.1 字符串的基本概念</h2>
-<p>字符串(string)是由零个或多个字符组成的有限序列，是一种特殊的线性表—— 它的每个元素都是字符。串中字符的数目称为串的长度，长度为零的串称为空串。</p>
+<p>字符串（string）是组成元素（结点）为单个字符的线性表，简称「串」。一个字符串可以是一个单词、 一个句子、一篇文章，或者一个文件的内容。串中所包含的字符个数称为<strong>串的长度</strong>；长度为零的串 称为<strong>空串</strong>，不包含任何字符内容。</p>
+<p>尽管字符串是一种特殊的线性表，但其逻辑结构与线性表相比存在两点区别：</p>
+<ol>
+<li>字符串的数据对象约束为<strong>字符集</strong>；</li>
+<li>线性表的基本操作大多以「单个元素」为操作对象，而字符串的基本操作通常以「<strong>串的整体</strong>」 作为操作对象——拼接、复制、抽取子串、模式匹配，动的都是一整段。</li>
+</ol>
+<p><strong>子串。</strong> 设 <span class="math">s<sub><span class="upr">1</span></sub><span class="rel">=</span>a<sub><span class="upr">0</span></sub>a<sub><span class="upr">1</span></sub>a<sub><span class="upr">2</span></sub>⋯a<sub>n<span class="bin">−</span><span class="upr">1</span></sub></span>、<span class="math">s<sub><span class="upr">2</span></sub><span class="rel">=</span>b<sub><span class="upr">0</span></sub>b<sub><span class="upr">1</span></sub>b<sub><span class="upr">2</span></sub>⋯b<sub>m<span class="bin">−</span><span class="upr">1</span></sub></span>（<span class="math"><span class="upr">0</span><span class="rel">≤</span>m<span class="rel">≤</span>n</span>）是两个 字符串，<span class="math">a<sub>i</sub></span> 和 <span class="math">b<sub>j</sub></span> 均为字符集中的字符。如果存在整数 <span class="math">i</span>（<span class="math"><span class="upr">0</span><span class="rel">≤</span>i<span class="rel">≤</span>n<span class="bin">−</span>m</span>），使得对任意 <span class="math">j<span class="rel">=</span><span class="upr">0</span>,<span class="upr">1</span>,⋯,m<span class="bin">−</span><span class="upr">1</span></span> 都有 <span class="math">b<sub>j</sub><span class="rel">=</span>a<sub>i<span class="bin">+</span>j</sub></span> 同时成立，则称字符串 <span class="math">s<sub><span class="upr">2</span></sub></span> 是 <span class="math">s<sub><span class="upr">1</span></sub></span> 的<strong>子串</strong>， 或称 <span class="math">s<sub><span class="upr">1</span></sub></span> 包含 <span class="math">s<sub><span class="upr">2</span></sub></span>。空字符串是所有字符串的子串，任何串都是其自身的子串；如果 <code>str</code> 的一个 子串非空且不为 <code>str</code> 自身，则称其为 <code>str</code> 的一个<strong>真子串</strong>。例如 <code>&quot;quick&quot;</code>、<code>&quot;jump&quot;</code>、<code>&quot;fox&quot;</code>、 <code>&quot;brown dog&quot;</code> 均为 <code>&quot;The quick brown dog jumps over the lazy fox&quot;</code> 的真子串。4.3 节的模式匹配 问题，问的就是「一个串是不是另一个串的子串，如果是，从哪个位置开始」。</p>
 <p>原书【代码4.1】给出字符串的抽象数据类型。那份声明有三处今天必须改：</p>
 <ol>
 <li><strong>类名是小写的 <code>string</code>。</strong> 在任何 <code>using namespace std;</code> 的翻译单元里， 它与 <code>std::string</code> 构成歧义。原书正文随后又改用大写 <code>String</code>， 同一章里两个名字混用。</li>
@@ -222,8 +228,15 @@ KMP:  10
 </ol>
 <p>本书的 <code>String</code> 把这三处分别改为：类名大写、<code>bool empty()</code>、 <code>std::optional&lt;size_type&gt; find(...)</code>、修改器返回 <code>String&amp;</code>。</p>
 <h3 id="411-字符编码"><a class="anchor" href="#411-字符编码">#</a>4.1.1 字符编码</h3>
-<p>字符串的逻辑元素是字符，内存中却保存编码单元。ASCII 为 0–127 的单字节编码，UTF-8 则以 1～4 个字节编码一个 Unicode 码点；因此 C++ 的 <code>char</code> 是一个字节，不等于一个“人眼看到的字符”。<code>std::string::size()</code> 返回字节数，不能用来数 Unicode 字符；需要按 UTF-8 解码或使用明确的 Unicode 库。字面量 <code>u8&quot;...&quot;</code> 表示 UTF-8 字节序列，编码本身不会改变字符串查找和拼接的接口语义。</p>
+<p>字符串的逻辑元素是字符，内存中却保存<strong>编码单元</strong>。计算机只能识别 0、1 组成的字节，因此实际 字符集的「字符」在内存中需要用「字节」来表示，这就是所谓的<strong>字符编码</strong>。</p>
+<p>在 C/C++ 等程序设计语言中，字符类型是单字节的基本数据类型，采用 ASCII（American Standard Code for Information Interchange，美国标准信息交换码）编码标准，每个字符用一个字节表示， 其中低 7 位表示字符，最高位均为 0。ASCII 编码集中包含 128 个字符：编号为第 0～32 号及第 127 号的 34 个字符为控制字符或通信专用字符，其余编号处于第 33～126 号之间的 94 个字符为 通用字符。控制符包括 LF（换行）、CR（回车）、FF（换页）、DEL（删除）、BEL（振铃）等，通信专用 字符则有 SOH（文头）、EOT（文尾）、ACK（确认）等；通用字符包括常用的 52 个大小写字母、10 个 数字以及若干标点符号和运算符号，其中大写字母的编号范围是 65～90，小写字母是 97～122， 10 个数字是 48～57。</p>
+<p>制定于 20 世纪 60 年代的 ASCII 标准没有考虑日后容纳中文、阿拉伯文等多种国际语言文字符号的 统一编码。在发展过程中，不同的语言形成了各自独立的字符编码系统，<strong>这些编码系统有可能使用 相同的编号来表示各自不同的字符</strong>：中文、日文和韩文尽管均采用两个字节的编码方式，但在编码上 存在冲突；每种语言都存在多种编码方式，例如中文的 GB2312-80（中文简体国标码，包括 6763 个 汉字）、BIG5（中文繁体编码，容纳 13053 个汉字），日文的 S-JIS、JIS 以及韩文 Wansung 码等。 这就导致不同语言系统之间进行文档交流非常困难——计算机看到的只是编码后的数字，而两种编码 可能使用相同的数字代表两个不同的字符。</p>
+<p>为了解决这些互通问题，产生了「通用文字符号编码标准」UNICODE。简单地说，UNICODE 是一种 可伸缩的编码：既可以容纳多种语言文字的大编码集，同时又可以缩减，允许用单字节表示常用的 ASCII 符号。今天最常见的落地形式是 UTF-8——它以 1～4 个字节编码一个 Unicode 码点，且与 ASCII 完全兼容。</p>
+<p><strong>由此产生一条 2008 年的书还讲不到的结论</strong>：C++ 的 <code>char</code> 是一个字节，<strong>不等于</strong>一个「人眼看到 的字符」。<code>std::string::size()</code> 返回的是字节数，不能用来数 Unicode 字符；要数字符就得按 UTF-8 解码，或使用明确的 Unicode 库。字面量 <code>u8&quot;...&quot;</code> 表示 UTF-8 字节序列。好在<strong>编码本身不改变 字符串概念和操作的本质</strong>：查找、拼接、抽取子串的接口语义与编码无关，所以本书与原书一样， 以 ASCII 为主，基本不涉及多国语言混排的问题。</p>
 <h3 id="412-字符的编码顺序"><a class="anchor" href="#412-字符的编码顺序">#</a>4.1.2 字符的编码顺序</h3>
+<p>为了便于进行字符串的比较和运算，字符编码表一般遵循约定俗成的「<strong>偏序编码规则</strong>」。这里所说的 字符偏序，是指根据字符的自然含义，某些字符间具有一定的次序，例如数字符号 <span class="math"><span class="upr">0</span>,<span class="upr">1</span>,<span class="upr">2</span>,⋯,<span class="upr">9</span></span> 的大小次序；为了符合其自然次序，在对这些字符编码时使其在字符集中的编码顺序和自然次序一致。 令函数 <span class="math"><span class="upr">encode</span>(x)</span> 为符号 <span class="math">x</span> 到其 ASCII 编码（序号）的映射函数，则有</p>
+<div class="math math-display"><span class="upr">encode</span>(&#x27;<span class="upr">0</span>&#x27;)<span class="bin">+</span><span class="upr">1</span><span class="rel">=</span><span class="upr">encode</span>(&#x27;<span class="upr">1</span>&#x27;), <span class="upr">encode</span>(&#x27;<span class="upr">1</span>&#x27;)<span class="bin">+</span><span class="upr">1</span><span class="rel">=</span><span class="upr">encode</span>(&#x27;<span class="upr">2</span>&#x27;), ⋯, <span class="upr">encode</span>(&#x27;<span class="upr">8</span>&#x27;)<span class="bin">+</span><span class="upr">1</span><span class="rel">=</span><span class="upr">encode</span>(&#x27;<span class="upr">9</span>&#x27;)</div>
+<p>即 10 个数字符号的编码是连续递增的。对于字母符号 <span class="math">A,B,C,⋯,Z</span> 也遵循类似的偏序规则， <span class="math">a,b,⋯,z</span> 同理。于是任意两个字符 <code>ch1</code> 和 <code>ch2</code> 均可用其编码值来直接比较大小；对于字母 而言，这种大小次序的含义就是按照字典编目次序。两个字符串按其构成的字符顺序比较大小，得到 的结果是：<code>&quot;monday&quot; &lt; &quot;sunday&quot; &lt; &quot;tuesday&quot;</code>，<code>&quot;123&quot; &lt; &quot;1234&quot; &lt; &quot;23&quot;</code>。<strong>注意这种次序仅仅是 字符串的字典次序，与日常生活中人们对其理解的次序不同</strong>——星期一在星期二之前，整数 123 比 23 要大。以上讨论的比较次序并不限于 ASCII 编码，也适合 GB2312 等其他语言文字在排序方面的 需要。</p>
 <p>ASCII 保留了数字 <code>0</code>–<code>9</code>、大写字母和小写字母各自连续递增的区间，所以同一区间内可用编码值比较。但这不是通用的语言学排序规则：字符的编码值比较是按码元的字典序，大小写、重音、中文排序都可能需要额外的 locale 或排序键。字符串比较先比较第一个不同的编码单元；若一个是另一个的前缀，较短者更小。因此对 <code>std::string</code> 而言 <code>&quot;123&quot; &lt; &quot;1234&quot; &lt; &quot;23&quot;</code>，但这不是整数大小比较。比较前必须先约定编码和规范化方式，不能把“字节序”误当成“自然语言顺序”。</p>
 <p><strong>这里有个 C++ 特有的坑，必须点破</strong>：上面那条结论只对 <code>std::string</code> 成立。两个<strong>字符串字面量</strong>之间写 <code>&lt;</code>，比的是两个数组的<strong>地址</strong>，不是内容：</p>
 <div class="codeblock" data-lang="text"><pre><code>$ g++ -std=c++17 -Wall -Wextra litcmp.cpp
@@ -235,18 +248,59 @@ true true      # (&quot;123&quot; &lt; std::string(&quot;1234&quot;))、(std::st
 false true     # (&quot;123&quot; &lt; &quot;1234&quot;)、(&quot;1234&quot; &lt; &quot;23&quot;)——第一个的答案反了</code></pre></div>
 <p>同一行代码，两边只要有一边是 <code>std::string</code>，比的就是内容；两边都是裸字面量，比的就是地址，而地址由编译器摆放决定。所以本书凡是比较字符串，一律先落到 <code>String</code>/<code>std::string</code> 上，再谈编码顺序。</p>
 <h2 id="42-字符串的存储结构和实现"><a class="anchor" href="#42-字符串的存储结构和实现">#</a>4.2 字符串的存储结构和实现</h2>
+<p>选择字符串的存储结构时要考虑字符串的<strong>变长特点</strong>，同时需结合具体的应用分析各种存储方案的 利弊。某些应用中字符串的长度变化非常显著——短如单词，长为文件；从统计分布来看，字符串 长度分布的方差很大。<strong>对于这种情况，用静态长度的向量作为存储结构是不恰当的。</strong> 字符串的变长 特点是无法回避的：拼接、查找、置换和模式匹配等操作本身都涉及变长的字符串操作，这些操作 时间开销大，必须精心设计算法、选择恰当的串存储结构。本节重点讨论程序执行过程中的字符串 <strong>变长存储</strong>问题。</p>
 <h3 id="为什么这一节没有-python-版"><a class="anchor" href="#为什么这一节没有-python-版">#</a>为什么这一节没有 Python 版</h3>
 <p>本节的对象是一个自管理的字符缓冲区：长度、容量、结尾空字符、深复制和移动后的源对象状态都属于接口契约。Python <code>str</code> 是不可变的运行时对象，<code>list</code> 也不会让读者实现缓冲区的分配、释放和强异常保证；把它们当作“字符串类的 Python 版”会跳过本节的存储布局和所有权问题。因此算法 4.3 的模式匹配有 Python 版，4.2 的字符串类只保留 C++ 实现。</p>
 <p><code>String</code> 采用动态变长的存储结构：内部持有一块以 <code>&#x27;\0&#x27;</code> 结尾的字符数组和当前长度， 构造时按初值长度分配，赋值时按新长度重新分配。这正是本节要教的内容， 所以缓冲区是<strong>裸 <code>char*</code></strong>——换成 <code>std::string</code> 这一节就没了。</p>
 <h3 id="421-字符串的顺序存储"><a class="anchor" href="#421-字符串的顺序存储">#</a>4.2.1 字符串的顺序存储</h3>
 <p>字符串用一段连续字符数组按字符的逻辑顺序存储，末尾保留 <code>\0</code> 作为 C 风格字符串的结束标志，并单独记录不含终止符的长度 <code>length</code>。因此容量至少要能容纳 <code>length + 1</code> 个字符；<code>\0</code> 不是字符串内容，不能计入长度。</p>
-<p>连续存储使按下标取第 <span class="math">i</span> 个字符为 <span class="math">O(<span class="upr">1</span>)</span>，但在中间插入或删除时必须移动其后的字符，拼接和抽取子串也要复制一段连续区域。若容量不足，通常重新申请更大的数组、复制旧内容、释放旧数组，再更新指针和长度；这也是后面 <code>String</code> 类需要自己维护所有权、拷贝和析构的原因。 下标访问是 O(1)，插入、拼接和抽取需要复制字符。</p>
+<p>顺序存储的字符串<strong>适合访问字符串中单个字符或连续的一组字符</strong>：按下标取第 <span class="math">i</span> 个字符是 <span class="math">O(<span class="upr">1</span>)</span>。 但进行插入和删除（增减字符）操作就不是很方便，需要移动插入或删除点后面的所有字符；拼接和 抽取子串也要复制一段连续区域。若容量不足，通常重新申请更大的数组、复制旧内容、释放旧数组， 再更新指针和长度；这也是后面 <code>String</code> 类需要自己维护所有权、拷贝和析构的原因。</p>
+<p>C/C++ 的标准字符串是顺序存储方案的典型代表：在程序中用 <code>char s[M];</code> 的形式定义字符串变量， 其中 <code>M</code> 是整型常数，表示字符数组的长度。标准字符串需要在其末尾带一个结束标记 <code>&#x27;\0&#x27;</code> 来表示 串的结束，因此<strong>字符串的长度不能超过最大长度 <code>M - 1</code></strong>。原书图 4.1 画的就是</p>
+<div class="codeblock" data-lang="text"><pre><code>char s1[12] = &quot;Hello world&quot;;
+char s2[8]  = &quot;2008&quot;;
+char s3[6];</code></pre></div>
+<p>这三个数组在内存里的样子。<strong>存储字符串的数组是静态定长的</strong>，程序运行中一旦产生更长的字符串 就会造成数组溢出，这给编写和调试程序带来不便——这正是本节接下来要用一个类来解决的问题。</p>
+<p>还有一处「字符串处理中非常容易犯的错误」值得单独点出：C++ 中的字符数组是用字符指针定义的， 指向字符数组的始址，<strong>赋值语句 <code>s1 = s2</code> 不能被理解为把 <code>s2</code> 的内容复制到 <code>s1</code></strong>。这也是本书的 <code>String</code> 必须自己写拷贝赋值运算符的原因（4.2.2 节）。</p>
 <figure><img loading="lazy" src="../assets/ac445f2352c5273d.jpg" alt="图 4.1 C++ 标准字符串的变量说明示意图"><figcaption>图 4.1 C++ 标准字符串的变量说明示意图</figcaption></figure>
 <p>图 4.1　C 风格字符串的变量说明示意。<code>&#x27;\0&#x27;</code> 是 ASCII 里 8 位全 0 的 NULL 符，只作结束标记用，不算内容；说明变量时可以用字符串常量给初值，也可以不给——图中的 <code>s3</code> 没给初值，存的就是空串。</p>
-<p>C 标准库在这块内存上定位字符：<code>strchr(s1, &#x27;o&#x27;)</code> 找第一次出现，<code>strrchr(s1, &#x27;o&#x27;)</code> 找倒数第一次出现。</p>
+<p>标准库 <code>&lt;string.h&gt;</code>（C++ 里是 <code>&lt;cstring&gt;</code>）提供了若干处理字符串的常用函数，原书表 4.1 列出了 常用的几个：</p>
+<p>表 4.1　标准串函数</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">函数名</th>
+<th style="text-align:left">功能说明</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><code>size_t strlen(char* s)</code></td>
+<td style="text-align:left">求字符串 <code>s</code> 的当前长度，不计结束符；空字符串的长度为 0</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>char* strcpy(char* s1, const char* s2)</code></td>
+<td style="text-align:left">将 <code>s2</code> 复制到 <code>s1</code>，并返回一个指向 <code>s1</code> 开始的指针</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>char* strcat(char* s1, const char* s2)</code></td>
+<td style="text-align:left">将 <code>s2</code> 拼接到 <code>s1</code> 尾部</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>int strcmp(const char* s1, const char* s2)</code></td>
+<td style="text-align:left">比较 <code>s1</code> 和 <code>s2</code>：全同返回 0，<code>s1</code> 大于 <code>s2</code> 返回正数，小于返回负数</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>char* strchr(char* s, char c)</code></td>
+<td style="text-align:left">定位到 <code>s</code> 中第一次出现字符 <code>c</code> 的位置，没有则返回空指针</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>char* strrchr(char* s, char c)</code></td>
+<td style="text-align:left">从尾部逆向定位，返回最后一次出现 <code>c</code> 的位置，没有则返回空指针</td>
+</tr>
+</tbody></table></div>
+<p>此外，输入/输出的处理也是标准串函数库中的主要组成部分，例如 <code>cin &gt;&gt; s1;</code> 从标准输入读取 字符串到串变量 <code>s1</code>，<code>cout &lt;&lt; s1;</code> 把 <code>s1</code> 的内容输出到标准输出。</p>
+<p>例如对图 4.1 中的 <code>s1</code> 调用 <code>strchr(s1, &#x27;o&#x27;)</code> 和 <code>strrchr(s1, &#x27;o&#x27;)</code>，将分别得到字符 <code>&#x27;o&#x27;</code> 的第一次和 倒数第一次出现位置：</p>
 <figure><img loading="lazy" src="../assets/3fd8da33af3abe6c.jpg" alt="图4.2 在字符串 s1 中寻找并定位给定字符 &#x27;o&#x27; 的位置"><figcaption>图4.2 在字符串 s1 中寻找并定位给定字符 &#x27;o&#x27; 的位置</figcaption></figure>
 <p>图 4.2　在字符串 <code>s1</code> 中定位字符 <code>&#x27;o&#x27;</code>。两个函数返回的都是指针，指向找到的那个字符；找不到返回空指针。本书的 <code>String</code> 用下标和 <code>std::optional</code> 表达同一件事——「没找到」不再靠一个特殊指针值来表示。</p>
 <h3 id="422-字符串类-class-string-的存储结构"><a class="anchor" href="#422-字符串类-class-string-的存储结构">#</a>4.2.2 字符串类 class String 的存储结构</h3>
+<p>字符串的顺序存储方式简单易实现，C++ 的标准串及其相关的标准函数也提供了若干实用的函数， <strong>但终归难以避免其静态定长的局限</strong>；而在实际应用中，大多的字符串变量具有动态变化的长度。</p>
+<p>那么为什么不用链式的变长结构？因为<strong>每一个链指针比一个字符所占的存储空间还大</strong>——用链表 存字符，指针域的开销会几倍于数据域（回到 2.4 节那条「指针所占比例超过 1:1 就要慎重」的判据）。 所以字符串的变长存储走的是另一条路：仍然顺序存放，但<strong>把这块缓冲区的分配与释放交给一个类 去管</strong>。</p>
 <p>顺序存储只说了「字符放在哪」，还没说「这块内存归谁、什么时候还」。 把它包成一个类之后，这两件事才有着落：类里存一个指向字符数组的指针和一个长度， 构造时申请、析构时释放、拷贝时另开一份——本节的教学内容就是这套<strong>变长存储管理</strong>。</p>
 <h4 id="教学版完整实现"><a class="anchor" href="#教学版完整实现">#</a>教学版：完整实现</h4>
 <p>下面是一份<strong>完整的、能直接编译运行的</strong>字符串类。一个文件、一个类。 后面 4.2.2、4.2.3 两节就是把它拆开逐段讲。</p>
@@ -494,10 +548,19 @@ String&amp; <span class="k">operator</span>=(String&amp;&amp; other) <span class
 <p>工程版的解法是加一个私有的 <code>raw()</code>：<code>data_</code> 为空时返回一个静态空串。 读取路径全部走它，于是「被移动之后仍是可用的空串」这个保证<strong>不花任何分配</strong>就成立。 教学版没有移动操作，也就不需要这一层。</p>
 <p>其余的差别与前几章相同：<code>[[nodiscard]]</code>、<code>noexcept</code>、copy-and-swap、 关系运算符全家（<code>&lt; &gt; &lt;= &gt;=</code> 都由 <code>compare()</code> 派生）。</p>
 <h2 id="43-字符串的模式匹配"><a class="anchor" href="#43-字符串的模式匹配">#</a>4.3 字符串的模式匹配</h2>
-<p>给定目标串 T 和模式串 P，模式匹配要回答：P 是否作为 T 的连续子串出现， 若出现，首次出现在哪个位置。</p>
+<p>字符串模式匹配是一种常用的运算。所谓<strong>模式匹配</strong>（pattern matching），简单地说就是在<strong>文本</strong> （text）中寻找一个给定的<strong>模式</strong>（pattern）：通常文本都很大，而模式则比较短小。典型的例子包括 文本编辑和 DNA 分析——编辑文本时人们经常使用「替换」命令对文中的某个字符串或语句进行替换， 此时便需先找到要被替换的内容；在文本编辑器中，模式通常为一个单词，长度在 10 个字符左右， 而文本的长度则从几百字到上百万字不等。在生物信息中，DNA 信息一般由 A、C、G、T 这 4 个符号 组成，基因一般也就是几百个字符的长度，而<strong>人类染色体的长度却有 30 亿之多</strong>。显而易见，这些 应用对匹配算法的效率要求很高。</p>
+<p>模式匹配有精确匹配和近似匹配两类。<strong>精确匹配</strong>（exact matching）：如果在目标 <span class="math">T</span> 中至少一处 存在模式 <span class="math">P</span>，则称匹配成功，否则即使目标与模式只有一个字符不同也算匹配失败。想要找的词可以 是单选的（例如 <code>&quot;set&quot;</code>），也可以是多选的——例如模式 <code>&quot;s?t&quot;</code> 表示任何以 <code>s</code> 打头、以 <code>t</code> 结尾、 中间夹一个字符的串都可与之匹配（<code>&quot;sat&quot;</code>、<code>&quot;set&quot;</code>、<code>&quot;sit&quot;</code> 都可以），模式中的符号 <code>?</code> 称为<strong>通配符</strong>； 更复杂的模式可以采用正则表达式来表示。<strong>近似匹配</strong>（approximate matching）：如果模式 <span class="math">P</span> 与 目标 <span class="math">T</span>（或其子串）存在某种程度的相似，则认为匹配成功；常用的衡量字符串相似度的方法，是根据 一个串转换成另一个串所需的基本操作（插入、删除、替换）数目来确定的。本节与原书一样，只讨论 <strong>精确匹配中的单选情况</strong>，不涉及通配符、正则表达式与近似匹配。</p>
+<p>给定目标串 <span class="math">T</span> 和模式串 <span class="math">P</span>，模式匹配要回答：<span class="math">P</span> 是否作为 <span class="math">T</span> 的连续子串出现，若出现，首次出现 在哪个位置。用原书的记号写出来：<span class="math">T<sub>j</sub></span>、<span class="math">P<sub>j</sub></span> 表示其在位置 <span class="math">j</span> 上的字符，<span class="math">|T|</span>、<span class="math">|P|</span> 表示长度， <span class="math">a<sup>n</sup></span> 表示由 <span class="math">n</span> 个字符 <span class="math">a</span> 组成的字符串，<strong><span class="math">P</span> 和 <span class="math">T</span> 的第一个字符都从位置 0 开始</strong>；模式匹配 就是要在 <span class="math">T</span> 中找到一个 <span class="math">j</span>，使得</p>
+<div class="math math-display">P<sub><span class="upr">0</span></sub>P<sub><span class="upr">1</span></sub>P<sub><span class="upr">2</span></sub>⋯P<sub>m<span class="bin">−</span><span class="upr">2</span></sub>P<sub>m<span class="bin">−</span><span class="upr">1</span></sub><span class="rel">=</span>T<sub>j</sub>T<sub>j<span class="bin">+</span><span class="upr">1</span></sub>T<sub>j<span class="bin">+</span><span class="upr">2</span></sub>⋯T<sub>j<span class="bin">+</span>m<span class="bin">−</span><span class="upr">2</span></sub>T<sub>j<span class="bin">+</span>m<span class="bin">−</span><span class="upr">1</span></sub></div>
+<p>否则称模式匹配失败。<strong>记住「都从位置 0 开始」这句话</strong>——4.3.1 节会看到，原书自己的两个算法 都没有遵守它。</p>
 <p>本节的教学内容是<strong>算法本身</strong>，因此下面的实现用 <code>std::string_view</code> 接收输入： 不拷贝、不拥有，把注意力留在匹配过程上。字符串容器的实现是 4.2 节的事。</p>
 <h3 id="431-朴素的模式匹配算法"><a class="anchor" href="#431-朴素的模式匹配算法">#</a>4.3.1 朴素的模式匹配算法</h3>
-<p>朴素算法的思路直白：把模式的首字符对齐目标的每一个位置，逐字符比较； 一旦失配，就把模式整体右移一位，从头再来。</p>
+<p>朴素算法的思路直白：把模式的首字符对齐目标的每一个位置，逐字符比较；某次比较失败（称为一次 <strong>失配</strong>）时，就把模式对于 <span class="math">T</span> 向右移动一个字符位置，重新开始下一趟匹配。如此不断重复，直到 某趟配串成功返回，或者比较到目标串的结束也没有出现配串，则匹配失败。</p>
+<p><strong>时间效率分情况看。</strong> 最佳情况是目标首位置开始的子串便是所要找的配串，只要通过 <span class="math">|P|</span> 次比较 即可完成匹配，代价 <span class="math">O(|P|)</span>，与模式的长度成正比。如果最终匹配失败，其最佳情况是每次都在模式 的首字符比较时就不等、于是右移一位，直到在目标的 <span class="math">|T|<span class="bin">−</span>|P|</span> 位置处依然与模式的首字符不匹配， 整个过程中至少比较了 <span class="math">(|T|<span class="bin">−</span>|P|<span class="bin">+</span><span class="upr">1</span>)</span> 次，时间代价 <span class="math">O(|T|<span class="bin">−</span>|P|<span class="bin">+</span><span class="upr">1</span>)</span>。</p>
+<p><strong>最差情况需要 <span class="math">O(|T|<span class="bin">⋅</span>|P|)</span></strong>：例如目标串 <span class="math">T</span> 形如 <span class="math">a<sup>n</sup></span>，而模式 <span class="math">P</span> 形如 <span class="math">a<sup>m<span class="bin">−</span><span class="upr">1</span></sup>b</span>，每趟都 是在模式的最后一个字符处不匹配，即每趟都需要进行 <span class="math">|P|</span> 次比较，再把模式右移一位、再次从模式 头比较，最多需要 <span class="math">(|T|<span class="bin">−</span>|P|<span class="bin">+</span><span class="upr">1</span>)</span> 趟，因此总共需要比较 <span class="math">|P|(|T|<span class="bin">−</span>|P|<span class="bin">+</span><span class="upr">1</span>)</span> 次。<strong>此类情况很少 出现在文本中，却经常出现在 DNA 信息和图像信息中</strong>——这正是朴素算法在生物计算里不够用的原因。</p>
+<p>平均代价同时依赖于目标和模式中字符的分布概率。假设一个字符串中只允许使用 2 种字符，那么使用 任一字符的概率为 <span class="math"><span class="upr">1</span>/<span class="upr">2</span></span>：对于第 <span class="math">j</span> 趟扫描来说，仅比较一次的概率为 <span class="math"><span class="upr">1</span>/<span class="upr">2</span></span>，比较两次的概率为 <span class="math"><span class="upr">1</span>/<span class="upr">4</span></span>，比较 <span class="math">m</span> 次的概率为 <span class="math"><span class="upr">2</span><sup><span class="bin">−</span>m</sup></span>，因此平均情况下第 <span class="math">j</span> 趟扫描的比较次数为 <span class="math">∑<sub>k<span class="rel">=</span><span class="upr">1</span></sub><sup>|P|</sup>k/<span class="upr">2</span><sup>k</sup>&lt;<span class="upr">2</span></span>，平均比较次数为 <span class="math"><span class="upr">2</span>(|T|<span class="bin">−</span>|P|<span class="bin">+</span><span class="upr">1</span>)&lt;<span class="upr">2</span>|T|</span> 次。若运用马尔科夫链 （Markov Chain）的有关理论，可以估算一个更好的比较次数 <span class="math"><span class="upr">2</span><sup>|P|<span class="bin">+</span><span class="upr">1</span></sup><span class="bin">−</span><span class="upr">2</span></span>；在通用的情况下，如果 字符串中允许使用的字符数目为 <span class="math">|A|</span>，则平均比较次数为 <span class="math">(|A|<sup>|P|<span class="bin">+</span><span class="upr">1</span></sup><span class="bin">−</span>|A|)/(|A|<span class="bin">−</span><span class="upr">1</span>)</span>。</p>
+<p><strong>问题出在哪里。</strong> 尽管朴素算法思想简单易懂，但效率较低：一旦某趟匹配中发生失配，<strong>无论模式的 具体情况如何，都采用模式右移一位开始下一趟的匹配</strong>。这会导致很多冗余的比较，因为目标 <span class="math">T</span> 中 的字符会多次与模式中的字符进行比较，造成<strong>目标的回溯</strong>。例如模式 <span class="math">P<span class="rel">=</span></span> <code>&quot;abacab&quot;</code> 与目标 <span class="math">T<span class="rel">=</span></span> <code>&quot;abacaabaccabacabaa&quot;</code> 的第 1 趟比较中，发现 <span class="math">P<sub><span class="upr">5</span></sub><span class="rel">≠</span>T<sub><span class="upr">5</span></sub></span> 时把模式右移一位、开始第 2 趟， 使得 <span class="math">P<sub><span class="upr">0</span></sub></span> 与 <span class="math">T<sub><span class="upr">1</span></sub></span> 比较；其实之前的匹配中 <span class="math">T<sub><span class="upr">1</span></sub></span> 已与 <span class="math">P<sub><span class="upr">1</span></sub></span> 比较过而且相等，由于 <span class="math">P<sub><span class="upr">1</span></sub></span> 与 <span class="math">P<sub><span class="upr">0</span></sub></span> 不同，因此可知 <span class="math">P<sub><span class="upr">0</span></sub></span> 与 <span class="math">T<sub><span class="upr">1</span></sub></span> 肯定不等，<strong>根本用不着重新比较</strong>。换言之，利用模式本身的构成特征 以及上趟匹配的比较结果，就能知道 <span class="math">P<sub><span class="upr">0</span></sub></span> 与 <span class="math">T<sub><span class="upr">1</span></sub></span> 肯定不等。</p>
+<p>一般来说，右移的位数越多效率就越好，但前提是要保证不能丢失 <span class="math">P</span> 和 <span class="math">T</span> 的任何可匹配子串。 Knuth、Morris、Pratt 等人发现，<strong>每次右移的位数存在，且与目标串无关，仅依赖于模式本身</strong>， 因此他们对朴素算法进行了改进：预先处理模式本身，分析其字符分布状况，为模式中的每一个字符 计算失配时应该右移的位数——此即 4.3.2 节所谓的<strong>字符串的特征向量</strong>，改进后的算法就是 4.3.3 节 的 KMP 算法。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/pattern_matching/modern.hpp">code/ch04/pattern_matching/modern.hpp#naive</a></div><pre><code><span class="c">/// 朴素模式匹配：返回 pattern 在 text 中首次出现的**起始下标**；没有则 std::nullopt。</span>
 <span class="c">///</span>
 <span class="c">/// 与原书【算法4.6】的关键差别是返回值：原书写的是 `return (j - pLen + 1);`，</span>

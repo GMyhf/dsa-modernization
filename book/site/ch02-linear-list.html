@@ -227,14 +227,25 @@ append 之后尾元素是 30</code></pre></div>
 <p><code>append</code> 经尾指针 O(1) 接链，不必再从头走到尾。</p>
 <blockquote><p><strong>本文件的地位</strong>：《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008） 第 2.1–2.2 节的现代化重排。原书正文（<code>dsa_raw.md:1145</code> 起）的讲法、编号、图表一概保留； 换掉的只是那套 2008 年的 C++ 写法。2.3 节链表另开一轮。</p><p>书里印的每一段 C++ 都来自 <code>code/ch02/array_list/</code>，真正编译、真正跑过 （<code>tools/check_doc.py</code> 的 R3 逐字核对）。原书那份写法错在哪、改了什么、 什么刻意没改，逐条记在 <code>code/ch02/array_list/legacy.md</code>。</p><p>代码风格遵循 <code>collab/DECISION_LOG.md</code> 的 D-001 与 D-005。</p></blockquote>
 <h2 id="21-线性表的概念"><a class="anchor" href="#21-线性表的概念">#</a>2.1 线性表的概念</h2>
-<p>线性表(linear list)是由 n(n ≥ 0) 个类型相同的数据元素组成的有限序列。 除第一个元素外，每个元素有且仅有一个直接前驱；除最后一个元素外， 每个元素有且仅有一个直接后继。</p>
-<p>线性表的抽象数据类型给出的是<strong>一组运算</strong>：置空、判空、在表尾追加、 在指定位置插入、删除指定位置的元素、按位置取值与改值、按值查找位置。</p>
+<p>线性表（linear list）是由称为元素（element）的数据项组成的一种有限且有序的序列， 这些元素也可称结点或表目。用第 1 章的二元组 <span class="math">B<span class="rel">=</span>(K,R)</span> 写出来就是</p>
+<div class="math math-display">K<span class="rel">=</span>{k<sub><span class="upr">0</span></sub>,k<sub><span class="upr">1</span></sub>,⋯,k<sub>n<span class="bin">−</span><span class="upr">1</span></sub>}, R<span class="rel">=</span>{r}, r<span class="rel">=</span>{⟨k<sub>i</sub>,k<sub>i<span class="bin">+</span><span class="upr">1</span></sub>⟩,<span class="upr">0</span><span class="rel">≤</span>i<span class="rel">≤</span>n<span class="bin">−</span><span class="upr">2</span>}</div>
+<p>结点集合 <span class="math">K</span> 中的元素个数 <span class="math">n</span> 称为线性表的<strong>长度</strong>：<span class="math">n<span class="rel">=</span><span class="upr">0</span></span> 时称空表，<span class="math">n&gt;<span class="upr">0</span></span> 时称非空表； <span class="math">k<sub><span class="upr">0</span></sub></span> 称开始结点或<strong>表首</strong>，<span class="math">k<sub>n<span class="bin">−</span><span class="upr">1</span></sub></span> 称终止结点或<strong>表尾</strong>。线性关系 <span class="math">r</span> 刻画元素间的前驱、 后继关系——<span class="math">k<sub>i</sub></span> 是 <span class="math">k<sub>i<span class="bin">+</span><span class="upr">1</span></sub></span> 的前驱，<span class="math">k<sub>i<span class="bin">+</span><span class="upr">1</span></sub></span> 是 <span class="math">k<sub>i</sub></span> 的后继，所以线性关系也称前驱关系或 后继关系。<strong>关系 <span class="math">r</span> 具有反对称性和传递性</strong>；由定义可知线性表的逻辑特征是：<span class="math">K</span> 中的每个 结点在关系 <span class="math">r</span> 上最多只有一个前驱结点和一个后继结点。</p>
+<p>线性结构有两个结构特点。<strong>均匀性</strong>：虽然不同线性表的数据元素可以各种各样，但同一线性表中 的各数据元素必定具有相同的数据类型和长度。<strong>有序性</strong>：各数据元素在表中都有自己的位置， 元素之间的相对位置是线性的。本章讨论的简单线性表因此约定所有元素同类型——概念上并不反对 元素类型不同（例如第 12 章的广义表），但那属于高级线性结构。</p>
+<p>同一种线性结构在不同场合有不同的称谓：顺序表、链表、串、栈、顺序文件；其中的元素也相应地 叫表目、结点或记录。一般情况下这些称谓可作为同义词互通使用。</p>
+<p>在线性表上可以实施的运算依赖于具体应用，但一般不外乎两大类：一类是<strong>对整个表</strong>的操作—— 创建或置空一个线性表、合并两个线性表、判断表是否为空或为满；另一类是<strong>对表中元素</strong>的操作 ——查找满足一定条件的元素、在表中插入或删除指定的元素。</p>
+<p>按照特性，线性表的运算还可以细分为 5 类：① 创建线性表的一个实例；② 析构，消除实例并释放 所占空间；③ 获取当前线性表的信息（由内容寻找位置、由位置读取元素内容），不改变表的内容； ④ 访问并改变表的内容或结构，例如更新指定元素、添加元素、删除元素、清空线性表； ⑤ 辅助管理操作，例如求表的当前长度。</p>
 <p>原书【代码2.1】用一个类模板 <code>List&lt;T&gt;</code> 来写这组运算。那份清单有两处今天必须改：</p>
 <ol>
 <li>它声明了 <code>bool delete(const int p);</code>——<strong><code>delete</code> 是 C++ 关键字</strong>，不能作函数名。 整章的删除操作都建立在这个编译不过的名字上。</li>
 <li>它写的是 <code>class List { void clear(); ... };</code>，<strong>通篇没有 <code>public:</code></strong>。 <code>class</code> 的默认访问权限是 private，于是这个抽象数据类型的每一个运算都调不到。 （同一本书第 3 章的代码3.1 是写了 <code>public:</code> 的。）</li>
 </ol>
 <p>第 2 点尤其值得停一下：抽象数据类型的意义就是<strong>对外</strong>给出一组运算。 一个所有运算都私有的 ADT，在语法上成立、在语义上是空的。</p>
+<p>原书在【代码2.1】之外还给出一组「当前位置（position）」运算：<code>setPos</code> 设置当前下标， <code>setStart</code> / <code>setEnd</code> 把当前下标移到表头或表尾，<code>prev</code> / <code>next</code> 让它左右移动一位；配合 <code>getValue</code> 就能依次处理每个元素。本书用迭代器（<code>begin()</code> / <code>end()</code> 加 range-for）达到同一 目的——「先跑一遍」那段 <code>for (int value : values)</code> 就是原书那段 <code>setStart</code> / <code>next</code> 循环的现代写法，好处是不必在容器里额外存一个「当前位置」状态。</p>
+<p>线性表运算的具体实现与它在计算机中的物理存储结构密切相关，效率也与存储结构相关。 线性表的存储结构本质上是<strong>逻辑结构到存储空间的映射</strong>：不仅要为结点集合到存储器单元建立 一个映射，同时还要为元素之间的线性关系到相应存储单元地址间的关系建立映射。主要有两类：</p>
+<ol>
+<li><strong>定长的顺序存储结构</strong>，简称顺序表。程序中通过创建数组来建立，为线性表分配一块连续的 存储空间，元素顺序地存储在这些地址连续的空间中，以「物理位置相邻」来表示元素之间的关系。 定长存储结构的不足之处是限制了线性表的长度变化。见 2.2 节。</li>
+<li><strong>变长的线性存储结构</strong>，也称链接式存储结构，简称链表。它使用指针来表示元素之间的线性 关系，利用前驱和后继关系将各个元素用指针链接起来；对表长不加限制，需要加入新元素时可以 方便地申请空间并链接到合适的位置上。见 2.3 节。</li>
+</ol>
 <p>本书把这组运算直接定义在 <code>ArrayList&lt;T&gt;</code> 上，不再另设一个基类—— 理由与第 3 章相同：那样的空基类给不了多态，却会带来非虚析构的未定义行为。 要定下来的是<strong>这张表</strong>：</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">运算</th>
@@ -1423,8 +1434,11 @@ Node* insert_before(Node* pos, U&amp;&amp; value) {
 }</code></pre></div>
 <p>工程版的测试覆盖头/中/尾插入、删尾后的尾指针修复、深拷贝、移动、元素构造异常和 move-only 元素；变异自检还确认&quot;删尾不回退 tail&quot;会在后续尾插崩溃， &quot;复制构造失败不清理&quot;会留下元素对象。原书逐条证据见 <code>code/ch02/linked_list/legacy.md</code>。</p>
 <h2 id="24-线性表实现方法的比较"><a class="anchor" href="#24-线性表实现方法的比较">#</a>2.4 线性表实现方法的比较</h2>
-<p>顺序表按下标随机访问是 O(1)，插入删除要搬动后续元素，平均 O(n)；链表在已知前驱时插入删除是 O(1)，但按位置找前驱仍是 O(n)。顺序表局部性好、无指针开销；链表按需分配、没有预留空洞。选择取决于「按位置读」多，还是「在已知结点旁改链接」多。</p>
-<p>不要用顺序表的场合：经常在表中间插入删除，或事先不知道长度上限。不要用链表的场合：按位置读远比插入删除多，或者指针本身比结点内容还占空间。</p>
+<p>顺序表是最简单的数据组织方法，因此大多数程序设计语言都提供了数组这种机制来实现它。除具有 易用、空间开销较小等特点之外，顺序表还提供了对任意元素进行<strong>随机访问</strong>的能力，适合于二分 检索及快速排序等运算，是存储静态数据的理想选择。按下标访问是 <span class="math">O(<span class="upr">1</span>)</span>，代价是插入删除要搬动 后续元素，平均 <span class="math">O(n)</span>。</p>
+<p>链表除了适用于频繁插入或删除内部元素的线性表之外，还适合于管理那些<strong>长度经常变化、或事先 无法确定长度</strong>的线性表。它在已知前驱结点时插入删除是 <span class="math">O(<span class="upr">1</span>)</span>，但按位置找到那个前驱仍是 <span class="math">O(n)</span>。</p>
+<p>作为基本的数据结构，线性表有着广泛的应用：存储管理本质上就是利用线性表管理可利用空间 （第 12 章）；线性表还可以作为基本成分构建复杂的数据结构，例如散列方法就是把顺序表和链表 结合起来的一种数据结构（第 10 章）。在实际应用中具体采用何种实现方法，取决于应用中线性表 数据元素的统计特征和操作特点。取舍时有两个因素值得注意。</p>
+<p><strong>1. 不要使用顺序表的场合。</strong> 线性表中经常要插入/删除内部元素时，不宜使用顺序表，因为顺序 表的插入/删除操作平均情况下需要移动表中一半的元素。此外，无法确定线性表长度的最大值时， 也不宜采用顺序表。</p>
+<p><strong>2. 不要使用链表的场合。</strong> 经常对线性表进行按位置的访问，而且按位读操作比插入/删除操作 频繁时，不宜使用链表，因为顺链表扫描浏览比按顺序表下标读元素要费时。此外，<strong>指针本身的 存储开销也需要考虑</strong>：如果与结点内容所占空间相比，指针所占的比例较大（超过 1:1），应该慎重 选择。</p>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
 <p>线性结构里元素满足一对一的先后关系。线性表有顺序和链式两种主要存法。顺序表易用、可随机访问，适合静态或按位读取多的数据；链表适合长度常变、或经常在已知结点旁增删的场合。具体选哪一种，看访问统计和操作特点。</p>
 <h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
