@@ -30,8 +30,12 @@ https://github.com/GMyhf/dsa-modernization
 | 章 | 文件名（`.md` / `.pptx` / `.mp4` 同名） | 课件页数 | 视频时长 | 主题 |
 | --- | --- | --- | --- | --- |
 | 1 | `DSA_CH01_Overview_ADT_Complexity` | 47 | 28:57 | 问题求解与 Floyd、逻辑/存储结构、抽象数据类型、渐进分析 |
+| 2 | `DSA_CH02_Linear_List` | 39 | 19:55 | 顺序表与链表、三法则、按位置访问 vs 改链接 |
+| 3 | `DSA_CH03_Stack_Queue` | 40 | 22:35 | 栈与队列、后缀求值、运行栈与递归深度实测、循环队列 |
+| 4 | `DSA_CH04_String` | 27 | 18:21 | 字符编码与串比较、串的存储、朴素匹配与 KMP |
+| 5 | `DSA_CH05_Binary_Tree` | 39 | 25:02 | 递归定义与三种周游、二叉搜索树、堆与线性建堆、Huffman |
 
-尚未编写：第 2–12 章。章号与输出文件名的对照表在
+尚未编写：第 6–12 章。章号与输出文件名的对照表在
 [`build_all.py`](build_all.py) 的 `CHAPTERS` 里。
 
 版面 16:9，中文字体**微软雅黑**，代码字体 **Consolas**。

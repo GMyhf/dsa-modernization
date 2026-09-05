@@ -1,0 +1,321 @@
+{
+  "voice": "zh-CN-YunyangNeural",
+  "rate": "+0%",
+  "total": "25:02",
+  "source_pptx_sha256": "e17af1b74e31b874bff6418ed1c30e90c019dd4cd4a3a4ebd811c6230d86af37",
+  "source_script_sha256": "30f9db0fd98292d8601b0451bdbe34448c8a51ba8dee26279108b46312b1d935",
+  "sections": [
+    {
+      "page": 1,
+      "title": "封面",
+      "start": "00:00",
+      "end": "00:33",
+      "seconds": 32.5,
+      "chars": 155
+    },
+    {
+      "page": 2,
+      "title": "本章要回答四个问题",
+      "start": "00:33",
+      "end": "01:13",
+      "seconds": 40.2,
+      "chars": 194
+    },
+    {
+      "page": 3,
+      "title": "本章的一句话",
+      "start": "01:13",
+      "end": "01:24",
+      "seconds": 10.9,
+      "chars": 47
+    },
+    {
+      "page": 4,
+      "title": "第 1 节　5.1 二叉树的概念",
+      "start": "01:24",
+      "end": "01:31",
+      "seconds": 7.4,
+      "chars": 27
+    },
+    {
+      "page": 5,
+      "title": "5.1.1 定义",
+      "start": "01:31",
+      "end": "02:11",
+      "seconds": 40.4,
+      "chars": 188
+    },
+    {
+      "page": 6,
+      "title": "图 5.1 二叉树的 5 种基本形态",
+      "start": "02:11",
+      "end": "02:43",
+      "seconds": 31.3,
+      "chars": 156
+    },
+    {
+      "page": 7,
+      "title": "5.1.2 三种特殊的二叉树",
+      "start": "02:43",
+      "end": "03:28",
+      "seconds": 44.9,
+      "chars": 222
+    },
+    {
+      "page": 8,
+      "title": "5.1.3 三条要反复用的性质",
+      "start": "03:28",
+      "end": "04:23",
+      "seconds": 55.3,
+      "chars": 258
+    },
+    {
+      "page": 9,
+      "title": "性质 5 不是纸面游戏",
+      "start": "04:23",
+      "end": "04:51",
+      "seconds": 28.4,
+      "chars": 153
+    },
+    {
+      "page": 10,
+      "title": "第 2 节　5.2 二叉树的周游",
+      "start": "04:51",
+      "end": "04:58",
+      "seconds": 7.1,
+      "chars": 24
+    },
+    {
+      "page": 11,
+      "title": "5.2.2 深度优先周游",
+      "start": "04:58",
+      "end": "05:38",
+      "seconds": 40.0,
+      "chars": 198
+    },
+    {
+      "page": 12,
+      "title": "图 5.5 周游的例子",
+      "start": "05:38",
+      "end": "05:58",
+      "seconds": 19.2,
+      "chars": 97
+    },
+    {
+      "page": 13,
+      "title": "同一棵树，四种周游",
+      "start": "05:58",
+      "end": "06:47",
+      "seconds": 49.0,
+      "chars": 260
+    },
+    {
+      "page": 14,
+      "title": "三个函数的形状完全一样",
+      "start": "06:47",
+      "end": "07:21",
+      "seconds": 34.8,
+      "chars": 201
+    },
+    {
+      "page": 15,
+      "title": "周游的代价，以及哪些地方不能用递归",
+      "start": "07:21",
+      "end": "08:18",
+      "seconds": 56.9,
+      "chars": 286
+    },
+    {
+      "page": 16,
+      "title": "表达式树：周游的一个用途",
+      "start": "08:18",
+      "end": "09:15",
+      "seconds": 56.5,
+      "chars": 286
+    },
+    {
+      "page": 17,
+      "title": "5.2.3 广度优先周游",
+      "start": "09:15",
+      "end": "10:00",
+      "seconds": 44.9,
+      "chars": 231
+    },
+    {
+      "page": 18,
+      "title": "第 3 节　5.3 / 5.4 存储结构与二叉搜索树",
+      "start": "10:00",
+      "end": "10:05",
+      "seconds": 5.0,
+      "chars": 15
+    },
+    {
+      "page": 19,
+      "title": "5.3 两种存储结构",
+      "start": "10:05",
+      "end": "10:56",
+      "seconds": 51.8,
+      "chars": 254
+    },
+    {
+      "page": 20,
+      "title": "5.4 二叉搜索树：为什么需要它",
+      "start": "10:56",
+      "end": "11:39",
+      "seconds": 42.2,
+      "chars": 200
+    },
+    {
+      "page": 21,
+      "title": "图 5.11 二叉搜索树",
+      "start": "11:39",
+      "end": "11:59",
+      "seconds": 20.5,
+      "chars": 102
+    },
+    {
+      "page": 22,
+      "title": "插入：不用移动数据，只改一根空指针",
+      "start": "11:59",
+      "end": "12:45",
+      "seconds": 45.5,
+      "chars": 225
+    },
+    {
+      "page": 23,
+      "title": "删除：本章最容易写错的一段",
+      "start": "12:45",
+      "end": "13:34",
+      "seconds": 49.7,
+      "chars": 252
+    },
+    {
+      "page": 24,
+      "title": "图 5.13 改进的删除办法",
+      "start": "13:34",
+      "end": "14:19",
+      "seconds": 44.7,
+      "chars": 221
+    },
+    {
+      "page": 25,
+      "title": "第 4 节　5.5 堆与优先队列",
+      "start": "14:19",
+      "end": "14:27",
+      "seconds": 7.7,
+      "chars": 28
+    },
+    {
+      "page": 26,
+      "title": "5.5 堆是什么",
+      "start": "14:27",
+      "end": "15:19",
+      "seconds": 52.3,
+      "chars": 259
+    },
+    {
+      "page": 27,
+      "title": "图 5.14 最小堆对应的完全二叉树",
+      "start": "15:19",
+      "end": "15:36",
+      "seconds": 17.0,
+      "chars": 82
+    },
+    {
+      "page": 28,
+      "title": "插入、删除与建堆",
+      "start": "15:36",
+      "end": "16:34",
+      "seconds": 58.0,
+      "chars": 291
+    },
+    {
+      "page": 29,
+      "title": "建堆为什么是 O(n) 而不是 O(n log n)",
+      "start": "16:34",
+      "end": "17:47",
+      "seconds": 73.5,
+      "chars": 388
+    },
+    {
+      "page": 30,
+      "title": "这个结论有实际后果",
+      "start": "17:47",
+      "end": "18:12",
+      "seconds": 25.0,
+      "chars": 153
+    },
+    {
+      "page": 31,
+      "title": "5.5.2 优先队列",
+      "start": "18:12",
+      "end": "19:05",
+      "seconds": 52.0,
+      "chars": 248
+    },
+    {
+      "page": 32,
+      "title": "第 5 节　5.6 Huffman 树及其应用",
+      "start": "19:05",
+      "end": "19:11",
+      "seconds": 6.8,
+      "chars": 28
+    },
+    {
+      "page": 33,
+      "title": "图 5.18 三棵权值相同、形状不同的扩充二叉树",
+      "start": "19:11",
+      "end": "19:34",
+      "seconds": 23.1,
+      "chars": 110
+    },
+    {
+      "page": 34,
+      "title": "Huffman 树的构造",
+      "start": "19:34",
+      "end": "20:23",
+      "seconds": 48.7,
+      "chars": 244
+    },
+    {
+      "page": 35,
+      "title": "5.6.2 Huffman 编码：问题从哪来",
+      "start": "20:23",
+      "end": "21:30",
+      "seconds": 66.5,
+      "chars": 345
+    },
+    {
+      "page": 36,
+      "title": "abbaaadc 的 Huffman 编码",
+      "start": "21:30",
+      "end": "21:58",
+      "seconds": 28.6,
+      "chars": 140
+    },
+    {
+      "page": 37,
+      "title": "两条值得记住的结论",
+      "start": "21:58",
+      "end": "23:09",
+      "seconds": 70.7,
+      "chars": 360
+    },
+    {
+      "page": 38,
+      "title": "本章小结",
+      "start": "23:09",
+      "end": "24:06",
+      "seconds": 57.4,
+      "chars": 283
+    },
+    {
+      "page": 39,
+      "title": "习题",
+      "start": "24:06",
+      "end": "25:02",
+      "seconds": 56.0,
+      "chars": 273
+    }
+  ]
+}

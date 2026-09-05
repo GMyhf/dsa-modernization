@@ -1,0 +1,225 @@
+{
+  "voice": "zh-CN-YunyangNeural",
+  "rate": "+0%",
+  "total": "18:21",
+  "source_pptx_sha256": "8cebd286a48ab5261d0f74bfc3e277fe2951f5e393169d5e2adc52e7107be204",
+  "source_script_sha256": "52ee14eb7991fa90ccd8eaac82661606e50691919099de83797b7657c64d6e26",
+  "sections": [
+    {
+      "page": 1,
+      "title": "封面",
+      "start": "00:00",
+      "end": "00:28",
+      "seconds": 28.1,
+      "chars": 134
+    },
+    {
+      "page": 2,
+      "title": "本章要回答三个问题",
+      "start": "00:28",
+      "end": "00:56",
+      "seconds": 27.4,
+      "chars": 130
+    },
+    {
+      "page": 3,
+      "title": "本章的一句话",
+      "start": "00:56",
+      "end": "01:11",
+      "seconds": 15.5,
+      "chars": 72
+    },
+    {
+      "page": 4,
+      "title": "第 1 节　4.1 字符串的基本概念",
+      "start": "01:11",
+      "end": "01:18",
+      "seconds": 7.0,
+      "chars": 24
+    },
+    {
+      "page": 5,
+      "title": "4.1 字符串与线性表的两点区别",
+      "start": "01:18",
+      "end": "02:06",
+      "seconds": 47.8,
+      "chars": 220
+    },
+    {
+      "page": 6,
+      "title": "原书【代码4.1】的三处问题",
+      "start": "02:06",
+      "end": "03:03",
+      "seconds": 57.2,
+      "chars": 341
+    },
+    {
+      "page": 7,
+      "title": "4.1.1 字符编码",
+      "start": "03:03",
+      "end": "04:10",
+      "seconds": 67.5,
+      "chars": 346
+    },
+    {
+      "page": 8,
+      "title": "一条 2008 年的书还讲不到的结论",
+      "start": "04:10",
+      "end": "04:47",
+      "seconds": 36.5,
+      "chars": 204
+    },
+    {
+      "page": 9,
+      "title": "4.1.2 字符的编码顺序",
+      "start": "04:47",
+      "end": "05:35",
+      "seconds": 48.4,
+      "chars": 248
+    },
+    {
+      "page": 10,
+      "title": "这里有个 C++ 特有的坑",
+      "start": "05:35",
+      "end": "06:18",
+      "seconds": 42.8,
+      "chars": 270
+    },
+    {
+      "page": 11,
+      "title": "第 2 节　4.2 字符串的存储结构和实现",
+      "start": "06:18",
+      "end": "06:23",
+      "seconds": 4.6,
+      "chars": 14
+    },
+    {
+      "page": 12,
+      "title": "4.2 串的顺序存储",
+      "start": "06:23",
+      "end": "07:12",
+      "seconds": 49.0,
+      "chars": 235
+    },
+    {
+      "page": 13,
+      "title": "原书 String 类的三处硬伤",
+      "start": "07:12",
+      "end": "08:07",
+      "seconds": 55.3,
+      "chars": 335
+    },
+    {
+      "page": 14,
+      "title": "第 3 节　4.3 字符串的模式匹配",
+      "start": "08:07",
+      "end": "08:13",
+      "seconds": 5.8,
+      "chars": 18
+    },
+    {
+      "page": 15,
+      "title": "4.3 模式匹配问题",
+      "start": "08:13",
+      "end": "09:08",
+      "seconds": 55.3,
+      "chars": 266
+    },
+    {
+      "page": 16,
+      "title": "4.3.1 朴素算法：思路与代价",
+      "start": "09:08",
+      "end": "10:02",
+      "seconds": 53.8,
+      "chars": 271
+    },
+    {
+      "page": 17,
+      "title": "朴素算法的问题出在哪里",
+      "start": "10:02",
+      "end": "10:25",
+      "seconds": 22.7,
+      "chars": 102
+    },
+    {
+      "page": 18,
+      "title": "一个具体的浪费",
+      "start": "10:25",
+      "end": "11:21",
+      "seconds": 56.7,
+      "chars": 297
+    },
+    {
+      "page": 19,
+      "title": "4.3.2 特征向量：一个例子就清楚了",
+      "start": "11:21",
+      "end": "12:21",
+      "seconds": 59.9,
+      "chars": 305
+    },
+    {
+      "page": 20,
+      "title": "特征向量怎么算",
+      "start": "12:21",
+      "end": "13:06",
+      "seconds": 44.5,
+      "chars": 235
+    },
+    {
+      "page": 21,
+      "title": "4.3.3 KMP：与朴素算法只差失配那一步",
+      "start": "13:06",
+      "end": "13:47",
+      "seconds": 41.0,
+      "chars": 217
+    },
+    {
+      "page": 22,
+      "title": "为什么 KMP 是线性的",
+      "start": "13:47",
+      "end": "14:36",
+      "seconds": 49.7,
+      "chars": 274
+    },
+    {
+      "page": 23,
+      "title": "图 4.12 KMP 匹配示例",
+      "start": "14:36",
+      "end": "15:10",
+      "seconds": 33.3,
+      "chars": 158
+    },
+    {
+      "page": 24,
+      "title": "一条能真正检出退化的测试",
+      "start": "15:10",
+      "end": "15:46",
+      "seconds": 36.3,
+      "chars": 185
+    },
+    {
+      "page": 25,
+      "title": "本章抓到的原书错误",
+      "start": "15:46",
+      "end": "16:31",
+      "seconds": 44.8,
+      "chars": 235
+    },
+    {
+      "page": 26,
+      "title": "本章小结",
+      "start": "16:31",
+      "end": "17:22",
+      "seconds": 51.5,
+      "chars": 249
+    },
+    {
+      "page": 27,
+      "title": "习题",
+      "start": "17:22",
+      "end": "18:21",
+      "seconds": 58.1,
+      "chars": 289
+    }
+  ]
+}

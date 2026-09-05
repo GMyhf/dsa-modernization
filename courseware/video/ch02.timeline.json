@@ -1,0 +1,321 @@
+{
+  "voice": "zh-CN-YunyangNeural",
+  "rate": "+0%",
+  "total": "19:55",
+  "source_pptx_sha256": "6ae267fcf6f0428edc9e526bea53e606eac9934068bf838668cad4d472d23749",
+  "source_script_sha256": "73186b6611d7ddbb3a421f6b450f431245a65c49c4b7b59ec608ca410d938f94",
+  "sections": [
+    {
+      "page": 1,
+      "title": "封面",
+      "start": "00:00",
+      "end": "00:32",
+      "seconds": 32.1,
+      "chars": 157
+    },
+    {
+      "page": 2,
+      "title": "本章要回答三个问题",
+      "start": "00:32",
+      "end": "01:11",
+      "seconds": 38.6,
+      "chars": 185
+    },
+    {
+      "page": 3,
+      "title": "本章的一句话",
+      "start": "01:11",
+      "end": "01:33",
+      "seconds": 22.6,
+      "chars": 109
+    },
+    {
+      "page": 4,
+      "title": "第 1 节　2.1 线性表的概念",
+      "start": "01:33",
+      "end": "01:41",
+      "seconds": 7.6,
+      "chars": 27
+    },
+    {
+      "page": 5,
+      "title": "2.1 线性表的定义",
+      "start": "01:41",
+      "end": "02:27",
+      "seconds": 46.4,
+      "chars": 231
+    },
+    {
+      "page": 6,
+      "title": "线性结构的两个特点，运算的五个类别",
+      "start": "02:27",
+      "end": "03:09",
+      "seconds": 41.9,
+      "chars": 201
+    },
+    {
+      "page": 7,
+      "title": "要定下来的是这张表",
+      "start": "03:09",
+      "end": "03:49",
+      "seconds": 39.8,
+      "chars": 181
+    },
+    {
+      "page": 8,
+      "title": "原书【代码2.1】的两处硬伤",
+      "start": "03:49",
+      "end": "04:39",
+      "seconds": 50.1,
+      "chars": 281
+    },
+    {
+      "page": 9,
+      "title": "第 2 节　2.2 顺序表",
+      "start": "04:39",
+      "end": "04:46",
+      "seconds": 7.2,
+      "chars": 24
+    },
+    {
+      "page": 10,
+      "title": "先跑一遍：顺序表",
+      "start": "04:46",
+      "end": "05:22",
+      "seconds": 35.6,
+      "chars": 180
+    },
+    {
+      "page": 11,
+      "title": "2.2.1 类定义：原书四个成员，这里三个",
+      "start": "05:22",
+      "end": "06:04",
+      "seconds": 42.4,
+      "chars": 244
+    },
+    {
+      "page": 12,
+      "title": "第四个成员 position 为什么删掉",
+      "start": "06:04",
+      "end": "06:43",
+      "seconds": 39.1,
+      "chars": 224
+    },
+    {
+      "page": 13,
+      "title": "按下标读写：O(1)",
+      "start": "06:43",
+      "end": "07:15",
+      "seconds": 31.6,
+      "chars": 175
+    },
+    {
+      "page": 14,
+      "title": "按内容检索：把「没找到」写进返回值类型",
+      "start": "07:15",
+      "end": "07:44",
+      "seconds": 28.8,
+      "chars": 157
+    },
+    {
+      "page": 15,
+      "title": "插入：搬 n 个元素",
+      "start": "07:44",
+      "end": "08:16",
+      "seconds": 32.3,
+      "chars": 168
+    },
+    {
+      "page": 16,
+      "title": "删除，与翻倍扩容",
+      "start": "08:16",
+      "end": "08:53",
+      "seconds": 36.4,
+      "chars": 183
+    },
+    {
+      "page": 17,
+      "title": "三法则",
+      "start": "08:53",
+      "end": "09:09",
+      "seconds": 16.9,
+      "chars": 82
+    },
+    {
+      "page": 18,
+      "title": "为什么三法则是硬要求",
+      "start": "09:09",
+      "end": "09:48",
+      "seconds": 38.6,
+      "chars": 205
+    },
+    {
+      "page": 19,
+      "title": "教学版补上的那两个函数",
+      "start": "09:48",
+      "end": "10:18",
+      "seconds": 29.9,
+      "chars": 154
+    },
+    {
+      "page": 20,
+      "title": "顺带看一眼原书的 clear",
+      "start": "10:18",
+      "end": "10:47",
+      "seconds": 29.4,
+      "chars": 171
+    },
+    {
+      "page": 21,
+      "title": "第 3 节　2.3 链表",
+      "start": "10:47",
+      "end": "10:54",
+      "seconds": 6.7,
+      "chars": 20
+    },
+    {
+      "page": 22,
+      "title": "链表换了哪一件事",
+      "start": "10:54",
+      "end": "11:09",
+      "seconds": 15.6,
+      "chars": 69
+    },
+    {
+      "page": 23,
+      "title": "图 2.4 单链表示例",
+      "start": "11:09",
+      "end": "11:27",
+      "seconds": 17.6,
+      "chars": 88
+    },
+    {
+      "page": 24,
+      "title": "从图 2.4 能读出来的三件事",
+      "start": "11:27",
+      "end": "12:04",
+      "seconds": 36.7,
+      "chars": 195
+    },
+    {
+      "page": 25,
+      "title": "先跑一遍：链表",
+      "start": "12:04",
+      "end": "12:29",
+      "seconds": 25.0,
+      "chars": 115
+    },
+    {
+      "page": 26,
+      "title": "图 2.6 引入头结点的单链表",
+      "start": "12:29",
+      "end": "12:52",
+      "seconds": 23.2,
+      "chars": 113
+    },
+    {
+      "page": 27,
+      "title": "结点与头结点",
+      "start": "12:52",
+      "end": "13:27",
+      "seconds": 35.3,
+      "chars": 187
+    },
+    {
+      "page": 28,
+      "title": "循链定位",
+      "start": "13:27",
+      "end": "13:48",
+      "seconds": 21.1,
+      "chars": 105
+    },
+    {
+      "page": 29,
+      "title": "插入与删除",
+      "start": "13:48",
+      "end": "14:18",
+      "seconds": 29.5,
+      "chars": 147
+    },
+    {
+      "page": 30,
+      "title": "析构必须循环，不能递归",
+      "start": "14:18",
+      "end": "14:47",
+      "seconds": 29.2,
+      "chars": 147
+    },
+    {
+      "page": 31,
+      "title": "图 2.10 双链表的结点",
+      "start": "14:47",
+      "end": "14:56",
+      "seconds": 9.0,
+      "chars": 43
+    },
+    {
+      "page": 32,
+      "title": "2.3.2 双链表：多一根指针买到什么",
+      "start": "14:56",
+      "end": "15:28",
+      "seconds": 31.6,
+      "chars": 149
+    },
+    {
+      "page": 33,
+      "title": "2.3.3 循环链表",
+      "start": "15:28",
+      "end": "16:16",
+      "seconds": 48.8,
+      "chars": 264
+    },
+    {
+      "page": 34,
+      "title": "第 4 节　2.4 线性表实现方法的比较",
+      "start": "16:16",
+      "end": "16:21",
+      "seconds": 4.6,
+      "chars": 14
+    },
+    {
+      "page": 35,
+      "title": "同一组运算，两种结构的代价",
+      "start": "16:21",
+      "end": "17:07",
+      "seconds": 45.5,
+      "chars": 221
+    },
+    {
+      "page": 36,
+      "title": "什么时候不要用",
+      "start": "17:07",
+      "end": "17:49",
+      "seconds": 42.4,
+      "chars": 211
+    },
+    {
+      "page": 37,
+      "title": "线性表在后面各章的位置",
+      "start": "17:49",
+      "end": "18:24",
+      "seconds": 35.4,
+      "chars": 167
+    },
+    {
+      "page": 38,
+      "title": "本章小结",
+      "start": "18:24",
+      "end": "19:08",
+      "seconds": 44.0,
+      "chars": 214
+    },
+    {
+      "page": 39,
+      "title": "习题",
+      "start": "19:08",
+      "end": "19:55",
+      "seconds": 47.0,
+      "chars": 244
+    }
+  ]
+}
