@@ -88,6 +88,7 @@ python3 build_all.py 01        # 只重新生成第 1 章
 python3 make_video.py 01                # 合成第 1 章
 python3 make_video.py 01 --audio-only   # 只跑 TTS，先看总时长够不够一节课
 python3 make_video.py 01 --check        # 只校验产物是否最新（闸门第 8 项）
+python3 make_video.py 01 --preview      # 从成品转一份 720p 轻量版，便于传阅
 ```
 
 流程：`content/chNN_narration.md` 逐页送进 edge-tts 得到旁白 → 从**当前**
@@ -99,6 +100,11 @@ sha256，任何一边改了而没重新合成，闸门第 8 项就会报「视�
 
 **讲稿是手写的，时间控制表是机器写的。** 讲稿文末的
 「附：时间控制表」由 `make_video.py` 按实测时长重写，不要手改。
+
+`--preview` 出的是 `video/chNN-preview.mp4`：720p 单声道，第 1 章约 26 MB
+（成品 48.5 MB）。很多渠道传不动 50 MB，做成脚本里的一档而不是临时敲一行
+ffmpeg —— 临时命令不可复现，下次再要一份就得凭记忆重敲，参数一定会漂。
+它只用来看清讲了什么，**正式放映用成品**。
 
 ⚠️ **成品 `.mp4` 不入库**（一章约 50 MB，而且每次重建整个文件都变，
 与仓库根目录不收 26 MB 扫描件同一个道理）。入库的是讲稿、字幕和时间轴，

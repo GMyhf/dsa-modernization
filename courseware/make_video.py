@@ -6,12 +6,14 @@
     python3 make_video.py 01                # 合成第 1 章
     python3 make_video.py 01 --audio-only   # 只跑 TTS，看看总时长够不够一节课
     python3 make_video.py 01 --check        # 只校验产物是否最新（闸门用）
+    python3 make_video.py 01 --preview      # 从成品转一份 720p 轻量版，便于传阅
 
 画面**从当前 .pptx 现导**（LibreOffice → PDF → PNG），不依赖任何预先存在的图片，
 所以视频永远和课件同版。旁白来自 content/chNN_narration.md，一节对应一页。
 
 产物:
-    DSA_CHNN_*.mp4                 成品
+    DSA_CHNN_*.mp4                 成品（1080p）
+    video/chNN-preview.mp4         轻量版（720p 单声道，--preview 才生成）
     video/chNN.srt                 字幕（每页一条）
     video/chNN.timeline.json       时间轴 + 两个来源文件的 sha256
     content/chNN_narration.md      文末「时间控制表」按实测时长重写
@@ -219,6 +221,23 @@ def concat(paths, out):
          '-movflags', '+faststart', out])
 
 
+def make_preview(src, dst):
+    """从成品转一份 720p 单声道的轻量版。
+
+    成品一章约 50MB，很多渠道（邮件、聊天工具、上传表单）传不动。
+    做成脚本里的一档而不是临时敲一行 ffmpeg：临时命令不可复现，
+    下次想再要一份就得凭记忆重敲，参数一定会漂。
+    画质档位有意选得保守 —— 它只用来看清讲了什么，正式放映用成品。
+    """
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    run(['ffmpeg', '-y', '-i', src,
+         '-vf', 'scale=1280:720:flags=lanczos',
+         '-c:v', 'libx264', '-preset', 'medium', '-crf', '28',
+         '-pix_fmt', 'yuv420p', '-r', '30', '-fps_mode', 'cfr',
+         '-c:a', 'aac', '-ar', '44100', '-ac', '1', '-b:a', '64k',
+         '-movflags', '+faststart', dst])
+
+
 # ---------------------------------------------------------------- 产出
 def write_srt(meta, path):
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -320,6 +339,8 @@ def main():
     ap.add_argument('chapter', help='章号，如 01')
     ap.add_argument('--audio-only', action='store_true', help='只跑 TTS 看总时长')
     ap.add_argument('--check', action='store_true', help='只校验产物是否最新')
+    ap.add_argument('--preview', action='store_true',
+                    help='从成品转一份 720p 轻量版，便于传阅')
     args = ap.parse_args()
 
     ch = args.chapter.zfill(2)
@@ -331,6 +352,16 @@ def main():
     mp4 = HERE / (stem + '.mp4')
     srt = HERE / 'video' / f'ch{ch}.srt'
     timeline = HERE / 'video' / f'ch{ch}.timeline.json'
+
+    if args.preview:
+        if not mp4.exists():
+            sys.exit(f'成品不存在：{mp4.name}。先跑 python3 make_video.py {ch}')
+        preview = HERE / 'video' / f'ch{ch}-preview.mp4'
+        make_preview(mp4, preview)
+        print('输出：%s　%.1f MB（成品 %.1f MB）'
+              % (preview.name, preview.stat().st_size / 1e6,
+                 mp4.stat().st_size / 1e6))
+        return 0
 
     if args.check:
         problems, hints = check(ch, pptx, script, mp4, timeline)
