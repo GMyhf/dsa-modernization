@@ -142,12 +142,18 @@ def read_open_items():
     return "\n".join(rows)
 
 
-def run_verify():
-    """交接闸门。顺序有意为之：先自证工具没坏，再用工具去证内容没坏。"""
-    py_files = sorted(
+def gate_py_files():
+    return sorted(
         str(p.relative_to(ROOT)) for p in ROOT.glob("tools/*.py")
     ) + sorted(str(p.relative_to(ROOT)) for p in ROOT.glob("tests/*.py"))
-    steps = [
+
+
+def verify_steps(py_files=None):
+    """闸门的步骤表。**单独抽出来是为了能被测试读到**：
+    2026-09-05 复核抓到的洞正是「某项检查存在、但没有出现在这张表里」——
+    要防住它复发，用例必须能拿到这张表本身，而不是只能整跑一遍闸门。"""
+    py_files = gate_py_files() if py_files is None else py_files
+    return [
         # 1. 工具自身的单元测试。闸门自己坏了，后面全绿也没有意义。
         ["python3", "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py", "-v"],
         ["python3", "-m", "py_compile", *py_files],
@@ -166,6 +172,11 @@ def run_verify():
         ["python3", "tools/build_slides.py", "--check"],
         # 3c2. 课件的 .pptx 版：同一份课件源的另一种产物（教室里常常只有 PowerPoint）。
         ["python3", "tools/build_pptx.py", "--check"],
+        # 3c3. courseware/ 那一套讲义+课件+视频的自带闸门。它此前完全在主闸门之外：
+        #      2026-09-05 复核发现，给它补的 8 项回归测试在这里一次都不会跑。
+        #      含真调 LibreOffice 逐页量版面的渲染检查（12 章 378 页，实测 33 秒）；
+        #      缺 python-pptx / LibreOffice 的机器上它降级并出声，不判红。
+        ["python3", "tools/check_courseware.py"],
         # 3d. PDF：sidecar 记录全部构建输入的内容哈希，书稿改了而 PDF 没重排就报红。
         ["python3", "tools/build_book_pdf.py", "--check"],
         # 3d2. 扫描件裁图：书稿里每张 assets/scan/ 的图都要能说出「裁自哪一页哪一块」，
@@ -177,6 +188,12 @@ def run_verify():
         # 4. 代码：真编译、真跑、Werror + ASan/UBSan。本项目最硬的一条。
         ["python3", "tools/check_code.py"],
     ]
+
+
+def run_verify():
+    """交接闸门。顺序有意为之：先自证工具没坏，再用工具去证内容没坏。"""
+    py_files = gate_py_files()
+    steps = verify_steps(py_files)
     outputs, ok = [], True
     # 每一步开跑前先喊一声。**这不是装饰**：整个闸门要跑好几分钟，
     # 其中 check_code 一步就占大半（32 个单元 × 2 档 × 最多 3 个可执行文件）。

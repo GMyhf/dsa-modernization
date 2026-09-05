@@ -12,7 +12,8 @@
 
 | 任务 | 内容 | 状态 | 负责人 | 备注 |
 | --- | --- | --- | --- | --- |
-| T-069 | courseware 门禁复核与优化 | Review | Codex | 两处漏检已修：PPTX 包内文件比对、渲染提取退出码与页数检查。8 项独立回归通过，旧实现实测 4 项失败；12 章 378 页非渲染门禁通过。完整验证仍受既有 PDF 过期与本机 ASan 空探针失败阻断，LibreOffice 实际转换失败；详见 NOTES-codex。 |
+| T-069 | courseware 门禁复核与优化 | Done | Codex | 两处漏检已修：PPTX 包内文件比对、渲染提取退出码与页数检查。8 项独立回归通过，旧实现实测 4 项失败；12 章 378 页非渲染门禁通过。完整验证仍受既有 PDF 过期与本机 ASan 空探针失败阻断，LibreOffice 实际转换失败；详见 NOTES-codex。 — Claude 复核（2026-09-05，Linux）：两处修订认可，在本机重跑 8 项自测全过。Codex 报的三处阻断已全部解除：PDF 已重排（536 页 / sha256 3b38eea57d39），ASan 空探针在 Linux 上通过（35/35 单元 × 2 档），LibreOffice 真跑通——12 份 PDF、378 页逐页版面检查全绿。收口条件由 T-070 补齐。 |
+| T-070 | **courseware 的闸门接进主闸门（D-038）** | Done | Claude | 复核 T-069 时抓到的第 4 处、也是本轮最硬的一处：`courseware/verify.py` 的 9 项与 Codex 新补的 8 项回归测试**完全在 `handoff.py --verify` 之外**，`courseware/*.py` 连 `py_compile` 都没进过——「装了却没跑」和「跑过且全绿」在交接记录上都是绿的。新增零依赖包装器 `tools/check_courseware.py` 进第 3c3 步，闸门 13 → 14 步；渲染检查默认就跑（实测 378 页 33 秒，同一条闸门里 `check_code` 要 129 秒）；缺件时降级但必须出声，`--require` 不接受降级。`verify_steps()` 从 `run_verify()` 里抽出来，好让用例读得到步骤表本身——这次的洞正是「检查存在、但不在表里」。8 项新自测，4 条变异自检全红（步骤表里删掉这一步 / 降级时不吭声 / 渲染改回默认不跑 / 缺 LibreOffice 时闷声跳过）。顺带修掉两处随 PDF 一起过期的数字：README 与网页版下载卡片都还停在 526 页。 |
 
 > ✅ **2026-08-12 全项目收口**：闸门退出码 0——61 项工具自测、台账 104/105 + 1 退场
 > + 0 待办、书稿 11 个文件、**19/19 单元双构建**（Debug+ASan/UBSan 与 Release-O2）。
@@ -142,6 +143,7 @@
 | D-034 | 2026-09-04 | 原书扫描件是「原文逐字怎么写」的出处（书页 = PDF 页 − 14，`tools/pdfref.py`）；编辑方针为尽量保留原书正确的内容与文字；正文保全度以棘轮方式进闸门（`tools/fidelity.py`，只在掉下去时判红） | **人** |
 | D-035 | 2026-09-04 | 书稿里我们自己合成过的插图一律改为从扫描件直接裁，裁法（书页 + 裁剪框 + dpi）登记在 `collab/figures_scan.json`，`figcrop.py --check` 核对哈希进闸门 | Claude 记录 |
 | D-037 | 2026-09-04 | 课件再出一份 `.pptx` 产物（`tools/pptx_writer.py` + `build_pptx.py`，纯标准库手写 OOXML，不引入 python-pptx）；事实源仍是 `book/slides/*.md`；投影没有滚动条，一页装不下就拆「…（续）」而不是溢出 | **人**（提出）/ Claude 记录 |
+| D-038 | 2026-09-05 | `courseware/` 的自带闸门接进主闸门第 3c3 步（`tools/check_courseware.py`，零依赖包装器）；渲染检查默认就跑（378 页 33 秒）；缺 python-pptx / LibreOffice 时降级退 0 但**必须打印「降级」**，`--require` 不接受降级 | Claude 记录 |
 | D-036 | 2026-09-04 | 学生 PDF 不收录 `book/插图.md`：正文的图已是扫描件裁图，图册再进来等于每张图印两遍（526 页 7.4MB ← 636 页 13.5MB）；图册留在仓库与网页版，仍归 `collect_figures.py --check` 核 | **人**（提出）/ Claude 记录 |
 | D-031 | 2026-08-20 | README「现状」的每个数字由 `tests/test_readme.py` 现场核算，手抄即红（代价：加测试要顺手改 README） | Claude（复核回应） |
 | D-030 | 2026-08-19 | 反向覆盖：课件每一页都要有出处（新增 R17 + `slide_coverage.json` 的 `pages` 表）；守孤儿页，不守正文厚度 | Claude 记录 |
