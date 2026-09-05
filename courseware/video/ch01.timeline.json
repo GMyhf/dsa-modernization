@@ -1,9 +1,9 @@
 {
   "voice": "zh-CN-YunyangNeural",
   "rate": "+0%",
-  "total": "28:57",
-  "source_pptx_sha256": "40985e23226e0c998d95adbce052ad3349b54bf1802b7c18b656d76c894af340",
-  "source_script_sha256": "8d6c96618d6ced41bdba724d4d4b6155e728841dc71a1367183800383542f56c",
+  "total": "29:04",
+  "source_pptx_sha256": "3405ae7e93e0413ca37fe9bde2f5b0bd41c790aba814ab96692639477f3f990c",
+  "source_script_sha256": "0c3a419ed5ef84b6bce931833975443c7540ce9505eb6ca32a59f720e4e6c205",
   "sections": [
     {
       "page": 1,
@@ -377,9 +377,9 @@
       "page": 47,
       "title": "习题",
       "start": "28:05",
-      "end": "28:57",
-      "seconds": 51.5,
-      "chars": 261
+      "end": "29:04",
+      "seconds": 58.8,
+      "chars": 305
     }
   ]
 }

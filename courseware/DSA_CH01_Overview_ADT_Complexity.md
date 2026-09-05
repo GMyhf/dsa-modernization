@@ -18,12 +18,19 @@ https://github.com/GMyhf/dsa-modernization
 | 类型 | 位置 |
 | --- | --- |
 | 课件（47 页，16:9） | [`DSA_CH01_Overview_ADT_Complexity.pptx`](DSA_CH01_Overview_ADT_Complexity.pptx) |
+| 视频（720p 轻量版） | [`video/ch01-preview.mp4`](video/ch01-preview.mp4) |
 | 书稿正文 | [`../book/ch01-adt.md`](../book/ch01-adt.md) |
 | 正文示例代码 | [`../code/ch01/adt/`](../code/ch01/adt/)（`modern.hpp` / `demo.cpp` / `test.cpp`） |
 | 上机题参考实现 | [`code/ch01/`](code/ch01/)（`partition_count.cpp` / `complex_adt.cpp`） |
 
-本讲义里的每一段 C++ 都摘自上面两个目录，都在 `-std=c++17 -Wall -Wextra -Werror`
-下编译通过并真的跑过。
+> **讲义里的 ```cpp 块是摘录，不是可直接编译的完整文件。** 为了讲解，
+> 它们删掉了文档注释、用 `// ...` 略去了与本处无关的部分。
+> **未删减的原件在上面那些代码目录里**，由 `tools/check_code.py` 在
+> `-Werror` + ASan/UBSan 与 `-O2` 两档下真编译、真运行。
+> 引用**原书**代码的地方一律标成 ```text —— 那些清单编译不过，所以不在 `code/` 里
+> （与 `book/` 的 R8 同一条口径）。
+> `courseware/verify.py` 第 9 项会逐块核对：每个 ```cpp 块的有效代码行必须多数能在
+> `code/` 或 `courseware/code/` 里找到，凭空写的代码会让闸门变红。
 
 ---
 
@@ -477,7 +484,7 @@ public:
    元素类型在编译期就定了，彼此之间根本不需要互相替换；这个基类从头到尾没有一处用到。
 2. **它还会引入一个陷阱。** 只要基类的析构函数不是 `virtual` 的，一旦有人写出
 
-   ```cpp
+   ```text
    List<int>* p = new ArrayList<int>;
    delete p;                              // 未定义行为
    ```
@@ -673,7 +680,7 @@ $$c_1 g(n) \le f(n) \le c_2 g(n)$$
 
 **（一）单层循环 —— $O(n)$**
 
-```cpp
+```text
 for (i = sum = 0; i < n; i++)    // 循环开始前 2 次赋值：i、sum
     sum += a[i];                 // 每轮 2 次赋值：sum、i
 ```
@@ -683,7 +690,7 @@ for (i = sum = 0; i < n; i++)    // 循环开始前 2 次赋值：i、sum
 
 **（二）嵌套循环 —— $O(n^2)$**
 
-```cpp
+```text
 for (i = 0; i < n; i++) {                        // 循环前 1 次：i
     for (j = 1, sum = a[0]; j <= i; j++)         // 每轮外层 3 次：i、j、sum
         sum += a[j];                             // 内层每轮 2 次，共执行 i 次
@@ -695,7 +702,7 @@ $$1 + 3n + \sum_{i=1}^{n-1} 2i = 1 + 3n + 2(1 + 2 + \cdots + n - 1) = 1 + 3n + n
 
 **（三）嵌套 $\ne$ 平方 —— 仍是 $O(n)$**
 
-```cpp
+```text
 for (i = 4; i < n; i++)                           // 外层 n - 4 次
     for (j = i - 3, sum = a[i - 4]; j <= i; j++)  // 内层恒定 4 次，与 i 无关
         sum += a[j];                              // 每个 i 合计 8 次赋值
@@ -833,6 +840,11 @@ $$C_{\mathrm{avg}} = \sum_{i} p(\mathrm{input}_i)\,\mathrm{steps}(\mathrm{input}
 ---
 
 ## 习题与参考答案
+
+> **本节是选讲，不是全集。** 这里收的是补充题、正文习题与上机题中挑出来讲的一部分；
+> **原书全部 345 道习题与上机题的参考答案，在 [`../book/习题与参考答案.md`](../book/习题与参考答案.md)。**
+> 那份文件由 `tools/check_doc.py` 的 R14 逐题守着 —— 每一道正文题都必须有同号答案，
+> 否则闸门变红。（闸门只验「有没有同号答案」，不验答案内容是否正确。）
 
 ### 补充证明练习
 

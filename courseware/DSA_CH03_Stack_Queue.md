@@ -21,6 +21,15 @@ https://github.com/GMyhf/dsa-modernization
 | 书稿正文 | [`../book/ch03-stack.md`](../book/ch03-stack.md) |
 | 代码 | [`../code/ch03/`](../code/ch03/)：`array_stack`、`linked_stack`、`expression_eval`、`recursion_and_stack`、`knapsack`、`queue`、`monotonic_stack` |
 
+> **讲义里的 ```cpp 块是摘录，不是可直接编译的完整文件。** 为了讲解，
+> 它们删掉了文档注释、用 `// ...` 略去了与本处无关的部分。
+> **未删减的原件在上面那些代码目录里**，由 `tools/check_code.py` 在
+> `-Werror` + ASan/UBSan 与 `-O2` 两档下真编译、真运行。
+> 引用**原书**代码的地方一律标成 ```text —— 那些清单编译不过，所以不在 `code/` 里
+> （与 `book/` 的 R8 同一条口径）。
+> `courseware/verify.py` 第 9 项会逐块核对：每个 ```cpp 块的有效代码行必须多数能在
+> `code/` 或 `courseware/code/` 里找到，凭空写的代码会让闸门变红。
+
 ---
 
 ## 本章要回答三个问题
@@ -424,6 +433,11 @@ C++ 标准库有 `std::deque`，`std::stack` 与 `std::queue` 默认都由它实
 ---
 
 ## 习题与参考答案
+
+> **本节是选讲，不是全集。** 这里收的是补充题、正文习题与上机题中挑出来讲的一部分；
+> **原书全部 345 道习题与上机题的参考答案，在 [`../book/习题与参考答案.md`](../book/习题与参考答案.md)。**
+> 那份文件由 `tools/check_doc.py` 的 R14 逐题守着 —— 每一道正文题都必须有同号答案，
+> 否则闸门变红。（闸门只验「有没有同号答案」，不验答案内容是否正确。）
 
 ### 补充算法设计题
 

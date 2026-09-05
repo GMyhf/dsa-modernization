@@ -19,6 +19,8 @@
             PDF 已嵌入中文字体（--render）
   8 视频    有旁白讲稿的章：讲稿一页一节、与课件页数相等；时间轴记录的来源摘要
             仍等于当前的课件与讲稿（即视频没过期）；字幕条数与页数一致
+  9 代码出处  讲义里每个 ```cpp 块的有效代码行，多数必须能在 code/ 或
+            courseware/code/ 里逐行找到 —— 凭空写的代码会红
 
 ⚠️ 第 6 项的存在理由：`**强调**` 与 `` `等宽` `` 是给排版引擎看的标记，不是内容。
    漏掉一层解析，它们就原样印在投影幕上；人眼对一个反引号极不敏感，
@@ -264,6 +266,71 @@ def check_markup(chapters, modules):
                          f'content/ch{ch}.py 的条目以空白开头：{raw!r}')
 
 
+# ---------------------------------------------------------------- 9 代码出处
+# 讲义里的 ```cpp 块是**摘录**：删了文档注释、用 `// ...` 略去了无关部分，
+# 所以不能像 book/ 的 R3 那样要求逐字节相同。但「摘录」和「凭空写」必须分得开 ——
+# 否则「讲义里的代码都来自真编译过的实现」就只是一句无人核对的话。
+#
+# ⚠️ 这一项是被自己的一次过度声明逼出来的：讲义原本写着「每一段 C++ 都摘自代码目录，
+#    都在 -Werror 下编译通过并真的跑过」。一量才发现 32 个块里只有 1 个逐字命中，
+#    而且有 4 个根本是**原书**代码的引用（编译不过，本就不该标成 cpp）。
+#    现在原书引用一律标 ```text（同 book/ 的 R8），```cpp 则由这一项按行核对。
+CODE_ORIGIN_RATIO = 0.60      # 有效行的最低命中比例
+
+
+def _code_only(line):
+    """去掉行尾注释与首尾空白 —— 比对的是**代码**，不是讲义自己写的注解。
+
+    讲义给每一行加教学注释正是它存在的理由，要求注释也逐字相同是本末倒置；
+    但代码本身必须真的来自 code/。所以这里只剥注释，不放宽代码。
+    """
+    s = line.split('//', 1)[0].strip()
+    return s
+
+
+def _significant(line):
+    s = _code_only(line)
+    return s not in ('', '{', '}', '};', '});') and len(s) > 3
+
+
+def check_code_origin(chapters):
+    pool = set()
+    for root in (HERE.parent / 'code', HERE / 'code'):
+        if not root.is_dir():
+            continue
+        for f in list(root.rglob('*.hpp')) + list(root.rglob('*.cpp')):
+            for line in f.read_text(encoding='utf-8', errors='replace').split('\n'):
+                stripped = _code_only(line)
+                if stripped:
+                    pool.add(stripped)
+    if not pool:
+        fail('9 代码出处', '找不到 code/ 与 courseware/code/，无法核对出处')
+        return
+
+    blocks = worst = 0
+    worst_at = ''
+    for ch in chapters:
+        md_path = HERE / (build_all.CHAPTERS[ch] + '.md')
+        if not md_path.is_file():
+            continue
+        text = md_path.read_text(encoding='utf-8')
+        for i, block in enumerate(re.findall(r'```cpp\n(.*?)```', text, re.S), 1):
+            lines = [_code_only(l) for l in block.split('\n') if _significant(l)]
+            if not lines:
+                continue
+            blocks += 1
+            hit = sum(1 for l in lines if l in pool)
+            ratio = hit / len(lines)
+            if ratio < CODE_ORIGIN_RATIO:
+                fail('9 代码出处',
+                     f'{md_path.name} 第 {i} 个 ```cpp 块只有 {hit}/{len(lines)} '
+                     f'行能在 code/ 里找到（{ratio:.0%} < {CODE_ORIGIN_RATIO:.0%}）：'
+                     f'{lines[0][:48]!r}。引用原书代码请标 ```text')
+            if blocks == 1 or ratio < worst:
+                worst, worst_at = ratio, f'{md_path.name} 第 {i} 块'
+    note(f'代码出处：{blocks} 个 ```cpp 块逐行核对，最低命中率 {worst:.0%}（{worst_at}）')
+
+
 # ---------------------------------------------------------------- 7 渲染
 BODY_BOTTOM_PT = (1.42 + 5.32) * 72          # 版心底 = 485.28pt（540pt 版面）
 FOOTER_TEXT_TOP_PT = 496.0                   # 页脚文本实测顶端，比文本框理论值略高
@@ -458,6 +525,7 @@ def main():
     check_regenerate(chapters, modules)
     check_markup(chapters, modules)
     check_video(chapters, modules)
+    check_code_origin(chapters)
     if args.render:
         check_render(chapters)
 
