@@ -1,0 +1,385 @@
+{
+  "voice": "zh-CN-YunyangNeural",
+  "rate": "+0%",
+  "total": "28:57",
+  "source_pptx_sha256": "6ada28a360ae3e64dd25810ab6cdff0de8c12f89a48b525c2ae0459004e7fc02",
+  "source_script_sha256": "8d6c96618d6ced41bdba724d4d4b6155e728841dc71a1367183800383542f56c",
+  "sections": [
+    {
+      "page": 1,
+      "title": "封面",
+      "start": "00:00",
+      "end": "00:34",
+      "seconds": 34.0,
+      "chars": 169
+    },
+    {
+      "page": 2,
+      "title": "本章要回答四个问题",
+      "start": "00:34",
+      "end": "01:14",
+      "seconds": 39.5,
+      "chars": 190
+    },
+    {
+      "page": 3,
+      "title": "本章的一句话",
+      "start": "01:14",
+      "end": "01:31",
+      "seconds": 17.6,
+      "chars": 79
+    },
+    {
+      "page": 4,
+      "title": "第 1 节　1.1 问题求解",
+      "start": "01:31",
+      "end": "01:39",
+      "seconds": 8.1,
+      "chars": 34
+    },
+    {
+      "page": 5,
+      "title": "1.1.1 问题描述：股市的传言",
+      "start": "01:39",
+      "end": "02:20",
+      "seconds": 40.4,
+      "chars": 200
+    },
+    {
+      "page": 6,
+      "title": "图 1.1 经纪人间的消息传递图",
+      "start": "02:20",
+      "end": "02:47",
+      "seconds": 27.6,
+      "chars": 130
+    },
+    {
+      "page": 7,
+      "title": "1.1.2 抽象：顶点 + 有向带权边",
+      "start": "02:47",
+      "end": "03:09",
+      "seconds": 21.3,
+      "chars": 108
+    },
+    {
+      "page": 8,
+      "title": "图 1.2 相邻矩阵",
+      "start": "03:09",
+      "end": "03:40",
+      "seconds": 31.2,
+      "chars": 157
+    },
+    {
+      "page": 9,
+      "title": "解法拆成三步",
+      "start": "03:40",
+      "end": "04:20",
+      "seconds": 39.8,
+      "chars": 219
+    },
+    {
+      "page": 10,
+      "title": "为什么取「最慢的一项」",
+      "start": "04:20",
+      "end": "04:42",
+      "seconds": 22.3,
+      "chars": 116
+    },
+    {
+      "page": 11,
+      "title": "把每个人都当一次起点",
+      "start": "04:42",
+      "end": "05:07",
+      "seconds": 25.3,
+      "chars": 119
+    },
+    {
+      "page": 12,
+      "title": "1.1.3 用起来：demo.cpp",
+      "start": "05:07",
+      "end": "05:38",
+      "seconds": 30.8,
+      "chars": 165
+    },
+    {
+      "page": 13,
+      "title": "模型：RumorNetwork 的对外接口",
+      "start": "05:38",
+      "end": "06:23",
+      "seconds": 45.1,
+      "chars": 242
+    },
+    {
+      "page": 14,
+      "title": "Floyd：三重循环到底在循环什么",
+      "start": "06:23",
+      "end": "07:16",
+      "seconds": 52.6,
+      "chars": 286
+    },
+    {
+      "page": 15,
+      "title": "选答案：每行取最大，再在其中取最小",
+      "start": "07:16",
+      "end": "07:55",
+      "seconds": 39.3,
+      "chars": 192
+    },
+    {
+      "page": 16,
+      "title": "「可能没有答案」怎么返回",
+      "start": "07:55",
+      "end": "08:40",
+      "seconds": 44.6,
+      "chars": 245
+    },
+    {
+      "page": 17,
+      "title": "编译并运行",
+      "start": "08:40",
+      "end": "09:00",
+      "seconds": 20.4,
+      "chars": 97
+    },
+    {
+      "page": 18,
+      "title": "第 2 节　1.2 数据结构",
+      "start": "09:00",
+      "end": "09:08",
+      "seconds": 7.4,
+      "chars": 27
+    },
+    {
+      "page": 19,
+      "title": "数据结构是三件事",
+      "start": "09:08",
+      "end": "09:25",
+      "seconds": 17.4,
+      "chars": 80
+    },
+    {
+      "page": 20,
+      "title": "1.2.1 逻辑结构：二元组 B = (K, R)",
+      "start": "09:25",
+      "end": "10:22",
+      "seconds": 57.5,
+      "chars": 292
+    },
+    {
+      "page": 21,
+      "title": "按关系的性质，逻辑结构分三类",
+      "start": "10:22",
+      "end": "11:04",
+      "seconds": 41.9,
+      "chars": 204
+    },
+    {
+      "page": 22,
+      "title": "1.2.2 存储结构：四种基本映射方法",
+      "start": "11:04",
+      "end": "12:10",
+      "seconds": 65.4,
+      "chars": 315
+    },
+    {
+      "page": 23,
+      "title": "索引：上下两行的错位就是它的全部意义",
+      "start": "12:10",
+      "end": "13:05",
+      "seconds": 54.9,
+      "chars": 254
+    },
+    {
+      "page": 24,
+      "title": "为什么索引函数不是数组那样的线性函数",
+      "start": "13:05",
+      "end": "13:31",
+      "seconds": 26.6,
+      "chars": 131
+    },
+    {
+      "page": 25,
+      "title": "1.2.3 抽象数据类型 ADT",
+      "start": "13:31",
+      "end": "14:21",
+      "seconds": 50.2,
+      "chars": 254
+    },
+    {
+      "page": 26,
+      "title": "ADT 的写法与原书的空模板",
+      "start": "14:21",
+      "end": "14:50",
+      "seconds": 28.5,
+      "chars": 143
+    },
+    {
+      "page": 27,
+      "title": "本书的一处改动：不写抽象基类",
+      "start": "14:50",
+      "end": "15:55",
+      "seconds": 64.9,
+      "chars": 328
+    },
+    {
+      "page": 28,
+      "title": "第 3 节　1.3 算法",
+      "start": "15:55",
+      "end": "16:02",
+      "seconds": 7.4,
+      "chars": 25
+    },
+    {
+      "page": 29,
+      "title": "1.3.1 算法的四条性质",
+      "start": "16:02",
+      "end": "16:47",
+      "seconds": 44.6,
+      "chars": 210
+    },
+    {
+      "page": 30,
+      "title": "1.3.2 六种算法设计方法",
+      "start": "16:47",
+      "end": "18:06",
+      "seconds": 79.5,
+      "chars": 407
+    },
+    {
+      "page": 31,
+      "title": "第 4 节　1.4 算法分析",
+      "start": "18:06",
+      "end": "18:15",
+      "seconds": 8.4,
+      "chars": 33
+    },
+    {
+      "page": 32,
+      "title": "为什么不能拿秒来衡量算法",
+      "start": "18:15",
+      "end": "19:03",
+      "seconds": 47.9,
+      "chars": 239
+    },
+    {
+      "page": 33,
+      "title": "1.4.1 渐进分析：只留增长最快的那一项",
+      "start": "19:03",
+      "end": "19:42",
+      "seconds": 39.0,
+      "chars": 202
+    },
+    {
+      "page": 34,
+      "title": "大 O 表示法",
+      "start": "19:42",
+      "end": "20:35",
+      "seconds": 53.0,
+      "chars": 306
+    },
+    {
+      "page": 35,
+      "title": "常见增长率：n 稍大就是天文数字",
+      "start": "20:35",
+      "end": "21:19",
+      "seconds": 44.6,
+      "chars": 233
+    },
+    {
+      "page": 36,
+      "title": "图 1.5 常用函数的增长趋势",
+      "start": "21:19",
+      "end": "21:40",
+      "seconds": 20.4,
+      "chars": 94
+    },
+    {
+      "page": 37,
+      "title": "Ω 与 Θ：下限，以及上下限同阶",
+      "start": "21:40",
+      "end": "22:24",
+      "seconds": 44.9,
+      "chars": 241
+    },
+    {
+      "page": 38,
+      "title": "数一数赋值操作（一）",
+      "start": "22:24",
+      "end": "22:41",
+      "seconds": 16.9,
+      "chars": 79
+    },
+    {
+      "page": 39,
+      "title": "数一数赋值操作（二）：嵌套循环",
+      "start": "22:41",
+      "end": "23:11",
+      "seconds": 29.2,
+      "chars": 150
+    },
+    {
+      "page": 40,
+      "title": "数一数赋值操作（三）：嵌套不等于平方",
+      "start": "23:11",
+      "end": "23:42",
+      "seconds": 31.1,
+      "chars": 152
+    },
+    {
+      "page": 41,
+      "title": "1.4.2 最佳、最差与平均",
+      "start": "23:42",
+      "end": "24:29",
+      "seconds": 47.2,
+      "chars": 243
+    },
+    {
+      "page": 42,
+      "title": "那该看哪一种情况",
+      "start": "24:29",
+      "end": "25:13",
+      "seconds": 44.1,
+      "chars": 231
+    },
+    {
+      "page": 43,
+      "title": "算法分析的第一条纪律",
+      "start": "25:13",
+      "end": "25:22",
+      "seconds": 9.4,
+      "chars": 43
+    },
+    {
+      "page": 44,
+      "title": "1.4.3 时间和空间的折衷",
+      "start": "25:22",
+      "end": "26:15",
+      "seconds": 52.2,
+      "chars": 254
+    },
+    {
+      "page": 45,
+      "title": "1.4.4 选数据结构的四条原则",
+      "start": "26:15",
+      "end": "27:10",
+      "seconds": 55.5,
+      "chars": 273
+    },
+    {
+      "page": 46,
+      "title": "本章小结",
+      "start": "27:10",
+      "end": "28:05",
+      "seconds": 55.0,
+      "chars": 250
+    },
+    {
+      "page": 47,
+      "title": "习题",
+      "start": "28:05",
+      "end": "28:57",
+      "seconds": 51.5,
+      "chars": 261
+    }
+  ]
+}

@@ -12,8 +12,10 @@ https://github.com/GMyhf/dsa-modernization
 | --- | --- | --- |
 | `*.md` 讲义 | 课后阅读、作业参考 | 完整正文、可运行代码、习题与参考答案 |
 | `*.pptx` 课件 | 课堂放映 | 只保留主干、关键代码与原书插图，16:9 版面 |
+| `*.mp4` 视频 | 课前预习、补课、异步学习 | 课件画面 + 逐页旁白，1920×1080，带字幕文件 |
 
-> 讲义与课件是一套东西，因此放在同一目录、成对维护：改讲义时顺手核对同名课件。
+> 三者是一套东西，因此放在同一目录、同名维护：改讲义时顺手核对同名课件，
+> 课件或讲稿改了就重新合成视频（闸门第 8 项会盯着这件事）。
 
 **与 `book/slides/` 的关系**：那一套是从书稿自动抽取的放映稿，
 覆盖全书 12 章、由 `tools/build_slides.py` 生成；本目录是**另起一套**、
@@ -25,9 +27,9 @@ https://github.com/GMyhf/dsa-modernization
 
 每章一行，`.md` 与 `.pptx` 同名。
 
-| 章 | 文件名（`.md` / `.pptx` 同名） | 课件页数 | 主题 |
-| --- | --- | --- | --- |
-| 1 | `DSA_CH01_Overview_ADT_Complexity` | 47 | 问题求解与 Floyd、逻辑/存储结构、抽象数据类型、渐进分析 |
+| 章 | 文件名（`.md` / `.pptx` / `.mp4` 同名） | 课件页数 | 视频时长 | 主题 |
+| --- | --- | --- | --- | --- |
+| 1 | `DSA_CH01_Overview_ADT_Complexity` | 47 | 28:57 | 问题求解与 Floyd、逻辑/存储结构、抽象数据类型、渐进分析 |
 
 尚未编写：第 2–12 章。章号与输出文件名的对照表在
 [`build_all.py`](build_all.py) 的 `CHAPTERS` 里。
@@ -43,12 +45,18 @@ https://github.com/GMyhf/dsa-modernization
 ```
 courseware/
 ├── DSA_CHNN_*.md        # 讲义（手写维护）
-├── DSA_CHNN_*.pptx      # 课件（由下面的脚本生成）
+├── DSA_CHNN_*.pptx      # 课件（由 build_all.py 生成）
+├── DSA_CHNN_*.mp4       # 视频（由 make_video.py 合成，**不入库**）
 ├── deck.py              # 排版引擎：主题配色、版面构件、自适应字号
-├── build_all.py         # 生成入口
-├── verify.py            # 闸门：配对 / 元数据 / 资源 / 编译 / 可重生成 / 版面 / 渲染
+├── build_all.py         # 课件生成入口
+├── make_video.py        # 视频合成入口
+├── verify.py            # 闸门 8 项
 ├── content/
-│   └── ch01.py          # 第 1 章课件的内容（META + SLIDES）
+│   ├── ch01.py             # 第 1 章课件的内容（META + SLIDES）
+│   └── ch01_narration.md   # 第 1 章的逐页旁白讲稿（手写维护）
+├── video/
+│   ├── ch01.srt            # 字幕（每页一条）
+│   └── ch01.timeline.json  # 时间轴 + 课件与讲稿的 sha256
 └── code/ch01/           # 讲义里上机题的参考实现（真编译、真运行）
 ```
 
@@ -56,11 +64,12 @@ courseware/
 讲义 `.md` 是手写维护的，与 `content/` 无生成关系；两者内容需人工保持一致，
 `verify.py` 只保证「源与产物一致」，保证不了「讲义与课件说的是同一件事」。
 
-**环境**：`python-pptx`（读图片尺寸还要 `Pillow`）。这是本仓库里
+**环境**：`python-pptx`（读图片尺寸还要 `Pillow`）；合成视频另需
+`edge-tts`、`ffmpeg`、`libreoffice`、`poppler-utils`。这是本仓库里
 **唯一**允许第三方依赖的目录 —— `tools/` 与 `code/` 仍然是纯标准库。
 
 ```bash
-pip install python-pptx Pillow
+pip install python-pptx Pillow edge-tts
 ```
 
 **生成**：
@@ -73,7 +82,35 @@ python3 build_all.py 01        # 只重新生成第 1 章
 
 ---
 
-## 3 修改内容
+## 3 视频
+
+```bash
+python3 make_video.py 01                # 合成第 1 章
+python3 make_video.py 01 --audio-only   # 只跑 TTS，先看总时长够不够一节课
+python3 make_video.py 01 --check        # 只校验产物是否最新（闸门第 8 项）
+```
+
+流程：`content/chNN_narration.md` 逐页送进 edge-tts 得到旁白 → 从**当前**
+`.pptx` 现导逐页 PNG（LibreOffice → PDF → `pdftoppm`）→ ffmpeg 把「一张静帧 +
+一段旁白」合成一个片段 → 拼接并做响度归一化（`loudnorm I=-16`）。
+
+因为画面是现导的，视频永远和课件同版；`video/chNN.timeline.json` 记下课件与讲稿的
+sha256，任何一边改了而没重新合成，闸门第 8 项就会报「视频过期」。
+
+**讲稿是手写的，时间控制表是机器写的。** 讲稿文末的
+「附：时间控制表」由 `make_video.py` 按实测时长重写，不要手改。
+
+⚠️ **成品 `.mp4` 不入库**（一章约 50 MB，而且每次重建整个文件都变，
+与仓库根目录不收 26 MB 扫描件同一个道理）。入库的是讲稿、字幕和时间轴，
+所以任何人都能重建出同一份。视频缺席时闸门只提示、不判红。
+
+语音默认 `zh-CN-YunyangNeural`、语速 `+0%`，用环境变量 `TTS_VOICE` / `TTS_RATE` 改。
+旁白**按讲稿文本的哈希缓存**：改了哪一页就只重合成哪一页；
+如果按「文件在就复用」判断，改了词却照旧用旧音频，视频和讲稿从此对不上且不会报错。
+
+---
+
+## 4 修改内容
 
 编辑 `content/chNN.py` 中的 `SLIDES` 列表即可，无需碰排版代码。
 每张幻灯片是一个元组：
@@ -97,7 +134,7 @@ python3 build_all.py 01        # 只重新生成第 1 章
 
 ---
 
-## 4 质量检查
+## 5 质量检查
 
 ```bash
 python3 verify.py            # 第 1–6 项，几秒
@@ -112,7 +149,8 @@ python3 verify.py --render   # 加第 7 项渲染检查（需 libreoffice + popp
 | 4 | 代码 | `courseware/code/` 下每个 `.cpp` 在 `-Werror` 下真编译、真运行 |
 | 5 | 可重生成 | `.pptx` 是不是当前 `content/` 的产物；页数与本文件的表格一致 |
 | 6 | 版面标记 | 放映稿上有没有印出 `**` 或反引号；条目有没有以空白开头 |
-| 7 | 渲染 | 逐页文字有没有越出版心、侵入页脚；PDF 有没有嵌入中文字体 |
+| 7 | 渲染 | 逐页文字有没有越出版心、侵入页脚、压在一起；PDF 有没有嵌入中文字体 |
+| 8 | 视频 | 讲稿是不是一页一节；时间轴记的来源摘要还对不对得上（视频过没过期） |
 
 第 5、6 项是这套东西最容易悄悄坏掉的地方：
 

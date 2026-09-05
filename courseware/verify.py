@@ -17,6 +17,8 @@
   6 版面标记  放映稿的非等宽文字里不得印出 `**` 或反引号；条目不得以空白开头
   7 渲染    逐页检查文字未越出版心、未侵入页脚、**没有两段文字压在一起**；
             PDF 已嵌入中文字体（--render）
+  8 视频    有旁白讲稿的章：讲稿一页一节、与课件页数相等；时间轴记录的来源摘要
+            仍等于当前的课件与讲稿（即视频没过期）；字幕条数与页数一致
 
 ⚠️ 第 6 项的存在理由：`**强调**` 与 `` `等宽` `` 是给排版引擎看的标记，不是内容。
    漏掉一层解析，它们就原样印在投影幕上；人眼对一个反引号极不敏感，
@@ -27,6 +29,7 @@
 
 import argparse
 import ast
+import json
 import re
 import subprocess
 import sys
@@ -39,6 +42,7 @@ sys.path.insert(0, str(HERE / 'content'))
 
 import build_all                                    # noqa: E402
 import deck                                         # noqa: E402
+import make_video                                   # noqa: E402
 from pptx import Presentation                       # noqa: E402
 from pptx.oxml.ns import qn                         # noqa: E402
 
@@ -373,6 +377,45 @@ def check_render(chapters):
         note(f'渲染检查：{len(pdfs)} 份 PDF，共 {total} 页')
 
 
+# ---------------------------------------------------------------- 8 视频
+def check_video(chapters, modules):
+    """视频本身不入库（一章约 50MB），所以这里查的是**能不能重建出同一份**：
+    讲稿与课件一页一节，时间轴记的来源摘要还对得上。"""
+    for ch in chapters:
+        stem = build_all.CHAPTERS[ch]
+        script = HERE / 'content' / f'ch{ch}_narration.md'
+        if not script.exists():
+            note(f'第{ch}章没有旁白讲稿，跳过视频检查')
+            continue
+        pptx = HERE / (stem + '.pptx')
+        pages = len(modules[ch].SLIDES) + 1        # 首页封面由 deck.build 补
+        body = make_video.narration_body(script)
+        found = make_video.SECTION.findall(body)
+        if len(found) != pages:
+            fail('8 视频', f'第{ch}章讲稿 {len(found)} 节，课件 {pages} 页 —— 一页一节，对不上')
+            continue
+        numbers = [int(n) for n, _ in found]
+        if numbers != list(range(1, pages + 1)):
+            fail('8 视频', f'第{ch}章讲稿的页号不是从 1 连续到 {pages}')
+            continue
+        timeline = HERE / 'video' / f'ch{ch}.timeline.json'
+        mp4 = HERE / (stem + '.mp4')
+        problems, hints = make_video.check(ch, pptx, script, mp4, timeline)
+        for prob in problems:
+            fail('8 视频', prob)
+        for hint in hints:
+            note(hint)
+        srt = HERE / 'video' / f'ch{ch}.srt'
+        if not srt.exists():
+            fail('8 视频', f'第{ch}章缺字幕 video/ch{ch}.srt')
+        elif len(re.findall(r'^\d+$', srt.read_text(encoding='utf-8'), re.M)) != pages:
+            fail('8 视频', f'第{ch}章字幕条数与课件页数不一致')
+        if not problems:
+            tl = json.loads(timeline.read_text(encoding='utf-8'))
+            note(f'第{ch}章视频 {pages} 页、总时长 {tl["total"]}，'
+                 f'与课件和讲稿同版（{tl["voice"]} {tl["rate"]}）')
+
+
 # ---------------------------------------------------------------- 入口
 def main():
     ap = argparse.ArgumentParser()
@@ -391,6 +434,7 @@ def main():
     check_code(chapters)
     check_regenerate(chapters, modules)
     check_markup(chapters, modules)
+    check_video(chapters, modules)
     if args.render:
         check_render(chapters)
 
