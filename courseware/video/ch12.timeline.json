@@ -1,0 +1,233 @@
+{
+  "voice": "zh-CN-YunyangNeural",
+  "rate": "+0%",
+  "total": "21:11",
+  "source_pptx_sha256": "8f2d6196fe2c46d51aa3d0ed0d0091581f63617e7eb018743393e8bf962c094f",
+  "source_script_sha256": "f0b7b893f586036c98d88a28d2a959457fdc596af8d8b6b456cc359b5311b378",
+  "sections": [
+    {
+      "page": 1,
+      "title": "封面",
+      "start": "00:00",
+      "end": "00:19",
+      "seconds": 19.0,
+      "chars": 95
+    },
+    {
+      "page": 2,
+      "title": "本章是四条独立的线",
+      "start": "00:19",
+      "end": "00:50",
+      "seconds": 31.0,
+      "chars": 159
+    },
+    {
+      "page": 3,
+      "title": "第 1 节　12.1 多维数组",
+      "start": "00:50",
+      "end": "00:54",
+      "seconds": 3.6,
+      "chars": 9
+    },
+    {
+      "page": 4,
+      "title": "12.1.1 多维数组的存储",
+      "start": "00:54",
+      "end": "01:46",
+      "seconds": 52.3,
+      "chars": 261
+    },
+    {
+      "page": 5,
+      "title": "地址公式：一个具体的例子",
+      "start": "01:46",
+      "end": "02:29",
+      "seconds": 42.8,
+      "chars": 205
+    },
+    {
+      "page": 6,
+      "title": "怎么验证「行优先 vs 列优先」写对了",
+      "start": "02:29",
+      "end": "03:22",
+      "seconds": 53.2,
+      "chars": 245
+    },
+    {
+      "page": 7,
+      "title": "12.1.2 特殊矩阵",
+      "start": "03:22",
+      "end": "04:11",
+      "seconds": 48.8,
+      "chars": 269
+    },
+    {
+      "page": 8,
+      "title": "12.1.3 稀疏矩阵",
+      "start": "04:11",
+      "end": "04:56",
+      "seconds": 45.7,
+      "chars": 221
+    },
+    {
+      "page": 9,
+      "title": "三种存法的代价",
+      "start": "04:56",
+      "end": "05:48",
+      "seconds": 51.5,
+      "chars": 254
+    },
+    {
+      "page": 10,
+      "title": "十字链表：一次改动要动两条链",
+      "start": "05:48",
+      "end": "06:54",
+      "seconds": 65.9,
+      "chars": 325
+    },
+    {
+      "page": 11,
+      "title": "第 2 节　12.2 广义表和存储管理",
+      "start": "06:54",
+      "end": "06:58",
+      "seconds": 4.4,
+      "chars": 13
+    },
+    {
+      "page": 12,
+      "title": "12.2.1 广义表",
+      "start": "06:58",
+      "end": "07:53",
+      "seconds": 55.2,
+      "chars": 279
+    },
+    {
+      "page": 13,
+      "title": "长度、深度、原子数是三个不同的指标",
+      "start": "07:53",
+      "end": "08:41",
+      "seconds": 47.2,
+      "chars": 237
+    },
+    {
+      "page": 14,
+      "title": "12.2.2 到 12.2.3 存储管理",
+      "start": "08:41",
+      "end": "10:03",
+      "seconds": 82.9,
+      "chars": 437
+    },
+    {
+      "page": 15,
+      "title": "12.2.4 无用单元回收：两种办法",
+      "start": "10:03",
+      "end": "10:54",
+      "seconds": 50.1,
+      "chars": 253
+    },
+    {
+      "page": 16,
+      "title": "标记–清除走一遍",
+      "start": "10:54",
+      "end": "11:29",
+      "seconds": 35.0,
+      "chars": 181
+    },
+    {
+      "page": 17,
+      "title": "实现上的两条要求",
+      "start": "11:29",
+      "end": "12:23",
+      "seconds": 54.2,
+      "chars": 264
+    },
+    {
+      "page": 18,
+      "title": "第 3 节　12.3 Trie 结构和 Patricia 树",
+      "start": "12:23",
+      "end": "12:29",
+      "seconds": 6.2,
+      "chars": 27
+    },
+    {
+      "page": 19,
+      "title": "Trie 与 BST 分属两种「分解」",
+      "start": "12:29",
+      "end": "13:08",
+      "seconds": 38.8,
+      "chars": 196
+    },
+    {
+      "page": 20,
+      "title": "12.3 Trie",
+      "start": "13:08",
+      "end": "14:01",
+      "seconds": 53.4,
+      "chars": 285
+    },
+    {
+      "page": 21,
+      "title": "Trie 的前提，以及它的不平衡",
+      "start": "14:01",
+      "end": "15:03",
+      "seconds": 62.2,
+      "chars": 323
+    },
+    {
+      "page": 22,
+      "title": "第 4 节　12.4 改进的二叉搜索树",
+      "start": "15:03",
+      "end": "15:11",
+      "seconds": 8.2,
+      "chars": 29
+    },
+    {
+      "page": 23,
+      "title": "12.4.1 最佳二叉搜索树：先数一数有多少棵",
+      "start": "15:11",
+      "end": "16:17",
+      "seconds": 65.2,
+      "chars": 346
+    },
+    {
+      "page": 24,
+      "title": "用动态规划求最佳 BST",
+      "start": "16:17",
+      "end": "17:01",
+      "seconds": 43.9,
+      "chars": 228
+    },
+    {
+      "page": 25,
+      "title": "12.4.2 AVL 树",
+      "start": "17:01",
+      "end": "18:05",
+      "seconds": 64.8,
+      "chars": 370
+    },
+    {
+      "page": 26,
+      "title": "12.4.3 伸展树，以及第 11 章的呼应",
+      "start": "18:05",
+      "end": "19:01",
+      "seconds": 55.3,
+      "chars": 294
+    },
+    {
+      "page": 27,
+      "title": "本章小结",
+      "start": "19:01",
+      "end": "19:54",
+      "seconds": 53.7,
+      "chars": 256
+    },
+    {
+      "page": 28,
+      "title": "习题，以及全课结语",
+      "start": "19:54",
+      "end": "21:11",
+      "seconds": 76.3,
+      "chars": 390
+    }
+  ]
+}

@@ -1,0 +1,193 @@
+{
+  "voice": "zh-CN-YunyangNeural",
+  "rate": "+0%",
+  "total": "15:30",
+  "source_pptx_sha256": "24641011bbdb7cf4620b89348ddadf6d561d342860fc03a5b3f4a6d47066b752",
+  "source_script_sha256": "2d5806f0e0c037f472f7c4906808ac736f5ba7c47a9b3d291b80faba3b9752f2",
+  "sections": [
+    {
+      "page": 1,
+      "title": "封面",
+      "start": "00:00",
+      "end": "00:21",
+      "seconds": 21.1,
+      "chars": 101
+    },
+    {
+      "page": 2,
+      "title": "本章换掉了一件事：成本模型",
+      "start": "00:21",
+      "end": "00:43",
+      "seconds": 22.1,
+      "chars": 107
+    },
+    {
+      "page": 3,
+      "title": "本章要回答三个问题",
+      "start": "00:43",
+      "end": "01:16",
+      "seconds": 32.7,
+      "chars": 151
+    },
+    {
+      "page": 4,
+      "title": "第 1 节　9.1 主存储器和外存储器",
+      "start": "01:16",
+      "end": "01:20",
+      "seconds": 4.4,
+      "chars": 14
+    },
+    {
+      "page": 5,
+      "title": "9.1 两种存储器",
+      "start": "01:20",
+      "end": "02:04",
+      "seconds": 44.2,
+      "chars": 212
+    },
+    {
+      "page": 6,
+      "title": "先建立成本模型",
+      "start": "02:04",
+      "end": "02:48",
+      "seconds": 43.4,
+      "chars": 214
+    },
+    {
+      "page": 7,
+      "title": "图 9.1 置换选择算法流程",
+      "start": "02:48",
+      "end": "03:10",
+      "seconds": 22.5,
+      "chars": 104
+    },
+    {
+      "page": 8,
+      "title": "第 2 节　9.2 文件的组织和管理",
+      "start": "03:10",
+      "end": "03:15",
+      "seconds": 4.3,
+      "chars": 13
+    },
+    {
+      "page": 9,
+      "title": "9.2.1 文件组织",
+      "start": "03:15",
+      "end": "03:58",
+      "seconds": 42.9,
+      "chars": 202
+    },
+    {
+      "page": 10,
+      "title": "一个必须澄清的说法",
+      "start": "03:58",
+      "end": "04:37",
+      "seconds": 39.8,
+      "chars": 200
+    },
+    {
+      "page": 11,
+      "title": "9.2.2 C++ 的流文件：原书接口已是历史写法",
+      "start": "04:37",
+      "end": "06:01",
+      "seconds": 83.6,
+      "chars": 480
+    },
+    {
+      "page": 12,
+      "title": "第 3 节　9.3 外排序",
+      "start": "06:01",
+      "end": "06:05",
+      "seconds": 3.8,
+      "chars": 10
+    },
+    {
+      "page": 13,
+      "title": "9.3 外排序的两个阶段",
+      "start": "06:05",
+      "end": "06:56",
+      "seconds": 51.5,
+      "chars": 260
+    },
+    {
+      "page": 14,
+      "title": "9.3.1 置换选择排序：让顺串更长",
+      "start": "06:56",
+      "end": "07:38",
+      "seconds": 42.2,
+      "chars": 216
+    },
+    {
+      "page": 15,
+      "title": "图 9.2 的过程摊开",
+      "start": "07:38",
+      "end": "08:40",
+      "seconds": 61.2,
+      "chars": 283
+    },
+    {
+      "page": 16,
+      "title": "两个守门不变量，以及输入形态的影响",
+      "start": "08:40",
+      "end": "09:43",
+      "seconds": 63.1,
+      "chars": 307
+    },
+    {
+      "page": 17,
+      "title": "9.3.2 二路外排序",
+      "start": "09:43",
+      "end": "10:33",
+      "seconds": 50.2,
+      "chars": 249
+    },
+    {
+      "page": 18,
+      "title": "「增加归并路数总会更快」也不成立",
+      "start": "10:33",
+      "end": "11:00",
+      "seconds": 27.0,
+      "chars": 132
+    },
+    {
+      "page": 19,
+      "title": "9.3.3 多路归并：先算一笔账",
+      "start": "11:00",
+      "end": "12:01",
+      "seconds": 61.2,
+      "chars": 331
+    },
+    {
+      "page": 20,
+      "title": "赢者树与败者树",
+      "start": "12:01",
+      "end": "13:10",
+      "seconds": 69.0,
+      "chars": 356
+    },
+    {
+      "page": 21,
+      "title": "一句限定：选择树不是通用的「取最小」工具",
+      "start": "13:10",
+      "end": "13:53",
+      "seconds": 42.7,
+      "chars": 209
+    },
+    {
+      "page": 22,
+      "title": "本章小结",
+      "start": "13:53",
+      "end": "14:38",
+      "seconds": 44.9,
+      "chars": 227
+    },
+    {
+      "page": 23,
+      "title": "习题",
+      "start": "14:38",
+      "end": "15:30",
+      "seconds": 52.5,
+      "chars": 264
+    }
+  ]
+}

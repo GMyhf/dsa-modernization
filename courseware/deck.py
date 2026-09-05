@@ -185,19 +185,24 @@ def _wrapped_lines(text, size_pt, width_pt):
     return max(1, math.ceil(_ems(text) * size_pt / width_pt))
 
 
+def _stack_height(items, size, width_pt, line_spacing, gap_ratio):
+    total = 0.0
+    for text, ratio in items:
+        s = size * ratio
+        total += _wrapped_lines(text, s, width_pt) * s * line_spacing
+        total += s * gap_ratio
+    return total
+
+
 def _fit_size(items, width_pt, height_pt, hi, lo, line_spacing, gap_ratio):
     """在 [lo, hi] 中挑最大的字号，使全部条目仍能装进 height_pt。
 
     items 为 (文本, 相对字号比例) 的列表。
+    **装不下时返回 lo，由调用方决定是钳位还是报错** —— 见 _add_bullets。
     """
     size = hi
     while size > lo:
-        total = 0.0
-        for text, ratio in items:
-            s = size * ratio
-            total += _wrapped_lines(text, s, width_pt) * s * line_spacing
-            total += s * gap_ratio
-        if total <= height_pt:
+        if _stack_height(items, size, width_pt, line_spacing, gap_ratio) <= height_pt:
             break
         size -= 0.5
     return size
@@ -298,9 +303,23 @@ def _add_bullets(prs, title, items):
             text = text[2:-2]
         parsed.append((text, sub, head))
 
-    size = _fit_size([(t, 0.82 if sub else 1.0) for t, sub, _ in parsed],
-                     body_w_pt, body_h_pt * 0.92, hi=20, lo=11.5,
-                     line_spacing=1.32, gap_ratio=0.62)
+    # ⚠️ 这里必须**在字号触底时报错**，而不是钳到 lo 之后照常画。
+    #    要点页没有代码页那样的边框，溢出的行会直接压在图注、页脚或彼此身上；
+    #    「文字仍在版心内」这条判据看不见「文字压着文字」。
+    #    第 9 章 9.2.2 那一页就是这么被 checklayout 抓出来的：8 个长条目，
+    #    钳到 11.5pt 仍高出版心，最后两行叠在一起。
+    #    字号是构建期算得出来的量，所以在这里当场失败。
+    LO = 11.5
+    scaled = [(t, 0.82 if sub else 1.0) for t, sub, _ in parsed]
+    avail_h_pt = body_h_pt * 0.92
+    size = _fit_size(scaled, body_w_pt, avail_h_pt, hi=20, lo=LO,
+                     line_spacing=BULLET_LEAD_EST, gap_ratio=0.62)
+    need = _stack_height(scaled, LO, body_w_pt, BULLET_LEAD_EST, 0.62)
+    if size <= LO and need > avail_h_pt:
+        raise LayoutOverflow(
+            f'bullets 页「{title}」内容过多：{len(parsed)} 条，'
+            f'字号降到下限 {LO}pt 仍需 {need:.0f}pt，版心只有 {avail_h_pt:.0f}pt。\n'
+            f'        请拆成两页或精简条目 —— 不要调低下限。')
     gap = size * 0.62
 
     _, tf = _textbox(slide, MARGIN, BODY_TOP, BODY_W, BODY_H)
@@ -437,6 +456,12 @@ def _add_image(prs, title, path, caption=''):
 # 这两个数都偏保守：宁可字号小半档，也不要让图注压到表格上。
 TABLE_SAFETY = 1.12      # 估算换行时给列宽留的余量
 TABLE_LEAD = 1.55        # 行高 / 字号（含中文字体的自然行高与行距）
+
+# 要点页估算行高时用的系数，和 TABLE_LEAD 同一个道理：
+# 段落上写的 line_spacing=1.32 是**倍数**，渲染器把它乘在中文字体的自然行高上
+# （Noto Sans CJK 约 1.48 em），实际每行占到 1.5 em 以上。
+# 按 1.32 估就会算少，多出来的行叠在一起 —— 第 9 章 9.2.2 那一页就是这么来的。
+BULLET_LEAD_EST = 1.58
 
 
 def _row_heights(rows, col_w, size, pad=16.0):

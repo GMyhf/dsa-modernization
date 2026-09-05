@@ -1,0 +1,201 @@
+{
+  "voice": "zh-CN-YunyangNeural",
+  "rate": "+0%",
+  "total": "15:19",
+  "source_pptx_sha256": "b30c65f5453f368c57e8191b90835bcf52f75aec87bb9ec78c4fef9c349b290a",
+  "source_script_sha256": "076ab825c8a39d03cd92df2437de70b4d97a9c547cb9a40cf5e9fb1f995a6734",
+  "sections": [
+    {
+      "page": 1,
+      "title": "封面",
+      "start": "00:00",
+      "end": "00:25",
+      "seconds": 25.3,
+      "chars": 124
+    },
+    {
+      "page": 2,
+      "title": "本章要回答三个问题",
+      "start": "00:25",
+      "end": "00:57",
+      "seconds": 31.9,
+      "chars": 158
+    },
+    {
+      "page": 3,
+      "title": "本章的一句话",
+      "start": "00:57",
+      "end": "01:15",
+      "seconds": 17.9,
+      "chars": 84
+    },
+    {
+      "page": 4,
+      "title": "第 1 节　6.1 树的定义和基本术语",
+      "start": "01:15",
+      "end": "01:20",
+      "seconds": 4.5,
+      "chars": 13
+    },
+    {
+      "page": 5,
+      "title": "6.1.1 树的两种等价定义",
+      "start": "01:20",
+      "end": "02:04",
+      "seconds": 44.4,
+      "chars": 220
+    },
+    {
+      "page": 6,
+      "title": "术语与一个关键区分",
+      "start": "02:04",
+      "end": "03:06",
+      "seconds": 62.0,
+      "chars": 309
+    },
+    {
+      "page": 7,
+      "title": "图 6.1 树形表示法",
+      "start": "03:06",
+      "end": "03:31",
+      "seconds": 25.1,
+      "chars": 129
+    },
+    {
+      "page": 8,
+      "title": "6.1.2 森林与二叉树的等价转换",
+      "start": "03:31",
+      "end": "04:17",
+      "seconds": 46.0,
+      "chars": 226
+    },
+    {
+      "page": 9,
+      "title": "转换的形式定义，以及它是可逆的",
+      "start": "04:17",
+      "end": "05:01",
+      "seconds": 43.5,
+      "chars": 222
+    },
+    {
+      "page": 10,
+      "title": "6.1.4 树的周游：为什么没有「中序」",
+      "start": "05:01",
+      "end": "05:53",
+      "seconds": 52.5,
+      "chars": 258
+    },
+    {
+      "page": 11,
+      "title": "一条值得单独记住的对应",
+      "start": "05:53",
+      "end": "06:18",
+      "seconds": 25.1,
+      "chars": 116
+    },
+    {
+      "page": 12,
+      "title": "为什么后根对上的是中序",
+      "start": "06:18",
+      "end": "07:07",
+      "seconds": 48.7,
+      "chars": 254
+    },
+    {
+      "page": 13,
+      "title": "第 2 节　6.2 树的链式存储结构",
+      "start": "07:07",
+      "end": "07:13",
+      "seconds": 6.7,
+      "chars": 22
+    },
+    {
+      "page": 14,
+      "title": "为什么一般树的存储比二叉树麻烦",
+      "start": "07:13",
+      "end": "07:57",
+      "seconds": 43.6,
+      "chars": 207
+    },
+    {
+      "page": 15,
+      "title": "四种链式表示法的取舍",
+      "start": "07:57",
+      "end": "08:58",
+      "seconds": 61.3,
+      "chars": 302
+    },
+    {
+      "page": 16,
+      "title": "图 6.8 静态左子右兄里的树归并",
+      "start": "08:58",
+      "end": "09:24",
+      "seconds": 25.3,
+      "chars": 125
+    },
+    {
+      "page": 17,
+      "title": "第 3 节　6.2.5 父指针表示法与并查集",
+      "start": "09:24",
+      "end": "09:32",
+      "seconds": 8.0,
+      "chars": 27
+    },
+    {
+      "page": 18,
+      "title": "等价类与并查集",
+      "start": "09:32",
+      "end": "10:38",
+      "seconds": 66.8,
+      "chars": 340
+    },
+    {
+      "page": 19,
+      "title": "两条改进：要防的是树退化成一条链",
+      "start": "10:38",
+      "end": "11:49",
+      "seconds": 70.8,
+      "chars": 352
+    },
+    {
+      "page": 20,
+      "title": "第 4 节　6.3 / 6.4 顺序存储与 K 叉树",
+      "start": "11:49",
+      "end": "11:54",
+      "seconds": 4.6,
+      "chars": 15
+    },
+    {
+      "page": 21,
+      "title": "6.3 顺序存储：把结点排进数组，靠附加信息还原",
+      "start": "11:54",
+      "end": "12:41",
+      "seconds": 47.7,
+      "chars": 240
+    },
+    {
+      "page": 22,
+      "title": "6.4 K 叉树",
+      "start": "12:41",
+      "end": "13:36",
+      "seconds": 54.2,
+      "chars": 295
+    },
+    {
+      "page": 23,
+      "title": "本章小结",
+      "start": "13:36",
+      "end": "14:25",
+      "seconds": 49.0,
+      "chars": 228
+    },
+    {
+      "page": 24,
+      "title": "习题",
+      "start": "14:25",
+      "end": "15:19",
+      "seconds": 54.7,
+      "chars": 268
+    }
+  ]
+}

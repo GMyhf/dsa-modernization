@@ -1,0 +1,257 @@
+{
+  "voice": "zh-CN-YunyangNeural",
+  "rate": "+0%",
+  "total": "21:05",
+  "source_pptx_sha256": "4bc40a561bd26bf6da0f5af8bb2271d9826469ba911a1b0c787b561d9fda9748",
+  "source_script_sha256": "51b8b855c39f38377e04d125089435a48de1bc08ff31f214b5b37475b046bcda",
+  "sections": [
+    {
+      "page": 1,
+      "title": "封面",
+      "start": "00:00",
+      "end": "00:19",
+      "seconds": 19.1,
+      "chars": 94
+    },
+    {
+      "page": 2,
+      "title": "读每一种排序方法时，同时问四件事",
+      "start": "00:19",
+      "end": "01:12",
+      "seconds": 52.8,
+      "chars": 260
+    },
+    {
+      "page": 3,
+      "title": "本章的一句话",
+      "start": "01:12",
+      "end": "01:31",
+      "seconds": 18.7,
+      "chars": 91
+    },
+    {
+      "page": 4,
+      "title": "第 1 节　8.1 排序问题的基本概念",
+      "start": "01:31",
+      "end": "01:37",
+      "seconds": 6.6,
+      "chars": 23
+    },
+    {
+      "page": 5,
+      "title": "8.1 术语先约定清楚",
+      "start": "01:37",
+      "end": "02:22",
+      "seconds": 45.4,
+      "chars": 236
+    },
+    {
+      "page": 6,
+      "title": "怎么衡量代价",
+      "start": "02:22",
+      "end": "03:09",
+      "seconds": 46.6,
+      "chars": 237
+    },
+    {
+      "page": 7,
+      "title": "本章的分类",
+      "start": "03:09",
+      "end": "03:42",
+      "seconds": 32.6,
+      "chars": 156
+    },
+    {
+      "page": 8,
+      "title": "第 2 节　8.2 插入排序",
+      "start": "03:42",
+      "end": "03:47",
+      "seconds": 5.4,
+      "chars": 21
+    },
+    {
+      "page": 9,
+      "title": "8.2.1 直接插入排序",
+      "start": "03:47",
+      "end": "04:39",
+      "seconds": 52.1,
+      "chars": 277
+    },
+    {
+      "page": 10,
+      "title": "8.2.2 Shell 排序",
+      "start": "04:39",
+      "end": "05:21",
+      "seconds": 41.8,
+      "chars": 228
+    },
+    {
+      "page": 11,
+      "title": "Shell 排序：一步跨四格",
+      "start": "05:21",
+      "end": "06:00",
+      "seconds": 39.1,
+      "chars": 195
+    },
+    {
+      "page": 12,
+      "title": "为什么 Shell 不稳定，以及增量怎么选",
+      "start": "06:00",
+      "end": "06:52",
+      "seconds": 51.6,
+      "chars": 275
+    },
+    {
+      "page": 13,
+      "title": "第 3 节　8.3 / 8.4 选择排序与交换排序",
+      "start": "06:52",
+      "end": "06:56",
+      "seconds": 4.8,
+      "chars": 14
+    },
+    {
+      "page": 14,
+      "title": "8.3 选择排序",
+      "start": "06:56",
+      "end": "07:49",
+      "seconds": 53.0,
+      "chars": 279
+    },
+    {
+      "page": 15,
+      "title": "8.4.2 快速排序：分、治、不用合",
+      "start": "07:49",
+      "end": "08:43",
+      "seconds": 53.8,
+      "chars": 280
+    },
+    {
+      "page": 16,
+      "title": "轴值怎么选，影响很大",
+      "start": "08:43",
+      "end": "09:35",
+      "seconds": 51.7,
+      "chars": 261
+    },
+    {
+      "page": 17,
+      "title": "第 4 节　8.5 / 8.6 归并排序与分配排序",
+      "start": "09:35",
+      "end": "09:40",
+      "seconds": 4.7,
+      "chars": 14
+    },
+    {
+      "page": 18,
+      "title": "8.5 归并排序",
+      "start": "09:40",
+      "end": "10:26",
+      "seconds": 45.9,
+      "chars": 228
+    },
+    {
+      "page": 19,
+      "title": "8.6.1 桶式排序：不再比较",
+      "start": "10:26",
+      "end": "11:20",
+      "seconds": 54.2,
+      "chars": 290
+    },
+    {
+      "page": 20,
+      "title": "8.6.2 基数排序",
+      "start": "11:20",
+      "end": "12:13",
+      "seconds": 52.9,
+      "chars": 280
+    },
+    {
+      "page": 21,
+      "title": "第 5 节　8.7 排序算法的时间代价",
+      "start": "12:13",
+      "end": "12:19",
+      "seconds": 6.2,
+      "chars": 21
+    },
+    {
+      "page": 22,
+      "title": "8.7.1 三种简单排序",
+      "start": "12:19",
+      "end": "13:09",
+      "seconds": 50.3,
+      "chars": 257
+    },
+    {
+      "page": 23,
+      "title": "8.7.2 实测",
+      "start": "13:09",
+      "end": "13:51",
+      "seconds": 41.7,
+      "chars": 200
+    },
+    {
+      "page": 24,
+      "title": "从这两张表读出来的三件事",
+      "start": "13:51",
+      "end": "14:55",
+      "seconds": 63.6,
+      "chars": 319
+    },
+    {
+      "page": 25,
+      "title": "原书量出的几条敏感性结论",
+      "start": "14:55",
+      "end": "15:54",
+      "seconds": 59.3,
+      "chars": 285
+    },
+    {
+      "page": 26,
+      "title": "标准库里的排序是怎么做的",
+      "start": "15:54",
+      "end": "16:48",
+      "seconds": 53.8,
+      "chars": 303
+    },
+    {
+      "page": 27,
+      "title": "8.7.3 排序问题的下限",
+      "start": "16:48",
+      "end": "17:36",
+      "seconds": 48.3,
+      "chars": 255
+    },
+    {
+      "page": 28,
+      "title": "判定树：证明",
+      "start": "17:36",
+      "end": "18:39",
+      "seconds": 62.6,
+      "chars": 331
+    },
+    {
+      "page": 29,
+      "title": "这个下界只约束比较排序",
+      "start": "18:39",
+      "end": "19:07",
+      "seconds": 28.4,
+      "chars": 133
+    },
+    {
+      "page": 30,
+      "title": "本章小结",
+      "start": "19:07",
+      "end": "19:57",
+      "seconds": 50.5,
+      "chars": 247
+    },
+    {
+      "page": 31,
+      "title": "习题",
+      "start": "19:57",
+      "end": "21:05",
+      "seconds": 67.7,
+      "chars": 337
+    }
+  ]
+}

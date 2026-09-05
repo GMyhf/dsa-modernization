@@ -86,7 +86,10 @@ META_KEYS = ('title', 'subtitle', 'footer', 'info')
 def check_metadata(chapters, modules):
     for ch in chapters:
         stem = build_all.CHAPTERS[ch]
-        md = (HERE / (stem + '.md')).read_text(encoding='utf-8')
+        md_path = HERE / (stem + '.md')
+        if not md_path.is_file():
+            continue      # 第 1 项已经报过「缺 .md」；这里再崩一次只会盖住那条消息
+        md = md_path.read_text(encoding='utf-8')
         head = md[:900]
         for label, pat in (('一级标题', r'^# .+'),
                            ('Updated 时间戳', r'\*Updated \d{4}-\d{2}-\d{2}'),
@@ -123,8 +126,10 @@ def check_assets(chapters, modules):
                                    f'找不到图片：{spec[2]}')
         # 讲义里的本地相对链接
         md_path = HERE / (stem + '.md')
-        for m in set(LINK.findall(md_path.read_text(encoding='utf-8'))
-                     + IMG.findall(md_path.read_text(encoding='utf-8'))):
+        if not md_path.is_file():
+            continue
+        md_text = md_path.read_text(encoding='utf-8')
+        for m in set(LINK.findall(md_text) + IMG.findall(md_text)):
             if m.startswith(('http://', 'https://', '#', 'mailto:')):
                 continue
             target = (md_path.parent / m.split('#', 1)[0]).resolve()
@@ -272,6 +277,23 @@ CJK_FONT_HINT = ('CJK', 'YaHei', 'SimSun', 'SimHei', 'Song', 'Hei', 'Ming',
 # 所以按「交集面积 / 较小者面积」判，而不是「是否相交」。
 OVERLAP_RATIO = 0.45
 
+# 表情符号等图形字符要排除在外。
+#
+# ⚠️ 这不是为了让检查通过。`⚠️` 在 PDF 里走的是 NotoColorEmoji（Type 3 字体），
+#    pdftotext 报出来的字框比实际字形大出一圈，会把**同一行**紧挨着的
+#    项目符号 `·` 整个罩住 —— 判据于是报「两段文字压在一起」，而放映稿上
+#    那一页完全正常（第 9 章 9.2.2 就是这么被误报的）。
+#    图形字符的字框本来就不可靠，与其调松阈值放过真问题，不如把它们摘出去。
+_PICTOGRAPH_RANGES = ((0x2190, 0x2BFF), (0xFE00, 0xFE0F), (0x1F000, 0x1FAFF))
+
+
+def _is_pictograph(text):
+    stripped = [ch for ch in text if not ch.isspace()]
+    if not stripped:
+        return False
+    return all(any(lo <= ord(ch) <= hi for lo, hi in _PICTOGRAPH_RANGES)
+               for ch in stripped)
+
 
 def overlapping_words(words):
     """找出彼此压在一起的字框。words 是 (xMin, yMin, xMax, yMax, 文本) 列表。
@@ -281,7 +303,8 @@ def overlapping_words(words):
     越界检查一声不吭。版面事故不只有「越出去」一种，还有「叠起来」。
     """
     hits = []
-    ordered = sorted(words, key=lambda w: w[1])
+    ordered = sorted((w for w in words if not _is_pictograph(w[4])),
+                     key=lambda w: w[1])
     for i, a in enumerate(ordered):
         for b in ordered[i + 1:]:
             if b[1] >= a[3]:            # 按 yMin 排过序，后面的都在 a 下方了

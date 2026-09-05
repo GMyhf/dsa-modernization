@@ -1,0 +1,217 @@
+{
+  "voice": "zh-CN-YunyangNeural",
+  "rate": "+0%",
+  "total": "20:12",
+  "source_pptx_sha256": "86ee4cbed70a61f649b5d5883d373320ca1a74a124f25510f60fc7dfe7544aab",
+  "source_script_sha256": "5873491172d3b6ed710894840b78a36df8bea41664b4e6aab089429725061f2f",
+  "sections": [
+    {
+      "page": 1,
+      "title": "封面",
+      "start": "00:00",
+      "end": "00:24",
+      "seconds": 23.9,
+      "chars": 112
+    },
+    {
+      "page": 2,
+      "title": "本章要回答三个问题",
+      "start": "00:24",
+      "end": "01:05",
+      "seconds": 40.9,
+      "chars": 195
+    },
+    {
+      "page": 3,
+      "title": "本章的一句话",
+      "start": "01:05",
+      "end": "01:26",
+      "seconds": 21.7,
+      "chars": 106
+    },
+    {
+      "page": 4,
+      "title": "第 1 节　10.1 基于线性表的检索",
+      "start": "01:26",
+      "end": "01:33",
+      "seconds": 6.7,
+      "chars": 22
+    },
+    {
+      "page": 5,
+      "title": "10.1.1 顺序检索",
+      "start": "01:33",
+      "end": "02:51",
+      "seconds": 77.5,
+      "chars": 389
+    },
+    {
+      "page": 6,
+      "title": "10.1.2 二分检索",
+      "start": "02:51",
+      "end": "03:51",
+      "seconds": 60.1,
+      "chars": 334
+    },
+    {
+      "page": 7,
+      "title": "图 10.2 二分检索的决策树",
+      "start": "03:51",
+      "end": "04:10",
+      "seconds": 19.2,
+      "chars": 90
+    },
+    {
+      "page": 8,
+      "title": "从决策树读出来的两件事",
+      "start": "04:10",
+      "end": "05:11",
+      "seconds": 61.4,
+      "chars": 304
+    },
+    {
+      "page": 9,
+      "title": "10.1.3 分块检索",
+      "start": "05:11",
+      "end": "06:25",
+      "seconds": 73.3,
+      "chars": 370
+    },
+    {
+      "page": 10,
+      "title": "分块检索：块间有序只负责排除别的块",
+      "start": "06:25",
+      "end": "06:59",
+      "seconds": 33.9,
+      "chars": 164
+    },
+    {
+      "page": 11,
+      "title": "第 2 节　10.2 集合的检索",
+      "start": "06:59",
+      "end": "07:05",
+      "seconds": 6.1,
+      "chars": 19
+    },
+    {
+      "page": 12,
+      "title": "10.2.1 集合的数学特性",
+      "start": "07:05",
+      "end": "07:51",
+      "seconds": 46.1,
+      "chars": 230
+    },
+    {
+      "page": 13,
+      "title": "可拿来测试的代数性质",
+      "start": "07:51",
+      "end": "08:39",
+      "seconds": 48.3,
+      "chars": 250
+    },
+    {
+      "page": 14,
+      "title": "有限全集上的位表示",
+      "start": "08:39",
+      "end": "09:24",
+      "seconds": 45.0,
+      "chars": 222
+    },
+    {
+      "page": 15,
+      "title": "位向量的代价与前提",
+      "start": "09:24",
+      "end": "10:02",
+      "seconds": 37.9,
+      "chars": 183
+    },
+    {
+      "page": 16,
+      "title": "第 3 节　10.3 散列方法",
+      "start": "10:02",
+      "end": "10:09",
+      "seconds": 7.0,
+      "chars": 24
+    },
+    {
+      "page": 17,
+      "title": "10.3.1 散列函数：三条选择原则",
+      "start": "10:09",
+      "end": "11:24",
+      "seconds": 74.5,
+      "chars": 390
+    },
+    {
+      "page": 18,
+      "title": "10.3.2 开散列（拉链法）",
+      "start": "11:24",
+      "end": "12:16",
+      "seconds": 52.5,
+      "chars": 259
+    },
+    {
+      "page": 19,
+      "title": "10.3.3 闭散列（开放地址法）",
+      "start": "12:16",
+      "end": "13:08",
+      "seconds": 52.4,
+      "chars": 251
+    },
+    {
+      "page": 20,
+      "title": "线性探查的毛病叫「聚集」",
+      "start": "13:08",
+      "end": "14:27",
+      "seconds": 78.7,
+      "chars": 395
+    },
+    {
+      "page": 21,
+      "title": "删除是闭散列的难点：为什么要墓碑",
+      "start": "14:27",
+      "end": "15:29",
+      "seconds": 61.8,
+      "chars": 304
+    },
+    {
+      "page": 22,
+      "title": "10.3.5 效率分析：衡量的是什么",
+      "start": "15:29",
+      "end": "16:28",
+      "seconds": 59.2,
+      "chars": 291
+    },
+    {
+      "page": 23,
+      "title": "三种策略放在一起比",
+      "start": "16:28",
+      "end": "17:14",
+      "seconds": 46.2,
+      "chars": 224
+    },
+    {
+      "page": 24,
+      "title": "0.5 是一条经验阈值",
+      "start": "17:14",
+      "end": "18:26",
+      "seconds": 71.3,
+      "chars": 359
+    },
+    {
+      "page": 25,
+      "title": "本章小结",
+      "start": "18:26",
+      "end": "19:15",
+      "seconds": 49.8,
+      "chars": 239
+    },
+    {
+      "page": 26,
+      "title": "习题",
+      "start": "19:15",
+      "end": "20:12",
+      "seconds": 56.3,
+      "chars": 293
+    }
+  ]
+}

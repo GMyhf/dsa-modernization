@@ -1,0 +1,225 @@
+{
+  "voice": "zh-CN-YunyangNeural",
+  "rate": "+0%",
+  "total": "17:46",
+  "source_pptx_sha256": "a0205f56396adc61bda3d0da14101c731f4e6c8e981003a6deb22caee1b519af",
+  "source_script_sha256": "a3563777712dfe2963a80ef9c56f1c2326a9998d46172d44838962e756b63387",
+  "sections": [
+    {
+      "page": 1,
+      "title": "封面",
+      "start": "00:00",
+      "end": "00:29",
+      "seconds": 28.7,
+      "chars": 134
+    },
+    {
+      "page": 2,
+      "title": "本章要回答的问题",
+      "start": "00:29",
+      "end": "01:00",
+      "seconds": 31.6,
+      "chars": 160
+    },
+    {
+      "page": 3,
+      "title": "本章的一句话",
+      "start": "01:00",
+      "end": "01:27",
+      "seconds": 26.6,
+      "chars": 131
+    },
+    {
+      "page": 4,
+      "title": "第 1 节　7.1 图的定义和基本术语",
+      "start": "01:27",
+      "end": "01:33",
+      "seconds": 6.4,
+      "chars": 21
+    },
+    {
+      "page": 5,
+      "title": "7.1 基本定义",
+      "start": "01:33",
+      "end": "02:29",
+      "seconds": 55.6,
+      "chars": 276
+    },
+    {
+      "page": 6,
+      "title": "连通性与生成树",
+      "start": "02:29",
+      "end": "03:34",
+      "seconds": 64.9,
+      "chars": 306
+    },
+    {
+      "page": 7,
+      "title": "选算法之前，先分清题目",
+      "start": "03:34",
+      "end": "04:17",
+      "seconds": 43.6,
+      "chars": 220
+    },
+    {
+      "page": 8,
+      "title": "第 2 节　7.3 图的存储结构",
+      "start": "04:17",
+      "end": "04:25",
+      "seconds": 7.2,
+      "chars": 24
+    },
+    {
+      "page": 9,
+      "title": "7.3.1 相邻矩阵",
+      "start": "04:25",
+      "end": "05:24",
+      "seconds": 59.4,
+      "chars": 316
+    },
+    {
+      "page": 10,
+      "title": "7.3.2 邻接表",
+      "start": "05:24",
+      "end": "06:06",
+      "seconds": 42.0,
+      "chars": 201
+    },
+    {
+      "page": 11,
+      "title": "两种存法的取舍",
+      "start": "06:06",
+      "end": "06:49",
+      "seconds": 42.5,
+      "chars": 220
+    },
+    {
+      "page": 12,
+      "title": "第 3 节　7.4 图的周游",
+      "start": "06:49",
+      "end": "06:56",
+      "seconds": 7.4,
+      "chars": 26
+    },
+    {
+      "page": 13,
+      "title": "7.4.1 深度优先周游",
+      "start": "06:56",
+      "end": "07:47",
+      "seconds": 51.5,
+      "chars": 255
+    },
+    {
+      "page": 14,
+      "title": "代价取决于存储结构，而不是取决于算法",
+      "start": "07:47",
+      "end": "08:23",
+      "seconds": 35.9,
+      "chars": 180
+    },
+    {
+      "page": 15,
+      "title": "7.4.2 广度优先周游：靠队列",
+      "start": "08:23",
+      "end": "09:07",
+      "seconds": 43.4,
+      "chars": 220
+    },
+    {
+      "page": 16,
+      "title": "7.4.3 拓扑排序",
+      "start": "09:07",
+      "end": "10:18",
+      "seconds": 71.5,
+      "chars": 360
+    },
+    {
+      "page": 17,
+      "title": "第 4 节　7.5 最短路径",
+      "start": "10:18",
+      "end": "10:24",
+      "seconds": 5.7,
+      "chars": 26
+    },
+    {
+      "page": 18,
+      "title": "图 7.18 最短路径的示例",
+      "start": "10:24",
+      "end": "10:44",
+      "seconds": 19.8,
+      "chars": 100
+    },
+    {
+      "page": 19,
+      "title": "7.5.1 Dijkstra",
+      "start": "10:44",
+      "end": "11:49",
+      "seconds": 64.9,
+      "chars": 350
+    },
+    {
+      "page": 20,
+      "title": "7.5.2 Floyd",
+      "start": "11:49",
+      "end": "12:53",
+      "seconds": 64.7,
+      "chars": 357
+    },
+    {
+      "page": 21,
+      "title": "第 5 节　7.6 最小生成树",
+      "start": "12:53",
+      "end": "13:00",
+      "seconds": 7.0,
+      "chars": 32
+    },
+    {
+      "page": 22,
+      "title": "7.6 目标与依据",
+      "start": "13:00",
+      "end": "14:10",
+      "seconds": 69.8,
+      "chars": 362
+    },
+    {
+      "page": 23,
+      "title": "两个算法，互补的适用面",
+      "start": "14:10",
+      "end": "14:53",
+      "seconds": 42.3,
+      "chars": 213
+    },
+    {
+      "page": 24,
+      "title": "连通图上两者的结果",
+      "start": "14:53",
+      "end": "15:18",
+      "seconds": 25.3,
+      "chars": 121
+    },
+    {
+      "page": 25,
+      "title": "第 6 章的并查集在这里兑现",
+      "start": "15:18",
+      "end": "16:03",
+      "seconds": 45.6,
+      "chars": 259
+    },
+    {
+      "page": 26,
+      "title": "本章小结",
+      "start": "16:03",
+      "end": "16:58",
+      "seconds": 54.5,
+      "chars": 284
+    },
+    {
+      "page": 27,
+      "title": "习题",
+      "start": "16:58",
+      "end": "17:46",
+      "seconds": 48.3,
+      "chars": 251
+    }
+  ]
+}

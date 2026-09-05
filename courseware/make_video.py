@@ -63,11 +63,38 @@ def run(cmd, **kw):
     return r.stdout.decode('utf-8', 'replace')
 
 
-def sha256_file(path):
+def pptx_digest(path):
+    """课件**画面内容**的摘要 —— 不是文件字节的摘要。
+
+    ⚠️ python-pptx 写出来的 .pptx **不是逐字节可复现的**（zip 里带时间戳）：
+    同一份 content 连着生成两次，字节摘要就不一样。用它当「视频过没过期」的
+    判据，等于每次重建课件都谎报一次过期 —— 判据一旦学会撒谎，就没人再看它了。
+    （这和讲稿时间控制表那次是同一类错误：把一个不稳定的量当成了指纹。）
+
+    这里改成摘要**决定画面的那些东西**：每页每个形状的位置尺寸、文字、
+    每个 run 的字号/加粗/字体，表格逐格文字，以及图片的内容哈希。
+    渲染出来长得一样，摘要就一样。
+    """
+    from pptx import Presentation
     h = hashlib.sha256()
-    with open(path, 'rb') as f:
-        for chunk in iter(lambda: f.read(1 << 20), b''):
-            h.update(chunk)
+    for slide in Presentation(str(path)).slides:
+        h.update(b'\x00slide')
+        for shape in slide.shapes:
+            h.update(('|%s,%s,%s,%s,%s' % (shape.shape_type, shape.left, shape.top,
+                                           shape.width, shape.height)).encode())
+            if shape.shape_type == 13:            # PICTURE
+                h.update(shape.image.blob)
+            frames = []
+            if shape.has_text_frame:
+                frames.append(shape.text_frame)
+            elif shape.has_table:
+                frames += [c.text_frame for r in shape.table.rows for c in r.cells]
+            for tf in frames:
+                for para in tf.paragraphs:
+                    for run in para.runs:
+                        f = run.font
+                        h.update(('|%s;%s;%s;%s' % (
+                            run.text, f.size, f.bold, f.name)).encode())
     return h.hexdigest()
 
 
@@ -163,7 +190,7 @@ def export_frames(pptx, outdir):
     """从当前 pptx 现导逐页 PNG；pptx 没变就复用。"""
     outdir.mkdir(parents=True, exist_ok=True)
     stamp = outdir / 'source.sha256'
-    digest = sha256_file(pptx)
+    digest = pptx_digest(pptx)
     pngs = sorted(outdir.glob('slide-*.png'))
     if stamp.exists() and stamp.read_text().strip() == digest and pngs:
         print('画面：复用已导出的 %d 页（课件未变）' % len(pngs))
@@ -312,7 +339,7 @@ def check(chapter, pptx, script, mp4, timeline):
     if problems:
         return problems, hints
     tl = json.loads(timeline.read_text(encoding='utf-8'))
-    if tl.get('source_pptx_sha256') != sha256_file(pptx):
+    if tl.get('source_pptx_sha256') != pptx_digest(pptx):
         problems.append(f'第{chapter}章视频过期：课件改过而视频没重建')
     if tl.get('source_script_sha256') != script_digest(script):
         problems.append(f'第{chapter}章视频过期：讲稿改过而视频没重建')

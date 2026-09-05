@@ -1,0 +1,225 @@
+{
+  "voice": "zh-CN-YunyangNeural",
+  "rate": "+0%",
+  "total": "18:39",
+  "source_pptx_sha256": "48d345eeabeaba2b57608e522086108d15602fff4204ec25857c789b00294749",
+  "source_script_sha256": "2b1da326ed513c8856c7ab2690e69d01a262123a07e1cec9a7620494e8b23076",
+  "sections": [
+    {
+      "page": 1,
+      "title": "封面",
+      "start": "00:00",
+      "end": "00:23",
+      "seconds": 22.9,
+      "chars": 111
+    },
+    {
+      "page": 2,
+      "title": "本章的关键指标",
+      "start": "00:23",
+      "end": "00:34",
+      "seconds": 11.3,
+      "chars": 52
+    },
+    {
+      "page": 3,
+      "title": "本章要回答四个问题",
+      "start": "00:34",
+      "end": "01:12",
+      "seconds": 37.4,
+      "chars": 173
+    },
+    {
+      "page": 4,
+      "title": "第 1 节　11.1 线性索引",
+      "start": "01:12",
+      "end": "01:15",
+      "seconds": 3.6,
+      "chars": 9
+    },
+    {
+      "page": 5,
+      "title": "11.1 线性索引",
+      "start": "01:15",
+      "end": "02:06",
+      "seconds": 50.4,
+      "chars": 251
+    },
+    {
+      "page": 6,
+      "title": "图 11.1 线性索引与不等长记录",
+      "start": "02:06",
+      "end": "02:24",
+      "seconds": 18.3,
+      "chars": 83
+    },
+    {
+      "page": 7,
+      "title": "多级索引",
+      "start": "02:24",
+      "end": "03:01",
+      "seconds": 36.9,
+      "chars": 182
+    },
+    {
+      "page": 8,
+      "title": "第 2 节　11.2 静态索引：多分树",
+      "start": "03:01",
+      "end": "03:05",
+      "seconds": 4.4,
+      "chars": 13
+    },
+    {
+      "page": 9,
+      "title": "11.2 为什么要多分",
+      "start": "03:05",
+      "end": "04:10",
+      "seconds": 65.1,
+      "chars": 318
+    },
+    {
+      "page": 10,
+      "title": "扇出不是随意选的",
+      "start": "04:10",
+      "end": "05:06",
+      "seconds": 56.3,
+      "chars": 284
+    },
+    {
+      "page": 11,
+      "title": "第 3 节　11.3 倒排索引",
+      "start": "05:06",
+      "end": "05:13",
+      "seconds": 6.4,
+      "chars": 20
+    },
+    {
+      "page": 12,
+      "title": "11.3 倒排索引",
+      "start": "05:13",
+      "end": "06:12",
+      "seconds": 58.8,
+      "chars": 287
+    },
+    {
+      "page": 13,
+      "title": "对正文文件的倒排",
+      "start": "06:12",
+      "end": "07:13",
+      "seconds": 61.0,
+      "chars": 309
+    },
+    {
+      "page": 14,
+      "title": "第 4 节　11.4 动态索引：B 树与 B+ 树",
+      "start": "07:13",
+      "end": "07:18",
+      "seconds": 5.5,
+      "chars": 17
+    },
+    {
+      "page": 15,
+      "title": "为什么外存索引必须用多分树",
+      "start": "07:18",
+      "end": "08:18",
+      "seconds": 60.1,
+      "chars": 327
+    },
+    {
+      "page": 16,
+      "title": "m 阶 B 树的定义：五条",
+      "start": "08:18",
+      "end": "09:08",
+      "seconds": 49.3,
+      "chars": 248
+    },
+    {
+      "page": 17,
+      "title": "B 树的四条性质",
+      "start": "09:08",
+      "end": "10:02",
+      "seconds": 54.3,
+      "chars": 275
+    },
+    {
+      "page": 18,
+      "title": "插入：可能朝着根的方向生长",
+      "start": "10:02",
+      "end": "10:52",
+      "seconds": 50.6,
+      "chars": 245
+    },
+    {
+      "page": 19,
+      "title": "根结点为什么可以只有 2 个子结点",
+      "start": "10:52",
+      "end": "11:45",
+      "seconds": 52.1,
+      "chars": 264
+    },
+    {
+      "page": 20,
+      "title": "B 树的树高：一个能算的上界",
+      "start": "11:45",
+      "end": "12:52",
+      "seconds": 67.3,
+      "chars": 350
+    },
+    {
+      "page": 21,
+      "title": "全章最值得记住的一笔账",
+      "start": "12:52",
+      "end": "14:07",
+      "seconds": 75.4,
+      "chars": 404
+    },
+    {
+      "page": 22,
+      "title": "B 树与 B+ 树谁更矮",
+      "start": "14:07",
+      "end": "14:56",
+      "seconds": 48.7,
+      "chars": 261
+    },
+    {
+      "page": 23,
+      "title": "动态索引与静态索引：更新成本由谁承担",
+      "start": "14:56",
+      "end": "15:50",
+      "seconds": 53.7,
+      "chars": 267
+    },
+    {
+      "page": 24,
+      "title": "第 5 节　11.5 位索引技术",
+      "start": "15:50",
+      "end": "15:54",
+      "seconds": 3.8,
+      "chars": 10
+    },
+    {
+      "page": 25,
+      "title": "11.5 位图索引",
+      "start": "15:54",
+      "end": "16:42",
+      "seconds": 48.6,
+      "chars": 247
+    },
+    {
+      "page": 26,
+      "title": "本章小结",
+      "start": "16:42",
+      "end": "17:37",
+      "seconds": 54.7,
+      "chars": 261
+    },
+    {
+      "page": 27,
+      "title": "习题",
+      "start": "17:37",
+      "end": "18:39",
+      "seconds": 62.0,
+      "chars": 309
+    }
+  ]
+}
