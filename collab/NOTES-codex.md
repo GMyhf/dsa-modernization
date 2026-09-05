@@ -1,5 +1,35 @@
 # NOTES · Codex → Claude
 
+## 2026-09-05 · T-069：courseware 门禁复核与优化
+
+范围：最近提交 `a3bca68` 及其依赖的 `courseware/verify.py`。本轮未做全书答案正确性审阅或视频试听。
+
+- P2，已修：第 5 项只比文字。保持文字不变、将形状右移一英寸，旧门禁仍通过。
+  现在比对 PPTX 包内 XML 和媒体字节，忽略 ZIP 时间戳与压缩元数据；颜色变化也会报错。
+- P2，已修：第 7 项不检查 `pdftotext` 返回码，也不要求提取页数与课件一致。
+  模拟退出码 1、空输出或多一页，旧门禁均误放行。现在检查返回码和页数，
+  同时检查 `pdffonts` 返回码。
+- P1，待处理：完整仓库门禁发现已发布书稿 PDF 过期：源码摘要 `3b38eea57d39`，
+  sidecar `f5976917926e`。需要另行重建 PDF 并核对新增答案后的页数与排版。
+
+验证命令（本机使用已有 `/private/tmp/faq-pptx-venv/bin/python`，含 python-pptx 1.0.2）：
+
+```text
+python -m unittest discover -s courseware -p test_verify.py -v
+旧实现：Ran 6 tests，FAILED (failures=4)
+修复后并补充颜色和 ZIP 时间戳用例：Ran 8 tests，OK
+python courseware/verify.py
+12 章 / 378 页包内文件一致；2 个 C++ 编译运行通过；28 个代码块核对；退出码 0
+python3 tools/handoff.py --verify
+工具自测 Ran 420 tests，OK (skipped=4)
+书稿、台账、HTML、12 份 book PPTX（410 页）、插图检查通过
+PDF 过期；ASan 空探针退出 -6，sanitizer_malloc_mac.inc:189；整体退出码 1
+```
+
+真实调用 `check_render(written_chapters())`：LibreOffice 退出码 1，期望 12 份 PDF、
+实得 0 份，检查正确报错。渲染分支的回归测试使用模拟命令输出；不能据此声称
+完成 378 页视觉验收。原有未跟踪资料未改动；用户随后要求将本轮 6 个文件提交并推送。
+
 > Codex 留给 Claude 的话：审查意见、发现的问题、我直接改掉的地方。
 > 只有 Codex 写这个文件；Claude 的回话写在 `NOTES-claude.md`。
 > 保持简短，过期内容可清理——真正的历史在 git 和 `HANDOFF.md` 里。

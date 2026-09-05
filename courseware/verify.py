@@ -3,7 +3,7 @@
 """verify.py —— 讲义与课件的一致性闸门。
 
 用法:
-    python3 verify.py             # 第 1–6 项，几秒
+    python3 verify.py             # 第 1–6、8、9 项
     python3 verify.py --render    # 加第 7 项渲染检查（需 libreoffice + poppler-utils）
 
 检查项:
@@ -13,7 +13,7 @@
   4 代码    content/ 与 deck.py 能 ast.parse；courseware/code/ 下每个 .cpp
             在 -Werror 下真编译、真运行，退出码为 0
   5 可重生成  课件能从 content/ 重建；页数与 README 的表格一致，
-            且重建产物与已提交的 .pptx **逐段文本相同**（防止改了源没重建）
+            且重建产物与已提交的 .pptx 包内文件一致（忽略 ZIP 时间戳）
   6 版面标记  放映稿的非等宽文字里不得印出 `**` 或反引号；条目不得以空白开头
   7 渲染    逐页检查文字未越出版心、未侵入页脚、**没有两段文字压在一起**；
             PDF 已嵌入中文字体（--render）
@@ -36,6 +36,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import zipfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -175,18 +176,10 @@ def check_code(chapters):
 README_ROW = re.compile(r'^\|\s*(\d+)\s*\|\s*`([^`]+)`\s*\|\s*(\d+)\s*\|', re.M)
 
 
-def slide_texts(path):
-    """把一份 pptx 摊平成「每页的文字列表」，用于逐段比对。"""
-    out = []
-    for slide in Presentation(str(path)).slides:
-        texts = []
-        for shape in slide.shapes:
-            if shape.has_text_frame:
-                texts.append(shape.text_frame.text)
-            elif shape.has_table:
-                texts += [c.text for r in shape.table.rows for c in r.cells]
-        out.append(texts)
-    return out
+def package_contents(path):
+    """Compare XML and media bytes without ZIP timestamps or compression metadata."""
+    with zipfile.ZipFile(path) as package:
+        return {name: package.read(name) for name in package.namelist()}
 
 
 def check_regenerate(chapters, modules):
@@ -207,10 +200,12 @@ def check_regenerate(chapters, modules):
             committed = HERE / (stem + '.pptx')
             if not committed.is_file():
                 continue
-            if slide_texts(rebuilt) != slide_texts(committed):
+            if package_contents(rebuilt) != package_contents(committed):
                 fail('5 可重生成',
                      f'{stem}.pptx 与 content/ch{ch}.py 不一致 —— '
                      f'改了源没重建？跑 `python3 build_all.py {ch}`')
+            else:
+                note(f'第{ch}章 {pages} 页，PPTX 包内文件与重建产物一致')
             if ch not in declared:
                 fail('5 可重生成', f'README.md 的文件清单里没有第{ch}章')
             else:
@@ -221,7 +216,6 @@ def check_regenerate(chapters, modules):
                 if dpages != pages:
                     fail('5 可重生成',
                          f'README.md 写第{ch}章 {dpages} 页，实际生成 {pages} 页')
-            note(f'第{ch}章 {pages} 页，与 content/ch{ch}.py 逐段一致')
 
 
 # ---------------------------------------------------------------- 6 版面标记
@@ -430,16 +424,28 @@ def check_render(chapters):
             return
         total = 0
         for pdf in pdfs:
-            fonts = subprocess.run(['pdffonts', str(pdf)],
-                                   capture_output=True, text=True).stdout
+            font_result = subprocess.run(['pdffonts', str(pdf)],
+                                         capture_output=True, text=True)
+            if font_result.returncode != 0:
+                fail('7 渲染', f'{pdf.name}: pdffonts 失败：{font_result.stderr.strip()}')
+                continue
+            fonts = font_result.stdout
             if not any(h in fonts for h in CJK_FONT_HINT):
                 fail('7 渲染', f'{pdf.name}: PDF 未嵌入任何已知中文字体，'
                                f'渲染结果可能是方框（本机字体环境限制）')
-            bbox = subprocess.run(['pdftotext', '-bbox', str(pdf), '-'],
-                                  capture_output=True, text=True).stdout
+            extracted = subprocess.run(['pdftotext', '-bbox', str(pdf), '-'],
+                                       capture_output=True, text=True)
+            if extracted.returncode != 0:
+                fail('7 渲染', f'{pdf.name}: pdftotext 失败：{extracted.stderr.strip()}')
+                continue
+            bbox = extracted.stdout
             pages = re.findall(
                 r'<page width="([\d.]+)" height="([\d.]+)">(.*?)</page>',
                 bbox, re.S)
+            expected_pages = len(Presentation(str(HERE / (pdf.stem + '.pptx'))).slides)
+            if not pages or len(pages) != expected_pages:
+                fail('7 渲染', f'{pdf.name}: 提取 {len(pages)} 页，课件 {expected_pages} 页')
+                continue
             total += len(pages)
             for pno, (pw, ph, body) in enumerate(pages, start=1):
                 pw, ph = float(pw), float(ph)

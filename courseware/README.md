@@ -66,7 +66,7 @@ courseware/
 ├── deck.py              # 排版引擎：主题配色、版面构件、自适应字号
 ├── build_all.py         # 课件生成入口
 ├── make_video.py        # 视频合成入口
-├── verify.py            # 闸门 8 项
+├── verify.py            # 闸门 9 项
 ├── content/
 │   ├── ch01.py             # 第 1 章课件的内容（META + SLIDES）
 │   └── ch01_narration.md   # 第 1 章的逐页旁白讲稿（手写维护）
@@ -178,7 +178,12 @@ ffmpeg —— 临时命令不可复现，下次再要一份就得凭记忆重敲
 ```bash
 python3 verify.py            # 第 1–6、8、9 项，几秒
 python3 verify.py --render   # 加第 7 项渲染检查（需 libreoffice + poppler-utils）
+python3 -m unittest discover -s . -p test_verify.py -v  # 门禁回归测试
 ```
+
+第 5 项逐项比较重建 PPTX 包内的 XML 与媒体字节，忽略 ZIP 时间戳和压缩方式；
+文字、图片、颜色或版式变化都需要重建。第 7 项要求文字提取成功且页数与 PPTX
+相符，提取失败或空输出不能视为渲染通过。
 
 | # | 检查 | 它回答的问题 |
 | --- | --- | --- |
