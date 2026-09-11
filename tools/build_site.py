@@ -81,6 +81,7 @@ PAGES = [
     ("ch12-advanced.md", "ch12-advanced.html", "body"),
     ("习题与参考答案.md", "exercises.html", "back"),
     ("期中复习题库.md", "midterm-review.html", "back"),
+    ("期末复习题库.md", "final-review.html", "back"),
     ("插图.md", "figures.html", "back"),
     ("勘误.md", "errata.html", "back"),
 ]
