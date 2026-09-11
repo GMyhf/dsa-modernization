@@ -156,8 +156,131 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <nav class="book"><b>导读</b><a href="index.html">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="midterm-review.html">期中复习题库（第 1—6 章）</a><a href="final-review.html" class="here">期末复习题库（第 7—12 章）</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a></nav>
 <main>
 
-<p>本篇按《数据结构与算法》期末复习大纲逐条配题，范围是第 7 章到第 12 章 （期中考过的第 1—6 章不直接考，但内容上会牵连到，那部分见 <a href="midterm-review.html">期中复习题库</a>）。大纲里标 ★ 的条目是重中之重，题号后同样标 ★。</p>
-<p><strong>怎么用</strong>：答案就跟在题目下面的引用块里，先把引用块遮住自己做一遍，再对答案。 每章按考试题型分五组：填空、选择、辨析与简答、算法填空与设计分析、证明。 分章题共 110 道；之后是一套完整的模拟卷（20 题），最后一页是速查表。</p>
+<p>本篇按 <strong>2025 年秋季学期的期末复习大纲</strong>逐条配题，范围是第 7 章到第 12 章 （期中考过的第 1—6 章不直接考，但内容上会牵连到，那部分见 <a href="midterm-review.html">期中复习题库</a>）。大纲里标 ★ 的条目是重中之重，题号后同样标 ★。</p>
+<p><strong>怎么用</strong>：答案就跟在题目下面的引用块里，先把引用块遮住自己做一遍，再对答案。 每章按考试题型分五组：填空、选择、辨析与简答、算法填空与设计分析、证明。 分章题共 118 道；之后是一套完整的模拟卷（20 题），最后一页是速查表。</p>
+<h3 id="大纲对照表"><a class="anchor" href="#大纲对照表">#</a>大纲对照表</h3>
+<p>把大纲逐条摊开，对上本篇的题号。<strong>没有哪一条是空的</strong>——这张表就是&quot;覆盖没覆盖&quot;的凭据。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">大纲条目</th>
+<th style="text-align:left">本篇题号</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><strong>7 章</strong> 图的深度/宽度周游</td>
+<td style="text-align:left">7-5、7-12</td>
+</tr>
+<tr>
+<td style="text-align:left">生成树、<strong>生成树林</strong>、最小生成树</td>
+<td style="text-align:left">7-2、7-12、7-17</td>
+</tr>
+<tr>
+<td style="text-align:left">★ 图的存储：相邻矩阵与邻接表</td>
+<td style="text-align:left">7-4、7-9、7-15</td>
+</tr>
+<tr>
+<td style="text-align:left">★ 拓扑排序（求若干个或所有序列）</td>
+<td style="text-align:left">7-6、7-13、7-16</td>
+</tr>
+<tr>
+<td style="text-align:left">★ 最短路径：Dijkstra、Floyd</td>
+<td style="text-align:left">7-7、7-11</td>
+</tr>
+<tr>
+<td style="text-align:left">★ 最小生成树：Prim、Kruskal 是贪心</td>
+<td style="text-align:left">7-10、7-14、7-17、7-20</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>★8 章</strong> 直接插入、★Shell、★快排、★基数、归并</td>
+<td style="text-align:left">8-2、8-3、8-4、8-6、8-15</td>
+</tr>
+<tr>
+<td style="text-align:left">比较/移动次数与最好最坏时空：<strong>含二分法插入排序</strong></td>
+<td style="text-align:left">8-13、8-14、8-19</td>
+</tr>
+<tr>
+<td style="text-align:left">各排序的平均时间</td>
+<td style="text-align:left">8-4、8-5</td>
+</tr>
+<tr>
+<td style="text-align:left">局部修改与混合应用</td>
+<td style="text-align:left">8-17、8-18</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>9 章</strong> ★ 置换选择排序</td>
+<td style="text-align:left">9-2、9-3、9-7、9-13</td>
+</tr>
+<tr>
+<td style="text-align:left">★ 多路归并：败者树、最佳归并树、读写盘次数</td>
+<td style="text-align:left">9-5、9-8、9-9、9-11、9-12、9-14</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>10 章</strong> 平均检索长度、二分检索、★散列表/同义词/碰撞/堆积</td>
+<td style="text-align:left">10-1、10-2、10-3、10-10</td>
+</tr>
+<tr>
+<td style="text-align:left">判定树与比较次数</td>
+<td style="text-align:left">10-2、10-10、10-18</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>散列函数的选择：除余、平方取中、折叠</strong></td>
+<td style="text-align:left">10-8、10-14</td>
+</tr>
+<tr>
+<td style="text-align:left">冲突处理：分离同义词子表、线性探测、双散列</td>
+<td style="text-align:left">10-4、10-12、10-13、10-15</td>
+</tr>
+<tr>
+<td style="text-align:left">★ 散列算法：查找、插入、删除与<strong>墓碑</strong></td>
+<td style="text-align:left">10-5、10-16、10-19</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>11 章</strong> 顺序/散列/倒排文件、静态与动态索引、红黑树</td>
+<td style="text-align:left">11-2、11-3、11-7</td>
+</tr>
+<tr>
+<td style="text-align:left">★ <strong>B 树与 B+ 树的插入</strong></td>
+<td style="text-align:left">11-15、11-16</td>
+</tr>
+<tr>
+<td style="text-align:left">★ <strong>B 树/B+ 树的读盘与写盘次数分析</strong></td>
+<td style="text-align:left">11-19、11-20</td>
+</tr>
+<tr>
+<td style="text-align:left">B 树/B+ 树的效率分析</td>
+<td style="text-align:left">11-5、11-12、11-13、11-21</td>
+</tr>
+<tr>
+<td style="text-align:left">★ <strong>红黑树的插入/删除</strong></td>
+<td style="text-align:left">11-11、11-17、11-18、11-22</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>12 章</strong> 特殊矩阵与稀疏矩阵的下标规律</td>
+<td style="text-align:left">12-1、12-2、12-4、12-12、12-18</td>
+</tr>
+<tr>
+<td style="text-align:left">★ 广义表的结构和周游</td>
+<td style="text-align:left">12-3、12-7</td>
+</tr>
+<tr>
+<td style="text-align:left">Trie 与 Patricia（只做了解）</td>
+<td style="text-align:left">12-13</td>
+</tr>
+<tr>
+<td style="text-align:left">最佳二叉搜索树</td>
+<td style="text-align:left">12-10、12-20</td>
+</tr>
+<tr>
+<td style="text-align:left">★ AVL 插入：LL/LR/RL/RR 与相关性质</td>
+<td style="text-align:left">12-5、12-8、12-15、12-19</td>
+</tr>
+<tr>
+<td style="text-align:left">★ 伸展树、<strong>半伸展树</strong></td>
+<td style="text-align:left">12-6、12-9、12-14、12-16</td>
+</tr>
+<tr>
+<td style="text-align:left">Splay 树的插入及<strong>区间操作</strong></td>
+<td style="text-align:left">12-16、12-17</td>
+</tr>
+</tbody></table></div>
 <p><strong>几个贯穿全篇的约定</strong>（考试写答案时最好也先声明一句）：</p>
 <ul>
 <li>数组下标、顶点编号若无特别说明一律<strong>从 0 开始</strong>；图的顶点数记 <span class="math">n</span>、边数记 <span class="math">e</span>。</li>
@@ -185,25 +308,29 @@ D-F 2   E-F 6</code></pre></div>
 <h3 id="一填空题"><a class="anchor" href="#一填空题">#</a>一、填空题</h3>
 <p><strong>7-1.</strong> 含 <span class="math">n</span> 个顶点的无向图，边数最多为 ____；含 <span class="math">n</span> 个顶点的有向图（不含自环、无重边）， 弧数最多为 ____。含 <span class="math">n</span> 个顶点的无向连通图，边数最少为 ____。</p>
 <blockquote><p><strong>答</strong>：<span class="math"><span class="frac"><span class="num">n(n<span class="bin">−</span><span class="upr">1</span>)</span><span class="den"><span class="upr">2</span></span></span></span>；<span class="math">n(n<span class="bin">−</span><span class="upr">1</span>)</span>；<span class="math">n<span class="bin">−</span><span class="upr">1</span></span>。 第三个的下界由「<span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 条边且连通即为树」给出——<strong>再少一条必然不连通</strong>。</p></blockquote>
-<p><strong>7-2.</strong> ★ 无向图 <span class="math">G</span> 有 8 个顶点、初始没有任何边。随机向 <span class="math">G</span> 添加 <span class="math">m</span> 条边， 要<strong>保证</strong> <span class="math">G</span> 一定连通，<span class="math">m</span> 最小是 ____。</p>
+<p><strong>7-2.</strong> 对无向图作深度优先或广度优先周游，<strong>连通图</strong>得到的是一棵 ____， <strong>非连通图</strong>得到的是若干棵树，合称 ____；它的棵数等于 ____。</p>
+<blockquote><p><strong>答</strong>：<strong>生成树</strong>；<strong>生成树林（生成森林）</strong>；<strong>图的连通分量个数</strong>。</p>
+<p>为什么棵数正好等于连通分量数：一次周游只能走遍起点所在的那个连通分量， 走完之后必须<strong>另选一个尚未访问的顶点重新出发</strong>，每重新出发一次就多一棵树。 所以「数生成树林里有几棵树」和「数连通分量」是同一件事—— 在遍历的外层加一句 <code>for v: if not visited[v] then DFS(v); cnt ← cnt + 1</code> 就能一并算出。</p>
+<p>两条顺带记住：含 <span class="math">n</span> 个顶点、<span class="math">c</span> 个连通分量的无向图， 其生成树林共有 <span class="math">n<span class="bin">−</span>c</span> 条边；深度优先得到的叫<strong>深度优先生成树（林）</strong>， 广度优先得到的叫<strong>广度优先生成树（林）</strong>，<strong>同一张图两者一般不同</strong>。</p></blockquote>
+<p><strong>7-3.</strong> ★ 无向图 <span class="math">G</span> 有 8 个顶点、初始没有任何边。随机向 <span class="math">G</span> 添加 <span class="math">m</span> 条边， 要<strong>保证</strong> <span class="math">G</span> 一定连通，<span class="math">m</span> 最小是 ____。</p>
 <blockquote><p><strong>答</strong>：<strong>22</strong>。 思路是<strong>先构造最坏情况，再加一条</strong>：把 <span class="math">n<span class="bin">−</span><span class="upr">1</span><span class="rel">=</span><span class="upr">7</span></span> 个顶点连成完全图， 用掉 <span class="math">C<sub><span class="upr">7</span></sub><sup><span class="upr">2</span></sup><span class="rel">=</span><span class="frac"><span class="num"><span class="upr">7</span><span class="bin">×</span><span class="upr">6</span></span><span class="den"><span class="upr">2</span></span></span><span class="rel">=</span><span class="upr">21</span></span> 条边，剩下那一个顶点仍然孤立—— 所以 21 条边<strong>不能保证</strong>连通。再加一条边时，它无论落在哪里都只能连到那个孤立点 （<span class="math"><span class="upr">7</span></span> 个点之间已经满了），图就连通了。故 <span class="math">m<span class="rel">=</span>C<sub>n<span class="bin">−</span><span class="upr">1</span></sub><sup><span class="upr">2</span></sup><span class="bin">+</span><span class="upr">1</span><span class="rel">=</span><span class="upr">21</span><span class="bin">+</span><span class="upr">1</span><span class="rel">=</span><span class="upr">22</span></span>。</p>
 <p><strong>一般公式</strong>：<span class="math">m<sub><span class="upr">min</span>&thinsp;</sub><span class="rel">=</span>C<sub>n<span class="bin">−</span><span class="upr">1</span></sub><sup><span class="upr">2</span></sup><span class="bin">+</span><span class="upr">1</span><span class="rel">=</span><span class="frac"><span class="num">(n<span class="bin">−</span><span class="upr">1</span>)(n<span class="bin">−</span><span class="upr">2</span>)</span><span class="den"><span class="upr">2</span></span></span><span class="bin">+</span><span class="upr">1</span></span>。 <strong>千万别答 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span></strong>——那是「可能连通」的最少边数，本题问的是「无论怎么放都连通」。 「保证」两个字一出现，就要去找<strong>反例最多能撑到几条边</strong>。</p></blockquote>
-<p><strong>7-3.</strong> ★ 含 <span class="math">n</span> 个顶点、<span class="math">e</span> 条边的图，用<strong>相邻矩阵</strong>存储需要 ____ 个存储单元， 用<strong>邻接表</strong>存储（无向图）需要 ____ 个表结点。当 ____ 时宜用相邻矩阵， 当 ____ 时宜用邻接表。</p>
+<p><strong>7-4.</strong> ★ 含 <span class="math">n</span> 个顶点、<span class="math">e</span> 条边的图，用<strong>相邻矩阵</strong>存储需要 ____ 个存储单元， 用<strong>邻接表</strong>存储（无向图）需要 ____ 个表结点。当 ____ 时宜用相邻矩阵， 当 ____ 时宜用邻接表。</p>
 <blockquote><p><strong>答</strong>：<span class="math">n<sup><span class="upr">2</span></sup></span>；<span class="math"><span class="upr">2</span>e</span>（每条无向边挂两次）；<strong>稠密图（<span class="math">e</span> 接近 <span class="math">n<sup><span class="upr">2</span></sup></span>）</strong>；<strong>稀疏图（<span class="math">e≪n<sup><span class="upr">2</span></sup></span>）</strong>。 有向图的邻接表只需 <span class="math">e</span> 个表结点。 两种结构的代价分野：<strong>判断 <span class="math">(i,j)</span> 是否有边</strong>，相邻矩阵 <span class="math">O(<span class="upr">1</span>)</span>、邻接表 <span class="math">O(d<sub>i</sub>)</span>； <strong>遍历某顶点的所有邻居</strong>，相邻矩阵 <span class="math">O(n)</span>、邻接表 <span class="math">O(d<sub>i</sub>)</span>。见第 7.3.1、7.3.2 节。</p></blockquote>
-<p><strong>7-4.</strong> 对 <span class="math">G<sub><span class="upr">1</span></sub></span> 从顶点 1 出发作深度优先周游（同一顶点的邻居按编号由小到大访问）， 得到的序列是 ____；作广度优先周游得到的序列是 ____。</p>
+<p><strong>7-5.</strong> 对 <span class="math">G<sub><span class="upr">1</span></sub></span> 从顶点 1 出发作深度优先周游（同一顶点的邻居按编号由小到大访问）， 得到的序列是 ____；作广度优先周游得到的序列是 ____。</p>
 <blockquote><p><strong>答</strong>：深度优先 <code>1 2 4 5 6 7 3</code>；广度优先 <code>1 2 3 4 5 6 7</code>。 深度优先：1 → 2 → 4 → 5 → 6 → 7（7 无出边，回溯）→ 5 的邻居都访问过 → …一路回到 1 → 3。 广度优先：第 0 层 {1}，第 1 层 {2,3}，第 2 层 {4,5}，第 3 层 {6}，第 4 层 {7}。 <strong>两种周游各需要一个辅助结构</strong>：深度优先用栈（或递归），广度优先用队列。</p></blockquote>
-<p><strong>7-5.</strong> ★ 有向无环图（DAG）一定存在 ____ 序列；该序列唯一的充要条件是 ____。</p>
+<p><strong>7-6.</strong> ★ 有向无环图（DAG）一定存在 ____ 序列；该序列唯一的充要条件是 ____。</p>
 <blockquote><p><strong>答</strong>：<strong>拓扑</strong>序列；充要条件是<strong>图中存在一条哈密顿路径</strong>（即一条经过全部顶点的有向路径）。 直观解释：拓扑序列唯一，当且仅当任何相邻两个顶点之间都有一条弧把先后关系钉死； 只要有某两个顶点互不可达，交换它们就能得到另一个合法的拓扑序列。</p></blockquote>
-<p><strong>7-6.</strong> Dijkstra 算法要求图中<strong>不含 ____</strong>；Floyd 算法允许 ____，但同样不允许 ____。 Floyd 的时间代价是 ____，空间代价是 ____。</p>
+<p><strong>7-7.</strong> Dijkstra 算法要求图中<strong>不含 ____</strong>；Floyd 算法允许 ____，但同样不允许 ____。 Floyd 的时间代价是 ____，空间代价是 ____。</p>
 <blockquote><p><strong>答</strong>：<strong>负权边</strong>；<strong>负权边</strong>；<strong>负权回路</strong>；<span class="math">Θ(n<sup><span class="upr">3</span></sup>)</span>；<span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>。 Dijkstra 的正确性依赖「已确定的顶点不会再被更短的路径改写」，负权边一出现这条就垮了。 Floyd 用的是动态规划（以「只允许经过前 <span class="math">k</span> 个顶点」为阶段），能容忍负权边； 但只要存在负权回路，「最短路径」这个概念本身就不成立（绕圈可以无限变小）。</p></blockquote>
 <h3 id="二选择题"><a class="anchor" href="#二选择题">#</a>二、选择题</h3>
-<p><strong>7-7.</strong> ★ （不定项）下面关于图的说法，正确的是（　）。 A. 若有向图中存在一个含两个以上顶点的强连通分量，则该图一定不是 DAG B. 若一个有向图存在拓扑序列，则它一定是 DAG C. 对 DAG 作深度优先搜索，得到的访问序列一定是它的一个拓扑序列 D. 「各边权值互不相同」是「最小生成树唯一」的充要条件</p>
-<blockquote><p><strong>答：A、B</strong>。 A 对：含两个以上顶点的强连通分量里任意两点互相可达，必然成环，与「无环」矛盾。 （注意题面加了「两个以上顶点」——单个顶点本身也算一个强连通分量，那不构成环。） B 对：拓扑序列把所有弧都变成「从前指向后」，若有环则环上的顶点谁都不能排在最前，矛盾。 这也是「拓扑排序可用于判环」的依据。 C <strong>错</strong>：DFS 的<strong>访问（发现）次序</strong>不是拓扑序。反例就在 7-4：<span class="math">G<sub><span class="upr">1</span></sub></span> 的 DFS 序列 <code>1 2 4 5 6 7 3</code> 把 3 排在了 2 后面，而弧 <span class="math"><span class="upr">3</span><span class="rel">→</span><span class="upr">2</span></span> 要求 3 在前。 <strong>正确的做法是取 DFS 的「完成时间」逆序</strong>（即后序的逆序）。 D <strong>错</strong>：它是<strong>充分不必要</strong>条件。<span class="math">G<sub><span class="upr">2</span></sub></span> 里有三条权为 5 的边，最小生成树却仍然唯一（见 7-16）。 必要条件要弱得多：<strong>每一条「切」上的最小边唯一</strong>即可。</p></blockquote>
-<p><strong>7-8.</strong> 用相邻矩阵存储含 <span class="math">n</span> 个顶点的图，求某个顶点的<strong>出度</strong>需要（　）时间。 A. <span class="math">O(<span class="upr">1</span>)</span>　B. <span class="math">O(n)</span>　C. <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>　D. <span class="math">O(e)</span></p>
+<p><strong>7-8.</strong> ★ （不定项）下面关于图的说法，正确的是（　）。 A. 若有向图中存在一个含两个以上顶点的强连通分量，则该图一定不是 DAG B. 若一个有向图存在拓扑序列，则它一定是 DAG C. 对 DAG 作深度优先搜索，得到的访问序列一定是它的一个拓扑序列 D. 「各边权值互不相同」是「最小生成树唯一」的充要条件</p>
+<blockquote><p><strong>答：A、B</strong>。 A 对：含两个以上顶点的强连通分量里任意两点互相可达，必然成环，与「无环」矛盾。 （注意题面加了「两个以上顶点」——单个顶点本身也算一个强连通分量，那不构成环。） B 对：拓扑序列把所有弧都变成「从前指向后」，若有环则环上的顶点谁都不能排在最前，矛盾。 这也是「拓扑排序可用于判环」的依据。 C <strong>错</strong>：DFS 的<strong>访问（发现）次序</strong>不是拓扑序。反例就在 7-5：<span class="math">G<sub><span class="upr">1</span></sub></span> 的 DFS 序列 <code>1 2 4 5 6 7 3</code> 把 3 排在了 2 后面，而弧 <span class="math"><span class="upr">3</span><span class="rel">→</span><span class="upr">2</span></span> 要求 3 在前。 <strong>正确的做法是取 DFS 的「完成时间」逆序</strong>（即后序的逆序）。 D <strong>错</strong>：它是<strong>充分不必要</strong>条件。<span class="math">G<sub><span class="upr">2</span></sub></span> 里有三条权为 5 的边，最小生成树却仍然唯一（见 7-17）。 必要条件要弱得多：<strong>每一条「切」上的最小边唯一</strong>即可。</p></blockquote>
+<p><strong>7-9.</strong> 用相邻矩阵存储含 <span class="math">n</span> 个顶点的图，求某个顶点的<strong>出度</strong>需要（　）时间。 A. <span class="math">O(<span class="upr">1</span>)</span>　B. <span class="math">O(n)</span>　C. <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>　D. <span class="math">O(e)</span></p>
 <blockquote><p><strong>答：B</strong>。出度等于该行中非零元素的个数，必须扫完一整行。 对照：邻接表求出度是 <span class="math">O(d)</span>（<span class="math">d</span> 为出度本身），但求<strong>入度</strong>反而要扫遍整张表，<span class="math">O(n<span class="bin">+</span>e)</span>—— 这正是需要「逆邻接表」或十字链表的原因。</p></blockquote>
-<p><strong>7-9.</strong> ★ 用 Prim 算法和 Kruskal 算法求最小生成树，下列说法正确的是（　）。 A. 两者得到的最小生成树一定相同 B. 两者得到的最小生成树权值之和一定相同 C. Prim 适合稀疏图，Kruskal 适合稠密图 D. Kruskal 每一步都要判断加入的边是否使已选边集连通</p>
+<p><strong>7-10.</strong> ★ 用 Prim 算法和 Kruskal 算法求最小生成树，下列说法正确的是（　）。 A. 两者得到的最小生成树一定相同 B. 两者得到的最小生成树权值之和一定相同 C. Prim 适合稀疏图，Kruskal 适合稠密图 D. Kruskal 每一步都要判断加入的边是否使已选边集连通</p>
 <blockquote><p><strong>答：B</strong>。最小生成树可能不唯一（有并列权值时），但<strong>权值之和是确定的</strong>，所以 A 错 B 对。 C 说反了：Prim 的代价与顶点数相关（<span class="math">O(n<sup><span class="upr">2</span></sup>)</span> 或堆优化到 <span class="math">O(e&thinsp;<span class="upr">log</span>&thinsp;n)</span>），适合<strong>稠密图</strong>； Kruskal 的代价是 <span class="math">O(e&thinsp;<span class="upr">log</span>&thinsp;e)</span>，适合<strong>稀疏图</strong>。 D 错：Kruskal 判的是「加入这条边会不会<strong>成环</strong>」，用并查集判两端是否已在同一个连通分量里， 不是判「是否连通」。</p></blockquote>
-<p><strong>7-10.</strong> 对 <span class="math">G<sub><span class="upr">1</span></sub></span> 用 Dijkstra 算法求顶点 1 到其余各点的最短路径， 除 1 之外各顶点<strong>进入已确定集合</strong>的先后次序是（　）。 A. <code>2 3 4 5 6 7</code>　B. <code>3 2 4 5 6 7</code>　C. <code>3 2 5 4 6 7</code>　D. <code>2 4 3 5 6 7</code></p>
+<p><strong>7-11.</strong> 对 <span class="math">G<sub><span class="upr">1</span></sub></span> 用 Dijkstra 算法求顶点 1 到其余各点的最短路径， 除 1 之外各顶点<strong>进入已确定集合</strong>的先后次序是（　）。 A. <code>2 3 4 5 6 7</code>　B. <code>3 2 4 5 6 7</code>　C. <code>3 2 5 4 6 7</code>　D. <code>2 4 3 5 6 7</code></p>
 <blockquote><p><strong>答：B</strong>。Dijkstra 每轮挑「当前距离估计最小的未确定顶点」，所以 <strong>加入次序就是最短距离由小到大的次序</strong>：</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">次序</th>
@@ -250,7 +377,7 @@ D-F 2   E-F 6</code></pre></div>
 </tbody></table></div>
 <p>注意 2 的最短路是 <span class="math"><span class="upr">1</span><span class="rel">→</span><span class="upr">3</span><span class="rel">→</span><span class="upr">2</span></span>（长 3）而不是直接的 <span class="math"><span class="upr">1</span><span class="rel">→</span><span class="upr">2</span></span>（长 4）—— <strong>顶点被&quot;确定&quot;之前，它的距离估计还会被后确定的邻居改小</strong>，这正是松弛的意义。</p></blockquote>
 <h3 id="三辨析与简答"><a class="anchor" href="#三辨析与简答">#</a>三、辨析与简答</h3>
-<p><strong>7-11.</strong> 辨析：「图的深度优先生成树和广度优先生成树，树高一定不同。」</p>
+<p><strong>7-12.</strong> 辨析：「图的深度优先生成树和广度优先生成树，树高一定不同。」</p>
 <blockquote><p><strong>答：不一定。</strong> 两者都可能相同，也可能差很多。</p>
 <ul>
 <li>极端一：图本身就是一条链，两种周游得到的生成树都是那条链，树高相同。</li>
@@ -258,7 +385,7 @@ D-F 2   E-F 6</code></pre></div>
 <li>一般情况下<strong>广度优先生成树的高度不会超过深度优先生成树</strong>，因为 BFS 树上每个顶点的 层号就是它到起点的<strong>最少边数</strong>，这是任何生成树都达不到更小的。</li>
 </ul>
 <p>真正稳妥的说法是：<strong>BFS 生成树给出无权图的最短路径，DFS 生成树不给</strong>。</p></blockquote>
-<p><strong>7-12.</strong> ★ 简答：拓扑排序的算法思想是什么？怎样用它判断有向图中是否有环？ 若图中有环，算法会停在什么状态？</p>
+<p><strong>7-13.</strong> ★ 简答：拓扑排序的算法思想是什么？怎样用它判断有向图中是否有环？ 若图中有环，算法会停在什么状态？</p>
 <blockquote><p><strong>答</strong>： <strong>思想</strong>（入度法）：反复挑一个<strong>入度为 0</strong> 的顶点输出，并把它连同它的出边一起删掉 （即把各后继的入度减一）；重复直到没有顶点可挑。</p>
 <div class="codeblock" data-lang="text"><pre><code>TopoSort(G)
     算出每个顶点的入度，把入度为 0 的顶点全部入栈（或队列）
@@ -271,7 +398,7 @@ D-F 2   E-F 6</code></pre></div>
     if count &lt; n then 报告「图中有环」</code></pre></div>
 <p><strong>判环</strong>：算法结束时若输出的顶点数 <span class="math">count&lt;n</span>，说明剩下的顶点入度都不为 0—— 它们互相牵制，必定构成（或通向）一个环。<strong>这就是拓扑排序判环的全部依据。</strong></p>
 <p><strong>代价</strong>：用邻接表时 <span class="math">O(n<span class="bin">+</span>e)</span>，每条边恰好被处理一次。 <strong>另一种做法</strong>是 DFS：按<strong>完成时间逆序</strong>输出即得拓扑序列；DFS 过程中若遇到指向 「已发现但未完成」顶点的弧（后向边），即说明有环。</p></blockquote>
-<p><strong>7-13.</strong> ★ 简答：Prim 与 Kruskal 都是贪心算法。分别说明它们每一步&quot;贪&quot;的是什么， 并各用一句话说明为什么贪心在这里是对的。</p>
+<p><strong>7-14.</strong> ★ 简答：Prim 与 Kruskal 都是贪心算法。分别说明它们每一步&quot;贪&quot;的是什么， 并各用一句话说明为什么贪心在这里是对的。</p>
 <blockquote><p><strong>答</strong>：</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left"></th>
@@ -299,8 +426,8 @@ D-F 2   E-F 6</code></pre></div>
 <td style="text-align:left"><span class="math">O(e&thinsp;<span class="upr">log</span>&thinsp;e)</span></td>
 </tr>
 </tbody></table></div>
-<p><strong>为什么贪心对</strong>：两者都靠同一条「切性质」—— 把顶点集任意划分成两半，<strong>横跨这条切的最小边一定属于某棵最小生成树</strong>。 Prim 每步取的是「已选点集」这条切上的最小边； Kruskal 每步取的边，也总是它所连接的两个连通分量之间的最小边。 证明见 7-19。</p></blockquote>
-<p><strong>7-14.</strong> 简答：相邻矩阵与邻接表，在「判断两点间是否有边」「求某点全部邻居」 「求全图的边数」三件事上各是什么代价？由此说明该怎样选。</p>
+<p><strong>为什么贪心对</strong>：两者都靠同一条「切性质」—— 把顶点集任意划分成两半，<strong>横跨这条切的最小边一定属于某棵最小生成树</strong>。 Prim 每步取的是「已选点集」这条切上的最小边； Kruskal 每步取的边，也总是它所连接的两个连通分量之间的最小边。 证明见 7-20。</p></blockquote>
+<p><strong>7-15.</strong> 简答：相邻矩阵与邻接表，在「判断两点间是否有边」「求某点全部邻居」 「求全图的边数」三件事上各是什么代价？由此说明该怎样选。</p>
 <blockquote><p><strong>答</strong>：</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">操作</th>
@@ -330,11 +457,11 @@ D-F 2   E-F 6</code></pre></div>
 </tbody></table></div>
 <p><strong>选法</strong>：稠密图（<span class="math">e<span class="rel">=</span>Θ(n<sup><span class="upr">2</span></sup>)</span>）或频繁问「某两点有没有边」时用相邻矩阵； 稀疏图或以「遍历邻居」为主时用邻接表。 一个实用判据：<strong>算法里若出现「for 每个邻居」就倾向邻接表，出现「if 有边」就倾向矩阵</strong>。</p></blockquote>
 <h3 id="四算法设计与分析"><a class="anchor" href="#四算法设计与分析">#</a>四、算法设计与分析</h3>
-<p><strong>7-15.</strong> ★ 对 <span class="math">G<sub><span class="upr">1</span></sub></span> 求出所有拓扑序列，并说明理由。</p>
+<p><strong>7-16.</strong> ★ 对 <span class="math">G<sub><span class="upr">1</span></sub></span> 求出所有拓扑序列，并说明理由。</p>
 <blockquote><p><strong>答</strong>：<strong>只有一个</strong>：<code>1 3 2 4 5 6 7</code>。</p>
 <p>用入度法推一遍：初始入度 <span class="math"><span class="upr">1</span>:<span class="upr">0</span></span>、<span class="math"><span class="upr">2</span>:<span class="upr">2</span></span>、<span class="math"><span class="upr">3</span>:<span class="upr">1</span></span>、<span class="math"><span class="upr">4</span>:<span class="upr">2</span></span>、<span class="math"><span class="upr">5</span>:<span class="upr">2</span></span>、<span class="math"><span class="upr">6</span>:<span class="upr">2</span></span>、<span class="math"><span class="upr">7</span>:<span class="upr">2</span></span>。 入度为 0 的只有 1 → 输出 1，删去 <span class="math"><span class="upr">1</span><span class="rel">→</span><span class="upr">2</span>,<span class="upr">1</span><span class="rel">→</span><span class="upr">3</span></span> → 3 的入度变 0（2 还剩 1，来自 <span class="math"><span class="upr">3</span><span class="rel">→</span><span class="upr">2</span></span>）→ 输出 3 → 2 入度变 0 → 输出 2 → 4 入度变 0 → 输出 4 → 5 → 6 → 7。 <strong>每一步可选的顶点都只有一个</strong>，所以序列唯一。</p>
 <p><strong>更快的判据</strong>：拓扑序列唯一 <span class="math"><span class="rel">↔</span></span> 图中存在哈密顿路径。 这里 <span class="math"><span class="upr">1</span><span class="rel">→</span><span class="upr">3</span><span class="rel">→</span><span class="upr">2</span><span class="rel">→</span><span class="upr">4</span><span class="rel">→</span><span class="upr">5</span><span class="rel">→</span><span class="upr">6</span><span class="rel">→</span><span class="upr">7</span></span> 正是一条经过全部 7 个顶点的有向路径， 它把任意相邻两点的先后关系都钉死了，因此别无选择。 反过来，只要某两个顶点之间互不可达，把它们对调就能造出第二个拓扑序列。</p></blockquote>
-<p><strong>7-16.</strong> ★ 对 <span class="math">G<sub><span class="upr">2</span></sub></span> 分别用 Kruskal 和 Prim（从 <span class="math">A</span> 出发）求最小生成树， 写出选边次序并画出结果；该最小生成树唯一吗？</p>
+<p><strong>7-17.</strong> ★ 对 <span class="math">G<sub><span class="upr">2</span></sub></span> 分别用 Kruskal 和 Prim（从 <span class="math">A</span> 出发）求最小生成树， 写出选边次序并画出结果；该最小生成树唯一吗？</p>
 <blockquote><p><strong>答</strong>： <strong>Kruskal</strong>（按权从小到大扫，成环就跳过）：</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">序</th>
@@ -388,8 +515,8 @@ D-F 2   E-F 6</code></pre></div>
        F ──2── D</code></pre></div>
 <p>边集 <span class="math">{AC(<span class="upr">1</span>), CF(<span class="upr">4</span>), FD(<span class="upr">2</span>), CB(<span class="upr">5</span>), BE(<span class="upr">3</span>)}</span>，总权 <span class="math"><span class="upr">1</span><span class="bin">+</span><span class="upr">4</span><span class="bin">+</span><span class="upr">2</span><span class="bin">+</span><span class="upr">5</span><span class="bin">+</span><span class="upr">3</span><span class="rel">=</span><span class="upr">15</span></span>。</p>
 <p><strong>唯一吗？唯一。</strong> 虽然图中有三条权为 5 的边（A-D、B-C、C-D），但： 处理到权 5 时，<span class="math">A</span>、<span class="math">C</span>、<span class="math">D</span>、<span class="math">F</span> 已经在同一个连通分量里，A-D 与 C-D 都会成环被跳过， <strong>能用的权 5 边只有 B-C 一条</strong>，没有选择余地。</p>
-<p><strong>这正是 7-7 选项 D 的反例</strong>：「边权互不相同」能保证 MST 唯一，但<strong>不是必要条件</strong>。</p></blockquote>
-<p><strong>7-17.</strong> ★ 给定一个用邻接表存储的无向图，设计算法判断它是否是一棵<strong>树</strong>， 并分析代价。</p>
+<p><strong>这正是 7-8 选项 D 的反例</strong>：「边权互不相同」能保证 MST 唯一，但<strong>不是必要条件</strong>。</p></blockquote>
+<p><strong>7-18.</strong> ★ 给定一个用邻接表存储的无向图，设计算法判断它是否是一棵<strong>树</strong>， 并分析代价。</p>
 <blockquote><p><strong>答</strong>：<strong>基本思想</strong>——无向图是树，当且仅当它<strong>连通</strong>且<strong>边数恰为 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span></strong> （这两条任取其一加上「无环」也等价，但边数最好数，无需额外判环）。</p>
 <p>用到的 ADT：</p>
 <div class="codeblock" data-lang="text"><pre><code>Graph
@@ -409,7 +536,7 @@ Queue：EnQueue / DeQueue / Empty，均为 O(1)</code></pre></div>
                 visited[w] ← true;  cnt ← cnt + 1;  Q.EnQueue(w)
     return cnt = n                          // 连通</code></pre></div>
 <p><strong>正确性</strong>：<span class="math">e<span class="rel">=</span>n<span class="bin">−</span><span class="upr">1</span></span> 且连通 <span class="math"><span class="rel">⇒</span></span> 无环（否则去掉环上一条边仍连通，边数就少于 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 了， 与连通图至少 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 条边矛盾），即为树。 <strong>代价</strong>：时间 <span class="math">O(n<span class="bin">+</span>e)</span>，空间 <span class="math">O(n)</span>（<code>visited</code> 加队列）。 <strong>常见错</strong>：只判连通不判边数——那放过了所有含环的连通图； 只判边数不判连通——那放过了「一个环 + 一棵树」这种边数恰好 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 却不连通的图。</p></blockquote>
-<p><strong>7-18.</strong> 设计算法求有向图中从顶点 <span class="math">u</span> 到顶点 <span class="math">v</span> 的<strong>所有</strong>简单路径（不重复经过顶点）， 并分析最坏代价。</p>
+<p><strong>7-19.</strong> 设计算法求有向图中从顶点 <span class="math">u</span> 到顶点 <span class="math">v</span> 的<strong>所有</strong>简单路径（不重复经过顶点）， 并分析最坏代价。</p>
 <blockquote><p><strong>答</strong>：<strong>基本思想</strong>——带回溯的深度优先搜索。 沿着一条路径往下走，把走过的顶点标记为「在当前路径上」；走到 <span class="math">v</span> 就输出整条路径； <strong>无论成功还是走不通，返回时都要把标记撤销</strong>（这一步叫回溯）， 否则别的路径会被误认为已经走过。</p>
 <div class="codeblock" data-lang="text"><pre><code>AllPaths(u, v)
     path ← 空表;  onPath[0..n-1] ← false
@@ -424,11 +551,11 @@ DFS(x)
     onPath[x] ← false;  path.removeLast()      // 回溯：撤销标记</code></pre></div>
 <p><strong>代价</strong>：路径条数本身最坏可达 <span class="math">O((n<span class="bin">−</span><span class="upr">2</span>)!)</span>（完全图里 <span class="math">u</span> 到 <span class="math">v</span> 的简单路径数）， 所以<strong>任何算法都不可能是多项式的</strong>——输出本身就是指数量级。 单条路径的输出代价 <span class="math">O(n)</span>，算法的时间与「路径条数 × 路径长度」同阶。 <strong>和单纯的 DFS 的区别必须写清楚</strong>：普通 DFS 的 <code>visited</code> 一旦置位就不撤销， 每个顶点只访问一次，<span class="math">O(n<span class="bin">+</span>e)</span>；本题的 <code>onPath</code> <strong>必须撤销</strong>，代价因此是指数的。</p></blockquote>
 <h3 id="五证明题"><a class="anchor" href="#五证明题">#</a>五、证明题</h3>
-<p><strong>7-19.</strong> ★ 证明最小生成树的「切性质」：把顶点集 <span class="math">V</span> 划分成非空的 <span class="math">S</span> 与 <span class="math">V∖S</span>， 若横跨这两部分的边中权值最小的边 <span class="math">e</span> 唯一，则 <span class="math">e</span> 一定属于<strong>每一棵</strong>最小生成树。</p>
+<p><strong>7-20.</strong> ★ 证明最小生成树的「切性质」：把顶点集 <span class="math">V</span> 划分成非空的 <span class="math">S</span> 与 <span class="math">V∖S</span>， 若横跨这两部分的边中权值最小的边 <span class="math">e</span> 唯一，则 <span class="math">e</span> 一定属于<strong>每一棵</strong>最小生成树。</p>
 <blockquote><p><strong>证明.</strong> 设 <span class="math">T</span> 是任意一棵最小生成树，反设 <span class="math">e<span class="rel">=</span>(u,v)<span class="rel">∉</span>T</span>（<span class="math">u<span class="rel">∈</span>S</span>，<span class="math">v<span class="rel">∉</span>S</span>）。 <span class="math">T</span> 是生成树，<span class="math">u</span> 与 <span class="math">v</span> 之间在 <span class="math">T</span> 上有唯一路径 <span class="math">P</span>。 <span class="math">P</span> 从 <span class="math">S</span> 内的 <span class="math">u</span> 走到 <span class="math">S</span> 外的 <span class="math">v</span>，<strong>必然至少有一条边 <span class="math">f</span> 横跨这条切</strong>。 由 <span class="math">e</span> 是横跨边中权最小且唯一，有 <span class="math">w(e)&lt;w(f)</span>。</p>
 <p>把 <span class="math">f</span> 从 <span class="math">T</span> 中去掉、把 <span class="math">e</span> 加进来，得到 <span class="math">T&#x27;<span class="rel">=</span>T<span class="bin">−</span>f<span class="bin">+</span>e</span>。 去掉 <span class="math">f</span> 使 <span class="math">T</span> 分成两个连通块，而 <span class="math">e</span> 的两端恰好分属这两块（<span class="math">P</span> 上 <span class="math">f</span> 的两侧）， 所以 <span class="math">T&#x27;</span> 仍是生成树；而 <span class="math">w(T&#x27;)<span class="rel">=</span>w(T)<span class="bin">−</span>w(f)<span class="bin">+</span>w(e)&lt;w(T)</span>，与 <span class="math">T</span> 最小矛盾。∎</p>
-<p><strong>推论</strong>：若全部边权互不相同，则每条切的最小边都唯一，因此<strong>最小生成树唯一</strong>。 反过来不成立——见 7-16 的 <span class="math">G<sub><span class="upr">2</span></sub></span>，边权有重复而 MST 仍唯一。</p></blockquote>
-<p><strong>7-20.</strong> ★ 设 <span class="math">G</span> 是无向简单图，对 <span class="math">G</span> 作深度优先搜索得到一棵 DFS 树 <span class="math">T</span>（可取任意顶点为根）。 证明：<span class="math">G</span> 中所有<strong>不在 <span class="math">T</span> 上</strong>的边 <span class="math">(u,v)</span>，<span class="math">u</span> 与 <span class="math">v</span> 在 <span class="math">T</span> 上必有<strong>祖先后代关系</strong>。</p>
+<p><strong>推论</strong>：若全部边权互不相同，则每条切的最小边都唯一，因此<strong>最小生成树唯一</strong>。 反过来不成立——见 7-17 的 <span class="math">G<sub><span class="upr">2</span></sub></span>，边权有重复而 MST 仍唯一。</p></blockquote>
+<p><strong>7-21.</strong> ★ 设 <span class="math">G</span> 是无向简单图，对 <span class="math">G</span> 作深度优先搜索得到一棵 DFS 树 <span class="math">T</span>（可取任意顶点为根）。 证明：<span class="math">G</span> 中所有<strong>不在 <span class="math">T</span> 上</strong>的边 <span class="math">(u,v)</span>，<span class="math">u</span> 与 <span class="math">v</span> 在 <span class="math">T</span> 上必有<strong>祖先后代关系</strong>。</p>
 <blockquote><p><strong>证明.</strong> 不妨设 DFS 过程中先发现 <span class="math">u</span>、后发现 <span class="math">v</span>（「发现」指首次访问）。 考察<strong>刚发现 <span class="math">v</span> 的那一刻</strong>。此时 <span class="math">u</span> 已被发现，只有两种可能：</p>
 <ol>
 <li><strong><span class="math">u</span> 已发现、尚未结束</strong>（还在递归栈上）。此时 DFS 正在遍历以 <span class="math">u</span> 为根的那棵子树， 而 <span class="math">v</span> 是在这段时间内被发现的，所以 <span class="math">v</span> 落在 <span class="math">u</span> 的子树里，即 <span class="math">u</span> 是 <span class="math">v</span> 的祖先。</li>
@@ -436,11 +563,11 @@ DFS(x)
 </ol>
 <p>所以只能是情形 1，<span class="math">u</span> 是 <span class="math">v</span> 的祖先。∎</p>
 <p><strong>这条结论的分量</strong>：它说明<strong>无向图的 DFS 只会产生树边和「后向边」（回边）， 不存在横叉边</strong>。判环、求割点与桥、求强连通分量这些算法都建立在这一条上。 （有向图不成立——有向图的 DFS 可以产生横叉边。）</p></blockquote>
-<p><strong>7-21.</strong> 证明：<span class="math">n</span> 个顶点的无向图若边数超过 <span class="math"><span class="frac"><span class="num">(n<span class="bin">−</span><span class="upr">1</span>)(n<span class="bin">−</span><span class="upr">2</span>)</span><span class="den"><span class="upr">2</span></span></span></span>，则它一定连通。</p>
+<p><strong>7-22.</strong> 证明：<span class="math">n</span> 个顶点的无向图若边数超过 <span class="math"><span class="frac"><span class="num">(n<span class="bin">−</span><span class="upr">1</span>)(n<span class="bin">−</span><span class="upr">2</span>)</span><span class="den"><span class="upr">2</span></span></span></span>，则它一定连通。</p>
 <blockquote><p><strong>证明.</strong> 反设图不连通，则顶点集可分成两个非空部分，分别含 <span class="math">k</span> 与 <span class="math">n<span class="bin">−</span>k</span> 个顶点 （<span class="math"><span class="upr">1</span><span class="rel">≤</span>k<span class="rel">≤</span>n<span class="bin">−</span><span class="upr">1</span></span>），两部分之间没有边。于是边数至多为</p>
 <div class="math math-display"><span class="frac"><span class="num">k(k<span class="bin">−</span><span class="upr">1</span>)</span><span class="den"><span class="upr">2</span></span></span><span class="bin">+</span><span class="frac"><span class="num">(n<span class="bin">−</span>k)(n<span class="bin">−</span>k<span class="bin">−</span><span class="upr">1</span>)</span><span class="den"><span class="upr">2</span></span></span></div>
 <p>把它看成 <span class="math">k</span> 的二次函数，在 <span class="math">k<span class="rel">=</span><span class="upr">1</span></span> 或 <span class="math">k<span class="rel">=</span>n<span class="bin">−</span><span class="upr">1</span></span> 处取最大值 <span class="math"><span class="frac"><span class="num">(n<span class="bin">−</span><span class="upr">1</span>)(n<span class="bin">−</span><span class="upr">2</span>)</span><span class="den"><span class="upr">2</span></span></span></span>。 这与「边数超过 <span class="math"><span class="frac"><span class="num">(n<span class="bin">−</span><span class="upr">1</span>)(n<span class="bin">−</span><span class="upr">2</span>)</span><span class="den"><span class="upr">2</span></span></span></span>」矛盾。∎</p>
-<p>这正是 7-2 的严格版本：<strong>最坏的不连通图就是「一个 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 阶完全图 + 一个孤立点」</strong>。</p></blockquote>
+<p>这正是 7-3 的严格版本：<strong>最坏的不连通图就是「一个 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 阶完全图 + 一个孤立点」</strong>。</p></blockquote>
 <hr>
 <h2 id="第-8-章-内排序"><a class="anchor" href="#第-8-章-内排序">#</a>第 8 章 内排序</h2>
 <p>本章反复用到同一个初始序列：<span class="math">A<span class="rel">=</span>{<span class="upr">9</span>,<span class="upr">4</span>,<span class="upr">8</span>,<span class="upr">5</span>,<span class="upr">2</span>,<span class="upr">7</span>,<span class="upr">3</span>,<span class="upr">6</span>}</span>（<span class="math">n<span class="rel">=</span><span class="upr">8</span></span>），排序一律从小到大。</p>
@@ -472,7 +599,7 @@ DFS(x)
 <p><strong>8-5.</strong> 归并排序的空间代价是 ____，堆排序是 ____，快速排序是 ____。</p>
 <blockquote><p><strong>答</strong>：<span class="math">O(n)</span>（辅助数组）；<span class="math">O(<span class="upr">1</span>)</span>；<span class="math">O(<span class="upr">log</span>&thinsp;n)</span> 平均、<span class="math">O(n)</span> 最坏（<strong>递归栈</strong>）。 快速排序常被说成「原地排序」，那只对数据而言；<strong>它的递归栈不是免费的</strong>， 先递归较小的一侧、对较大的一侧改用循环，可以把栈深稳定在 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>。</p></blockquote>
 <p><strong>8-6.</strong> ★ 对 <span class="math">n</span> 个 <span class="math">d</span> 位、每位取值 <span class="math"><span class="upr">0..</span>r<span class="bin">−</span><span class="upr">1</span></span> 的整数作<strong>最低位优先</strong>基数排序， 需要 ____ 趟分配与收集，时间代价 ____，空间代价 ____。</p>
-<blockquote><p><strong>答</strong>：<span class="math">d</span> 趟；<span class="math">O(d(n<span class="bin">+</span>r))</span>；<span class="math">O(n<span class="bin">+</span>r)</span>。 对 <span class="math">n</span> 个三位十进制数就是 3 趟、每趟 10 个桶。 <strong>基数排序能突破 <span class="math">Ω(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 下界，是因为它不是基于比较的</strong>—— 它用的是关键码的<strong>内部结构</strong>（按位分配），下界定理管不到它（见 8-19）。 代价是要求关键码能拆成固定位数、且取值范围有限。</p></blockquote>
+<blockquote><p><strong>答</strong>：<span class="math">d</span> 趟；<span class="math">O(d(n<span class="bin">+</span>r))</span>；<span class="math">O(n<span class="bin">+</span>r)</span>。 对 <span class="math">n</span> 个三位十进制数就是 3 趟、每趟 10 个桶。 <strong>基数排序能突破 <span class="math">Ω(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 下界，是因为它不是基于比较的</strong>—— 它用的是关键码的<strong>内部结构</strong>（按位分配），下界定理管不到它（见 8-20）。 代价是要求关键码能拆成固定位数、且取值范围有限。</p></blockquote>
 <h3 id="二选择题-1"><a class="anchor" href="#二选择题-1">#</a>二、选择题</h3>
 <p><strong>8-7.</strong> ★ 对 <span class="math">A<span class="rel">=</span>{<span class="upr">9</span>,<span class="upr">4</span>,<span class="upr">8</span>,<span class="upr">5</span>,<span class="upr">2</span>,<span class="upr">7</span>,<span class="upr">3</span>,<span class="upr">6</span>}</span> 从小到大排序，下列序列<strong>不可能</strong>是某一趟排序结束后的 中间状态的是（　）。 A. <code>4 9 8 5 2 7 3 6</code> B. <code>2 4 8 5 9 7 3 6</code> C. <code>4 8 5 2 7 3 6 9</code> D. <code>4 9 5 8 2 7 3 6</code> E. <code>9 4 8 6 2 7 3 5</code></p>
 <blockquote><p><strong>答：E</strong>。前四个各自对得上一种算法：</p>
@@ -506,9 +633,9 @@ DFS(x)
 <p><strong>8-8.</strong> 下列排序算法中，<strong>每一趟结束后都能确定至少一个元素的最终位置</strong>的是（　）。 A. 直接插入排序　B. 归并排序　C. 冒泡排序与快速排序　D. Shell 排序</p>
 <blockquote><p><strong>答：C</strong>。冒泡每趟把当前最大值送到末尾；快速排序每趟把轴放到它的最终位置。 A、B、D 都不具备这个性质——直接插入排完前 <span class="math">i</span> 个，但它们在全局中的位置还会被后面的元素挤动； 归并到最后一趟才定位；Shell 更是要到增量为 1 才收敛。 <strong>这个性质是「判断某个中间状态出自哪种算法」的主要抓手</strong>（见 8-7）。</p></blockquote>
 <p><strong>8-9.</strong> 若待排序列基本有序，下列算法中最快的是（　）。 A. 快速排序（取首元素为轴）　B. 直接插入排序　C. 堆排序　D. 直接选择排序</p>
-<blockquote><p><strong>答：B</strong>。直接插入在基本有序时每个元素只需比较一两次就位，接近 <span class="math">O(n)</span>。 A 恰恰相反——基本有序时取首元素为轴会退化到 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>。 C、D 与初始次序无关，仍是 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 与 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>。 <strong>这条性质正是「快速排序 + 插入排序」混合算法的立足点</strong>（见 8-16）。</p></blockquote>
+<blockquote><p><strong>答：B</strong>。直接插入在基本有序时每个元素只需比较一两次就位，接近 <span class="math">O(n)</span>。 A 恰恰相反——基本有序时取首元素为轴会退化到 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>。 C、D 与初始次序无关，仍是 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 与 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>。 <strong>这条性质正是「快速排序 + 插入排序」混合算法的立足点</strong>（见 8-17）。</p></blockquote>
 <p><strong>8-10.</strong> 基于比较的排序算法，最坏情况下的比较次数下界是（　）。 A. <span class="math">Ω(n)</span>　B. <span class="math">Ω(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>　C. <span class="math">Ω(n<sup><span class="upr">2</span></sup>)</span>　D. 没有下界</p>
-<blockquote><p><strong>答：B</strong>。<span class="math">n</span> 个互异元素有 <span class="math">n!</span> 种排列，每次比较最多把候选集折半， 因此判定树至少 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>(n!)⌉<span class="rel">=</span>Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 层（证明见 8-19）。 <strong>注意前提是「基于比较」</strong>：基数排序、桶排序不受此限。</p></blockquote>
+<blockquote><p><strong>答：B</strong>。<span class="math">n</span> 个互异元素有 <span class="math">n!</span> 种排列，每次比较最多把候选集折半， 因此判定树至少 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>(n!)⌉<span class="rel">=</span>Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 层（证明见 8-20）。 <strong>注意前提是「基于比较」</strong>：基数排序、桶排序不受此限。</p></blockquote>
 <h3 id="三辨析与简答-1"><a class="anchor" href="#三辨析与简答-1">#</a>三、辨析与简答</h3>
 <p><strong>8-11.</strong> 辨析：「快速排序是最快的排序算法。」</p>
 <blockquote><p><strong>答：不准确，要分三层说。</strong></p>
@@ -553,8 +680,44 @@ DFS(x)
 </tr>
 </tbody></table></div>
 <p>平均值的来历：随机排列中<strong>逆序对的期望个数是 <span class="math"><span class="frac"><span class="num">n(n<span class="bin">−</span><span class="upr">1</span>)</span><span class="den"><span class="upr">4</span></span></span></span></strong>， 而直接插入排序的移动次数恰好等于逆序对个数—— <strong>每交换/后移一次，正好消掉一个逆序对</strong>。这条对应关系也说明： 任何「只交换相邻元素」的排序（冒泡、插入）最坏都至少要 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span> 次移动。</p></blockquote>
+<p><strong>8-14.</strong> 简答：<strong>二分法插入排序</strong>是把直接插入排序中「顺序找插入位置」换成二分查找。 它的比较次数和移动次数各是多少？总时间代价有没有改善？它还稳定吗？</p>
+<blockquote><p><strong>答</strong>：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left"></th>
+<th style="text-align:left">直接插入排序</th>
+<th style="text-align:left">二分法插入排序</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">比较次数</td>
+<td style="text-align:left">最好 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span>、最坏与平均 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span></td>
+<td style="text-align:left"><strong>一律 <span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span></strong>（第 <span class="math">i</span> 个元素花 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>i⌉</span> 次）</td>
+</tr>
+<tr>
+<td style="text-align:left">移动次数</td>
+<td style="text-align:left">平均与最坏 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span></td>
+<td style="text-align:left"><strong>仍是 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>，一点没省</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">总时间</td>
+<td style="text-align:left"><span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span></td>
+<td style="text-align:left"><strong>仍是 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span></strong></td>
+</tr>
+<tr>
+<td style="text-align:left">空间</td>
+<td style="text-align:left"><span class="math">O(<span class="upr">1</span>)</span></td>
+<td style="text-align:left"><span class="math">O(<span class="upr">1</span>)</span></td>
+</tr>
+<tr>
+<td style="text-align:left">稳定性</td>
+<td style="text-align:left">稳定</td>
+<td style="text-align:left"><strong>仍然稳定</strong>（有条件，见下）</td>
+</tr>
+</tbody></table></div>
+<p><strong>关键结论：二分插入只省了比较，没省移动，所以渐进阶不变。</strong> 原因是找到位置之后，<strong>该搬的元素一个也少不了</strong>——插入位置到末尾之间的元素都要后移一格， 这部分是 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span> 的来源。它的收益只在「比较很贵而移动很便宜」时才明显 （例如关键码是长字符串、而元素本身是指针）。</p>
+<p><strong>稳定性的那个条件</strong>：二分查找遇到与待插元素<strong>相等</strong>的关键码时， 必须继续<strong>往右</strong>找（把插入点定在所有相等元素之后），否则就会把新元素插到相等元素前面， 稳定性就丢了。这一条和 8-15 里「判据要用 <code>&gt;</code> 不能用 <code>≥</code>」是同一回事。</p>
+<p><strong>总时间下界的由来</strong>：二分插入仍然只做「相邻元素后移」这一种数据移动， 由 8-19 的逆序对论证，这类算法的最坏移动次数不可能低于 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>。</p></blockquote>
 <h3 id="四算法填空与设计分析"><a class="anchor" href="#四算法填空与设计分析">#</a>四、算法填空与设计分析</h3>
-<p><strong>8-14.</strong> ★ <strong>算法填空</strong>：下面是直接插入排序，补全三个空。</p>
+<p><strong>8-15.</strong> ★ <strong>算法填空</strong>：下面是直接插入排序，补全三个空。</p>
 <div class="codeblock" data-lang="text"><pre><code>InsertSort(A, n)
     for i ← 1 to n - 1
         temp ← A[i]
@@ -570,7 +733,7 @@ DFS(x)
 <li>判据是 <code>A[j] &gt; temp</code> 而<strong>不是</strong> <code>≥</code>——用 <code>≥</code> 会把相等的元素也搬过去， <strong>排序就不稳定了</strong>，这是本题最容易丢分的一处；</li>
 <li>循环结束后插入的位置是 <code>j + 1</code>（此时 <code>A[j] ≤ temp</code> 或 <code>j = -1</code>），不是 <code>j</code>。</li>
 </ol></blockquote>
-<p><strong>8-15.</strong> ★ 对 <span class="math">A<span class="rel">=</span>{<span class="upr">9</span>,<span class="upr">4</span>,<span class="upr">8</span>,<span class="upr">5</span>,<span class="upr">2</span>,<span class="upr">7</span>,<span class="upr">3</span>,<span class="upr">6</span>}</span> 建<strong>最大堆</strong>并作堆排序， 写出建堆结果与前两趟排序后的数组。</p>
+<p><strong>8-16.</strong> ★ 对 <span class="math">A<span class="rel">=</span>{<span class="upr">9</span>,<span class="upr">4</span>,<span class="upr">8</span>,<span class="upr">5</span>,<span class="upr">2</span>,<span class="upr">7</span>,<span class="upr">3</span>,<span class="upr">6</span>}</span> 建<strong>最大堆</strong>并作堆排序， 写出建堆结果与前两趟排序后的数组。</p>
 <blockquote><p><strong>答</strong>： <strong>建堆</strong>（筛选法，从 <span class="math">i<span class="rel">=</span>⌊n/<span class="upr">2</span>⌋<span class="bin">−</span><span class="upr">1</span><span class="rel">=</span><span class="upr">3</span></span> 倒着向下筛，与较<strong>大</strong>的孩子比）：</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">步</th>
@@ -612,7 +775,7 @@ DFS(x)
 <p><strong>最大堆</strong>：<code>9 6 8 5 2 7 3 4</code></p>
 <p><strong>第 1 趟</strong>：堆顶 9 与末尾 4 交换，堆长减到 7，对根筛选 → <code>8 6 7 5 2 4 3 | 9</code> <strong>第 2 趟</strong>：堆顶 8 与 3 交换，堆长 6，筛选 → <code>7 6 4 5 2 3 | 8 9</code></p>
 <p><strong>代价</strong>：建堆 <span class="math">O(n)</span>，之后 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 次「换到末尾 + 筛选」各 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>， 合计 <span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>；空间 <span class="math">O(<span class="upr">1</span>)</span>。 <strong>注意升序排序要用最大堆</strong>（堆顶是最大值，换到末尾正好就位），别用最小堆。</p></blockquote>
-<p><strong>8-16.</strong> ★ <strong>算法填空</strong>：输入基本有序时插入排序很快，可以据此加速快速排序—— 子数组长度不超过 <span class="math">k</span>（<span class="math">k<span class="rel">≥</span><span class="upr">2</span></span>）时快排直接返回，最外层快排结束后再对整个数组跑一遍插入排序。 补全五个空，并给出平均时间复杂度。</p>
+<p><strong>8-17.</strong> ★ <strong>算法填空</strong>：输入基本有序时插入排序很快，可以据此加速快速排序—— 子数组长度不超过 <span class="math">k</span>（<span class="math">k<span class="rel">≥</span><span class="upr">2</span></span>）时快排直接返回，最外层快排结束后再对整个数组跑一遍插入排序。 补全五个空，并给出平均时间复杂度。</p>
 <div class="codeblock" data-lang="text"><pre><code>QuickSortLimitK(A, left, right, k)
     if left ≥ right or right - left + 1 ≤ k then return
     选轴并作一趟划分，设轴的最终位置为 p
@@ -635,7 +798,7 @@ HybridSort(A, n, k)
 <li><strong>插入排序部分</strong>：快排结束时数组「按段有序」——任何元素与它最终位置的距离不超过 <span class="math">k</span>， 因此逆序对总数是 <span class="math">O(nk)</span>，插入排序的代价与逆序对数同阶，为 <span class="math">O(nk)</span>。</li>
 </ul>
 <p><strong><span class="math">k</span> 怎么选</strong>：<span class="math">k</span> 太小则省不下递归开销，<span class="math">k</span> 太大则 <span class="math">nk</span> 那一项失控； 实际库实现常取 <span class="math">k</span> 在 <span class="math"><span class="upr">8</span><span class="rel">∼</span><span class="upr">32</span></span> 之间，此时两项都接近 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 而常数更小。 <strong><span class="math">k</span> 取常数时总代价仍是 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span></strong>，收益全在常数因子上—— 这道题要考的就是「渐进阶不变、常数变小」也是一种真实的优化。</p></blockquote>
-<p><strong>8-17.</strong> 设计算法，在 <span class="math">O(n)</span> 时间内把一个只含 0、1、2 三种值的数组原地排好序， 要求只扫描一遍、额外空间 <span class="math">O(<span class="upr">1</span>)</span>。</p>
+<p><strong>8-18.</strong> 设计算法，在 <span class="math">O(n)</span> 时间内把一个只含 0、1、2 三种值的数组原地排好序， 要求只扫描一遍、额外空间 <span class="math">O(<span class="upr">1</span>)</span>。</p>
 <blockquote><p><strong>答</strong>：<strong>基本思想</strong>——三路划分（荷兰国旗问题）。 用三个指针把数组分成四段：<code>[0, lo)</code> 全是 0，<code>[lo, i)</code> 全是 1， <code>(hi, n-1]</code> 全是 2，<code>[i, hi]</code> 是待定区。每步看 <code>A[i]</code>：</p>
 <div class="codeblock" data-lang="text"><pre><code>ThreeWayPartition(A, n)
     lo ← 0;  i ← 0;  hi ← n - 1
@@ -649,21 +812,21 @@ HybridSort(A, n, k)
 <p><strong><code>A[i] = 2</code> 那一支为什么不能 <code>i ← i + 1</code></strong>：从 <code>hi</code> 换过来的元素还没被检查过， 必须留在原地再看一轮。而 <code>A[i] = 0</code> 那一支换过来的元素来自 <code>[lo, i)</code>， 那一段已经确定全是 1，可以放心前进。<strong>这是本题唯一的陷阱。</strong></p>
 <p><strong>代价</strong>：时间 <span class="math">Θ(n)</span>（每轮 <code>i</code> 前进或 <code>hi</code> 后退，两者合计至多 <span class="math">n</span> 次），空间 <span class="math">Θ(<span class="upr">1</span>)</span>。 <strong>稳定吗</strong>：不稳定（有跨距离交换），但本题元素只有三种取值，通常不关心。</p></blockquote>
 <h3 id="五证明题-1"><a class="anchor" href="#五证明题-1">#</a>五、证明题</h3>
-<p><strong>8-18.</strong> ★ 证明：任何「只交换相邻元素」的排序算法，最坏情况下至少需要 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span> 次交换。</p>
+<p><strong>8-19.</strong> ★ 证明：任何「只交换相邻元素」的排序算法，最坏情况下至少需要 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span> 次交换。</p>
 <blockquote><p><strong>证明.</strong> 定义排列的<strong>逆序对</strong>为满足 <span class="math">i&lt;j</span> 且 <span class="math">A[i]&gt;A[j]</span> 的下标对。 交换相邻的两个元素 <span class="math">A[i]</span> 与 <span class="math">A[i<span class="bin">+</span><span class="upr">1</span>]</span>，只可能改变这一对的相对次序， 其余任何一对元素的相对次序都不变——所以<strong>一次相邻交换至多消掉一个逆序对</strong>。</p>
 <p>完全逆序的输入 <span class="math">n,n<span class="bin">−</span><span class="upr">1</span>,⋯,<span class="upr">1</span></span> 有 <span class="math"><span class="frac"><span class="num">n(n<span class="bin">−</span><span class="upr">1</span>)</span><span class="den"><span class="upr">2</span></span></span></span> 个逆序对，而有序序列的逆序对为 0， 故至少需要 <span class="math"><span class="frac"><span class="num">n(n<span class="bin">−</span><span class="upr">1</span>)</span><span class="den"><span class="upr">2</span></span></span><span class="rel">=</span>Θ(n<sup><span class="upr">2</span></sup>)</span> 次相邻交换。∎</p>
 <p><strong>推论</strong>：冒泡排序、直接插入排序都属于这一类，所以它们的最坏代价<strong>不可能</strong>优于 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>—— 这不是实现得不好，而是「只动相邻元素」这个约束本身的代价。 Shell 排序快，恰恰是因为它用大增量<strong>跨距离</strong>搬元素，一次能消掉多个逆序对。</p></blockquote>
-<p><strong>8-19.</strong> ★ 证明：基于比较的排序算法，最坏情况下至少需要 <span class="math">Ω(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 次比较。</p>
+<p><strong>8-20.</strong> ★ 证明：基于比较的排序算法，最坏情况下至少需要 <span class="math">Ω(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 次比较。</p>
 <blockquote><p><strong>证明.</strong> 把算法在所有输入上的执行过程画成一棵<strong>判定树</strong>： 每个内部结点是一次比较（两个分支对应两种结果），每个叶结点对应一种输出排列。 算法必须能区分 <span class="math">n</span> 个互异元素的全部 <span class="math">n!</span> 种排列，因此判定树<strong>至少有 <span class="math">n!</span> 个叶结点</strong>。</p>
 <p>一棵高度为 <span class="math">h</span> 的二叉树至多有 <span class="math"><span class="upr">2</span><sup>h</sup></span> 个叶结点，故 <span class="math"><span class="upr">2</span><sup>h</sup><span class="rel">≥</span>n!</span>，即</p>
 <div class="math math-display">h<span class="rel">≥</span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>(n!)</div>
 <p>而 <span class="math"><span class="upr">log</span><sub><span class="upr">2</span></sub>(n!)<span class="rel">=</span>Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>（上界由 <span class="math">n!<span class="rel">≤</span>n<sup>n</sup></span> 得，下界由 <span class="math">n!<span class="rel">≥</span>(n/<span class="upr">2</span>)<sup>n/<span class="upr">2</span></sup></span> 得）。 最坏情况的比较次数就是判定树的高度 <span class="math">h</span>，故至少 <span class="math">Ω(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>。∎</p>
 <p><strong>这条下界有明确的适用边界</strong>：它只管「所有信息都来自元素之间的两两比较」的算法。 基数排序、桶排序按关键码的<strong>内部结构</strong>分配，一次操作获得的信息量不止一比特， 所以能做到 <span class="math">O(n)</span> 而不违反本定理。</p></blockquote>
-<p><strong>8-20.</strong> 证明：<span class="math">n</span> 个元素的随机排列中，逆序对的期望个数是 <span class="math"><span class="frac"><span class="num">n(n<span class="bin">−</span><span class="upr">1</span>)</span><span class="den"><span class="upr">4</span></span></span></span>。</p>
+<p><strong>8-21.</strong> 证明：<span class="math">n</span> 个元素的随机排列中，逆序对的期望个数是 <span class="math"><span class="frac"><span class="num">n(n<span class="bin">−</span><span class="upr">1</span>)</span><span class="den"><span class="upr">4</span></span></span></span>。</p>
 <blockquote><p><strong>证明.</strong> 对每一对下标 <span class="math">i&lt;j</span> 定义指示变量 <span class="math">X<sub>ij</sub></span>：若 <span class="math">(i,j)</span> 构成逆序对则为 1，否则为 0。 在随机排列中，<span class="math">A[i]&gt;A[j]</span> 与 <span class="math">A[i]&lt;A[j]</span> 概率各为 <span class="math"><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span></span>，故 <span class="math">E[X<sub>ij</sub>]<span class="rel">=</span><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span></span>。 逆序对总数 <span class="math">X<span class="rel">=</span>∑<sub>i&lt;j</sub>X<sub>ij</sub></span>，由期望的线性性（不要求独立）：</p>
 <div class="math math-display">E[X]<span class="rel">=</span>∑<sub>i&lt;j</sub>E[X<sub>ij</sub>]<span class="rel">=</span><span class="frac"><span class="num">n(n<span class="bin">−</span><span class="upr">1</span>)</span><span class="den"><span class="upr">2</span></span></span><span class="bin">⋅</span><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span><span class="rel">=</span><span class="frac"><span class="num">n(n<span class="bin">−</span><span class="upr">1</span>)</span><span class="den"><span class="upr">4</span></span></span></div>
 <p>∎</p>
-<p>结合 8-18 的对应关系可得：<strong>直接插入排序的平均移动次数约为 <span class="math"><span class="frac"><span class="num">n<sup><span class="upr">2</span></sup></span><span class="den"><span class="upr">4</span></span></span></span></strong>， 正好是最坏情况的一半——这解释了 8-13 表里的那个 <span class="math"><span class="frac"><span class="num">n<sup><span class="upr">2</span></sup></span><span class="den"><span class="upr">4</span></span></span></span>。</p></blockquote>
+<p>结合 8-19 的对应关系可得：<strong>直接插入排序的平均移动次数约为 <span class="math"><span class="frac"><span class="num">n<sup><span class="upr">2</span></sup></span><span class="den"><span class="upr">4</span></span></span></span></strong>， 正好是最坏情况的一半——这解释了 8-13 表里的那个 <span class="math"><span class="frac"><span class="num">n<sup><span class="upr">2</span></sup></span><span class="den"><span class="upr">4</span></span></span></span>。</p></blockquote>
 <hr>
 <h2 id="第-9-章-文件管理和外排序"><a class="anchor" href="#第-9-章-文件管理和外排序">#</a>第 9 章 文件管理和外排序</h2>
 <h3 id="一填空题-2"><a class="anchor" href="#一填空题-2">#</a>一、填空题</h3>
@@ -923,8 +1086,29 @@ HybridSort(A, n, k)
 <li><strong>二次探测</strong>：探查序列改为 <span class="math">H(k)<span class="bin">±</span><span class="upr">1</span><sup><span class="upr">2</span></sup>,<span class="bin">±</span><span class="upr">2</span><sup><span class="upr">2</span></sup>,⋯</span>，跳着走， 散列值不同的关键码不再共用同一条连续通道，一次聚集被打散。 <strong>代价</strong>：散列值<strong>相同</strong>的关键码仍然走同一条序列（称二次聚集）； 而且不保证能探遍整张表——表长取素数且 <span class="math">α&lt;<span class="frac"><span class="num"><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span></span> 时才有保证。</li>
 <li><strong>双散列</strong>：步长由第二个散列函数给出，<span class="math">H(k)<span class="bin">+</span>i<span class="bin">⋅</span>H<sub><span class="upr">2</span></sub>(k)</span>。 连散列值相同、步长不同的关键码也会分开，聚集最轻。 <strong>代价</strong>：多算一个散列函数；且必须保证 <span class="math">H<sub><span class="upr">2</span></sub>(k)</span> 与表长<strong>互素</strong>（表长取素数、<span class="math">H<sub><span class="upr">2</span></sub></span> 取值非 0 即可）， 否则探查序列走不遍全表。</li>
 </ul></blockquote>
+<p><strong>10-14.</strong> ★ 简答：构造散列函数常用的三种方法是<strong>除余法</strong>、<strong>平方取中法</strong>、<strong>折叠法</strong>。 分别说明它们的做法、各自想解决什么问题，并各举一个算例。</p>
+<blockquote><p><strong>答</strong>：三种方法的共同目标只有一个——<strong>让关键码的每一位都尽量影响到最终的散列地址</strong>， 从而把关键码均匀地铺开。</p>
+<p><strong>(1) 除余法</strong> <span class="math">H(k)<span class="rel">=</span>k&thinsp;<span class="upr">bmod</span>&thinsp;p</span>。</p>
+<ul>
+<li><strong>做法</strong>：<span class="math">p</span> 取<strong>接近表长的素数</strong>。</li>
+<li><strong>要解决的问题</strong>：若 <span class="math">p</span> 取 <span class="math"><span class="upr">2</span><sup>t</sup></span>，则 <span class="math">k&thinsp;<span class="upr">bmod</span>&thinsp;<span class="upr">2</span><sup>t</sup></span> 只保留了 <span class="math">k</span> 的低 <span class="math">t</span> 位， <strong>高位的信息全部丢掉</strong>；关键码若低位有规律（例如都以 00 结尾），冲突会成片出现。 取素数能让各位都参与取模运算。</li>
+<li><strong>算例</strong>：表长 100，取 <span class="math">p<span class="rel">=</span><span class="upr">97</span></span>；<span class="math">k<span class="rel">=</span><span class="upr">1234</span></span> 时 <span class="math">H(k)<span class="rel">=</span><span class="upr">1234</span>&thinsp;<span class="upr">bmod</span>&thinsp;<span class="upr">97</span><span class="rel">=</span><span class="upr">70</span></span>。</li>
+</ul>
+<p><strong>(2) 平方取中法</strong>：把 <span class="math">k</span> 平方，取结果<strong>中间的若干位</strong>作为地址。</p>
+<ul>
+<li><strong>要解决的问题</strong>：平方之后，<strong>中间那几位受 <span class="math">k</span> 的所有位共同影响</strong> （两端的位只受 <span class="math">k</span> 的高位或低位影响），因此中间位的随机性最好。 适合「不知道关键码分布、但怀疑它某几位有规律」的场合。</li>
+<li><strong>算例</strong>：<span class="math">k<span class="rel">=</span><span class="upr">123</span></span>，<span class="math">k<sup><span class="upr">2</span></sup><span class="rel">=</span><span class="upr">15129</span></span>（5 位），取中间 3 位得 <span class="math">H(k)<span class="rel">=</span><span class="bold"><span class="upr">512</span></span></span>。 再如 <span class="math">k<span class="rel">=</span><span class="upr">4731</span></span>，<span class="math">k<sup><span class="upr">2</span></sup><span class="rel">=</span><span class="upr">22382361</span></span>（8 位），取中间 3 位得 <span class="math"><span class="upr">823</span></span>。</li>
+</ul>
+<p><strong>(3) 折叠法</strong>：把 <span class="math">k</span> 按地址位数<strong>分成等长的几段</strong>（最后一段可短），再把各段相加， 舍去进位得到地址。分两种叠法：</p>
+<ul>
+<li><strong>移位折叠</strong>：各段直接对齐相加；</li>
+<li><strong>边界折叠</strong>：把<strong>相邻两段沿边界翻转</strong>后再相加（像折纸一样来回折）。</li>
+<li><strong>要解决的问题</strong>：关键码<strong>位数远多于地址位数</strong>时（如 18 位身份证号映射到 4 位地址）， 直接截取会丢掉大部分信息，折叠能让<strong>每一位都参与进来</strong>。</li>
+<li><strong>算例</strong>：<span class="math">k<span class="rel">=</span><span class="upr">123456789</span></span>，地址 3 位，分成 <code>123 | 456 | 789</code>。 移位折叠：<span class="math"><span class="upr">123</span><span class="bin">+</span><span class="upr">456</span><span class="bin">+</span><span class="upr">789</span><span class="rel">=</span><span class="upr">1368</span></span>，取后三位得 <span class="math"><span class="bold"><span class="upr">368</span></span></span>； 边界折叠：把第二段翻转成 <span class="math"><span class="upr">654</span></span>，<span class="math"><span class="upr">123</span><span class="bin">+</span><span class="upr">654</span><span class="bin">+</span><span class="upr">789</span><span class="rel">=</span><span class="upr">1566</span></span>，取后三位得 <span class="math"><span class="bold"><span class="upr">566</span></span></span>。</li>
+</ul>
+<p><strong>怎么选</strong>：<strong>除余法最常用</strong>，实现简单、效果稳定； 关键码分布未知时用平方取中；关键码特别长时用折叠先压缩、再除余。 三者都不解决冲突，冲突要靠 10-13 的那几种办法处理。</p></blockquote>
 <h3 id="四算法设计与分析-2"><a class="anchor" href="#四算法设计与分析-2">#</a>四、算法设计与分析</h3>
-<p><strong>10-14.</strong> ★ 设散列表长 <span class="math">m<span class="rel">=</span><span class="upr">13</span></span>，散列函数 <span class="math">H(k)<span class="rel">=</span>k&thinsp;<span class="upr">bmod</span>&thinsp;<span class="upr">13</span></span>，用<strong>线性探测</strong>处理冲突。 依次插入关键码 <span class="math"><span class="upr">19</span>,<span class="upr">14</span>,<span class="upr">23</span>,<span class="upr">1</span>,<span class="upr">68</span>,<span class="upr">20</span>,<span class="upr">84</span>,<span class="upr">27</span>,<span class="upr">55</span>,<span class="upr">11</span></span>， (1) 画出散列表；(2) 求成功检索的平均检索长度；(3) 求失败检索的平均检索长度。</p>
+<p><strong>10-15.</strong> ★ 设散列表长 <span class="math">m<span class="rel">=</span><span class="upr">13</span></span>，散列函数 <span class="math">H(k)<span class="rel">=</span>k&thinsp;<span class="upr">bmod</span>&thinsp;<span class="upr">13</span></span>，用<strong>线性探测</strong>处理冲突。 依次插入关键码 <span class="math"><span class="upr">19</span>,<span class="upr">14</span>,<span class="upr">23</span>,<span class="upr">1</span>,<span class="upr">68</span>,<span class="upr">20</span>,<span class="upr">84</span>,<span class="upr">27</span>,<span class="upr">55</span>,<span class="upr">11</span></span>， (1) 画出散列表；(2) 求成功检索的平均检索长度；(3) 求失败检索的平均检索长度。</p>
 <blockquote><p><strong>答</strong>： <strong>(1) 逐个插入</strong>（<span class="math">H</span> 值：<span class="math"><span class="upr">19</span><span class="rel">→</span><span class="upr">6</span></span>、<span class="math"><span class="upr">14</span><span class="rel">→</span><span class="upr">1</span></span>、<span class="math"><span class="upr">23</span><span class="rel">→</span><span class="upr">10</span></span>、<span class="math"><span class="upr">1</span><span class="rel">→</span><span class="upr">1</span></span>、<span class="math"><span class="upr">68</span><span class="rel">→</span><span class="upr">3</span></span>、<span class="math"><span class="upr">20</span><span class="rel">→</span><span class="upr">7</span></span>、 <span class="math"><span class="upr">84</span><span class="rel">→</span><span class="upr">6</span></span>、<span class="math"><span class="upr">27</span><span class="rel">→</span><span class="upr">1</span></span>、<span class="math"><span class="upr">55</span><span class="rel">→</span><span class="upr">3</span></span>、<span class="math"><span class="upr">11</span><span class="rel">→</span><span class="upr">11</span></span>）：</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">下标</th>
@@ -1054,7 +1238,7 @@ HybridSort(A, n, k)
 <li>失败 ASL 的分母是<strong>表长 13</strong>（每个初始地址等概率），不是关键码个数；</li>
 <li>下标 1..8 连成一大片，这正是<strong>堆积</strong>的现场：<span class="math">α<span class="rel">=</span><span class="frac"><span class="num"><span class="upr">10</span></span><span class="den"><span class="upr">13</span></span></span><span class="rel">≈</span><span class="upr">0.77</span></span> 已经偏高， 失败检索的平均探查次数飙到 4 以上。换成拉链法，失败平均只要约 <span class="math">α<span class="rel">≈</span><span class="upr">0.77</span></span> 次。</li>
 </ol></blockquote>
-<p><strong>10-15.</strong> ★ 写出闭散列表（线性探测、带墓碑）的检索、插入、删除算法， 并说明墓碑在三个算法里各起什么作用。</p>
+<p><strong>10-16.</strong> ★ 写出闭散列表（线性探测、带墓碑）的检索、插入、删除算法， 并说明墓碑在三个算法里各起什么作用。</p>
 <blockquote><p><strong>答</strong>：表中每个槽有三种状态：<code>EMPTY</code>（从未用过）、<code>OCCUPIED</code>（有记录）、<code>DELETED</code>（墓碑）。</p>
 <div class="codeblock" data-lang="text"><pre><code>Search(T, k)
     i ← 0
@@ -1089,7 +1273,7 @@ Delete(T, k)
 <li><strong>删除</strong>：只打标记，<strong>不恢复成 EMPTY</strong>。</li>
 </ul>
 <p><strong>代价</strong>：三者最坏都是 <span class="math">O(m)</span>，平均 <span class="math">O(<span class="upr">1</span>)</span>（<span class="math">α</span> 受控时）。 墓碑多了要重建表——这是闭散列的固有负担。</p></blockquote>
-<p><strong>10-16.</strong> 设计算法，判断两个长度分别为 <span class="math">n</span>、<span class="math">m</span> 的整数数组是否有公共元素。 分别给出基于排序和基于散列的方案并比较。</p>
+<p><strong>10-17.</strong> 设计算法，判断两个长度分别为 <span class="math">n</span>、<span class="math">m</span> 的整数数组是否有公共元素。 分别给出基于排序和基于散列的方案并比较。</p>
 <blockquote><p><strong>答</strong>： <strong>方案一（排序 + 双指针）</strong>：把较短的数组排序，或两个都排序后同步扫描。</p>
 <div class="codeblock" data-lang="text"><pre><code>HasCommon_Sort(A, n, B, m)
     对 A、B 分别排序
@@ -1115,12 +1299,12 @@ Delete(T, k)
 </ul>
 <p><strong>这道题的考点是「没有普遍最优解」</strong>：答题时把前提列清楚比选哪个更重要。</p></blockquote>
 <h3 id="五证明题-3"><a class="anchor" href="#五证明题-3">#</a>五、证明题</h3>
-<p><strong>10-17.</strong> ★ 证明：二分检索的最大检索长度为 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>(n<span class="bin">+</span><span class="upr">1</span>)⌉</span>。</p>
+<p><strong>10-18.</strong> ★ 证明：二分检索的最大检索长度为 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>(n<span class="bin">+</span><span class="upr">1</span>)⌉</span>。</p>
 <blockquote><p><strong>证明.</strong> 二分检索的判定树是一棵有 <span class="math">n</span> 个内部结点的二叉树， 最大检索长度等于树的层数 <span class="math">h</span>（根算第 1 层，比较 1 次）。 二分每次把候选区间<strong>至少折半</strong>，所以第 <span class="math">j</span> 层至多有 <span class="math"><span class="upr">2</span><sup>j<span class="bin">−</span><span class="upr">1</span></sup></span> 个结点， 而判定树的形状由折半过程唯一决定、且是「尽量填满」的，故</p>
 <div class="math math-display"><span class="upr">2</span><sup>h<span class="bin">−</span><span class="upr">1</span></sup><span class="rel">≤</span>n<span class="rel">≤</span><span class="upr">2</span><sup>h</sup><span class="bin">−</span><span class="upr">1</span></div>
 <p>左端由「前 <span class="math">h<span class="bin">−</span><span class="upr">1</span></span> 层若排满只有 <span class="math"><span class="upr">2</span><sup>h<span class="bin">−</span><span class="upr">1</span></sup><span class="bin">−</span><span class="upr">1</span></span> 个结点，不足以放下 <span class="math">n</span> 个」推出， 右端由「<span class="math">h</span> 层至多 <span class="math"><span class="upr">2</span><sup>h</sup><span class="bin">−</span><span class="upr">1</span></span> 个结点」推出。整理得 <span class="math"><span class="upr">2</span><sup>h<span class="bin">−</span><span class="upr">1</span></sup>&lt;n<span class="bin">+</span><span class="upr">1</span><span class="rel">≤</span><span class="upr">2</span><sup>h</sup></span>， 两边取对数得 <span class="math">h<span class="bin">−</span><span class="upr">1</span>&lt;&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>(n<span class="bin">+</span><span class="upr">1</span>)<span class="rel">≤</span>h</span>，即 <span class="math">h<span class="rel">=</span>⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>(n<span class="bin">+</span><span class="upr">1</span>)⌉</span>。∎</p>
 <p>这与第 5 章「<span class="math">n</span> 个结点的完全二叉树高度为 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>(n<span class="bin">+</span><span class="upr">1</span>)⌉</span>」是同一条结论—— <strong>二分检索的判定树就是一棵完全二叉树形状的 BST</strong>。</p></blockquote>
-<p><strong>10-18.</strong> 证明：闭散列表中<strong>不能</strong>用「置为空」来实现删除。</p>
+<p><strong>10-19.</strong> 证明：闭散列表中<strong>不能</strong>用「置为空」来实现删除。</p>
 <blockquote><p><strong>证明.</strong> 反设可以。构造一个反例即可： 设表长 <span class="math">m<span class="rel">=</span><span class="upr">7</span></span>，<span class="math">H(k)<span class="rel">=</span>k&thinsp;<span class="upr">bmod</span>&thinsp;<span class="upr">7</span></span>，线性探测。依次插入 <span class="math"><span class="upr">7</span></span>、<span class="math"><span class="upr">14</span></span>、<span class="math"><span class="upr">21</span></span>， 它们都散列到 0，于是占据下标 0、1、2。</p>
 <p>此时检索 <span class="math"><span class="upr">21</span></span> 的过程是：探 0（是 7，不等）→ 探 1（是 14，不等）→ 探 2（命中）。</p>
 <p>现在删除 <span class="math"><span class="upr">14</span></span> 并把下标 1 置空。再检索 <span class="math"><span class="upr">21</span></span>：探 0（不等）→ 探 1（<strong>空位，判定失败</strong>）→ 返回「不在表中」。 但 <span class="math"><span class="upr">21</span></span> 明明还在下标 2。矛盾。∎</p>
@@ -1132,9 +1316,34 @@ Delete(T, k)
 <blockquote><p><strong>答</strong>：<strong>关键码</strong>与<strong>记录的存储地址</strong>；稠密索引为<strong>每一条记录</strong>建一个索引项； 稀疏索引只为<strong>每一个存储块（页）</strong>建一个索引项；只有主文件本身<strong>按该关键码有序</strong>时才行。 由此可得一条硬约束：<strong>一个文件至多有一个稀疏索引（对应它的物理排序字段）， 但可以有多个稠密索引</strong>——这就是「主索引 vs 辅索引」的分界。</p></blockquote>
 <p><strong>11-2.</strong> 倒排索引的两个组成部分是 ____ 和 ____。它把「给定记录找属性值」反过来变成 ____， 因此特别适合 ____。</p>
 <blockquote><p><strong>答</strong>：<strong>词典（关键词表）</strong>与<strong>倒排表（每个关键词对应的记录号列表）</strong>； 变成「<strong>给定属性值找记录</strong>」；适合<strong>全文检索、多关键词组合查询</strong>。 求「同时含 A 和 B 的文档」时，把两条倒排表（都按记录号有序）用双指针求交即可， 代价 <span class="math">O(|L<sub>A</sub>|<span class="bin">+</span>|L<sub>B</sub>|)</span>——<strong>两条表都有序是这一步能做快的前提</strong>。</p></blockquote>
-<p><strong>11-3.</strong> ★ <span class="math">m</span> 阶 B 树的五条性质：每个结点至多 ____ 个子结点； 除根和叶外每个结点至少 ____ 个子结点；根结点至少 ____ 个子结点（除非它是叶）； 所有叶结点 ____；有 <span class="math">k</span> 个子结点的结点恰含 ____ 个关键码。</p>
+<p><strong>11-3.</strong> 索引技术中的几个基本概念：按关键码顺序存放记录的文件叫 ____； 按关键码的散列值决定记录存放位置的文件叫 ____； 以「属性值 → 记录号表」组织的文件叫 ____。 索引结构一旦建立就不再改变的叫 ____，随插入删除自行调整的叫 ____， 后者的代表是 ____。</p>
+<blockquote><p><strong>答</strong>：<strong>顺序文件</strong>；<strong>散列文件</strong>；<strong>倒排文件</strong>； <strong>静态索引结构</strong>；<strong>动态索引结构</strong>；<strong>B 树（及 B+ 树）</strong>。</p>
+<p>三种文件组织的适用面各不相同：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left"></th>
+<th style="text-align:left">擅长</th>
+<th style="text-align:left">不擅长</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">顺序文件</td>
+<td style="text-align:left"><strong>范围查询</strong>、顺序批处理；可用稀疏索引</td>
+<td style="text-align:left">插入要搬移记录</td>
+</tr>
+<tr>
+<td style="text-align:left">散列文件</td>
+<td style="text-align:left"><strong>按关键码等值查找</strong>，平均 <span class="math">O(<span class="upr">1</span>)</span></td>
+<td style="text-align:left"><strong>不支持范围查询、不支持顺序访问</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">倒排文件</td>
+<td style="text-align:left"><strong>多关键词组合查询</strong>、全文检索</td>
+<td style="text-align:left">更新代价高（倒排表要跟着改）</td>
+</tr>
+</tbody></table></div>
+<p>静态与动态的分界：<strong>静态索引</strong>（如多分树、分块索引）建好之后插入只能进溢出区， 溢出多了性能就塌；<strong>动态索引</strong>（B 树）用分裂与合并把结构维持住， <strong>代价是每次更新都可能写多个磁盘页</strong>（见 11-20）。</p></blockquote>
+<p><strong>11-4.</strong> ★ <span class="math">m</span> 阶 B 树的五条性质：每个结点至多 ____ 个子结点； 除根和叶外每个结点至少 ____ 个子结点；根结点至少 ____ 个子结点（除非它是叶）； 所有叶结点 ____；有 <span class="math">k</span> 个子结点的结点恰含 ____ 个关键码。</p>
 <blockquote><p><strong>答</strong>：<span class="math">m</span>；<span class="math">⌈m/<span class="upr">2</span>⌉</span>；<strong>2</strong>；<strong>都在同一层</strong>；<span class="math">k<span class="bin">−</span><span class="upr">1</span></span>。 由此可得关键码个数的上下限：非根结点含 <span class="math">⌈m/<span class="upr">2</span>⌉<span class="bin">−</span><span class="upr">1</span></span> 到 <span class="math">m<span class="bin">−</span><span class="upr">1</span></span> 个关键码。 <strong>「所有叶结点在同一层」是 B 树的灵魂</strong>——它保证了树高平衡，从而保证访外次数有上界。 阶为 3 的 B 树就是通常说的 <strong>2-3 树</strong>。</p></blockquote>
-<p><strong>11-4.</strong> ★ B+ 树与 B 树的主要区别：B+ 树的<strong>所有记录都存在 ____</strong>， 内部结点只起 ____ 作用；B+ 树的叶结点之间通常用 ____ 链起来。 因此 B+ 树比 B 树多出的一项能力是 ____。</p>
+<p><strong>11-5.</strong> ★ B+ 树与 B 树的主要区别：B+ 树的<strong>所有记录都存在 ____</strong>， 内部结点只起 ____ 作用；B+ 树的叶结点之间通常用 ____ 链起来。 因此 B+ 树比 B 树多出的一项能力是 ____。</p>
 <blockquote><p><strong>答</strong>：<strong>叶结点</strong>；<strong>索引（分界）</strong>；<strong>指针（顺序链）</strong>；<strong>支持高效的顺序访问与范围查询</strong>。</p>
 <p>两条推论必须记牢：</p>
 <ol>
@@ -1142,29 +1351,29 @@ Delete(T, k)
 <li><strong>B+ 树的每次检索都要走到叶</strong>（长度固定），B 树可能在内部结点就命中（长度不定）。</li>
 </ol>
 <p>内部结点不带数据 ⟹ 同样大小的页能装下更多分支 ⟹ <strong>树更矮、访外更少</strong>， 这是数据库索引普遍选 B+ 树的真正原因。</p></blockquote>
-<p><strong>11-5.</strong> 在含 <span class="math">n</span> 个关键码的 <span class="math">m</span> 阶 B 树上检索，最多访问 ____ 个结点； 树高 <span class="math">h</span> 满足 <span class="math">h<span class="rel">≤</span></span> ____。</p>
+<p><strong>11-6.</strong> 在含 <span class="math">n</span> 个关键码的 <span class="math">m</span> 阶 B 树上检索，最多访问 ____ 个结点； 树高 <span class="math">h</span> 满足 <span class="math">h<span class="rel">≤</span></span> ____。</p>
 <blockquote><p><strong>答</strong>：<span class="math">h</span> 个（从根到叶各一次），再加 1 次读主文件数据块； <span class="math">h<span class="rel">≤</span>&thinsp;<span class="upr">log</span><sub>⌈m/<span class="upr">2</span>⌉</sub><span class="frac"><span class="num">n<span class="bin">+</span><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span><span class="bin">+</span><span class="upr">1</span></span>。 这个上界来自「最坏情况下每个非根结点只有 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 个子结点」。 数量级感受一下：<span class="math">m<span class="rel">=</span><span class="upr">100</span></span>、<span class="math">n<span class="rel">=</span><span class="upr">10</span><sup><span class="upr">8</span></sup></span> 时 <span class="math">h</span> 只有 4 左右——<strong>四次访外就能定位一亿条记录中的一条</strong>。</p></blockquote>
-<p><strong>11-6.</strong> 红黑树的四条性质：① 结点非红即黑；② ____ 是黑色； ③ 红结点的子结点 ____；④ 从任一结点到其所有后代空叶结点的路径上，____ 相同。 由此可得含 <span class="math">n</span> 个内部结点的红黑树，树高最多 ____。</p>
+<p><strong>11-7.</strong> 红黑树的四条性质：① 结点非红即黑；② ____ 是黑色； ③ 红结点的子结点 ____；④ 从任一结点到其所有后代空叶结点的路径上，____ 相同。 由此可得含 <span class="math">n</span> 个内部结点的红黑树，树高最多 ____。</p>
 <blockquote><p><strong>答</strong>：<strong>根结点</strong>（有的教材还要求空叶结点为黑）；<strong>必须是黑色</strong>（即<strong>不允许红红相邻</strong>）； <strong>黑结点个数</strong>（黑高）；<span class="math"><span class="upr">2</span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>(n<span class="bin">+</span><span class="upr">1</span>)</span> 量级。 <strong>这四条合起来只做一件事：让最长路径不超过最短路径的两倍。</strong> 最短路径全黑，最长路径红黑相间——长度至多是前者的 2 倍，所以树高仍是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>。</p></blockquote>
 <h3 id="二选择题-4"><a class="anchor" href="#二选择题-4">#</a>二、选择题</h3>
-<p><strong>11-7.</strong> ★ B+ 树不同于 B 树的特点之一是（　）。 A. 能支持顺序检索 B. 结点中含有关键码 C. 根结点至少有两个分支 D. 所有叶结点都在同一层上</p>
+<p><strong>11-8.</strong> ★ B+ 树不同于 B 树的特点之一是（　）。 A. 能支持顺序检索 B. 结点中含有关键码 C. 根结点至少有两个分支 D. 所有叶结点都在同一层上</p>
 <blockquote><p><strong>答：A</strong>。B、C、D 三条 <strong>B 树也都有</strong>，不是「不同点」。 A 是 B+ 树独有的：全部记录都在叶结点上，且叶结点用指针顺序链起来， 于是<strong>从某个关键码开始顺着叶链往下走就能做范围扫描</strong>，B 树做不到这一点 （B 树的记录散布在各层内部结点上，顺序访问要中序遍历整棵树）。</p>
 <p><strong>这类题的解法</strong>：把四个选项逐个去问「B 树有没有？」——<strong>有的就不是&quot;不同点&quot;</strong>。</p></blockquote>
-<p><strong>11-8.</strong> 一棵 5 阶 B 树，除根结点外，每个结点的关键码个数范围是（　）。 A. 1 到 4　B. 2 到 4　C. 2 到 5　D. 3 到 5</p>
+<p><strong>11-9.</strong> 一棵 5 阶 B 树，除根结点外，每个结点的关键码个数范围是（　）。 A. 1 到 4　B. 2 到 4　C. 2 到 5　D. 3 到 5</p>
 <blockquote><p><strong>答：B</strong>。子结点数至少 <span class="math">⌈<span class="upr">5</span>/<span class="upr">2</span>⌉<span class="rel">=</span><span class="upr">3</span></span>，至多 5；关键码数 = 子结点数 <span class="math"><span class="bin">−</span><span class="upr">1</span></span>，即 2 到 4。 <strong>根结点是唯一的例外</strong>：它可以只有 1 个关键码（2 个子结点）， 独根时甚至可以只有 1 个关键码而没有子结点。</p></blockquote>
-<p><strong>11-9.</strong> 向 B 树插入关键码时，结点「上溢」的处理办法是（　）。 A. 把多余的关键码移到兄弟结点 B. 把结点分裂成两个，<strong>中间</strong>的关键码上升到父结点 C. 把最大的关键码上升到父结点 D. 重建整棵树</p>
+<p><strong>11-10.</strong> 向 B 树插入关键码时，结点「上溢」的处理办法是（　）。 A. 把多余的关键码移到兄弟结点 B. 把结点分裂成两个，<strong>中间</strong>的关键码上升到父结点 C. 把最大的关键码上升到父结点 D. 重建整棵树</p>
 <blockquote><p><strong>答：B</strong>。取中间那个关键码上升，才能保证分裂出的两半都满足「至少 <span class="math">⌈m/<span class="upr">2</span>⌉<span class="bin">−</span><span class="upr">1</span></span> 个关键码」。 <strong>插入引起的分裂可能一路向上传播，若根也分裂，树就长高一层</strong>—— B 树是<strong>从叶向根生长</strong>的，这与 BST 从根向叶生长正好相反， 也正是「所有叶结点始终在同一层」能被维持住的原因。</p></blockquote>
-<p><strong>11-10.</strong> 红黑树插入新结点后出现「红红冲突」，若新结点的<strong>叔父结点是红色</strong>， 应当采取的操作是（　）。 A. 以祖父结点为轴旋转　B. 父结点与祖父结点换色后旋转 C. 父、叔父变黑，祖父变红，冲突上移　D. 直接把新结点变黑</p>
+<p><strong>11-11.</strong> 红黑树插入新结点后出现「红红冲突」，若新结点的<strong>叔父结点是红色</strong>， 应当采取的操作是（　）。 A. 以祖父结点为轴旋转　B. 父结点与祖父结点换色后旋转 C. 父、叔父变黑，祖父变红，冲突上移　D. 直接把新结点变黑</p>
 <blockquote><p><strong>答：C</strong>。叔父为红时<strong>只换色不旋转</strong>：父和叔父变黑、祖父变红， 这样这棵子树的黑高不变，但祖父变红后可能与<strong>它的</strong>父亲再次红红冲突， 于是把祖父当作新的「问题结点」继续向上处理——<strong>冲突沿路径上移，最多走 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span> 层</strong>。 只有叔父为<strong>黑</strong>（或不存在）时才需要旋转（B 描述的是那一种情形）。 D 错：直接把新结点变黑会破坏黑高相等。</p></blockquote>
 <h3 id="三辨析与简答-4"><a class="anchor" href="#三辨析与简答-4">#</a>三、辨析与简答</h3>
-<p><strong>11-11.</strong> ★ 简答：为什么外存索引用 B 树 / B+ 树，而不用 AVL 树或红黑树？</p>
+<p><strong>11-12.</strong> ★ 简答：为什么外存索引用 B 树 / B+ 树，而不用 AVL 树或红黑树？</p>
 <blockquote><p><strong>答</strong>：因为<strong>外存的代价单位是「页」，不是「结点」</strong>。</p>
 <ul>
 <li>AVL、红黑树是<strong>二叉</strong>树，<span class="math">n</span> 个关键码的树高约 <span class="math"><span class="upr">log</span><sub><span class="upr">2</span></sub>n</span>。 若以结点为内外存交换单位，检索一次要访外约 <span class="math"><span class="upr">log</span><sub><span class="upr">2</span></sub>n</span> 次—— <span class="math">n<span class="rel">=</span><span class="upr">10</span><sup><span class="upr">8</span></sup></span> 时约 27 次，每次寻道以毫秒计，完全不能接受。</li>
 <li>B 树把一个<strong>磁盘页</strong>做成一个结点，页内塞尽可能多的关键码（阶 <span class="math">m</span> 可达几百）。 树高降到 <span class="math"><span class="upr">log</span><sub>m</sub>n</span>，<span class="math">m<span class="rel">=</span><span class="upr">100</span></span>、<span class="math">n<span class="rel">=</span><span class="upr">10</span><sup><span class="upr">8</span></sup></span> 时只有 4 层左右，<strong>访外 4 次</strong>。</li>
 </ul>
 <p><strong>一句话：二叉树优化的是比较次数，B 树优化的是访外次数</strong>； 内存里比较很便宜，外存里访问很贵，所以两种场合的最优结构不同。 反过来，红黑树、AVL 在内存里仍然是首选（B 树的页内查找在内存里反而是浪费）。</p></blockquote>
-<p><strong>11-12.</strong> 简答：B 树的插入和删除分别可能引起什么调整？各自怎样保持性质？</p>
+<p><strong>11-13.</strong> 简答：B 树的插入和删除分别可能引起什么调整？各自怎样保持性质？</p>
 <blockquote><p><strong>答</strong>：</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left"></th>
@@ -1186,7 +1395,7 @@ Delete(T, k)
 </tr>
 </tbody></table></div>
 <p>两条共同点：<strong>调整只沿着一条根到叶的路径进行</strong>，代价 <span class="math">O(h)<span class="rel">=</span>O(<span class="upr">log</span><sub>m</sub>n)</span>； <strong>所有叶结点始终在同一层</strong>这条性质在任何时刻都保持。</p></blockquote>
-<p><strong>11-13.</strong> 辨析：「红黑树是一种平衡二叉树，所以它和 AVL 树的平衡标准是一样的。」</p>
+<p><strong>11-14.</strong> 辨析：「红黑树是一种平衡二叉树，所以它和 AVL 树的平衡标准是一样的。」</p>
 <blockquote><p><strong>答：错。两者的&quot;平衡&quot;定义完全不同。</strong></p>
 <ul>
 <li><strong>AVL</strong>：任何结点的左右子树<strong>高度差不超过 1</strong>。这是很强的约束，树更矮（更接近 <span class="math"><span class="upr">log</span><sub><span class="upr">2</span></sub>n</span>）， <strong>检索更快</strong>；代价是插入删除时要做更多旋转来维持。</li>
@@ -1194,7 +1403,7 @@ Delete(T, k)
 </ul>
 <p><strong>结论</strong>：查多改少 → AVL；改动频繁 → 红黑树。 这也是 C++ <code>std::map</code>、Java <code>TreeMap</code>、Linux 内核调度器都选红黑树的原因。</p></blockquote>
 <h3 id="四算法设计与分析-3"><a class="anchor" href="#四算法设计与分析-3">#</a>四、算法设计与分析</h3>
-<p><strong>11-14.</strong> ★ 依次把关键码 <span class="math"><span class="upr">20</span>,<span class="upr">40</span>,<span class="upr">10</span>,<span class="upr">30</span>,<span class="upr">15</span>,<span class="upr">35</span>,<span class="upr">7</span>,<span class="upr">26</span>,<span class="upr">18</span>,<span class="upr">22</span>,<span class="upr">5</span>,<span class="upr">42</span>,<span class="upr">13</span>,<span class="upr">46</span>,<span class="upr">27</span>,<span class="upr">8</span>,<span class="upr">32</span>,<span class="upr">38</span>,<span class="upr">24</span>,<span class="upr">45</span></span> 插入一棵初始为空的 <strong>5 阶</strong> B 树，画出最终结果，并说明根结点里有哪些关键码。</p>
+<p><strong>11-15.</strong> ★ 依次把关键码 <span class="math"><span class="upr">20</span>,<span class="upr">40</span>,<span class="upr">10</span>,<span class="upr">30</span>,<span class="upr">15</span>,<span class="upr">35</span>,<span class="upr">7</span>,<span class="upr">26</span>,<span class="upr">18</span>,<span class="upr">22</span>,<span class="upr">5</span>,<span class="upr">42</span>,<span class="upr">13</span>,<span class="upr">46</span>,<span class="upr">27</span>,<span class="upr">8</span>,<span class="upr">32</span>,<span class="upr">38</span>,<span class="upr">24</span>,<span class="upr">45</span></span> 插入一棵初始为空的 <strong>5 阶</strong> B 树，画出最终结果，并说明根结点里有哪些关键码。</p>
 <blockquote><p><strong>答</strong>：5 阶 B 树每结点至多 4 个关键码，满 5 个时分裂、中间那个（第 3 个）上升。</p>
 <p><strong>最终的 B 树</strong>（两层）：</p>
 <div class="codeblock" data-lang="text"><pre><code>根:                [10, 20, 30, 40]
@@ -1209,7 +1418,55 @@ Delete(T, k)
 <li>若再插一个使某叶分裂、根变成 5 个关键码，根也会分裂，树将长到 3 层。</li>
 </ol>
 <p><strong>答题提醒</strong>：阶为<strong>偶数</strong>时「中间那个」有两种取法（偏左或偏右）， 不同教材结果不同；<strong>做题前先声明自己用哪种</strong>，或者优先挑奇数阶的题做。</p></blockquote>
-<p><strong>11-15.</strong> ★ 一棵红黑树如下（括号里是颜色）。 (1) 插入关键码 40，写出自平衡的过程与结果；(2) 在原树上插入关键码 3，同样作答。</p>
+<p><strong>11-16.</strong> ★ 依次把 <span class="math"><span class="upr">10</span>,<span class="upr">20</span>,<span class="upr">30</span>,<span class="upr">40</span>,<span class="upr">50</span>,<span class="upr">60</span>,<span class="upr">70</span>,<span class="upr">80</span>,<span class="upr">90</span></span> 插入一棵初始为空的 <strong>5 阶 B+ 树</strong>， 画出最终结果；并与同样输入下的 <strong>5 阶 B 树</strong>（做法见 11-15）对照，说明两者的差别。</p>
+<blockquote><p><strong>答</strong>：约定（做题前务必声明）：5 阶 B+ 树的内部结点至多 5 个子结点、4 个关键码； 叶结点至多 4 个关键码；<strong>叶满时分裂成 2 + 3，并把右叶的首关键码&quot;复制&quot;上去</strong>； 内部结点满时分裂，中间关键码&quot;移动&quot;上去。</p>
+<p><strong>逐步过程</strong>：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">插入</th>
+<th style="text-align:left">发生了什么</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">10,20,30,40</td>
+<td style="text-align:left">都进同一个叶（同时也是根），<code>[10,20,30,40]</code></td>
+</tr>
+<tr>
+<td style="text-align:left">50</td>
+<td style="text-align:left">叶满 5 个 → 分裂成 <code>[10,20]</code> 与 <code>[30,40,50]</code>，<strong>复制</strong> 30 上去成为新根 <code>[30]</code></td>
+</tr>
+<tr>
+<td style="text-align:left">60</td>
+<td style="text-align:left">进右叶 → <code>[30,40,50,60]</code></td>
+</tr>
+<tr>
+<td style="text-align:left">70</td>
+<td style="text-align:left">右叶满 → 分裂成 <code>[30,40]</code> 与 <code>[50,60,70]</code>，<strong>复制</strong> 50 上去，根变 <code>[30,50]</code></td>
+</tr>
+<tr>
+<td style="text-align:left">80</td>
+<td style="text-align:left">进最右叶 → <code>[50,60,70,80]</code></td>
+</tr>
+<tr>
+<td style="text-align:left">90</td>
+<td style="text-align:left">最右叶满 → 分裂成 <code>[50,60]</code> 与 <code>[70,80,90]</code>，<strong>复制</strong> 70 上去，根变 <code>[30,50,70]</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>最终 B+ 树</strong>：</p>
+<div class="codeblock" data-lang="text"><pre><code>内部（索引层）:        [30, 50, 70]
+                   /      |     |      \
+叶（数据层）:  [10,20] ↔ [30,40] ↔ [50,60] ↔ [70,80,90]
+               （叶之间用指针顺序链起来）</code></pre></div>
+<p><strong>同样输入下的 5 阶 B 树</strong>：</p>
+<div class="codeblock" data-lang="text"><pre><code>根:                    [30, 60]
+             /            |            \
+         [10,20]       [40,50]      [70,80,90]</code></pre></div>
+<p><strong>三处差别，都要能说出来</strong>：</p>
+<ol>
+<li><strong>关键码是否重复</strong>。B+ 树的 30、50、70 <strong>既在根里、又在叶里</strong>（索引层是叶层的复写）； B 树的 30、60 <strong>只在根里，叶中没有</strong>。</li>
+<li><strong>记录放在哪里</strong>。B+ 树全部记录都在叶层，内部结点只是分界； B 树的记录跟着关键码散布在各层。</li>
+<li><strong>检索长度</strong>。B+ 树每次都要走到叶，长度固定等于树高； B 树<strong>可能在内部结点就命中</strong>，长度不定（运气好时更短）。</li>
+</ol>
+<p><strong>由此得到 B+ 树的看家本领</strong>：叶层顺序链起来，<strong>从任一关键码出发可以顺着叶链做范围扫描</strong>； 而且内部结点不带数据，同样大小的页能装更多分支，<strong>树更矮、访外更少</strong>。 这就是数据库索引普遍选 B+ 树的原因（对照 11-5）。</p></blockquote>
+<p><strong>11-17.</strong> ★ 一棵红黑树如下（括号里是颜色）。 (1) 插入关键码 40，写出自平衡的过程与结果；(2) 在原树上插入关键码 3，同样作答。</p>
 <div class="codeblock" data-lang="text"><pre><code>            20(黑)
         /          \
      10(红)        30(黑)
@@ -1238,7 +1495,108 @@ Delete(T, k)
   /   \
 1(红) 5(红)</code></pre></div>
 <p><strong>两问正好覆盖红黑树插入的两大情形</strong>： <strong>叔父红 → 只换色、冲突上移；叔父黑 → 换色 + 旋转（内侧先把它转成外侧）</strong>。 核对黑高：结果里从根到任一空叶的黑结点数都相同，且没有红红相邻 ✓</p></blockquote>
-<p><strong>11-16.</strong> 设主文件有 <span class="math"><span class="upr">10</span><sup><span class="upr">6</span></sup></span> 条记录，每个磁盘页可容纳 100 个索引项。 (1) 若用 B+ 树作索引，树高大约是多少？检索一条记录要访外几次？ (2) 与「顺序检索」和「内存二分检索」相比，差别在哪？</p>
+<p><strong>11-18.</strong> ★ 红黑树的<strong>删除</strong>。给定下面这棵红黑树：</p>
+<div class="codeblock" data-lang="text"><pre><code>            20(黑)
+        /          \
+     10(红)        30(黑)
+     /    \        /    \
+   5(黑) 15(黑) 25(红)  35(红)
+   /
+ 1(红)</code></pre></div>
+<p>(1) 删除关键码 1；(2) 删除关键码 15。分别说明调整过程并画出结果。 (3) 另给一棵树：根 <code>20(黑)</code>，左孩子 <code>10(黑)</code>，右孩子 <code>30(黑)</code>（都是叶）。删除 10 会怎样？</p>
+<blockquote><p><strong>答</strong>：<strong>先把删除的总框架说清楚</strong>（三步）：</p>
+<ol>
+<li><strong>按 BST 的办法定位</strong>。若被删结点有两个孩子，<strong>用中序后继（或前驱）顶替它</strong>， 问题就转化成「删除一个至多有一个孩子的结点」——这一步与普通 BST 完全相同。</li>
+<li><strong>看真正被摘走的那个结点的颜色</strong>：</li>
+</ol>
+<ul>
+<li><strong>红色</strong> → 摘掉它不改变任何路径上的黑结点数，<strong>什么都不用做</strong>；</li>
+<li><strong>黑色</strong> → 该分支的黑高少了 1，出现所谓「<strong>双黑</strong>」，必须修复。</li>
+</ul>
+<ol>
+<li><strong>修复</strong>（只在第 2 步是黑色时进行）：若顶上来的孩子是红的，<strong>把它涂黑</strong>即可补回； 否则按「兄弟与两个侄子的颜色」分四种情形处理，<strong>至多 3 次旋转</strong>。</li>
+</ol>
+<hr>
+<p><strong>(1) 删除 1</strong> —— 1 是<strong>红色</strong>叶结点，直接摘走，黑高不变，<strong>不需要任何调整</strong>：</p>
+<div class="codeblock" data-lang="text"><pre><code>            20(黑)
+        /          \
+     10(红)        30(黑)
+     /    \        /    \
+   5(黑) 15(黑) 25(红)  35(红)</code></pre></div>
+<p><strong>(2) 删除 15</strong> —— 15 是<strong>黑色</strong>叶结点，摘走后它那一侧黑高少 1，出现双黑。 看它的兄弟：双黑位于父 10 的<strong>右</strong>边，兄弟是 <code>5(黑)</code>， 兄弟的「远侄」（远离双黑的那个侄子，即 5 的左孩子）是 <code>1(红)</code> → <strong>情形 4</strong>： <strong>兄弟取父结点的颜色、父结点与远侄都变黑、对父结点作一次旋转</strong>（这里是右旋）。</p>
+<div class="codeblock" data-lang="text"><pre><code>            20(黑)
+        /          \
+      5(红)        30(黑)
+      /   \        /    \
+   1(黑) 10(黑) 25(红)  35(红)</code></pre></div>
+<p>核对：没有红红相邻；从根到任一空叶的黑结点数都相同 ✓</p>
+<p><strong>(3) 删除 10</strong> —— 10 是黑叶，摘走后左边双黑；兄弟 <code>30(黑)</code>， 它的两个孩子都是空叶（都算黑）→ <strong>情形 2</strong>： <strong>把兄弟涂红，双黑上移给父结点</strong>。父结点是根，循环结束、把根涂黑即可：</p>
+<div class="codeblock" data-lang="text"><pre><code>      20(黑)
+          \
+          30(红)</code></pre></div>
+<p>注意这一步<strong>整棵树的黑高减少了 1</strong>——这是合法的，因为所有路径同时减少。</p>
+<hr>
+<p><strong>删除修复的四种情形（记这张表就够）</strong>。设双黑结点为 <span class="math">x</span>、其兄弟为 <span class="math">w</span>：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">情形</th>
+<th style="text-align:left">条件</th>
+<th style="text-align:left">处理</th>
+<th style="text-align:left">之后</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left"><span class="math">w</span> 是<strong>红</strong>的</td>
+<td style="text-align:left"><span class="math">w</span> 与父换色，对父旋转</td>
+<td style="text-align:left">化归成 <span class="math">w</span> 为黑的情形</td>
+</tr>
+<tr>
+<td style="text-align:left">2</td>
+<td style="text-align:left"><span class="math">w</span> 黑，<strong>两个侄子都黑</strong></td>
+<td style="text-align:left"><span class="math">w</span> 变红，<strong>双黑上移到父</strong></td>
+<td style="text-align:left">继续向上，最多走 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span> 层</td>
+</tr>
+<tr>
+<td style="text-align:left">3</td>
+<td style="text-align:left"><span class="math">w</span> 黑，<strong>近侄红、远侄黑</strong></td>
+<td style="text-align:left">近侄与 <span class="math">w</span> 换色，对 <span class="math">w</span> 旋转</td>
+<td style="text-align:left">化归成情形 4</td>
+</tr>
+<tr>
+<td style="text-align:left">4</td>
+<td style="text-align:left"><span class="math">w</span> 黑，<strong>远侄红</strong></td>
+<td style="text-align:left"><span class="math">w</span> 取父色，父与远侄变黑，对父旋转</td>
+<td style="text-align:left"><strong>修复完成，结束</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>要点</strong>：只有<strong>情形 2 会向上传播</strong>，其余三种最多再走一步就结束， 所以删除的旋转次数<strong>至多 3 次</strong>（情形 1 → 情形 3 → 情形 4 各一次）， 而颜色翻转最多 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span> 次。</p>
+<p><strong>与插入对照</strong>（插入见 11-17）：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left"></th>
+<th style="text-align:left">插入</th>
+<th style="text-align:left">删除</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">麻烦的来源</td>
+<td style="text-align:left"><strong>红红相邻</strong></td>
+<td style="text-align:left"><strong>黑高变少</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">看谁的颜色</td>
+<td style="text-align:left"><strong>叔父</strong></td>
+<td style="text-align:left"><strong>兄弟和两个侄子</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">只换色的那一支</td>
+<td style="text-align:left">叔父红 → 冲突上移</td>
+<td style="text-align:left">情形 2 → 双黑上移</td>
+</tr>
+<tr>
+<td style="text-align:left">旋转次数上限</td>
+<td style="text-align:left"><strong>2</strong></td>
+<td style="text-align:left"><strong>3</strong></td>
+</tr>
+</tbody></table></div></blockquote>
+<p><strong>11-19.</strong> 设主文件有 <span class="math"><span class="upr">10</span><sup><span class="upr">6</span></sup></span> 条记录，每个磁盘页可容纳 100 个索引项。 (1) 若用 B+ 树作索引，树高大约是多少？检索一条记录要访外几次？ (2) 与「顺序检索」和「内存二分检索」相比，差别在哪？</p>
 <blockquote><p><strong>答</strong>： <strong>(1)</strong> B+ 树的叶层要放下 <span class="math"><span class="upr">10</span><sup><span class="upr">6</span></sup></span> 个索引项，每页 100 个 → 叶层约 <span class="math"><span class="upr">10</span><sup><span class="upr">4</span></sup></span> 页； 上一层为这 <span class="math"><span class="upr">10</span><sup><span class="upr">4</span></sup></span> 页建索引 → 约 <span class="math"><span class="upr">10</span><sup><span class="upr">2</span></sup></span> 页；再上一层 → 1 页（根）。 所以树高约 <strong>3 层</strong>（根 + 中间层 + 叶层）。</p>
 <p>检索一条记录：读根、读中间层、读叶，共 <strong>3 次访外</strong>，再加 1 次读主文件数据页， 合计 <strong>4 次访外</strong>。</p>
 <p><strong>(2)</strong> 对比（设一次访外约 <span class="math"><span class="upr">10</span><sup><span class="bin">−</span><span class="upr">2</span></sup></span> 秒、一次内存比较约 <span class="math"><span class="upr">10</span><sup><span class="bin">−</span><span class="upr">8</span></sup></span> 秒）：</p>
@@ -1264,8 +1622,41 @@ Delete(T, k)
 </tr>
 </tbody></table></div>
 <p><strong>结论</strong>：外存场景下，<strong>衡量代价的唯一尺子是访外次数</strong>； B+ 树用「加大结点、降低树高」把它压到个位数。 内存装得下时当然内存结构更快，<strong>但索引存在的意义正是&quot;装不下&quot;那一档</strong>。</p></blockquote>
+<p><strong>11-20.</strong> ★ 分析 <span class="math">m</span> 阶 B 树上<strong>检索、插入、删除</strong>各自的<strong>读盘</strong>与<strong>写盘</strong>次数 （设树高为 <span class="math">h</span>，一个结点恰好是一个磁盘页，且根结点常驻内存之外不作特殊处理）。</p>
+<blockquote><p><strong>答</strong>：先立一条口径：<strong>读一个结点算一次读盘，改一个结点就要把它写回，算一次写盘。</strong></p>
+<p><strong>(1) 检索</strong></p>
+<ul>
+<li><strong>读</strong>：从根沿一条路径下降到目标结点，最多 <span class="math">h</span> 次； 若关键码在内部结点就命中（B 树可能如此），则少于 <span class="math">h</span> 次。 找到之后还要按地址去主文件取记录，<strong>再加 1 次读</strong>。</li>
+<li><strong>写</strong>：<strong>0 次</strong>——检索不改动索引。</li>
+<li>合计最多 <span class="math">h<span class="bin">+</span><span class="upr">1</span></span> 次访外。</li>
+</ul>
+<p><strong>(2) 插入</strong></p>
+<ul>
+<li><strong>读</strong>：先走一遍检索路径到叶，<span class="math">h</span> 次读。</li>
+<li><strong>写</strong>：分两种情况。</li>
+<li><strong>不发生分裂</strong>：只改那个叶结点，<strong>写 1 次</strong>。</li>
+<li><strong>发生分裂</strong>：设自下而上共有 <span class="math">s</span> 个结点分裂。每分裂一个结点要写出<strong>两个</strong>新结点， 共 <span class="math"><span class="upr">2</span>s</span> 次；最上面那个接收分界关键码的父结点还要改一次，<strong>再写 1 次</strong>。 合计 <strong><span class="math"><span class="upr">2</span>s<span class="bin">+</span><span class="upr">1</span></span> 次写</strong>。</li>
+<li><strong>若一直分裂到根</strong>（<span class="math">s<span class="rel">=</span>h</span>），根分裂后还要<strong>新建一个根</strong>，合计 <span class="math"><span class="upr">2</span>h<span class="bin">+</span><span class="upr">1</span></span> 次写，树高加一。</li>
+<li><strong>最好情形</strong>：<span class="math">h</span> 读 + 1 写；<strong>最坏情形</strong>：<span class="math">h</span> 读 + <span class="math"><span class="upr">2</span>h<span class="bin">+</span><span class="upr">1</span></span> 写。</li>
+</ul>
+<p><strong>(3) 删除</strong></p>
+<ul>
+<li><strong>读</strong>：检索路径 <span class="math">h</span> 次；若被删关键码在内部结点，还要向下找中序前驱/后继来顶替， 最多再读到叶层，仍是 <span class="math">O(h)</span>。 <strong>向兄弟借</strong>或<strong>与兄弟合并</strong>时要读兄弟结点，每层<strong>多读 1 次</strong>。</li>
+<li><strong>写</strong>：</li>
+<li><strong>不发生下溢</strong>：写 1 次。</li>
+<li><strong>向兄弟借</strong>（旋转）：改被删结点、兄弟、父结点三个，<strong>写 3 次</strong>，且<strong>到此为止</strong>；</li>
+<li><strong>与兄弟合并</strong>：合并成一个结点（写 1）、父结点少一个分界（写 1）， 若父结点因此下溢则继续向上；设向上传播了 <span class="math">t</span> 层，约 <strong><span class="math"><span class="upr">2</span>t</span> 次写</strong>。</li>
+<li>合并一直传到根且根只剩一个孩子时，<strong>树高减一</strong>。</li>
+</ul>
+<p><strong>三条最值得记住的结论</strong>：</p>
+<ol>
+<li><strong>读盘次数由树高决定，<span class="math">h<span class="rel">=</span>O(<span class="upr">log</span><sub>⌈m/<span class="upr">2</span>⌉</sub>n)</span></strong>，而 <span class="math">m</span> 在<strong>对数的底</strong>上—— 这就是「把结点做成一整页、把 <span class="math">m</span> 做大」的全部收益（见 11-21）。</li>
+<li><strong>写盘次数取决于分裂/合并传播了几层</strong>，绝大多数插入删除都不传播， 所以<strong>平均写盘次数接近 1</strong>；最坏才是 <span class="math">O(h)</span>。</li>
+<li><strong>检索不写盘</strong>——这是 B 树能承受高并发只读负载的原因。</li>
+</ol>
+<p><strong>B+ 树的差别</strong>：检索<strong>必须走到叶</strong>，读盘固定为 <span class="math">h</span>（不会提前命中）； 但内部结点不存数据，同样页大小下 <span class="math">m</span> 更大、<span class="math">h</span> 更小，<strong>通常总读盘次数反而更少</strong>； 且范围查询可以沿叶链顺序读，<strong>一次定位 + 顺序扫描</strong>，比 B 树的中序遍历省得多。</p></blockquote>
 <h3 id="五证明题-4"><a class="anchor" href="#五证明题-4">#</a>五、证明题</h3>
-<p><strong>11-17.</strong> ★ 证明：含 <span class="math">n</span> 个关键码的 <span class="math">m</span> 阶 B 树，其高度 <span class="math">h</span> 满足 <span class="math">h<span class="rel">≤</span>&thinsp;<span class="upr">log</span><sub>⌈m/<span class="upr">2</span>⌉</sub><span class="frac"><span class="num">n<span class="bin">+</span><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span><span class="bin">+</span><span class="upr">1</span></span>。</p>
+<p><strong>11-21.</strong> ★ 证明：含 <span class="math">n</span> 个关键码的 <span class="math">m</span> 阶 B 树，其高度 <span class="math">h</span> 满足 <span class="math">h<span class="rel">≤</span>&thinsp;<span class="upr">log</span><sub>⌈m/<span class="upr">2</span>⌉</sub><span class="frac"><span class="num">n<span class="bin">+</span><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span><span class="bin">+</span><span class="upr">1</span></span>。</p>
 <blockquote><p><strong>证明.</strong> 记 <span class="math">t<span class="rel">=</span>⌈m/<span class="upr">2</span>⌉</span>。要让树尽可能<strong>高</strong>，就让每个结点尽可能<strong>少</strong>装子结点。 按定义，根至少 2 个子结点，其余非叶结点至少 <span class="math">t</span> 个子结点。于是第 <span class="math">i</span> 层 （根为第 1 层）的结点数至少为</p>
 <div class="math math-display"><span class="upr">1</span>, <span class="upr">2</span>, <span class="upr">2</span>t, <span class="upr">2</span>t<sup><span class="upr">2</span></sup>, ⋯, <span class="upr">2</span>t<sup>h<span class="bin">−</span><span class="upr">1</span></sup></div>
 <p>叶结点全在第 <span class="math">h</span> 层（这里把「失败结点」那一层算作第 <span class="math">h<span class="bin">+</span><span class="upr">1</span></span> 层更方便， 按本书的算法，关键码总数 <span class="math">n</span> 与叶层指针数的关系是<strong>指针数 <span class="math"><span class="rel">=</span>n<span class="bin">+</span><span class="upr">1</span></span></strong>）。 第 <span class="math">h</span> 层的指针（外部结点）数至少为 <span class="math"><span class="upr">2</span>t<sup>h<span class="bin">−</span><span class="upr">1</span></sup></span>，故</p>
@@ -1274,7 +1665,7 @@ Delete(T, k)
 <div class="math math-display">h<span class="rel">≤</span>&thinsp;<span class="upr">log</span><sub>⌈m/<span class="upr">2</span>⌉</sub><span class="frac"><span class="num">n<span class="bin">+</span><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span><span class="bin">+</span><span class="upr">1</span></div>
 <p>∎</p>
 <p><strong>这个界的实际含义</strong>：<span class="math">m</span> 出现在<strong>对数的底</strong>上。 把 <span class="math">m</span> 从 2 增大到 100，树高就从 <span class="math"><span class="upr">log</span><sub><span class="upr">2</span></sub>n</span> 变成约 <span class="math"><span class="upr">log</span><sub><span class="upr">50</span></sub>n</span>， 相当于除以 5.6——<strong>这就是&quot;把结点做成一整页&quot;的全部收益</strong>。</p></blockquote>
-<p><strong>11-18.</strong> 证明：含 <span class="math">n</span> 个内部结点的红黑树，其高度不超过 <span class="math"><span class="upr">2</span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>(n<span class="bin">+</span><span class="upr">1</span>)</span>。</p>
+<p><strong>11-22.</strong> 证明：含 <span class="math">n</span> 个内部结点的红黑树，其高度不超过 <span class="math"><span class="upr">2</span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>(n<span class="bin">+</span><span class="upr">1</span>)</span>。</p>
 <blockquote><p><strong>证明.</strong> 记结点 <span class="math">x</span> 的<strong>黑高</strong> <span class="math">bh(x)</span> 为从 <span class="math">x</span>（不含 <span class="math">x</span>）到任一后代空叶路径上的黑结点数 （由性质④，这个数与选哪条路径无关）。</p>
 <p><strong>第一步：以 <span class="math">x</span> 为根的子树至少有 <span class="math"><span class="upr">2</span><sup>bh(x)</sup><span class="bin">−</span><span class="upr">1</span></span> 个内部结点。</strong> 对 <span class="math">x</span> 的高度作归纳： <span class="math">x</span> 是空叶时 <span class="math">bh(x)<span class="rel">=</span><span class="upr">0</span></span>，内部结点数 <span class="math"><span class="upr">0</span><span class="rel">=</span><span class="upr">2</span><sup><span class="upr">0</span></sup><span class="bin">−</span><span class="upr">1</span></span> ✓； 一般地 <span class="math">x</span> 的两个孩子的黑高至少为 <span class="math">bh(x)<span class="bin">−</span><span class="upr">1</span></span>，由归纳假设各自至少有 <span class="math"><span class="upr">2</span><sup>bh(x)<span class="bin">−</span><span class="upr">1</span></sup><span class="bin">−</span><span class="upr">1</span></span> 个内部结点， 加上 <span class="math">x</span> 自己，总数至少 <span class="math"><span class="upr">2</span>(<span class="upr">2</span><sup>bh(x)<span class="bin">−</span><span class="upr">1</span></sup><span class="bin">−</span><span class="upr">1</span>)<span class="bin">+</span><span class="upr">1</span><span class="rel">=</span><span class="upr">2</span><sup>bh(x)</sup><span class="bin">−</span><span class="upr">1</span></span> ✓。</p>
 <p><strong>第二步：<span class="math">bh(<span class="upr">根</span>)<span class="rel">≥</span>h/<span class="upr">2</span></span>。</strong> 由性质③（不允许红红相邻）， 任何一条从根到空叶的路径上，红结点不可能连续出现，因此<strong>至少一半的结点是黑的</strong>。</p>
@@ -1393,8 +1784,39 @@ Delete(T, k)
 <li><strong>Patricia 树</strong>：把 Trie 里那些单分支的链<strong>压缩成一条边</strong>， 每个内部结点记录「下一步该比较第几位」，于是内部结点数降到 <span class="math">O(n)</span>。</li>
 </ul>
 <p><strong>相对 BST 的优势</strong>：检索代价是 <span class="math">O(|k|)</span>（关键码长度），<strong>与集合规模无关</strong>， 而 BST 是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span> 次<strong>整串比较</strong>，每次比较本身又是 <span class="math">O(|k|)</span>； 而且 Trie 天然支持<strong>前缀查询</strong>（求所有以某串开头的关键码），BST 做不到。 代价是空间开销大、对字母表大小敏感。（本章对这两者只要求了解。）</p></blockquote>
+<p><strong>12-14.</strong> ★ 简答：<strong>半伸展树（semi-splaying）</strong>与普通伸展树有什么区别？ 它为什么能减少旋转次数？</p>
+<blockquote><p><strong>答</strong>：两者只在<strong>一字形（zig-zig）</strong>这一种情况上不同。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left"></th>
+<th style="text-align:left">伸展树（全伸展）</th>
+<th style="text-align:left">半伸展树</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">一字形怎么转</td>
+<td style="text-align:left">先转祖父、再转父，把 <span class="math">x</span> 提两层</td>
+<td style="text-align:left"><strong>像 AVL 的 LL/RR 那样处理</strong>：以父结点的位置为轴旋转</td>
+</tr>
+<tr>
+<td style="text-align:left">下一轮从谁继续</td>
+<td style="text-align:left">仍是 <span class="math">x</span> 本身</td>
+<td style="text-align:left"><strong>当前结点上移到父结点</strong>，从父结点继续</td>
+</tr>
+<tr>
+<td style="text-align:left">终点</td>
+<td style="text-align:left">必须把 <span class="math">x</span> 送到<strong>根</strong></td>
+<td style="text-align:left"><strong>不要求把检索结点送到根</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">旋转次数</td>
+<td style="text-align:left">与 <span class="math">x</span> 的深度成正比</td>
+<td style="text-align:left">约为前者的一半</td>
+</tr>
+</tbody></table></div>
+<p><strong>为什么能省</strong>：全伸展每一轮都盯着 <span class="math">x</span> 自己，非把它顶到根不可； 半伸展在一字形情形下把「当前结点」交给父结点接着往上走， <strong>相当于每两层只付一层的代价</strong>，路径上的结点同样被提了上来，但少转了一半。</p>
+<p><strong>代价</strong>：由于 <span class="math">x</span> 未必到根，<strong>「刚访问过的结点下次一定在根」这条性质就没有了</strong>； 它的摊还界与全伸展<strong>不同</strong>（仍是对数量级，但常数与分析方式都变了）。 之字形（zig-zag）两者处理相同。</p>
+<p><strong>和 AVL、红黑树摆在一起看</strong>（对照 12-11）： 伸展树一族的共同点是<strong>不存任何平衡信息</strong>（没有平衡因子、没有颜色）， 全靠「把刚访问的搬上来」自适应；半伸展则是在「搬多少」上做了个折衷。</p></blockquote>
 <h3 id="四算法设计与分析-4"><a class="anchor" href="#四算法设计与分析-4">#</a>四、算法设计与分析</h3>
-<p><strong>12-14.</strong> ★ 对下面这棵 AVL 树依次插入 10、65、64，画出每次插入后的树， 并指出每次的旋转类型（不需要旋转也要说明）。</p>
+<p><strong>12-15.</strong> ★ 对下面这棵 AVL 树依次插入 10、65、64，画出每次插入后的树， 并指出每次的旋转类型（不需要旋转也要说明）。</p>
 <div class="codeblock" data-lang="text"><pre><code>        50
       /     \
     30       70
@@ -1427,7 +1849,7 @@ Delete(T, k)
  /  \      /  \
 10   20   60   65</code></pre></div>
 <p><strong>三次插入正好覆盖三种情况：单旋、不旋、双旋。</strong> 答题要点：(1) 先指出<strong>危急结点</strong>是谁；(2) 再按「头两步的方向」判型； (3) 旋转后核对中序序列不变（这里始终是 <code>10 15 20 30 40 50 60 64 65 70 80</code>）。</p></blockquote>
-<p><strong>12-15.</strong> ★ 对一棵伸展树依次插入 <span class="math"><span class="upr">10</span>,<span class="upr">20</span>,<span class="upr">30</span>,<span class="upr">40</span>,<span class="upr">50</span>,<span class="upr">60</span>,<span class="upr">70</span></span>（每次插入后都把新结点展开到根）， 然后检索 20 并展开。写出两步之后的树形，并说明展开用到了哪几种旋转。</p>
+<p><strong>12-16.</strong> ★ 对一棵伸展树依次插入 <span class="math"><span class="upr">10</span>,<span class="upr">20</span>,<span class="upr">30</span>,<span class="upr">40</span>,<span class="upr">50</span>,<span class="upr">60</span>,<span class="upr">70</span></span>（每次插入后都把新结点展开到根）， 然后检索 20 并展开。写出两步之后的树形，并说明展开用到了哪几种旋转。</p>
 <blockquote><p><strong>答</strong>： <strong>插入阶段</strong>：每个新键都比树中所有键大，插入后展开到根，于是树退化成一条<strong>左斜链</strong>：</p>
 <div class="codeblock" data-lang="text"><pre><code>70
 └左 60
@@ -1446,7 +1868,7 @@ Delete(T, k)
      30    50</code></pre></div>
 <p><strong>看点在于树高</strong>：原来是一条长 7 的链（访问 10 要走 6 步）， 展开之后高度降到 3。<strong>一字形旋转的作用正是把同向长链压短</strong>—— 这就是伸展树「不维持平衡、却能摊还 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>」的机制： 每次访问深结点的同时，顺手把那条深路径上的所有结点都提了上来， 代价被后续的访问摊薄了。</p>
 <p><strong>注意</strong>：如果把一字形替换成「连续两次父子单旋」，20 同样能到根， <strong>但那条链只会被平移、不会被压短</strong>，摊还界就失效了。这是一字形不能简化的原因。</p></blockquote>
-<p><strong>12-16.</strong> ★ 基于伸展树实现一个简单的文本编辑器。文本是一个字符串， 每个结点存一个字符及它在文本中的下标 <code>index</code>，另有左右孩子与父指针。要求支持： <code>copy(i,j)</code> 把下标 <span class="math">[i,j]</span> 的字符复制到剪贴板； <code>cut(i,j)</code> 把这段删除并移到剪贴板；<code>paste(i)</code> 把剪贴板内容插入到下标 <span class="math">i</span> 之后。 写出三个操作的基本思想。</p>
+<p><strong>12-17.</strong> ★ 基于伸展树实现一个简单的文本编辑器。文本是一个字符串， 每个结点存一个字符及它在文本中的下标 <code>index</code>，另有左右孩子与父指针。要求支持： <code>copy(i,j)</code> 把下标 <span class="math">[i,j]</span> 的字符复制到剪贴板； <code>cut(i,j)</code> 把这段删除并移到剪贴板；<code>paste(i)</code> 把剪贴板内容插入到下标 <span class="math">i</span> 之后。 写出三个操作的基本思想。</p>
 <blockquote><p><strong>答</strong>：<strong>统一的思路只有一句：用两次 splay 把要操作的那一段&quot;孤立&quot;成一棵子树。</strong></p>
 <p>用到的 ADT：</p>
 <div class="codeblock" data-lang="text"><pre><code>SplayTree
@@ -1481,12 +1903,12 @@ paste(i)
 <p><strong>代价</strong>：两次 splay 摊还 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>；<code>Shift</code> 若逐结点改 <code>index</code> 是 <span class="math">O(段长)</span>， 工程上会在结点里存一个<strong>懒标记（lazy tag）</strong>，把整棵子树的平移记成 <span class="math">O(<span class="upr">1</span>)</span>， 用到时再下推。复制子树是 <span class="math">O(k)</span>，<span class="math">k</span> 为剪贴板长度——这一项无法避免。</p>
 <p><strong>评分要点</strong>：(1) 说清伸展树的旋转/splay 操作；(2) 说清「两次 splay 孤立区间」这一步； (3) 三个操作各自对 <code>index</code> 的维护不能漏——<strong>删除后要把后面的下标整体前移， 插入后要整体后移</strong>，这是最容易丢分的地方。</p></blockquote>
 <h3 id="五证明题-5"><a class="anchor" href="#五证明题-5">#</a>五、证明题</h3>
-<p><strong>12-17.</strong> 证明：<span class="math">n</span> 阶下三角矩阵按行优先压缩后，<span class="math">a<sub>i,j</sub></span>（<span class="math">i<span class="rel">≥</span>j</span>，下标从 0 起） 的位置是 <span class="math"><span class="frac"><span class="num">i(i<span class="bin">+</span><span class="upr">1</span>)</span><span class="den"><span class="upr">2</span></span></span><span class="bin">+</span>j</span>，并说明为什么这个映射是<strong>双射</strong>。</p>
+<p><strong>12-18.</strong> 证明：<span class="math">n</span> 阶下三角矩阵按行优先压缩后，<span class="math">a<sub>i,j</sub></span>（<span class="math">i<span class="rel">≥</span>j</span>，下标从 0 起） 的位置是 <span class="math"><span class="frac"><span class="num">i(i<span class="bin">+</span><span class="upr">1</span>)</span><span class="den"><span class="upr">2</span></span></span><span class="bin">+</span>j</span>，并说明为什么这个映射是<strong>双射</strong>。</p>
 <blockquote><p><strong>证明.</strong> 按行优先，<span class="math">a<sub>i,j</sub></span> 之前存放的元素恰好是： 第 <span class="math"><span class="upr">0</span></span> 行的 1 个、第 <span class="math"><span class="upr">1</span></span> 行的 2 个、……、第 <span class="math">i<span class="bin">−</span><span class="upr">1</span></span> 行的 <span class="math">i</span> 个， 再加上第 <span class="math">i</span> 行中位于它左边的 <span class="math">j</span> 个。故位置为</p>
 <div class="math math-display">∑<sub>r<span class="rel">=</span><span class="upr">0</span></sub><sup>i<span class="bin">−</span><span class="upr">1</span></sup>(r<span class="bin">+</span><span class="upr">1</span>)<span class="bin">+</span>j<span class="rel">=</span><span class="frac"><span class="num">i(i<span class="bin">+</span><span class="upr">1</span>)</span><span class="den"><span class="upr">2</span></span></span><span class="bin">+</span>j</div>
 <p><strong>双射性</strong>：定义域是 <span class="math">{(i,j):<span class="upr">0</span><span class="rel">≤</span>j<span class="rel">≤</span>i<span class="rel">≤</span>n<span class="bin">−</span><span class="upr">1</span>}</span>，共 <span class="math"><span class="frac"><span class="num">n(n<span class="bin">+</span><span class="upr">1</span>)</span><span class="den"><span class="upr">2</span></span></span></span> 个点； 值域是 <span class="math">{<span class="upr">0</span>,<span class="upr">1</span>,⋯,<span class="frac"><span class="num">n(n<span class="bin">+</span><span class="upr">1</span>)</span><span class="den"><span class="upr">2</span></span></span><span class="bin">−</span><span class="upr">1</span>}</span>，元素个数相同。 又因为对固定的 <span class="math">i</span>，<span class="math">j</span> 取遍 <span class="math"><span class="upr">0..</span>i</span> 时位置取遍 <span class="math">[<span class="frac"><span class="num">i(i<span class="bin">+</span><span class="upr">1</span>)</span><span class="den"><span class="upr">2</span></span></span>, <span class="frac"><span class="num">i(i<span class="bin">+</span><span class="upr">1</span>)</span><span class="den"><span class="upr">2</span></span></span><span class="bin">+</span>i]</span> 这一整段连续区间， 而相邻两行的区间首尾相接、互不重叠（第 <span class="math">i</span> 行末是 <span class="math"><span class="frac"><span class="num">i(i<span class="bin">+</span><span class="upr">1</span>)</span><span class="den"><span class="upr">2</span></span></span><span class="bin">+</span>i<span class="rel">=</span><span class="frac"><span class="num">(i<span class="bin">+</span><span class="upr">1</span>)(i<span class="bin">+</span><span class="upr">2</span>)</span><span class="den"><span class="upr">2</span></span></span><span class="bin">−</span><span class="upr">1</span></span>， 恰好是第 <span class="math">i<span class="bin">+</span><span class="upr">1</span></span> 行起点的前一个），所以映射是单射； 单射加上两端个数相同，即为双射。∎</p>
 <p><strong>双射意味着不浪费也不冲突</strong>——每个存储单元恰好放一个非零元，压缩率达到理论最优。</p></blockquote>
-<p><strong>12-18.</strong> ★ 证明：AVL 树中插入一个结点后，<strong>至多做一次旋转</strong>（单旋或双旋）就能恢复平衡。</p>
+<p><strong>12-19.</strong> ★ 证明：AVL 树中插入一个结点后，<strong>至多做一次旋转</strong>（单旋或双旋）就能恢复平衡。</p>
 <blockquote><p><strong>证明.</strong> 设危急结点为 <span class="math">x</span>（最靠近插入点的失衡祖先），不妨设插入发生在 <span class="math">x</span> 的左子树， 使 <span class="math">x</span> 的平衡因子变成 <span class="math"><span class="bin">+</span><span class="upr">2</span></span>。记插入前 <span class="math">x</span> 的左子树高为 <span class="math">h</span>、右子树高为 <span class="math">h<span class="bin">−</span><span class="upr">1</span></span>， 插入后左子树高变成 <span class="math">h<span class="bin">+</span><span class="upr">1</span></span>。</p>
 <p>关键在于计算<strong>旋转之后这棵子树的高度</strong>：</p>
 <ul>
@@ -1495,7 +1917,7 @@ paste(i)
 </ul>
 <p>而<strong>插入之前</strong>，这棵子树的高度正是 <span class="math">h</span>（左 <span class="math">h</span>、右 <span class="math">h<span class="bin">−</span><span class="upr">1</span></span>）。 也就是说，<strong>旋转之后子树的高度与插入之前完全相同</strong>。 于是 <span class="math">x</span> 的所有祖先看到的子树高度没有任何变化，它们的平衡因子自然保持不变， 不可能再失衡。因此只需在 <span class="math">x</span> 处旋转一次。∎</p>
 <p><strong>对照删除</strong>：删除后旋转会让子树高度<strong>减少 1</strong>，这个变化会沿着路径向上传播， 因此<strong>删除可能需要 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span> 次旋转</strong>——这正是 AVL 删除比插入麻烦的原因， 也是本章大纲只要求掌握插入的原因。</p></blockquote>
-<p><strong>12-19.</strong> 证明：在最佳二叉搜索树问题中，<strong>贪心地把概率最大的关键码放在根</strong>不一定最优； 并说明为什么必须用动态规划。</p>
+<p><strong>12-20.</strong> 证明：在最佳二叉搜索树问题中，<strong>贪心地把概率最大的关键码放在根</strong>不一定最优； 并说明为什么必须用动态规划。</p>
 <blockquote><p><strong>证明（举反例）.</strong> 设三个关键码 <span class="math">k<sub><span class="upr">1</span></sub>&lt;k<sub><span class="upr">2</span></sub>&lt;k<sub><span class="upr">3</span></sub></span>，检索概率分别为 <span class="math">p<sub><span class="upr">1</span></sub><span class="rel">=</span><span class="upr">0.4</span></span>、<span class="math">p<sub><span class="upr">2</span></sub><span class="rel">=</span><span class="upr">0.45</span></span>、<span class="math">p<sub><span class="upr">3</span></sub><span class="rel">=</span><span class="upr">0.15</span></span>。代价记为 <span class="math">∑p<sub>i</sub><span class="bin">⋅</span>(<span class="upr">层数</span><span class="bin">+</span><span class="upr">1</span>)</span>。</p>
 <ul>
 <li><strong>贪心</strong>：把概率最大的 <span class="math">k<sub><span class="upr">2</span></sub></span> 放根，<span class="math">k<sub><span class="upr">1</span></sub></span>、<span class="math">k<sub><span class="upr">3</span></sub></span> 各为一个孩子： <span class="math"><span class="upr">0.45</span><span class="bin">×</span><span class="upr">1</span><span class="bin">+</span><span class="upr">0.4</span><span class="bin">×</span><span class="upr">2</span><span class="bin">+</span><span class="upr">0.15</span><span class="bin">×</span><span class="upr">2</span><span class="rel">=</span><span class="upr">0.45</span><span class="bin">+</span><span class="upr">0.8</span><span class="bin">+</span><span class="upr">0.3</span><span class="rel">=</span><span class="upr">1.55</span></span>。</li>
@@ -1546,7 +1968,7 @@ paste(i)
 <blockquote><p><strong>答</strong>： <strong>1. 错。</strong> DFS 的<strong>发现次序</strong>不是拓扑序，因为 DFS 可能先一头扎进某条深路径， 而那条路径上的顶点其实有别的前驱还没访问。 正确做法是取 DFS 的<strong>完成时间逆序</strong>（即后序遍历的逆序）。 反例：顶点 <span class="math">{<span class="upr">1</span>,<span class="upr">2</span>,<span class="upr">3</span>}</span>，弧为 <span class="math"><span class="upr">1</span><span class="rel">→</span><span class="upr">2</span></span>、<span class="math"><span class="upr">3</span><span class="rel">→</span><span class="upr">2</span></span>，从 1 开始 DFS 得到发现序 <code>1 2 3</code>， 而 3 必须排在 2 前面。</p>
 <p><strong>2.</strong> Dijkstra 的正确性依赖一条不变式：<strong>每次取出的&quot;当前最小距离&quot;顶点，其距离已经是最终值</strong>。 这条不变式的证明用到「路径越长权和越大」——负权边一出现就不成立。</p>
 <p>最小反例：三个顶点 <span class="math">A,B,C</span>，边 <span class="math">A<span class="rel">→</span>B</span> 权 2、<span class="math">A<span class="rel">→</span>C</span> 权 5、<span class="math">C<span class="rel">→</span>B</span> 权 <span class="math"><span class="bin">−</span><span class="upr">4</span></span>。 Dijkstra 从 <span class="math">A</span> 出发先确定 <span class="math">B</span>（距离 2，因为 2 &lt; 5），此后 <span class="math">B</span> 不再更新； 但真正的最短路是 <span class="math">A<span class="rel">→</span>C<span class="rel">→</span>B</span>，长度 <span class="math"><span class="upr">5</span><span class="bin">−</span><span class="upr">4</span><span class="rel">=</span><span class="upr">1</span></span>。<strong>答案错了。</strong> 含负权边要用 Bellman-Ford；负权<strong>回路</strong>则根本没有最短路。</p>
-<p><strong>3.</strong> 闭散列的检索用「遇到空位就判定失败」作为终止条件， 这条判据成立的前提是<strong>探查链上没有空洞</strong>。 若删除时直接置空，就在链中间挖了个洞，排在洞后面的同义词<strong>从此再也找不到</strong> （证明见 10-18 的反例）。墓碑保住链的连续性，同时允许该槽被重新占用。</p>
+<p><strong>3.</strong> 闭散列的检索用「遇到空位就判定失败」作为终止条件， 这条判据成立的前提是<strong>探查链上没有空洞</strong>。 若删除时直接置空，就在链中间挖了个洞，排在洞后面的同义词<strong>从此再也找不到</strong> （证明见 10-19 的反例）。墓碑保住链的连续性，同时允许该槽被重新占用。</p>
 <p><strong>代价与对策</strong>：墓碑既不算空也不算满，检索时不能提前停， 删除多了之后<strong>失败检索会越来越慢</strong>。工程做法是统计墓碑比例， 超过阈值就<strong>整表重建（rehash）</strong>：新建一张表，把所有 <code>OCCUPIED</code> 的记录重新插入， 墓碑随之全部消失。</p>
 <p><strong>4. 不准确。</strong> 前半句结论常常成立，但理由不完整，而且「一定」过头了。</p>
 <ul>
@@ -1630,7 +2052,7 @@ paste(i)
 <blockquote><p><strong>证明.</strong> 反设有两棵不同的最小生成树 <span class="math">T<sub><span class="upr">1</span></sub><span class="rel">≠</span>T<sub><span class="upr">2</span></sub></span>，权值和相等（都最小）。 取<strong>只属于其中一棵</strong>的边里权值最小的那条，记为 <span class="math">e</span>；不妨设 <span class="math">e<span class="rel">∈</span>T<sub><span class="upr">1</span></sub>∖T<sub><span class="upr">2</span></sub></span>。</p>
 <p>把 <span class="math">e<span class="rel">=</span>(u,v)</span> 加入 <span class="math">T<sub><span class="upr">2</span></sub></span>，会形成唯一一个环 <span class="math">C</span>。环 <span class="math">C</span> 上必有一条边 <span class="math">f<span class="rel">∉</span>T<sub><span class="upr">1</span></sub></span> （否则 <span class="math">C</span> 的所有边都在 <span class="math">T<sub><span class="upr">1</span></sub></span> 里，<span class="math">T<sub><span class="upr">1</span></sub></span> 就含环了，与它是树矛盾）。 于是 <span class="math">f<span class="rel">∈</span>T<sub><span class="upr">2</span></sub>∖T<sub><span class="upr">1</span></sub></span>，<span class="math">f</span> 也是「只属于其中一棵」的边，由 <span class="math">e</span> 的取法有 <span class="math">w(e)&lt;w(f)</span> （边权互不相同，不会相等）。</p>
 <p>考察 <span class="math">T<sub><span class="upr">2</span></sub>&#x27;<span class="rel">=</span>T<sub><span class="upr">2</span></sub><span class="bin">+</span>e<span class="bin">−</span>f</span>：它仍是生成树（去掉环上一条边不破坏连通性），而 <span class="math">w(T<sub><span class="upr">2</span></sub>&#x27;)<span class="rel">=</span>w(T<sub><span class="upr">2</span></sub>)<span class="bin">+</span>w(e)<span class="bin">−</span>w(f)&lt;w(T<sub><span class="upr">2</span></sub>)</span>，与 <span class="math">T<sub><span class="upr">2</span></sub></span> 是最小生成树矛盾。∎</p>
-<p><strong>反过来不成立</strong>：边权有重复时 MST 仍可能唯一（见 7-16 的 <span class="math">G<sub><span class="upr">2</span></sub></span>）。 真正的充要条件要弱得多：<strong>每条切上的最小边唯一</strong>。</p></blockquote>
+<p><strong>反过来不成立</strong>：边权有重复时 MST 仍可能唯一（见 7-17 的 <span class="math">G<sub><span class="upr">2</span></sub></span>）。 真正的充要条件要弱得多：<strong>每条切上的最小边唯一</strong>。</p></blockquote>
 <p><strong>2.</strong> 证明：对 <span class="math">n</span> 个记录作 <span class="math">k</span> 路归并外排序，若初始顺串数为 <span class="math">m</span>， 则总的读写页次约为 <span class="math"><span class="upr">2</span><span class="frac"><span class="num">n</span><span class="den">b</span></span>⌈<span class="upr">log</span><sub>k</sub>m⌉</span>（<span class="math">b</span> 为每页记录数）， 并说明为什么「增大 <span class="math">k</span>」和「增大内存工作区 <span class="math">M</span>」都能减少它，两者的作用有何不同。</p>
 <blockquote><p><strong>证明.</strong> 归并分若干趟。<strong>每一趟都要把当前全部数据完整地读入一次、写出一次</strong>： 因为 <span class="math">k</span> 路归并是把 <span class="math">k</span> 条顺串合成一条，一趟下来所有记录恰好各被读一次、写一次。 一趟的页次为 <span class="math"><span class="upr">2</span><span class="frac"><span class="num">n</span><span class="den">b</span></span></span>。</p>
 <p>每一趟把顺串数从 <span class="math">x</span> 变成 <span class="math">⌈x/k⌉</span>，从 <span class="math">m</span> 降到 1 需要 <span class="math">⌈<span class="upr">log</span><sub>k</sub>m⌉</span> 趟。 两者相乘即得总页次 <span class="math"><span class="upr">2</span><span class="frac"><span class="num">n</span><span class="den">b</span></span>⌈<span class="upr">log</span><sub>k</sub>m⌉</span>。∎</p>
@@ -1650,43 +2072,47 @@ paste(i)
 </tr></thead><tbody>
 <tr>
 <td style="text-align:left">保证连通的最少边数</td>
-<td style="text-align:left"><span class="math"><span class="frac"><span class="num">(n<span class="bin">−</span><span class="upr">1</span>)(n<span class="bin">−</span><span class="upr">2</span>)</span><span class="den"><span class="upr">2</span></span></span><span class="bin">+</span><span class="upr">1</span></span>（7-2、7-21）</td>
+<td style="text-align:left"><span class="math"><span class="frac"><span class="num">(n<span class="bin">−</span><span class="upr">1</span>)(n<span class="bin">−</span><span class="upr">2</span>)</span><span class="den"><span class="upr">2</span></span></span><span class="bin">+</span><span class="upr">1</span></span>（7-3、7-22）</td>
 </tr>
 <tr>
 <td style="text-align:left">相邻矩阵 / 邻接表</td>
-<td style="text-align:left">判边 <span class="math">O(<span class="upr">1</span>)</span> / <span class="math">O(d)</span>；遍历邻居 <span class="math">O(n)</span> / <span class="math">O(d)</span>；空间 <span class="math">n<sup><span class="upr">2</span></sup></span> / <span class="math">n<span class="bin">+</span>e</span>（7-3、7-14）</td>
+<td style="text-align:left">判边 <span class="math">O(<span class="upr">1</span>)</span> / <span class="math">O(d)</span>；遍历邻居 <span class="math">O(n)</span> / <span class="math">O(d)</span>；空间 <span class="math">n<sup><span class="upr">2</span></sup></span> / <span class="math">n<span class="bin">+</span>e</span>（7-4、7-15）</td>
 </tr>
 <tr>
 <td style="text-align:left">拓扑排序</td>
-<td style="text-align:left">反复取入度 0；输出数 <span class="math">&lt;n</span> 即有环；<span class="math">O(n<span class="bin">+</span>e)</span>（7-12）</td>
+<td style="text-align:left">反复取入度 0；输出数 <span class="math">&lt;n</span> 即有环；<span class="math">O(n<span class="bin">+</span>e)</span>（7-13）</td>
 </tr>
 <tr>
 <td style="text-align:left">拓扑序唯一</td>
-<td style="text-align:left">当且仅当图中有哈密顿路径（7-5、7-15）</td>
+<td style="text-align:left">当且仅当图中有哈密顿路径（7-6、7-16）</td>
 </tr>
 <tr>
 <td style="text-align:left">DFS 序 ≠ 拓扑序</td>
-<td style="text-align:left">要取<strong>完成时间逆序</strong>（7-7C、模拟卷二·1）</td>
+<td style="text-align:left">要取<strong>完成时间逆序</strong>（7-8C、模拟卷二·1）</td>
 </tr>
 <tr>
 <td style="text-align:left">Dijkstra</td>
-<td style="text-align:left">不许负权边；加入次序 = 最短距离升序（7-6、7-10）</td>
+<td style="text-align:left">不许负权边；加入次序 = 最短距离升序（7-7、7-11）</td>
 </tr>
 <tr>
 <td style="text-align:left">Floyd</td>
-<td style="text-align:left">允许负权边、不许负权回路；<span class="math">Θ(n<sup><span class="upr">3</span></sup>)</span>（7-6）</td>
+<td style="text-align:left">允许负权边、不许负权回路；<span class="math">Θ(n<sup><span class="upr">3</span></sup>)</span>（7-7）</td>
 </tr>
 <tr>
 <td style="text-align:left">MST 切性质</td>
-<td style="text-align:left">切上最小边唯一 <span class="math"><span class="rel">⇒</span></span> 它属于每棵 MST（7-19）</td>
+<td style="text-align:left">切上最小边唯一 <span class="math"><span class="rel">⇒</span></span> 它属于每棵 MST（7-20）</td>
 </tr>
 <tr>
 <td style="text-align:left">边权互异 <span class="math"><span class="rel">⇒</span></span> MST 唯一</td>
-<td style="text-align:left">充分<strong>不必要</strong>（7-16 是反例、模拟卷五·1 是证明）</td>
+<td style="text-align:left">充分<strong>不必要</strong>（7-17 是反例、模拟卷五·1 是证明）</td>
 </tr>
 <tr>
 <td style="text-align:left">无向图 DFS</td>
-<td style="text-align:left">只有树边和回边，<strong>没有横叉边</strong>（7-20）</td>
+<td style="text-align:left">只有树边和回边，<strong>没有横叉边</strong>（7-21）</td>
+</tr>
+<tr>
+<td style="text-align:left">生成树林</td>
+<td style="text-align:left">非连通图周游得若干棵树，<strong>棵数 = 连通分量数</strong>；共 <span class="math">n<span class="bin">−</span>c</span> 条边（7-2）</td>
 </tr>
 </tbody></table></div>
 <h3 id="内排序"><a class="anchor" href="#内排序">#</a>内排序</h3>
@@ -1716,23 +2142,27 @@ paste(i)
 </tr>
 <tr>
 <td style="text-align:left">基数排序</td>
-<td style="text-align:left"><span class="math">d</span> 趟、<span class="math">O(d(n<span class="bin">+</span>r))</span>；<strong>不基于比较</strong>，不受下界约束（8-6、8-19）</td>
+<td style="text-align:left"><span class="math">d</span> 趟、<span class="math">O(d(n<span class="bin">+</span>r))</span>；<strong>不基于比较</strong>，不受下界约束（8-6、8-20）</td>
 </tr>
 <tr>
 <td style="text-align:left">相邻交换类下界</td>
-<td style="text-align:left"><span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>，因为一次交换至多消一个逆序对（8-18）</td>
+<td style="text-align:left"><span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>，因为一次交换至多消一个逆序对（8-19）</td>
+</tr>
+<tr>
+<td style="text-align:left">二分法插入排序</td>
+<td style="text-align:left">比较降到 <span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，<strong>移动仍 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span></strong>，总时间没改善（8-14）</td>
 </tr>
 <tr>
 <td style="text-align:left">比较排序下界</td>
-<td style="text-align:left"><span class="math">Ω(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，判定树至少 <span class="math">n!</span> 个叶（8-19）</td>
+<td style="text-align:left"><span class="math">Ω(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，判定树至少 <span class="math">n!</span> 个叶（8-20）</td>
 </tr>
 <tr>
 <td style="text-align:left">逆序对期望</td>
-<td style="text-align:left"><span class="math"><span class="frac"><span class="num">n(n<span class="bin">−</span><span class="upr">1</span>)</span><span class="den"><span class="upr">4</span></span></span></span>，即插入排序平均移动 <span class="math"><span class="frac"><span class="num">n<sup><span class="upr">2</span></sup></span><span class="den"><span class="upr">4</span></span></span></span> 次（8-20）</td>
+<td style="text-align:left"><span class="math"><span class="frac"><span class="num">n(n<span class="bin">−</span><span class="upr">1</span>)</span><span class="den"><span class="upr">4</span></span></span></span>，即插入排序平均移动 <span class="math"><span class="frac"><span class="num">n<sup><span class="upr">2</span></sup></span><span class="den"><span class="upr">4</span></span></span></span> 次（8-21）</td>
 </tr>
 <tr>
 <td style="text-align:left">快排 + 插入混合</td>
-<td style="text-align:left"><span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;<span class="frac"><span class="num">n</span><span class="den">k</span></span><span class="bin">+</span>nk)</span>；<span class="math">k</span> 为常数时仍 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，收益在常数（8-16）</td>
+<td style="text-align:left"><span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;<span class="frac"><span class="num">n</span><span class="den">k</span></span><span class="bin">+</span>nk)</span>；<span class="math">k</span> 为常数时仍 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，收益在常数（8-17）</td>
 </tr>
 </tbody></table></div>
 <h3 id="外排序"><a class="anchor" href="#外排序">#</a>外排序</h3>
@@ -1776,7 +2206,7 @@ paste(i)
 </tr></thead><tbody>
 <tr>
 <td style="text-align:left">二分最大检索长度</td>
-<td style="text-align:left"><span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>(n<span class="bin">+</span><span class="upr">1</span>)⌉</span>（10-17）</td>
+<td style="text-align:left"><span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>(n<span class="bin">+</span><span class="upr">1</span>)⌉</span>（10-18）</td>
 </tr>
 <tr>
 <td style="text-align:left">二分 ASL</td>
@@ -1791,6 +2221,14 @@ paste(i)
 <td style="text-align:left"><span class="math">p</span> 取<strong>接近表长的素数</strong>，别取 2 的幂（10-8）</td>
 </tr>
 <tr>
+<td style="text-align:left">平方取中法</td>
+<td style="text-align:left">取 <span class="math">k<sup><span class="upr">2</span></sup></span> 的中间几位——中间位受 <span class="math">k</span> <strong>所有位</strong>影响（10-14）</td>
+</tr>
+<tr>
+<td style="text-align:left">折叠法</td>
+<td style="text-align:left">等长分段相加取低位；移位折叠 / 边界折叠（关键码远长于地址时用）（10-14）</td>
+</tr>
+<tr>
 <td style="text-align:left">线性探测</td>
 <td style="text-align:left">成功 <span class="math"><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span>(<span class="upr">1</span><span class="bin">+</span><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den"><span class="upr">1</span><span class="bin">−</span>α</span></span>)</span>、失败 <span class="math"><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span>(<span class="upr">1</span><span class="bin">+</span><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den">(<span class="upr">1</span><span class="bin">−</span>α)<sup><span class="upr">2</span></sup></span></span>)</span>（10-4）</td>
 </tr>
@@ -1800,15 +2238,15 @@ paste(i)
 </tr>
 <tr>
 <td style="text-align:left">墓碑</td>
-<td style="text-align:left">检索<strong>跳过</strong>、插入<strong>可占但要走完链</strong>、删除<strong>只打标记</strong>；多了要 rehash（10-5、10-15）</td>
+<td style="text-align:left">检索<strong>跳过</strong>、插入<strong>可占但要走完链</strong>、删除<strong>只打标记</strong>；多了要 rehash（10-5、10-16）</td>
 </tr>
 <tr>
 <td style="text-align:left">为什么不能置空</td>
-<td style="text-align:left">会截断同义词的探查链（10-18）</td>
+<td style="text-align:left">会截断同义词的探查链（10-19）</td>
 </tr>
 <tr>
 <td style="text-align:left">失败 ASL 的分母</td>
-<td style="text-align:left">是<strong>表长</strong>，不是记录数（10-14）</td>
+<td style="text-align:left">是<strong>表长</strong>，不是记录数（10-15）</td>
 </tr>
 </tbody></table></div>
 <h3 id="索引"><a class="anchor" href="#索引">#</a>索引</h3>
@@ -1818,11 +2256,19 @@ paste(i)
 </tr></thead><tbody>
 <tr>
 <td style="text-align:left"><span class="math">m</span> 阶 B 树</td>
-<td style="text-align:left">至多 <span class="math">m</span> 子结点、<span class="math">m<span class="bin">−</span><span class="upr">1</span></span> 关键码；非根至少 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 子结点；<strong>叶同层</strong>（11-3、11-8）</td>
+<td style="text-align:left">至多 <span class="math">m</span> 子结点、<span class="math">m<span class="bin">−</span><span class="upr">1</span></span> 关键码；非根至少 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 子结点；<strong>叶同层</strong>（11-4、11-9）</td>
 </tr>
 <tr>
 <td style="text-align:left">B 树插入</td>
-<td style="text-align:left">上溢 → <strong>中间关键码上升</strong>、分裂；<strong>从叶向根长高</strong>（11-9、11-14）</td>
+<td style="text-align:left">上溢 → 中间关键码<strong>移动</strong>上升、分裂；<strong>从叶向根长高</strong>（11-10、11-15）</td>
+</tr>
+<tr>
+<td style="text-align:left">B+ 树插入</td>
+<td style="text-align:left">叶分裂时右叶首键<strong>复制</strong>上升（关键码在索引层重复出现）（11-16）</td>
+</tr>
+<tr>
+<td style="text-align:left">读盘 / 写盘</td>
+<td style="text-align:left">检索读 <span class="math"><span class="rel">≤</span>h</span>、<strong>写 0</strong>；插入读 <span class="math">h</span>、写 <span class="math"><span class="upr">2</span>s<span class="bin">+</span><span class="upr">1</span></span>（<span class="math">s</span> 为分裂层数）；删除借则写 3、合并约写 <span class="math"><span class="upr">2</span>t</span>（11-20）</td>
 </tr>
 <tr>
 <td style="text-align:left">B 树删除</td>
@@ -1830,23 +2276,27 @@ paste(i)
 </tr>
 <tr>
 <td style="text-align:left">B+ 树</td>
-<td style="text-align:left">记录全在叶、叶间有链 → <strong>支持顺序与范围查询</strong>；检索长度固定（11-4、11-7）</td>
+<td style="text-align:left">记录全在叶、叶间有链 → <strong>支持顺序与范围查询</strong>；检索长度固定（11-5、11-8）</td>
 </tr>
 <tr>
 <td style="text-align:left">B 树高度</td>
-<td style="text-align:left"><span class="math">h<span class="rel">≤</span>&thinsp;<span class="upr">log</span><sub>⌈m/<span class="upr">2</span>⌉</sub><span class="frac"><span class="num">n<span class="bin">+</span><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span><span class="bin">+</span><span class="upr">1</span></span>；<span class="math">m</span> 在<strong>对数的底</strong>上（11-17）</td>
+<td style="text-align:left"><span class="math">h<span class="rel">≤</span>&thinsp;<span class="upr">log</span><sub>⌈m/<span class="upr">2</span>⌉</sub><span class="frac"><span class="num">n<span class="bin">+</span><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span><span class="bin">+</span><span class="upr">1</span></span>；<span class="math">m</span> 在<strong>对数的底</strong>上（11-21）</td>
 </tr>
 <tr>
 <td style="text-align:left">为什么外存不用 AVL</td>
-<td style="text-align:left">二叉树高 <span class="math"><span class="upr">log</span><sub><span class="upr">2</span></sub>n</span>，访外太多；B 树把结点做成一整页（11-11）</td>
+<td style="text-align:left">二叉树高 <span class="math"><span class="upr">log</span><sub><span class="upr">2</span></sub>n</span>，访外太多；B 树把结点做成一整页（11-12）</td>
 </tr>
 <tr>
 <td style="text-align:left">红黑树四性质</td>
-<td style="text-align:left">根黑、不许红红相邻、黑高相等 → 树高 <span class="math"><span class="rel">≤</span><span class="upr">2</span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>(n<span class="bin">+</span><span class="upr">1</span>)</span>（11-6、11-18）</td>
+<td style="text-align:left">根黑、不许红红相邻、黑高相等 → 树高 <span class="math"><span class="rel">≤</span><span class="upr">2</span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>(n<span class="bin">+</span><span class="upr">1</span>)</span>（11-7、11-22）</td>
 </tr>
 <tr>
 <td style="text-align:left">红黑树插入</td>
-<td style="text-align:left"><strong>叔父红 → 只换色、冲突上移</strong>；<strong>叔父黑 → 换色 + 旋转</strong>（内侧先转成外侧）（11-10、11-15）</td>
+<td style="text-align:left"><strong>叔父红 → 只换色、冲突上移</strong>；<strong>叔父黑 → 换色 + 旋转</strong>（内侧先转成外侧）；旋转 <span class="math"><span class="rel">≤</span><span class="upr">2</span></span> 次（11-11、11-17）</td>
+</tr>
+<tr>
+<td style="text-align:left">红黑树删除</td>
+<td style="text-align:left">删红 → 不用管；删黑 → 「双黑」，看<strong>兄弟与两个侄子</strong>分四情形；只有情形 2 向上传播；旋转 <span class="math"><span class="rel">≤</span><span class="upr">3</span></span> 次（11-18）</td>
 </tr>
 </tbody></table></div>
 <h3 id="高级数据结构"><a class="anchor" href="#高级数据结构">#</a>高级数据结构</h3>
@@ -1856,7 +2306,7 @@ paste(i)
 </tr></thead><tbody>
 <tr>
 <td style="text-align:left">下三角压缩</td>
-<td style="text-align:left"><span class="math"><span class="frac"><span class="num">i(i<span class="bin">+</span><span class="upr">1</span>)</span><span class="den"><span class="upr">2</span></span></span><span class="bin">+</span>j</span>（下标从 0）；共 <span class="math"><span class="frac"><span class="num">n(n<span class="bin">+</span><span class="upr">1</span>)</span><span class="den"><span class="upr">2</span></span></span></span> 个单元（12-1、12-17）</td>
+<td style="text-align:left"><span class="math"><span class="frac"><span class="num">i(i<span class="bin">+</span><span class="upr">1</span>)</span><span class="den"><span class="upr">2</span></span></span><span class="bin">+</span>j</span>（下标从 0）；共 <span class="math"><span class="frac"><span class="num">n(n<span class="bin">+</span><span class="upr">1</span>)</span><span class="den"><span class="upr">2</span></span></span></span> 个单元（12-1、12-18）</td>
 </tr>
 <tr>
 <td style="text-align:left">多维数组偏移</td>
@@ -1872,27 +2322,31 @@ paste(i)
 </tr>
 <tr>
 <td style="text-align:left">AVL 四种旋转</td>
-<td style="text-align:left">看危急结点往下的<strong>头两步方向</strong>；LR、RL 要双旋（12-5、12-8、12-14）</td>
+<td style="text-align:left">看危急结点往下的<strong>头两步方向</strong>；LR、RL 要双旋（12-5、12-8、12-15）</td>
 </tr>
 <tr>
 <td style="text-align:left">AVL 插入</td>
-<td style="text-align:left"><strong>至多一次旋转</strong>，因为旋转后子树高度回到插入前（12-18）</td>
+<td style="text-align:left"><strong>至多一次旋转</strong>，因为旋转后子树高度回到插入前（12-19）</td>
 </tr>
 <tr>
 <td style="text-align:left">AVL 删除</td>
-<td style="text-align:left">可能 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span> 次旋转（高度会向上传播）（12-18）</td>
+<td style="text-align:left">可能 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span> 次旋转（高度会向上传播）（12-19）</td>
 </tr>
 <tr>
 <td style="text-align:left">伸展树</td>
-<td style="text-align:left">单旋 / 一字形 / 之字形；访问后<strong>展开到根</strong>；<strong>摊还</strong> <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>，单次可达 <span class="math">O(n)</span>（12-6、12-9、12-15）</td>
+<td style="text-align:left">单旋 / 一字形 / 之字形；访问后<strong>展开到根</strong>；<strong>摊还</strong> <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>，单次可达 <span class="math">O(n)</span>（12-6、12-9、12-16）</td>
+</tr>
+<tr>
+<td style="text-align:left">半伸展树</td>
+<td style="text-align:left">只改一字形：当前结点<strong>上移到父</strong>继续，<strong>不必送到根</strong>；旋转约减半（12-14）</td>
 </tr>
 <tr>
 <td style="text-align:left">伸展树区间操作</td>
-<td style="text-align:left"><strong>两次 splay 把区间孤立成一棵子树</strong>，再整体搬（12-16）</td>
+<td style="text-align:left"><strong>两次 splay 把区间孤立成一棵子树</strong>，再整体搬（12-17）</td>
 </tr>
 <tr>
 <td style="text-align:left">最佳 BST</td>
-<td style="text-align:left">最小化带权平均检索长度；中序被钉死 ⟹ 贪心失效、必须 DP，<span class="math">O(n<sup><span class="upr">3</span></sup>)</span>（12-10、12-19）</td>
+<td style="text-align:left">最小化带权平均检索长度；中序被钉死 ⟹ 贪心失效、必须 DP，<span class="math">O(n<sup><span class="upr">3</span></sup>)</span>（12-10、12-20）</td>
 </tr>
 </tbody></table></div>
 <h3 id="答题格式提醒"><a class="anchor" href="#答题格式提醒">#</a>答题格式提醒</h3>
@@ -1905,7 +2359,7 @@ paste(i)
 </ol>
 <div class="pagenav"><a href="midterm-review.html"><span class="dir">← 上一篇</span>期中复习题库（第 1—6 章）</a><a href="figures.html" style="text-align:right"><span class="dir">下一篇 →</span>原书插图</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#第-7-章-图">第 7 章 图</a><a href="#一填空题" class="sub">一、填空题</a><a href="#二选择题" class="sub">二、选择题</a><a href="#三辨析与简答" class="sub">三、辨析与简答</a><a href="#四算法设计与分析" class="sub">四、算法设计与分析</a><a href="#五证明题" class="sub">五、证明题</a><a href="#第-8-章-内排序">第 8 章 内排序</a><a href="#一填空题-1" class="sub">一、填空题</a><a href="#二选择题-1" class="sub">二、选择题</a><a href="#三辨析与简答-1" class="sub">三、辨析与简答</a><a href="#四算法填空与设计分析" class="sub">四、算法填空与设计分析</a><a href="#五证明题-1" class="sub">五、证明题</a><a href="#第-9-章-文件管理和外排序">第 9 章 文件管理和外排序</a><a href="#一填空题-2" class="sub">一、填空题</a><a href="#二选择题-2" class="sub">二、选择题</a><a href="#三辨析与简答-2" class="sub">三、辨析与简答</a><a href="#四算法设计与分析-1" class="sub">四、算法设计与分析</a><a href="#五证明题-2" class="sub">五、证明题</a><a href="#第-10-章-检索">第 10 章 检索</a><a href="#一填空题-3" class="sub">一、填空题</a><a href="#二选择题-3" class="sub">二、选择题</a><a href="#三辨析与简答-3" class="sub">三、辨析与简答</a><a href="#四算法设计与分析-2" class="sub">四、算法设计与分析</a><a href="#五证明题-3" class="sub">五、证明题</a><a href="#第-11-章-索引技术">第 11 章 索引技术</a><a href="#一填空题-4" class="sub">一、填空题</a><a href="#二选择题-4" class="sub">二、选择题</a><a href="#三辨析与简答-4" class="sub">三、辨析与简答</a><a href="#四算法设计与分析-3" class="sub">四、算法设计与分析</a><a href="#五证明题-4" class="sub">五、证明题</a><a href="#第-12-章-高级数据结构">第 12 章 高级数据结构</a><a href="#一填空题-5" class="sub">一、填空题</a><a href="#二选择题-5" class="sub">二、选择题</a><a href="#三辨析与简答-5" class="sub">三、辨析与简答</a><a href="#四算法设计与分析-4" class="sub">四、算法设计与分析</a><a href="#五证明题-5" class="sub">五、证明题</a><a href="#模拟卷120-分钟100-分">模拟卷（120 分钟，100 分）</a><a href="#一填空与选择每空-2-分共-24-分" class="sub">一、填空与选择（每空 2 分，共 24 分）</a><a href="#二辨析与简答每题-6-分共-24-分" class="sub">二、辨析与简答（每题 6 分，共 24 分）</a><a href="#三算法填空每空-2-分共-12-分" class="sub">三、算法填空（每空 2 分，共 12 分）</a><a href="#四算法设计与分析每题-10-分共-20-分" class="sub">四、算法设计与分析（每题 10 分，共 20 分）</a><a href="#五证明题20-分每题-10-分" class="sub">五、证明题（20 分，每题 10 分）</a><a href="#考前速查表">考前速查表</a><a href="#图" class="sub">图</a><a href="#内排序" class="sub">内排序</a><a href="#外排序" class="sub">外排序</a><a href="#检索" class="sub">检索</a><a href="#索引" class="sub">索引</a><a href="#高级数据结构" class="sub">高级数据结构</a><a href="#答题格式提醒" class="sub">答题格式提醒</a></nav>
+<nav class="page"><b>本页</b><a href="#大纲对照表" class="sub">大纲对照表</a><a href="#第-7-章-图">第 7 章 图</a><a href="#一填空题" class="sub">一、填空题</a><a href="#二选择题" class="sub">二、选择题</a><a href="#三辨析与简答" class="sub">三、辨析与简答</a><a href="#四算法设计与分析" class="sub">四、算法设计与分析</a><a href="#五证明题" class="sub">五、证明题</a><a href="#第-8-章-内排序">第 8 章 内排序</a><a href="#一填空题-1" class="sub">一、填空题</a><a href="#二选择题-1" class="sub">二、选择题</a><a href="#三辨析与简答-1" class="sub">三、辨析与简答</a><a href="#四算法填空与设计分析" class="sub">四、算法填空与设计分析</a><a href="#五证明题-1" class="sub">五、证明题</a><a href="#第-9-章-文件管理和外排序">第 9 章 文件管理和外排序</a><a href="#一填空题-2" class="sub">一、填空题</a><a href="#二选择题-2" class="sub">二、选择题</a><a href="#三辨析与简答-2" class="sub">三、辨析与简答</a><a href="#四算法设计与分析-1" class="sub">四、算法设计与分析</a><a href="#五证明题-2" class="sub">五、证明题</a><a href="#第-10-章-检索">第 10 章 检索</a><a href="#一填空题-3" class="sub">一、填空题</a><a href="#二选择题-3" class="sub">二、选择题</a><a href="#三辨析与简答-3" class="sub">三、辨析与简答</a><a href="#四算法设计与分析-2" class="sub">四、算法设计与分析</a><a href="#五证明题-3" class="sub">五、证明题</a><a href="#第-11-章-索引技术">第 11 章 索引技术</a><a href="#一填空题-4" class="sub">一、填空题</a><a href="#二选择题-4" class="sub">二、选择题</a><a href="#三辨析与简答-4" class="sub">三、辨析与简答</a><a href="#四算法设计与分析-3" class="sub">四、算法设计与分析</a><a href="#五证明题-4" class="sub">五、证明题</a><a href="#第-12-章-高级数据结构">第 12 章 高级数据结构</a><a href="#一填空题-5" class="sub">一、填空题</a><a href="#二选择题-5" class="sub">二、选择题</a><a href="#三辨析与简答-5" class="sub">三、辨析与简答</a><a href="#四算法设计与分析-4" class="sub">四、算法设计与分析</a><a href="#五证明题-5" class="sub">五、证明题</a><a href="#模拟卷120-分钟100-分">模拟卷（120 分钟，100 分）</a><a href="#一填空与选择每空-2-分共-24-分" class="sub">一、填空与选择（每空 2 分，共 24 分）</a><a href="#二辨析与简答每题-6-分共-24-分" class="sub">二、辨析与简答（每题 6 分，共 24 分）</a><a href="#三算法填空每空-2-分共-12-分" class="sub">三、算法填空（每空 2 分，共 12 分）</a><a href="#四算法设计与分析每题-10-分共-20-分" class="sub">四、算法设计与分析（每题 10 分，共 20 分）</a><a href="#五证明题20-分每题-10-分" class="sub">五、证明题（20 分，每题 10 分）</a><a href="#考前速查表">考前速查表</a><a href="#图" class="sub">图</a><a href="#内排序" class="sub">内排序</a><a href="#外排序" class="sub">外排序</a><a href="#检索" class="sub">检索</a><a href="#索引" class="sub">索引</a><a href="#高级数据结构" class="sub">高级数据结构</a><a href="#答题格式提醒" class="sub">答题格式提醒</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/期末复习题库.md</code> 生成
