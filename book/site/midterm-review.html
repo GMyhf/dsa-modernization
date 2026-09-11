@@ -1801,6 +1801,604 @@ Count()           return groups</code></pre></div>
 <p><strong>第三步：与空指针的对应。</strong> 二叉链表中，每个结点有两个指针域，共 <span class="math"><span class="upr">2</span>n</span> 个； 非空指针恰好指向除根之外的每个结点，共 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 个； 故空指针域有 <span class="math"><span class="upr">2</span>n<span class="bin">−</span>(n<span class="bin">−</span><span class="upr">1</span>)<span class="rel">=</span>n<span class="bin">+</span><span class="upr">1</span></span> 个。 而每一个空指针正对应扩充时添上的一个外部结点，两者一一对应，数目同为 <span class="math">n<span class="bin">+</span><span class="upr">1</span></span>。∎</p>
 <p><strong>这条结论的意义</strong>：<strong>二叉链表里有将近一半的指针是空的</strong>（<span class="math">n<span class="bin">+</span><span class="upr">1</span></span> 个空、<span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 个非空）， 空指针占的空间与结点本身同阶。线索（穿线）二叉树就是把这些空指针利用起来存遍历前驱后继， 从而不用栈也能完成中序遍历。</p></blockquote>
 <hr>
+<h2 id="往年真题精选按章归位"><a class="anchor" href="#往年真题精选按章归位">#</a>往年真题精选（按章归位）</h2>
+<p>这一组题来自往年期中真题，补的是前面按提要出题时没覆盖到的题型。 编号另起一套（真-N），<strong>答案里会标出它与前面哪道题是同一个知识点</strong>，方便对照着看。</p>
+<h3 id="对照表"><a class="anchor" href="#对照表">#</a>对照表</h3>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">真题考点</th>
+<th style="text-align:left">本篇对应</th>
+<th style="text-align:left">补在这里的理由</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">ADT 不含存储结构</td>
+<td style="text-align:left">1-2、1-8</td>
+<td style="text-align:left">已覆盖</td>
+</tr>
+<tr>
+<td style="text-align:left">调和级数型二重循环</td>
+<td style="text-align:left">真-1</td>
+<td style="text-align:left">新题型：内层次数是 <span class="math">N/i</span>，不是常数也不是 <span class="math">n</span></td>
+</tr>
+<tr>
+<td style="text-align:left">双链表交换相邻两结点</td>
+<td style="text-align:left">真-2（对照 2-4、2-8）</td>
+<td style="text-align:left">新题型：六条指针语句的先后次序</td>
+</tr>
+<tr>
+<td style="text-align:left">顺序表与链表的选择</td>
+<td style="text-align:left">2-10、2-14</td>
+<td style="text-align:left">已覆盖</td>
+</tr>
+<tr>
+<td style="text-align:left">受约束的二叉搜索树计数</td>
+<td style="text-align:left">真-3（对照 5-1、5-26）</td>
+<td style="text-align:left">新题型：带约束的 Catalan 递推</td>
+</tr>
+<tr>
+<td style="text-align:left">建堆 + 插入 SiftUp</td>
+<td style="text-align:left">真-14（对照 5-23）</td>
+<td style="text-align:left">5-23 做的是删除，这里补插入</td>
+</tr>
+<tr>
+<td style="text-align:left">嵌套括号表示法读树</td>
+<td style="text-align:left">真-4（对照 6-2、6-8）</td>
+<td style="text-align:left">新题型：另一种树的书面表示</td>
+</tr>
+<tr>
+<td style="text-align:left">入栈出栈<strong>操作序列</strong>是否合法</td>
+<td style="text-align:left">真-5（对照 3-7、3-18、3-25）</td>
+<td style="text-align:left">前面判的是<strong>输出序列</strong>，这里判的是<strong>操作序列</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>strcpy</code> 地址重叠</td>
+<td style="text-align:left">真-6</td>
+<td style="text-align:left">新题型：串运算的工程陷阱</td>
+</tr>
+<tr>
+<td style="text-align:left">求 next 数组</td>
+<td style="text-align:left">真-7（对照 4-4、4-16）</td>
+<td style="text-align:left">同类，多一组手算</td>
+</tr>
+<tr>
+<td style="text-align:left">Huffman 构造 + 平均码长 + 频率变化</td>
+<td style="text-align:left">真-8（对照 5-22）</td>
+<td style="text-align:left">第三问是新题型，<strong>且参考答案算错了</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">两个队列实现栈（算法填空）</td>
+<td style="text-align:left">真-9（对照 3-11）</td>
+<td style="text-align:left">3-11 是两个栈实现队列，方向相反</td>
+</tr>
+<tr>
+<td style="text-align:left">判断串是否由子串重复构成</td>
+<td style="text-align:left">4-17</td>
+<td style="text-align:left">已覆盖（就是最小循环节）</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>L</code>/<code>R</code> 数组求父指针、判后代</td>
+<td style="text-align:left">真-10</td>
+<td style="text-align:left">新题型：顺序存储 + 父指针的应用</td>
+</tr>
+<tr>
+<td style="text-align:left">树的镜面映射 + 层次输出</td>
+<td style="text-align:left">真-11（对照 6-16、6-17、6-20）</td>
+<td style="text-align:left">新题型：建树 + 还原 + BFS 三步合一</td>
+</tr>
+<tr>
+<td style="text-align:left">并查集逐步合并</td>
+<td style="text-align:left">真-13（对照 6-19）</td>
+<td style="text-align:left">同类，多一组手算</td>
+</tr>
+<tr>
+<td style="text-align:left">满 <span class="math">k</span> 叉树叶结点数</td>
+<td style="text-align:left">真-12（对照 6-23、6-25）</td>
+<td style="text-align:left">新题型：与空指针那条同源但结论不同</td>
+</tr>
+</tbody></table></div>
+<h3 id="第-1-章"><a class="anchor" href="#第-1-章">#</a>第 1 章</h3>
+<p><strong>真-1.</strong> ★ 下面的程序段找出所有满足 <span class="math">i<span class="bin">⋅</span>j<span class="rel">≤</span>N</span> 的正整数对 <span class="math">(i,j)</span>，求它的时间复杂度。</p>
+<div class="codeblock" data-lang="text"><pre><code>for i ← 1 to N
+    max_j ← N / i            // 整除
+    j ← 1
+    while j ≤ max_j
+        输出 (i, j)
+        j ← j + 1</code></pre></div>
+<p>A. <span class="math">Θ(N&thinsp;<span class="upr">log</span>&thinsp;N)</span>　B. <span class="math">Θ(N<span class="sqrt">N</span>)</span>　C. <span class="math">Θ(N<sup><span class="upr">2</span></sup>)</span>　D. <span class="math">Θ(<span class="sqrt">N</span>&thinsp;<span class="upr">log</span>&thinsp;N)</span></p>
+<blockquote><p><strong>答：A</strong>。内层对每个 <span class="math">i</span> 执行 <span class="math">⌊N/i⌋</span> 次，总次数</p>
+<div class="math math-display">∑<sub>i<span class="rel">=</span><span class="upr">1</span></sub><sup>N</sup>⌊<span class="frac"><span class="num">N</span><span class="den">i</span></span>⌋ <span class="rel">≈</span> N∑<sub>i<span class="rel">=</span><span class="upr">1</span></sub><sup>N</sup><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den">i</span></span> <span class="rel">=</span> N<span class="bin">⋅</span>H<sub>N</sub></div>
+<p>而调和数 <span class="math">H<sub>N</sub><span class="rel">=</span>&thinsp;<span class="upr">ln</span>&thinsp;N<span class="bin">+</span>γ<span class="bin">+</span>O(<span class="upr">1</span>/N)<span class="rel">=</span>Θ(<span class="upr">log</span>&thinsp;N)</span>，故总次数为 <span class="math">Θ(N&thinsp;<span class="upr">log</span>&thinsp;N)</span>。 （<span class="math">N<span class="rel">=</span><span class="upr">10</span><sup><span class="upr">4</span></sup></span> 时实际是 <span class="math"><span class="upr">93</span> <span class="upr">668</span></span>，<span class="math">N&thinsp;<span class="upr">ln</span>&thinsp;N<span class="rel">≈</span><span class="upr">92</span> <span class="upr">103</span></span>，量级吻合。）</p>
+<p><strong>这道题的价值在于「内层次数既不是常数也不是 <span class="math">n</span>」</strong>—— 看见两重循环就写 <span class="math">Θ(N<sup><span class="upr">2</span></sup>)</span> 是错的（那要求内层每次都跑 <span class="math">Θ(N)</span> 次， 这里只有 <span class="math">i<span class="rel">=</span><span class="upr">1</span></span> 那一轮如此）。做法仍是 1-19 的老套路：<strong>先写出求和式，再化简</strong>。</p>
+<p>顺便记住调和级数这个界：<span class="math"><span class="upr">1</span><span class="bin">+</span><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span><span class="bin">+</span>⋯<span class="bin">+</span><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den">n</span></span><span class="rel">=</span>Θ(<span class="upr">log</span>&thinsp;n)</span>。 它在快排平均情况、散列表探查次数里都会再出现。</p></blockquote>
+<h3 id="第-2-章"><a class="anchor" href="#第-2-章">#</a>第 2 章</h3>
+<p><strong>真-2.</strong> ★ 双链表中已知结点 <code>p</code> 的前驱和后继都存在，且 <code>p</code> 的后继不是尾结点。 要把 <code>p</code> 与它的后继<strong>交换位置</strong>，下列语句序列正确的是（　）。</p>
+<div class="codeblock" data-lang="text"><pre><code>A. p-&gt;prev-&gt;next = p-&gt;next;  p-&gt;next-&gt;prev = p-&gt;prev;  p-&gt;next-&gt;next-&gt;prev = p;
+   p-&gt;next-&gt;next = p;        p-&gt;next = p-&gt;next-&gt;next;  p-&gt;prev = p-&gt;next;
+B. p-&gt;next-&gt;next-&gt;prev = p;  p-&gt;prev-&gt;next = p-&gt;next;  p-&gt;next-&gt;next = p;
+   p-&gt;next-&gt;prev = p-&gt;prev;  p-&gt;next = p-&gt;next-&gt;next;  p-&gt;prev = p-&gt;next;
+C. p-&gt;next-&gt;next-&gt;prev = p;  p-&gt;next-&gt;prev = p-&gt;prev;  p-&gt;prev = p-&gt;next;
+   p-&gt;prev-&gt;prev-&gt;next = p-&gt;prev;  p-&gt;next = p-&gt;prev-&gt;next;  p-&gt;prev-&gt;next = p;</code></pre></div>
+<blockquote><p><strong>答：C</strong>。设原来的四个结点依次是 <span class="math">A</span>（<code>p</code> 的前驱）、<span class="math">B</span>（就是 <code>p</code>）、<span class="math">C</span>（<code>p</code> 的后继）、<span class="math">D</span>， 交换后应当是 <span class="math">A<span class="rel">↔</span>C<span class="rel">↔</span>B<span class="rel">↔</span>D</span>。逐句核对 C：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">语句</th>
+<th style="text-align:left">实际效果</th>
+<th style="text-align:left">对不对</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><code>p-&gt;next-&gt;next-&gt;prev = p;</code></td>
+<td style="text-align:left"><span class="math">D.prev<span class="rel">←</span>B</span></td>
+<td style="text-align:left">✓</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>p-&gt;next-&gt;prev = p-&gt;prev;</code></td>
+<td style="text-align:left"><span class="math">C.prev<span class="rel">←</span>A</span></td>
+<td style="text-align:left">✓</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>p-&gt;prev = p-&gt;next;</code></td>
+<td style="text-align:left"><span class="math">B.prev<span class="rel">←</span>C</span>（此后 <code>p-&gt;prev</code> 就是 <span class="math">C</span>）</td>
+<td style="text-align:left">✓</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>p-&gt;prev-&gt;prev-&gt;next = p-&gt;prev;</code></td>
+<td style="text-align:left"><code>p-&gt;prev</code> 是 <span class="math">C</span>，<span class="math">C.prev</span> 已是 <span class="math">A</span>，故 <span class="math">A.next<span class="rel">←</span>C</span></td>
+<td style="text-align:left">✓</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>p-&gt;next = p-&gt;prev-&gt;next;</code></td>
+<td style="text-align:left"><span class="math">C.next</span> 还没改，仍是 <span class="math">D</span>，故 <span class="math">B.next<span class="rel">←</span>D</span></td>
+<td style="text-align:left">✓</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>p-&gt;prev-&gt;next = p;</code></td>
+<td style="text-align:left"><span class="math">C.next<span class="rel">←</span>B</span></td>
+<td style="text-align:left">✓</td>
+</tr>
+</tbody></table></div>
+<p>六条指针全部接对。</p>
+<p><strong>为什么这种题只能一句一句核</strong>：<code>p-&gt;prev</code> 和 <code>p-&gt;next</code> 在序列执行途中<strong>会改变含义</strong>， 后面的语句读到的是改过之后的值。C 正是利用了这一点（第 3 句之后 <code>p-&gt;prev</code> 已经是 <span class="math">C</span>）， 而 A、B 里都有某一句读到了已经被改坏的指针。</p>
+<p><strong>考场上的稳妥写法</strong>：与其背这六句，不如写成「<strong>先摘再插</strong>」的两步， 每一步都是你已经会的基本操作：</p>
+<div class="codeblock" data-lang="text"><pre><code>SwapWithNext(p)
+    q ← p-&gt;next
+    // 第一步：把 p 从链上摘下来
+    p-&gt;prev-&gt;next ← q
+    q-&gt;prev ← p-&gt;prev
+    // 第二步：把 p 插到 q 之后
+    p-&gt;next ← q-&gt;next
+    q-&gt;next-&gt;prev ← p
+    q-&gt;next ← p
+    p-&gt;prev ← q</code></pre></div>
+<p><strong>另一个合法答案是「只换数据域」</strong>：<code>swap(p-&gt;data, p-&gt;next-&gt;data)</code>，<span class="math">O(<span class="upr">1</span>)</span> 且不可能接错。 但要注意前提——<strong>外部若还有指针指着某个结点并认准它的值，这种做法会骗过它们</strong> （和 2-19 的「偷天换日」是同一类代价）。题目问「指针操作」时不能用它。</p></blockquote>
+<h3 id="第-3-章"><a class="anchor" href="#第-3-章">#</a>第 3 章</h3>
+<p><strong>真-5.</strong> ★ 用 <code>S</code> 表示入栈、<code>X</code> 表示出栈，一个初态和终态都是空栈的操作过程可以写成一个由 <code>S</code>、<code>X</code> 组成的序列（例如 <code>SXSX</code> 合法，<code>SXXS</code> 非法）。 (1) 给出一个序列合法的<strong>充要条件</strong>。 (2) 对元素互不相同的输入序列，两个<strong>不同的</strong>合法操作序列可能产生<strong>相同的输出序列</strong>吗？</p>
+<blockquote><p><strong>答</strong>： <strong>(1) 充要条件</strong>：序列中 <code>S</code> 与 <code>X</code> 的总数相等，且<strong>任何一个前缀里 <code>S</code> 的个数都不少于 <code>X</code> 的个数</strong>。 前一条保证终态是空栈，后一条保证中途不会对空栈做出栈。 这与「<span class="math">n</span> 对括号合法配对」是同一个条件（<code>S</code> 当左括号、<code>X</code> 当右括号）， 所以长度为 <span class="math"><span class="upr">2</span>n</span> 的合法序列恰有 <span class="math">C<sub>n</sub></span> 个——<strong>又是 Catalan 数</strong>（见 3-24）。</p>
+<p><strong>注意与 3-7、3-18、3-25 区分</strong>：那几道判的是<strong>输出序列</strong>合不合法， 这道判的是<strong>操作序列</strong>合不合法。两者都由 Catalan 数计数，但判据完全不同： 操作序列看「前缀里 S 是否够用」，输出序列看「有没有 <span class="math">i&lt;j&lt;k</span> 使 <span class="math">p<sub>j</sub>&lt;p<sub>k</sub>&lt;p<sub>i</sub></span>」。</p>
+<p><strong>(2) 不可能。</strong> 设 <span class="math">T<sub><span class="upr">1</span></sub><span class="rel">≠</span>T<sub><span class="upr">2</span></sub></span> 是两个合法操作序列，取它们<strong>第一个不同的位置</strong> <span class="math">n<span class="bin">+</span><span class="upr">1</span></span>： 前 <span class="math">n</span> 步完全相同，故此刻栈的内容、已输出的内容、下一个待入栈的元素都相同。 不妨设 <span class="math">T<sub><span class="upr">1</span></sub></span> 在这一步做 <code>S</code>、<span class="math">T<sub><span class="upr">2</span></sub></span> 做 <code>X</code>。 设此刻栈顶是 <span class="math">a</span>、下一个待入栈的元素是 <span class="math">b</span>（<span class="math">T<sub><span class="upr">2</span></sub></span> 能做 <code>X</code> 说明栈非空，<span class="math">a</span> 存在； <span class="math">T<sub><span class="upr">1</span></sub></span> 能做 <code>S</code> 说明还有输入，<span class="math">b</span> 存在）。</p>
+<ul>
+<li>在 <span class="math">T<sub><span class="upr">2</span></sub></span> 里：<span class="math">a</span> <strong>此刻就被输出</strong>，而 <span class="math">b</span> 还没入栈，所以输出序列中 <strong><span class="math">a</span> 在 <span class="math">b</span> 之前</strong>；</li>
+<li>在 <span class="math">T<sub><span class="upr">1</span></sub></span> 里：<span class="math">b</span> 被压到 <span class="math">a</span> 上面，<span class="math">b</span> 必须先弹出 <span class="math">a</span> 才能弹，所以 <strong><span class="math">b</span> 在 <span class="math">a</span> 之前</strong>。</li>
+</ul>
+<p>两个合法序列最终都会把所有元素输出，故 <span class="math">a</span>、<span class="math">b</span> 都出现在各自的输出里， 而它们的先后相反，输出序列必不相同。∎</p>
+<p><strong>结论值得记住</strong>：长度 <span class="math"><span class="upr">2</span>n</span> 的合法操作序列、<span class="math"><span class="upr">1..</span>n</span> 的合法出栈序列、<span class="math">n</span> 个结点的二叉树形态， <strong>三者一一对应，个数都是 <span class="math">C<sub>n</sub></span></strong>——(2) 证的正是「操作序列到输出序列」这个映射是单射。</p></blockquote>
+<p><strong>真-9.</strong> ★ <strong>算法填空</strong>：用两个队列实现一个栈。队列只提供 <code>push(x)</code> 入队、<code>pop()</code> 队首出队、 <code>front()</code> 取队首、<code>empty()</code> 判空。补全五个空。</p>
+<div class="codeblock" data-lang="text"><pre><code>class MyStack
+    queue queue1, queue2
+
+    push(x)
+        ____(1)____
+        while ____(2)____
+            ____(3)____
+            queue1.pop()
+        swap(queue1, queue2)
+
+    pop()
+        r ← queue1.front();  queue1.pop();  return r
+
+    top()      return ____(4)____
+    empty()    return ____(5)____</code></pre></div>
+<blockquote><p><strong>答</strong>： (1) <code>queue2.push(x)</code>　(2) <code>!queue1.empty()</code>　(3) <code>queue2.push(queue1.front())</code> (4) <code>queue1.front()</code>　(5) <code>queue1.empty()</code></p>
+<p><strong>思路</strong>：队列是先进先出，而栈要后进先出，所以<strong>每次 push 都把新元素放到队首</strong>。 做法是：新元素先单独进 <code>queue2</code>，再把 <code>queue1</code> 里原有的元素<strong>按原顺序</strong>全部倒到它后面， 最后交换两个队列的身份。于是 <code>queue1</code> 的队首永远是最后压入的那个元素， <code>pop</code>/<code>top</code> 直接取队首即可。</p>
+<p><strong>代价</strong>：<code>push</code> 是 <span class="math">O(n)</span>（要倒一遍），<code>pop</code>、<code>top</code>、<code>empty</code> 都是 <span class="math">O(<span class="upr">1</span>)</span>。</p>
+<p><strong>和 3-11 正好相反，值得放在一起记</strong>：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left"></th>
+<th style="text-align:left">两个栈做队列（3-11）</th>
+<th style="text-align:left">两个队列做栈（本题）</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">代价重的一端</td>
+<td style="text-align:left">出队（倒栈），但<strong>摊还 <span class="math">O(<span class="upr">1</span>)</span></strong></td>
+<td style="text-align:left">入栈，<strong>每次都是 <span class="math">O(n)</span>，不能摊还</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">另一端</td>
+<td style="text-align:left">入队 <span class="math">O(<span class="upr">1</span>)</span></td>
+<td style="text-align:left">出栈 <span class="math">O(<span class="upr">1</span>)</span></td>
+</tr>
+<tr>
+<td style="text-align:left">为什么不同</td>
+<td style="text-align:left">元素一生只被倒一次</td>
+<td style="text-align:left">每 push 一次就要把全部元素倒一次</td>
+</tr>
+</tbody></table></div>
+<p>最后一行是这两道题真正的考点：<strong>摊还分析成立与否，取决于「每个元素被搬动的总次数」是否有界</strong>。</p></blockquote>
+<h3 id="第-4-章"><a class="anchor" href="#第-4-章">#</a>第 4 章</h3>
+<p><strong>真-6.</strong> (1) 实现 <code>strcpy(char* destination, char* source)</code> 时，若两个地址满足 <code>source &lt; destination &lt; source + strlen(source)</code>，该怎么处理？为什么？ (2) 求 <code>abababa</code> 的优化前与优化后 next 数组。</p>
+<blockquote><p><strong>答</strong>： <strong>(1) 必须从后往前拷贝</strong>——从 <code>source</code> 的最后一个字节（含结尾的 <code>&#x27;\0&#x27;</code>）开始， 倒着往 <code>destination</code> 写。</p>
+<p>理由：这个条件说明<strong>目标区间与源区间重叠，而且目标落在源的后半段</strong>。 若照常从前往后拷，写到 <code>destination[0]</code> 就覆盖了 <code>source</code> 中间某个还没被读的字节， 后面再读到它时读到的已经是刚写进去的内容，结果是错的（典型症状是后半段变成前半段的重复）。 倒着拷时，每次写的位置都在<strong>尚未读到的区域之后</strong>，不会破坏还没读的数据。</p>
+<p><strong>补两句</strong>：C 标准里 <code>strcpy</code> 对重叠区间的行为是<strong>未定义</strong>的，处理重叠是 <code>memmove</code> 的职责； <code>memmove</code> 正是按两个地址的相对位置在「正向拷」和「反向拷」之间二选一。 反过来，若 <code>destination &lt; source</code>，就必须<strong>从前往后</strong>拷——方向选反同样会错。</p>
+<p><strong>(2)</strong>：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left"><span class="math">i</span></th>
+<th style="text-align:left">0</th>
+<th style="text-align:left">1</th>
+<th style="text-align:left">2</th>
+<th style="text-align:left">3</th>
+<th style="text-align:left">4</th>
+<th style="text-align:left">5</th>
+<th style="text-align:left">6</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><code>P[i]</code></td>
+<td style="text-align:left">a</td>
+<td style="text-align:left">b</td>
+<td style="text-align:left">a</td>
+<td style="text-align:left">b</td>
+<td style="text-align:left">a</td>
+<td style="text-align:left">b</td>
+<td style="text-align:left">a</td>
+</tr>
+<tr>
+<td style="text-align:left">优化前</td>
+<td style="text-align:left">−1</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">2</td>
+<td style="text-align:left">3</td>
+<td style="text-align:left">4</td>
+</tr>
+<tr>
+<td style="text-align:left">优化后</td>
+<td style="text-align:left">−1</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">−1</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">−1</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">−1</td>
+</tr>
+</tbody></table></div>
+<p>优化前逐位算最长公共真前后缀：<code>a</code>→0，<code>ab</code>→0，<code>aba</code>→1，<code>abab</code>→2，<code>ababa</code>→3，<code>ababab</code>→4。 优化后按 4-12 的规则：<code>P[2]=&#x27;a&#x27;</code> 与 <code>P[next[2]=0]=&#x27;a&#x27;</code> 相同 → 借 <code>next[0]=-1</code>； <code>P[3]=&#x27;b&#x27;</code> 与 <code>P[1]=&#x27;b&#x27;</code> 相同 → 借 <code>next[1]=0</code>；后面同理交替。</p>
+<p><strong>这个模式把两种 next 的差别放大到了极点</strong>：优化前是 <span class="math"><span class="bin">−</span><span class="upr">1</span>,<span class="upr">0</span>,<span class="upr">0</span>,<span class="upr">1</span>,<span class="upr">2</span>,<span class="upr">3</span>,<span class="upr">4</span></span> 步步升高， 优化后只在 <span class="math"><span class="bin">−</span><span class="upr">1</span></span> 和 <span class="math"><span class="upr">0</span></span> 之间跳。原因是 <code>abababa</code> 每一位都与它的回退目标同字符， 退过去必定再失配，所以全部被一路借到底。 <strong>再提醒一次</strong>：做最小循环节（4-17）这类题必须用<strong>优化前</strong>的那一行。</p></blockquote>
+<h3 id="第-5-章"><a class="anchor" href="#第-5-章">#</a>第 5 章</h3>
+<p><strong>真-3.</strong> ★ 用值为 <span class="math"><span class="upr">1</span></span> 到 <span class="math"><span class="upr">5</span></span> 的 5 个结点组成二叉搜索树， 要求树上<strong>每个结点的左子树结点数都不少于右子树结点数</strong>。这样的二叉搜索树共有多少棵？</p>
+<blockquote><p><strong>答：6 棵。</strong></p>
+<p>关键一步：<strong>给定关键码集合，二叉搜索树由树的形状唯一决定</strong>（中序必须递增， 所以哪个值放哪个位置是定死的）。于是问题变成「数满足约束的二叉树形状」。</p>
+<p>设 <span class="math">f(n)</span> 为 <span class="math">n</span> 个结点、每个结点都满足「左子树结点数 <span class="math"><span class="rel">≥</span></span> 右子树结点数」的形状数。 按根的左右子树规模 <span class="math">(l,r)</span> 分类，<span class="math">l<span class="bin">+</span>r<span class="rel">=</span>n<span class="bin">−</span><span class="upr">1</span></span> 且 <span class="math">l<span class="rel">≥</span>r</span>：</p>
+<div class="math math-display">f(n)<span class="rel">=</span>∑<sub>l<span class="rel">≥</span>(n<span class="bin">−</span><span class="upr">1</span>)/<span class="upr">2</span></sub>f(l) f(n<span class="bin">−</span><span class="upr">1</span><span class="bin">−</span>l),  f(<span class="upr">0</span>)<span class="rel">=</span>f(<span class="upr">1</span>)<span class="rel">=</span><span class="upr">1</span></div>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left"><span class="math">n</span></th>
+<th style="text-align:left">拆法 <span class="math">(l,r)</span></th>
+<th style="text-align:left"><span class="math">f(n)</span></th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">2</td>
+<td style="text-align:left">(1,0)</td>
+<td style="text-align:left">1</td>
+</tr>
+<tr>
+<td style="text-align:left">3</td>
+<td style="text-align:left">(2,0)、(1,1)</td>
+<td style="text-align:left"><span class="math"><span class="upr">1</span><span class="bin">+</span><span class="upr">1</span><span class="rel">=</span><span class="upr">2</span></span></td>
+</tr>
+<tr>
+<td style="text-align:left">4</td>
+<td style="text-align:left">(3,0)、(2,1)</td>
+<td style="text-align:left"><span class="math"><span class="upr">2</span><span class="bin">+</span><span class="upr">1</span><span class="rel">=</span><span class="upr">3</span></span></td>
+</tr>
+<tr>
+<td style="text-align:left">5</td>
+<td style="text-align:left">(4,0)、(3,1)、(2,2)</td>
+<td style="text-align:left"><span class="math"><span class="upr">3</span><span class="bin">+</span><span class="upr">2</span><span class="bin">⋅</span><span class="upr">1</span><span class="bin">+</span><span class="upr">1</span><span class="bin">⋅</span><span class="upr">1</span><span class="rel">=</span><span class="upr">6</span></span></td>
+</tr>
+</tbody></table></div>
+<p>所以答案是 <strong>6</strong>。（穷举 5 个结点的全部 <span class="math">C<sub><span class="upr">5</span></sub><span class="rel">=</span><span class="upr">42</span></span> 种形状逐个验证，也得 6。）</p>
+<p><strong>和 5-26 对照着看</strong>：去掉约束就是 Catalan 数 <span class="math"><span class="upr">42</span></span>； 加上「左不少于右」这一条，递推式的求和范围从「全部 <span class="math">l</span>」缩成「<span class="math">l<span class="rel">≥</span>r</span> 的那一半」， 数量掉到 6。<strong>带约束的计数题一律这么做：先写出无约束的递推，再收窄求和范围。</strong></p></blockquote>
+<p><strong>真-8.</strong> ★ 字符集 <span class="math">{a,b,c,d,e,f,g}</span> 的频率为 <span class="math">{<span class="upr">6</span>%,<span class="upr">8</span>%,<span class="upr">9</span>%,<span class="upr">10</span>%,<span class="upr">12</span>%,<span class="upr">25</span>%,<span class="upr">30</span>%}</span>。 (1) 构造 Huffman 树；(2) 求平均编码长度； (3) 若 <span class="math">g</span> 的频率下降、其余字符的<strong>相对比例不变</strong>、<strong>编码方式不变</strong>， <span class="math">g</span> 的频率降到多少时，定长编码反而比这套 Huffman 编码更省？</p>
+<blockquote><p><strong>答</strong>： <strong>(1) 构造</strong>（每次合并最小的两个）：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">步</th>
+<th style="text-align:left">合并</th>
+<th style="text-align:left">新权</th>
+<th style="text-align:left">剩余</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left">6(a) + 8(b)</td>
+<td style="text-align:left">14</td>
+<td style="text-align:left">9, 10, 12, <strong>14</strong>, 25, 30</td>
+</tr>
+<tr>
+<td style="text-align:left">2</td>
+<td style="text-align:left">9(c) + 10(d)</td>
+<td style="text-align:left">19</td>
+<td style="text-align:left">12, 14, <strong>19</strong>, 25, 30</td>
+</tr>
+<tr>
+<td style="text-align:left">3</td>
+<td style="text-align:left">12(e) + 14</td>
+<td style="text-align:left">26</td>
+<td style="text-align:left">19, <strong>26</strong>, 25, 30</td>
+</tr>
+<tr>
+<td style="text-align:left">4</td>
+<td style="text-align:left">19 + 25(f)</td>
+<td style="text-align:left">44</td>
+<td style="text-align:left">26, 30, <strong>44</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">5</td>
+<td style="text-align:left">26 + 30(g)</td>
+<td style="text-align:left">56</td>
+<td style="text-align:left">44, <strong>56</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">6</td>
+<td style="text-align:left">44 + 56</td>
+<td style="text-align:left">100</td>
+<td style="text-align:left">完成</td>
+</tr>
+</tbody></table></div>
+<div class="codeblock" data-lang="text"><pre><code>                100
+           0 /       \ 1
+           44          56
+        0 /  \1     0 /  \1
+       19    25(f)  26    30(g)
+     0/  \1       0/  \1
+   9(c) 10(d)  12(e)  14
+                    0/  \1
+                  6(a)  8(b)</code></pre></div>
+<p>码长：<span class="math">a,b</span> 为 4；<span class="math">c,d,e</span> 为 3；<span class="math">f,g</span> 为 2。</p>
+<p><strong>(2) 平均编码长度 <span class="math"><span class="rel">=</span><span class="upr">2.59</span></span> 位/字符。</strong> 用「所有新生成结点权值之和」最快：<span class="math"><span class="upr">14</span><span class="bin">+</span><span class="upr">19</span><span class="bin">+</span><span class="upr">26</span><span class="bin">+</span><span class="upr">44</span><span class="bin">+</span><span class="upr">56</span><span class="bin">+</span><span class="upr">100</span><span class="rel">=</span><span class="upr">259</span></span>，即 <span class="math"><span class="upr">2.59</span></span>。 逐项验算：<span class="math"><span class="upr">4</span>(<span class="upr">0.06</span><span class="bin">+</span><span class="upr">0.08</span>)<span class="bin">+</span><span class="upr">3</span>(<span class="upr">0.09</span><span class="bin">+</span><span class="upr">0.10</span><span class="bin">+</span><span class="upr">0.12</span>)<span class="bin">+</span><span class="upr">2</span>(<span class="upr">0.25</span><span class="bin">+</span><span class="upr">0.30</span>)<span class="rel">=</span><span class="upr">0.56</span><span class="bin">+</span><span class="upr">0.93</span><span class="bin">+</span><span class="upr">1.10</span><span class="rel">=</span><span class="upr">2.59</span></span> ✓</p>
+<blockquote><p><strong>这一问的参考答案给的是 2.69，是算错的。</strong> 它最后一组写成 <span class="math"><span class="upr">2</span><span class="bin">×</span>(<span class="upr">0.25</span><span class="bin">+</span><span class="upr">0.35</span>)</span>， 把 <span class="math">g</span> 的 <span class="math"><span class="upr">30</span>%</span> 当成了 <span class="math"><span class="upr">35</span>%</span>；题面给的七个频率相加恰好是 <span class="math"><span class="upr">100</span>%</span>，<span class="math">g</span> 只能是 <span class="math"><span class="upr">30</span>%</span>。 用它自己画出的那棵树逐项核算，结果就是 <span class="math"><span class="upr">259</span>/<span class="upr">100</span><span class="rel">=</span><span class="upr">2.59</span></span>。</p></blockquote>
+<p><strong>(3) 按题面给的频率，定长编码永远不会更省。</strong> 定长需要 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub><span class="upr">7</span>⌉<span class="rel">=</span><span class="upr">3</span></span> 位。设 <span class="math">g</span> 的频率降为 <span class="math">x</span>，其余六个按原比例缩放 （它们原本合计 <span class="math"><span class="upr">70</span>%</span>），则这套<strong>固定不变</strong>的码的平均长度是</p>
+<div class="math math-display">L(x)<span class="rel">=</span><span class="frac"><span class="num"><span class="upr">1</span><span class="bin">−</span>x</span><span class="den"><span class="upr">0.70</span></span></span><span class="bin">×</span><span class="upr">1.99</span><span class="bin">+</span><span class="upr">2</span>x<span class="rel">=</span><span class="upr">2.8429</span><span class="bin">−</span><span class="upr">0.8429</span>x</div>
+<p>其中 <span class="math"><span class="upr">1.99</span><span class="rel">=</span><span class="upr">4</span>(<span class="upr">0.06</span><span class="bin">+</span><span class="upr">0.08</span>)<span class="bin">+</span><span class="upr">3</span>(<span class="upr">0.09</span><span class="bin">+</span><span class="upr">0.10</span><span class="bin">+</span><span class="upr">0.12</span>)<span class="bin">+</span><span class="upr">2</span><span class="bin">×</span><span class="upr">0.25</span></span> 是其余六个字符的加权码长。 <span class="math">L</span> 随 <span class="math">x</span> 减小而增大，取最大值于 <span class="math">x<span class="rel">=</span><span class="upr">0</span></span>：<span class="math">L(<span class="upr">0</span>)<span class="rel">=</span><span class="upr">1.99</span>/<span class="upr">0.70</span><span class="rel">=</span><span class="upr">2.8429</span>&lt;<span class="upr">3</span></span>。 所以对一切 <span class="math">x<span class="rel">∈</span>[<span class="upr">0</span>,<span class="upr">0.30</span>]</span> 都有 <span class="math">L(x)&lt;<span class="upr">3</span></span>——<strong>无解</strong>。</p>
+<blockquote><p>参考答案解出的 <span class="math">x<span class="rel">=</span><span class="upr">4</span>/<span class="upr">69</span></span> 来自同一处笔误（把分母写成 <span class="math"><span class="upr">0.65</span></span>）。代回原题的数字即可发现矛盾。</p></blockquote>
+<p><strong>但这一问想考的东西是对的，换一组数字就成立</strong>： <strong>编码方式一旦固定，频率漂移之后它就不再最优，甚至可能输给定长。</strong> 用同一棵树举个能成立的例子——设 <span class="math">a</span>（码长 4）的频率升到 <span class="math">y</span>，其余六个按原比例缩小 （它们原本合计 <span class="math"><span class="upr">94</span>%</span>，加权码长 <span class="math"><span class="upr">2.35</span></span>）：</p>
+<div class="math math-display">L(y)<span class="rel">=</span><span class="frac"><span class="num"><span class="upr">2.35</span></span><span class="den"><span class="upr">0.94</span></span></span>(<span class="upr">1</span><span class="bin">−</span>y)<span class="bin">+</span><span class="upr">4</span>y<span class="rel">=</span><span class="upr">2.5</span><span class="bin">+</span><span class="upr">1.5</span>y</div>
+<p>令 <span class="math">L(y)<span class="rel">=</span><span class="upr">3</span></span> 得 <span class="math">y<span class="rel">=</span><span class="upr">1</span>/<span class="upr">3</span></span>。即 <strong><span class="math">a</span> 的频率超过 <span class="math"><span class="upr">1</span>/<span class="upr">3</span></span> 之后，这套固定的 Huffman 码就不如定长的 3 位</strong>。 （此时真正的最优编码当然要重算——重算出来的 Huffman 码永远不会差于定长， <strong>会输的是「用旧频率算出来、却拿去编新数据」的那套码</strong>。这正是实际压缩器要么随数据自适应、 要么把码表随文件一起存的原因。）</p></blockquote>
+<p><strong>真-14.</strong> ★ 用自底向上的 SiftDown 把 <span class="math">{<span class="upr">23</span>,<span class="upr">12</span>,<span class="upr">17</span>,<span class="upr">5</span>,<span class="upr">28</span>,<span class="upr">30</span>,<span class="upr">15</span>,<span class="upr">8</span>}</span> 建成最小堆； 再向所得的堆中插入 <span class="math"><span class="upr">4</span></span>，写出 SiftUp 调整后的序列。</p>
+<blockquote><p><strong>答</strong>：<span class="math">n<span class="rel">=</span><span class="upr">8</span></span>，从 <span class="math">i<span class="rel">=</span>⌊<span class="upr">8</span>/<span class="upr">2</span>⌋<span class="bin">−</span><span class="upr">1</span><span class="rel">=</span><span class="upr">3</span></span> 开始倒着筛。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">步</th>
+<th style="text-align:left"><span class="math">i</span></th>
+<th style="text-align:left">动作</th>
+<th style="text-align:left">数组</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">0</td>
+<td style="text-align:left">—</td>
+<td style="text-align:left">初始</td>
+<td style="text-align:left"><code>23 12 17 5 28 30 15 8</code></td>
+</tr>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left">3</td>
+<td style="text-align:left">结点 5，唯一的孩子 8，<span class="math"><span class="upr">5</span><span class="rel">≤</span><span class="upr">8</span></span> 不动</td>
+<td style="text-align:left"><code>23 12 17 5 28 30 15 8</code></td>
+</tr>
+<tr>
+<td style="text-align:left">2</td>
+<td style="text-align:left">2</td>
+<td style="text-align:left">结点 17，孩子 30、15，与较小的 15 换</td>
+<td style="text-align:left"><code>23 12 15 5 28 30 17 8</code></td>
+</tr>
+<tr>
+<td style="text-align:left">3</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">结点 12，孩子 5、28，与 5 换；12 落到下标 3，孩子 8，再换</td>
+<td style="text-align:left"><code>23 5 15 8 28 30 17 12</code></td>
+</tr>
+<tr>
+<td style="text-align:left">4</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">结点 23，孩子 5、15，与 5 换；23 到下标 1，孩子 8、28，与 8 换；23 到下标 3，孩子 12，再换</td>
+<td style="text-align:left"><code>5 8 15 12 28 30 17 23</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>建堆结果：<span class="math">{<span class="upr">5</span>,<span class="upr">8</span>,<span class="upr">15</span>,<span class="upr">12</span>,<span class="upr">28</span>,<span class="upr">30</span>,<span class="upr">17</span>,<span class="upr">23</span>}</span></strong></p>
+<p><strong>插入 4</strong>：放到末尾（下标 8），然后一路上浮。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">位置</th>
+<th style="text-align:left">父</th>
+<th style="text-align:left">比较</th>
+<th style="text-align:left">结果</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">8</td>
+<td style="text-align:left">下标 3（值 12）</td>
+<td style="text-align:left"><span class="math"><span class="upr">4</span>&lt;<span class="upr">12</span></span></td>
+<td style="text-align:left">交换 → <code>5 8 15 4 28 30 17 23 12</code></td>
+</tr>
+<tr>
+<td style="text-align:left">3</td>
+<td style="text-align:left">下标 1（值 8）</td>
+<td style="text-align:left"><span class="math"><span class="upr">4</span>&lt;<span class="upr">8</span></span></td>
+<td style="text-align:left">交换 → <code>5 4 15 8 28 30 17 23 12</code></td>
+</tr>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left">下标 0（值 5）</td>
+<td style="text-align:left"><span class="math"><span class="upr">4</span>&lt;<span class="upr">5</span></span></td>
+<td style="text-align:left">交换 → <code>4 5 15 8 28 30 17 23 12</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>插入结果：<span class="math">{<span class="upr">4</span>,<span class="upr">5</span>,<span class="upr">15</span>,<span class="upr">8</span>,<span class="upr">28</span>,<span class="upr">30</span>,<span class="upr">17</span>,<span class="upr">23</span>,<span class="upr">12</span>}</span></strong></p>
+<p><strong>建堆与插入的方向正好相反，别搞混</strong>（这也是 5-14、5-25 的分水岭）： 建堆是<strong>从最后一个分支结点倒着向下筛</strong>，单次 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span> 但整体 <span class="math">O(n)</span>； 插入是<strong>从末尾向上浮</strong>，单次就是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>，<span class="math">n</span> 次插入建堆要 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>。</p></blockquote>
+<p><strong>真-10.</strong> ★ 用两个一维数组 <code>L</code>、<code>R</code> 存一棵 <span class="math">N</span> 个结点的二叉树：<code>L[i]</code>、<code>R[i]</code> 分别是结点 <span class="math">i</span> 的左、右孩子编号，为 0 表示空（结点从 1 编号，<code>L[0]=R[0]=0</code>）。 (1) 设计算法由 <code>L</code>、<code>R</code> 生成数组 <code>T</code>，使 <code>T[i]</code> 存结点 <span class="math">i</span> 的父结点（<code>T[0]=0</code>，根的父记 0）。 (2) 用 <code>L</code>、<code>R</code>、<code>T</code> 判断结点 <span class="math">U</span> 是否为结点 <span class="math">V</span> 的后代。</p>
+<blockquote><p><strong>答</strong>： <strong>(1) 基本思想</strong>——<strong>反着填</strong>：与其对每个结点去找父亲（那要搜索整个数组）， 不如对每个结点把它的两个孩子<strong>登记一次</strong>。每条边只被写一次，一趟就够。</p>
+<div class="codeblock" data-lang="text"><pre><code>BuildParent(L, R, N)
+    for i ← 0 to N:  T[i] ← 0          // 根与空位都留 0
+    for i ← 1 to N
+        if L[i] ≠ 0 then T[L[i]] ← i
+        if R[i] ≠ 0 then T[R[i]] ← i
+    return T</code></pre></div>
+<p><strong>代价</strong>：时间 <span class="math">Θ(N)</span>，额外空间 <span class="math">Θ(N)</span>（就是 <code>T</code> 本身）。 <strong>正确性</strong>：二叉树里每个非根结点恰好被某一个结点当作左孩子或右孩子登记一次， 所以每个 <code>T[i]</code> 被写且只被写一次；根从没被登记，保持 0。</p>
+<p><strong>(2) 基本思想</strong>——把「<span class="math">U</span> 是不是 <span class="math">V</span> 的后代」翻过来问成「<span class="math">V</span> 是不是 <span class="math">U</span> 的祖先」。 有了父指针，后者只要<strong>从 <span class="math">U</span> 沿父链往上走</strong>，看能不能碰到 <span class="math">V</span>：</p>
+<div class="codeblock" data-lang="text"><pre><code>IsDescendant(U, V, T)
+    x ← T[U]                  // 从 U 的父亲开始，所以 U 不算自己的后代
+    while x ≠ 0
+        if x = V then return true
+        x ← T[x]
+    return false</code></pre></div>
+<p><strong>代价</strong>：时间 <span class="math">O(h)</span>（<span class="math">h</span> 为树高），最坏 <span class="math">O(N)</span>；空间 <span class="math">O(<span class="upr">1</span>)</span>。</p>
+<p><strong>为什么要翻过来问</strong>：直接做是「从 <span class="math">V</span> 出发把整棵子树遍历一遍，看里面有没有 <span class="math">U</span>」， 那是 <span class="math">O(<span class="upr">子树大小</span>)</span>、最坏 <span class="math">O(N)</span>，还要一个栈。 <strong>往上走只有一条路，往下走有很多条</strong>——这正是父指针表示法的长处（6-15、6-18）。</p></blockquote>
+<h3 id="第-6-章"><a class="anchor" href="#第-6-章">#</a>第 6 章</h3>
+<p><strong>真-4.</strong> 一棵树的嵌套括号表示为 <code>(A(B(D)(E(I)(J))(F))(C(G)(H)))</code>，则这棵树中没有度为（　）的结点。 A. 1　B. 2　C. 3　D. 4</p>
+<blockquote><p><strong>答：A</strong>。嵌套表示的读法：<strong>紧跟在一个结点后面的每一对括号，就是它的一棵子树</strong>。 拆开来是</p>
+<div class="codeblock" data-lang="text"><pre><code>A
+├── B
+│   ├── D
+│   ├── E
+│   │   ├── I
+│   │   └── J
+│   └── F
+└── C
+    ├── G
+    └── H</code></pre></div>
+<p>各结点的度：<code>A</code> 为 2、<code>B</code> 为 3、<code>E</code> 为 2、<code>C</code> 为 2，其余（<code>D F I J G H</code>）为 0。 出现过的度是 <span class="math">{<span class="upr">0</span>,<span class="upr">2</span>,<span class="upr">3</span>}</span>，<strong>没有度为 1 的结点</strong>，也没有 4。</p>
+<p><strong>校验一下别数错</strong>：结点数 <span class="math">n<span class="rel">=</span><span class="upr">10</span></span>，由 6-2 的度数公式 <span class="math">n<span class="rel">=</span><span class="upr">1</span><span class="bin">+</span>∑<sub>i</sub>i<span class="bin">⋅</span>n<sub>i</sub><span class="rel">=</span><span class="upr">1</span><span class="bin">+</span>(<span class="upr">2</span><span class="bin">×</span><span class="upr">3</span><span class="bin">+</span><span class="upr">3</span><span class="bin">×</span><span class="upr">1</span>)<span class="rel">=</span><span class="upr">1</span><span class="bin">+</span><span class="upr">9</span><span class="rel">=</span><span class="upr">10</span></span> ✓ （度为 2 的有 <code>A</code>、<code>E</code>、<code>C</code> 共 3 个，度为 3 的有 <code>B</code> 共 1 个）。</p></blockquote>
+<p><strong>真-11.</strong> ★ 一棵树的<strong>镜面映射</strong>指把每个结点的子结点次序反转。 输入输出树时常把树转成对应的二叉树，并给只有一个子结点的分支结点补一个虚子结点 <code>$</code>， 形成「伪满二叉树」；再对这棵二叉树作<strong>前序遍历</strong>，内部结点标 0、叶结点标 1，虚结点也输出。 给定这样的前序序列，设计算法输出<strong>原树的镜面映射的广度优先（层次）序列</strong>。 例：输入 <code>a0 b0 $1 c0 d0 $1 e1 f1 $1</code>，输出 <code>a f c b e d</code>。</p>
+<blockquote><p><strong>答</strong>：三步走，每一步都是学过的东西。</p>
+<p><strong>第一步：按前序递归建「伪满二叉树」。</strong> 伪满的意思是<strong>每个内部结点恰有两个孩子</strong>，所以读到标 0 的记号就递归读左、再递归读右； 读到标 1 的记号就是叶子。<code>$</code> 是虚结点，建成空指针即可。</p>
+<div class="codeblock" data-lang="text"><pre><code>Build(tokens)                        // tokens 是一个只能顺序取的记号流
+    t ← tokens.next()
+    if t.ch = &#x27;$&#x27; then return 空      // 虚结点：它一定标 1，不再往下读
+    建结点 node(t.ch)
+    if t.flag = 0                     // 内部结点，恰有两个孩子
+        node.left  ← Build(tokens)
+        node.right ← Build(tokens)
+    return node</code></pre></div>
+<p><strong>第二步：按「左子/右兄」把二叉树读回成树。</strong> 不必真的另建一棵树—— 只要记住 <code>node.left</code> 是<strong>长子</strong>、<code>node.right</code> 是<strong>下一个兄弟</strong>（6-3）， 于是「结点 <span class="math">p</span> 的全部孩子」就是<strong>从 <code>p.left</code> 出发的那条右链</strong>。</p>
+<p><strong>第三步：层次遍历，孩子从右往左入队。</strong> 镜面映射是把每个结点的孩子反序，而层次遍历只关心「孩子按什么顺序入队」—— 所以<strong>根本不用真的去反转这棵树</strong>，入队时倒着放就等价了。</p>
+<div class="codeblock" data-lang="text"><pre><code>MirrorLevelOrder(root)
+    Q ← 空队列;  Q.EnQueue(root)
+    while not Q.Empty()
+        p ← Q.DeQueue()
+        输出 p.ch
+        C ← 空表
+        for c ← p.left;  c ≠ 空;  c ← c.right      // 收集 p 的全部孩子
+            C.append(c)
+        for j ← |C| - 1 downto 0                   // 从右往左入队 = 镜面
+            Q.EnQueue(C[j])</code></pre></div>
+<p><strong>对例子走一遍</strong>：由输入建出的二叉树是 <code>a.left=b, a.right=$</code>；<code>b.left=$, b.right=c</code>；<code>c.left=d, c.right=f</code>；<code>d.left=$, d.right=e</code>。 按左子右兄读回成树：</p>
+<div class="codeblock" data-lang="text"><pre><code>a
+├── b
+├── c
+│   ├── d
+│   └── e
+└── f</code></pre></div>
+<p>层次遍历、孩子倒着入队：输出 <code>a</code>，把 <code>f c b</code> 入队 → 输出 <code>f</code>（无孩子）→ 输出 <code>c</code>， 把 <code>e d</code> 入队 → 输出 <code>b</code>（无孩子）→ 输出 <code>e</code> → 输出 <code>d</code>。 结果 <strong><code>a f c b e d</code></strong> ✓</p>
+<p><strong>代价</strong>：建树每个记号读一次 <span class="math">Θ(N)</span>；层次遍历每个结点进出队各一次、 每条兄弟边走一次，<span class="math">Θ(N)</span>。合计<strong>时间 <span class="math">Θ(N)</span></strong>； 空间是建树的 <span class="math">Θ(N)</span> 加队列的 <span class="math">O(w)</span>（<span class="math">w</span> 为最大宽度）。</p>
+<p><strong>三个容易丢分的点</strong>： (1) <code>$</code> 也在输入里，<strong>必须读掉</strong>，否则后面整串错位； (2) 伪满的性质是「内部结点恰有两个孩子」，所以标 0 就读两个、标 1 就不读， 不要写成「读到 <code>$</code> 才停」； (3) 镜面不用真反转——<strong>在入队顺序上做文章</strong>，这是本题最值钱的一句话。</p></blockquote>
+<p><strong>真-13.</strong> 对下列 9 个等价偶对依次合并，给出最终的父指针数组与树形： <span class="math">(<span class="upr">0</span>,<span class="upr">2</span>),(<span class="upr">1</span>,<span class="upr">2</span>),(<span class="upr">3</span>,<span class="upr">4</span>),(<span class="upr">4</span>,<span class="upr">5</span>),(<span class="upr">2</span>,<span class="upr">5</span>),(<span class="upr">6</span>,<span class="upr">7</span>),(<span class="upr">8</span>,<span class="upr">7</span>),(<span class="upr">2</span>,<span class="upr">8</span>),(<span class="upr">9</span>,<span class="upr">7</span>)</span>。 采用<strong>重量权衡合并</strong>（结点少的并入结点多的；同样大时<strong>根值大的并入根值小的</strong>）与<strong>路径压缩</strong>。</p>
+<blockquote><p><strong>答</strong>：记根的父为 <span class="math"><span class="bin">−</span><span class="upr">1</span></span>。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">步</th>
+<th style="text-align:left">偶对</th>
+<th style="text-align:left">两个根（元素数）</th>
+<th style="text-align:left">动作</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left">(0,2)</td>
+<td style="text-align:left">0(1), 2(1) 并列</td>
+<td style="text-align:left">2 挂到 0 下，<span class="math">w<sub><span class="upr">0</span></sub><span class="rel">=</span><span class="upr">2</span></span></td>
+</tr>
+<tr>
+<td style="text-align:left">2</td>
+<td style="text-align:left">(1,2)</td>
+<td style="text-align:left">1(1), 0(2)</td>
+<td style="text-align:left">1 挂到 0 下，<span class="math">w<sub><span class="upr">0</span></sub><span class="rel">=</span><span class="upr">3</span></span></td>
+</tr>
+<tr>
+<td style="text-align:left">3</td>
+<td style="text-align:left">(3,4)</td>
+<td style="text-align:left">3(1), 4(1) 并列</td>
+<td style="text-align:left">4 挂到 3 下，<span class="math">w<sub><span class="upr">3</span></sub><span class="rel">=</span><span class="upr">2</span></span></td>
+</tr>
+<tr>
+<td style="text-align:left">4</td>
+<td style="text-align:left">(4,5)</td>
+<td style="text-align:left">3(2), 5(1)</td>
+<td style="text-align:left">5 挂到 3 下，<span class="math">w<sub><span class="upr">3</span></sub><span class="rel">=</span><span class="upr">3</span></span></td>
+</tr>
+<tr>
+<td style="text-align:left">5</td>
+<td style="text-align:left">(2,5)</td>
+<td style="text-align:left">0(3), 3(3) 并列</td>
+<td style="text-align:left">3 挂到 0 下，<span class="math">w<sub><span class="upr">0</span></sub><span class="rel">=</span><span class="upr">6</span></span></td>
+</tr>
+<tr>
+<td style="text-align:left">6</td>
+<td style="text-align:left">(6,7)</td>
+<td style="text-align:left">6(1), 7(1) 并列</td>
+<td style="text-align:left">7 挂到 6 下，<span class="math">w<sub><span class="upr">6</span></sub><span class="rel">=</span><span class="upr">2</span></span></td>
+</tr>
+<tr>
+<td style="text-align:left">7</td>
+<td style="text-align:left">(8,7)</td>
+<td style="text-align:left">8(1), 6(2)</td>
+<td style="text-align:left">8 挂到 6 下，<span class="math">w<sub><span class="upr">6</span></sub><span class="rel">=</span><span class="upr">3</span></span></td>
+</tr>
+<tr>
+<td style="text-align:left">8</td>
+<td style="text-align:left">(2,8)</td>
+<td style="text-align:left">0(6), 6(3)</td>
+<td style="text-align:left">6 挂到 0 下，<span class="math">w<sub><span class="upr">0</span></sub><span class="rel">=</span><span class="upr">9</span></span></td>
+</tr>
+<tr>
+<td style="text-align:left">9</td>
+<td style="text-align:left">(9,7)</td>
+<td style="text-align:left">9(1), 0(9)；<code>Find(7)</code> 走 <span class="math"><span class="upr">7</span><span class="rel">→</span><span class="upr">6</span><span class="rel">→</span><span class="upr">0</span></span>，<strong>压缩后 <code>parent[7]=0</code></strong></td>
+<td style="text-align:left">9 挂到 0 下，<span class="math">w<sub><span class="upr">0</span></sub><span class="rel">=</span><span class="upr">10</span></span></td>
+</tr>
+</tbody></table></div>
+<p><strong>最终父指针数组</strong>（下标 0..9）：<code>-1 0 0 0 3 3 0 0 6 0</code></p>
+<div class="codeblock" data-lang="text"><pre><code>                0
+     /   /   /  |   \   \
+    1   2   3   6   7    9
+           / \   \
+          4   5   8</code></pre></div>
+<p>全部 10 个元素属于同一个等价类，树高只有 2。</p>
+<p><strong>两处最容易错</strong>： (1) <strong>第 9 步的路径压缩发生在 <code>Find(7)</code> 里</strong>，把 7 直接挂到 0 下—— 压缩是<strong>查找时</strong>顺手做的，不是合并时做的（6-18）； (2) 并列时的取舍规则必须照题面写的来。本题与 6-19 用的是同一条 （「根值大的并入根值小的」），换一条规则树形就对不上答案。</p></blockquote>
+<p><strong>真-12.</strong> ★ 证明：非空<strong>满 <span class="math">k</span> 叉树</strong>（每个内部结点恰有 <span class="math">k</span> 个孩子）若有 <span class="math">n</span> 个内部结点， 则叶结点数为 <span class="math">n(k<span class="bin">−</span><span class="upr">1</span>)<span class="bin">+</span><span class="upr">1</span></span>。</p>
+<blockquote><p><strong>证明一（数边）.</strong> 设叶结点数为 <span class="math">L</span>，总结点数 <span class="math">N<span class="rel">=</span>n<span class="bin">+</span>L</span>。 每条边都从某个内部结点射向它的一个孩子，而每个内部结点恰有 <span class="math">k</span> 个孩子，故边数 <span class="math">E<span class="rel">=</span>nk</span>； 另一方面除根外每个结点恰有一条入边，故 <span class="math">E<span class="rel">=</span>N<span class="bin">−</span><span class="upr">1</span></span>。两式联立：</p>
+<div class="math math-display">nk<span class="rel">=</span>n<span class="bin">+</span>L<span class="bin">−</span><span class="upr">1</span><span class="rel">⇒</span>L<span class="rel">=</span>nk<span class="bin">−</span>n<span class="bin">+</span><span class="upr">1</span><span class="rel">=</span>n(k<span class="bin">−</span><span class="upr">1</span>)<span class="bin">+</span><span class="upr">1</span></div>
+<p>∎</p>
+<p><strong>证明二（归纳）.</strong> 对 <span class="math">n</span> 归纳。 <span class="math">n<span class="rel">=</span><span class="upr">1</span></span> 时只有根是内部结点，它恰有 <span class="math">k</span> 个孩子且都是叶，<span class="math">L<span class="rel">=</span>k<span class="rel">=</span><span class="upr">1</span><span class="bin">⋅</span>(k<span class="bin">−</span><span class="upr">1</span>)<span class="bin">+</span><span class="upr">1</span></span> ✓。 设 <span class="math">n<span class="rel">=</span>m</span> 时成立，即 <span class="math">L<sub>m</sub><span class="rel">=</span>m(k<span class="bin">−</span><span class="upr">1</span>)<span class="bin">+</span><span class="upr">1</span></span>。<span class="math">n<span class="rel">=</span>m<span class="bin">+</span><span class="upr">1</span></span> 的满 <span class="math">k</span> 叉树可以由某棵 <span class="math">n<span class="rel">=</span>m</span> 的满 <span class="math">k</span> 叉树 <strong>把一个叶结点变成内部结点</strong>得到：这一步减少 1 个叶、新增 <span class="math">k</span> 个叶，净增 <span class="math">k<span class="bin">−</span><span class="upr">1</span></span> 个，故</p>
+<div class="math math-display">L<sub>m<span class="bin">+</span><span class="upr">1</span></sub><span class="rel">=</span>L<sub>m</sub><span class="bin">+</span>(k<span class="bin">−</span><span class="upr">1</span>)<span class="rel">=</span>m(k<span class="bin">−</span><span class="upr">1</span>)<span class="bin">+</span><span class="upr">1</span><span class="bin">+</span>(k<span class="bin">−</span><span class="upr">1</span>)<span class="rel">=</span>(m<span class="bin">+</span><span class="upr">1</span>)(k<span class="bin">−</span><span class="upr">1</span>)<span class="bin">+</span><span class="upr">1</span></div>
+<p>∎</p>
+<p><strong>别和 6-23 搞混，两条结论不是一回事</strong>：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left"></th>
+<th style="text-align:left">说的是什么</th>
+<th style="text-align:left">结果</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">本题</td>
+<td style="text-align:left"><strong>满</strong> <span class="math">k</span> 叉树里，<span class="math">n</span> 个<strong>内部结点</strong>对应多少<strong>叶结点</strong></td>
+<td style="text-align:left"><span class="math">n(k<span class="bin">−</span><span class="upr">1</span>)<span class="bin">+</span><span class="upr">1</span></span></td>
+</tr>
+<tr>
+<td style="text-align:left">6-23</td>
+<td style="text-align:left"><strong>任意</strong> <span class="math">k</span> 叉树里，<span class="math">n</span> 个<strong>结点</strong>留下多少<strong>空指针</strong></td>
+<td style="text-align:left"><span class="math">n(k<span class="bin">−</span><span class="upr">1</span>)<span class="bin">+</span><span class="upr">1</span></span></td>
+</tr>
+</tbody></table></div>
+<p>数值表达式一模一样，是因为两者算的都是「<span class="math">nk</span> 条槽位减掉 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 条被占用的边」—— 一个把剩下的槽位看成叶结点，另一个看成空指针。<span class="math">k<span class="rel">=</span><span class="upr">2</span></span> 时分别退化成 「满二叉树叶数 = 分支结点数 + 1」和「<span class="math">n</span> 个结点的二叉树有 <span class="math">n<span class="bin">+</span><span class="upr">1</span></span> 个空指针」（5-24）。</p></blockquote>
+<hr>
 <h2 id="考前速查表"><a class="anchor" href="#考前速查表">#</a>考前速查表</h2>
 <p>一页纸能带走的东西。<strong>公式后面括号里是本篇的题号</strong>，忘了推导就翻回去看。</p>
 <h3 id="渐进分析"><a class="anchor" href="#渐进分析">#</a>渐进分析</h3>
@@ -1836,6 +2434,10 @@ Count()           return groups</code></pre></div>
 <td style="text-align:left"><span class="math"><span class="upr">log</span><sub><span class="upr">2</span></sub>(n!)</span></td>
 <td style="text-align:left"><span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>（1-25）</td>
 </tr>
+<tr>
+<td style="text-align:left">调和级数 <span class="math"><span class="upr">1</span><span class="bin">+</span><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span><span class="bin">+</span>⋯<span class="bin">+</span><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den">n</span></span></span></td>
+<td style="text-align:left"><span class="math">Θ(<span class="upr">log</span>&thinsp;n)</span>；故 <span class="math">∑<sub>i<span class="rel">≤</span>N</sub>N/i<span class="rel">=</span>Θ(N&thinsp;<span class="upr">log</span>&thinsp;N)</span>（真-1）</td>
+</tr>
 </tbody></table></div>
 <h3 id="线性表"><a class="anchor" href="#线性表">#</a>线性表</h3>
 <div class="table-wrap"><table><thead><tr>
@@ -1859,6 +2461,10 @@ Count()           return groups</code></pre></div>
 <td style="text-align:left"><code>p-&gt;prev-&gt;next = p-&gt;next; p-&gt;next-&gt;prev = p-&gt;prev;</code>（2-4）</td>
 </tr>
 <tr>
+<td style="text-align:left">双链表交换相邻两结点</td>
+<td style="text-align:left">别背六句，写成「先摘再插」；或直接换数据域（真-2）</td>
+</tr>
+<tr>
 <td style="text-align:left">有序链表能否二分</td>
 <td style="text-align:left"><strong>不能</strong>，取中点是 <span class="math">Θ(n)</span>（2-22）</td>
 </tr>
@@ -1875,6 +2481,14 @@ Count()           return groups</code></pre></div>
 <tr>
 <td style="text-align:left">合法出栈序列判据</td>
 <td style="text-align:left">不存在 <span class="math">i&lt;j&lt;k</span> 使 <span class="math">p<sub>j</sub>&lt;p<sub>k</sub>&lt;p<sub>i</sub></span>（3-7、3-25）</td>
+</tr>
+<tr>
+<td style="text-align:left">合法<strong>操作</strong>序列（S/X）判据</td>
+<td style="text-align:left">S、X 总数相等，且每个前缀里 S 不少于 X（真-5）</td>
+</tr>
+<tr>
+<td style="text-align:left">两个栈做队列 / 两个队列做栈</td>
+<td style="text-align:left">前者出队摊还 <span class="math">O(<span class="upr">1</span>)</span>；后者入栈每次 <span class="math">O(n)</span>，<strong>摊不掉</strong>（3-11、真-9）</td>
 </tr>
 <tr>
 <td style="text-align:left">循环队列（牺牲一格）</td>
@@ -1984,6 +2598,14 @@ Count()           return groups</code></pre></div>
 <td style="text-align:left">BST 删除</td>
 <td style="text-align:left">用中序前驱（左子树最右者）顶替，<strong>先安置它的左子树</strong>（5-12、5-21）</td>
 </tr>
+<tr>
+<td style="text-align:left">带约束的 BST 计数</td>
+<td style="text-align:left">先写无约束的 Catalan 递推，再收窄求和范围（真-3）</td>
+</tr>
+<tr>
+<td style="text-align:left">固定的 Huffman 码遇上频率漂移</td>
+<td style="text-align:left">可能反输给定长编码；重算出来的才始终不差于定长（真-8）</td>
+</tr>
 </tbody></table></div>
 <h3 id="树与森林"><a class="anchor" href="#树与森林">#</a>树与森林</h3>
 <div class="table-wrap"><table><thead><tr>
@@ -2015,6 +2637,18 @@ Count()           return groups</code></pre></div>
 <td style="text-align:left"><span class="math">n(K<span class="bin">−</span><span class="upr">1</span>)<span class="bin">+</span><span class="upr">1</span></span>（6-6、6-23）</td>
 </tr>
 <tr>
+<td style="text-align:left">满 <span class="math">K</span> 叉树叶结点数</td>
+<td style="text-align:left"><span class="math">n(K<span class="bin">−</span><span class="upr">1</span>)<span class="bin">+</span><span class="upr">1</span></span>（<span class="math">n</span> 为<strong>内部结点</strong>数）；与上一行同源不同义（真-12）</td>
+</tr>
+<tr>
+<td style="text-align:left">父指针的长处</td>
+<td style="text-align:left"><strong>往上走只有一条路</strong>：判祖先/后代、并查集（真-10、6-18）</td>
+</tr>
+<tr>
+<td style="text-align:left">求镜面映射的层次序列</td>
+<td style="text-align:left">不用真反转树，<strong>入队时孩子从右往左</strong>（真-11）</td>
+</tr>
+<tr>
 <td style="text-align:left">并查集优化</td>
 <td style="text-align:left">重量权衡合并（比<strong>元素个数</strong>）→ 树高 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>；路径压缩在 <code>Find</code> 时做（6-7、6-18、6-24）</td>
 </tr>
@@ -2033,7 +2667,7 @@ Count()           return groups</code></pre></div>
 </ol>
 <div class="pagenav"><a href="exercises.html"><span class="dir">← 上一篇</span>习题、上机题与参考答案</a><a href="figures.html" style="text-align:right"><span class="dir">下一篇 →</span>原书插图</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#第-1-章-概论">第 1 章 概论</a><a href="#一填空题" class="sub">一、填空题</a><a href="#二选择题" class="sub">二、选择题</a><a href="#三辨析与简答" class="sub">三、辨析与简答</a><a href="#四算法设计与分析" class="sub">四、算法设计与分析</a><a href="#五数学证明" class="sub">五、数学证明</a><a href="#第-2-章-线性表">第 2 章 线性表</a><a href="#一填空题-1" class="sub">一、填空题</a><a href="#二选择题-1" class="sub">二、选择题</a><a href="#三辨析与简答-1" class="sub">三、辨析与简答</a><a href="#四算法设计与分析-1" class="sub">四、算法设计与分析</a><a href="#五数学证明-1" class="sub">五、数学证明</a><a href="#第-3-章-栈与队列">第 3 章 栈与队列</a><a href="#一填空题-2" class="sub">一、填空题</a><a href="#二选择题-2" class="sub">二、选择题</a><a href="#三辨析与简答-2" class="sub">三、辨析与简答</a><a href="#四算法设计与分析-2" class="sub">四、算法设计与分析</a><a href="#五数学证明-2" class="sub">五、数学证明</a><a href="#第-4-章-字符串">第 4 章 字符串</a><a href="#一填空题-3" class="sub">一、填空题</a><a href="#二选择题-3" class="sub">二、选择题</a><a href="#三辨析与简答-3" class="sub">三、辨析与简答</a><a href="#四算法设计与分析-3" class="sub">四、算法设计与分析</a><a href="#五数学证明-3" class="sub">五、数学证明</a><a href="#第-5-章-二叉树">第 5 章 二叉树</a><a href="#一填空题-4" class="sub">一、填空题</a><a href="#二选择题-4" class="sub">二、选择题</a><a href="#三辨析与简答-4" class="sub">三、辨析与简答</a><a href="#四算法设计与分析-4" class="sub">四、算法设计与分析</a><a href="#五数学证明-4" class="sub">五、数学证明</a><a href="#第-6-章-树">第 6 章 树</a><a href="#一填空题-5" class="sub">一、填空题</a><a href="#二选择题-5" class="sub">二、选择题</a><a href="#三辨析与简答-5" class="sub">三、辨析与简答</a><a href="#四算法设计与分析-5" class="sub">四、算法设计与分析</a><a href="#五数学证明-5" class="sub">五、数学证明</a><a href="#模拟卷120-分钟100-分">模拟卷（120 分钟，100 分）</a><a href="#一填空题每空-2-分共-20-分" class="sub">一、填空题（每空 2 分，共 20 分）</a><a href="#二选择题每题-2-分共-16-分" class="sub">二、选择题（每题 2 分，共 16 分）</a><a href="#三辨析与简答题每题-6-分共-24-分" class="sub">三、辨析与简答题（每题 6 分，共 24 分）</a><a href="#四算法设计与分析题每题-10-分共-30-分" class="sub">四、算法设计与分析题（每题 10 分，共 30 分）</a><a href="#五证明题10-分" class="sub">五、证明题（10 分）</a><a href="#考前速查表">考前速查表</a><a href="#渐进分析" class="sub">渐进分析</a><a href="#线性表" class="sub">线性表</a><a href="#栈与队列" class="sub">栈与队列</a><a href="#字符串" class="sub">字符串</a><a href="#二叉树" class="sub">二叉树</a><a href="#树与森林" class="sub">树与森林</a><a href="#答题格式提醒" class="sub">答题格式提醒</a></nav>
+<nav class="page"><b>本页</b><a href="#第-1-章-概论">第 1 章 概论</a><a href="#一填空题" class="sub">一、填空题</a><a href="#二选择题" class="sub">二、选择题</a><a href="#三辨析与简答" class="sub">三、辨析与简答</a><a href="#四算法设计与分析" class="sub">四、算法设计与分析</a><a href="#五数学证明" class="sub">五、数学证明</a><a href="#第-2-章-线性表">第 2 章 线性表</a><a href="#一填空题-1" class="sub">一、填空题</a><a href="#二选择题-1" class="sub">二、选择题</a><a href="#三辨析与简答-1" class="sub">三、辨析与简答</a><a href="#四算法设计与分析-1" class="sub">四、算法设计与分析</a><a href="#五数学证明-1" class="sub">五、数学证明</a><a href="#第-3-章-栈与队列">第 3 章 栈与队列</a><a href="#一填空题-2" class="sub">一、填空题</a><a href="#二选择题-2" class="sub">二、选择题</a><a href="#三辨析与简答-2" class="sub">三、辨析与简答</a><a href="#四算法设计与分析-2" class="sub">四、算法设计与分析</a><a href="#五数学证明-2" class="sub">五、数学证明</a><a href="#第-4-章-字符串">第 4 章 字符串</a><a href="#一填空题-3" class="sub">一、填空题</a><a href="#二选择题-3" class="sub">二、选择题</a><a href="#三辨析与简答-3" class="sub">三、辨析与简答</a><a href="#四算法设计与分析-3" class="sub">四、算法设计与分析</a><a href="#五数学证明-3" class="sub">五、数学证明</a><a href="#第-5-章-二叉树">第 5 章 二叉树</a><a href="#一填空题-4" class="sub">一、填空题</a><a href="#二选择题-4" class="sub">二、选择题</a><a href="#三辨析与简答-4" class="sub">三、辨析与简答</a><a href="#四算法设计与分析-4" class="sub">四、算法设计与分析</a><a href="#五数学证明-4" class="sub">五、数学证明</a><a href="#第-6-章-树">第 6 章 树</a><a href="#一填空题-5" class="sub">一、填空题</a><a href="#二选择题-5" class="sub">二、选择题</a><a href="#三辨析与简答-5" class="sub">三、辨析与简答</a><a href="#四算法设计与分析-5" class="sub">四、算法设计与分析</a><a href="#五数学证明-5" class="sub">五、数学证明</a><a href="#模拟卷120-分钟100-分">模拟卷（120 分钟，100 分）</a><a href="#一填空题每空-2-分共-20-分" class="sub">一、填空题（每空 2 分，共 20 分）</a><a href="#二选择题每题-2-分共-16-分" class="sub">二、选择题（每题 2 分，共 16 分）</a><a href="#三辨析与简答题每题-6-分共-24-分" class="sub">三、辨析与简答题（每题 6 分，共 24 分）</a><a href="#四算法设计与分析题每题-10-分共-30-分" class="sub">四、算法设计与分析题（每题 10 分，共 30 分）</a><a href="#五证明题10-分" class="sub">五、证明题（10 分）</a><a href="#往年真题精选按章归位">往年真题精选（按章归位）</a><a href="#对照表" class="sub">对照表</a><a href="#第-1-章" class="sub">第 1 章</a><a href="#第-2-章" class="sub">第 2 章</a><a href="#第-3-章" class="sub">第 3 章</a><a href="#第-4-章" class="sub">第 4 章</a><a href="#第-5-章" class="sub">第 5 章</a><a href="#第-6-章" class="sub">第 6 章</a><a href="#考前速查表">考前速查表</a><a href="#渐进分析" class="sub">渐进分析</a><a href="#线性表" class="sub">线性表</a><a href="#栈与队列" class="sub">栈与队列</a><a href="#字符串" class="sub">字符串</a><a href="#二叉树" class="sub">二叉树</a><a href="#树与森林" class="sub">树与森林</a><a href="#答题格式提醒" class="sub">答题格式提醒</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/期中复习题库.md</code> 生成
