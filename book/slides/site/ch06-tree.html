@@ -377,8 +377,8 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <p>这是经典顺序编码，今天主要用于理解树的序列化；工程中的紧凑树通常会考虑 LOUDS 或平衡括号编码。</p>
 <figure><img loading="lazy" src="../../assets/scan/fig-6-14.png" alt="图6.14 带右链的先根次序表示法"><figcaption>图6.14 带右链的先根次序表示法</figcaption></figure>
 <div class="codeblock" data-lang="text"><pre><code>先根次序   A  B  C  E  F  D  G  H  J  I
-ltag       0  0  0  0  1  1  1  0  1  1     0 = 有孩子
-rtag       0  1  0  1  1  1  0  0  1  1     0 = 有下一个兄弟</code></pre></div>
+ltag       0  1  0  1  1  1  0  0  1  1     0 = 有孩子
+rtag       0  0  0  0  1  1  1  0  1  1     0 = 有下一个兄弟</code></pre></div>
 <p><strong>光靠这三行就能把链恢复出来</strong>，靠的是先根次序的一条性质： 任何结点的子树都<strong>紧跟在它后面</strong>，子树排完才轮到它的下一个兄弟。</p></section><section class="slide" data-notes="&lt;p&gt;原书这段代码在 ltag==1 分支里直接 aStack.top()，&lt;strong&gt;没有判空&lt;/strong&gt;。
 标志位不自洽的输入（比如两个结点都说「没孩子、没兄弟」）会让它对空栈取顶，
 那是未定义行为。本书判空并抛异常，另加一条「末结点仍声称有孩子」的收尾检查。

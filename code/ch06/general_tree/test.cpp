@@ -145,24 +145,39 @@ void test_disjoint_set() {
 
 // 【算法6.10】带双标记位的先根次序表示 → 「左子/右兄」树。
 //
-// 用原书图6.5(a) 那片森林的双标记序列（图6.15）：
+// 用原书图6.5(a) 那片森林的双标记序列（图6.15，原书第 154 页）：
 //   先根次序 A B C E F D G H J I
-//   ltag(有孩子) 0 0 0 0 1 1 1 0 1 1  →  has_child = (ltag == 0)
-//   rtag(有兄弟) 0 1 0 1 1 1 0 0 1 1  →  has_sibling = (rtag == 0)
+//   ltag(有孩子) 0 1 0 1 1 1 0 0 1 1  →  has_child = (ltag == 0)
+//   rtag(有兄弟) 0 0 0 0 1 1 1 0 1 1  →  has_sibling = (rtag == 0)
 //
-// 判据是**先根周游必须还原成同一串**——序列进、序列出，中间那套栈机制若错，
-// 顺序立刻乱。变异：把「扫到没有孩子的结点才弹栈」改成「每个结点都弹」，这里会红。
+// **这两行以前是反的**（2026-09-11 修）。图6.15 的三行从上到下印的是 rtag / info / ltag，
+// ltag 在最下面；照着「第一行就是 ltag」抄，两行就互换了。互换之后还原出来的是
+// **另一片森林**——C 成了 B 的孩子而不是 B 的兄弟——可它的**先根序列恰好一字不差**，
+// 所以当时那条「先根周游还原出原序列」的判据一点都没红。
+//
+// 于是判据加到两条：先根 + 后根。两种次序合起来才能唯一确定一棵树
+// （与「前序 + 中序定二叉树」同一条道理，见书稿第 6.1.4 节的对应关系），
+// 光对先根是查不出结构错的。
+//   先根 A B C E F D G H J I
+//   后根 B E F C D A J H I G
+// 再加上逐点的父子 / 兄弟断言，把 B 是叶子、C 的父是 A 这两处钉死。
+//
+// 变异自检（2026-09-11 实测）：
+//   · 把「扫到没有孩子的结点才弹栈」改成「每个结点都弹」→ 压栈出栈配不上，
+//     from_dual_tag 抛「标志位不自洽」，两档构建都红；
+//   · 把 ltag/rtag 两行换回互换的那一组 → 后根那条加结构断言共 10 条红，
+//     而**先根那条照样绿**——这正是当初没能抓住它的原因。
 void test_dual_tag_construction() {
     using Node = dsa::GeneralTree<char>::DualTagNode;
     const Node nodes[] = {
-        {'A', true,  true },   // ltag=0 rtag=0
-        {'B', true,  false},   // ltag=0 rtag=1
-        {'C', true,  true },   // ltag=0 rtag=0
-        {'E', true,  false},   // ltag=0 rtag=1
+        {'A', true,  true },   // ltag=0 rtag=0：有孩子 B，有下一棵树 G
+        {'B', false, true },   // ltag=1 rtag=0：叶结点，有兄弟 C
+        {'C', true,  true },   // ltag=0 rtag=0：有孩子 E，有兄弟 D
+        {'E', false, true },   // ltag=1 rtag=0：叶结点，有兄弟 F
         {'F', false, false},   // ltag=1 rtag=1
         {'D', false, false},   // ltag=1 rtag=1
-        {'G', false, true },   // ltag=1 rtag=0
-        {'H', true,  true },   // ltag=0 rtag=0
+        {'G', true,  false},   // ltag=0 rtag=1：有孩子 H，是最后一棵树
+        {'H', true,  true },   // ltag=0 rtag=0：有孩子 J，有兄弟 I
         {'J', false, false},   // ltag=1 rtag=1
         {'I', false, false},   // ltag=1 rtag=1
     };
@@ -172,19 +187,42 @@ void test_dual_tag_construction() {
     tree.preorder([&pre](char c) { pre.push_back(c); });
     check(pre == "ABCEFDGHJI", "算法6.10 先根周游还原出原序列");
 
-    // 结构本身也要对：A 的第一个孩子是 B，B 的第一个孩子是 C。
-    const auto* a = tree.root();
-    check(a != nullptr && a->value == 'A', "算法6.10 根是 A");
-    check(a->child != nullptr && a->child->value == 'B', "算法6.10 A 的长子是 B");
-    check(a->child->child != nullptr && a->child->child->value == 'C', "算法6.10 B 的长子是 C");
-    // A 的 rtag 为 0，所以它在森林里还有下一棵树
-    check(a->sibling != nullptr, "算法6.10 A 有右兄弟（这是一片森林，不是一棵树）");
+    // 光有先根分不出两片森林，后根才分得出：互换 ltag/rtag 得到的那片森林后根是
+    // "FEDCBA JIHG" 之类，与下面这串对不上。
+    std::string post;
+    tree.postorder([&post](char c) { post.push_back(c); });
+    check(post == "BEFCDAJHIG", "算法6.10 后根周游与原书图6.5(a) 一致");
 
+    // 结构本身也要对：A 的长子是 B，B 是叶结点，C 是 B 的右兄弟、父是 A。
+    //
+    // 这几句一律走 null 安全的取值器。理由是实打实踩过的：变异自检时把 ltag/rtag 换回
+    // 互换的那一组，`a->child->sibling` 就是空指针，原先直写 `c->child` 当场是 UB——
+    // release-O2 下直接 SIGSEGV，连哪条断言红的都看不见。测试要在坏数据上**报错**，
+    // 不是**崩溃**。
+    auto kid = [](const auto* n) { return n != nullptr ? n->child : nullptr; };
+    auto sib = [](const auto* n) { return n != nullptr ? n->sibling : nullptr; };
+    auto par = [](const auto* n) { return n != nullptr ? n->parent : nullptr; };
+    auto is = [](const auto* n, char expect) { return n != nullptr && n->value == expect; };
+
+    const auto* a = tree.root();
+    check(is(a, 'A'), "算法6.10 根是 A");
+    check(is(kid(a), 'B'), "算法6.10 A 的长子是 B");
+    check(kid(kid(a)) == nullptr, "算法6.10 B 是叶结点（ltag 为 1）");
+
+    const auto* c = sib(kid(a));
+    check(is(c, 'C'), "算法6.10 C 是 B 的右兄弟，不是 B 的孩子");
+    check(is(kid(c), 'E'), "算法6.10 C 的长子是 E");
+    check(is(sib(kid(c)), 'F'), "算法6.10 F 是 E 的右兄弟");
     // 父指针也要接对：兄弟共享父结点
-    const auto* c = a->child->child;
-    check(c->parent == a->child, "算法6.10 C 的父是 B");
-    check(c->sibling != nullptr && c->sibling->parent == a->child,
-          "算法6.10 C 的右兄弟与 C 同父");
+    check(par(c) == a, "算法6.10 C 的父是 A");
+    check(is(sib(c), 'D') && par(sib(c)) == a, "算法6.10 C 的右兄弟 D 与 C 同父");
+
+    // A 的 rtag 为 0，所以它在森林里还有下一棵树
+    const auto* g = sib(a);
+    check(is(g, 'G'), "算法6.10 A 有右兄弟 G（这是一片森林，不是一棵树）");
+    check(is(kid(g), 'H'), "算法6.10 G 的长子是 H");
+    check(is(kid(kid(g)), 'J'), "算法6.10 H 的长子是 J");
+    check(is(sib(kid(g)), 'I') && par(sib(kid(g))) == g, "算法6.10 I 是 H 的右兄弟、父是 G");
 }
 
 void test_dual_tag_edge_cases() {

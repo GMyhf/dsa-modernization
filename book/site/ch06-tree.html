@@ -644,8 +644,9 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <figure><img loading="lazy" src="../assets/scan/fig-6-15.png" alt="图 6.15 带双标记的先根次序表示法"><figcaption>图 6.15 带双标记的先根次序表示法</figcaption></figure>
 <p>图 6.15　双标记先根次序表示法的原书示例。</p>
 <div class="codeblock" data-lang="text"><pre><code>先根次序   A  B  C  E  F  D  G  H  J  I
-ltag       0  0  0  0  1  1  1  0  1  1     0 = 有孩子
-rtag       0  1  0  1  1  1  0  0  1  1     0 = 有下一个兄弟</code></pre></div>
+ltag       0  1  0  1  1  1  0  0  1  1     0 = 有孩子
+rtag       0  0  0  0  1  1  1  0  1  1     0 = 有下一个兄弟</code></pre></div>
+<blockquote><p><strong>照抄这张图很容易把两行读反。</strong> 图 6.15 的三行从上到下是 <code>rtag</code> / <code>info</code> / <code>ltag</code>—— <code>ltag</code> 在<strong>最下面</strong>，不在最上面。按定义核一遍就知道哪行是哪行：<code>B</code> 在图6.5(a) 里是叶结点， 它的 <code>ltag</code> 必须是 1；<code>B</code> 有兄弟 <code>C</code>，它的 <code>rtag</code> 必须是 0。 两行一旦互换，还原出来的是<strong>另一片森林</strong>（<code>C</code> 会变成 <code>B</code> 的孩子而不是兄弟）， 而它的<strong>先根序列恰好还是 <code>A B C E F D G H J I</code></strong>——所以只对先根序列是查不出来的， 得同时对后根序列（<code>B E F C D A J H I G</code>）。本书的测试两条都对。</p></blockquote>
 <p><strong>光靠这三行就能把链恢复出来</strong>，靠的是先根次序的一条性质：任何结点的子树都紧跟在它后面， 子树排完才轮到它的下一个兄弟。于是「谁是某个结点的右兄弟」要等它整棵子树扫完才知道—— 用一把栈记着：扫到 <code>rtag == 0</code> 的结点就压栈，扫到 <code>ltag == 1</code> 的结点（没有孩子，说明子树到头） 就弹一个出来，把刚建的结点接成它的右兄弟。</p>
 <p>【算法6.10】带双标记位先根次序树构造算法。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp">code/ch06/general_tree/modern.hpp#dual-tag</a></div><pre><code><span class="c">/// 【算法6.10】带双标记位的先根次序表示 → 「左子/右兄」链式树。</span>
