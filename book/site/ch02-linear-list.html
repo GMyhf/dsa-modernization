@@ -153,7 +153,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
     · <a href="errata.html">原书勘误</a></p>
 </div></header>
 <div class="layout">
-<nav class="book"><b>导读</b><a href="index.html">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html" class="here">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a></nav>
+<nav class="book"><b>导读</b><a href="index.html">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html" class="here">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="midterm-review.html">期中复习题库（第 1—6 章）</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a></nav>
 <main>
 
 <p>线性表把一串同类型元素排成唯一的先后次序。顺序表把元素连续放在数组里，能 O(1) 按下标访问； 链表用链接保存相邻关系，能在已知结点位置 O(1) 插入或删除。关键是区分「按位置找元素」和 「已知结点后改链接」这两类操作。</p>
@@ -225,7 +225,9 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 删除位置 0 得到 10，剩余: 20 30
 append 之后尾元素是 30</code></pre></div>
 <p><code>append</code> 经尾指针 O(1) 接链，不必再从头走到尾。</p>
-<blockquote><p><strong>本文件的地位</strong>：《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008） 第 2.1–2.2 节的现代化重排。原书正文（<code>dsa_raw.md:1145</code> 起）的讲法、编号、图表一概保留； 换掉的只是那套 2008 年的 C++ 写法。2.3 节链表另开一轮。</p><p>书里印的每一段 C++ 都来自 <code>code/ch02/array_list/</code>，真正编译、真正跑过 （<code>tools/check_doc.py</code> 的 R3 逐字核对）。原书那份写法错在哪、改了什么、 什么刻意没改，逐条记在 <code>code/ch02/array_list/legacy.md</code>。</p><p>代码风格遵循 <code>collab/DECISION_LOG.md</code> 的 D-001 与 D-005。</p></blockquote>
+<blockquote><p><strong>本文件的地位</strong>：《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008） 第 2.1–2.2 节的现代化重排。原书正文（<code>dsa_raw.md:1145</code> 起）的讲法、编号、图表一概保留； 换掉的只是那套 2008 年的 C++ 写法。2.3 节链表另开一轮。</p>
+<p>书里印的每一段 C++ 都来自 <code>code/ch02/array_list/</code>，真正编译、真正跑过 （<code>tools/check_doc.py</code> 的 R3 逐字核对）。原书那份写法错在哪、改了什么、 什么刻意没改，逐条记在 <code>code/ch02/array_list/legacy.md</code>。</p>
+<p>代码风格遵循 <code>collab/DECISION_LOG.md</code> 的 D-001 与 D-005。</p></blockquote>
 <h2 id="21-线性表的概念"><a class="anchor" href="#21-线性表的概念">#</a>2.1 线性表的概念</h2>
 <p>线性表（linear list）是由称为元素（element）的数据项组成的一种有限且有序的序列， 这些元素也可称结点或表目。用第 1 章的二元组 <span class="math">B<span class="rel">=</span>(K,R)</span> 写出来就是</p>
 <div class="math math-display">K<span class="rel">=</span>{k<sub><span class="upr">0</span></sub>,k<sub><span class="upr">1</span></sub>,⋯,k<sub>n<span class="bin">−</span><span class="upr">1</span></sub>}, R<span class="rel">=</span>{r}, r<span class="rel">=</span>{⟨k<sub>i</sub>,k<sub>i<span class="bin">+</span><span class="upr">1</span></sub>⟩,<span class="upr">0</span><span class="rel">≤</span>i<span class="rel">≤</span>n<span class="bin">−</span><span class="upr">2</span>}</div>

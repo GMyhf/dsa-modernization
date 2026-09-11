@@ -64,7 +64,11 @@ class TestCodeFidelity(unittest.TestCase):
         checked = 0
         for md, out, _ in build_site.PAGES:
             source = (build_site.BOOK / md).read_text(encoding="utf-8")
-            blocks, lines, index = [], source.split("\n"), 0
+            # 先剥掉一层 `> `：引用块里也可以放代码围栏（参考答案里全是），
+            # 渲染器 2026-09-11 起递归处理引用块，这里的扫描要跟上，否则
+            # 嵌在引用块里的围栏一个都数不到。
+            lines = [re.sub(r"^>[ \t]?", "", line) for line in source.split("\n")]
+            blocks, index = [], 0
             while index < len(lines):
                 if lines[index].startswith("```"):
                     index += 1

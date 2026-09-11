@@ -153,7 +153,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
     · <a href="errata.html">原书勘误</a></p>
 </div></header>
 <div class="layout">
-<nav class="book"><b>导读</b><a href="index.html">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html" class="here">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a></nav>
+<nav class="book"><b>导读</b><a href="index.html">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html" class="here">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="midterm-review.html">期中复习题库（第 1—6 章）</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a></nav>
 <main>
 
 <p>字符串是字符的有限序列。先区分「保存字符串」的类与「在文本中找模式」的算法：前者处理容量、 复制和下标边界，后者处理比较顺序。朴素匹配在失配后移动模式；KMP 预先计算 <code>next</code> 信息，避免 重复比较已经知道相等的前缀。</p>
@@ -211,7 +211,9 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 朴素: 10
 KMP:  10
 原书返回 11，一律差 1</code></pre></div>
-<blockquote><p><strong>本文件的地位</strong>：《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008） 第 4 章的现代化重排（4.1 字符串概念、4.2 存储结构与实现、4.3 模式匹配）。</p><p>书里印的每一段 C++ 都来自 <code>code/ch04/string_class/</code> 与 <code>code/ch04/pattern_matching/</code>， 真正编译、真正跑过（<code>tools/check_doc.py</code> 的 R3 逐字核对）。原书那份写法错在哪、 改了什么、什么刻意没改，逐条记在两个单元各自的 <code>legacy.md</code>。</p><p><strong>本章有一处不是写法问题，是算法结果错</strong>：原书两个模式匹配算法返回的位置都差 1。 详见 4.3.1 节末。</p></blockquote>
+<blockquote><p><strong>本文件的地位</strong>：《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008） 第 4 章的现代化重排（4.1 字符串概念、4.2 存储结构与实现、4.3 模式匹配）。</p>
+<p>书里印的每一段 C++ 都来自 <code>code/ch04/string_class/</code> 与 <code>code/ch04/pattern_matching/</code>， 真正编译、真正跑过（<code>tools/check_doc.py</code> 的 R3 逐字核对）。原书那份写法错在哪、 改了什么、什么刻意没改，逐条记在两个单元各自的 <code>legacy.md</code>。</p>
+<p><strong>本章有一处不是写法问题，是算法结果错</strong>：原书两个模式匹配算法返回的位置都差 1。 详见 4.3.1 节末。</p></blockquote>
 <h2 id="41-字符串的基本概念"><a class="anchor" href="#41-字符串的基本概念">#</a>4.1 字符串的基本概念</h2>
 <p>字符串（string）是组成元素（结点）为单个字符的线性表，简称「串」。一个字符串可以是一个单词、 一个句子、一篇文章，或者一个文件的内容。串中所包含的字符个数称为<strong>串的长度</strong>；长度为零的串 称为<strong>空串</strong>，不包含任何字符内容。</p>
 <p>尽管字符串是一种特殊的线性表，但其逻辑结构与线性表相比存在两点区别：</p>

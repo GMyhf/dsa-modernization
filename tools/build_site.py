@@ -80,6 +80,7 @@ PAGES = [
     ("ch11-index.md", "ch11-index.html", "body"),
     ("ch12-advanced.md", "ch12-advanced.html", "body"),
     ("习题与参考答案.md", "exercises.html", "back"),
+    ("期中复习题库.md", "midterm-review.html", "back"),
     ("插图.md", "figures.html", "back"),
     ("勘误.md", "errata.html", "back"),
 ]
@@ -525,20 +526,19 @@ def render_blocks(lines, ctx, anchors):
             out.append("</tbody></table></div>")
             continue
 
-        # 引用：空的 > 行分段
+        # 引用：剥掉一层 `> ` 之后递归渲染。
+        #
+        # 早先这里只把每段拼成 `<p>`，于是引用块里的代码围栏、表格、列表全被压成一行行内文本
+        # （`book/期中复习题库.md` 的参考答案里全是这三样，2026-09-11 实测整段变成
+        # ```` ``text Reverse(L) p ← ... ```` 这样的一坨）。改成递归调用 render_blocks，
+        # 引用块里就能放和正文一样的东西；纯散文的引用块渲染结果与原来逐字节相同。
         if line.startswith(">"):
-            chunks, current = [], []
+            inner = []
             while index < count and lines[index].startswith(">"):
-                stripped = lines[index].lstrip(">").strip()
-                if stripped:
-                    current.append(stripped)
-                elif current:
-                    chunks.append(current)
-                    current = []
+                inner.append(re.sub(r"^>[ \t]?", "", lines[index]))
                 index += 1
-            if current:
-                chunks.append(current)
-            body = "".join(f"<p>{render_inline(' '.join(c), ctx)}</p>" for c in chunks)
+            body, inner_headings = render_blocks(inner, ctx, anchors)
+            headings.extend(inner_headings)
             out.append(f"<blockquote>{body}</blockquote>")
             continue
 
