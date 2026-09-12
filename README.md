@@ -66,7 +66,7 @@ python3 tools/check_courseware.py      # courseware/ 那套讲义+课件+视频�
 ```
 
 网页版在线可读：**<https://gmyhf.github.io/dsa-modernization/>**，
-首页顶上有整本 PDF 的下载卡片（656 页 / 7.8 MB，卡片上的数字由构建器读文件得出，不是手写的）。
+首页顶上有整本 PDF 的下载卡片（656 页 / 7.9 MB，卡片上的数字由构建器读文件得出，不是手写的）。
 本地读就双击 `book/site/index.html`，或 `python3 -m http.server -d book` 后打开
 `http://localhost:8000/site/`。它是 `book/*.md` 的产物，闸门里有一条
 `build_site.py --check` 盯着两者不许脱节。
