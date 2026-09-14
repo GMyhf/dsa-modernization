@@ -34,7 +34,7 @@ https://github.com/GMyhf/dsa-modernization
 
 | 章 | 文件名（`.md` / `.pptx` / `.mp4` 同名） | 课件页数 | 视频时长 | 主题 |
 | --- | --- | --- | --- | --- |
-| 1 | `DSA_CH01_Overview_ADT_Complexity` | 47 | 29:04 | 问题求解与 Floyd、逻辑/存储结构、抽象数据类型、渐进分析 |
+| 1 | `DSA_CH01_Overview_ADT_Complexity` | 47 | 29:24 | 问题求解与 Floyd、逻辑/存储结构、抽象数据类型、渐进分析 |
 | 2 | `DSA_CH02_Linear_List` | 39 | 20:03 | 顺序表与链表、三法则、按位置访问 vs 改链接 |
 | 3 | `DSA_CH03_Stack_Queue` | 40 | 22:43 | 栈与队列、后缀求值、运行栈与递归深度实测、循环队列 |
 | 4 | `DSA_CH04_String` | 27 | 18:29 | 字符编码与串比较、串的存储、朴素匹配与 KMP |

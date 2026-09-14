@@ -114,9 +114,12 @@ int main() {
 
     ('code', '模型：RumorNetwork 的对外接口', '''class RumorNetwork {
 public:
-    // 取 int 上限的 1/4，给 a + b 留余量：用 max() 相加就是整数溢出
+    // infinity 只表示「没有直接路线」；每段时间都必须小于它
     static constexpr int infinity = std::numeric_limits<int>::max() / 4;
-
+    // 最短时间是若干段之和，用 64 位存；「到不了」另记 unreachable
+    using distance_type = std::int64_t;
+    static constexpr distance_type unreachable =
+        std::numeric_limits<distance_type>::max();
     explicit RumorNetwork(std::size_t people);                    // 建 n x n 距离矩阵
     void add_route(std::size_t from, std::size_t to, int cost);   // 加一条有向边
     [[nodiscard]] std::optional<std::size_t> best_source() const; // 算答案
@@ -125,13 +128,18 @@ private:
     std::vector<std::vector<int>> distance_;    // 相邻矩阵；末尾下划线 = 私有成员
 };''', '这一屏就是这个 ADT 的全部：三个运算 + 一份内部表示。调用者不该关心后者'),
 
-    ('code', 'Floyd：三重循环到底在循环什么', '''auto shortest = distance_;          // 复制一份，多次调用不改动原网络
+    ('code', 'Floyd：三重循环到底在循环什么', '''const std::size_t people = distance_.size();
+std::vector<std::vector<distance_type>> shortest(               // 64 位，初值全是 unreachable
+    people, std::vector<distance_type>(people, unreachable));
+for (std::size_t from = 0; from < people; ++from)
+    for (std::size_t to = 0; to < people; ++to)
+        if (distance_[from][to] != infinity) shortest[from][to] = distance_[from][to];
 
-for (std::size_t via = 0; via < shortest.size(); ++via) {          // 允许经过 via
-    for (std::size_t from = 0; from < shortest.size(); ++from) {   // 固定起点
-        for (std::size_t to = 0; to < shortest.size(); ++to) {     // 固定终点
-            if (shortest[from][via] != infinity &&                 // 两段都可达
-                shortest[via][to] != infinity &&
+for (std::size_t via = 0; via < people; ++via) {                // 允许经过 via
+    for (std::size_t from = 0; from < people; ++from) {         // 固定起点
+        for (std::size_t to = 0; to < people; ++to) {           // 固定终点
+            if (shortest[from][via] != unreachable &&           // 两段都可达
+                shortest[via][to] != unreachable &&
                 shortest[from][to] > shortest[from][via] + shortest[via][to]) {
                 shortest[from][to] = shortest[from][via] + shortest[via][to];
             }
@@ -140,11 +148,11 @@ for (std::size_t via = 0; via < shortest.size(); ++via) {          // 允许经�
 }''', 'B2→B4 没有直接边，但 B2→B5 (8) + B5→B1 (5) + B1→B4 (4) = 17'),
 
     ('code', '选答案：每行取最大，再在其中取最小', '''std::optional<std::size_t> result;          // 空 = 还没找到合格的起点
-int smallest_eccentricity = infinity;
+distance_type smallest_eccentricity = unreachable;
 
-for (std::size_t from = 0; from < shortest.size(); ++from) {
-    int largest_distance = 0;
-    for (int distance : shortest[from]) {   // 这一行的最大值 = 该起点的完成时间
+for (std::size_t from = 0; from < people; ++from) {
+    distance_type largest_distance = 0;
+    for (distance_type distance : shortest[from]) {   // 这一行的最大值 = 该起点的完成时间
         largest_distance = distance > largest_distance ? distance : largest_distance;
     }
     if (largest_distance < smallest_eccentricity) {

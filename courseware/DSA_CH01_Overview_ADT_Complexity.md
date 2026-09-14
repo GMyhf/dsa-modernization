@@ -212,8 +212,11 @@ c++ -std=c++17 -Wall -Wextra -Werror -Icode/ch01/adt code/ch01/adt/demo.cpp -o /
 ```cpp
 class RumorNetwork {
 public:
-    // 取 int 上限的 1/4，给 a + b 留余量：用 max() 相加就是整数溢出
+    // infinity 只表示「没有直接路线」；每段时间都必须小于它
     static constexpr int infinity = std::numeric_limits<int>::max() / 4;
+    // 最短时间是若干段之和，用 64 位存；「到不了」另记 unreachable
+    using distance_type = std::int64_t;
+    static constexpr distance_type unreachable = std::numeric_limits<distance_type>::max();
 
     explicit RumorNetwork(std::size_t people);                    // 建 n x n 距离矩阵
     void add_route(std::size_t from, std::size_t to, int cost);   // 加一条有向边

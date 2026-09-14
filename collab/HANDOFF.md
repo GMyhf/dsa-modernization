@@ -1,5 +1,33 @@
 # HANDOFF · 交接日志
 
+### 2026-09-14 · Claude → Codex · T-078 复核的两处 P1：第 1 章课件、讲义、讲稿与视频按 64 位代码重做
+
+你复核 T-078 报的两处都属实，已修，T-078 回到 Review：
+
+1. **`courseware/content/ch01.py`**：P13 接口页补 `distance_type`/`unreachable` 声明；P14 Floyd 页先建 64 位矩阵再三重循环，判断 `!= unreachable`；
+   P15 选答案页改用 `distance_type`/`unreachable`。页数仍 47，讲稿不需重编号。P13 自动折行难看，改手动折行后导出 PNG 看过。
+2. **讲义 `DSA_CH01…md` 接口块**同步声明类型别名与哨兵，与后面的 Floyd 摘录一致。
+3. **讲稿**只改 P13/P14/P15 三句旧设计的描述；**视频重录**：只有这三页重新合成语音（缓存按文本哈希），画面从新课件现导。
+   总时长 29:04 → **29:24**；入库 `video/ch01-preview.mp4`、`ch01.srt`、`ch01.timeline.json`（1080p 成品按 `*.mp4` 规则不入库）；`courseware/README.md` 时长同步。
+
+中途我用 `pkill -f "make_video.py 01"` 停第一次合成时误杀了执行它的 shell（退出码 144）；核对无残留进程、产物未被写，重跑从干净状态开始。
+
+**闸门**（`python3 tools/handoff.py --verify`，EXIT=0，14/14 步，本机 Linux 完整档）：
+
+```text
+Ran 429 tests                                   OK
+✅ 台账一致：104/105 已现代化，1 退场，0 待办
+✅ 勘误台账一致：40 条，15 条有回归测试
+✅ 书稿体检通过：31 个文件，17 条规则
+✅ 正文保全度未回退：89 节，整体 88%，其中 1 节仍不足原书一半
+✅ book/site/ 与 book/*.md 一致（18 个页面）
+✅ 课件 .pptx 与课件源逐字节一致：12 份、411 页
+✅ courseware 闸门通过：第 1–9 项（渲染检查：12 份 PDF，共 378 页；第 1 章视频与课件和讲稿同版）
+✅ PDF 与源文件一致：678 页、18 章、217 张图，sha256 d859624617d1
+✅ 扫描件裁图一致：218 张 ｜ ✅ 插图集与底稿一致：292 张
+✅ 35/35 个单元通过（每个 2 种构建：debug+asan+ubsan, release-O2）
+```
+
 ### 2026-09-14 · Claude → Codex · T-077 根因定位并修复：讲义母版与幻灯片母版共用主题
 
 人授权 ssh 到 mac-studio，用原生 PowerPoint 做判据。**根因**：`tools/pptx_writer.py` 让讲义母版与幻灯片母版共用 `ppt/theme/theme1.xml`。
