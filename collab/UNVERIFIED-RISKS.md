@@ -122,6 +122,30 @@ ulimit -s                       # 先看看你的栈有多大，数字全跟着�
 **周游仍然是递归为主实现**，按 §3d 只提供迭代版作补充——那是教学内容，不能抹掉。
 所以「病态深树上做周游」依然有栈风险，上面那张实测表对周游仍然有效。
 
+### 2026-09-14 补：`HuffmanTree` 的释放（T-075，Codex 复核抓出）
+
+这一条原先**不在清单里**。Huffman 树看上去不会深，但 `HuffmanTree` 允许权重为 **0**：
+等权结点合并时堆的平局让树退化成一条链，**高度 = 叶子数**。正权不会这样——高为 $h$ 的
+Huffman 树总权至少是斐波那契数 $F(h+1)$，而工程版每次合并都做 `int` 溢出检查，
+所以正权树高不超过约 45（这一条是推理；实测 400 万个权 1 的叶子析构无恙）。
+
+同一台机器、8 MB 栈，全 0 权 $n$ 个叶子，建树后析构：
+
+| 版本 | `-O2` | Debug + ASan/UBSan |
+| --- | --- | --- |
+| 工程版 `modern.hpp`（递归 `destroy`，已修） | 10 万通过；**100 万段错误** | 10 万通过；**100 万 stack-overflow** |
+| 工程版 `modern.hpp`（现在：右旋迭代释放） | 100 万通过 | 100 万通过 |
+| 教学版 `teaching.hpp`（递归 `destroy`，**未改**） | 30 万通过；**100 万段错误** | 10 万通过；**30 万 stack-overflow** |
+
+- **工程版已修**：`destroy` 改成与 `BinaryTree` 相同的「有左孩子就右旋、否则删当前走右边」，额外空间 O(1)、`noexcept`。
+  析构与移动赋值两条释放路径都走它。`code/ch05/heap_huffman/test.cpp` 的
+  `test_huffman_zero_weight_chain_is_released_iteratively` 用 100 万个 0 权叶子守着：改回递归，ASan 档报 stack-overflow、闸门红。
+- **教学版照旧递归**（D-012：教学版少讲几件事），所以「几十万个 0 权叶子」会压穿调用栈。
+  现实输入（字符频次）不会出现几十万个 0 权，但这是**已知、未修**的风险。
+- **复现**：`g++ -std=c++17 -O2 -Icode probe.cpp`，`probe.cpp` 里用 `std::vector<int>(n, 0)` 建
+  `dsa::HuffmanTree`（教学版去掉 `dsa::` 并包含 `teaching.hpp`），让它离开作用域；`n` 取 100000 / 300000 / 1000000，
+  再加 `-O0 -g -fsanitize=address,undefined` 各跑一遍。数字随 `ulimit -s` 变。
+
 ### 2026-08-14 实测：`unique_ptr` 串链的析构深度
 
 `code/ch02/ownership` 把「换成智能指针会怎样」量了出来。本机 8 MB 栈：

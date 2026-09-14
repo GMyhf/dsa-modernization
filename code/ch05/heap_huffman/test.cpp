@@ -152,6 +152,22 @@ void test_huffman_wpl_batched() {
     try { (void)dsa::huffman_wpl_batched(nullptr, 2); } catch (const std::invalid_argument&) { null_rejected = true; }
     check(null_rejected, "批量 Huffman：非空输入给空指针抛 invalid_argument");
 }
+/// T-075（Codex 复核）：权重允许为 0，同权平局时树会退化成一条链，高度 = 叶子数。
+/// 递归版 destroy 在这里实测 100 万个 0 权叶子：-O2 段错误，ASan stack-overflow。
+/// 析构与移动赋值两条释放路径都要走到。
+void test_huffman_zero_weight_chain_is_released_iteratively() {
+    constexpr std::size_t kLeaves = 1000000;
+    const std::vector<int> zeros(kLeaves, 0);
+    {
+        dsa::HuffmanTree chain(zeros.data(), zeros.size());
+        check(chain.total_weight() == 0, "Huffman：100 万个 0 权叶子能建树（总权 0）");
+    }   // 析构在这里
+    check(true, "Huffman：100 万个 0 权叶子的退化树析构不压穿调用栈");
+    dsa::HuffmanTree target(zeros.data(), zeros.size());
+    const int small[] = {1, 2};
+    target = dsa::HuffmanTree(small, 2);   // 移动赋值先释放 target 原来那棵退化树
+    check(target.total_weight() == 3, "Huffman：移动赋值释放 100 万叶子的退化树后接管新树");
+}
 }  // namespace
 
 int main() {
@@ -159,6 +175,7 @@ int main() {
     test_heap_with_comparator();
     test_running_median();
     test_huffman_wpl_batched();
+    test_huffman_zero_weight_chain_is_released_iteratively();
     dsa::MinHeap<int> heap;
     for (int value : {5, 1, 4, 2, 3}) heap.insert(value);
     dsa::MinHeap<int> copy = heap;

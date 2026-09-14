@@ -359,6 +359,8 @@ static BinaryTree rebuild(const T* inorder, const T* other, std::size_t count, O
         throw std::invalid_argument("rebuild: non-empty sequence given as null pointer");
     }
     // 位置查找表：中序下标按键排序，之后二分查位置。排好序顺便查出重复键。
+    // D-001 §2 的边界：std::sort / std::lower_bound 只用在这张「键 → 中序下标」的查找表上，
+    // 树结点、区间帧栈（LinkedStack）和挂接过程仍全部手写——没有拿 STL 容器替代本章要教的结构。
     std::unique_ptr<std::size_t[]> by_key(new std::size_t[count]);
     for (std::size_t i = 0; i < count; ++i) by_key[i] = i;
     const auto key_less = [inorder](std::size_t a, std::size_t b) { return inorder[a] < inorder[b]; };
@@ -1560,7 +1562,12 @@ struct WeightGroup {
 /// 祖先个数正是它的深度）。所以只要把每次合并出的新权累加起来。
 /// 又因为同权的若干棵树谁先合并都一样，最小的一组有 c 棵时，一次就合并出 c/2 棵
 /// 权为 2w 的树；c 为奇数时剩下的那一棵要和**下一小**的树合并，不能丢。
-/// 堆里放的是「组」，每轮组数不增或 count 减半，k 个输入组约 O(k log k + log n) 轮。
+/// 堆里放的是「组」，一轮处理一个最小权的组。
+///
+/// 轮数：**只证明了平凡上界**——每轮至少造出一个内部结点，所以至多 n−1 轮（n = 叶子总数）；
+/// n 可达 1e9，这个界没有实用价值。更紧的界**没有证明**。实测（T-075，Python 逐行移植计数）：
+/// 6 个组、count 取 1/2/3/≈1e9 的对抗混合最坏 352 轮，约「每组 log₂n 轮」；
+/// 1e9 叶子的单组 101 轮。早先写在这里的 O(k log k + log n) 被这组实测**否定**了，已撤掉。
 ///
 /// 溢出界：设总权 W = Σ weight·count、叶子数 n = Σ count，则 WPL ≤ W·⌈log2 n⌉。
 /// 该乘积小于 2^64 时一定不溢出；否则中途任何一次加法/乘法溢出都抛 std::overflow_error，

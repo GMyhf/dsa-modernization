@@ -204,12 +204,25 @@ public:
         return root_ ? root_->weight : 0;
     }
 private:
-    /// 后序释放，先删子树再删父结点；Huffman 树高度受权重分布影响，仍需关注深度上界。
+    /// 释放整棵树，**不递归**、额外空间 O(1)：有左孩子就把它右旋到上面，没有就删掉当前结点走右边。
+    /// 每次旋转让某个结点离开左链一次，总步数 O(n)。
+    ///
+    /// 为什么不用递归（T-075，Codex 复核抓出）：权重允许为 0，同权结点平局时堆会把树合并成一条链，
+    /// 高度可以等于叶子数。实测 100 万个 0 权叶子，递归版析构在 -O2 下段错误、ASan 下 stack-overflow。
+    /// 正权不会这样——高为 h 的 Huffman 树总权至少是斐波那契数 F(h+1)，int 放得下时 h 不超过约 45。
     static void destroy(Node* node) noexcept {
-        if (node == nullptr) return;
-        destroy(node->left);
-        destroy(node->right);
-        delete node;
+        while (node != nullptr) {
+            if (node->left != nullptr) {
+                Node* left = node->left;          // 右旋：左孩子升上来，当前结点挂到它的右边
+                node->left = left->right;
+                left->right = node;
+                node = left;
+            } else {
+                Node* right = node->right;
+                delete node;
+                node = right;
+            }
+        }
     }
 
     Node* root_{nullptr};
@@ -229,7 +242,12 @@ struct WeightGroup {
 /// 祖先个数正是它的深度）。所以只要把每次合并出的新权累加起来。
 /// 又因为同权的若干棵树谁先合并都一样，最小的一组有 c 棵时，一次就合并出 c/2 棵
 /// 权为 2w 的树；c 为奇数时剩下的那一棵要和**下一小**的树合并，不能丢。
-/// 堆里放的是「组」，每轮组数不增或 count 减半，k 个输入组约 O(k log k + log n) 轮。
+/// 堆里放的是「组」，一轮处理一个最小权的组。
+///
+/// 轮数：**只证明了平凡上界**——每轮至少造出一个内部结点，所以至多 n−1 轮（n = 叶子总数）；
+/// n 可达 1e9，这个界没有实用价值。更紧的界**没有证明**。实测（T-075，Python 逐行移植计数）：
+/// 6 个组、count 取 1/2/3/≈1e9 的对抗混合最坏 352 轮，约「每组 log₂n 轮」；
+/// 1e9 叶子的单组 101 轮。早先写在这里的 O(k log k + log n) 被这组实测**否定**了，已撤掉。
 ///
 /// 溢出界：设总权 W = Σ weight·count、叶子数 n = Σ count，则 WPL ≤ W·⌈log2 n⌉。
 /// 该乘积小于 2^64 时一定不溢出；否则中途任何一次加法/乘法溢出都抛 std::overflow_error，

@@ -440,6 +440,8 @@ BST 中序: 1 3 4 6 7 8 10 14
         <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;rebuild: non-empty sequence given as null pointer&quot;</span>);
     }
     <span class="c">// 位置查找表：中序下标按键排序，之后二分查位置。排好序顺便查出重复键。</span>
+    <span class="c">// D-001 §2 的边界：std::sort / std::lower_bound 只用在这张「键 → 中序下标」的查找表上，</span>
+    <span class="c">// 树结点、区间帧栈（LinkedStack）和挂接过程仍全部手写——没有拿 STL 容器替代本章要教的结构。</span>
     std::unique_ptr&lt;std::<span class="t">size_t</span>[]&gt; by_key(<span class="k">new</span> std::<span class="t">size_t</span>[count]);
     <span class="k">for</span> (std::<span class="t">size_t</span> i = <span class="n">0</span>; i &lt; count; ++i) by_key[i] = i;
     <span class="k">const</span> <span class="k">auto</span> key_less = [inorder](std::<span class="t">size_t</span> a, std::<span class="t">size_t</span> b) { <span class="k">return</span> inorder[a] &lt; inorder[b]; };
@@ -1410,7 +1412,12 @@ Direct leak of 24 byte(s) in 1 object(s) allocated from:
 <span class="c">/// 祖先个数正是它的深度）。所以只要把每次合并出的新权累加起来。</span>
 <span class="c">/// 又因为同权的若干棵树谁先合并都一样，最小的一组有 c 棵时，一次就合并出 c/2 棵</span>
 <span class="c">/// 权为 2w 的树；c 为奇数时剩下的那一棵要和**下一小**的树合并，不能丢。</span>
-<span class="c">/// 堆里放的是「组」，每轮组数不增或 count 减半，k 个输入组约 O(k log k + log n) 轮。</span>
+<span class="c">/// 堆里放的是「组」，一轮处理一个最小权的组。</span>
+<span class="c">///</span>
+<span class="c">/// 轮数：**只证明了平凡上界**——每轮至少造出一个内部结点，所以至多 n−1 轮（n = 叶子总数）；</span>
+<span class="c">/// n 可达 1e9，这个界没有实用价值。更紧的界**没有证明**。实测（T-075，Python 逐行移植计数）：</span>
+<span class="c">/// 6 个组、count 取 1/2/3/≈1e9 的对抗混合最坏 352 轮，约「每组 log₂n 轮」；</span>
+<span class="c">/// 1e9 叶子的单组 101 轮。早先写在这里的 O(k log k + log n) 被这组实测**否定**了，已撤掉。</span>
 <span class="c">///</span>
 <span class="c">/// 溢出界：设总权 W = Σ weight·count、叶子数 n = Σ count，则 WPL ≤ W·⌈log2 n⌉。</span>
 <span class="c">/// 该乘积小于 2^64 时一定不溢出；否则中途任何一次加法/乘法溢出都抛 std::overflow_error，</span>

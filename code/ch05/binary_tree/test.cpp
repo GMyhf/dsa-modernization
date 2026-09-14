@@ -153,35 +153,55 @@ bool throws_invalid(const std::vector<int>& a, const std::vector<int>& b, bool p
     return false;
 }
 
+// 合法输入上的重建一律经这两个包装调用：实现若回归（左右子树大小算反、取根位置对调），
+// 合法序列会被误判为不自洽而抛 invalid_argument——折成空值，交给下面具名的 check 去红，
+// 而不是让未捕获异常 terminate 整个进程（那样只知道「挂了」，不知道是哪条用例、为什么）。
+std::optional<dsa::BinaryTree<int>> rebuild_post(const std::vector<int>& in, const std::vector<int>& post) {
+    try { return dsa::BinaryTree<int>::from_inorder_postorder(in.data(), post.data(), in.size()); }
+    catch (const std::invalid_argument&) { return std::nullopt; }
+}
+std::optional<dsa::BinaryTree<int>> rebuild_pre(const std::vector<int>& pre, const std::vector<int>& in) {
+    try { return dsa::BinaryTree<int>::from_preorder_inorder(pre.data(), in.data(), in.size()); }
+    catch (const std::invalid_argument&) { return std::nullopt; }
+}
+
 void test_rebuild_random_round_trip() {
-    bool post_ok = true, pre_ok = true;
+    bool post_ok = true, pre_ok = true, post_accepted = true, pre_accepted = true;
     for (int round = 0; round < 400; ++round) {
         const int n = static_cast<int>(next_random() % 51);
         const auto original = random_tree(n);
         const Traversals want = traversals_of(original);
-        const auto from_post = dsa::BinaryTree<int>::from_inorder_postorder(want.in.data(), want.post.data(), want.in.size());
-        const Traversals got_post = traversals_of(from_post);
-        post_ok = post_ok && got_post.pre == want.pre && got_post.in == want.in && got_post.post == want.post && got_post.level == want.level;
-        const auto from_pre = dsa::BinaryTree<int>::from_preorder_inorder(want.pre.data(), want.in.data(), want.in.size());
-        const Traversals got_pre = traversals_of(from_pre);
-        pre_ok = pre_ok && got_pre.pre == want.pre && got_pre.in == want.in && got_pre.post == want.post && got_pre.level == want.level;
+        const auto from_post = rebuild_post(want.in, want.post);
+        post_accepted = post_accepted && from_post.has_value();
+        if (from_post) {
+            const Traversals got_post = traversals_of(*from_post);
+            post_ok = post_ok && got_post.pre == want.pre && got_post.in == want.in && got_post.post == want.post && got_post.level == want.level;
+        }
+        const auto from_pre = rebuild_pre(want.pre, want.in);
+        pre_accepted = pre_accepted && from_pre.has_value();
+        if (from_pre) {
+            const Traversals got_pre = traversals_of(*from_pre);
+            pre_ok = pre_ok && got_pre.pre == want.pre && got_pre.in == want.in && got_pre.post == want.post && got_pre.level == want.level;
+        }
     }
-    check(post_ok, "重建：400 棵随机树（n≤50）中序+后序重建后四种周游序列（含层次）全一致");
-    check(pre_ok, "重建：400 棵随机树（n≤50）前序+中序重建后四种周游序列（含层次）全一致");
+    check(post_accepted, "重建：400 棵随机树的合法中序+后序全部被接受（没有被误判为不自洽）");
+    check(pre_accepted, "重建：400 棵随机树的合法前序+中序全部被接受（没有被误判为不自洽）");
+    check(post_accepted && post_ok, "重建：400 棵随机树（n≤50）中序+后序重建后四种周游序列（含层次）全一致");
+    check(pre_accepted && pre_ok, "重建：400 棵随机树（n≤50）前序+中序重建后四种周游序列（含层次）全一致");
 }
 
 void test_rebuild_small_cases() {
     const auto empty = dsa::BinaryTree<int>::from_inorder_postorder(nullptr, nullptr, 0);
     check(empty.empty(), "重建：空序列得空树（count 为 0 时允许空指针）");
-    const int one = 42;
-    const auto single = dsa::BinaryTree<int>::from_preorder_inorder(&one, &one, 1);
-    check(!single.empty() && single.root()->value == 42 && single.root()->left == nullptr && single.root()->right == nullptr,
+    const auto single = rebuild_pre({42}, {42});
+    check(single && !single->empty() && single->root()->value == 42 && single->root()->left == nullptr && single->root()->right == nullptr,
           "重建：单结点");
     // 图 5.5：中序 DBGEACHFI，后序 DGEBHIFCA → 前序 ABDEGCFHI
     const std::vector<int> in{'D','B','G','E','A','C','H','F','I'}, post{'D','G','E','B','H','I','F','C','A'};
-    const auto fig = dsa::BinaryTree<int>::from_inorder_postorder(in.data(), post.data(), in.size());
-    check(traversals_of(fig).pre == std::vector<int>({'A','B','D','E','G','C','F','H','I'}), "重建：图 5.5 由中序+后序得前序 ABDEGCFHI");
-    check(traversals_of(fig).level == std::vector<int>({'A','B','C','D','E','F','G','H','I'}), "重建：图 5.5 形状正确（层次序列）");
+    const auto fig = rebuild_post(in, post);
+    check(fig.has_value(), "重建：图 5.5 的合法中序+后序被接受");
+    check(fig && traversals_of(*fig).pre == std::vector<int>({'A','B','D','E','G','C','F','H','I'}), "重建：图 5.5 由中序+后序得前序 ABDEGCFHI");
+    check(fig && traversals_of(*fig).level == std::vector<int>({'A','B','C','D','E','F','G','H','I'}), "重建：图 5.5 形状正确（层次序列）");
 }
 
 void test_rebuild_rejects_inconsistent() {
@@ -222,7 +242,10 @@ void test_rebuild_left_chain() {
     constexpr int kDepth = 200000;
     std::vector<int> in(kDepth), post(kDepth);
     for (int i = 0; i < kDepth; ++i) { in[static_cast<std::size_t>(i)] = i; post[static_cast<std::size_t>(i)] = i; }   // 左链：中序与后序都是自底向上
-    const auto chain = dsa::BinaryTree<int>::from_inorder_postorder(in.data(), post.data(), in.size());
+    const auto rebuilt = rebuild_post(in, post);
+    check(rebuilt.has_value(), "重建：20 万深纯左链的合法中序+后序被接受");
+    if (!rebuilt) return;
+    const auto& chain = *rebuilt;
     std::size_t depth = 0; bool only_left = true;
     for (const auto* node = chain.root(); node != nullptr; node = node->left) { ++depth; only_left = only_left && node->right == nullptr; }
     check(depth == static_cast<std::size_t>(kDepth) && only_left, "重建：20 万深纯左链不压穿调用栈且形状正确");

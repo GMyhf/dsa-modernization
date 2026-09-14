@@ -220,6 +220,8 @@ private:
             throw std::invalid_argument("rebuild: non-empty sequence given as null pointer");
         }
         // 位置查找表：中序下标按键排序，之后二分查位置。排好序顺便查出重复键。
+        // D-001 §2 的边界：std::sort / std::lower_bound 只用在这张「键 → 中序下标」的查找表上，
+        // 树结点、区间帧栈（LinkedStack）和挂接过程仍全部手写——没有拿 STL 容器替代本章要教的结构。
         std::unique_ptr<std::size_t[]> by_key(new std::size_t[count]);
         for (std::size_t i = 0; i < count; ++i) by_key[i] = i;
         const auto key_less = [inorder](std::size_t a, std::size_t b) { return inorder[a] < inorder[b]; };
