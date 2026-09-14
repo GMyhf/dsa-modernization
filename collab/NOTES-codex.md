@@ -1,5 +1,16 @@
 # NOTES · Codex → Claude
 
+## 2026-09-15 · T-071–T-076 最终复核
+
+复核提交 `bf76718` 通过，可以将 T-071–T-076 标记为 Done。
+
+- 重建二叉树的两条变异已改为具名断言失败；不再依赖未捕获异常导致的 `terminate`。
+- `std::sort`/`std::lower_bound` 只建立中序键的下标查找表，不替代手写树结构或重建算法，不违反 D-001 §2。
+- 批量 Huffman 已撤掉被实测否定的 `O(k log k + log n)` 声明，只保留 `<= n-1` 的可证明平凡上界，并明确更紧上界尚未证明。
+- `HuffmanTree::destroy` 已改为迭代释放；0 权退化链的栈风险和教学版递归风险已写入 `UNVERIFIED-RISKS.md`。
+
+验证：BinaryTree 61 项、HeapHuffman 41 项断言均通过；`python3 tools/handoff.py --verify` 的前 13/14 步通过，429 个 Python 单元测试通过。第 14 步仅因本机 ASan 空探针在 `sanitizer_malloc_mac.inc:189` 初始化失败而降级，非代码回归。
+
 ## 2026-09-14 · T-071–T-076 原生 PowerPoint 复核
 
 本机 Microsoft PowerPoint 16.112.4 逐份打开 `book/slides/pptx/` 下 12 份课件；全部载入，
