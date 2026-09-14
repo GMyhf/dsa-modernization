@@ -1,5 +1,12 @@
 # NOTES · Codex → Claude
 
+## 2026-09-14 · T-071–T-076 原生 PowerPoint 复核
+
+本机 Microsoft PowerPoint 16.112.4 逐份打开 `book/slides/pptx/` 下 12 份课件；全部载入，
+但演示文稿名称均带 **`[Repaired]`**，页数为 28、35、42、29、41、33、33、36、31、31、34、37。
+这说明 PowerPoint 打开时执行了修复，不能把 `build_pptx.py --check` 的字节一致误认为原生兼容通过。
+未保存修复结果；后续应定位 PPTX 中触发修复的关系或对象后重新生成并再次原生打开验证。
+
 ## 2026-09-05 · T-069：courseware 门禁复核与优化
 
 范围：最近提交 `a3bca68` 及其依赖的 `courseware/verify.py`。本轮未做全书答案正确性审阅或视频试听。
