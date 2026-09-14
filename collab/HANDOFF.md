@@ -1,5 +1,41 @@
 # HANDOFF · 交接日志
 
+### 2026-09-14 · Claude → Codex · T-077 根因定位并修复：讲义母版与幻灯片母版共用主题
+
+人授权 ssh 到 mac-studio，用原生 PowerPoint 做判据。**根因**：`tools/pptx_writer.py` 让讲义母版与幻灯片母版共用 `ppt/theme/theme1.xml`。
+
+**方法**（中间包全在 Mac 的 `/tmp/t077/`，判据脚本 `/tmp/t077/oracle.sh`：`osascript` 打开包、读演示文稿名是否带 `[Repaired]`）：
+
+| 轮 | 做了什么 | 结论 |
+| --- | --- | --- |
+| 定标 | `courseware/…CH01…pptx` 与 `book/slides/pptx/ch01-adt.pptx` | 前者干净、后者 `[Repaired]`，判据成立 |
+| v1 | 真 `pptx_writer` 生成 10 个单要素最小包 | **一张空白幻灯片就修复**：形状/表格/图片/备注代码全部排除 |
+| v2 | 空白包上逐项补 presProps/viewProps/tableStyles、txStyles、换主题、defaultTextStyle，及去掉讲义母版 | 前几项各自与合并都无效；**唯独去掉讲义母版就干净** |
+| v3 | 讲义母版改用自己的 `theme2.xml`；另试只补 notesStyle、只补占位符 | 前者让空白包、带备注包、第 1 章成品全部干净；后两者仍修复 |
+
+**修复**：`write` 多写 `ppt/theme/theme2.xml`，讲义母版关系指向它并登记 content-type。重排后 **12 份课件在 PowerPoint 中全部无 `[Repaired]`**。
+新用例 `tests/test_build_pptx.py::TestPackage::test_each_master_owns_its_theme`；变异改回共用 `theme1.xml` 当场红，还原后课件逐字节一致。
+README 自测数 428 → 429（首跑 `--verify` 被 `test_readme` 抓到）。
+
+**给 Codex**：你 Mac 工作区里未提交的 `book/slides/pptx/ch01-adt.pptx` 与本次产物冲突，`git pull` 前请先 `git checkout -- book/slides/pptx/ch01-adt.pptx`。
+未验：PowerPoint for Windows。
+
+**闸门**（`python3 tools/handoff.py --verify`，EXIT=0，14/14 步，本机 Linux 完整档）：
+
+```text
+Ran 429 tests                                   OK
+✅ 台账一致：104/105 已现代化，1 退场，0 待办
+✅ 勘误台账一致：40 条，15 条有回归测试
+✅ 书稿体检通过：31 个文件，17 条规则
+✅ 正文保全度未回退：89 节，整体 88%，其中 1 节仍不足原书一半
+✅ book/site/ 与 book/*.md 一致（18 个页面）
+✅ 课件 .pptx 与课件源逐字节一致：12 份、411 页
+✅ courseware 闸门通过：第 1–9 项（渲染检查：12 份 PDF，共 378 页）
+✅ PDF 与源文件一致：678 页、18 章、217 张图，sha256 d859624617d1
+✅ 扫描件裁图一致：218 张 ｜ ✅ 插图集与底稿一致：292 张
+✅ 35/35 个单元通过（每个 2 种构建：debug+asan+ubsan, release-O2）
+```
+
 ### 2026-09-14 · Claude → Codex · T-078 续：路径距离改 64 位（D-039，人拍板）
 
 上一条 T-078 交接里留作「待拍板」的路径总长撞哨兵，人选了 64 位距离，全文见 `DECISION_LOG.md` D-039。

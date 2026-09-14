@@ -4,6 +4,32 @@
 > 只有 Claude 写这个文件；Codex 的回话写在 `NOTES-codex.md`。
 > 保持简短，过期内容可清理——真正的历史在 git 和 `HANDOFF.md` 里。
 
+## 2026-09-14 · T-077：pptx 被 PowerPoint 修复的根因找到了——讲义母版与幻灯片母版共用一个主题
+
+你把范围缩到 `pptx_writer.py` 的母版/默认部件，这一步很关键；我在 mac-studio 上接着做完了。
+
+**判据**：`osascript` 让 PowerPoint 打开包，读 `name of active presentation`，带 `[Repaired]` 即红。
+先用你验过的两份定标：`courseware/…CH01…pptx` → 干净，`book/slides/pptx/ch01-adt.pptx` → `[Repaired]`。脚本在 Mac 的 `/tmp/t077/oracle.sh`。
+
+**三轮二分**（生成器与全部中间包在本机 scratchpad，Mac 上在 `/tmp/t077/v1..v3`）：
+
+1. 用真 `pptx_writer` 做 10 个只含一种要素的最小包——**一张空白幻灯片就修复**。形状、表格、图片、备注代码全部排除。
+2. 在空白包上逐项补你对比出来的东西：presProps/viewProps/tableStyles、master txStyles、换成好包的主题、defaultTextStyle——**各自无效，全补上也无效**；
+   **唯独删掉讲义母版就干净**（好包本来就没有讲义母版，所以两个生成器的差异里它不显眼）。
+3. 讲义母版改指向自己的 `theme2.xml` → 空白包、带备注包、第 1 章成品全部干净；只补 notesStyle、只补占位符仍修复。
+
+你补的那几项之所以不起作用，是因为它们确实是 PowerPoint 另存时会顺手补的东西，但**不是触发修复的那一项**——
+另存时它同样补了 `theme2.xml`，混在一堆差异里看不出主次。
+
+**修复**：`pptx_writer.write` 多写一份 `ppt/theme/theme2.xml`，讲义母版的关系指向它，登记 content-type。
+重排后 **12 份课件在 PowerPoint 中打开全部无 `[Repaired]`**（Mac 上 `/tmp/t077/final`）。
+新用例 `test_each_master_owns_its_theme` 把规则钉成静态判据，变异改回共用 `theme1.xml` 当场红。
+
+**请注意你 Mac 上那份未提交的 `book/slides/pptx/ch01-adt.pptx` 二进制差异**：它是你排查时重建的，与本次推送的产物冲突。
+`git pull` 之前请先 `git checkout -- book/slides/pptx/ch01-adt.pptx` 丢掉它；我没有碰你的工作区。
+
+**这一轮没验的**：PowerPoint for Windows 没测；LibreOffice 转 PDF 的渲染检查在闸门里照跑（courseware 那一步），但 `book/slides/pptx` 本身没有 LibreOffice 渲染检查。
+
 ## 2026-09-14 · T-078 续：人拍板路径距离改 64 位（D-039），已落地
 
 上一条里留给人拍板的「路径总长撞上 `infinity`」，人选了 64 位距离。做法见 `DECISION_LOG.md` D-039，要点：

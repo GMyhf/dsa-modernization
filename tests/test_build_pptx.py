@@ -172,6 +172,36 @@ class TestPackage(unittest.TestCase):
                         self.assertIn(f"ppt/media/{target}", names,
                                       f"{path.name}: 引用了不存在的 {target}")
 
+    def test_each_master_owns_its_theme(self):
+        """**讲义母版与幻灯片母版不能共用一个主题部件。**
+
+        T-077：共用 `theme1.xml` 在 schema 上不违规、LibreOffice 照开，但原生 PowerPoint
+        每次打开都要「修复」，标题带 `[Repaired]`。在 mac-studio 上用 PowerPoint 逐项二分：
+        一张空白幻灯片的包就会触发；只给讲义母版换成自己的 `theme2.xml` 就好，
+        补 notesStyle、占位符、presProps/viewProps/tableStyles 各自都无效。
+        上面那条 2026-09-05 的事故里 Office 另存时多出的 `theme2.xml`，就是它在修这个。
+        PowerPoint 进不了闸门，所以把实测出的规则钉成静态判据。
+        """
+        import re
+
+        def theme_of(pack, rels):
+            body = pack.read(rels).decode("utf-8")
+            targets = re.findall(r'Type="[^"]*/theme" Target="\.\./theme/([^"]+)"', body)
+            self.assertEqual(len(targets), 1, f"{rels} 应恰好指向一个主题")
+            return f"ppt/theme/{targets[0]}"
+
+        for path in self.deck():
+            with zipfile.ZipFile(path) as pack:
+                names = set(pack.namelist())
+                slide_theme = theme_of(pack, "ppt/slideMasters/_rels/slideMaster1.xml.rels")
+                notes_theme = theme_of(pack, "ppt/notesMasters/_rels/notesMaster1.xml.rels")
+                types = pack.read("[Content_Types].xml").decode("utf-8")
+            self.assertNotEqual(slide_theme, notes_theme,
+                                f"{path.name}: 讲义母版与幻灯片母版共用 {slide_theme}，PowerPoint 会报修复")
+            for theme in (slide_theme, notes_theme):
+                self.assertIn(theme, names, f"{path.name}: 缺 {theme}")
+                self.assertIn(f'PartName="/{theme}"', types, f"{path.name}: {theme} 没有登记 content-type")
+
     def test_notes_are_carried_over(self):
         """讲稿是课件的一半价值，不能在转 .pptx 的时候丢掉。"""
         with zipfile.ZipFile(build_pptx.OUT_DIR / "ch03-stack.pptx") as pack:
@@ -228,7 +258,7 @@ class TestPagination(unittest.TestCase):
         self.assertTrue(all(title.endswith("（续）") for title in titles[1:]))
 
     def test_real_decks_have_no_overflow(self):
-        """入库的这一版：410 页里一页都不许溢出。"""
+        """入库的这一版：411 页里一页都不许溢出。"""
         ctx = build_pptx.Ctx()
         for path in build_pptx.sources():
             meta, text = __import__("build_slides").split_front_matter(

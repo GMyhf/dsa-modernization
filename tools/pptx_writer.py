@@ -313,6 +313,11 @@ def write(path, slides, title="课件", images=None):
     overrides = []
 
     parts["ppt/theme/theme1.xml"] = _theme()
+    # 讲义母版必须有**自己的**主题部件，不能和幻灯片母版共用 theme1.xml。
+    # 共用在 schema 上不违规、LibreOffice 也照开，但 PowerPoint 每次打开都要「修复」（标题带 [Repaired]）。
+    # T-077 在 mac-studio 上用 PowerPoint 逐项二分实测：只做这一处改动，空白稿、带备注稿、第 1 章成品都不再修复；
+    # 补 notesStyle、补占位符、补 presProps/viewProps/tableStyles 各自都无效。
+    parts["ppt/theme/theme2.xml"] = _theme()
     parts["ppt/slideMasters/slideMaster1.xml"] = (
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
         f'<p:sldMaster {NS}>{_sptree("")}{CLRMAP}'
@@ -330,7 +335,7 @@ def write(path, slides, title="课件", images=None):
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
         f'<p:notesMaster {NS}>{_sptree("")}{CLRMAP}</p:notesMaster>')
     parts["ppt/notesMasters/_rels/notesMaster1.xml.rels"] = _rels([
-        ("rId1", f"{REL}/theme", "../theme/theme1.xml")])
+        ("rId1", f"{REL}/theme", "../theme/theme2.xml")])
 
     for name, blob in images.items():
         parts[f"ppt/media/{name}"] = blob
@@ -419,6 +424,7 @@ def write(path, slides, title="课件", images=None):
         ("/ppt/notesMasters/notesMaster1.xml",
          "application/vnd.openxmlformats-officedocument.presentationml.notesMaster+xml"),
         ("/ppt/theme/theme1.xml", "application/vnd.openxmlformats-officedocument.theme+xml"),
+        ("/ppt/theme/theme2.xml", "application/vnd.openxmlformats-officedocument.theme+xml"),
         ("/docProps/core.xml", "application/vnd.openxmlformats-package.core-properties+xml"),
         ("/docProps/app.xml",
          "application/vnd.openxmlformats-officedocument.extended-properties+xml"),
