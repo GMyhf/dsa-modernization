@@ -1,8 +1,10 @@
 #include "modern.hpp"
 
 #include <cstdio>
+#include <cstdint>
 #include <memory>
 #include <stdexcept>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -59,6 +61,7 @@ struct Life {
     ~Life() { --live; }
     static void reset(int at = 0) { copies = 0; throw_at = at; }
 };
+bool operator<(const Life& a, const Life& b) noexcept { return a.value < b.value; }
 void test_partial_clone_is_cleaned() {
     Life::reset();
     { dsa::BinaryTree<Life> leaf; leaf.create_tree(Life(2)); dsa::BinaryTree<Life> tree; tree.create_tree(Life(1), std::move(leaf)); const int before = Life::live; Life::reset(2); bool threw = false; try { dsa::BinaryTree<Life> copy(tree); } catch (const std::runtime_error&) { threw = true; } Life::reset(); check(threw && Life::live == before, "复制半树失败时已分配结点全部回收"); }
@@ -108,9 +111,129 @@ void test_degenerate_chain_does_not_blow_the_stack() {
     chain.make_empty();
     check(chain.empty(), "百万深左链可析构");
 }
+
+// ---- 由两种周游序列重建二叉树 ----------------------------------------------
+struct Traversals { std::vector<int> pre, in, post, level; };
+Traversals traversals_of(const dsa::BinaryTree<int>& tree) {
+    Traversals t;   // 深链也要能取序列：用非递归周游与层次周游
+    tree.preorder_iterative([&](int v) { t.pre.push_back(v); });
+    tree.inorder_iterative([&](int v) { t.in.push_back(v); });
+    tree.postorder_iterative([&](int v) { t.post.push_back(v); });
+    tree.level_order([&](int v) { t.level.push_back(v); });
+    return t;
+}
+
+std::uint64_t lcg_state = 88172645463325252ULL;
+std::uint64_t next_random() { lcg_state = lcg_state * 6364136223846793005ULL + 1442695040888963407ULL; return lcg_state >> 33; }
+
+/// 随机形状、随机（互不相同的）键：键是 0..n-1 洗牌后的前 n 个，挂接位置随机。
+dsa::BinaryTree<int> random_tree(int n) {
+    std::vector<int> keys(static_cast<std::size_t>(n));
+    for (int i = 0; i < n; ++i) keys[static_cast<std::size_t>(i)] = i * 7 - 100;   // 含负数
+    for (std::size_t i = keys.size(); i > 1; --i) std::swap(keys[i - 1], keys[next_random() % i]);
+    dsa::BinaryTree<int> tree;
+    if (n == 0) return tree;
+    tree.create_tree(keys[0]);
+    for (std::size_t i = 1; i < keys.size(); ++i) {
+        auto* node = tree.root();
+        for (;;) {
+            auto*& link = (next_random() & 1) ? node->left : node->right;
+            if (link == nullptr) { link = new dsa::BinaryTree<int>::Node(keys[i]); break; }
+            node = link;
+        }
+    }
+    return tree;
+}
+
+bool throws_invalid(const std::vector<int>& a, const std::vector<int>& b, bool postorder) {
+    try {
+        if (postorder) (void)dsa::BinaryTree<int>::from_inorder_postorder(a.data(), b.data(), a.size());
+        else (void)dsa::BinaryTree<int>::from_preorder_inorder(a.data(), b.data(), a.size());
+    } catch (const std::invalid_argument&) { return true; }
+    return false;
+}
+
+void test_rebuild_random_round_trip() {
+    bool post_ok = true, pre_ok = true;
+    for (int round = 0; round < 400; ++round) {
+        const int n = static_cast<int>(next_random() % 51);
+        const auto original = random_tree(n);
+        const Traversals want = traversals_of(original);
+        const auto from_post = dsa::BinaryTree<int>::from_inorder_postorder(want.in.data(), want.post.data(), want.in.size());
+        const Traversals got_post = traversals_of(from_post);
+        post_ok = post_ok && got_post.pre == want.pre && got_post.in == want.in && got_post.post == want.post && got_post.level == want.level;
+        const auto from_pre = dsa::BinaryTree<int>::from_preorder_inorder(want.pre.data(), want.in.data(), want.in.size());
+        const Traversals got_pre = traversals_of(from_pre);
+        pre_ok = pre_ok && got_pre.pre == want.pre && got_pre.in == want.in && got_pre.post == want.post && got_pre.level == want.level;
+    }
+    check(post_ok, "重建：400 棵随机树（n≤50）中序+后序重建后四种周游序列（含层次）全一致");
+    check(pre_ok, "重建：400 棵随机树（n≤50）前序+中序重建后四种周游序列（含层次）全一致");
+}
+
+void test_rebuild_small_cases() {
+    const auto empty = dsa::BinaryTree<int>::from_inorder_postorder(nullptr, nullptr, 0);
+    check(empty.empty(), "重建：空序列得空树（count 为 0 时允许空指针）");
+    const int one = 42;
+    const auto single = dsa::BinaryTree<int>::from_preorder_inorder(&one, &one, 1);
+    check(!single.empty() && single.root()->value == 42 && single.root()->left == nullptr && single.root()->right == nullptr,
+          "重建：单结点");
+    // 图 5.5：中序 DBGEACHFI，后序 DGEBHIFCA → 前序 ABDEGCFHI
+    const std::vector<int> in{'D','B','G','E','A','C','H','F','I'}, post{'D','G','E','B','H','I','F','C','A'};
+    const auto fig = dsa::BinaryTree<int>::from_inorder_postorder(in.data(), post.data(), in.size());
+    check(traversals_of(fig).pre == std::vector<int>({'A','B','D','E','G','C','F','H','I'}), "重建：图 5.5 由中序+后序得前序 ABDEGCFHI");
+    check(traversals_of(fig).level == std::vector<int>({'A','B','C','D','E','F','G','H','I'}), "重建：图 5.5 形状正确（层次序列）");
+}
+
+void test_rebuild_rejects_inconsistent() {
+    check(throws_invalid({1, 2, 3}, {1, 2, 4}, true), "重建拒绝：后序出现中序没有的键");
+    check(throws_invalid({1, 1}, {1, 1}, true), "重建拒绝：中序有重复键");
+    {   // 重复键即使不单独查也会因「根落在区间外」被拒（抽屉原理），单独查是为了报错说对原因
+        std::string message;
+        const std::vector<int> dup{1, 2, 1};
+        try { (void)dsa::BinaryTree<int>::from_inorder_postorder(dup.data(), dup.data(), dup.size()); }
+        catch (const std::invalid_argument& e) { message = e.what(); }
+        check(message.find("duplicate") != std::string::npos, "重建拒绝：重复键的报错指明 duplicate，而不是笼统的区间错误");
+    }
+    check(throws_invalid({1, 2}, {1, 1}, true), "重建拒绝：后序有重复键（同集合不同多重集）");
+    check(throws_invalid({1, 2, 3}, {3, 1, 2}, true), "重建拒绝：中序 123、后序 312 不对应任何二叉树");
+    check(throws_invalid({2, 3, 1}, {1, 2, 3}, false), "重建拒绝：前序 231、中序 123 不对应任何二叉树");
+    check(throws_invalid({3, 1, 4, 2}, {1, 2, 3, 4}, false), "重建拒绝：前序 3142、中序 1234——键都对，但 4 落在左子树的中序区间之外");
+    check(!throws_invalid({2, 1, 3, 4}, {1, 2, 3, 4}, false), "重建：合法的前序 2134、中序 1234 不被误拒");
+    bool null_rejected = false;
+    try { (void)dsa::BinaryTree<int>::from_inorder_postorder(nullptr, nullptr, 3); } catch (const std::invalid_argument&) { null_rejected = true; }
+    check(null_rejected, "重建拒绝：非空序列给空指针");
+
+    // 失败时半成品树必须回收：用 Life 计活对象数（LeakSanitizer 也会看着）
+    Life::reset();
+    {
+        std::vector<Life> in, bad;
+        for (int v : {1, 2, 3, 4, 5}) in.emplace_back(v);
+        for (int v : {1, 2, 9, 4, 5}) bad.emplace_back(v);
+        const int before = Life::live;
+        bool threw = false;
+        try { (void)dsa::BinaryTree<Life>::from_inorder_postorder(in.data(), bad.data(), in.size()); }
+        catch (const std::invalid_argument&) { threw = true; }
+        check(threw && Life::live == before, "重建中途发现不自洽：已建结点全部回收");
+    }
+}
+
+/// 纯左链：深度 = 结点数。重建不递归，所以深度不受调用栈限制；这里取 20 万。
+void test_rebuild_left_chain() {
+    constexpr int kDepth = 200000;
+    std::vector<int> in(kDepth), post(kDepth);
+    for (int i = 0; i < kDepth; ++i) { in[static_cast<std::size_t>(i)] = i; post[static_cast<std::size_t>(i)] = i; }   // 左链：中序与后序都是自底向上
+    const auto chain = dsa::BinaryTree<int>::from_inorder_postorder(in.data(), post.data(), in.size());
+    std::size_t depth = 0; bool only_left = true;
+    for (const auto* node = chain.root(); node != nullptr; node = node->left) { ++depth; only_left = only_left && node->right == nullptr; }
+    check(depth == static_cast<std::size_t>(kDepth) && only_left, "重建：20 万深纯左链不压穿调用栈且形状正确");
+    std::vector<int> pre;
+    chain.preorder_iterative([&](int v) { pre.push_back(v); });
+    check(pre.size() == in.size() && pre.front() == kDepth - 1 && pre.back() == 0, "重建：左链的前序是自顶向下");
+}
 }  // namespace
 
 int main() {
     test_traversals_and_parent(); test_tree_ownership_and_rule_of_five(); test_partial_clone_is_cleaned(); test_bst_insert_remove_contract(); test_degenerate_chain_does_not_blow_the_stack();
+    test_rebuild_random_round_trip(); test_rebuild_small_cases(); test_rebuild_rejects_inconsistent(); test_rebuild_left_chain();
     std::printf("BinaryTree: %d 项断言，%d 失败\n", checks, failures); return failures == 0 ? 0 : 1;
 }

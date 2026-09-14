@@ -618,6 +618,100 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
     std::vector&lt;<span class="t">int</span>&gt; buffer(values.size());
     merge_sort_optimized_range(values, buffer, <span class="n">0</span>, values.size());
 }</code></pre></div>
+<h3 id="归并排序的副产品逆序对计数"><a class="anchor" href="#归并排序的副产品逆序对计数">#</a>归并排序的副产品：逆序对计数</h3>
+<p>8.2.1 节分析直接插入排序的平均代价时定义过<strong>逆置</strong>：<span class="math">i&lt;j</span> 而 <span class="math">p<sub>i</sub>&gt;p<sub>j</sub></span> 的一对元素。 那里用它来数代价——处理第 <span class="math">i</span> 个记录时，内层循环向后挪位的次数恰好是它前面比它大的记录个数， 所以<strong>整趟直接插入排序的挪位次数就等于序列的逆置数</strong>；再加上每趟暂存、回填各一次，总移动次数 是「逆置数 <span class="math"><span class="bin">+</span><span class="upr">2</span>(n<span class="bin">−</span><span class="upr">1</span>)</span>」，逆序输入时正是 8.2.1 节的 <span class="math">(n<span class="bin">−</span><span class="upr">1</span>)(n<span class="bin">+</span><span class="upr">4</span>)/<span class="upr">2</span></span>。反过来，想<strong>求</strong>一个序列的 逆置数（常叫「逆序对数」），照着插入排序去数是 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>。</p>
+<p>归并排序能在 <span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 内数完，而且只需在合并里多写一句。逆置 <span class="math">(p<sub>i</sub>,p<sub>j</sub>)</span> 要么两个元素 都在左半段，要么都在右半段，要么一左一右：前两类由递归数掉，第三类在合并时数。两段各自有序， 当右段的 <code>values[right]</code> <strong>严格小于</strong>左段的 <code>values[left]</code> 时，左段里还没输出的 <code>[left, middle)</code> 全都比它大，一次记上 <code>middle - left</code> 个（写成闭区间 <span class="math">[i,mid]</span> 就是常见的 <span class="math">mid<span class="bin">−</span>i<span class="bin">+</span><span class="upr">1</span></span>）。相等时取左边、不计数：<strong>相等元素不构成逆置</strong>，这与归并排序稳定性来自同一个 <code>&lt;</code>。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#inversions</a></div><pre><code><span class="c">// 归并排序的副产品（原书无清单）：逆置（逆序对）计数，Θ(n log n)。</span>
+<span class="c">// 与 merge_ranges 同一个合并过程，只多一句计数：右段的 values[right] 严格小于</span>
+<span class="c">// 左段的 values[left] 时，左段还没输出的 [left, middle) 都比它大，一次记 middle - left 个。</span>
+<span class="c">// 相等时取左边、不计数——相等元素不构成逆置，这与稳定性是同一个 `&lt;`。</span>
+<span class="k">inline</span> std::uint64_t merge_count_ranges(std::vector&lt;<span class="t">int</span>&gt;&amp; values, std::vector&lt;<span class="t">int</span>&gt;&amp; buffer,
+                                        std::<span class="t">size_t</span> first, std::<span class="t">size_t</span> middle, std::<span class="t">size_t</span> last) {
+    std::uint64_t inversions = <span class="n">0</span>;
+    std::<span class="t">size_t</span> left = first;
+    std::<span class="t">size_t</span> right = middle;
+    std::<span class="t">size_t</span> output = first;
+    <span class="k">while</span> (left &lt; middle &amp;&amp; right &lt; last) {
+        <span class="k">if</span> (values[right] &lt; values[left]) {
+            inversions += middle - left;
+            buffer[output++] = values[right++];
+        } <span class="k">else</span> {
+            buffer[output++] = values[left++];
+        }
+    }
+    <span class="k">while</span> (left &lt; middle) buffer[output++] = values[left++];
+    <span class="k">while</span> (right &lt; last) buffer[output++] = values[right++];
+    <span class="k">for</span> (std::<span class="t">size_t</span> index = first; index &lt; last; ++index) values[index] = buffer[index];
+    <span class="k">return</span> inversions;
+}
+
+<span class="k">inline</span> std::uint64_t count_inversions_range(std::vector&lt;<span class="t">int</span>&gt;&amp; values, std::vector&lt;<span class="t">int</span>&gt;&amp; buffer,
+                                            std::<span class="t">size_t</span> first, std::<span class="t">size_t</span> last) {
+    <span class="k">if</span> (last - first &lt; <span class="n">2</span>) <span class="k">return</span> <span class="n">0</span>;
+    <span class="k">const</span> std::<span class="t">size_t</span> middle = first + (last - first) / <span class="n">2</span>;
+    <span class="k">return</span> count_inversions_range(values, buffer, first, middle)
+         + count_inversions_range(values, buffer, middle, last)
+         + merge_count_ranges(values, buffer, first, middle, last);
+}
+
+<span class="c">// 按值传参：函数在自己的副本上归并，调用方的序列原样不动（计数是查询，不该顺手排序）。</span>
+<span class="c">// 调用方若本来就要排序，写 count_inversions(std::move(v)) 即可省掉这次拷贝。</span>
+<span class="c">// 返回 64 位：逆置数最多 n(n-1)/2，n &gt;= 65537 时就超过 INT_MAX，用 int 累加是有符号溢出。</span>
+<span class="k">inline</span> std::uint64_t count_inversions(std::vector&lt;<span class="t">int</span>&gt; values) {
+    std::vector&lt;<span class="t">int</span>&gt; buffer(values.size());
+    <span class="k">return</span> count_inversions_range(values, buffer, <span class="n">0</span>, values.size());
+}</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.py">code/ch08/sorting/modern.py#inversions</a></div><pre><code><span class="c"># 归并排序的副产品（原书无清单）：逆置（逆序对）计数，Θ(n log n)。</span>
+<span class="c"># 与 merge_ranges 同一个合并过程，只多一句计数：右段元素严格小于左段当前元素时，</span>
+<span class="c"># 左段还没输出的 [left, middle) 都比它大，一次记 middle - left 个。</span>
+<span class="k">def</span> merge_count_ranges(values: <span class="t">list</span>[<span class="t">int</span>], buffer: <span class="t">list</span>[<span class="t">int</span>],
+                       first: <span class="t">int</span>, middle: <span class="t">int</span>, last: <span class="t">int</span>) -&gt; <span class="t">int</span>:
+    inversions = <span class="n">0</span>
+    left, right, output = first, middle, first
+    <span class="k">while</span> left &lt; middle <span class="k">and</span> right &lt; last:
+        <span class="c"># 与 merge_ranges 同一个 `&lt;`：相等时取左边、不计数——相等元素不构成逆置。</span>
+        <span class="k">if</span> values[right] &lt; values[left]:
+            inversions += middle - left
+            buffer[output] = values[right]
+            right += <span class="n">1</span>
+        <span class="k">else</span>:
+            buffer[output] = values[left]
+            left += <span class="n">1</span>
+        output += <span class="n">1</span>
+    <span class="k">while</span> left &lt; middle:
+        buffer[output] = values[left]
+        left += <span class="n">1</span>
+        output += <span class="n">1</span>
+    <span class="k">while</span> right &lt; last:
+        buffer[output] = values[right]
+        right += <span class="n">1</span>
+        output += <span class="n">1</span>
+    values[first:last] = buffer[first:last]
+    <span class="k">return</span> inversions
+
+
+<span class="k">def</span> count_inversions_range(values: <span class="t">list</span>[<span class="t">int</span>], buffer: <span class="t">list</span>[<span class="t">int</span>], first: <span class="t">int</span>, last: <span class="t">int</span>) -&gt; <span class="t">int</span>:
+    <span class="k">if</span> last - first &lt; <span class="n">2</span>:
+        <span class="k">return</span> <span class="n">0</span>
+    middle = first + (last - first) // <span class="n">2</span>
+    <span class="k">return</span> (count_inversions_range(values, buffer, first, middle)
+            + count_inversions_range(values, buffer, middle, last)
+            + merge_count_ranges(values, buffer, first, middle, last))
+
+
+<span class="c"># 在副本上归并，调用方的序列原样不动。Python 整数没有宽度，</span>
+<span class="c"># C++ 版那个「n &gt;= 65537 就溢出 int」的坑在这里不存在。</span>
+<span class="k">def</span> count_inversions(values: <span class="t">list</span>[<span class="t">int</span>]) -&gt; <span class="t">int</span>:
+    work = <span class="t">list</span>(values)
+    buffer = [<span class="n">0</span>] * <span class="t">len</span>(work)
+    <span class="k">return</span> count_inversions_range(work, buffer, <span class="n">0</span>, <span class="t">len</span>(work))</code></pre></div>
+<p>两处设计值得点明：</p>
+<ul>
+<li><strong>计数不顺手排序。</strong> C++ 版按值传参、在副本上归并，调用方的序列原样不动；本来就要排序的调用方 写 <code>count_inversions(std::move(v))</code> 省掉这次拷贝。Python 版同样先 <code>list(values)</code> 再归并。</li>
+<li><strong>结果必须是 64 位。</strong> 逆置数最多 <span class="math">n(n<span class="bin">−</span><span class="upr">1</span>)/<span class="upr">2</span></span>，<span class="math">n<span class="rel">≥</span><span class="upr">65537</span></span> 时就超过 <code>INT_MAX</code>，而机考的 <span class="math">n</span> 动辄 <span class="math"><span class="upr">10</span><sup><span class="upr">5</span></sup></span>。累加器写成 <code>int</code> 是有符号溢出：测试里 <span class="math">n<span class="rel">=</span><span class="upr">70000</span></span> 的严格递减序列应得 <span class="math"><span class="upr">2449965000</span></span>，改成 <code>int</code> 后 UBSan 档当场报 <code>signed integer overflow</code>，<code>-O2</code> 档不报任何错、 只是悄悄给出一个错数，由断言抓住；再加一条 <span class="math">n<span class="rel">=</span><span class="upr">100000</span></span>（<span class="math"><span class="upr">4999950000</span></span> 超过 32 位无符号上限）， 连「换成 <code>unsigned</code>」这种不触发未定义行为的截断也一并锁住。Python 整数没有宽度，这个坑不存在。 在 OJ 上交 C++ 时，这一条就是「答案开 <code>long long</code>」。</li>
+</ul>
+<p><strong>变形题（留作练习）。</strong> 求满足 <span class="math">i&lt;j</span> 且 <span class="math">a<sub>i</sub><span class="bin">+</span>a<sub>j</sub>&gt;b<sub>i</sub><span class="bin">+</span>b<sub>j</sub></span> 的对数。移项得 <span class="math">a<sub>i</sub><span class="bin">−</span>b<sub>i</sub>&gt;b<sub>j</sub><span class="bin">−</span>a<sub>j</sub></span>，令 <span class="math">c<sub>i</sub><span class="rel">=</span>a<sub>i</sub><span class="bin">−</span>b<sub>i</sub></span>，条件变成 <span class="math">c<sub>i</sub>&gt;<span class="bin">−</span>c<sub>j</sub></span>：仍是「前面的数比后面的某个量大」， 套用上面的框架，只是合并时拿左段的 <span class="math">c<sub>i</sub></span> 去比右段的 <span class="math"><span class="bin">−</span>c<sub>j</sub></span>（先用双指针数完，再照常合并）。 顺带可以注意到，这个条件等价于 <span class="math">c<sub>i</sub><span class="bin">+</span>c<sub>j</sub>&gt;<span class="upr">0</span></span>，对 <span class="math">i</span>、<span class="math">j</span> 对称，所以「<span class="math">i&lt;j</span>」其实不起作用—— 把 <span class="math">c</span> 排序后双指针也能数，可以拿来对拍。</p>
+<p><strong>另一条路：离散化 + 树状数组。</strong> 从左到右扫描，把每个值换成它在全体值中的名次（离散化）， 用树状数组维护「已扫过的值里各名次出现几次」；扫到 <span class="math">a<sub>j</sub></span> 时，前面比它大的个数就是 「已扫过的个数 <span class="math"><span class="bin">−</span></span> 名次不超过 <span class="math">a<sub>j</sub></span> 的个数」，查询与更新都是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>。相等元素名次相同、 落在「不超过」一侧，因此同样不计入逆置。本书第12章正文目前没有树状数组一节， 可测实现在 <code>code/ch12/fenwick</code>（<code>FenwickTree::add</code> 单点加、<code>FenwickTree::prefix_sum</code> 前缀和）。 两种做法代价同为 <span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>；归并法不需要离散化，树状数组法则能在序列动态追加时继续回答。</p>
 <h2 id="86-分配排序和索引排序"><a class="anchor" href="#86-分配排序和索引排序">#</a>8.6 分配排序和索引排序</h2>
 <p>本章要介绍的最后一种排序算法是<strong>分配排序</strong>（distribution sorting）。<strong>这种排序算法的唯一特征是 不需要进行关键码之间的比较，但是需要事先知道记录序列的一些具体情况。</strong></p>
 <p>三种情况对应三种做法：如果事先知道序列中记录的排序码都位于某个小区间段内，就可以用 8.6.1 的 <strong>桶式排序</strong>；当排序码值域 <span class="math">m</span> 很大时，可以拆分为多个部分来进行比较，这就是基于桶式排序的 <strong>基数排序</strong>（radix sorting，8.6.2）；为减少记录的移动，可以采取基于静态链的基数排序，这本质上 是一种<strong>索引排序</strong>（index sorting）或称地址排序（address sorting，8.6.3）——索引排序后的结果应该 可以在 <span class="math">Θ(n)</span> 的线性时间内整理为按照数组下标为序的有序序列。</p>
@@ -1165,7 +1259,7 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 </ol>
 <div class="pagenav"><a href="ch07-graph.html"><span class="dir">← 上一篇</span>第7章 图</a><a href="ch09-external-sort.html" style="text-align:right"><span class="dir">下一篇 →</span>第9章 文件管理与外部排序</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#81-排序问题的基本概念">8.1 排序问题的基本概念</a><a href="#82-插入排序">8.2 插入排序</a><a href="#821-直接插入排序" class="sub">8.2.1 直接插入排序</a><a href="#822-shell-排序" class="sub">8.2.2 Shell 排序</a><a href="#83-选择排序">8.3 选择排序</a><a href="#831-直接选择排序" class="sub">8.3.1 直接选择排序</a><a href="#832-堆排序" class="sub">8.3.2 堆排序</a><a href="#84-交换排序">8.4 交换排序</a><a href="#841-冒泡排序" class="sub">8.4.1 冒泡排序</a><a href="#842-快速排序" class="sub">8.4.2 快速排序</a><a href="#85-归并排序">8.5 归并排序</a><a href="#86-分配排序和索引排序">8.6 分配排序和索引排序</a><a href="#861-桶式排序" class="sub">8.6.1 桶式排序</a><a href="#862-基数排序" class="sub">8.6.2 基数排序</a><a href="#863-索引排序" class="sub">8.6.3 索引排序</a><a href="#87-排序算法的时间代价">8.7 排序算法的时间代价</a><a href="#871-简单排序算法的时间代价" class="sub">8.7.1 简单排序算法的时间代价</a><a href="#872-排序算法的理论和实验时间" class="sub">8.7.2 排序算法的理论和实验时间</a><a href="#873-排序问题的下限" class="sub">8.7.3 排序问题的下限</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充复杂度题参考课程第-8-章" class="sub">补充复杂度题（参考课程第 8 章）</a><a href="#原书习题" class="sub">原书习题</a><a href="#上机题">上机题</a><a href="#原书上机题" class="sub">原书上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#81-排序问题的基本概念">8.1 排序问题的基本概念</a><a href="#82-插入排序">8.2 插入排序</a><a href="#821-直接插入排序" class="sub">8.2.1 直接插入排序</a><a href="#822-shell-排序" class="sub">8.2.2 Shell 排序</a><a href="#83-选择排序">8.3 选择排序</a><a href="#831-直接选择排序" class="sub">8.3.1 直接选择排序</a><a href="#832-堆排序" class="sub">8.3.2 堆排序</a><a href="#84-交换排序">8.4 交换排序</a><a href="#841-冒泡排序" class="sub">8.4.1 冒泡排序</a><a href="#842-快速排序" class="sub">8.4.2 快速排序</a><a href="#85-归并排序">8.5 归并排序</a><a href="#归并排序的副产品逆序对计数" class="sub">归并排序的副产品：逆序对计数</a><a href="#86-分配排序和索引排序">8.6 分配排序和索引排序</a><a href="#861-桶式排序" class="sub">8.6.1 桶式排序</a><a href="#862-基数排序" class="sub">8.6.2 基数排序</a><a href="#863-索引排序" class="sub">8.6.3 索引排序</a><a href="#87-排序算法的时间代价">8.7 排序算法的时间代价</a><a href="#871-简单排序算法的时间代价" class="sub">8.7.1 简单排序算法的时间代价</a><a href="#872-排序算法的理论和实验时间" class="sub">8.7.2 排序算法的理论和实验时间</a><a href="#873-排序问题的下限" class="sub">8.7.3 排序问题的下限</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充复杂度题参考课程第-8-章" class="sub">补充复杂度题（参考课程第 8 章）</a><a href="#原书习题" class="sub">原书习题</a><a href="#上机题">上机题</a><a href="#原书上机题" class="sub">原书上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch08-sorting.md</code> 生成

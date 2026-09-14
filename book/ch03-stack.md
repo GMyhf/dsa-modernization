@@ -1726,7 +1726,7 @@ def knapsack_optimized(capacity: int, weights: list[int]) -> list[int] | None:
 把它换成 `std::stack` 的薄封装固然更短，但这一节要教的正是这些实现细节本身。
 
 完整实现见 `code/ch03/array_stack/modern.hpp`，测试见同目录 `test.cpp`
-（58 项断言，覆盖上表每一行；用 `python3 tools/check_code.py` 在
+（85 项断言，覆盖上表每一行；用 `python3 tools/check_code.py` 在
 `-Werror` + ASan/UBSan 与 `-O2` 两种构建下各跑一遍）。
 
 ## 3.2 队列
@@ -2194,6 +2194,67 @@ private:
 由此可见，这几种限制存取点的表都是某种受限的双端队列。C++ 标准库的基本序列中就有双端队列
 `std::deque`，`std::stack` 与 `std::queue` 默认都是通过它实现的——**但那是使用者的视角**；
 本章手写这两种结构，是因为「存储怎么落、边界怎么守」本身就是这一章的教学内容。
+
+### 出栈序列能不能得到：拿顺序栈模拟一遍
+
+本章习题第 7 题问 5 辆列车开出车站的次序有多少种，第 8 题给出合法出栈序列的充分必要条件，
+补充算法设计题第 2 题要证明合法序列的个数是 Catalan 数。三道题背后是同一个操作层面的问题：
+**车辆 $1, 2, \ldots, n$ 依次进栈，给定一个出栈次序，它能不能得到？能的话，怎么进、怎么出？**
+
+回答它不需要搜索。拿栈模拟一遍，每一步都没有选择余地——看下一辆要开出的车：
+
+1. **正在栈顶**：必须现在就开出。再压进一辆，它就被盖住了；
+2. **还没进栈**：只能把后面的车一辆辆压进去，直到它到达栈顶；
+3. **已在栈里、却不在栈顶**：它上面压着别的车，这个次序不可能。
+
+第 3 种情况不必单独判断：车全部进过栈了还等不到它，就是它。以 `3, 1, 2` 为例：3 要先开出，
+1、2 就必须都已进栈，而且 2 压在 1 上面；3 开走之后栈顶是 2，1 出不来。
+
+```cpp file=code/ch03/array_stack/modern.hpp#stack-sequence
+enum class StackOp { Push, Pop };
+
+/// 车辆 1, 2, …, n 依次进栈，途中随时可以出栈。问：出栈次序能否恰好是 pop_order？
+/// 能则返回一串操作（按这个次序做 Push / Pop 就得到它），不能返回 std::nullopt。
+///
+/// 做法是**拿本节的 ArrayStack 模拟一遍**，每一步都没有选择余地：
+///   下一个要出栈的车正在栈顶 —— 必须现在就出（再压一辆它就被盖住了）；
+///   还没进栈               —— 只能一辆辆往里压，直到它到栈顶；
+///   已经在栈里、却不在栈顶   —— 它上面压着别的车，这个次序不可能。
+/// 第三种情况不必单独判断：压完所有车还等不到它，就是它。
+///
+/// pop_order 里出现重复、缺号或越界的编号时同样返回 std::nullopt：
+/// 进栈的车两两不同，出栈次序只可能是 1..n 的一个排列。
+[[nodiscard]] inline std::optional<std::vector<StackOp>> stack_operations_for(
+        const std::vector<int>& pop_order) {
+    const int n = static_cast<int>(pop_order.size());
+    ArrayStack<int> stack;
+    std::vector<StackOp> ops;
+    int next_car = 1;  // 下一辆等着进栈的车
+    for (int wanted : pop_order) {
+        while (stack.empty() || *stack.peek() != wanted) {
+            if (next_car > n) {
+                return std::nullopt;  // 车都进过栈了，它还没到栈顶：被压在下面了
+            }
+            stack.push(next_car);
+            ++next_car;
+            ops.push_back(StackOp::Push);
+        }
+        (void)stack.pop();
+        ops.push_back(StackOp::Pop);
+    }
+    return ops;
+}
+```
+
+模拟用的就是本节的 `ArrayStack`，看栈顶用的是不拷贝的 `ArrayStack::peek`。「这个次序不可能」
+是可预期的结果，不是错误，所以返回 `std::nullopt` 而不是抛异常——与 `pop()` 在空栈上的口径一致。
+每辆车至多进栈、出栈各一次，整个判定是 $O(n)$ 的。
+
+测试对 $n = 1, \ldots, 7$ 穷举全部 5913 个排列，逐个核对三件事：合法序列的个数恰为
+1、2、5、14、42、132、429，即 Catalan 数 $C_n = \frac{(2n)!}{(n+1)!\,n!}$；判定结果与习题第 8 题的
+判据（不存在 $i < j < k$ 使 $p_j < p_k < p_i$）逐个一致；返回的操作序列用另一个栈独立重放，
+恰好得到目标次序。第 8 题的判据是一个 $O(n^3)$ 的三重循环，与这里的模拟过程不共用任何一行，
+所以两者一致才有分量。
 
 
 ## 本章小结

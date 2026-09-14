@@ -4,9 +4,12 @@
 // 递归 DFS 保留原书的教学结构；极深/病态树会耗尽调用栈，见 legacy.md 的风险说明。
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
 #include <functional>
+#include <memory>
 #include <optional>
+#include <stdexcept>
 #include <utility>
 
 namespace dsa {
@@ -188,7 +191,80 @@ public:
         return parent_of_impl(root_, wanted);
     }
 
+    // >>> rebuild
+    /// 由中序 + 后序序列重建二叉树（两个序列各 count 个元素，**关键码互不相同**）。
+    ///
+    /// 不自洽的输入一律抛 std::invalid_argument，绝不默默建出一棵错树：
+    /// 中序里有重复键、后序里出现中序没有的键、某个根落在当前中序区间之外。
+    /// 能建完就说明两个序列恰好是这棵树的中序与后序（归纳即得），不必再周游核对。
+    /// 要求 T 支持 operator<（用来排序查位置）。时间 O(n log n)，额外空间 O(n)。
+    static BinaryTree from_inorder_postorder(const T* inorder, const T* postorder, std::size_t count) {
+        return rebuild(inorder, postorder, count, Order::postorder);
+    }
+    /// 由前序 + 中序序列重建（本章上机题第 1 题）。契约同上。
+    static BinaryTree from_preorder_inorder(const T* preorder, const T* inorder, std::size_t count) {
+        return rebuild(inorder, preorder, count, Order::preorder);
+    }
+    // <<< rebuild
+
 private:
+    enum class Order { preorder, postorder };
+
+    // >>> rebuild-impl
+    /// 两种重建共用的主体。**不递归**：待建的子树用手写链式栈保存为「区间帧」，
+    /// 退化成链的输入也不会压穿调用栈。每一帧只记下标，不复制子数组。
+    static BinaryTree rebuild(const T* inorder, const T* other, std::size_t count, Order order) {
+        BinaryTree result;
+        if (count == 0) return result;
+        if (inorder == nullptr || other == nullptr) {
+            throw std::invalid_argument("rebuild: non-empty sequence given as null pointer");
+        }
+        // 位置查找表：中序下标按键排序，之后二分查位置。排好序顺便查出重复键。
+        std::unique_ptr<std::size_t[]> by_key(new std::size_t[count]);
+        for (std::size_t i = 0; i < count; ++i) by_key[i] = i;
+        const auto key_less = [inorder](std::size_t a, std::size_t b) { return inorder[a] < inorder[b]; };
+        std::sort(by_key.get(), by_key.get() + count, key_less);
+        for (std::size_t i = 1; i < count; ++i) {
+            if (!(inorder[by_key[i - 1]] < inorder[by_key[i]])) {
+                throw std::invalid_argument("rebuild: duplicate key in inorder sequence");
+            }
+        }
+        const auto position_in_inorder = [&](const T& key) {
+            const std::size_t* hit = std::lower_bound(by_key.get(), by_key.get() + count, key,
+                [inorder](std::size_t index, const T& k) { return inorder[index] < k; });
+            if (hit == by_key.get() + count || key < inorder[*hit]) {
+                throw std::invalid_argument("rebuild: key missing from inorder sequence");
+            }
+            return *hit;
+        };
+
+        // 一帧 = 「把中序 [in_begin, in_end) 与另一序列 [other_begin, …) 建成子树，挂到 *link」。
+        struct Frame { Node** link; std::size_t in_begin, in_end, other_begin; };
+        LinkedStack<Frame> pending;
+        pending.push(Frame{&result.root_, 0, count, 0});
+        while (auto frame = pending.pop()) {
+            const std::size_t size = frame->in_end - frame->in_begin;
+            if (size == 0) continue;                         // 空子树：*link 已是 nullptr
+            // 前序的根在区间最前，后序的根在区间最后。
+            const std::size_t root_at = order == Order::preorder ? frame->other_begin
+                                                                 : frame->other_begin + size - 1;
+            const std::size_t k = position_in_inorder(other[root_at]);
+            if (k < frame->in_begin || k >= frame->in_end) {
+                throw std::invalid_argument("rebuild: root lies outside its inorder range");
+            }
+            Node* const node = new Node(other[root_at]);
+            *frame->link = node;                             // 先挂上：再抛异常时由 result 统一释放
+            const std::size_t left_size = k - frame->in_begin;
+            // 左子树在另一序列里紧跟根（前序）或从区间头开始（后序），右子树接在左子树后面。
+            const std::size_t left_other = order == Order::preorder ? frame->other_begin + 1
+                                                                    : frame->other_begin;
+            pending.push(Frame{&node->right, k + 1, frame->in_end, left_other + left_size});
+            pending.push(Frame{&node->left, frame->in_begin, k, left_other});
+        }
+        return result;
+    }
+    // <<< rebuild-impl
+
     // >>> iterative-destroy
     /// 释放整棵树。**迭代实现**，栈深度恒定。
     ///

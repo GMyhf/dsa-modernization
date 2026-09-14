@@ -776,6 +776,134 @@ inline void merge_sort_optimized(std::vector<int>& values) {
 }
 ```
 
+### 归并排序的副产品：逆序对计数
+
+8.2.1 节分析直接插入排序的平均代价时定义过**逆置**：$i<j$ 而 $p_i>p_j$ 的一对元素。
+那里用它来数代价——处理第 $i$ 个记录时，内层循环向后挪位的次数恰好是它前面比它大的记录个数，
+所以**整趟直接插入排序的挪位次数就等于序列的逆置数**；再加上每趟暂存、回填各一次，总移动次数
+是「逆置数 $+2(n-1)$」，逆序输入时正是 8.2.1 节的 $(n-1)(n+4)/2$。反过来，想**求**一个序列的
+逆置数（常叫「逆序对数」），照着插入排序去数是 $\Theta(n^2)$。
+
+归并排序能在 $\Theta(n\log n)$ 内数完，而且只需在合并里多写一句。逆置 $(p_i, p_j)$ 要么两个元素
+都在左半段，要么都在右半段，要么一左一右：前两类由递归数掉，第三类在合并时数。两段各自有序，
+当右段的 `values[right]` **严格小于**左段的 `values[left]` 时，左段里还没输出的
+`[left, middle)` 全都比它大，一次记上 `middle - left` 个（写成闭区间 $[i, mid]$ 就是常见的
+$mid-i+1$）。相等时取左边、不计数：**相等元素不构成逆置**，这与归并排序稳定性来自同一个 `<`。
+
+```cpp file=code/ch08/sorting/modern.hpp#inversions
+// 归并排序的副产品（原书无清单）：逆置（逆序对）计数，Θ(n log n)。
+// 与 merge_ranges 同一个合并过程，只多一句计数：右段的 values[right] 严格小于
+// 左段的 values[left] 时，左段还没输出的 [left, middle) 都比它大，一次记 middle - left 个。
+// 相等时取左边、不计数——相等元素不构成逆置，这与稳定性是同一个 `<`。
+inline std::uint64_t merge_count_ranges(std::vector<int>& values, std::vector<int>& buffer,
+                                        std::size_t first, std::size_t middle, std::size_t last) {
+    std::uint64_t inversions = 0;
+    std::size_t left = first;
+    std::size_t right = middle;
+    std::size_t output = first;
+    while (left < middle && right < last) {
+        if (values[right] < values[left]) {
+            inversions += middle - left;
+            buffer[output++] = values[right++];
+        } else {
+            buffer[output++] = values[left++];
+        }
+    }
+    while (left < middle) buffer[output++] = values[left++];
+    while (right < last) buffer[output++] = values[right++];
+    for (std::size_t index = first; index < last; ++index) values[index] = buffer[index];
+    return inversions;
+}
+
+inline std::uint64_t count_inversions_range(std::vector<int>& values, std::vector<int>& buffer,
+                                            std::size_t first, std::size_t last) {
+    if (last - first < 2) return 0;
+    const std::size_t middle = first + (last - first) / 2;
+    return count_inversions_range(values, buffer, first, middle)
+         + count_inversions_range(values, buffer, middle, last)
+         + merge_count_ranges(values, buffer, first, middle, last);
+}
+
+// 按值传参：函数在自己的副本上归并，调用方的序列原样不动（计数是查询，不该顺手排序）。
+// 调用方若本来就要排序，写 count_inversions(std::move(v)) 即可省掉这次拷贝。
+// 返回 64 位：逆置数最多 n(n-1)/2，n >= 65537 时就超过 INT_MAX，用 int 累加是有符号溢出。
+inline std::uint64_t count_inversions(std::vector<int> values) {
+    std::vector<int> buffer(values.size());
+    return count_inversions_range(values, buffer, 0, values.size());
+}
+```
+
+```python file=code/ch08/sorting/modern.py#inversions
+# 归并排序的副产品（原书无清单）：逆置（逆序对）计数，Θ(n log n)。
+# 与 merge_ranges 同一个合并过程，只多一句计数：右段元素严格小于左段当前元素时，
+# 左段还没输出的 [left, middle) 都比它大，一次记 middle - left 个。
+def merge_count_ranges(values: list[int], buffer: list[int],
+                       first: int, middle: int, last: int) -> int:
+    inversions = 0
+    left, right, output = first, middle, first
+    while left < middle and right < last:
+        # 与 merge_ranges 同一个 `<`：相等时取左边、不计数——相等元素不构成逆置。
+        if values[right] < values[left]:
+            inversions += middle - left
+            buffer[output] = values[right]
+            right += 1
+        else:
+            buffer[output] = values[left]
+            left += 1
+        output += 1
+    while left < middle:
+        buffer[output] = values[left]
+        left += 1
+        output += 1
+    while right < last:
+        buffer[output] = values[right]
+        right += 1
+        output += 1
+    values[first:last] = buffer[first:last]
+    return inversions
+
+
+def count_inversions_range(values: list[int], buffer: list[int], first: int, last: int) -> int:
+    if last - first < 2:
+        return 0
+    middle = first + (last - first) // 2
+    return (count_inversions_range(values, buffer, first, middle)
+            + count_inversions_range(values, buffer, middle, last)
+            + merge_count_ranges(values, buffer, first, middle, last))
+
+
+# 在副本上归并，调用方的序列原样不动。Python 整数没有宽度，
+# C++ 版那个「n >= 65537 就溢出 int」的坑在这里不存在。
+def count_inversions(values: list[int]) -> int:
+    work = list(values)
+    buffer = [0] * len(work)
+    return count_inversions_range(work, buffer, 0, len(work))
+```
+
+两处设计值得点明：
+
+- **计数不顺手排序。** C++ 版按值传参、在副本上归并，调用方的序列原样不动；本来就要排序的调用方
+  写 `count_inversions(std::move(v))` 省掉这次拷贝。Python 版同样先 `list(values)` 再归并。
+- **结果必须是 64 位。** 逆置数最多 $n(n-1)/2$，$n \ge 65537$ 时就超过 `INT_MAX`，而机考的
+  $n$ 动辄 $10^5$。累加器写成 `int` 是有符号溢出：测试里 $n=70000$ 的严格递减序列应得
+  $2449965000$，改成 `int` 后 UBSan 档当场报 `signed integer overflow`，`-O2` 档不报任何错、
+  只是悄悄给出一个错数，由断言抓住；再加一条 $n=100000$（$4999950000$ 超过 32 位无符号上限），
+  连「换成 `unsigned`」这种不触发未定义行为的截断也一并锁住。Python 整数没有宽度，这个坑不存在。
+  在 OJ 上交 C++ 时，这一条就是「答案开 `long long`」。
+
+**变形题（留作练习）。** 求满足 $i<j$ 且 $a_i+a_j>b_i+b_j$ 的对数。移项得
+$a_i-b_i > b_j-a_j$，令 $c_i=a_i-b_i$，条件变成 $c_i > -c_j$：仍是「前面的数比后面的某个量大」，
+套用上面的框架，只是合并时拿左段的 $c_i$ 去比右段的 $-c_j$（先用双指针数完，再照常合并）。
+顺带可以注意到，这个条件等价于 $c_i+c_j>0$，对 $i$、$j$ 对称，所以「$i<j$」其实不起作用——
+把 $c$ 排序后双指针也能数，可以拿来对拍。
+
+**另一条路：离散化 + 树状数组。** 从左到右扫描，把每个值换成它在全体值中的名次（离散化），
+用树状数组维护「已扫过的值里各名次出现几次」；扫到 $a_j$ 时，前面比它大的个数就是
+「已扫过的个数 $-$ 名次不超过 $a_j$ 的个数」，查询与更新都是 $O(\log n)$。相等元素名次相同、
+落在「不超过」一侧，因此同样不计入逆置。本书第12章正文目前没有树状数组一节，
+可测实现在 `code/ch12/fenwick`（`FenwickTree::add` 单点加、`FenwickTree::prefix_sum` 前缀和）。
+两种做法代价同为 $\Theta(n\log n)$；归并法不需要离散化，树状数组法则能在序列动态追加时继续回答。
+
 ## 8.6 分配排序和索引排序
 
 本章要介绍的最后一种排序算法是**分配排序**（distribution sorting）。**这种排序算法的唯一特征是

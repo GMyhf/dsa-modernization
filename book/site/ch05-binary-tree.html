@@ -412,6 +412,78 @@ BST 中序: 1 3 4 6 7 8 10 14
 </tbody></table></div>
 <p>中序那一行值得多看一眼：它和原式长得像，但<strong>括号丢了</strong>，照它算出来的是 <span class="math">A<span class="bin">+</span>B<span class="bin">×</span>C<span class="bin">+</span>D</span>，已经不是原来的表达式。要印回可读的中缀式，必须在周游时按优先级补括号。前缀式和后缀式不需要括号——运算符出现的位置本身就定死了运算次序。</p>
 <p>第 3.1.4 节那个后缀表达式求值器（原书【算法3.5】）吃的正是这棵树后序周游的结果；那一节把中缀式转成后缀式的工作，换个说法就是「建出这棵表达式树，再后序周游一遍」。本章上机题第 5 题（原书第 2 题）「表达式二叉树」要做的就是这件事：读入一种表达式，在机内建出这棵树，再按要求输出另外两种。</p>
+<h4 id="由周游序列重建二叉树"><a class="anchor" href="#由周游序列重建二叉树">#</a>由周游序列重建二叉树</h4>
+<p>反过来问：给出周游序列，能不能把树建回来？<strong>一个序列不行</strong>——前序 <code>A B C</code> 既可以是一条左链，也可以是一条右链。<strong>前序（或后序）加中序就够了</strong>，前提是结点的关键码互不相同：后序的最后一个元素（前序的第一个元素）一定是根；在中序里找到根的位置 <span class="math">k</span>，它左边的就是左子树的全部结点，右边的就是右子树；左子树的结点个数 <span class="math">k</span> 一旦知道，前序或后序里哪一段属于左子树、哪一段属于右子树也就切开了。对两段各做一遍同样的事，直到区间为空。</p>
+<p>以图 5.5 为例：后序 <code>D G E B H I F C A</code> 的末元素 A 是根；A 在中序 <code>D B G E A C H F I</code> 里左边有 4 个结点，于是后序的前 4 个 <code>D G E B</code> 是左子树的后序、接下来的 <code>H I F C</code> 是右子树的后序，再各自对照中序的 <code>D B G E</code> 与 <code>C H F I</code> 递推下去。前序加后序则不够：前序 <code>A B</code>、后序 <code>B A</code> 说不清 B 是左孩子还是右孩子。</p>
+<p>这是一道典型的上机题（本章上机题第 1 题就是「由先序和中序序列重建二叉树」），写法有两处常见的坑。第一，每一层都把子数组拷贝出来再递归，总代价会退化成 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>；只传<strong>下标区间</strong>、在中序里<strong>查位置</strong>就不必拷贝。第二，<strong>输入不自洽时默默建出一棵树</strong>。中序 <code>1 2 3</code>、后序 <code>3 1 2</code> 不对应任何一棵二叉树：根是 2，左子树只该有结点 1，后序里对应的却是 3。朴素写法在这里要么越界、要么建出一棵中序根本不是 <code>1 2 3</code> 的树。工程版的处理与第 6 章由双标记先根序列重建森林（【算法6.10】）时一样：<strong>能当场指出输入错了，就不把错误合法化</strong>。检查只要一条——每次取出的根必须落在当前的中序区间里；键重复、键缺失、次序矛盾最后都会撞上它，重复键另外单独报出，好让报错说对原因。</p>
+<p>工程版把两种重建做成 <code>BinaryTree</code> 的两个静态工厂，返回一棵拥有全部结点的新树：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/modern.hpp">code/ch05/binary_tree/modern.hpp#rebuild</a></div><pre><code><span class="c">/// 由中序 + 后序序列重建二叉树（两个序列各 count 个元素，**关键码互不相同**）。</span>
+<span class="c">///</span>
+<span class="c">/// 不自洽的输入一律抛 std::invalid_argument，绝不默默建出一棵错树：</span>
+<span class="c">/// 中序里有重复键、后序里出现中序没有的键、某个根落在当前中序区间之外。</span>
+<span class="c">/// 能建完就说明两个序列恰好是这棵树的中序与后序（归纳即得），不必再周游核对。</span>
+<span class="c">/// 要求 T 支持 operator&lt;（用来排序查位置）。时间 O(n log n)，额外空间 O(n)。</span>
+<span class="k">static</span> BinaryTree from_inorder_postorder(<span class="k">const</span> T* inorder, <span class="k">const</span> T* postorder, std::<span class="t">size_t</span> count) {
+    <span class="k">return</span> rebuild(inorder, postorder, count, Order::postorder);
+}
+<span class="c">/// 由前序 + 中序序列重建（本章上机题第 1 题）。契约同上。</span>
+<span class="k">static</span> BinaryTree from_preorder_inorder(<span class="k">const</span> T* preorder, <span class="k">const</span> T* inorder, std::<span class="t">size_t</span> count) {
+    <span class="k">return</span> rebuild(inorder, preorder, count, Order::preorder);
+}</code></pre></div>
+<p>主体只写一份。它<strong>没有写成递归</strong>：待建的子树记成「中序区间 + 另一序列的起点 + 该挂到哪根指针上」这样一帧，压进本章那把手写链式栈。递归版的深度等于树高，退化成链的输入会和 5.6a 说的递归 <code>clone</code> 一样压穿运行栈；显式栈在堆上，测试里 20 万结点的纯左链照样重建。查位置用的是「把中序下标按键排序，再二分」，所以要求 <code>T</code> 支持 <code>&lt;</code>，总代价 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/modern.hpp">code/ch05/binary_tree/modern.hpp#rebuild-impl</a></div><pre><code><span class="c">/// 两种重建共用的主体。**不递归**：待建的子树用手写链式栈保存为「区间帧」，</span>
+<span class="c">/// 退化成链的输入也不会压穿调用栈。每一帧只记下标，不复制子数组。</span>
+<span class="k">static</span> BinaryTree rebuild(<span class="k">const</span> T* inorder, <span class="k">const</span> T* other, std::<span class="t">size_t</span> count, Order order) {
+    BinaryTree result;
+    <span class="k">if</span> (count == <span class="n">0</span>) <span class="k">return</span> result;
+    <span class="k">if</span> (inorder == <span class="k">nullptr</span> || other == <span class="k">nullptr</span>) {
+        <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;rebuild: non-empty sequence given as null pointer&quot;</span>);
+    }
+    <span class="c">// 位置查找表：中序下标按键排序，之后二分查位置。排好序顺便查出重复键。</span>
+    std::unique_ptr&lt;std::<span class="t">size_t</span>[]&gt; by_key(<span class="k">new</span> std::<span class="t">size_t</span>[count]);
+    <span class="k">for</span> (std::<span class="t">size_t</span> i = <span class="n">0</span>; i &lt; count; ++i) by_key[i] = i;
+    <span class="k">const</span> <span class="k">auto</span> key_less = [inorder](std::<span class="t">size_t</span> a, std::<span class="t">size_t</span> b) { <span class="k">return</span> inorder[a] &lt; inorder[b]; };
+    std::sort(by_key.get(), by_key.get() + count, key_less);
+    <span class="k">for</span> (std::<span class="t">size_t</span> i = <span class="n">1</span>; i &lt; count; ++i) {
+        <span class="k">if</span> (!(inorder[by_key[i - <span class="n">1</span>]] &lt; inorder[by_key[i]])) {
+            <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;rebuild: duplicate key in inorder sequence&quot;</span>);
+        }
+    }
+    <span class="k">const</span> <span class="k">auto</span> position_in_inorder = [&amp;](<span class="k">const</span> T&amp; key) {
+        <span class="k">const</span> std::<span class="t">size_t</span>* hit = std::lower_bound(by_key.get(), by_key.get() + count, key,
+            [inorder](std::<span class="t">size_t</span> index, <span class="k">const</span> T&amp; k) { <span class="k">return</span> inorder[index] &lt; k; });
+        <span class="k">if</span> (hit == by_key.get() + count || key &lt; inorder[*hit]) {
+            <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;rebuild: key missing from inorder sequence&quot;</span>);
+        }
+        <span class="k">return</span> *hit;
+    };
+
+    <span class="c">// 一帧 = 「把中序 [in_begin, in_end) 与另一序列 [other_begin, …) 建成子树，挂到 *link」。</span>
+    <span class="k">struct</span> Frame { Node** link; std::<span class="t">size_t</span> in_begin, in_end, other_begin; };
+    LinkedStack&lt;Frame&gt; pending;
+    pending.push(Frame{&amp;result.root_, <span class="n">0</span>, count, <span class="n">0</span>});
+    <span class="k">while</span> (<span class="k">auto</span> frame = pending.pop()) {
+        <span class="k">const</span> std::<span class="t">size_t</span> size = frame-&gt;in_end - frame-&gt;in_begin;
+        <span class="k">if</span> (size == <span class="n">0</span>) <span class="k">continue</span>;                         <span class="c">// 空子树：*link 已是 nullptr</span>
+        <span class="c">// 前序的根在区间最前，后序的根在区间最后。</span>
+        <span class="k">const</span> std::<span class="t">size_t</span> root_at = order == Order::preorder ? frame-&gt;other_begin
+                                                             : frame-&gt;other_begin + size - <span class="n">1</span>;
+        <span class="k">const</span> std::<span class="t">size_t</span> k = position_in_inorder(other[root_at]);
+        <span class="k">if</span> (k &lt; frame-&gt;in_begin || k &gt;= frame-&gt;in_end) {
+            <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;rebuild: root lies outside its inorder range&quot;</span>);
+        }
+        Node* <span class="k">const</span> node = <span class="k">new</span> Node(other[root_at]);
+        *frame-&gt;link = node;                             <span class="c">// 先挂上：再抛异常时由 result 统一释放</span>
+        <span class="k">const</span> std::<span class="t">size_t</span> left_size = k - frame-&gt;in_begin;
+        <span class="c">// 左子树在另一序列里紧跟根（前序）或从区间头开始（后序），右子树接在左子树后面。</span>
+        <span class="k">const</span> std::<span class="t">size_t</span> left_other = order == Order::preorder ? frame-&gt;other_begin + <span class="n">1</span>
+                                                                : frame-&gt;other_begin;
+        pending.push(Frame{&amp;node-&gt;right, k + <span class="n">1</span>, frame-&gt;in_end, left_other + left_size});
+        pending.push(Frame{&amp;node-&gt;left, frame-&gt;in_begin, k, left_other});
+    }
+    <span class="k">return</span> result;
+}</code></pre></div>
+<p>为什么「能建完就一定对」？对区间长度归纳：根取自区间的末端（后序）或首端（前序），左右两段恰好分走剩下的元素；若两段各自重建出的子树中序、后序（前序）与各自的区间一致，拼上根之后整棵树也一致。所以建完之后不必再周游一遍核对。测试用 400 棵随机树做往返：取序列、重建、再取四种序列（含层次序列，确认形状也一样）逐一比对。</p>
 <h3 id="523-广度优先周游二叉树"><a class="anchor" href="#523-广度优先周游二叉树">#</a>5.2.3 广度优先周游二叉树</h3>
 <p><strong>先把三种深度优先周游的代价算清楚。</strong> 不管采用哪种周游方式，对于有 <span class="math">n</span> 个结点的二叉树， 周游完树的所有元素都需要 <span class="math">O(n)</span> 时间——只要对每个结点的处理（<code>Visit</code> 的执行）时间是一个常数， 周游二叉树就可以在线性时间内完成。所需要的<strong>辅助空间为周游过程中栈的最大容量，即树的高度</strong>； 最坏情况下（每个结点只有一个孩子的「藤」），具有 <span class="math">n</span> 个结点的二叉树高度为 <span class="math">n</span>，所需空间复杂度 为 <span class="math">O(n)</span>。写成递归时这个栈就是运行栈，因此那句「树退化成藤会爆栈」不是危言耸听—— 本书 README 的「闸门证明不了什么」一节量过这个边界。</p>
 <p>深度优先是尽量往深走，广度优先是一层一层走：首先访问第 0 层（即根结点所在的层），然后从左到右 依次访问第 1 层的两个结点，依次类推——当第 <span class="math">i</span> 层的所有结点访问完之后，再从左至右依次访问 第 <span class="math">i<span class="bin">+</span><span class="upr">1</span></span> 层的各个结点。对图 5.5 那棵树，结果是 A B C D E F G H I。</p>
@@ -1269,6 +1341,42 @@ BST 中序: 1 3 4 6 7 8 10 14
 <p>优先队列的应用很广泛。例如，计算机的操作系统用一个优先队列来实现等候进程的调度管理：在一 系列等待执行的进程中，每一个进程可以用一个数值来表示它的优先级，优先级越高这个值就越小， 优先级高的进程应该最先获得处理器。另一个例子是打印机的输出任务队列：对于先后到达的、打印 几百页和只有几页的任务，一个合理的方法是先打印页数少的任务，这样做就是按照文件的大小来 排列打印任务的优先顺序。</p>
 <p>优先队列可以用多种方法实现，例如采用无序线性表或者有序线性表：无序表的插入可为 <span class="math">O(<span class="upr">1</span>)</span>， 但取最小值要 <span class="math">O(n)</span>；有序表取最小值可为 <span class="math">O(<span class="upr">1</span>)</span>，但插入要移动元素。<strong>堆是一种很好的优先队列 实现方法</strong>：一旦最小堆建成，其堆顶元素就满足关键码最小的要求，为快速查找和删除优先级最高的 元素创造条件；进行插入、删除等操作时，也能有效地保持堆的性质，从而确保优先队列的高效性。 具体地说，查看堆顶为 <span class="math">O(<span class="upr">1</span>)</span>，插入与移除堆顶为 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>，建堆为 <span class="math">O(n)</span>。</p>
 <p>本书的 <code>MinHeap&lt;T&gt;</code> 就是一个最小优先队列：<code>insert</code> 对应入队，<code>remove_min</code> 对应取出最高优先级任务，空队列以 <code>std::nullopt</code> 表示。Huffman 构造反复取两个最小权值，Dijkstra 和 Prim 则反复取当前距离或边权最小的候选；这些算法需要的是“下一项最优”，不需要把整个队列排序。若应用要求相同优先级保持到达顺序，还要把到达序号作为第二关键码显式存入元素。</p>
+<h4 id="对顶堆动态维护中位数"><a class="anchor" href="#对顶堆动态维护中位数">#</a>对顶堆：动态维护中位数</h4>
+<p>优先队列的一个经典上机题：数据一个一个到来，每来一个就要报出当前的中位数。每次排序是 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>；用两个堆可以做到插入 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>、查询 <span class="math">O(<span class="upr">1</span>)</span>。</p>
+<p>做法是把已到的数据劈成两半：<strong>较小的一半放进最大堆，较大的一半放进最小堆</strong>，并始终保持两件事——最大堆里的每个元素都不大于最小堆里的每个元素；两个堆一样大，或者最大堆多一个。于是中位数就是最大堆的堆顶。新元素不大于最大堆堆顶就进最大堆，否则进最小堆；进完之后若两堆的大小差出了规定，把多的那边的堆顶搬到另一边——一次搬一个就够，因为插入前两堆至多差 1。两个堆背靠背、堆顶相对，所以叫「对顶堆」。</p>
+<p>这里需要一个<strong>最大堆</strong>。工程版没有再写一个类，而是给 <code>MinHeap</code> 加了一个比较器模板参数，默认 <code>std::less&lt;T&gt;</code>；<code>MinHeap&lt;T, std::greater&lt;T&gt;&gt;</code> 的堆顶就是最大元素。原书代码5.11 那个堆的结构、上浮与下沉一行没变，只是把 <code>&lt;</code> 换成了 <code>compare_</code>。另外加了一个只看不拿的 <code>MinHeap::peek</code>，与第 3 章栈的 <code>peek</code> 同一个约定：返回指针，空堆为 <code>nullptr</code>，下一次插入或删除后失效。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/heap_huffman/modern.hpp">code/ch05/heap_huffman/modern.hpp#running-median</a></div><pre><code><span class="c">/// 对顶堆求动态中位数：较小的一半放进**最大堆** lower_，较大的一半放进**最小堆** upper_。</span>
+<span class="c">///</span>
+<span class="c">/// 不变式：lower_ 的每个元素 ≤ upper_ 的每个元素，且</span>
+<span class="c">///         lower_.size() == upper_.size() 或 lower_.size() == upper_.size() + 1。</span>
+<span class="c">/// 于是中位数永远是 lower_ 的堆顶。元素个数为偶数时取**下中位数**（第 n/2 小，从 1 数），</span>
+<span class="c">/// 不做两数平均——那需要 T 支持除法，而且整数平均会截断，调用方要平均就自己取两个堆顶。</span>
+<span class="c">/// insert 为 O(log n)，median 为 O(1)。</span>
+<span class="k">template</span> &lt;<span class="k">typename</span> T&gt;
+<span class="k">class</span> RunningMedian {
+<span class="k">public</span>:
+    <span class="t">void</span> insert(<span class="k">const</span> T&amp; value) {
+        <span class="k">if</span> (lower_.empty() || !(*lower_.peek() &lt; value)) lower_.insert(value);
+        <span class="k">else</span> upper_.insert(value);
+        rebalance();
+    }
+    <span class="c">/// 空时 std::nullopt。</span>
+    [[nodiscard]] std::optional&lt;T&gt; median() <span class="k">const</span> {
+        <span class="k">if</span> (<span class="k">const</span> T* top = lower_.peek()) <span class="k">return</span> *top;
+        <span class="k">return</span> std::nullopt;
+    }
+    [[nodiscard]] std::<span class="t">size_t</span> size() <span class="k">const</span> <span class="k">noexcept</span> { <span class="k">return</span> lower_.size() + upper_.size(); }
+
+<span class="k">private</span>:
+    <span class="c">/// 每次插入后两堆大小至多差 2，搬一个堆顶就回到不变式。</span>
+    <span class="t">void</span> rebalance() {
+        <span class="k">if</span> (lower_.size() &gt; upper_.size() + <span class="n">1</span>) upper_.insert(*lower_.remove_min());
+        <span class="k">else</span> <span class="k">if</span> (upper_.size() &gt; lower_.size()) lower_.insert(*upper_.remove_min());
+    }
+    MinHeap&lt;T, std::greater&lt;T&gt;&gt; lower_;   <span class="c">// 较小的一半，堆顶是其中最大的</span>
+    MinHeap&lt;T&gt; upper_;                    <span class="c">// 较大的一半，堆顶是其中最小的</span>
+};</code></pre></div>
+<p>元素个数为偶数时，<code>RunningMedian::median</code> 返回<strong>下中位数</strong>（排好序后第 <span class="math">n/<span class="upr">2</span></span> 个，从 1 数），不做两数平均：平均需要 <code>T</code> 支持除法，整数平均还会截断，要平均的调用方自己取两个堆顶即可。测试把每一次插入后的结果都与「复制一份排序取中间」对比，数据取自很小的值域，重复值很多；另有全升序、全降序两条，分别让新元素一直落进同一边、逼着每次都搬堆顶。</p>
 <h2 id="56-huffman-树及其应用"><a class="anchor" href="#56-huffman-树及其应用">#</a>5.6 Huffman 树及其应用</h2>
 <h3 id="为什么这一节没有-python-版-3"><a class="anchor" href="#为什么这一节没有-python-版-3">#</a>为什么这一节没有 Python 版</h3>
 <p>本节的 Huffman 教学实现同时承担树结点的所有权、优先队列数组和异常路径的清理；例如权值校验必须在第一次 <code>new</code> 之前完成，否则中途抛异常会泄漏已经建立的结点。Python 的 <code>heapq</code> 与垃圾回收会把这两个存储问题藏掉，留下的只是一个算法结果。因此这里不提供 Python 版，避免读者误以为两种语言承担的是同一层教学内容。</p>
@@ -1286,6 +1394,72 @@ BST 中序: 1 3 4 6 7 8 10 14
 <div class="codeblock" data-lang="text"><pre><code>==2738715==ERROR: LeakSanitizer: detected memory leaks
 Direct leak of 24 byte(s) in 1 object(s) allocated from:
     #1 HuffmanTree::HuffmanTree(int const*, unsigned long) teaching.hpp:180</code></pre></div>
+<h4 id="权值成批给出只求-wpl"><a class="anchor" href="#权值成批给出只求-wpl">#</a>权值成批给出：只求 WPL</h4>
+<p>另一类常见的上机题把输入换成「权 <span class="math">w<sub>i</sub></span> 出现了 <span class="math">c<sub>i</sub></span> 次」，<span class="math">c<sub>i</sub></span> 可以到 <span class="math"><span class="upr">10</span><sup><span class="upr">9</span></sup></span>，只问最小的带权路径长度。结点根本建不出来，要换两个想法。</p>
+<p><strong>第一，WPL 等于所有内部结点的权之和。</strong> 每个内部结点的权是它下面全部叶子的权之和，所以一个深度为 <span class="math">d</span> 的叶子，它的权在它的 <span class="math">d</span> 个祖先里各被算了一次，合起来恰好是「权 × 深度」。以原书的权 2、3、4、7 为例，三次合并得到的内部结点权是 5、9、16，<span class="math"><span class="upr">5</span><span class="bin">+</span><span class="upr">9</span><span class="bin">+</span><span class="upr">16</span><span class="rel">=</span><span class="upr">30</span></span>，与上面按深度算的一样。于是不必知道树的形状，只要把每次合并出的新权累加。</p>
+<p><strong>第二，同权的树可以整批合并。</strong> 若当前最小的权是 <span class="math">w</span>、有 <span class="math">c</span> 棵，前 <span class="math">⌊c/<span class="upr">2</span>⌋</span> 次合并取的一定都是两棵 <span class="math">w</span>（合并出的 <span class="math"><span class="upr">2</span>w</span> 不比 <span class="math">w</span> 小），一步就得到 <span class="math">⌊c/<span class="upr">2</span>⌋</span> 棵权为 <span class="math"><span class="upr">2</span>w</span> 的树，WPL 加上 <span class="math"><span class="upr">2</span>w⌊c/<span class="upr">2</span>⌋</span>。<span class="math">c</span> 为奇数时<strong>会余下一棵 <span class="math">w</span></strong>，它要留在堆里，和下一小的树合并——这正是最容易漏掉的一步，漏了结果就偏小。堆里放的是「(权, 棵数)」这样的组，取出一组时顺手把堆顶同权的组并进来。<span class="math"><span class="upr">10</span><sup><span class="upr">9</span></sup></span> 棵等权叶子每轮棵数减半，大约 30 轮就结束。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/heap_huffman/modern.hpp">code/ch05/heap_huffman/modern.hpp#huffman-wpl-batched</a></div><pre><code><span class="c">/// 一组同权叶子：weight 这个权出现了 count 次。</span>
+<span class="k">struct</span> WeightGroup {
+    std::uint64_t weight;
+    std::uint64_t count;
+};
+
+<span class="c">/// 只求 Huffman 树的带权路径长度，不建树——叶子数可达 1e9 量级，结点根本放不下。</span>
+<span class="c">///</span>
+<span class="c">/// 依据：WPL 等于**所有内部结点的权之和**（每个叶子的权在它的每个祖先里各被加一次，</span>
+<span class="c">/// 祖先个数正是它的深度）。所以只要把每次合并出的新权累加起来。</span>
+<span class="c">/// 又因为同权的若干棵树谁先合并都一样，最小的一组有 c 棵时，一次就合并出 c/2 棵</span>
+<span class="c">/// 权为 2w 的树；c 为奇数时剩下的那一棵要和**下一小**的树合并，不能丢。</span>
+<span class="c">/// 堆里放的是「组」，每轮组数不增或 count 减半，k 个输入组约 O(k log k + log n) 轮。</span>
+<span class="c">///</span>
+<span class="c">/// 溢出界：设总权 W = Σ weight·count、叶子数 n = Σ count，则 WPL ≤ W·⌈log2 n⌉。</span>
+<span class="c">/// 该乘积小于 2^64 时一定不溢出；否则中途任何一次加法/乘法溢出都抛 std::overflow_error，</span>
+<span class="c">/// 不返回回绕后的错数。count 为 0 的组忽略；叶子数 ≤ 1 时 WPL 为 0。</span>
+<span class="k">inline</span> std::uint64_t huffman_wpl_batched(<span class="k">const</span> WeightGroup* groups, std::<span class="t">size_t</span> group_count) {
+    <span class="k">if</span> (group_count != <span class="n">0</span> &amp;&amp; groups == <span class="k">nullptr</span>) {
+        <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;huffman_wpl_batched: non-empty input requires groups&quot;</span>);
+    }
+    <span class="k">struct</span> ByWeight {
+        std::uint64_t weight, count;
+        <span class="t">bool</span> <span class="k">operator</span>&lt;(<span class="k">const</span> ByWeight&amp; other) <span class="k">const</span> <span class="k">noexcept</span> { <span class="k">return</span> weight &lt; other.weight; }
+    };
+    <span class="k">const</span> <span class="k">auto</span> add = [](std::uint64_t a, std::uint64_t b) {
+        <span class="k">if</span> (a &gt; std::numeric_limits&lt;std::uint64_t&gt;::max() - b) <span class="k">throw</span> std::overflow_error(<span class="s">&quot;Huffman WPL overflows uint64&quot;</span>);
+        <span class="k">return</span> a + b;
+    };
+    <span class="k">const</span> <span class="k">auto</span> mul = [](std::uint64_t a, std::uint64_t b) {
+        <span class="k">if</span> (b != <span class="n">0</span> &amp;&amp; a &gt; std::numeric_limits&lt;std::uint64_t&gt;::max() / b) <span class="k">throw</span> std::overflow_error(<span class="s">&quot;Huffman WPL overflows uint64&quot;</span>);
+        <span class="k">return</span> a * b;
+    };
+
+    MinHeap&lt;ByWeight&gt; heap;
+    <span class="k">for</span> (std::<span class="t">size_t</span> i = <span class="n">0</span>; i &lt; group_count; ++i) {
+        <span class="k">if</span> (groups[i].count != <span class="n">0</span>) heap.insert(ByWeight{groups[i].weight, groups[i].count});
+    }
+    std::uint64_t wpl = <span class="n">0</span>;
+    <span class="k">while</span> (<span class="k">auto</span> smallest = heap.remove_min()) {
+        ByWeight group = *smallest;
+        <span class="k">while</span> (heap.peek() != <span class="k">nullptr</span> &amp;&amp; heap.peek()-&gt;weight == group.weight) {   <span class="c">// 同权的组并成一组</span>
+            group.count = add(group.count, heap.remove_min()-&gt;count);
+        }
+        <span class="k">if</span> (group.count == <span class="n">1</span>) {
+            <span class="k">auto</span> next = heap.remove_min();
+            <span class="k">if</span> (!next) <span class="k">break</span>;                              <span class="c">// 只剩一棵树：它就是根</span>
+            <span class="k">const</span> std::uint64_t merged = add(group.weight, next-&gt;weight);
+            wpl = add(wpl, merged);
+            heap.insert(ByWeight{merged, <span class="n">1</span>});
+            <span class="k">if</span> (next-&gt;count &gt; <span class="n">1</span>) heap.insert(ByWeight{next-&gt;weight, next-&gt;count - <span class="n">1</span>});
+        } <span class="k">else</span> {
+            <span class="k">const</span> std::uint64_t pairs = group.count / <span class="n">2</span>;
+            <span class="k">const</span> std::uint64_t merged = mul(group.weight, <span class="n">2</span>);
+            wpl = add(wpl, mul(merged, pairs));            <span class="c">// pairs 个内部结点，各权 2w</span>
+            <span class="k">if</span> (group.count % <span class="n">2</span> == <span class="n">1</span>) heap.insert(ByWeight{group.weight, <span class="n">1</span>});   <span class="c">// 奇数余下的一棵</span>
+            heap.insert(ByWeight{merged, pairs});
+        }
+    }
+    <span class="k">return</span> wpl;
+}</code></pre></div>
+<p>结果用 64 位无符号数。设总权 <span class="math">W<span class="rel">=</span>∑w<sub>i</sub>c<sub>i</sub></span>、叶子总数 <span class="math">n<span class="rel">=</span>∑c<sub>i</sub></span>，因为等权时尽量满的树深度不超过 <span class="math">⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>n⌉</span>，最优的 WPL 不超过 <span class="math">W⌈<span class="upr">log</span><sub><span class="upr">2</span></sub>n⌉</span>；这个数小于 <span class="math"><span class="upr">2</span><sup><span class="upr">64</span></sup></span> 就一定不溢出。超出时，中途的每一次加法和乘法都先检查，溢出就抛 <code>std::overflow_error</code>，不返回回绕后的错数。测试把几百组随机的小输入逐个展开成单个叶子，交给 5.5 那份教学版 <code>HuffmanTree::weighted_path_length</code> 真建树核对；<span class="math"><span class="upr">10</span><sup><span class="upr">9</span></sup></span> 棵等权叶子则与闭式公式 <span class="math">n⌊<span class="upr">log</span><sub><span class="upr">2</span></sub>n⌋<span class="bin">+</span><span class="upr">2</span>(n<span class="bin">−</span><span class="upr">2</span><sup>⌊<span class="upr">log</span><sub><span class="upr">2</span></sub>n⌋</sup>)</span> 核对。</p>
 <h3 id="562-huffman-编码"><a class="anchor" href="#562-huffman-编码">#</a>5.6.2 Huffman 编码</h3>
 <h4 id="编码与译码"><a class="anchor" href="#编码与译码">#</a>编码与译码</h4>
 <p>建出树只是半程。Huffman 树的<strong>用途</strong>是给字符编码，这一节把它走完。</p>

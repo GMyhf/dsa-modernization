@@ -23,6 +23,7 @@
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 namespace dsa {
 
@@ -286,5 +287,41 @@ template <typename T>
 void swap(ArrayStack<T>& a, ArrayStack<T>& b) noexcept {
     a.swap(b);
 }
+
+// >>> stack-sequence
+enum class StackOp { Push, Pop };
+
+/// 车辆 1, 2, …, n 依次进栈，途中随时可以出栈。问：出栈次序能否恰好是 pop_order？
+/// 能则返回一串操作（按这个次序做 Push / Pop 就得到它），不能返回 std::nullopt。
+///
+/// 做法是**拿本节的 ArrayStack 模拟一遍**，每一步都没有选择余地：
+///   下一个要出栈的车正在栈顶 —— 必须现在就出（再压一辆它就被盖住了）；
+///   还没进栈               —— 只能一辆辆往里压，直到它到栈顶；
+///   已经在栈里、却不在栈顶   —— 它上面压着别的车，这个次序不可能。
+/// 第三种情况不必单独判断：压完所有车还等不到它，就是它。
+///
+/// pop_order 里出现重复、缺号或越界的编号时同样返回 std::nullopt：
+/// 进栈的车两两不同，出栈次序只可能是 1..n 的一个排列。
+[[nodiscard]] inline std::optional<std::vector<StackOp>> stack_operations_for(
+        const std::vector<int>& pop_order) {
+    const int n = static_cast<int>(pop_order.size());
+    ArrayStack<int> stack;
+    std::vector<StackOp> ops;
+    int next_car = 1;  // 下一辆等着进栈的车
+    for (int wanted : pop_order) {
+        while (stack.empty() || *stack.peek() != wanted) {
+            if (next_car > n) {
+                return std::nullopt;  // 车都进过栈了，它还没到栈顶：被压在下面了
+            }
+            stack.push(next_car);
+            ++next_car;
+            ops.push_back(StackOp::Push);
+        }
+        (void)stack.pop();
+        ops.push_back(StackOp::Pop);
+    }
+    return ops;
+}
+// <<< stack-sequence
 
 }  // namespace dsa

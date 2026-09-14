@@ -140,6 +140,91 @@ def test_shortest_paths() -> None:
     check(lonely.floyd()[0][2] == modern.Graph.infinity, "算法7.9 到不了的顶点是无穷")
 
 
+def path_is_valid(path, source, target, weights, distance) -> bool:
+    """平局允许任选一条：只验首尾、每条边存在、边权和等于最短距离。"""
+    if not path or path[0] != source or path[-1] != target:
+        return False
+    total = 0
+    for previous, vertex in zip(path, path[1:]):
+        if weights[previous][vertex] is None:
+            return False
+        total += weights[previous][vertex]
+    return total == distance
+
+
+def path_or_none(tree, target):
+    """前驱乱记时 shortest_path 会抛——折成「没取到路径」，让具名断言去红，而不是整个测试崩掉。"""
+    try:
+        return modern.Graph.shortest_path(tree, target)
+    except ValueError:
+        return None
+
+
+def test_shortest_path_reconstruction() -> None:
+    graph = directed()
+    tree = graph.dijkstra_tree(0)
+    check(tree.distance == graph.dijkstra(0), "算法7.8 dijkstra_tree 距离与 dijkstra 相同")
+    check(tree.predecessor[0] is None, "算法7.8 源点没有前驱")
+    check(path_or_none(tree, 4) == [0, 1, 2, 3, 4], "算法7.8 唯一最短路 0→1→2→3→4")
+    check(path_or_none(tree, 0) == [0], "算法7.8 汇点即源点")
+    lonely = modern.Graph(3)
+    lonely.add_edge(0, 1, 4)
+    lonely_tree = lonely.dijkstra_tree(0)
+    check(modern.Graph.shortest_path(lonely_tree, 2) is None, "算法7.8 到不了返回 None")
+    check(lonely_tree.predecessor[2] is None, "算法7.8 到不了的顶点没有前驱")
+    raised = False
+    try:
+        modern.Graph.shortest_path(lonely_tree, 3)
+    except IndexError:
+        raised = True
+    check(raised, "算法7.8 shortest_path 越界汇点")
+    for label, patch in (("断掉", {4: None}), ("成环", {3: 4})):
+        predecessor = list(tree.predecessor)
+        for vertex, previous in patch.items():
+            predecessor[vertex] = previous
+        raised = False
+        try:
+            modern.Graph.shortest_path(modern.ShortestPathTree(0, tree.distance, predecessor), 4)
+        except ValueError:
+            raised = True
+        check(raised, f"算法7.8 {label}的前驱链被拒绝")
+
+    import random
+    rng = random.Random(20260914)
+    reachability = validity = distances = True
+    paths = 0
+    for round_index in range(300):
+        count = rng.randint(1, 8)
+        undirected_graph = round_index % 2 == 1
+        sample = modern.Graph(count)
+        weights = [[0 if a == b else None for b in range(count)] for a in range(count)]
+        for source in range(count):
+            for target in range(count):
+                if source == target or rng.random() >= 0.35:
+                    continue
+                weight = rng.randint(0, 4)
+                sample.add_edge(source, target, weight, not undirected_graph)
+                weights[source][target] = weight
+                if undirected_graph:
+                    weights[target][source] = weight
+        floyd = sample.floyd()
+        for source in range(count):
+            sample_tree = sample.dijkstra_tree(source)
+            distances = distances and sample_tree.distance == floyd[source]
+            for target in range(count):
+                found = path_or_none(sample_tree, target)
+                reachable = floyd[source][target] < modern.Graph.infinity
+                reachability = reachability and (found is not None) == reachable
+                if found is not None and reachable:
+                    paths += 1
+                    validity = validity and path_is_valid(found, source, target, weights,
+                                                          floyd[source][target])
+    check(distances, "算法7.8 随机图 dijkstra_tree 距离等于 Floyd")
+    check(reachability, "算法7.8 随机图 有路径当且仅当 Floyd 可达")
+    check(validity, "算法7.8 随机图 路径首尾正确、边都存在、边权和等于最短距离")
+    check(paths > 1000, "算法7.8 随机图 确实重建了足够多条路径")
+
+
 def minimum_spanning_weight() -> int:
     """穷举所有 4 条边的组合，作为独立裁判验 MST 的总权重。"""
     import itertools
@@ -195,6 +280,7 @@ def main() -> int:
     test_topological_sort()
     test_shortest_paths()
     test_minimum_spanning_tree()
+    test_shortest_path_reconstruction()
     shared = shared_cases.load()
     for case in shared:
         if case.expected_error == "invalid_argument":
@@ -210,13 +296,18 @@ def main() -> int:
                 raised = True
             check(raised, f"T-047 {case.name} exception")
         else:
-            count, edges = case.input.split("|", 1)
-            graph = modern.Graph(int(count))
-            for edge in edges.split(";"):
+            parts = case.input.split("|")
+            graph = modern.Graph(int(parts[0]))
+            for edge in parts[1].split(";"):
                 source, target, weight = shared_cases.integers(edge)
                 graph.add_edge(source, target, weight)
-            check(graph.dijkstra(0) == shared_cases.integers(case.expected),
-                  f"T-047 {case.name} distances")
+            if case.operation == "dijkstra_path":
+                path = path_or_none(graph.dijkstra_tree(0), int(parts[2]))
+                expected = None if case.expected == "none" else shared_cases.integers(case.expected)
+                check(path == expected, f"T-047 {case.name} path")
+            else:
+                check(graph.dijkstra(0) == shared_cases.integers(case.expected),
+                      f"T-047 {case.name} distances")
     print(f"共享用例: {len(shared)}")
     print(f"Graph(Python): {checks} 项断言，{failures} 失败")
     return 0 if failures == 0 else 1

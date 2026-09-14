@@ -13,6 +13,15 @@ class Edge:
     weight: int
 
 
+@dataclass(frozen=True)
+class ShortestPathTree:
+    """原书 Dist 类的 length 与 pre 两个域；源点和到不了的顶点前驱为 None。"""
+
+    source: int
+    distance: list[int]
+    predecessor: list[int | None]
+
+
 class Graph:
     """邻接矩阵图；不存在的边以 infinity 表示。"""
 
@@ -115,6 +124,45 @@ class Graph:
                     distance[target] = candidate
         return distance
     # <<< dijkstra
+
+    # >>> dijkstra-path
+    def dijkstra_tree(self, source: int) -> "ShortestPathTree":
+        """与 dijkstra 同一个算法，多记原书 Dist 的 pre 域：只在松弛成功时改前驱。"""
+        self._check_vertex(source)
+        distance = [self.infinity] * self.vertices
+        predecessor: list[int | None] = [None] * self.vertices
+        used = [False] * self.vertices
+        distance[source] = 0
+        for _ in range(self.vertices):
+            vertex = self._nearest(distance, used)
+            if vertex is None or distance[vertex] == self.infinity:
+                break
+            used[vertex] = True
+            for target in range(self.vertices):
+                candidate = distance[vertex] + self._adjacency[vertex][target]
+                if self._adjacency[vertex][target] < self.infinity and candidate < distance[target]:
+                    distance[target] = candidate
+                    predecessor[target] = vertex
+        return ShortestPathTree(source, distance, predecessor)
+
+    @staticmethod
+    def shortest_path(tree: "ShortestPathTree", target: int) -> list[int] | None:
+        """顺着 pre 从汇点走回源点再翻转；到不了返回 None，汇点即源点时是 [source]。"""
+        count = len(tree.distance)
+        if not 0 <= target < count or not 0 <= tree.source < count or len(tree.predecessor) != count:
+            raise IndexError("vertex")
+        if tree.distance[target] == Graph.infinity:
+            return None
+        path = [target]
+        vertex = target
+        while vertex != tree.source:
+            previous = tree.predecessor[vertex]
+            if previous is None or len(path) > count:
+                raise ValueError("broken predecessor chain")
+            vertex = previous
+            path.append(vertex)
+        return path[::-1]
+    # <<< dijkstra-path
 
     # >>> floyd
     def floyd(self) -> list[list[int]]:

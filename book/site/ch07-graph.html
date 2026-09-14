@@ -1019,6 +1019,102 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
             <span class="k">if</span> self._adjacency[vertex][target] &lt; self.infinity <span class="k">and</span> candidate &lt; distance[target]:
                 distance[target] = candidate
     <span class="k">return</span> distance</code></pre></div>
+<h4 id="把路径本身取出来"><a class="anchor" href="#把路径本身取出来">#</a>把路径本身取出来</h4>
+<p>上面的 <code>dijkstra</code> 只给距离。要输出路径，就像前文说的那样多记一个 <code>pre</code> 域，也就是原书 <code>Dist</code> 类里的 <code>pre</code>。<code>Graph::dijkstra_tree</code> 和 <code>dijkstra</code> 是同一个算法，只多了一句：<strong>只在松弛成功时</strong>把 <code>to</code> 的前驱设为 <code>from</code>。如果不管松没松弛都去改前驱，距离数组照样正确，但顺着前驱走出来的路径和距离对不上，甚至会走成环。源点没有前驱，到不了的顶点也没有前驱，所以前驱数组用 <code>std::optional</code>。</p>
+<p><code>Graph::shortest_path</code> 从汇点出发，顺着前驱倒着走回源点，再把序列反转过来。到不了时返回空；汇点就是源点时，路径只有源点一个顶点。前驱链断了或者成环，说明传进来的树已经坏了，这时抛 <code>std::invalid_argument</code>。有好几条等长的最短路径时，返回哪一条取决于顶点的扫描次序，所以测试不断言具体路径，只断言路径合法：首尾是源点和汇点，每一步都是图里真实存在的边，边权之和等于 Floyd 算出的最短距离。这项检查在随机小图上跑，边权取 0 到 4，并列和零权边都会大量出现。</p>
+<p>关于溢出：本章用 <code>int</code> 存距离，「无穷大」取 <code>INT_MAX/4</code>。松弛时两个加数都小于这个值，和小于 <code>INT_MAX/2</code>，不会溢出。代价是总长达到 <code>INT_MAX/4</code> 的路径会被当成到不了。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#dijkstra-path</a></div><pre><code><span class="c">/// 原书 Dist 类的 `length` 与 `pre` 两个域：到各点的距离，和最短路径上的前一个顶点。</span>
+<span class="c">/// 源点自己、以及到不了的顶点，没有前一个顶点（`std::nullopt`）。</span>
+<span class="k">struct</span> ShortestPathTree {
+    std::<span class="t">size_t</span> source;
+    std::vector&lt;<span class="t">int</span>&gt; distance;
+    std::vector&lt;std::optional&lt;std::<span class="t">size_t</span>&gt;&gt; predecessor;
+};
+
+<span class="c">/// 与 `dijkstra` 同一个算法，多记一个 `pre`：**只在松弛成功时**改前驱。</span>
+<span class="c">/// 溢出：两个加数都小于 infinity = INT_MAX/4，和小于 INT_MAX/2，不会溢出；</span>
+<span class="c">/// 代价是总长 &gt;= infinity 的路径会被当成「到不了」。</span>
+[[nodiscard]] ShortestPathTree dijkstra_tree(std::<span class="t">size_t</span> source) <span class="k">const</span> {
+    check_vertex(source);
+    ShortestPathTree tree{source, std::vector&lt;<span class="t">int</span>&gt;(vertices(), infinity),
+                          std::vector&lt;std::optional&lt;std::<span class="t">size_t</span>&gt;&gt;(vertices())};
+    std::vector&lt;<span class="t">bool</span>&gt; used(vertices());
+    tree.distance[source] = <span class="n">0</span>;
+    <span class="k">for</span> (std::<span class="t">size_t</span> count = <span class="n">0</span>; count &lt; vertices(); ++count) {
+        <span class="k">const</span> std::<span class="t">size_t</span> from = nearest_unvisited(tree.distance, used);
+        <span class="k">if</span> (from == vertices() || tree.distance[from] == infinity) {
+            <span class="k">break</span>;
+        }
+        used[from] = <span class="k">true</span>;
+        <span class="k">for</span> (std::<span class="t">size_t</span> to = <span class="n">0</span>; to &lt; vertices(); ++to) {
+            <span class="k">if</span> (adjacency_[from][to] &lt; infinity &amp;&amp;
+                tree.distance[to] &gt; tree.distance[from] + adjacency_[from][to]) {
+                tree.distance[to] = tree.distance[from] + adjacency_[from][to];
+                tree.predecessor[to] = from;
+            }
+        }
+    }
+    <span class="k">return</span> tree;
+}
+
+<span class="c">/// 顺着 `pre` 从汇点倒着走回源点，再把序列翻过来。到不了返回 `std::nullopt`；</span>
+<span class="c">/// 汇点就是源点时路径是 `{source}`。前驱链断了或成环，说明传进来的树是坏的。</span>
+[[nodiscard]] <span class="k">static</span> std::optional&lt;std::vector&lt;std::<span class="t">size_t</span>&gt;&gt; shortest_path(
+    <span class="k">const</span> ShortestPathTree&amp; tree, std::<span class="t">size_t</span> target) {
+    <span class="k">const</span> std::<span class="t">size_t</span> count = tree.distance.size();
+    <span class="k">if</span> (target &gt;= count || tree.source &gt;= count || tree.predecessor.size() != count) {
+        <span class="k">throw</span> std::out_of_range(<span class="s">&quot;vertex&quot;</span>);
+    }
+    <span class="k">if</span> (tree.distance[target] == infinity) {
+        <span class="k">return</span> std::nullopt;
+    }
+    std::vector&lt;std::<span class="t">size_t</span>&gt; path{target};
+    <span class="k">for</span> (std::<span class="t">size_t</span> vertex = target; vertex != tree.source;) {
+        <span class="k">if</span> (!tree.predecessor[vertex] || path.size() &gt; count) {
+            <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;broken predecessor chain&quot;</span>);
+        }
+        vertex = *tree.predecessor[vertex];
+        path.push_back(vertex);
+    }
+    std::reverse(path.begin(), path.end());
+    <span class="k">return</span> path;
+}</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.py">code/ch07/graph/modern.py#dijkstra-path</a></div><pre><code><span class="k">def</span> dijkstra_tree(self, source: <span class="t">int</span>) -&gt; <span class="s">&quot;ShortestPathTree&quot;</span>:
+    <span class="s">&quot;&quot;&quot;与 dijkstra 同一个算法，多记原书 Dist 的 pre 域：只在松弛成功时改前驱。&quot;&quot;&quot;</span>
+    self._check_vertex(source)
+    distance = [self.infinity] * self.vertices
+    predecessor: <span class="t">list</span>[<span class="t">int</span> | <span class="k">None</span>] = [<span class="k">None</span>] * self.vertices
+    used = [<span class="k">False</span>] * self.vertices
+    distance[source] = <span class="n">0</span>
+    <span class="k">for</span> _ <span class="k">in</span> <span class="t">range</span>(self.vertices):
+        vertex = self._nearest(distance, used)
+        <span class="k">if</span> vertex <span class="k">is</span> <span class="k">None</span> <span class="k">or</span> distance[vertex] == self.infinity:
+            <span class="k">break</span>
+        used[vertex] = <span class="k">True</span>
+        <span class="k">for</span> target <span class="k">in</span> <span class="t">range</span>(self.vertices):
+            candidate = distance[vertex] + self._adjacency[vertex][target]
+            <span class="k">if</span> self._adjacency[vertex][target] &lt; self.infinity <span class="k">and</span> candidate &lt; distance[target]:
+                distance[target] = candidate
+                predecessor[target] = vertex
+    <span class="k">return</span> ShortestPathTree(source, distance, predecessor)
+
+@staticmethod
+<span class="k">def</span> shortest_path(tree: <span class="s">&quot;ShortestPathTree&quot;</span>, target: <span class="t">int</span>) -&gt; <span class="t">list</span>[<span class="t">int</span>] | <span class="k">None</span>:
+    <span class="s">&quot;&quot;&quot;顺着 pre 从汇点走回源点再翻转；到不了返回 None，汇点即源点时是 [source]。&quot;&quot;&quot;</span>
+    count = <span class="t">len</span>(tree.distance)
+    <span class="k">if</span> <span class="k">not</span> <span class="n">0</span> &lt;= target &lt; count <span class="k">or</span> <span class="k">not</span> <span class="n">0</span> &lt;= tree.source &lt; count <span class="k">or</span> <span class="t">len</span>(tree.predecessor) != count:
+        <span class="k">raise</span> IndexError(<span class="s">&quot;vertex&quot;</span>)
+    <span class="k">if</span> tree.distance[target] == Graph.infinity:
+        <span class="k">return</span> <span class="k">None</span>
+    path = [target]
+    vertex = target
+    <span class="k">while</span> vertex != tree.source:
+        previous = tree.predecessor[vertex]
+        <span class="k">if</span> previous <span class="k">is</span> <span class="k">None</span> <span class="k">or</span> <span class="t">len</span>(path) &gt; count:
+            <span class="k">raise</span> ValueError(<span class="s">&quot;broken predecessor chain&quot;</span>)
+        vertex = previous
+        path.append(vertex)
+    <span class="k">return</span> path[::-<span class="n">1</span>]</code></pre></div>
 <h3 id="752-每对顶点之间的最短路径"><a class="anchor" href="#752-每对顶点之间的最短路径">#</a>7.5.2 每对顶点之间的最短路径</h3>
 <p>给定带权图 <span class="math">G<span class="rel">=</span>⟨V,E⟩</span>，要求对任意的顶点有序对 <span class="math">⟨v<sub>i</sub>,v<sub>j</sub>⟩</span> 找出从 <span class="math">v<sub>i</sub></span> 到 <span class="math">v<sub>j</sub></span> 的 最短路径，这个问题通常称为<strong>所有顶点对之间的最短路径</strong>（all-pairs shortest paths）问题。</p>
 <p>解决它可以每次以一个顶点为源点、重复执行 Dijkstra 算法 <span class="math">n</span> 次，时间复杂度为 <span class="math">O(n<sup><span class="upr">3</span></sup>)</span>。下面介绍 <strong>Floyd 算法</strong>，它是一个典型的<strong>动态规划法</strong>：先自底向上分别求解子问题的解，然后由这些子问题的解 得到原问题的解；时间复杂度也是 <span class="math">O(n<sup><span class="upr">3</span></sup>)</span>，但形式上比较简单。</p>
@@ -1176,6 +1272,9 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
             parent[left] = right
             result.append(edge)
     <span class="k">return</span> result <span class="k">if</span> <span class="t">len</span>(result) + <span class="n">1</span> == self.vertices <span class="k">else</span> <span class="k">None</span></code></pre></div>
+<p><strong>附：把 Kruskal 的过程倒过来用。</strong> 有一类题目给出一棵带权树，要求补成一个完全图，使这棵树是该完全图<strong>唯一</strong>的最小生成树，并使完全图的总权最小（边权为整数）。思路是按边权从小到大重放 Kruskal 的合并过程。处理树边 <span class="math">(u,v,w)</span> 时，<span class="math">u</span>、<span class="math">v</span> 所在的两个连通分量规模为 <span class="math">s<sub><span class="upr">1</span></sub></span>、<span class="math">s<sub><span class="upr">2</span></sub></span>，两个分量之间一共有 <span class="math">s<sub><span class="upr">1</span></sub><span class="bin">⋅</span>s<sub><span class="upr">2</span></sub></span> 对顶点。其中一对由这条树边连着，剩下的 <span class="math">s<sub><span class="upr">1</span></sub><span class="bin">⋅</span>s<sub><span class="upr">2</span></sub><span class="bin">−</span><span class="upr">1</span></span> 条边都必须比 <span class="math">w</span> 严格大，否则 Kruskal 可以改选它们，最小生成树就不唯一了。所以这些边最少取 <span class="math">w<span class="bin">+</span><span class="upr">1</span></span>，答案是</p>
+<div class="math math-display">∑<sub>(u,v,w)</sub>[ w<span class="bin">+</span>(w<span class="bin">+</span><span class="upr">1</span>)(s<sub><span class="upr">1</span></sub>s<sub><span class="upr">2</span></sub><span class="bin">−</span><span class="upr">1</span>) ]</div>
+<p>其中 <span class="math">s<sub><span class="upr">1</span></sub>s<sub><span class="upr">2</span></sub></span> 正是第 6 章 <code>ComponentCounter::connect</code> 的返回值（见 6.2.5 节）。如果题目只要求「是一棵最小生成树」而不要求唯一，把 <span class="math">w<span class="bin">+</span><span class="upr">1</span></span> 换成 <span class="math">w</span> 即可。</p>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
 <p>本章介绍了图的基本概念以及图的重要运算，<strong>重点是图的存储结构、图的周游、拓扑排序、最短路径、 最小生成树等相关算法</strong>。</p>
 <p>首先介绍了图的相关定义和抽象数据类型。图可以分为无向图和有向图，这两种图中含有一些对应的 概念，例如边和弧、度和出度/入度、连通分量和强连通分量等；在图的定义中还给出了子图、带权图等概念。</p>

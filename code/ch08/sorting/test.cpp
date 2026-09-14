@@ -79,6 +79,53 @@ void test_algorithm_specific_invariants() {
     check(dsa::sorting::insertion_index_sort({}).empty(), "算法8.14 empty index sort");
 }
 
+// 独立裁判：O(n²) 逐对数逆置。严格 `>`，相等元素不算。
+std::uint64_t brute_inversions(const std::vector<int>& values) {
+    std::uint64_t count = 0;
+    for (std::size_t i = 0; i < values.size(); ++i)
+        for (std::size_t j = i + 1; j < values.size(); ++j)
+            if (values[j] < values[i]) ++count;
+    return count;
+}
+
+std::vector<int> strictly_decreasing(int count) {
+    std::vector<int> values(static_cast<std::size_t>(count));
+    for (int i = 0; i < count; ++i) values[static_cast<std::size_t>(i)] = count - i;
+    return values;
+}
+
+void test_inversions() {
+    using dsa::sorting::count_inversions;
+    check(count_inversions({}) == 0, "逆序对 empty");
+    check(count_inversions({4, 4, 4, 4, 4}) == 0, "逆序对 equal elements are not inversions");
+    check(count_inversions({2, 1, 2, 1}) == 3, "逆序对 duplicates counted strictly");
+
+    std::vector<int> caller{5, 3, 5, 1};
+    check(count_inversions(caller) == 4 && caller == std::vector<int>({5, 3, 5, 1}),
+          "逆序对 caller's sequence untouched");
+
+    // 随机数组 + 小值域（大量重复）与暴力裁判逐一对拍。
+    bool agree = true;
+    for (unsigned seed = 1; seed <= 300; ++seed) {
+        const auto values = dsa::sorting::random_values(seed % 64, 6, seed);
+        if (count_inversions(values) != brute_inversions(values)) {
+            agree = false;
+            std::printf("  mismatch at seed %u\n", seed);
+            break;
+        }
+    }
+    check(agree, "逆序对 matches O(n^2) brute force on random duplicates");
+
+    // 溢出锁：n = 70000 严格递减，逆置数 n(n-1)/2 = 2449965000 > INT_MAX。
+    // 累加器若退回 int，-O0 下 UBSan 报 signed-integer-overflow，-O2 下截断成负数再转无符号，
+    // 两档都与期望值不等。再加一条 n = 100000（4999950000 > UINT32_MAX），
+    // 连「换成 unsigned 32 位」这种不报 UB 的截断也锁住。
+    const std::uint64_t n70k = count_inversions(strictly_decreasing(70000));
+    check(n70k == 2449965000ULL, "逆序对 n=70000 reversed exceeds INT_MAX");
+    check(n70k > static_cast<std::uint64_t>(std::numeric_limits<int>::max()), "逆序对 result wider than int");
+    check(count_inversions(strictly_decreasing(100000)) == 4999950000ULL,
+          "逆序对 n=100000 reversed exceeds UINT32_MAX");
+}
 
 // T-047：用例表由 code/support/shared_cases.hpp 读，**不再自己解析**。
 // 本单元原先手抄了一份解析：它能跑，但格式一变就会和另外十个单元静默分家——
@@ -94,6 +141,11 @@ void test_shared_cases() {
             continue;
         }
         auto values = dsa::shared_cases::integers(item.input);
+        if (item.operation == "inversions") {
+            check(dsa::sorting::count_inversions(values) == std::stoull(item.expected),
+                  "T-047 shared inversions");
+            continue;
+        }
         if (item.expected_error == "invalid_argument") {
             bool raised = false;
             try { dsa::sorting::counting_sort(values); }
@@ -129,6 +181,7 @@ int main() {
     test_index_sort();
     test_static_queue_and_tools();
     test_algorithm_specific_invariants();
+    test_inversions();
     test_shared_cases();
     std::printf("Sorting: %d 项断言，%d 失败\n", checks, failures);
     return failures == 0 ? 0 : 1;

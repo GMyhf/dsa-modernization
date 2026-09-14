@@ -629,6 +629,47 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
     std::vector&lt;std::<span class="t">size_t</span>&gt; parent_;
     std::vector&lt;std::<span class="t">size_t</span>&gt; size_;  <span class="c">// 原书 nCount：子树元素数目</span>
 };</code></pre></div>
+<h4 id="顺带数出连通分量和连通点对"><a class="anchor" href="#顺带数出连通分量和连通点对">#</a>顺带数出连通分量和连通点对</h4>
+<p>并查集最常见的用法是<strong>动态连通性</strong>：图的边一条条加进来，每加一条就要回答「现在有几个连通分量」「现在有多少对顶点互相连通」。两个数都不必重新数，合并时顺手维护即可：</p>
+<ul>
+<li><strong>连通分量数</strong>从 <span class="math">n</span> 开始，每次<strong>成功</strong>合并减 1；两端本来就在同一集合里的冗余边不改变它。</li>
+<li><strong>连通点对数</strong>从 0 开始。把规模为 <span class="math">s<sub><span class="upr">1</span></sub></span>、<span class="math">s<sub><span class="upr">2</span></sub></span> 的两个集合并成一个，新连通的无序点对恰好是 <span class="math">s<sub><span class="upr">1</span></sub><span class="bin">⋅</span>s<sub><span class="upr">2</span></sub></span> 对：一边任取一个、另一边任取一个。</li>
+</ul>
+<p>这里最容易错的是 <span class="math">s<sub><span class="upr">1</span></sub></span>、<span class="math">s<sub><span class="upr">2</span></sub></span> <strong>从哪里读</strong>。重量记在根上（原书的 <code>nCount</code> 只对根有意义），所以必须先 <code>find</code> 到根再读规模；拿边的端点直接去读 <code>size_</code>，读到的是某棵子树当年的旧规模。另一种错法是合并之后再读，那时两个规模已经加在了一起。下面这一层把两个规模都在合并<strong>之前</strong>经 <code>DisjointSet::set_size</code> 从根上读出。点对数用 64 位无符号整数：<span class="math">n</span> 个元素最多 <span class="math">n(n<span class="bin">−</span><span class="upr">1</span>)/<span class="upr">2</span></span> 对，32 位在 <span class="math">n</span> 约 9.3 万时就会溢出。</p>
+<p><code>ComponentCounter</code> 组合一个 <code>DisjointSet</code>，没有去改 <code>DisjointSet::unite</code>：合并规则保持上面的样子，计数是外面这一层的事。内部的并查集是私有的，调用方没办法绕过计数直接合并，两个数也就不会失真。<code>ComponentCounter::connect</code> 返回这条边新连通的点对数，冗余边返回 0；<code>ComponentCounter::components</code> 和 <code>ComponentCounter::connected_pairs</code> 都是 <span class="math">O(<span class="upr">1</span>)</span> 的查询。测试在 <span class="math">n<span class="rel">≤</span><span class="upr">30</span></span> 的随机边序列上每连一条边就用 BFS 暴力重数一遍，逐步对拍这两个数。第 7 章 Kruskal 算法一节的末尾有一个用到 <span class="math">s<sub><span class="upr">1</span></sub><span class="bin">⋅</span>s<sub><span class="upr">2</span></sub></span> 的例子。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp">code/ch06/general_tree/modern.hpp#component-counter</a></div><pre><code><span class="c">/// 并查集的一个常见用法：边一条条加进来，随时回答「现在有几个连通分量」</span>
+<span class="c">/// 「现在有多少对顶点互相连通」。两个数都在合并成功时 O(1) 维护。</span>
+<span class="c">///</span>
+<span class="c">/// 合并规模为 s1、s2 的两个集合，新连通的无序点对恰好是 s1·s2 对——</span>
+<span class="c">/// **两个规模都要在合并之前、从根上读**：读非根元素的 size_ 或读合并后的规模，都是错的。</span>
+<span class="c">/// 用 `std::uint64_t` 装点对数：n 个元素最多 n(n-1)/2 对，n 到 2^32 量级才会溢出。</span>
+<span class="c">///</span>
+<span class="c">/// 这里组合一个 `DisjointSet` 而不改动它：`unite` 保持原书的样子，计数是外面这一层的事。</span>
+<span class="c">/// 内部的并查集是私有的，所以不存在「绕过计数直接合并」把两个数弄脏的途径。</span>
+<span class="k">class</span> ComponentCounter {
+<span class="k">public</span>:
+    <span class="k">explicit</span> ComponentCounter(std::<span class="t">size_t</span> count) : sets_(count), component_count_(count) {}
+
+    <span class="c">/// 连一条边 (left, right)，返回因此**新**连通的点对数；两端本已连通时返回 0。</span>
+    std::uint64_t connect(std::<span class="t">size_t</span> left, std::<span class="t">size_t</span> right) {
+        <span class="k">const</span> std::uint64_t pairs =
+            <span class="k">static_cast</span>&lt;std::uint64_t&gt;(sets_.set_size(left)) * sets_.set_size(right);
+        <span class="k">if</span> (!sets_.unite(left, right)) {
+            <span class="k">return</span> <span class="n">0</span>;  <span class="c">// 冗余边：分量数不变，点对数不变</span>
+        }
+        --component_count_;
+        pair_total_ += pairs;
+        <span class="k">return</span> pairs;
+    }
+
+    [[nodiscard]] std::<span class="t">size_t</span> components() <span class="k">const</span> <span class="k">noexcept</span> { <span class="k">return</span> component_count_; }
+    [[nodiscard]] std::uint64_t connected_pairs() <span class="k">const</span> <span class="k">noexcept</span> { <span class="k">return</span> pair_total_; }
+
+<span class="k">private</span>:
+    DisjointSet sets_;
+    std::<span class="t">size_t</span> component_count_;
+    std::uint64_t pair_total_{<span class="n">0</span>};
+};</code></pre></div>
 <h2 id="63-树的顺序存储结构"><a class="anchor" href="#63-树的顺序存储结构">#</a>6.3 树的顺序存储结构</h2>
 <p><strong>顺序存储表示法存储树，要求把树中的结点按照一定的顺序存储到一片连续的存储单元中；为了能够 显示出树的逻辑结构，需要在结点表中包含足够的结构信息。</strong> 链式存储每个结点单独分配，指针占空间， 也不利于整块读写；而把结点按某一种周游次序排进数组，再用很少的附加信息记下「谁是下一个兄弟」 或「有几个孩子」，就能在连续空间里还原整棵树。</p>
 <p>下面介绍与树和森林的<strong>遍历次序</strong>相关的几种典型的顺序存储结构，都以图 6.5(a) 中所示的森林为例。 原书给了四种，思路都对；本章不另写一套未验证的实现，只把还原办法说清楚。</p>

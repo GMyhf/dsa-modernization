@@ -8,6 +8,7 @@
 `tools/check_code.py` 的 `check_d025` 只查实现文件。
 """
 
+import random
 import sys
 from pathlib import Path
 
@@ -246,6 +247,56 @@ def test_index_sort() -> None:
     check(order == list(range(6)), "算法8.15 Python 多环后索引仍复位")
 
 
+def brute_inversions(values: list[int]) -> int:
+    """独立裁判：O(n²) 逐对数逆置。严格 `>`，相等元素不算。"""
+    return sum(1 for i in range(len(values)) for j in range(i + 1, len(values))
+               if values[i] > values[j])
+
+
+class WriteCountingList(list):
+    """数自己被写了多少次的 list，用来观测直接插入排序的挪位次数。"""
+
+    writes = 0
+
+    def __setitem__(self, index, value):
+        WriteCountingList.writes += 1
+        list.__setitem__(self, index, value)
+
+
+def test_inversions() -> None:
+    check(modern.count_inversions([]) == 0, "逆序对 Python 空表")
+    check(modern.count_inversions([4, 4, 4, 4, 4]) == 0, "逆序对 Python 相等元素不算逆置")
+    check(modern.count_inversions([2, 1, 2, 1]) == 3, "逆序对 Python 重复元素严格计数")
+
+    caller = [5, 3, 5, 1]
+    check(modern.count_inversions(caller) == 4 and caller == [5, 3, 5, 1],
+          "逆序对 Python 不动调用方的序列")
+
+    rng = random.Random(2025)
+    agree = True
+    for _ in range(300):
+        data = [rng.randrange(6) for _ in range(rng.randrange(64))]
+        if modern.count_inversions(data) != brute_inversions(data):
+            agree = False
+            break
+    check(agree, "逆序对 Python 与 O(n²) 暴力裁判对拍（小值域、大量重复）")
+
+    # 与 C++ 侧同一个溢出锁的数值：Python 不会溢出，这里钉的是公式与实现本身。
+    n = 70_000
+    check(modern.count_inversions(list(range(n, 0, -1))) == 2_449_965_000,
+          "逆序对 Python n=70000 严格递减 = n(n-1)/2")
+
+    # 正文说「逆置数 = 直接插入排序内层循环的挪位次数」，这里直接数出来：
+    # insertion_sort 对每个 index 回填一次（n-1 次写），其余每次写都是一次挪位。
+    rng = random.Random(8)
+    data = [rng.randrange(10) for _ in range(200)]
+    values = WriteCountingList(data)
+    WriteCountingList.writes = 0
+    modern.insertion_sort(values)
+    check(WriteCountingList.writes - (len(data) - 1) == modern.count_inversions(data),
+          "逆序对 Python 等于直接插入排序的挪位次数")
+
+
 def test_shared_cases() -> int:
     """用例表由 support/shared_cases.py 读，**不再自己解析**（T-047）。
 
@@ -260,6 +311,10 @@ def test_shared_cases() -> int:
             check(modern.COUNTING_RANGE_LIMIT == int(case.expected), f"T-047 {case.name}")
             continue
         values = shared_cases.integers(case.input)
+        if case.operation == "inversions":
+            check(modern.count_inversions(values) == int(case.expected),
+                  f"T-047 {case.name} shared inversions")
+            continue
         if case.expected_error == "invalid_argument":
             raised = False
             try:
@@ -290,6 +345,7 @@ def main() -> int:
     test_radix_sorts()
     test_radix_does_not_depend_on_machine_word()
     test_index_sort()
+    test_inversions()
     test_shared_cases()
     print(f"Sorting(Python): {checks} 项断言，{failures} 失败")
     return 0 if failures == 0 else 1

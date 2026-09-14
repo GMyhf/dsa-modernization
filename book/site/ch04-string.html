@@ -814,6 +814,109 @@ std::string::find 对照         = 2</code></pre></div>
 <p>原书用 P = <code>&quot;abcdaabcab&quot;</code>（特征向量 <span class="math">{<span class="bin">−</span><span class="upr">1</span>,<span class="upr">0</span>,<span class="upr">0</span>,<span class="upr">0</span>,<span class="bin">−</span><span class="upr">1</span>,<span class="upr">1</span>,<span class="upr">0</span>,<span class="upr">0</span>,<span class="upr">3</span>,<span class="upr">0</span>}</span>）、T = <code>&quot;abcddabcababcdaabcababcdaabcabaa&quot;</code> 走了一遍完整过程：</p>
 <figure><img loading="lazy" src="../assets/scan/fig-4-12.png" alt="图 4.12 KMP 匹配示例"><figcaption>图 4.12 KMP 匹配示例</figcaption></figure>
 <p>图 4.12　KMP 匹配示例。第 1 趟比到第 5 次发现 <span class="math">P<sub><span class="upr">4</span></sub><span class="rel">≠</span>T<sub><span class="upr">4</span></sub></span>，<span class="math">P<sub><span class="upr">4</span></sub></span> 的特征值是 −1，模式右移 <span class="math"><span class="upr">4</span><span class="bin">−</span>(<span class="bin">−</span><span class="upr">1</span>)<span class="rel">=</span><span class="upr">5</span></span> 位；第 2 趟到第 9 次比较时 <span class="math">P<sub><span class="upr">3</span></sub><span class="rel">≠</span>T<sub><span class="upr">8</span></sub></span>，按特征值 0 右移 <span class="math"><span class="upr">3</span><span class="bin">−</span><span class="upr">0</span><span class="rel">=</span><span class="upr">3</span></span> 位；第 3 趟第 12 次比较时 <span class="math">P<sub><span class="upr">2</span></sub><span class="rel">≠</span>T<sub><span class="upr">10</span></sub></span>，右移 2 位；第 4 趟比到第 22 次匹配成功。<strong>整个过程中目标下标一次都没有回退</strong>——对照图 4.6 里被反复比较的那些字符，省下的就是这些。</p>
+<h3 id="kmp-的另一个用途求最小循环节"><a class="anchor" href="#kmp-的另一个用途求最小循环节">#</a>KMP 的另一个用途：求最小循环节</h3>
+<p>原书讲特征向量只为匹配服务。但它算出来的那个量——前缀里「最长的相同前缀与后缀」——本身还回答 另一个问题：<strong>一个串最短是由多长的一段反复拼成的？</strong> 程序设计上机考试里常见的「循环串」 「字符串乘方」「前缀中的周期」三类题，核心都是这一件事。</p>
+<p><strong>两个定义。</strong> 串 <span class="math">s</span> 长为 <span class="math">n</span>。既是 <span class="math">s</span> 的真前缀、又是 <span class="math">s</span> 的真后缀的子串叫 <span class="math">s</span> 的<strong>真边界</strong> （<code>abab</code> 的真边界有 <code>ab</code> 和空串）。正整数 <span class="math">p</span> 叫 <span class="math">s</span> 的<strong>周期</strong>，当且仅当对所有 <span class="math"><span class="upr">0</span><span class="rel">≤</span>i&lt;n<span class="bin">−</span>p</span> 都有 <span class="math">s<sub>i</sub><span class="rel">=</span>s<sub>i<span class="bin">+</span>p</sub></span>。</p>
+<p><strong>定理：<span class="math">s</span> 有长为 <span class="math">b</span> 的真边界，当且仅当 <span class="math">n<span class="bin">−</span>b</span> 是 <span class="math">s</span> 的周期。所以最小周期 = <span class="math">n</span> − 最长真边界的长度。</strong> 证明只需把两边展开：长为 <span class="math">b</span> 的真边界说的是 <span class="math">s<sub><span class="upr">0</span></sub>s<sub><span class="upr">1</span></sub>⋯s<sub>b<span class="bin">−</span><span class="upr">1</span></sub><span class="rel">=</span>s<sub>n<span class="bin">−</span>b</sub>s<sub>n<span class="bin">−</span>b<span class="bin">+</span><span class="upr">1</span></sub>⋯s<sub>n<span class="bin">−</span><span class="upr">1</span></sub></span>， 也就是对所有 <span class="math"><span class="upr">0</span><span class="rel">≤</span>i&lt;b</span> 有 <span class="math">s<sub>i</sub><span class="rel">=</span>s<sub>i<span class="bin">+</span>(n<span class="bin">−</span>b)</sub></span>；令 <span class="math">p<span class="rel">=</span>n<span class="bin">−</span>b</span>，这恰好是「对所有 <span class="math"><span class="upr">0</span><span class="rel">≤</span>i&lt;n<span class="bin">−</span>p</span> 有 <span class="math">s<sub>i</sub><span class="rel">=</span>s<sub>i<span class="bin">+</span>p</sub></span>」——<strong>同一组等式的两种读法</strong>。边界越长周期越短，最长的边界就对应最小的周期。</p>
+<p>三个例子：<code>abcabcabc</code> 的最长真边界是 <code>abcabc</code>，最小周期 <span class="math"><span class="upr">9</span><span class="bin">−</span><span class="upr">6</span><span class="rel">=</span><span class="upr">3</span></span>；<code>ababa</code> 的最长真边界是 <code>aba</code>， 最小周期 <span class="math"><span class="upr">5</span><span class="bin">−</span><span class="upr">3</span><span class="rel">=</span><span class="upr">2</span></span>，但 2 不整除 5，它<strong>不是</strong>某个串的整数次重复；<code>abcd</code> 没有非空真边界，最小周期就是 4。</p>
+<p><strong>边界长度怎么算。</strong> 4.3.2 节的特征向量回答的正是「前缀的最长相同前后缀有多长」，只是原书印的是 <strong>优化版</strong>。求周期要用去掉那一步优化的版本——回退链一模一样，只是不做 <code>next[i] = next[k]</code> 的借用：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/pattern_matching/modern.hpp">code/ch04/pattern_matching/modern.hpp#border-lengths</a></div><pre><code><span class="c">/// 未优化的失效函数：border[i] 是前缀 s[0..i] 的**最长真边界**长度——</span>
+<span class="c">/// 既是它的真前缀、又是它的真后缀的最长那一段有多长。</span>
+<span class="c">///</span>
+<span class="c">/// 这就是 build_next 去掉「优化」那一步之后的数，只是下标错开一位、没有 −1：</span>
+<span class="c">/// 未优化的 next[i+1] == border[i]。回退 `k = border[k - 1]` 与 build_next 的</span>
+<span class="c">/// `k = next[k]` 是同一个动作。</span>
+<span class="c">///</span>
+<span class="c">/// **求周期不能拿 build_next 代替它。** 优化版的 `next[i] = next[k]` 专为匹配服务：</span>
+<span class="c">/// 当 P[i] == P[k] 时它跳过一个注定失配的落点，于是 next[i] 不再是边界长度。</span>
+<span class="c">/// 例如 &quot;aaaa&quot; 的优化版 next 是 {−1,−1,−1,−1}，而边界长度是 {0,1,2,3}。</span>
+[[nodiscard]] <span class="k">inline</span> std::vector&lt;std::<span class="t">size_t</span>&gt; border_lengths(std::string_view s) {
+    <span class="k">const</span> std::<span class="t">size_t</span> n = s.size();
+    std::vector&lt;std::<span class="t">size_t</span>&gt; border(n);
+    <span class="k">for</span> (std::<span class="t">size_t</span> i = <span class="n">1</span>; i &lt; n; ++i) {
+        std::<span class="t">size_t</span> k = border[i - <span class="n">1</span>];  <span class="c">// 先试着把上一个前缀的最长边界延长一个字符</span>
+        <span class="k">while</span> (k &gt; <span class="n">0</span> &amp;&amp; s[i] != s[k]) {
+            k = border[k - <span class="n">1</span>];  <span class="c">// 延长不了，退到「边界的边界」再试</span>
+        }
+        <span class="k">if</span> (s[i] == s[k]) {
+            ++k;
+        }
+        border[i] = k;
+    }
+    <span class="k">return</span> border;
+}</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/pattern_matching/modern.py">code/ch04/pattern_matching/modern.py#border-lengths</a></div><pre><code><span class="k">def</span> border_lengths(s: <span class="t">str</span>) -&gt; <span class="t">list</span>[<span class="t">int</span>]:
+    <span class="s">&quot;&quot;&quot;未优化的失效函数：border[i] 是前缀 s[0..i] 的最长真边界长度。
+
+    求周期不能拿 build_next 代替：优化版 next[i] = next[k] 不再是边界长度，
+    例如 &quot;aaaa&quot; 的优化版 next 是 [-1, -1, -1, -1]，边界长度是 [0, 1, 2, 3]。
+    &quot;&quot;&quot;</span>
+    border = [<span class="n">0</span>] * <span class="t">len</span>(s)
+    <span class="k">for</span> i <span class="k">in</span> <span class="t">range</span>(<span class="n">1</span>, <span class="t">len</span>(s)):
+        k = border[i - <span class="n">1</span>]
+        <span class="k">while</span> k &gt; <span class="n">0</span> <span class="k">and</span> s[i] != s[k]:
+            k = border[k - <span class="n">1</span>]
+        <span class="k">if</span> s[i] == s[k]:
+            k += <span class="n">1</span>
+        border[i] = k
+    <span class="k">return</span> border</code></pre></div>
+<p><strong>陷阱一：原书的优化版 next 不能拿来求周期。</strong> <code>next[i] = next[k]</code> 是专为匹配做的：<span class="math">P<sub>i</sub><span class="rel">=</span>P<sub>k</sub></span> 时， 退到 <span class="math">k</span> 注定再失配一次，于是直接借用 <code>next[k]</code> 跳过这个落点。对匹配而言那个落点没用，对周期而言 它恰恰是答案。<code>aaaa</code> 的优化版 next 是 <span class="math">{<span class="bin">−</span><span class="upr">1</span>,<span class="bin">−</span><span class="upr">1</span>,<span class="bin">−</span><span class="upr">1</span>,<span class="bin">−</span><span class="upr">1</span>}</span>，而边界长度是 <span class="math">{<span class="upr">0</span>,<span class="upr">1</span>,<span class="upr">2</span>,<span class="upr">3</span>}</span>；拿 「前缀长 − next」去算前缀 <code>aaa</code> 的周期，得到 <span class="math"><span class="upr">3</span><span class="bin">−</span>(<span class="bin">−</span><span class="upr">1</span>)<span class="rel">=</span><span class="upr">4</span></span>，比前缀本身还长，正确答案是 1。 本书的测试在 <span class="math">{a,b}</span> 上长度不超过 10 的全部串、全部前缀上统计过：优化版给出错误周期的前缀 <strong>数以千计</strong>，这不是个别串的巧合。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/pattern_matching/modern.hpp">code/ch04/pattern_matching/modern.hpp#minimal-period</a></div><pre><code><span class="c">/// 最小周期 p：满足 s[i] == s[i+p]（对所有 0 ≤ i &lt; n−p）的最小正整数。</span>
+<span class="c">/// 定理：p = n − （整串的最长真边界长度）。空串约定返回 0。</span>
+<span class="c">///</span>
+<span class="c">/// 注意 p 不一定整除 n：&quot;ababa&quot; 的最小周期是 2，但它不是某个串重复若干次。</span>
+[[nodiscard]] <span class="k">inline</span> std::<span class="t">size_t</span> minimal_period(std::string_view s) {
+    <span class="k">const</span> std::<span class="t">size_t</span> n = s.size();
+    <span class="k">if</span> (n == <span class="n">0</span>) {
+        <span class="k">return</span> <span class="n">0</span>;
+    }
+    <span class="k">return</span> n - border_lengths(s)[n - <span class="n">1</span>];
+}
+
+<span class="c">/// s 能否写成某个**更短**的串重复至少两次（「循环串」问题）。</span>
+<span class="c">///</span>
+<span class="c">/// 两个条件缺一不可：</span>
+<span class="c">///   n % p == 0 —— 周期不整除长度就拼不回整串（&quot;ababa&quot;）；</span>
+<span class="c">///   p &lt; n      —— 边界为 0 时 p == n，而 n % n == 0 **恒成立**，</span>
+<span class="c">///                 漏掉这一条会把 &quot;abcd&quot; 这种毫无重复的串也判成循环串。</span>
+[[nodiscard]] <span class="k">inline</span> <span class="t">bool</span> is_repetition(std::string_view s) {
+    <span class="k">const</span> std::<span class="t">size_t</span> n = s.size();
+    <span class="k">const</span> std::<span class="t">size_t</span> p = minimal_period(s);
+    <span class="k">return</span> p &lt; n &amp;&amp; n % p == <span class="n">0</span>;
+}
+
+<span class="c">/// 最大的 K，使 s 恰好是某个串重复 K 次（「字符串乘方」问题）。</span>
+<span class="c">/// 不是循环串时 K = 1（s 就是它自己重复一次）；空串约定返回 0。</span>
+[[nodiscard]] <span class="k">inline</span> std::<span class="t">size_t</span> repetition_count(std::string_view s) {
+    <span class="k">if</span> (s.empty()) {
+        <span class="k">return</span> <span class="n">0</span>;
+    }
+    <span class="k">return</span> is_repetition(s) ? s.size() / minimal_period(s) : <span class="n">1</span>;
+}</code></pre></div>
+<div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/pattern_matching/modern.py">code/ch04/pattern_matching/modern.py#minimal-period</a></div><pre><code><span class="k">def</span> minimal_period(s: <span class="t">str</span>) -&gt; <span class="t">int</span>:
+    <span class="s">&quot;&quot;&quot;最小周期 p = n - 整串的最长真边界长度；空串约定返回 0。&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="k">not</span> s:
+        <span class="k">return</span> <span class="n">0</span>
+    <span class="k">return</span> <span class="t">len</span>(s) - border_lengths(s)[-<span class="n">1</span>]
+
+
+<span class="k">def</span> is_repetition(s: <span class="t">str</span>) -&gt; <span class="t">bool</span>:
+    <span class="s">&quot;&quot;&quot;s 能否写成更短的串重复至少两次。
+
+    p &lt; n 不能省：边界为 0 时 p == n，而 n % n == 0 恒成立。
+    &quot;&quot;&quot;</span>
+    p = minimal_period(s)
+    <span class="k">return</span> p &lt; <span class="t">len</span>(s) <span class="k">and</span> <span class="t">len</span>(s) % p == <span class="n">0</span>
+
+
+<span class="k">def</span> repetition_count(s: <span class="t">str</span>) -&gt; <span class="t">int</span>:
+    <span class="s">&quot;&quot;&quot;最大的 K，使 s 是某个串重复 K 次；不是循环串时为 1，空串为 0。&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="k">not</span> s:
+        <span class="k">return</span> <span class="n">0</span>
+    <span class="k">return</span> <span class="t">len</span>(s) // minimal_period(s) <span class="k">if</span> is_repetition(s) <span class="k">else</span> <span class="n">1</span></code></pre></div>
+<p><strong>陷阱二：边界为 0 时，「整除」不等于「循环」。</strong> 判断 <span class="math">s</span> 是否由一个更短的串重复而成，要同时满足 <span class="math">n&thinsp;<span class="upr">bmod</span>&thinsp;p<span class="rel">=</span><span class="upr">0</span></span> 与 <span class="math">p&lt;n</span>。边界为 0 时 <span class="math">p<span class="rel">=</span>n</span>，而 <span class="math">n&thinsp;<span class="upr">bmod</span>&thinsp;n<span class="rel">=</span><span class="upr">0</span></span> <strong>恒成立</strong>——只写第一个条件， <code>abcd</code> 就被当成了循环串。「前缀中的周期」一类题要逐个前缀报出重复次数 <span class="math">K&gt;<span class="upr">1</span></span> 的那些，漏了这一条， 每个没有边界的前缀都会被报出来。</p>
+<p><strong>三类题怎么落到这组函数上。</strong> 循环串就是 <code>is_repetition</code>；字符串乘方（最大的 <span class="math">K</span> 使 <span class="math">s</span> 是某串重复 <span class="math">K</span> 次）就是 <code>repetition_count</code>；前缀中的周期，对 <code>border_lengths</code> 的每个下标 <span class="math">i</span>，拿长为 <span class="math">i<span class="bin">+</span><span class="upr">1</span></span> 的 前缀套同一条判断即可——整个串只算一遍失效函数，总代价 <span class="math">O(n)</span>。</p>
+<p><strong>测试怎么证伪它。</strong> 独立参照物是周期的定义本身：逐个试 <span class="math">p<span class="rel">=</span><span class="upr">1</span>,<span class="upr">2</span>,…</span> 的 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span> 暴力解。 在 <span class="math">{a,b}</span> 上长度 0 到 10 的全部 2047 个串上，<code>minimal_period</code>、<code>repetition_count</code>、<code>is_repetition</code> 与暴力解逐个对拍，C++ 与 Python 两侧各跑一遍；两个陷阱各有专门的断言——把实现改成用优化版 next，或者删掉 <code>p &lt; n</code>，测试当场变红。</p>
 <h2 id="与原书的对照"><a class="anchor" href="#与原书的对照">#</a>与原书的对照</h2>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">原书</th>
@@ -847,7 +950,7 @@ std::string::find 对照         = 2</code></pre></div>
 </tr>
 </tbody></table></div>
 <p><strong>刻意没改的</strong>：朴素匹配仍是回溯式的；next 仍是原书的优化版（图4.11 对的是这一版）； KMP 的 next 仍由调用方传入并可跨目标复用。这三条是本节全部的教学内容。</p>
-<p>完整实现见 <code>code/ch04/pattern_matching/modern.hpp</code>，测试见同目录 <code>test.cpp</code> （56 项断言，含 3000 组随机对拍；用 <code>python3 tools/check_code.py</code> 在 <code>-Werror</code> + ASan/UBSan 与 <code>-O2</code> 两种构建下各跑一遍）。</p>
+<p>完整实现见 <code>code/ch04/pattern_matching/modern.hpp</code>，测试见同目录 <code>test.cpp</code> （92 项断言，含 3000 组随机对拍与最小周期的 2047 串穷举；用 <code>python3 tools/check_code.py</code> 在 <code>-Werror</code> + ASan/UBSan 与 <code>-O2</code> 两种构建下各跑一遍）。</p>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
 <p><strong>字符串是由零个或多个字符顺序排列组成的有限序列。</strong> 它是一种特殊的线性表，其特殊性主要体现在 组成表的每个元素均为一个字符，以及与此相应的一些特殊操作。一个字符串中所包含的字符的个数为 串的长度，长度为零的字符串称为空字符串；主字符串 <span class="math">S<sub><span class="upr">1</span></sub></span> 中若干个连续字符组成的子序列 <span class="math">S<sub><span class="upr">2</span></sub></span> 被称为 <span class="math">S<sub><span class="upr">1</span></sub></span> 的子串，而 <span class="math">S<sub><span class="upr">1</span></sub></span> 被称为 <span class="math">S<sub><span class="upr">2</span></sub></span> 的主串。</p>
 <p><strong>选择字符串的存储结构时要考虑字符串的变长特点。</strong> 顺序存储使用类型为 <code>char</code> 的一维定长数组， 访问字符串中的单个字符或连续的一组字符比较容易，但进行插入和删除（增减字符）操作就不太方便， 因为需要移动相关的字符。<strong>为了更方便地处理字符串、避免静态定长字符串数组的问题，有些字符串类的 存储结构和实现方案提供了动态的字符串存储空间管理。</strong></p>
@@ -877,7 +980,7 @@ std::string::find 对照         = 2</code></pre></div>
 <p>要求和提示：<strong>必须实现查找字符串的操作（用 KMP 或其他模式匹配算法），不允许用编程环境所提供 的查找算法</strong>（可以用函数重载）；有能力的同学可以支持 <code>*</code>、<code>?</code> 等通配符；本题不要求做图形界面， 建议实现普通的字符界面编辑器，注意界面简单友好；允许使用编程环境提供的图形包与字符串类； 可以研究网上开源代码包，但最好不要直接采用，可以在详细说明自己引用了哪些包中哪些代码段的 情况下进行局部引用；统计自己编写的代码行数时，开源代码包、编程环境生成的代码框架等不能计算 在内。</p>
 <div class="pagenav"><a href="ch03-stack.html"><span class="dir">← 上一篇</span>第3章 栈与队列</a><a href="ch05-binary-tree.html" style="text-align:right"><span class="dir">下一篇 →</span>第5章 二叉树</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#41-字符串的基本概念">4.1 字符串的基本概念</a><a href="#411-字符编码" class="sub">4.1.1 字符编码</a><a href="#412-字符的编码顺序" class="sub">4.1.2 字符的编码顺序</a><a href="#42-字符串的存储结构和实现">4.2 字符串的存储结构和实现</a><a href="#为什么这一节没有-python-版" class="sub">为什么这一节没有 Python 版</a><a href="#421-字符串的顺序存储" class="sub">4.2.1 字符串的顺序存储</a><a href="#422-字符串类-class-string-的存储结构" class="sub">4.2.2 字符串类 class String 的存储结构</a><a href="#423-字符串运算的实现" class="sub">4.2.3 字符串运算的实现</a><a href="#42a-进阶选读从教学版到工程版" class="sub">4.2a 进阶（选读）：从教学版到工程版</a><a href="#43-字符串的模式匹配">4.3 字符串的模式匹配</a><a href="#431-朴素的模式匹配算法" class="sub">4.3.1 朴素的模式匹配算法</a><a href="#432-字符串的特征向量" class="sub">4.3.2 字符串的特征向量</a><a href="#433-kmp-模式匹配算法" class="sub">4.3.3 KMP 模式匹配算法</a><a href="#与原书的对照">与原书的对照</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#41-字符串的基本概念">4.1 字符串的基本概念</a><a href="#411-字符编码" class="sub">4.1.1 字符编码</a><a href="#412-字符的编码顺序" class="sub">4.1.2 字符的编码顺序</a><a href="#42-字符串的存储结构和实现">4.2 字符串的存储结构和实现</a><a href="#为什么这一节没有-python-版" class="sub">为什么这一节没有 Python 版</a><a href="#421-字符串的顺序存储" class="sub">4.2.1 字符串的顺序存储</a><a href="#422-字符串类-class-string-的存储结构" class="sub">4.2.2 字符串类 class String 的存储结构</a><a href="#423-字符串运算的实现" class="sub">4.2.3 字符串运算的实现</a><a href="#42a-进阶选读从教学版到工程版" class="sub">4.2a 进阶（选读）：从教学版到工程版</a><a href="#43-字符串的模式匹配">4.3 字符串的模式匹配</a><a href="#431-朴素的模式匹配算法" class="sub">4.3.1 朴素的模式匹配算法</a><a href="#432-字符串的特征向量" class="sub">4.3.2 字符串的特征向量</a><a href="#433-kmp-模式匹配算法" class="sub">4.3.3 KMP 模式匹配算法</a><a href="#kmp-的另一个用途求最小循环节" class="sub">KMP 的另一个用途：求最小循环节</a><a href="#与原书的对照">与原书的对照</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch04-string.md</code> 生成

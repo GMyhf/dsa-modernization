@@ -1,6 +1,8 @@
 #include "modern.hpp"
 
+#include <cstdint>
 #include <cstdio>
+#include <random>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -323,6 +325,80 @@ void test_weighted_union_tie_break() {
     check(reversed.find(3) == 2, "结果与参数顺序无关，仍是 3 挂到 2 下");
 }
 
+// 连通分量与连通点对：每连一条边后，拿「边表 + BFS」暴力数一遍对拍。
+// 变异判据：读非根元素的规模（学生常见错）、在冗余边上也减分量数——两者都要红。
+struct BruteCount {
+    std::size_t components;
+    std::uint64_t pairs;
+};
+BruteCount brute_force(std::size_t count, const std::vector<std::pair<std::size_t, std::size_t>>& edges) {
+    std::vector<std::vector<std::size_t>> adjacent(count);
+    for (const auto& edge : edges) {
+        adjacent[edge.first].push_back(edge.second);
+        adjacent[edge.second].push_back(edge.first);
+    }
+    std::vector<bool> seen(count);
+    BruteCount result{0, 0};
+    for (std::size_t start = 0; start < count; ++start) {
+        if (seen[start]) continue;
+        ++result.components;
+        std::vector<std::size_t> queue{start};
+        seen[start] = true;
+        for (std::size_t head = 0; head < queue.size(); ++head) {
+            for (std::size_t next : adjacent[queue[head]]) {
+                if (!seen[next]) { seen[next] = true; queue.push_back(next); }
+            }
+        }
+        const std::uint64_t size = queue.size();
+        result.pairs += size * (size - 1) / 2;
+    }
+    return result;
+}
+
+void test_component_counter() {
+    dsa::ComponentCounter counter(4);
+    check(counter.components() == 4 && counter.connected_pairs() == 0, "6.2.5 计数 初始 n 个分量、0 对");
+    check(counter.connect(0, 1) == 1, "6.2.5 计数 1×1 新增 1 对");
+    check(counter.connect(2, 3) == 1, "6.2.5 计数 另一组 1×1");
+    check(counter.connect(1, 3) == 4, "6.2.5 计数 经非根元素合并 2×2 新增 4 对");
+    check(counter.components() == 1 && counter.connected_pairs() == 6, "6.2.5 计数 全连通 C(4,2)=6");
+    check(counter.connect(0, 3) == 0, "6.2.5 计数 冗余边新增 0 对");
+    check(counter.connect(2, 2) == 0, "6.2.5 计数 自环新增 0 对");
+    check(counter.components() == 1 && counter.connected_pairs() == 6, "6.2.5 计数 冗余边不改两个数");
+    bool rejected = false;
+    try { (void)counter.connect(0, 4); } catch (const std::out_of_range&) { rejected = true; }
+    check(rejected && counter.components() == 1, "6.2.5 计数 越界抛异常且不动计数");
+
+    std::mt19937 random(20260914);
+    bool pair_delta = true, totals = true, redundant = true;
+    std::size_t redundant_seen = 0;
+    for (int round = 0; round < 200; ++round) {
+        const std::size_t count = 1 + random() % 30;
+        dsa::ComponentCounter sample(count);
+        std::vector<std::pair<std::size_t, std::size_t>> edges;
+        std::uint64_t before = 0;
+        for (int step = 0; step < 45; ++step) {
+            const std::size_t left = random() % count;
+            const std::size_t right = random() % count;
+            const std::size_t components_before = sample.components();
+            const std::uint64_t added = sample.connect(left, right);
+            edges.emplace_back(left, right);
+            const auto expected = brute_force(count, edges);
+            pair_delta = pair_delta && added == expected.pairs - before;
+            totals = totals && sample.components() == expected.components &&
+                     sample.connected_pairs() == expected.pairs;
+            if (expected.pairs == before) {
+                ++redundant_seen;
+                redundant = redundant && added == 0 && sample.components() == components_before;
+            }
+            before = expected.pairs;
+        }
+    }
+    check(pair_delta, "6.2.5 计数 随机 connect 返回值等于新增连通点对（BFS 对拍）");
+    check(totals, "6.2.5 计数 随机 分量数与点对总数等于 BFS 暴力结果");
+    check(redundant && redundant_seen > 100, "6.2.5 计数 随机 冗余边返回 0 且分量数不变");
+}
+
 }  // namespace
 
 int main() {
@@ -332,6 +408,7 @@ int main() {
     test_dual_tag_edge_cases();
     test_weighted_union_rule();
     test_weighted_union_tie_break();
+    test_component_counter();
     std::printf("GeneralTree: %d 项断言，%d 失败\n", checks, failures);
     return failures == 0 ? 0 : 1;
 }

@@ -1,6 +1,8 @@
 // 原书【代码5.11】【代码5.12】：手写最小堆与 Huffman 合并树。
 #pragma once
 #include <cstddef>
+#include <cstdint>
+#include <functional>
 #include <limits>
 #include <optional>
 #include <stdexcept>
@@ -9,14 +11,16 @@
 
 namespace dsa {
 // >>> min-heap
-template <typename T>
+/// Compare 默认 std::less<T>，堆顶是「按 Compare 最小」的元素；
+/// 传 std::greater<T> 就是最大堆（对顶堆求中位数要用它）。
+template <typename T, typename Compare = std::less<T>>
 class MinHeap {
 public:
     static_assert(std::is_nothrow_move_constructible<T>::value && std::is_nothrow_move_assignable<T>::value,
                   "MinHeap growth relies on non-throwing moves; use a noexcept-movable element type.");
 
     MinHeap() = default;
-    MinHeap(const MinHeap& other) : data_(other.capacity_ ? new T[other.capacity_] : nullptr), size_(other.size_), capacity_(other.capacity_) {
+    MinHeap(const MinHeap& other) : data_(other.capacity_ ? new T[other.capacity_] : nullptr), size_(other.size_), capacity_(other.capacity_), compare_(other.compare_) {
         try { for (std::size_t i = 0; i < size_; ++i) data_[i] = other.data_[i]; }
         catch (...) { delete[] data_; throw; }
     }
@@ -28,15 +32,18 @@ public:
             data_ = other.data_;
             size_ = other.size_;
             capacity_ = other.capacity_;
+            compare_ = other.compare_;
             other.data_ = nullptr;
             other.size_ = other.capacity_ = 0;
         }
         return *this;
     }
     ~MinHeap() { delete[] data_; }
-    void swap(MinHeap& other) noexcept { using std::swap; swap(data_, other.data_); swap(size_, other.size_); swap(capacity_, other.capacity_); }
+    void swap(MinHeap& other) noexcept { using std::swap; swap(data_, other.data_); swap(size_, other.size_); swap(capacity_, other.capacity_); swap(compare_, other.compare_); }
     [[nodiscard]] bool empty() const noexcept { return size_ == 0; }
     [[nodiscard]] std::size_t size() const noexcept { return size_; }
+    /// 只看堆顶、不拷贝；空堆为 nullptr。指针在下一次 insert / remove_min 后失效（D-001 §3b）。
+    [[nodiscard]] const T* peek() const noexcept { return size_ == 0 ? nullptr : &data_[0]; }
     void insert(const T& value) { ensure_capacity(); data_[size_] = value; sift_up(size_++); }
     void insert(T&& value) { ensure_capacity(); data_[size_] = std::move(value); sift_up(size_++); }
     [[nodiscard]] std::optional<T> remove_min() {
@@ -61,7 +68,7 @@ private:
         capacity_ = next;
     }
     void sift_up(std::size_t index) {
-        while (index != 0 && data_[index] < data_[(index - 1) / 2]) {
+        while (index != 0 && compare_(data_[index], data_[(index - 1) / 2])) {
             using std::swap;
             swap(data_[index], data_[(index - 1) / 2]);
             index = (index - 1) / 2;
@@ -72,8 +79,8 @@ private:
             const std::size_t left = index * 2 + 1;
             const std::size_t right = left + 1;
             std::size_t smallest = index;
-            if (left < size_ && data_[left] < data_[smallest]) smallest = left;
-            if (right < size_ && data_[right] < data_[smallest]) smallest = right;
+            if (left < size_ && compare_(data_[left], data_[smallest])) smallest = left;
+            if (right < size_ && compare_(data_[right], data_[smallest])) smallest = right;
             if (smallest == index) return;
             using std::swap;
             swap(data_[index], data_[smallest]);
@@ -83,8 +90,43 @@ private:
     T* data_{nullptr};
     std::size_t size_{0};
     std::size_t capacity_{0};
+    Compare compare_{};
 };
 // <<< min-heap
+
+// >>> running-median
+/// 对顶堆求动态中位数：较小的一半放进**最大堆** lower_，较大的一半放进**最小堆** upper_。
+///
+/// 不变式：lower_ 的每个元素 ≤ upper_ 的每个元素，且
+///         lower_.size() == upper_.size() 或 lower_.size() == upper_.size() + 1。
+/// 于是中位数永远是 lower_ 的堆顶。元素个数为偶数时取**下中位数**（第 n/2 小，从 1 数），
+/// 不做两数平均——那需要 T 支持除法，而且整数平均会截断，调用方要平均就自己取两个堆顶。
+/// insert 为 O(log n)，median 为 O(1)。
+template <typename T>
+class RunningMedian {
+public:
+    void insert(const T& value) {
+        if (lower_.empty() || !(*lower_.peek() < value)) lower_.insert(value);
+        else upper_.insert(value);
+        rebalance();
+    }
+    /// 空时 std::nullopt。
+    [[nodiscard]] std::optional<T> median() const {
+        if (const T* top = lower_.peek()) return *top;
+        return std::nullopt;
+    }
+    [[nodiscard]] std::size_t size() const noexcept { return lower_.size() + upper_.size(); }
+
+private:
+    /// 每次插入后两堆大小至多差 2，搬一个堆顶就回到不变式。
+    void rebalance() {
+        if (lower_.size() > upper_.size() + 1) upper_.insert(*lower_.remove_min());
+        else if (upper_.size() > lower_.size()) lower_.insert(*upper_.remove_min());
+    }
+    MinHeap<T, std::greater<T>> lower_;   // 较小的一半，堆顶是其中最大的
+    MinHeap<T> upper_;                    // 较大的一半，堆顶是其中最小的
+};
+// <<< running-median
 
 // >>> huffman
 class HuffmanTree {
@@ -173,4 +215,68 @@ private:
     Node* root_{nullptr};
 };
 // <<< huffman
+
+// >>> huffman-wpl-batched
+/// 一组同权叶子：weight 这个权出现了 count 次。
+struct WeightGroup {
+    std::uint64_t weight;
+    std::uint64_t count;
+};
+
+/// 只求 Huffman 树的带权路径长度，不建树——叶子数可达 1e9 量级，结点根本放不下。
+///
+/// 依据：WPL 等于**所有内部结点的权之和**（每个叶子的权在它的每个祖先里各被加一次，
+/// 祖先个数正是它的深度）。所以只要把每次合并出的新权累加起来。
+/// 又因为同权的若干棵树谁先合并都一样，最小的一组有 c 棵时，一次就合并出 c/2 棵
+/// 权为 2w 的树；c 为奇数时剩下的那一棵要和**下一小**的树合并，不能丢。
+/// 堆里放的是「组」，每轮组数不增或 count 减半，k 个输入组约 O(k log k + log n) 轮。
+///
+/// 溢出界：设总权 W = Σ weight·count、叶子数 n = Σ count，则 WPL ≤ W·⌈log2 n⌉。
+/// 该乘积小于 2^64 时一定不溢出；否则中途任何一次加法/乘法溢出都抛 std::overflow_error，
+/// 不返回回绕后的错数。count 为 0 的组忽略；叶子数 ≤ 1 时 WPL 为 0。
+inline std::uint64_t huffman_wpl_batched(const WeightGroup* groups, std::size_t group_count) {
+    if (group_count != 0 && groups == nullptr) {
+        throw std::invalid_argument("huffman_wpl_batched: non-empty input requires groups");
+    }
+    struct ByWeight {
+        std::uint64_t weight, count;
+        bool operator<(const ByWeight& other) const noexcept { return weight < other.weight; }
+    };
+    const auto add = [](std::uint64_t a, std::uint64_t b) {
+        if (a > std::numeric_limits<std::uint64_t>::max() - b) throw std::overflow_error("Huffman WPL overflows uint64");
+        return a + b;
+    };
+    const auto mul = [](std::uint64_t a, std::uint64_t b) {
+        if (b != 0 && a > std::numeric_limits<std::uint64_t>::max() / b) throw std::overflow_error("Huffman WPL overflows uint64");
+        return a * b;
+    };
+
+    MinHeap<ByWeight> heap;
+    for (std::size_t i = 0; i < group_count; ++i) {
+        if (groups[i].count != 0) heap.insert(ByWeight{groups[i].weight, groups[i].count});
+    }
+    std::uint64_t wpl = 0;
+    while (auto smallest = heap.remove_min()) {
+        ByWeight group = *smallest;
+        while (heap.peek() != nullptr && heap.peek()->weight == group.weight) {   // 同权的组并成一组
+            group.count = add(group.count, heap.remove_min()->count);
+        }
+        if (group.count == 1) {
+            auto next = heap.remove_min();
+            if (!next) break;                              // 只剩一棵树：它就是根
+            const std::uint64_t merged = add(group.weight, next->weight);
+            wpl = add(wpl, merged);
+            heap.insert(ByWeight{merged, 1});
+            if (next->count > 1) heap.insert(ByWeight{next->weight, next->count - 1});
+        } else {
+            const std::uint64_t pairs = group.count / 2;
+            const std::uint64_t merged = mul(group.weight, 2);
+            wpl = add(wpl, mul(merged, pairs));            // pairs 个内部结点，各权 2w
+            if (group.count % 2 == 1) heap.insert(ByWeight{group.weight, 1});   // 奇数余下的一棵
+            heap.insert(ByWeight{merged, pairs});
+        }
+    }
+    return wpl;
+}
+// <<< huffman-wpl-batched
 }

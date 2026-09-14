@@ -189,6 +189,54 @@ def merge_sort(values: list[int]) -> None:
 # <<< merge
 
 
+# >>> inversions
+# 归并排序的副产品（原书无清单）：逆置（逆序对）计数，Θ(n log n)。
+# 与 merge_ranges 同一个合并过程，只多一句计数：右段元素严格小于左段当前元素时，
+# 左段还没输出的 [left, middle) 都比它大，一次记 middle - left 个。
+def merge_count_ranges(values: list[int], buffer: list[int],
+                       first: int, middle: int, last: int) -> int:
+    inversions = 0
+    left, right, output = first, middle, first
+    while left < middle and right < last:
+        # 与 merge_ranges 同一个 `<`：相等时取左边、不计数——相等元素不构成逆置。
+        if values[right] < values[left]:
+            inversions += middle - left
+            buffer[output] = values[right]
+            right += 1
+        else:
+            buffer[output] = values[left]
+            left += 1
+        output += 1
+    while left < middle:
+        buffer[output] = values[left]
+        left += 1
+        output += 1
+    while right < last:
+        buffer[output] = values[right]
+        right += 1
+        output += 1
+    values[first:last] = buffer[first:last]
+    return inversions
+
+
+def count_inversions_range(values: list[int], buffer: list[int], first: int, last: int) -> int:
+    if last - first < 2:
+        return 0
+    middle = first + (last - first) // 2
+    return (count_inversions_range(values, buffer, first, middle)
+            + count_inversions_range(values, buffer, middle, last)
+            + merge_count_ranges(values, buffer, first, middle, last))
+
+
+# 在副本上归并，调用方的序列原样不动。Python 整数没有宽度，
+# C++ 版那个「n >= 65537 就溢出 int」的坑在这里不存在。
+def count_inversions(values: list[int]) -> int:
+    work = list(values)
+    buffer = [0] * len(work)
+    return count_inversions_range(work, buffer, 0, len(work))
+# <<< inversions
+
+
 # 算法8.9：已有序时跳过 merge；小分区改用插入排序。
 def merge_sort_optimized_range(values: list[int], buffer: list[int],
                                first: int, last: int) -> None:

@@ -997,6 +997,153 @@ O(|T|·|P|)，直接撞上构建闸门的超时。
 
 图 4.12　KMP 匹配示例。第 1 趟比到第 5 次发现 $P_4 \neq T_4$，$P_4$ 的特征值是 −1，模式右移 $4-(-1)=5$ 位；第 2 趟到第 9 次比较时 $P_3 \neq T_8$，按特征值 0 右移 $3-0=3$ 位；第 3 趟第 12 次比较时 $P_2 \neq T_{10}$，右移 2 位；第 4 趟比到第 22 次匹配成功。**整个过程中目标下标一次都没有回退**——对照图 4.6 里被反复比较的那些字符，省下的就是这些。
 
+### KMP 的另一个用途：求最小循环节
+
+原书讲特征向量只为匹配服务。但它算出来的那个量——前缀里「最长的相同前缀与后缀」——本身还回答
+另一个问题：**一个串最短是由多长的一段反复拼成的？** 程序设计上机考试里常见的「循环串」
+「字符串乘方」「前缀中的周期」三类题，核心都是这一件事。
+
+**两个定义。** 串 $s$ 长为 $n$。既是 $s$ 的真前缀、又是 $s$ 的真后缀的子串叫 $s$ 的**真边界**
+（`abab` 的真边界有 `ab` 和空串）。正整数 $p$ 叫 $s$ 的**周期**，当且仅当对所有 $0 \le i < n-p$
+都有 $s_i = s_{i+p}$。
+
+**定理：$s$ 有长为 $b$ 的真边界，当且仅当 $n-b$ 是 $s$ 的周期。所以最小周期 = $n$ − 最长真边界的长度。**
+证明只需把两边展开：长为 $b$ 的真边界说的是 $s_0 s_1 \cdots s_{b-1} = s_{n-b} s_{n-b+1} \cdots s_{n-1}$，
+也就是对所有 $0 \le i < b$ 有 $s_i = s_{i+(n-b)}$；令 $p = n-b$，这恰好是「对所有 $0 \le i < n-p$ 有
+$s_i = s_{i+p}$」——**同一组等式的两种读法**。边界越长周期越短，最长的边界就对应最小的周期。
+
+三个例子：`abcabcabc` 的最长真边界是 `abcabc`，最小周期 $9-6=3$；`ababa` 的最长真边界是 `aba`，
+最小周期 $5-3=2$，但 2 不整除 5，它**不是**某个串的整数次重复；`abcd` 没有非空真边界，最小周期就是 4。
+
+**边界长度怎么算。** 4.3.2 节的特征向量回答的正是「前缀的最长相同前后缀有多长」，只是原书印的是
+**优化版**。求周期要用去掉那一步优化的版本——回退链一模一样，只是不做 `next[i] = next[k]` 的借用：
+
+```cpp file=code/ch04/pattern_matching/modern.hpp#border-lengths
+/// 未优化的失效函数：border[i] 是前缀 s[0..i] 的**最长真边界**长度——
+/// 既是它的真前缀、又是它的真后缀的最长那一段有多长。
+///
+/// 这就是 build_next 去掉「优化」那一步之后的数，只是下标错开一位、没有 −1：
+/// 未优化的 next[i+1] == border[i]。回退 `k = border[k - 1]` 与 build_next 的
+/// `k = next[k]` 是同一个动作。
+///
+/// **求周期不能拿 build_next 代替它。** 优化版的 `next[i] = next[k]` 专为匹配服务：
+/// 当 P[i] == P[k] 时它跳过一个注定失配的落点，于是 next[i] 不再是边界长度。
+/// 例如 "aaaa" 的优化版 next 是 {−1,−1,−1,−1}，而边界长度是 {0,1,2,3}。
+[[nodiscard]] inline std::vector<std::size_t> border_lengths(std::string_view s) {
+    const std::size_t n = s.size();
+    std::vector<std::size_t> border(n);
+    for (std::size_t i = 1; i < n; ++i) {
+        std::size_t k = border[i - 1];  // 先试着把上一个前缀的最长边界延长一个字符
+        while (k > 0 && s[i] != s[k]) {
+            k = border[k - 1];  // 延长不了，退到「边界的边界」再试
+        }
+        if (s[i] == s[k]) {
+            ++k;
+        }
+        border[i] = k;
+    }
+    return border;
+}
+```
+
+```python file=code/ch04/pattern_matching/modern.py#border-lengths
+def border_lengths(s: str) -> list[int]:
+    """未优化的失效函数：border[i] 是前缀 s[0..i] 的最长真边界长度。
+
+    求周期不能拿 build_next 代替：优化版 next[i] = next[k] 不再是边界长度，
+    例如 "aaaa" 的优化版 next 是 [-1, -1, -1, -1]，边界长度是 [0, 1, 2, 3]。
+    """
+    border = [0] * len(s)
+    for i in range(1, len(s)):
+        k = border[i - 1]
+        while k > 0 and s[i] != s[k]:
+            k = border[k - 1]
+        if s[i] == s[k]:
+            k += 1
+        border[i] = k
+    return border
+```
+
+**陷阱一：原书的优化版 next 不能拿来求周期。** `next[i] = next[k]` 是专为匹配做的：$P_i = P_k$ 时，
+退到 $k$ 注定再失配一次，于是直接借用 `next[k]` 跳过这个落点。对匹配而言那个落点没用，对周期而言
+它恰恰是答案。`aaaa` 的优化版 next 是 $\{-1,-1,-1,-1\}$，而边界长度是 $\{0,1,2,3\}$；拿
+「前缀长 − next」去算前缀 `aaa` 的周期，得到 $3-(-1)=4$，比前缀本身还长，正确答案是 1。
+本书的测试在 $\{a,b\}$ 上长度不超过 10 的全部串、全部前缀上统计过：优化版给出错误周期的前缀
+**数以千计**，这不是个别串的巧合。
+
+```cpp file=code/ch04/pattern_matching/modern.hpp#minimal-period
+/// 最小周期 p：满足 s[i] == s[i+p]（对所有 0 ≤ i < n−p）的最小正整数。
+/// 定理：p = n − （整串的最长真边界长度）。空串约定返回 0。
+///
+/// 注意 p 不一定整除 n："ababa" 的最小周期是 2，但它不是某个串重复若干次。
+[[nodiscard]] inline std::size_t minimal_period(std::string_view s) {
+    const std::size_t n = s.size();
+    if (n == 0) {
+        return 0;
+    }
+    return n - border_lengths(s)[n - 1];
+}
+
+/// s 能否写成某个**更短**的串重复至少两次（「循环串」问题）。
+///
+/// 两个条件缺一不可：
+///   n % p == 0 —— 周期不整除长度就拼不回整串（"ababa"）；
+///   p < n      —— 边界为 0 时 p == n，而 n % n == 0 **恒成立**，
+///                 漏掉这一条会把 "abcd" 这种毫无重复的串也判成循环串。
+[[nodiscard]] inline bool is_repetition(std::string_view s) {
+    const std::size_t n = s.size();
+    const std::size_t p = minimal_period(s);
+    return p < n && n % p == 0;
+}
+
+/// 最大的 K，使 s 恰好是某个串重复 K 次（「字符串乘方」问题）。
+/// 不是循环串时 K = 1（s 就是它自己重复一次）；空串约定返回 0。
+[[nodiscard]] inline std::size_t repetition_count(std::string_view s) {
+    if (s.empty()) {
+        return 0;
+    }
+    return is_repetition(s) ? s.size() / minimal_period(s) : 1;
+}
+```
+
+```python file=code/ch04/pattern_matching/modern.py#minimal-period
+def minimal_period(s: str) -> int:
+    """最小周期 p = n - 整串的最长真边界长度；空串约定返回 0。"""
+    if not s:
+        return 0
+    return len(s) - border_lengths(s)[-1]
+
+
+def is_repetition(s: str) -> bool:
+    """s 能否写成更短的串重复至少两次。
+
+    p < n 不能省：边界为 0 时 p == n，而 n % n == 0 恒成立。
+    """
+    p = minimal_period(s)
+    return p < len(s) and len(s) % p == 0
+
+
+def repetition_count(s: str) -> int:
+    """最大的 K，使 s 是某个串重复 K 次；不是循环串时为 1，空串为 0。"""
+    if not s:
+        return 0
+    return len(s) // minimal_period(s) if is_repetition(s) else 1
+```
+
+**陷阱二：边界为 0 时，「整除」不等于「循环」。** 判断 $s$ 是否由一个更短的串重复而成，要同时满足
+$n \bmod p = 0$ 与 $p < n$。边界为 0 时 $p = n$，而 $n \bmod n = 0$ **恒成立**——只写第一个条件，
+`abcd` 就被当成了循环串。「前缀中的周期」一类题要逐个前缀报出重复次数 $K > 1$ 的那些，漏了这一条，
+每个没有边界的前缀都会被报出来。
+
+**三类题怎么落到这组函数上。** 循环串就是 `is_repetition`；字符串乘方（最大的 $K$ 使 $s$ 是某串重复
+$K$ 次）就是 `repetition_count`；前缀中的周期，对 `border_lengths` 的每个下标 $i$，拿长为 $i+1$ 的
+前缀套同一条判断即可——整个串只算一遍失效函数，总代价 $O(n)$。
+
+**测试怎么证伪它。** 独立参照物是周期的定义本身：逐个试 $p = 1, 2, \ldots$ 的 $O(n^2)$ 暴力解。
+在 $\{a,b\}$ 上长度 0 到 10 的全部 2047 个串上，`minimal_period`、`repetition_count`、`is_repetition`
+与暴力解逐个对拍，C++ 与 Python 两侧各跑一遍；两个陷阱各有专门的断言——把实现改成用优化版
+next，或者删掉 `p < n`，测试当场变红。
+
 ## 与原书的对照
 
 | 原书 | 现在 | 为什么 |
@@ -1011,7 +1158,7 @@ O(|T|·|P|)，直接撞上构建闸门的超时。
 KMP 的 next 仍由调用方传入并可跨目标复用。这三条是本节全部的教学内容。
 
 完整实现见 `code/ch04/pattern_matching/modern.hpp`，测试见同目录 `test.cpp`
-（56 项断言，含 3000 组随机对拍；用 `python3 tools/check_code.py` 在
+（92 项断言，含 3000 组随机对拍与最小周期的 2047 串穷举；用 `python3 tools/check_code.py` 在
 `-Werror` + ASan/UBSan 与 `-O2` 两种构建下各跑一遍）。
 
 

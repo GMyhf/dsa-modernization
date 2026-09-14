@@ -934,6 +934,111 @@ def dijkstra(self, source: int) -> list[int]:
     return distance
 ```
 
+#### 把路径本身取出来
+
+上面的 `dijkstra` 只给距离。要输出路径，就像前文说的那样多记一个 `pre` 域，也就是原书 `Dist` 类里的 `pre`。`Graph::dijkstra_tree` 和 `dijkstra` 是同一个算法，只多了一句：**只在松弛成功时**把 `to` 的前驱设为 `from`。如果不管松没松弛都去改前驱，距离数组照样正确，但顺着前驱走出来的路径和距离对不上，甚至会走成环。源点没有前驱，到不了的顶点也没有前驱，所以前驱数组用 `std::optional`。
+
+`Graph::shortest_path` 从汇点出发，顺着前驱倒着走回源点，再把序列反转过来。到不了时返回空；汇点就是源点时，路径只有源点一个顶点。前驱链断了或者成环，说明传进来的树已经坏了，这时抛 `std::invalid_argument`。有好几条等长的最短路径时，返回哪一条取决于顶点的扫描次序，所以测试不断言具体路径，只断言路径合法：首尾是源点和汇点，每一步都是图里真实存在的边，边权之和等于 Floyd 算出的最短距离。这项检查在随机小图上跑，边权取 0 到 4，并列和零权边都会大量出现。
+
+关于溢出：本章用 `int` 存距离，「无穷大」取 `INT_MAX/4`。松弛时两个加数都小于这个值，和小于 `INT_MAX/2`，不会溢出。代价是总长达到 `INT_MAX/4` 的路径会被当成到不了。
+
+```cpp file=code/ch07/graph/modern.hpp#dijkstra-path
+/// 原书 Dist 类的 `length` 与 `pre` 两个域：到各点的距离，和最短路径上的前一个顶点。
+/// 源点自己、以及到不了的顶点，没有前一个顶点（`std::nullopt`）。
+struct ShortestPathTree {
+    std::size_t source;
+    std::vector<int> distance;
+    std::vector<std::optional<std::size_t>> predecessor;
+};
+
+/// 与 `dijkstra` 同一个算法，多记一个 `pre`：**只在松弛成功时**改前驱。
+/// 溢出：两个加数都小于 infinity = INT_MAX/4，和小于 INT_MAX/2，不会溢出；
+/// 代价是总长 >= infinity 的路径会被当成「到不了」。
+[[nodiscard]] ShortestPathTree dijkstra_tree(std::size_t source) const {
+    check_vertex(source);
+    ShortestPathTree tree{source, std::vector<int>(vertices(), infinity),
+                          std::vector<std::optional<std::size_t>>(vertices())};
+    std::vector<bool> used(vertices());
+    tree.distance[source] = 0;
+    for (std::size_t count = 0; count < vertices(); ++count) {
+        const std::size_t from = nearest_unvisited(tree.distance, used);
+        if (from == vertices() || tree.distance[from] == infinity) {
+            break;
+        }
+        used[from] = true;
+        for (std::size_t to = 0; to < vertices(); ++to) {
+            if (adjacency_[from][to] < infinity &&
+                tree.distance[to] > tree.distance[from] + adjacency_[from][to]) {
+                tree.distance[to] = tree.distance[from] + adjacency_[from][to];
+                tree.predecessor[to] = from;
+            }
+        }
+    }
+    return tree;
+}
+
+/// 顺着 `pre` 从汇点倒着走回源点，再把序列翻过来。到不了返回 `std::nullopt`；
+/// 汇点就是源点时路径是 `{source}`。前驱链断了或成环，说明传进来的树是坏的。
+[[nodiscard]] static std::optional<std::vector<std::size_t>> shortest_path(
+    const ShortestPathTree& tree, std::size_t target) {
+    const std::size_t count = tree.distance.size();
+    if (target >= count || tree.source >= count || tree.predecessor.size() != count) {
+        throw std::out_of_range("vertex");
+    }
+    if (tree.distance[target] == infinity) {
+        return std::nullopt;
+    }
+    std::vector<std::size_t> path{target};
+    for (std::size_t vertex = target; vertex != tree.source;) {
+        if (!tree.predecessor[vertex] || path.size() > count) {
+            throw std::invalid_argument("broken predecessor chain");
+        }
+        vertex = *tree.predecessor[vertex];
+        path.push_back(vertex);
+    }
+    std::reverse(path.begin(), path.end());
+    return path;
+}
+```
+```python file=code/ch07/graph/modern.py#dijkstra-path
+def dijkstra_tree(self, source: int) -> "ShortestPathTree":
+    """与 dijkstra 同一个算法，多记原书 Dist 的 pre 域：只在松弛成功时改前驱。"""
+    self._check_vertex(source)
+    distance = [self.infinity] * self.vertices
+    predecessor: list[int | None] = [None] * self.vertices
+    used = [False] * self.vertices
+    distance[source] = 0
+    for _ in range(self.vertices):
+        vertex = self._nearest(distance, used)
+        if vertex is None or distance[vertex] == self.infinity:
+            break
+        used[vertex] = True
+        for target in range(self.vertices):
+            candidate = distance[vertex] + self._adjacency[vertex][target]
+            if self._adjacency[vertex][target] < self.infinity and candidate < distance[target]:
+                distance[target] = candidate
+                predecessor[target] = vertex
+    return ShortestPathTree(source, distance, predecessor)
+
+@staticmethod
+def shortest_path(tree: "ShortestPathTree", target: int) -> list[int] | None:
+    """顺着 pre 从汇点走回源点再翻转；到不了返回 None，汇点即源点时是 [source]。"""
+    count = len(tree.distance)
+    if not 0 <= target < count or not 0 <= tree.source < count or len(tree.predecessor) != count:
+        raise IndexError("vertex")
+    if tree.distance[target] == Graph.infinity:
+        return None
+    path = [target]
+    vertex = target
+    while vertex != tree.source:
+        previous = tree.predecessor[vertex]
+        if previous is None or len(path) > count:
+            raise ValueError("broken predecessor chain")
+        vertex = previous
+        path.append(vertex)
+    return path[::-1]
+```
+
 ### 7.5.2 每对顶点之间的最短路径
 
 给定带权图 $G = \langle V, E \rangle$，要求对任意的顶点有序对 $\langle v_i, v_j \rangle$ 找出从 $v_i$ 到 $v_j$ 的
@@ -1169,6 +1274,12 @@ def kruskal(self) -> list[Edge] | None:
             result.append(edge)
     return result if len(result) + 1 == self.vertices else None
 ```
+
+**附：把 Kruskal 的过程倒过来用。** 有一类题目给出一棵带权树，要求补成一个完全图，使这棵树是该完全图**唯一**的最小生成树，并使完全图的总权最小（边权为整数）。思路是按边权从小到大重放 Kruskal 的合并过程。处理树边 $(u,v,w)$ 时，$u$、$v$ 所在的两个连通分量规模为 $s_1$、$s_2$，两个分量之间一共有 $s_1 \cdot s_2$ 对顶点。其中一对由这条树边连着，剩下的 $s_1 \cdot s_2 - 1$ 条边都必须比 $w$ 严格大，否则 Kruskal 可以改选它们，最小生成树就不唯一了。所以这些边最少取 $w+1$，答案是
+
+$$\sum_{(u,v,w)} \left[\, w + (w+1)(s_1 s_2 - 1) \,\right]$$
+
+其中 $s_1 s_2$ 正是第 6 章 `ComponentCounter::connect` 的返回值（见 6.2.5 节）。如果题目只要求「是一棵最小生成树」而不要求唯一，把 $w+1$ 换成 $w$ 即可。
 
 
 ## 本章小结

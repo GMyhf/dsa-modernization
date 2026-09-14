@@ -130,4 +130,67 @@ using next_type = std::ptrdiff_t;
 }
 // <<< kmp
 
+// >>> border-lengths
+/// 未优化的失效函数：border[i] 是前缀 s[0..i] 的**最长真边界**长度——
+/// 既是它的真前缀、又是它的真后缀的最长那一段有多长。
+///
+/// 这就是 build_next 去掉「优化」那一步之后的数，只是下标错开一位、没有 −1：
+/// 未优化的 next[i+1] == border[i]。回退 `k = border[k - 1]` 与 build_next 的
+/// `k = next[k]` 是同一个动作。
+///
+/// **求周期不能拿 build_next 代替它。** 优化版的 `next[i] = next[k]` 专为匹配服务：
+/// 当 P[i] == P[k] 时它跳过一个注定失配的落点，于是 next[i] 不再是边界长度。
+/// 例如 "aaaa" 的优化版 next 是 {−1,−1,−1,−1}，而边界长度是 {0,1,2,3}。
+[[nodiscard]] inline std::vector<std::size_t> border_lengths(std::string_view s) {
+    const std::size_t n = s.size();
+    std::vector<std::size_t> border(n);
+    for (std::size_t i = 1; i < n; ++i) {
+        std::size_t k = border[i - 1];  // 先试着把上一个前缀的最长边界延长一个字符
+        while (k > 0 && s[i] != s[k]) {
+            k = border[k - 1];  // 延长不了，退到「边界的边界」再试
+        }
+        if (s[i] == s[k]) {
+            ++k;
+        }
+        border[i] = k;
+    }
+    return border;
+}
+// <<< border-lengths
+
+// >>> minimal-period
+/// 最小周期 p：满足 s[i] == s[i+p]（对所有 0 ≤ i < n−p）的最小正整数。
+/// 定理：p = n − （整串的最长真边界长度）。空串约定返回 0。
+///
+/// 注意 p 不一定整除 n："ababa" 的最小周期是 2，但它不是某个串重复若干次。
+[[nodiscard]] inline std::size_t minimal_period(std::string_view s) {
+    const std::size_t n = s.size();
+    if (n == 0) {
+        return 0;
+    }
+    return n - border_lengths(s)[n - 1];
+}
+
+/// s 能否写成某个**更短**的串重复至少两次（「循环串」问题）。
+///
+/// 两个条件缺一不可：
+///   n % p == 0 —— 周期不整除长度就拼不回整串（"ababa"）；
+///   p < n      —— 边界为 0 时 p == n，而 n % n == 0 **恒成立**，
+///                 漏掉这一条会把 "abcd" 这种毫无重复的串也判成循环串。
+[[nodiscard]] inline bool is_repetition(std::string_view s) {
+    const std::size_t n = s.size();
+    const std::size_t p = minimal_period(s);
+    return p < n && n % p == 0;
+}
+
+/// 最大的 K，使 s 恰好是某个串重复 K 次（「字符串乘方」问题）。
+/// 不是循环串时 K = 1（s 就是它自己重复一次）；空串约定返回 0。
+[[nodiscard]] inline std::size_t repetition_count(std::string_view s) {
+    if (s.empty()) {
+        return 0;
+    }
+    return is_repetition(s) ? s.size() / minimal_period(s) : 1;
+}
+// <<< minimal-period
+
 }  // namespace dsa

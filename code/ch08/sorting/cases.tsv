@@ -4,3 +4,10 @@ insertion-mixed	insertion	3,-2,7,3,0,-2,9,1	-2,-2,0,1,3,3,7,9
 counting-sparse	counting	-5000001,5000000		invalid_argument
 radix-signed	radix	-256,-1,0,1,256	-256,-1,0,1,256	
 index-order	index	29,12,34,8	3,1,0,2	
+inversions-empty	inversions		0	
+inversions-single	inversions	42	0	
+inversions-sorted	inversions	-3,-1,0,4,8	0	
+inversions-reversed	inversions	5,4,3,2,1	10	
+inversions-all-equal	inversions	7,7,7,7	0	
+inversions-duplicates	inversions	3,1,3,1,2	5	
+inversions-mixed	inversions	3,-2,7,3,0,-2,9,1	13	

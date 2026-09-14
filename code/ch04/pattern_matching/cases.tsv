@@ -2,3 +2,13 @@ name	operation	input	expected	expected_error
 kmp-middle	search	abababd|ababd	2	
 kmp-missing	search	abcdef|gh	-1	
 bad-next	bad_next	abc|a		invalid_argument
+period-abcabcabc	period	abcabcabc	3	
+period-aaaa	period	aaaa	1	
+period-no-border	period	abcd	4	
+period-not-dividing	period	ababa	2	
+period-empty	period		0	
+power-ababab	repetition	ababab	3	
+power-aaaa	repetition	aaaa	4	
+power-no-border	repetition	abcd	1	
+power-not-dividing	repetition	ababa	1	
+power-aabaab	repetition	aabaab	2	

@@ -2,6 +2,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -318,5 +319,41 @@ private:
     std::vector<std::size_t> size_;  // 原书 nCount：子树元素数目
 };
 // <<< disjoint-set
+
+// >>> component-counter
+/// 并查集的一个常见用法：边一条条加进来，随时回答「现在有几个连通分量」
+/// 「现在有多少对顶点互相连通」。两个数都在合并成功时 O(1) 维护。
+///
+/// 合并规模为 s1、s2 的两个集合，新连通的无序点对恰好是 s1·s2 对——
+/// **两个规模都要在合并之前、从根上读**：读非根元素的 size_ 或读合并后的规模，都是错的。
+/// 用 `std::uint64_t` 装点对数：n 个元素最多 n(n-1)/2 对，n 到 2^32 量级才会溢出。
+///
+/// 这里组合一个 `DisjointSet` 而不改动它：`unite` 保持原书的样子，计数是外面这一层的事。
+/// 内部的并查集是私有的，所以不存在「绕过计数直接合并」把两个数弄脏的途径。
+class ComponentCounter {
+public:
+    explicit ComponentCounter(std::size_t count) : sets_(count), component_count_(count) {}
+
+    /// 连一条边 (left, right)，返回因此**新**连通的点对数；两端本已连通时返回 0。
+    std::uint64_t connect(std::size_t left, std::size_t right) {
+        const std::uint64_t pairs =
+            static_cast<std::uint64_t>(sets_.set_size(left)) * sets_.set_size(right);
+        if (!sets_.unite(left, right)) {
+            return 0;  // 冗余边：分量数不变，点对数不变
+        }
+        --component_count_;
+        pair_total_ += pairs;
+        return pairs;
+    }
+
+    [[nodiscard]] std::size_t components() const noexcept { return component_count_; }
+    [[nodiscard]] std::uint64_t connected_pairs() const noexcept { return pair_total_; }
+
+private:
+    DisjointSet sets_;
+    std::size_t component_count_;
+    std::uint64_t pair_total_{0};
+};
+// <<< component-counter
 
 }  // namespace dsa

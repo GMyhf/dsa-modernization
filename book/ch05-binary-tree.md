@@ -321,6 +321,91 @@ static void postorder_impl(const Node* node, Visitor& visit) {
 
 第 3.1.4 节那个后缀表达式求值器（原书【算法3.5】）吃的正是这棵树后序周游的结果；那一节把中缀式转成后缀式的工作，换个说法就是「建出这棵表达式树，再后序周游一遍」。本章上机题第 5 题（原书第 2 题）「表达式二叉树」要做的就是这件事：读入一种表达式，在机内建出这棵树，再按要求输出另外两种。
 
+#### 由周游序列重建二叉树
+
+反过来问：给出周游序列，能不能把树建回来？**一个序列不行**——前序 `A B C` 既可以是一条左链，也可以是一条右链。**前序（或后序）加中序就够了**，前提是结点的关键码互不相同：后序的最后一个元素（前序的第一个元素）一定是根；在中序里找到根的位置 $k$，它左边的就是左子树的全部结点，右边的就是右子树；左子树的结点个数 $k$ 一旦知道，前序或后序里哪一段属于左子树、哪一段属于右子树也就切开了。对两段各做一遍同样的事，直到区间为空。
+
+以图 5.5 为例：后序 `D G E B H I F C A` 的末元素 A 是根；A 在中序 `D B G E A C H F I` 里左边有 4 个结点，于是后序的前 4 个 `D G E B` 是左子树的后序、接下来的 `H I F C` 是右子树的后序，再各自对照中序的 `D B G E` 与 `C H F I` 递推下去。前序加后序则不够：前序 `A B`、后序 `B A` 说不清 B 是左孩子还是右孩子。
+
+这是一道典型的上机题（本章上机题第 1 题就是「由先序和中序序列重建二叉树」），写法有两处常见的坑。第一，每一层都把子数组拷贝出来再递归，总代价会退化成 $O(n^2)$；只传**下标区间**、在中序里**查位置**就不必拷贝。第二，**输入不自洽时默默建出一棵树**。中序 `1 2 3`、后序 `3 1 2` 不对应任何一棵二叉树：根是 2，左子树只该有结点 1，后序里对应的却是 3。朴素写法在这里要么越界、要么建出一棵中序根本不是 `1 2 3` 的树。工程版的处理与第 6 章由双标记先根序列重建森林（【算法6.10】）时一样：**能当场指出输入错了，就不把错误合法化**。检查只要一条——每次取出的根必须落在当前的中序区间里；键重复、键缺失、次序矛盾最后都会撞上它，重复键另外单独报出，好让报错说对原因。
+
+工程版把两种重建做成 `BinaryTree` 的两个静态工厂，返回一棵拥有全部结点的新树：
+
+```cpp file=code/ch05/binary_tree/modern.hpp#rebuild
+/// 由中序 + 后序序列重建二叉树（两个序列各 count 个元素，**关键码互不相同**）。
+///
+/// 不自洽的输入一律抛 std::invalid_argument，绝不默默建出一棵错树：
+/// 中序里有重复键、后序里出现中序没有的键、某个根落在当前中序区间之外。
+/// 能建完就说明两个序列恰好是这棵树的中序与后序（归纳即得），不必再周游核对。
+/// 要求 T 支持 operator<（用来排序查位置）。时间 O(n log n)，额外空间 O(n)。
+static BinaryTree from_inorder_postorder(const T* inorder, const T* postorder, std::size_t count) {
+    return rebuild(inorder, postorder, count, Order::postorder);
+}
+/// 由前序 + 中序序列重建（本章上机题第 1 题）。契约同上。
+static BinaryTree from_preorder_inorder(const T* preorder, const T* inorder, std::size_t count) {
+    return rebuild(inorder, preorder, count, Order::preorder);
+}
+```
+
+主体只写一份。它**没有写成递归**：待建的子树记成「中序区间 + 另一序列的起点 + 该挂到哪根指针上」这样一帧，压进本章那把手写链式栈。递归版的深度等于树高，退化成链的输入会和 5.6a 说的递归 `clone` 一样压穿运行栈；显式栈在堆上，测试里 20 万结点的纯左链照样重建。查位置用的是「把中序下标按键排序，再二分」，所以要求 `T` 支持 `<`，总代价 $O(n\log n)$：
+
+```cpp file=code/ch05/binary_tree/modern.hpp#rebuild-impl
+/// 两种重建共用的主体。**不递归**：待建的子树用手写链式栈保存为「区间帧」，
+/// 退化成链的输入也不会压穿调用栈。每一帧只记下标，不复制子数组。
+static BinaryTree rebuild(const T* inorder, const T* other, std::size_t count, Order order) {
+    BinaryTree result;
+    if (count == 0) return result;
+    if (inorder == nullptr || other == nullptr) {
+        throw std::invalid_argument("rebuild: non-empty sequence given as null pointer");
+    }
+    // 位置查找表：中序下标按键排序，之后二分查位置。排好序顺便查出重复键。
+    std::unique_ptr<std::size_t[]> by_key(new std::size_t[count]);
+    for (std::size_t i = 0; i < count; ++i) by_key[i] = i;
+    const auto key_less = [inorder](std::size_t a, std::size_t b) { return inorder[a] < inorder[b]; };
+    std::sort(by_key.get(), by_key.get() + count, key_less);
+    for (std::size_t i = 1; i < count; ++i) {
+        if (!(inorder[by_key[i - 1]] < inorder[by_key[i]])) {
+            throw std::invalid_argument("rebuild: duplicate key in inorder sequence");
+        }
+    }
+    const auto position_in_inorder = [&](const T& key) {
+        const std::size_t* hit = std::lower_bound(by_key.get(), by_key.get() + count, key,
+            [inorder](std::size_t index, const T& k) { return inorder[index] < k; });
+        if (hit == by_key.get() + count || key < inorder[*hit]) {
+            throw std::invalid_argument("rebuild: key missing from inorder sequence");
+        }
+        return *hit;
+    };
+
+    // 一帧 = 「把中序 [in_begin, in_end) 与另一序列 [other_begin, …) 建成子树，挂到 *link」。
+    struct Frame { Node** link; std::size_t in_begin, in_end, other_begin; };
+    LinkedStack<Frame> pending;
+    pending.push(Frame{&result.root_, 0, count, 0});
+    while (auto frame = pending.pop()) {
+        const std::size_t size = frame->in_end - frame->in_begin;
+        if (size == 0) continue;                         // 空子树：*link 已是 nullptr
+        // 前序的根在区间最前，后序的根在区间最后。
+        const std::size_t root_at = order == Order::preorder ? frame->other_begin
+                                                             : frame->other_begin + size - 1;
+        const std::size_t k = position_in_inorder(other[root_at]);
+        if (k < frame->in_begin || k >= frame->in_end) {
+            throw std::invalid_argument("rebuild: root lies outside its inorder range");
+        }
+        Node* const node = new Node(other[root_at]);
+        *frame->link = node;                             // 先挂上：再抛异常时由 result 统一释放
+        const std::size_t left_size = k - frame->in_begin;
+        // 左子树在另一序列里紧跟根（前序）或从区间头开始（后序），右子树接在左子树后面。
+        const std::size_t left_other = order == Order::preorder ? frame->other_begin + 1
+                                                                : frame->other_begin;
+        pending.push(Frame{&node->right, k + 1, frame->in_end, left_other + left_size});
+        pending.push(Frame{&node->left, frame->in_begin, k, left_other});
+    }
+    return result;
+}
+```
+
+为什么「能建完就一定对」？对区间长度归纳：根取自区间的末端（后序）或首端（前序），左右两段恰好分走剩下的元素；若两段各自重建出的子树中序、后序（前序）与各自的区间一致，拼上根之后整棵树也一致。所以建完之后不必再周游一遍核对。测试用 400 棵随机树做往返：取序列、重建、再取四种序列（含层次序列，确认形状也一样）逐一比对。
+
 ### 5.2.3 广度优先周游二叉树
 
 **先把三种深度优先周游的代价算清楚。** 不管采用哪种周游方式，对于有 $n$ 个结点的二叉树，
@@ -1368,6 +1453,50 @@ $$\sum_{i=0}^{h} 2^{i}(h-i) \;=\; \sum_{j=0}^{h} 2^{\,h-j}\cdot j \;=\; 2^{h}\su
 
 本书的 `MinHeap<T>` 就是一个最小优先队列：`insert` 对应入队，`remove_min` 对应取出最高优先级任务，空队列以 `std::nullopt` 表示。Huffman 构造反复取两个最小权值，Dijkstra 和 Prim 则反复取当前距离或边权最小的候选；这些算法需要的是“下一项最优”，不需要把整个队列排序。若应用要求相同优先级保持到达顺序，还要把到达序号作为第二关键码显式存入元素。
 
+#### 对顶堆：动态维护中位数
+
+优先队列的一个经典上机题：数据一个一个到来，每来一个就要报出当前的中位数。每次排序是 $O(n\log n)$；用两个堆可以做到插入 $O(\log n)$、查询 $O(1)$。
+
+做法是把已到的数据劈成两半：**较小的一半放进最大堆，较大的一半放进最小堆**，并始终保持两件事——最大堆里的每个元素都不大于最小堆里的每个元素；两个堆一样大，或者最大堆多一个。于是中位数就是最大堆的堆顶。新元素不大于最大堆堆顶就进最大堆，否则进最小堆；进完之后若两堆的大小差出了规定，把多的那边的堆顶搬到另一边——一次搬一个就够，因为插入前两堆至多差 1。两个堆背靠背、堆顶相对，所以叫「对顶堆」。
+
+这里需要一个**最大堆**。工程版没有再写一个类，而是给 `MinHeap` 加了一个比较器模板参数，默认 `std::less<T>`；`MinHeap<T, std::greater<T>>` 的堆顶就是最大元素。原书代码5.11 那个堆的结构、上浮与下沉一行没变，只是把 `<` 换成了 `compare_`。另外加了一个只看不拿的 `MinHeap::peek`，与第 3 章栈的 `peek` 同一个约定：返回指针，空堆为 `nullptr`，下一次插入或删除后失效。
+
+```cpp file=code/ch05/heap_huffman/modern.hpp#running-median
+/// 对顶堆求动态中位数：较小的一半放进**最大堆** lower_，较大的一半放进**最小堆** upper_。
+///
+/// 不变式：lower_ 的每个元素 ≤ upper_ 的每个元素，且
+///         lower_.size() == upper_.size() 或 lower_.size() == upper_.size() + 1。
+/// 于是中位数永远是 lower_ 的堆顶。元素个数为偶数时取**下中位数**（第 n/2 小，从 1 数），
+/// 不做两数平均——那需要 T 支持除法，而且整数平均会截断，调用方要平均就自己取两个堆顶。
+/// insert 为 O(log n)，median 为 O(1)。
+template <typename T>
+class RunningMedian {
+public:
+    void insert(const T& value) {
+        if (lower_.empty() || !(*lower_.peek() < value)) lower_.insert(value);
+        else upper_.insert(value);
+        rebalance();
+    }
+    /// 空时 std::nullopt。
+    [[nodiscard]] std::optional<T> median() const {
+        if (const T* top = lower_.peek()) return *top;
+        return std::nullopt;
+    }
+    [[nodiscard]] std::size_t size() const noexcept { return lower_.size() + upper_.size(); }
+
+private:
+    /// 每次插入后两堆大小至多差 2，搬一个堆顶就回到不变式。
+    void rebalance() {
+        if (lower_.size() > upper_.size() + 1) upper_.insert(*lower_.remove_min());
+        else if (upper_.size() > lower_.size()) lower_.insert(*upper_.remove_min());
+    }
+    MinHeap<T, std::greater<T>> lower_;   // 较小的一半，堆顶是其中最大的
+    MinHeap<T> upper_;                    // 较大的一半，堆顶是其中最小的
+};
+```
+
+元素个数为偶数时，`RunningMedian::median` 返回**下中位数**（排好序后第 $n/2$ 个，从 1 数），不做两数平均：平均需要 `T` 支持除法，整数平均还会截断，要平均的调用方自己取两个堆顶即可。测试把每一次插入后的结果都与「复制一份排序取中间」对比，数据取自很小的值域，重复值很多；另有全升序、全降序两条，分别让新元素一直落进同一边、逼着每次都搬堆顶。
+
 ## 5.6 Huffman 树及其应用
 
 ### 为什么这一节没有 Python 版
@@ -1409,6 +1538,80 @@ Huffman 树的意义就是让这个数最小——权大的离根近，编码就
 Direct leak of 24 byte(s) in 1 object(s) allocated from:
     #1 HuffmanTree::HuffmanTree(int const*, unsigned long) teaching.hpp:180
 ```
+
+#### 权值成批给出：只求 WPL
+
+另一类常见的上机题把输入换成「权 $w_i$ 出现了 $c_i$ 次」，$c_i$ 可以到 $10^9$，只问最小的带权路径长度。结点根本建不出来，要换两个想法。
+
+**第一，WPL 等于所有内部结点的权之和。** 每个内部结点的权是它下面全部叶子的权之和，所以一个深度为 $d$ 的叶子，它的权在它的 $d$ 个祖先里各被算了一次，合起来恰好是「权 × 深度」。以原书的权 2、3、4、7 为例，三次合并得到的内部结点权是 5、9、16，$5+9+16=30$，与上面按深度算的一样。于是不必知道树的形状，只要把每次合并出的新权累加。
+
+**第二，同权的树可以整批合并。** 若当前最小的权是 $w$、有 $c$ 棵，前 $\lfloor c/2\rfloor$ 次合并取的一定都是两棵 $w$（合并出的 $2w$ 不比 $w$ 小），一步就得到 $\lfloor c/2\rfloor$ 棵权为 $2w$ 的树，WPL 加上 $2w\lfloor c/2\rfloor$。$c$ 为奇数时**会余下一棵 $w$**，它要留在堆里，和下一小的树合并——这正是最容易漏掉的一步，漏了结果就偏小。堆里放的是「(权, 棵数)」这样的组，取出一组时顺手把堆顶同权的组并进来。$10^9$ 棵等权叶子每轮棵数减半，大约 30 轮就结束。
+
+```cpp file=code/ch05/heap_huffman/modern.hpp#huffman-wpl-batched
+/// 一组同权叶子：weight 这个权出现了 count 次。
+struct WeightGroup {
+    std::uint64_t weight;
+    std::uint64_t count;
+};
+
+/// 只求 Huffman 树的带权路径长度，不建树——叶子数可达 1e9 量级，结点根本放不下。
+///
+/// 依据：WPL 等于**所有内部结点的权之和**（每个叶子的权在它的每个祖先里各被加一次，
+/// 祖先个数正是它的深度）。所以只要把每次合并出的新权累加起来。
+/// 又因为同权的若干棵树谁先合并都一样，最小的一组有 c 棵时，一次就合并出 c/2 棵
+/// 权为 2w 的树；c 为奇数时剩下的那一棵要和**下一小**的树合并，不能丢。
+/// 堆里放的是「组」，每轮组数不增或 count 减半，k 个输入组约 O(k log k + log n) 轮。
+///
+/// 溢出界：设总权 W = Σ weight·count、叶子数 n = Σ count，则 WPL ≤ W·⌈log2 n⌉。
+/// 该乘积小于 2^64 时一定不溢出；否则中途任何一次加法/乘法溢出都抛 std::overflow_error，
+/// 不返回回绕后的错数。count 为 0 的组忽略；叶子数 ≤ 1 时 WPL 为 0。
+inline std::uint64_t huffman_wpl_batched(const WeightGroup* groups, std::size_t group_count) {
+    if (group_count != 0 && groups == nullptr) {
+        throw std::invalid_argument("huffman_wpl_batched: non-empty input requires groups");
+    }
+    struct ByWeight {
+        std::uint64_t weight, count;
+        bool operator<(const ByWeight& other) const noexcept { return weight < other.weight; }
+    };
+    const auto add = [](std::uint64_t a, std::uint64_t b) {
+        if (a > std::numeric_limits<std::uint64_t>::max() - b) throw std::overflow_error("Huffman WPL overflows uint64");
+        return a + b;
+    };
+    const auto mul = [](std::uint64_t a, std::uint64_t b) {
+        if (b != 0 && a > std::numeric_limits<std::uint64_t>::max() / b) throw std::overflow_error("Huffman WPL overflows uint64");
+        return a * b;
+    };
+
+    MinHeap<ByWeight> heap;
+    for (std::size_t i = 0; i < group_count; ++i) {
+        if (groups[i].count != 0) heap.insert(ByWeight{groups[i].weight, groups[i].count});
+    }
+    std::uint64_t wpl = 0;
+    while (auto smallest = heap.remove_min()) {
+        ByWeight group = *smallest;
+        while (heap.peek() != nullptr && heap.peek()->weight == group.weight) {   // 同权的组并成一组
+            group.count = add(group.count, heap.remove_min()->count);
+        }
+        if (group.count == 1) {
+            auto next = heap.remove_min();
+            if (!next) break;                              // 只剩一棵树：它就是根
+            const std::uint64_t merged = add(group.weight, next->weight);
+            wpl = add(wpl, merged);
+            heap.insert(ByWeight{merged, 1});
+            if (next->count > 1) heap.insert(ByWeight{next->weight, next->count - 1});
+        } else {
+            const std::uint64_t pairs = group.count / 2;
+            const std::uint64_t merged = mul(group.weight, 2);
+            wpl = add(wpl, mul(merged, pairs));            // pairs 个内部结点，各权 2w
+            if (group.count % 2 == 1) heap.insert(ByWeight{group.weight, 1});   // 奇数余下的一棵
+            heap.insert(ByWeight{merged, pairs});
+        }
+    }
+    return wpl;
+}
+```
+
+结果用 64 位无符号数。设总权 $W=\sum w_ic_i$、叶子总数 $n=\sum c_i$，因为等权时尽量满的树深度不超过 $\lceil\log_2 n\rceil$，最优的 WPL 不超过 $W\lceil\log_2 n\rceil$；这个数小于 $2^{64}$ 就一定不溢出。超出时，中途的每一次加法和乘法都先检查，溢出就抛 `std::overflow_error`，不返回回绕后的错数。测试把几百组随机的小输入逐个展开成单个叶子，交给 5.5 那份教学版 `HuffmanTree::weighted_path_length` 真建树核对；$10^9$ 棵等权叶子则与闭式公式 $n\lfloor\log_2 n\rfloor+2(n-2^{\lfloor\log_2 n\rfloor})$ 核对。
 
 ### 5.6.2 Huffman 编码
 

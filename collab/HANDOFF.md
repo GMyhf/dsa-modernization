@@ -1,5 +1,54 @@
 # HANDOFF · 交接日志
 
+### 2026-09-14 · Claude → Codex · T-071–T-076：对照 2025 秋课程仓库，补虚报、补机考题型、补书面作业
+
+人让我拿 `elainafan/Data-Structures-and-Algorithms-A-2025Fall-PKU` 对照本项目找改进点，
+报告后指定「P0/P1/P2 全做，先认领再动手」。认领提交 `12db6ff`。
+
+**P0（T-071）**：附录 OJ 迁移表两处虚报——「中序+后序重建 → `code/ch05/binary_tree`」「逆序对 → `code/ch08/sorting`」，
+两单元原本 grep 无实现（与算法6.10 同类）。修法是补实现（见下），不是删声明。第 4 章课程作业重写：
+KMP 与 DFA 的关系（8 状态转移表、DFA 由 border 递推）；删 `b`/`ac` 改为原地 O(1) 写指针法。
+**我自己报告里的一处夸大已更正**：旧的读写栈答案输出其实对（全量对拍一致），错在空间；
+另查出该节题号引错、「循环移动」无出处（改标本书自拟），追踪矩阵同一错误一并更正。
+
+**P1（T-072–T-075，代码由 4 个子 agent 按单元并行写、我逐个读过 diff）**：
+
+| 单元 | 新增 | 断言（前→后） | 变异 |
+| --- | --- | --- | --- |
+| ch04/pattern_matching | `border_lengths`、`minimal_period`、`is_repetition`、`repetition_count`（C++/Py/共享表） | C++ 59→92，Py 617→645 | 3/3 红 |
+| ch08/sorting | `count_inversions`（归并计数，64 位） | C++ 56→71，Py 134→148 | 全红，含 `int`/`uint32_t` 截断 |
+| ch07/graph | `dijkstra_tree` + `shortest_path`（C++/Py/共享表） | C++ 44→59，Py 52 | 6/6 红 |
+| ch06/general_tree | `ComponentCounter`（分量数、连通点对） | 78→95 | 3/3 红（含「读非根 size」） |
+| ch05/binary_tree | `from_inorder_postorder`、`from_preorder_inorder`（非递归） | 39→57 | 全红，2 条靠 terminate |
+| ch05/heap_huffman | `MinHeap<T, Compare>`、`RunningMedian`、`huffman_wpl_batched` | 21→38 | 全红 |
+| ch03/array_stack | `stack_operations_for`（n=1..7 合法数 = Catalan） | 74→85 | 4/4 红 |
+
+各章正文加了**不编号**小节（ch03/04/05/06/07/08），`book/ch12` 的树状数组单元首次在正文（ch08）被引用。
+`dijkstra` 与 `DisjointSet::unite` 函数体一字未动——课件逐字引用了这两个切片。
+
+**P2（T-076）**：附录补第 1/3/4/5/6/8/9/10/12 章共约 30 条课程作业答案与原书 5.19/5.20/5.21、10 章题 3 的具体数值；
+题面一律取 `ref_DSA/` 原件，数值全部由 scratchpad 脚本复算（对拍/穷举），学生仓库只作交叉核对且在「来源文件登记」写明其作答有错。
+
+**闸门**（`python3 tools/handoff.py --verify`，EXIT=0，14/14 步）：
+
+```text
+Ran 428 tests                                   OK
+✅ 台账一致：104/105 已现代化，1 退场，0 待办
+✅ 勘误台账一致：40 条，15 条有回归测试
+✅ 书稿体检通过：31 个文件，17 条规则（题目覆盖：正文 345 道，已作答 345 道）
+✅ 正文保全度未回退：89 节，整体 88%，其中 1 节仍不足原书一半
+✅ book/site/ 与 book/*.md 一致（18 个页面）
+✅ 课件 .pptx 与课件源逐字节一致：12 份、410 页 ｜ ✅ courseware 闸门通过：第 1–9 项
+✅ PDF 与源文件一致：678 页、18 章、217 张图，sha256 10ed491e1845（原 656 页，README 两处页数/体积同步改）
+✅ 扫描件裁图一致：218 张 ｜ ✅ 插图集与底稿一致：292 张
+✅ 35/35 个单元通过（每个 2 种构建：debug+asan+ubsan, release-O2），其中 13 个单元另有 Python 两档
+```
+
+第一次跑 `--verify` 是红的：我先建网页版、后重排 PDF，下载卡片读到的是旧 PDF；另 `tests/test_readme` 抓到 README 页数过期。
+重建网页版、改 README 后复跑全绿——**建产物的顺序是 PDF 在前、网页版在后**。
+
+**请你重点看**：`NOTES-claude.md` 本日条目的 5 条（terminate 变红、`<algorithm>` 算不算 D-001 §2、成批 Huffman 轮数界、Dijkstra 重复、`HuffmanTree::destroy` 递归未进风险清单）。
+
 ### 2026-09-11 · Claude · 拿课程 Word 原件核对两份大纲，修掉 3 处粘贴损伤（其中 1 处是我自己弄的）
 
 用户说这两份大纲是从 docx 复制粘贴来的、可能带进错误，让我发现不对的就改，

@@ -633,6 +633,53 @@ private:
 };
 ```
 
+#### 顺带数出连通分量和连通点对
+
+并查集最常见的用法是**动态连通性**：图的边一条条加进来，每加一条就要回答「现在有几个连通分量」「现在有多少对顶点互相连通」。两个数都不必重新数，合并时顺手维护即可：
+
+- **连通分量数**从 $n$ 开始，每次**成功**合并减 1；两端本来就在同一集合里的冗余边不改变它。
+- **连通点对数**从 0 开始。把规模为 $s_1$、$s_2$ 的两个集合并成一个，新连通的无序点对恰好是 $s_1 \cdot s_2$ 对：一边任取一个、另一边任取一个。
+
+这里最容易错的是 $s_1$、$s_2$ **从哪里读**。重量记在根上（原书的 `nCount` 只对根有意义），所以必须先 `find` 到根再读规模；拿边的端点直接去读 `size_`，读到的是某棵子树当年的旧规模。另一种错法是合并之后再读，那时两个规模已经加在了一起。下面这一层把两个规模都在合并**之前**经 `DisjointSet::set_size` 从根上读出。点对数用 64 位无符号整数：$n$ 个元素最多 $n(n-1)/2$ 对，32 位在 $n$ 约 9.3 万时就会溢出。
+
+`ComponentCounter` 组合一个 `DisjointSet`，没有去改 `DisjointSet::unite`：合并规则保持上面的样子，计数是外面这一层的事。内部的并查集是私有的，调用方没办法绕过计数直接合并，两个数也就不会失真。`ComponentCounter::connect` 返回这条边新连通的点对数，冗余边返回 0；`ComponentCounter::components` 和 `ComponentCounter::connected_pairs` 都是 $O(1)$ 的查询。测试在 $n \le 30$ 的随机边序列上每连一条边就用 BFS 暴力重数一遍，逐步对拍这两个数。第 7 章 Kruskal 算法一节的末尾有一个用到 $s_1 \cdot s_2$ 的例子。
+
+```cpp file=code/ch06/general_tree/modern.hpp#component-counter
+/// 并查集的一个常见用法：边一条条加进来，随时回答「现在有几个连通分量」
+/// 「现在有多少对顶点互相连通」。两个数都在合并成功时 O(1) 维护。
+///
+/// 合并规模为 s1、s2 的两个集合，新连通的无序点对恰好是 s1·s2 对——
+/// **两个规模都要在合并之前、从根上读**：读非根元素的 size_ 或读合并后的规模，都是错的。
+/// 用 `std::uint64_t` 装点对数：n 个元素最多 n(n-1)/2 对，n 到 2^32 量级才会溢出。
+///
+/// 这里组合一个 `DisjointSet` 而不改动它：`unite` 保持原书的样子，计数是外面这一层的事。
+/// 内部的并查集是私有的，所以不存在「绕过计数直接合并」把两个数弄脏的途径。
+class ComponentCounter {
+public:
+    explicit ComponentCounter(std::size_t count) : sets_(count), component_count_(count) {}
+
+    /// 连一条边 (left, right)，返回因此**新**连通的点对数；两端本已连通时返回 0。
+    std::uint64_t connect(std::size_t left, std::size_t right) {
+        const std::uint64_t pairs =
+            static_cast<std::uint64_t>(sets_.set_size(left)) * sets_.set_size(right);
+        if (!sets_.unite(left, right)) {
+            return 0;  // 冗余边：分量数不变，点对数不变
+        }
+        --component_count_;
+        pair_total_ += pairs;
+        return pairs;
+    }
+
+    [[nodiscard]] std::size_t components() const noexcept { return component_count_; }
+    [[nodiscard]] std::uint64_t connected_pairs() const noexcept { return pair_total_; }
+
+private:
+    DisjointSet sets_;
+    std::size_t component_count_;
+    std::uint64_t pair_total_{0};
+};
+```
+
 ## 6.3 树的顺序存储结构
 
 **顺序存储表示法存储树，要求把树中的结点按照一定的顺序存储到一片连续的存储单元中；为了能够

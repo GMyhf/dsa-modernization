@@ -6,6 +6,7 @@
 
 #include "support/fault_injection.hpp"
 
+#include <algorithm>
 #include <cstdio>
 #include <cstdint>
 #include <cstdlib>
@@ -17,6 +18,7 @@
 #include <string>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 // T-004：ArrayStack 改用裸存储之后，它的分配走的是
 // `::operator new(bytes, std::align_val_t)`，而不再是 `new T[n]`。
@@ -476,6 +478,84 @@ void test_clear_keeps_capacity() {
     check(s.capacity() == cap, "clear 保留已分配容量");
 }
 
+// ── T-075：出栈序列的合法性 ────────────────────────────────────────────────
+//
+// 独立参照物是本章习题 8 的判据：输入 1..n 经一个栈能得到排列 p，
+// 当且仅当**不存在** i < j < k 使 p[j] < p[k] < p[i]。O(n³) 三重循环，
+// 与 stack_operations_for 的模拟过程不共用任何一行。
+bool has_312_pattern(const std::vector<int>& p) {
+    for (std::size_t i = 0; i < p.size(); ++i)
+        for (std::size_t j = i + 1; j < p.size(); ++j)
+            for (std::size_t k = j + 1; k < p.size(); ++k)
+                if (p[j] < p[k] && p[k] < p[i]) return true;
+    return false;
+}
+
+/// 用一个 std::vector 当栈，把操作序列独立重放一遍，返回出栈次序。
+/// 操作非法（空栈 Pop、Push 超过 n 辆）时返回空 optional。
+std::optional<std::vector<int>> replay(const std::vector<dsa::StackOp>& ops, int n) {
+    std::vector<int> stack;
+    std::vector<int> out;
+    int next_car = 1;
+    for (dsa::StackOp op : ops) {
+        if (op == dsa::StackOp::Push) {
+            if (next_car > n) return std::nullopt;
+            stack.push_back(next_car++);
+        } else {
+            if (stack.empty()) return std::nullopt;
+            out.push_back(stack.back());
+            stack.pop_back();
+        }
+    }
+    return out;
+}
+
+void test_stack_sequence_counts_are_catalan() {
+    const std::size_t catalan[] = {1, 2, 5, 14, 42, 132, 429};
+    bool all_counts = true;
+    bool agree_with_312 = true;
+    bool replays_ok = true;
+    bool op_count_ok = true;
+    for (int n = 1; n <= 7; ++n) {
+        std::vector<int> perm(static_cast<std::size_t>(n));
+        for (int i = 0; i < n; ++i) perm[static_cast<std::size_t>(i)] = i + 1;
+        std::size_t valid = 0;
+        do {
+            const auto ops = dsa::stack_operations_for(perm);
+            if (ops.has_value() == has_312_pattern(perm)) agree_with_312 = false;
+            if (ops) {
+                ++valid;
+                if (replay(*ops, n) != std::optional<std::vector<int>>(perm)) replays_ok = false;
+                if (ops->size() != 2 * static_cast<std::size_t>(n)) op_count_ok = false;
+            }
+        } while (std::next_permutation(perm.begin(), perm.end()));
+        if (valid != catalan[n - 1]) {
+            all_counts = false;
+            std::printf("    n=%d 合法出栈序列 %zu 个，Catalan 数应为 %zu\n", n, valid, catalan[n - 1]);
+        }
+    }
+    check(all_counts, "T-075 n=1..7 的合法出栈序列数恰为 Catalan 数 1,2,5,14,42,132,429");
+    check(agree_with_312, "T-075 模拟判定与习题 8 的「无 312 模式」判据在全部 5913 个排列上一致");
+    check(replays_ok, "T-075 返回的操作序列独立重放后恰好得到目标出栈次序");
+    check(op_count_ok, "T-075 合法序列的操作恰为 n 次 Push + n 次 Pop");
+}
+
+void test_stack_sequence_examples() {
+    check(!dsa::stack_operations_for({3, 1, 2}).has_value(), "T-075 3,1,2 不可能：3 出栈时 1 压在 2 下面");
+    const auto ops = dsa::stack_operations_for({3, 2, 1});
+    using Op = dsa::StackOp;
+    const std::vector<Op> want{Op::Push, Op::Push, Op::Push, Op::Pop, Op::Pop, Op::Pop};
+    check(ops.has_value() && *ops == want, "T-075 3,2,1：三次 Push 再三次 Pop");
+    const auto interleaved = dsa::stack_operations_for({1, 3, 2});
+    const std::vector<Op> want_interleaved{Op::Push, Op::Pop, Op::Push, Op::Push, Op::Pop, Op::Pop};
+    check(interleaved.has_value() && *interleaved == want_interleaved, "T-075 1,3,2 的操作序列逐个一致");
+    const auto empty = dsa::stack_operations_for({});
+    check(empty.has_value() && empty->empty(), "T-075 零辆车：合法，操作序列为空");
+    check(!dsa::stack_operations_for({1, 1}).has_value(), "T-075 编号重复：不是排列，拒绝");
+    check(!dsa::stack_operations_for({1, 3}).has_value(), "T-075 编号越界：拒绝");
+    check(!dsa::stack_operations_for({0}).has_value(), "T-075 编号 0 不在 1..n 里：拒绝");
+}
+
 }  // namespace
 
 int main() {
@@ -499,6 +579,8 @@ int main() {
     test_no_console_output();
     test_at_throws_out_of_range();
     test_clear_keeps_capacity();
+    test_stack_sequence_counts_are_catalan();
+    test_stack_sequence_examples();
 
     std::printf("ArrayStack: %d 项断言，%d 失败\n", g_checks, g_failed);
     return g_failed == 0 ? 0 : 1;

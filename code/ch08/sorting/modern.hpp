@@ -182,6 +182,49 @@ inline void merge_sort(std::vector<int>& values) {
 }
 // <<< merge
 
+// >>> inversions
+// 归并排序的副产品（原书无清单）：逆置（逆序对）计数，Θ(n log n)。
+// 与 merge_ranges 同一个合并过程，只多一句计数：右段的 values[right] 严格小于
+// 左段的 values[left] 时，左段还没输出的 [left, middle) 都比它大，一次记 middle - left 个。
+// 相等时取左边、不计数——相等元素不构成逆置，这与稳定性是同一个 `<`。
+inline std::uint64_t merge_count_ranges(std::vector<int>& values, std::vector<int>& buffer,
+                                        std::size_t first, std::size_t middle, std::size_t last) {
+    std::uint64_t inversions = 0;
+    std::size_t left = first;
+    std::size_t right = middle;
+    std::size_t output = first;
+    while (left < middle && right < last) {
+        if (values[right] < values[left]) {
+            inversions += middle - left;
+            buffer[output++] = values[right++];
+        } else {
+            buffer[output++] = values[left++];
+        }
+    }
+    while (left < middle) buffer[output++] = values[left++];
+    while (right < last) buffer[output++] = values[right++];
+    for (std::size_t index = first; index < last; ++index) values[index] = buffer[index];
+    return inversions;
+}
+
+inline std::uint64_t count_inversions_range(std::vector<int>& values, std::vector<int>& buffer,
+                                            std::size_t first, std::size_t last) {
+    if (last - first < 2) return 0;
+    const std::size_t middle = first + (last - first) / 2;
+    return count_inversions_range(values, buffer, first, middle)
+         + count_inversions_range(values, buffer, middle, last)
+         + merge_count_ranges(values, buffer, first, middle, last);
+}
+
+// 按值传参：函数在自己的副本上归并，调用方的序列原样不动（计数是查询，不该顺手排序）。
+// 调用方若本来就要排序，写 count_inversions(std::move(v)) 即可省掉这次拷贝。
+// 返回 64 位：逆置数最多 n(n-1)/2，n >= 65537 时就超过 INT_MAX，用 int 累加是有符号溢出。
+inline std::uint64_t count_inversions(std::vector<int> values) {
+    std::vector<int> buffer(values.size());
+    return count_inversions_range(values, buffer, 0, values.size());
+}
+// <<< inversions
+
 // 算法8.9：已有序时跳过 merge；小分区改用插入排序。
 inline void merge_sort_optimized_range(std::vector<int>& values, std::vector<int>& buffer,
                                        std::size_t first, std::size_t last) {

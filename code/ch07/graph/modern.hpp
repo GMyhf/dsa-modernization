@@ -134,6 +134,65 @@ public:
     }
     // <<< dijkstra
 
+    // >>> dijkstra-path
+    /// 原书 Dist 类的 `length` 与 `pre` 两个域：到各点的距离，和最短路径上的前一个顶点。
+    /// 源点自己、以及到不了的顶点，没有前一个顶点（`std::nullopt`）。
+    struct ShortestPathTree {
+        std::size_t source;
+        std::vector<int> distance;
+        std::vector<std::optional<std::size_t>> predecessor;
+    };
+
+    /// 与 `dijkstra` 同一个算法，多记一个 `pre`：**只在松弛成功时**改前驱。
+    /// 溢出：两个加数都小于 infinity = INT_MAX/4，和小于 INT_MAX/2，不会溢出；
+    /// 代价是总长 >= infinity 的路径会被当成「到不了」。
+    [[nodiscard]] ShortestPathTree dijkstra_tree(std::size_t source) const {
+        check_vertex(source);
+        ShortestPathTree tree{source, std::vector<int>(vertices(), infinity),
+                              std::vector<std::optional<std::size_t>>(vertices())};
+        std::vector<bool> used(vertices());
+        tree.distance[source] = 0;
+        for (std::size_t count = 0; count < vertices(); ++count) {
+            const std::size_t from = nearest_unvisited(tree.distance, used);
+            if (from == vertices() || tree.distance[from] == infinity) {
+                break;
+            }
+            used[from] = true;
+            for (std::size_t to = 0; to < vertices(); ++to) {
+                if (adjacency_[from][to] < infinity &&
+                    tree.distance[to] > tree.distance[from] + adjacency_[from][to]) {
+                    tree.distance[to] = tree.distance[from] + adjacency_[from][to];
+                    tree.predecessor[to] = from;
+                }
+            }
+        }
+        return tree;
+    }
+
+    /// 顺着 `pre` 从汇点倒着走回源点，再把序列翻过来。到不了返回 `std::nullopt`；
+    /// 汇点就是源点时路径是 `{source}`。前驱链断了或成环，说明传进来的树是坏的。
+    [[nodiscard]] static std::optional<std::vector<std::size_t>> shortest_path(
+        const ShortestPathTree& tree, std::size_t target) {
+        const std::size_t count = tree.distance.size();
+        if (target >= count || tree.source >= count || tree.predecessor.size() != count) {
+            throw std::out_of_range("vertex");
+        }
+        if (tree.distance[target] == infinity) {
+            return std::nullopt;
+        }
+        std::vector<std::size_t> path{target};
+        for (std::size_t vertex = target; vertex != tree.source;) {
+            if (!tree.predecessor[vertex] || path.size() > count) {
+                throw std::invalid_argument("broken predecessor chain");
+            }
+            vertex = *tree.predecessor[vertex];
+            path.push_back(vertex);
+        }
+        std::reverse(path.begin(), path.end());
+        return path;
+    }
+    // <<< dijkstra-path
+
     // >>> floyd
     [[nodiscard]] std::vector<std::vector<int>> floyd() const {
         auto distance = adjacency_;

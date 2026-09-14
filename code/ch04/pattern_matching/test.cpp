@@ -166,6 +166,123 @@ void test_no_console_output() {
     check(captured.str().empty(), "匹配算法全程不向 cout/cerr 写任何东西");
 }
 
+// ── T-072：最小周期 ────────────────────────────────────────────────────────
+//
+// 独立参照物是**定义本身**：逐个试 p = 1, 2, …，第一个满足 s[i] == s[i+p] 的就是。
+// O(n²)，与 border_lengths 的回退链没有共用任何一行。
+std::size_t brute_minimal_period(std::string_view s) {
+    for (std::size_t p = 1; p <= s.size(); ++p) {
+        bool ok = true;
+        for (std::size_t i = 0; i + p < s.size() && ok; ++i) {
+            ok = s[i] == s[i + p];
+        }
+        if (ok) {
+            return p;
+        }
+    }
+    return 0;
+}
+
+/// 最大 K：逐个试能整除 n 的真约数 d，看 s 是否等于 s[0..d) 重复 n/d 次。
+std::size_t brute_repetition_count(std::string_view s) {
+    const std::size_t n = s.size();
+    for (std::size_t d = 1; d < n; ++d) {
+        if (n % d != 0) {
+            continue;
+        }
+        std::string built;
+        for (std::size_t t = 0; t < n / d; ++t) {
+            built += std::string(s.substr(0, d));
+        }
+        if (built == s) {
+            return n / d;
+        }
+    }
+    return n == 0 ? 0 : 1;
+}
+
+void test_minimal_period_brute_force() {
+    std::size_t strings = 0;
+    std::size_t period_bad = 0;
+    std::size_t power_bad = 0;
+    std::size_t border_bad = 0;
+    std::size_t proper_repetitions = 0;
+    for (std::size_t len = 0; len <= 10; ++len) {
+        for (std::size_t mask = 0; mask < (std::size_t{1} << len); ++mask) {
+            std::string s;
+            for (std::size_t i = 0; i < len; ++i) {
+                s += ((mask >> i) & 1U) ? 'b' : 'a';
+            }
+            ++strings;
+            if (dsa::minimal_period(s) != brute_minimal_period(s)) {
+                if (++period_bad <= 3) std::printf("    最小周期不一致: \"%s\"\n", s.c_str());
+            }
+            const std::size_t k = brute_repetition_count(s);
+            if (dsa::repetition_count(s) != k || dsa::is_repetition(s) != (k > 1)) {
+                if (++power_bad <= 3) std::printf("    乘方不一致: \"%s\"\n", s.c_str());
+            }
+            proper_repetitions += k > 1 ? 1 : 0;
+            // 每个前缀的边界长度 == 前缀长度 − 该前缀的最小周期
+            const auto border = dsa::border_lengths(s);
+            for (std::size_t i = 0; i < len; ++i) {
+                if (border[i] != i + 1 - brute_minimal_period(std::string_view(s).substr(0, i + 1))) {
+                    ++border_bad;
+                }
+            }
+        }
+    }
+    check(strings == 2047, "{a,b} 上长度 0..10 的串全部穷举（2047 个）");
+    check(period_bad == 0, "T-072 minimal_period 与按定义逐个试 p 的暴力解在 2047 个串上一致");
+    check(power_bad == 0, "T-072 repetition_count / is_repetition 与逐个试约数的暴力解一致");
+    check(border_bad == 0, "T-072 border_lengths 的每个前缀值 == 前缀长 − 前缀最小周期");
+    check(proper_repetitions > 50, "穷举里确有足够多的循环串（否则乘方分支没被测到）");
+}
+
+// 陷阱一：原书优化版 next 不是边界长度，拿它求周期会错。
+// 未优化时「长度为 i 的前缀的最小周期 = i − next[i]」；把优化版代进这条公式：
+void test_optimized_next_gives_wrong_periods() {
+    const auto next = dsa::build_next("aaaa");
+    const std::vector<dsa::next_type> optimized{-1, -1, -1, -1};
+    check(next == optimized, "\"aaaa\" 的优化版 next 全是 −1");
+    const auto wrong = 3 - next[3];  // 前缀 "aaa" 用优化版 next 算出的「周期」
+    check(wrong == 4, "陷阱：用优化版 next 算前缀 \"aaa\" 的周期得 4，比前缀本身还长");
+    check(dsa::minimal_period("aaa") == 1, "前缀 \"aaa\" 的最小周期实为 1");
+    check(3 - dsa::border_lengths("aaaa")[2] == 1, "用未优化的 border_lengths 算同一个前缀得 1");
+
+    // 不是个例：在 {a,b} 长度 1..10 的全部串、全部前缀上统计。
+    std::size_t wrong_count = 0;
+    std::size_t right_count = 0;
+    for (std::size_t len = 1; len <= 10; ++len) {
+        for (std::size_t mask = 0; mask < (std::size_t{1} << len); ++mask) {
+            std::string s;
+            for (std::size_t i = 0; i < len; ++i) s += ((mask >> i) & 1U) ? 'b' : 'a';
+            const auto nx = dsa::build_next(s);
+            const auto border = dsa::border_lengths(s);
+            for (std::size_t i = 1; i < len; ++i) {
+                const std::size_t truth = brute_minimal_period(std::string_view(s).substr(0, i));
+                if (static_cast<dsa::next_type>(i) - nx[i] != static_cast<dsa::next_type>(truth)) ++wrong_count;
+                if (i - border[i - 1] != truth) ++right_count;
+            }
+        }
+    }
+    check(wrong_count > 1000, "优化版 next 在上千个前缀上给出错误周期——陷阱是普遍的，不是个例");
+    check(right_count == 0, "未优化的 border_lengths 在同一批前缀上一个都不错");
+}
+
+// 陷阱二：边界为 0 时 p == n，n % n == 0 恒成立，但这不是循环串。
+void test_zero_border_is_not_a_repetition() {
+    check(dsa::border_lengths("abcd").back() == 0, "\"abcd\" 的整串边界为 0");
+    check(dsa::minimal_period("abcd") == 4, "边界为 0 时最小周期等于串长");
+    check(!dsa::is_repetition("abcd"), "陷阱：\"abcd\" 满足 4 % 4 == 0，但不是循环串");
+    check(!dsa::is_repetition("a"), "单字符串不是循环串");
+    check(dsa::repetition_count("abcd") == 1, "\"abcd\" 的乘方次数是 1");
+    check(!dsa::is_repetition("ababa"), "周期 2 不整除 5：\"ababa\" 不是循环串");
+    check(dsa::is_repetition("abab"), "\"abab\" 是 \"ab\" 重复 2 次");
+    check(dsa::minimal_period("") == 0 && dsa::repetition_count("") == 0 && !dsa::is_repetition(""),
+          "空串：周期 0、乘方 0、不是循环串");
+    check(dsa::border_lengths("").empty(), "空串的边界数组为空");
+}
+
 }  // namespace
 
 int main() {
@@ -178,8 +295,23 @@ int main() {
     test_randomised_agreement();
     test_kmp_is_linear_on_the_naive_worst_case();
     test_no_console_output();
+    test_minimal_period_brute_force();
+    test_optimized_next_gives_wrong_periods();
+    test_zero_border_is_not_a_repetition();
     const auto shared = dsa::shared_cases::load();
     for (const auto& item : shared) {
+        if (item.operation == "period") {
+            check(dsa::minimal_period(item.input) == std::stoul(item.expected),
+                  "T-072 最小周期（共享用例 " + item.name + "）");
+            continue;
+        }
+        if (item.operation == "repetition") {
+            check(dsa::repetition_count(item.input) == std::stoul(item.expected),
+                  "T-072 字符串乘方（共享用例 " + item.name + "）");
+            continue;
+        }
+        check(item.operation == "search" || item.operation == "bad_next",
+              "共享用例的 operation 可识别：" + item.operation);
         const auto split = item.input.find('|');
         const std::string text = item.input.substr(0, split);
         const std::string pattern = item.input.substr(split + 1);
