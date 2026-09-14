@@ -506,7 +506,8 @@ int smallest_eccentricity = infinity;</code></pre></div>
     }
 
     <span class="t">void</span> add_route(std::<span class="t">size_t</span> from, std::<span class="t">size_t</span> to, <span class="t">int</span> cost) {
-        <span class="k">if</span> (from &gt;= distance_.size() || to &gt;= distance_.size() || cost &lt; <span class="n">0</span>) {
+        <span class="c">// cost 不小于 infinity 时，下面的 Floyd 会把这条路线当成「没有路线」，结果静默出错。</span>
+        <span class="k">if</span> (from &gt;= distance_.size() || to &gt;= distance_.size() || cost &lt; <span class="n">0</span> || cost &gt;= infinity) {
             <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;route&quot;</span>);
         }
         <span class="k">if</span> (cost &lt; distance_[from][to]) {

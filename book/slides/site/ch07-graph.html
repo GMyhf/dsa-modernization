@@ -176,6 +176,9 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
     <span class="k">if</span> (weight &lt; <span class="n">0</span>) {
         <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;negative edge&quot;</span>);
     }
+    <span class="k">if</span> (weight &gt;= infinity) {  <span class="c">// infinity 表示「无边」，这么大的权存进去就被当成没有边</span>
+        <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;edge weight must be below Graph::infinity&quot;</span>);
+    }
     adjacency_[from][to] = weight;
     <span class="k">if</span> (!directed) {
         adjacency_[to][from] = weight;

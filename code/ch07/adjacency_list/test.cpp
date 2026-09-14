@@ -169,6 +169,14 @@ void test_argument_checks() {
         threw = true;
     }
     check(threw, "7.4 负权边被拒绝（Dijkstra 的前提）");
+    // T-078：权 >= infinity 若被收下，Dijkstra 会把它当成「到不了」且不报任何错。
+    threw = false;
+    try {
+        graph.add_edge(0, 1, dsa::GraphList::infinity);
+    } catch (const std::invalid_argument&) {
+        threw = true;
+    }
+    check(threw, "T-078 权 >= infinity 被拒绝，而不是静默变成到不了");
 
     threw = false;
     try {

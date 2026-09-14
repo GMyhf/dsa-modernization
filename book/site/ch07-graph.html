@@ -285,7 +285,7 @@ public:
 </tr>
 </tbody></table></div>
 <p><code>delEdge</code> 本书没有实现：后面七个算法都不删边，凭空加一个没有测试覆盖的运算，只会多一处无人验证的代码。需要时按 D-001 的规矩补，连测试一起补。</p>
-<p>接口上还有一条贯穿全章的约定：<strong>「有环」「不连通」不是异常，是可预期的结果</strong>。所以 <code>topological_sort</code>（图里有环）、<code>prim</code> 和 <code>kruskal</code>（图不连通）返回 <code>std::optional</code>，空值本身就是答案；<code>GraphList::weight</code> 在两点之间没有边时同样返回空。真正的用法错误才抛异常——顶点下标越界抛 <code>std::out_of_range</code>，负权边抛 <code>std::invalid_argument</code>（Dijkstra 在负权上不成立，见 7.5.1 节）。原书把这些情况打印到 <code>cout</code>，容器里做输出，调用者既拿不到结果也没法测试。</p>
+<p>接口上还有一条贯穿全章的约定：<strong>「有环」「不连通」不是异常，是可预期的结果</strong>。所以 <code>topological_sort</code>（图里有环）、<code>prim</code> 和 <code>kruskal</code>（图不连通）返回 <code>std::optional</code>，空值本身就是答案；<code>GraphList::weight</code> 在两点之间没有边时同样返回空。真正的用法错误才抛异常——顶点下标越界抛 <code>std::out_of_range</code>，负权边抛 <code>std::invalid_argument</code>（Dijkstra 在负权上不成立，见 7.5.1 节），权不小于 <code>infinity</code> 的边同样抛——<code>infinity</code> 在矩阵里兼任「无边」，这么大的权若被收下，后面所有算法都会把它当成没有边，而且一声不吭。原书把这些情况打印到 <code>cout</code>，容器里做输出，调用者既拿不到结果也没法测试。</p>
 <h2 id="73-图的存储结构"><a class="anchor" href="#73-图的存储结构">#</a>7.3 图的存储结构</h2>
 <p>图常用两种存法。邻接矩阵用 <span class="math">n<span class="bin">×</span>n</span> 的表，<span class="math">A[i][j]</span> 表示 <span class="math">i</span> 到 <span class="math">j</span> 有没有边、权是多少，适合稠密图和需要 <span class="math">O(<span class="upr">1</span>)</span> 问「两点之间有没有边」的算法（Floyd、Prim）。邻接表为每个顶点挂一条出边表，适合稀疏图和只沿出边走的算法（DFS、BFS、Dijkstra、拓扑）。</p>
 <p>两种都有可运行实现：邻接矩阵是 <code>code/ch07/graph</code>（代码7.1–7.3），邻接表是 <code>code/ch07/adjacency_list</code>（代码7.4）。两者<strong>逐项对拍</strong>——同一张图上 DFS/BFS 序列、拓扑序、Dijkstra 距离向量必须完全相同，外加 30 轮随机图对拍。换存储方式不该换答案，只该换代价。</p>
@@ -495,6 +495,9 @@ public:
         check_vertex(to);
         <span class="k">if</span> (weight &lt; <span class="n">0</span>) {
             <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;negative edge&quot;</span>);
+        }
+        <span class="k">if</span> (weight &gt;= infinity) {  <span class="c">// Dijkstra 以 infinity 表示「到不了」，这么大的权会被静默当成没有边</span>
+            <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;edge weight must be below GraphList::infinity&quot;</span>);
         }
         put(from, to, weight);
         <span class="k">if</span> (!directed) {

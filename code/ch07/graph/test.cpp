@@ -47,6 +47,18 @@ void test_shortest_paths() {
     check(disconnected.dijkstra(0)[2] == dsa::Graph::infinity, "算法7.8 unreachable stays infinity");
     bool rejected = false; try { disconnected.add_edge(1, 2, -1); } catch (const std::invalid_argument&) { rejected = true; }
     check(rejected, "代码7.3 rejects negative Dijkstra weight");
+    // T-078：infinity 兼任「无边」，权 >= infinity 的边若被收下，所有算法都会把它当成不存在。
+    for (const int huge : {dsa::Graph::infinity, dsa::Graph::infinity + 1}) {
+        dsa::Graph graph(2);
+        rejected = false;
+        try { graph.add_edge(0, 1, huge); } catch (const std::invalid_argument&) { rejected = true; }
+        check(rejected, "T-078 权 >= infinity 被拒绝，而不是静默变成无边");
+        check(graph.dijkstra(0)[1] == dsa::Graph::infinity, "T-078 被拒绝的边没有写进矩阵");
+    }
+    dsa::Graph largest(2);
+    largest.add_edge(0, 1, dsa::Graph::infinity - 1);
+    check(largest.dijkstra(0)[1] == dsa::Graph::infinity - 1, "T-078 infinity-1 是合法的最大权，Dijkstra 看得见它");
+    check(largest.dfs(0).size() == 2, "T-078 infinity-1 的边对周游也是边");
 }
 void test_minimum_spanning_trees() {
     dsa::Graph graph(5);

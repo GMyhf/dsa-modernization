@@ -48,6 +48,9 @@ public:
         if (weight < 0) {
             throw std::invalid_argument("negative edge");
         }
+        if (weight >= infinity) {  // Dijkstra 以 infinity 表示「到不了」，这么大的权会被静默当成没有边
+            throw std::invalid_argument("edge weight must be below GraphList::infinity");
+        }
         put(from, to, weight);
         if (!directed) {
             put(to, from, weight);

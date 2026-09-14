@@ -288,7 +288,8 @@ public:
     }
 
     void add_route(std::size_t from, std::size_t to, int cost) {
-        if (from >= distance_.size() || to >= distance_.size() || cost < 0) {
+        // cost 不小于 infinity 时，下面的 Floyd 会把这条路线当成「没有路线」，结果静默出错。
+        if (from >= distance_.size() || to >= distance_.size() || cost < 0 || cost >= infinity) {
             throw std::invalid_argument("route");
         }
         if (cost < distance_[from][to]) {

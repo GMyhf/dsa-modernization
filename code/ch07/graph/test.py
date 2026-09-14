@@ -77,6 +77,20 @@ def test_add_edge() -> None:
     except ValueError:
         raised = True
     check(raised, "代码7.3 rejects negative Dijkstra weight")
+    # T-078：infinity 兼任「无边」，权 >= infinity 的边若被收下，所有算法都会把它当成不存在。
+    for huge in (modern.Graph.infinity, modern.Graph.infinity + 1):
+        graph = modern.Graph(2)
+        raised = False
+        try:
+            graph.add_edge(0, 1, huge)
+        except ValueError:
+            raised = True
+        check(raised, "T-078 权 >= infinity 被拒绝，而不是静默变成无边")
+        check(graph.dijkstra(0)[1] == modern.Graph.infinity, "T-078 被拒绝的边没有写进矩阵")
+    largest = modern.Graph(2)
+    largest.add_edge(0, 1, modern.Graph.infinity - 1)
+    check(largest.dijkstra(0)[1] == modern.Graph.infinity - 1, "T-078 infinity-1 是合法的最大权，Dijkstra 看得见它")
+    check(len(largest.dfs(0)) == 2, "T-078 infinity-1 的边对周游也是边")
 
 
 def test_dfs_and_bfs_are_distinguishable() -> None:

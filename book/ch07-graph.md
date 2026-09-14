@@ -142,7 +142,7 @@ for (Edge e = G.FirstEdge(v); G.IsEdge(e); e = G.NextEdge(e)) { /* 处理 e */ }
 
 `delEdge` 本书没有实现：后面七个算法都不删边，凭空加一个没有测试覆盖的运算，只会多一处无人验证的代码。需要时按 D-001 的规矩补，连测试一起补。
 
-接口上还有一条贯穿全章的约定：**「有环」「不连通」不是异常，是可预期的结果**。所以 `topological_sort`（图里有环）、`prim` 和 `kruskal`（图不连通）返回 `std::optional`，空值本身就是答案；`GraphList::weight` 在两点之间没有边时同样返回空。真正的用法错误才抛异常——顶点下标越界抛 `std::out_of_range`，负权边抛 `std::invalid_argument`（Dijkstra 在负权上不成立，见 7.5.1 节）。原书把这些情况打印到 `cout`，容器里做输出，调用者既拿不到结果也没法测试。
+接口上还有一条贯穿全章的约定：**「有环」「不连通」不是异常，是可预期的结果**。所以 `topological_sort`（图里有环）、`prim` 和 `kruskal`（图不连通）返回 `std::optional`，空值本身就是答案；`GraphList::weight` 在两点之间没有边时同样返回空。真正的用法错误才抛异常——顶点下标越界抛 `std::out_of_range`，负权边抛 `std::invalid_argument`（Dijkstra 在负权上不成立，见 7.5.1 节），权不小于 `infinity` 的边同样抛——`infinity` 在矩阵里兼任「无边」，这么大的权若被收下，后面所有算法都会把它当成没有边，而且一声不吭。原书把这些情况打印到 `cout`，容器里做输出，调用者既拿不到结果也没法测试。
 
 ## 7.3 图的存储结构
 
@@ -249,6 +249,9 @@ public:
         check_vertex(to);
         if (weight < 0) {
             throw std::invalid_argument("negative edge");
+        }
+        if (weight >= infinity) {  // Dijkstra 以 infinity 表示「到不了」，这么大的权会被静默当成没有边
+            throw std::invalid_argument("edge weight must be below GraphList::infinity");
         }
         put(from, to, weight);
         if (!directed) {

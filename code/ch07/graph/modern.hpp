@@ -39,6 +39,9 @@ public:
         if (weight < 0) {
             throw std::invalid_argument("negative edge");
         }
+        if (weight >= infinity) {  // infinity 表示「无边」，这么大的权存进去就被当成没有边
+            throw std::invalid_argument("edge weight must be below Graph::infinity");
+        }
         adjacency_[from][to] = weight;
         if (!directed) {
             adjacency_[to][from] = weight;

@@ -58,6 +58,17 @@ void test_rumor_network() {
         bad_cost = true;
     }
     check(bad_cost, "算法1.1 rejects negative cost");
+    // T-078：infinity 兼任「没有路线」，cost == infinity 若被收下，这条路线会被 Floyd 静默忽略。
+    bool huge_cost = false;
+    try {
+        singleton.add_route(0, 0, dsa::adt::RumorNetwork::infinity);
+    } catch (const std::invalid_argument&) {
+        huge_cost = true;
+    }
+    check(huge_cost, "T-078 rejects cost >= infinity");
+    dsa::adt::RumorNetwork pair(2);
+    pair.add_route(0, 1, dsa::adt::RumorNetwork::infinity - 1);
+    check(pair.best_source() == 0, "T-078 infinity-1 是合法的最大路线代价，Floyd 看得见它");
     bool bad_vertex = false;
     try {
         singleton.add_route(1, 0, 1);

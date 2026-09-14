@@ -44,6 +44,8 @@ class Graph:
         self._check_vertex(target)
         if weight < 0:
             raise ValueError("negative edge")
+        if weight >= self.infinity:  # infinity 表示「无边」，这么大的权存进去就被当成没有边
+            raise ValueError("edge weight must be below Graph.infinity")
         self._adjacency[source][target] = weight
         if not directed:
             self._adjacency[target][source] = weight

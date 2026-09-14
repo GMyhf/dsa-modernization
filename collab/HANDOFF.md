@@ -1,5 +1,40 @@
 # HANDOFF · 交接日志
 
+### 2026-09-14 · Claude → Codex · T-078 修复你报的 P1；登记 T-077（pptx 在 PowerPoint 中被修复）
+
+**T-077（Backlog，未认领）**：你用原生 PowerPoint 打开 12 份 `book/slides/pptx` 全部显示 `[Repaired]`。
+非 T-071–T-076 引入（`2410ce5` 没动 pptx）。我在 Linux 上对 24 份 pptx 做了只读结构检查（content type、关系目标、
+rId/sldId/形状 id 唯一、sldId ≥ 256），全部无问题——触发点在更细的 schema 层，需要有 PowerPoint 的一方另存对比。步骤写在 PLAN。
+
+**T-078（Review）**：`add_edge` 权 ≥ `infinity` 被静默当成无边，复核属实。修法：拒绝 `weight >= infinity`，C++/Python 同步；
+共享表加 `weight-at-infinity`（被拒）、`largest-weight`（`infinity-1` 被收下）两行。**同一编码的兄弟单元同样有洞，一并修**：
+`ch07/adjacency_list::add_edge`、`ch01/adt::RumorNetwork::add_route`。
+
+| 单元 | 断言（前→后） | 变异 |
+| --- | --- | --- |
+| ch07/graph | C++ 59→67，Py 52→60，共享 5→7 | C++ 去守卫红、`>=`→`>` 红、Python 去守卫红 |
+| ch07/adjacency_list | 157 | 去守卫红 |
+| ch01/adt | 9 | 去守卫红 |
+
+**未修、待拍板**：路径**总长**达到 `infinity` 仍静默当成到不了（`infinity-1` + `1` 两条合法边后 `dijkstra`/`floyd` 报到不了、`bfs` 报可达，C++/Python 实测一致）。
+改法涉及书稿/课件逐字印出的 `#dijkstra`/`#floyd`，记在 PLAN T-078，没有顺手做。
+
+**闸门**（`python3 tools/handoff.py --verify`，EXIT=0，14/14 步，本机 Linux 完整档，非降级）：
+
+```text
+Ran 428 tests                                   OK
+✅ 台账一致：104/105 已现代化，1 退场，0 待办
+✅ 勘误台账一致：40 条，15 条有回归测试
+✅ 书稿体检通过：31 个文件，17 条规则
+✅ 正文保全度未回退：89 节，整体 88%，其中 1 节仍不足原书一半
+✅ book/site/ 与 book/*.md 一致（18 个页面）
+✅ 课件 .pptx 与课件源逐字节一致：12 份、410 页（ch07 因 #graph-build 切片变化重排）
+✅ courseware 闸门通过：第 1–9 项（渲染检查：12 份 PDF，共 378 页；python-pptx 1.0.2 在位）
+✅ PDF 与源文件一致：678 页、18 章、217 张图，sha256 3aa19f6a7788
+✅ 扫描件裁图一致：218 张 ｜ ✅ 插图集与底稿一致：292 张
+✅ 35/35 个单元通过（每个 2 种构建：debug+asan+ubsan, release-O2）
+```
+
 ### 2026-09-14 · Claude → Codex · T-071–T-076：对照 2025 秋课程仓库，补虚报、补机考题型、补书面作业
 
 人让我拿 `elainafan/Data-Structures-and-Algorithms-A-2025Fall-PKU` 对照本项目找改进点，
