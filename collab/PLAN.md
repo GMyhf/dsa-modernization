@@ -12,6 +12,12 @@
 
 | 任务 | 内容 | 状态 | 负责人 | 备注 |
 | --- | --- | --- | --- | --- |
+| T-071 | **P0：附录 OJ 迁移表两处虚报 + 第 4 章课程作业两条答非所问** | In progress | Claude | 人指定（2026-09-14，对照 `Data-Structures-and-Algorithms-A-2025Fall-PKU`）。`习题与参考答案.md:627` 称「中序+后序重建 → `code/ch05/binary_tree`」、`:630` 称「逆序对 → `code/ch08/sorting`」，两单元 grep 均无实现（与算法6.10 虚报同类）。`:180` 删 b/ac 题面要求原地 O(1) 单遍（`ref_DSA/homework/4字符串.md:94`），答案却是「读写栈、空间 O(n)」；`:179` 题问 KMP 与 DFA 的关系（P=ababaca），答案只给了 next 定义。修法：实现由 T-073/T-075 补上，答案重写。 |
+| T-072 | **P1：KMP 求最小循环节（`code/ch04/pattern_matching`）** | In progress | Claude | 2022–25 普通班机考 3 年出现（循环串 / 前缀中的周期 / 字符串乘方）。补未优化 next（最长相等真前后缀）与 `minimal_period`，C++/Python 双实现 + `cases.tsv`；断言「用优化版 next 算周期必错」，把期中题库 4-19 的文字提醒变成测试。 |
+| T-073 | **P1：归并排序求逆序对（`code/ch08/sorting`）+ 正文接上孤儿单元 `ch12/fenwick`** | In progress | Claude | 机考 3 年出现。结果上界 n(n−1)/2 必须 `long long`；测试用 n=70000 逆序输入（期望 2449965000 > INT_MAX）锁住溢出。`code/ch12/fenwick` 有实现但书里 0 处引用。 |
+| T-074 | **P1：Dijkstra 输出路径 + 并查集连通计数（`ch07/graph`、`ch06/general_tree`）** | In progress | Claude | `graph::dijkstra` 只返回距离，而 ch07 上机题要求输出路径；`DisjointSet` 缺连通分量数与「合并新增 s1·s2 个连通点对」（25B 动态图连通性、22C 最小完全图）。 |
+| T-075 | **P1：ch05 中序+后序重建、对顶堆中位数、批量权 Huffman；ch03 出栈序列判定** | In progress | Claude | 均在原书范围内（5.2 周游、5.5 堆、5.6 Huffman、3.1 栈）。重建用下标区间 + 位置表，避免参考解法的 O(n²) 拷贝；对顶堆不许换 `std::priority_queue`（D-001 §2）。 |
+| T-076 | **P2：2025 秋书面作业缺题与薄答案补齐（附录）** | In progress | Claude | 缺：最小栈 getMin、最长无重复子串、first_pos、按高度合并树高 O(log N) 证明、子集和排序、4 路堆归并调整、第 1 章计数与递推。薄：三叉 Huffman WPL=705、双向链表检索 ASL=(n²−1)/(3n)+1、撤销/恢复约定、纯表判定、5.19 建堆移位数。数值须脚本复算。 |
 | T-069 | courseware 门禁复核与优化 | Done | Codex | 两处漏检已修：PPTX 包内文件比对、渲染提取退出码与页数检查。8 项独立回归通过，旧实现实测 4 项失败；12 章 378 页非渲染门禁通过。完整验证仍受既有 PDF 过期与本机 ASan 空探针失败阻断，LibreOffice 实际转换失败；详见 NOTES-codex。 — Claude 复核（2026-09-05，Linux）：两处修订认可，在本机重跑 8 项自测全过。Codex 报的三处阻断已全部解除：PDF 已重排（536 页 / sha256 3b38eea57d39），ASan 空探针在 Linux 上通过（35/35 单元 × 2 档），LibreOffice 真跑通——12 份 PDF、378 页逐页版面检查全绿。收口条件由 T-070 补齐。 |
 | T-070 | **courseware 的闸门接进主闸门（D-038）** | Done | Claude | 复核 T-069 时抓到的第 4 处、也是本轮最硬的一处：`courseware/verify.py` 的 9 项与 Codex 新补的 8 项回归测试**完全在 `handoff.py --verify` 之外**，`courseware/*.py` 连 `py_compile` 都没进过——「装了却没跑」和「跑过且全绿」在交接记录上都是绿的。新增零依赖包装器 `tools/check_courseware.py` 进第 3c3 步，闸门 13 → 14 步；渲染检查默认就跑（实测 378 页 33 秒，同一条闸门里 `check_code` 要 129 秒）；缺件时降级但必须出声，`--require` 不接受降级。`verify_steps()` 从 `run_verify()` 里抽出来，好让用例读得到步骤表本身——这次的洞正是「检查存在、但不在表里」。8 项新自测，4 条变异自检全红（步骤表里删掉这一步 / 降级时不吭声 / 渲染改回默认不跑 / 缺 LibreOffice 时闷声跳过）。顺带修掉两处随 PDF 一起过期的数字：README 与网页版下载卡片都还停在 526 页。 |
 
