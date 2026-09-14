@@ -88,45 +88,63 @@ k 的含义是「只允许经过前 k 个顶点中转」，它必须是**最外�
 
 # 实现：两件事在一个函数里
 
-```cpp file=code/ch01/adt/modern.hpp#fn:best_source
-[[nodiscard]] std::optional<std::size_t> best_source() const {
-    auto shortest = distance_;
-    for (std::size_t via = 0; via < shortest.size(); ++via) {
-        for (std::size_t from = 0; from < shortest.size(); ++from) {
-            for (std::size_t to = 0; to < shortest.size(); ++to) {
-                if (shortest[from][via] != infinity &&
-                    shortest[via][to] != infinity &&
-                    shortest[from][to] > shortest[from][via] + shortest[via][to]) {
-                    shortest[from][to] = shortest[from][via] + shortest[via][to];
-                }
+第一件事：先跑 Floyd，求出每对人之间的最短时间。
+
+```cpp file=code/ch01/adt/modern.hpp#best-source-floyd
+const std::size_t people = distance_.size();
+std::vector<std::vector<distance_type>> shortest(
+    people, std::vector<distance_type>(people, unreachable));
+for (std::size_t from = 0; from < people; ++from) {
+    for (std::size_t to = 0; to < people; ++to) {
+        if (distance_[from][to] != infinity) {
+            shortest[from][to] = distance_[from][to];
+        }
+    }
+}
+for (std::size_t via = 0; via < people; ++via) {
+    for (std::size_t from = 0; from < people; ++from) {
+        for (std::size_t to = 0; to < people; ++to) {
+            if (shortest[from][via] != unreachable &&
+                shortest[via][to] != unreachable &&
+                shortest[from][to] > shortest[from][via] + shortest[via][to]) {
+                shortest[from][to] = shortest[from][via] + shortest[via][to];
             }
         }
     }
-
-    std::optional<std::size_t> result;
-    int smallest_eccentricity = infinity;
-    for (std::size_t from = 0; from < shortest.size(); ++from) {
-        int largest_distance = 0;
-        for (int distance : shortest[from]) {
-            largest_distance = distance > largest_distance ? distance : largest_distance;
-        }
-        if (largest_distance < smallest_eccentricity) {
-            smallest_eccentricity = largest_distance;
-            result = from;
-        }
-    }
-    return result;
 }
 ```
 
-先跑 Floyd，再对每个起点取**这一行的最大值**，最后在所有起点里取最小。
+<!-- 备注
+1. k（这里叫 via）在最外层；
+2. infinity 只表示「没有直接路线」，每段时间都必须小于它；最短时间是若干段之和，
+   用 64 位的 distance_type 存、到不了记 unreachable——总长恰好等于 infinity 的路径
+   就不会被误读成到不了，更长的也不会溢出（有符号溢出是未定义行为）。
+-->
+
+---
+
+# 实现（续）：每行取最大，再在所有起点里取最小
+
+```cpp file=code/ch01/adt/modern.hpp#best-source-pick
+std::optional<std::size_t> result;
+distance_type smallest_eccentricity = unreachable;
+for (std::size_t from = 0; from < people; ++from) {
+    distance_type largest_distance = 0;
+    for (distance_type distance : shortest[from]) {
+        largest_distance = distance > largest_distance ? distance : largest_distance;
+    }
+    if (largest_distance < smallest_eccentricity) {
+        smallest_eccentricity = largest_distance;
+        result = from;
+    }
+}
+return result;
+```
+
+第二件事：对每个起点取**这一行的最大值**（它的完成时间），最后在所有起点里取最小。
 
 <!-- 备注
-三处值得说：
-1. k（这里叫 via）在最外层；
-2. infinity 取的是 INT_MAX/4 而不是 INT_MAX——两个 infinity 相加会溢出，
-   而溢出是未定义行为；
-3. 返回 optional：图不连通时**没有**这样的起点，那不是错误，是可预期状态。
+返回 optional：图不连通时**没有**这样的起点，那不是错误，是可预期状态。
 -->
 ---
 

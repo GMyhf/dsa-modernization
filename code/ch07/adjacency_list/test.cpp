@@ -120,10 +120,18 @@ void test_shortest_paths_agree_with_the_matrix() {
     check(list_dist[4] == 20, "7.4 教科书例子：0 到 4 的最短距离是 20");
     check(list_dist[0] == 0, "7.4 源点到自己是 0");
 
-    // 不可达顶点：两边都应给出 infinity。
+    // 不可达顶点：两边都应给出 unreachable（D-039）。
     auto broken = build(3, {{0, 1, 5}});
-    check(broken.list.dijkstra(0)[2] == GraphList::infinity, "7.4 不可达顶点是 infinity");
-    check(broken.matrix.dijkstra(0)[2] == Graph::infinity, "7.4 矩阵版同样");
+    check(broken.list.dijkstra(0)[2] == GraphList::unreachable, "7.4 不可达顶点是 unreachable");
+    check(broken.matrix.dijkstra(0)[2] == Graph::unreachable, "7.4 矩阵版同样");
+
+    // D-039：长链总长 5*(infinity-1) = 2684354550 超过 INT_MAX，两种表示法都要精确且一致。
+    std::vector<std::array<int, 3>> chain_edges;
+    for (int v = 0; v + 1 < 6; ++v) chain_edges.push_back({v, v + 1, GraphList::infinity - 1});
+    auto chain = build(6, chain_edges);
+    const GraphList::distance_type total = 5 * static_cast<GraphList::distance_type>(GraphList::infinity - 1);
+    check(chain.list.dijkstra(0)[5] == total, "D-039 邻接表 Dijkstra 长链总长超过 INT_MAX 仍精确");
+    check(chain.list.dijkstra(0) == chain.matrix.dijkstra(0), "D-039 长链上与矩阵版逐项一致");
 }
 
 void test_prim_agrees_on_total_weight() {

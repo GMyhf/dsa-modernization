@@ -241,13 +241,21 @@ private:
 #### Floyd：三重循环到底在循环什么
 
 ```cpp
-auto shortest = distance_;          // 复制一份，多次调用不改动原网络
-
-for (std::size_t via = 0; via < shortest.size(); ++via) {          // 允许经过 via
-    for (std::size_t from = 0; from < shortest.size(); ++from) {   // 固定起点
-        for (std::size_t to = 0; to < shortest.size(); ++to) {     // 固定终点
-            if (shortest[from][via] != infinity &&                 // 两段都可达
-                shortest[via][to] != infinity &&
+const std::size_t people = distance_.size();
+std::vector<std::vector<distance_type>> shortest(                  // 64 位：路径是若干段之和
+    people, std::vector<distance_type>(people, unreachable));
+for (std::size_t from = 0; from < people; ++from) {
+    for (std::size_t to = 0; to < people; ++to) {
+        if (distance_[from][to] != infinity) {                     // 有直接路线才抄进来
+            shortest[from][to] = distance_[from][to];
+        }
+    }
+}
+for (std::size_t via = 0; via < people; ++via) {                   // 允许经过 via
+    for (std::size_t from = 0; from < people; ++from) {            // 固定起点
+        for (std::size_t to = 0; to < people; ++to) {              // 固定终点
+            if (shortest[from][via] != unreachable &&              // 两段都可达
+                shortest[via][to] != unreachable &&
                 shortest[from][to] > shortest[from][via] + shortest[via][to]) {
                 shortest[from][to] = shortest[from][via] + shortest[via][to];
             }
@@ -255,6 +263,11 @@ for (std::size_t via = 0; via < shortest.size(); ++via) {          // 允许经�
     }
 }
 ```
+
+`infinity` 只表示「两人之间没有直接路线」；最短时间是若干段之和，可能超过 `int`，
+所以另开一个 64 位矩阵 `shortest`，「到不了」记为 `unreachable`。
+若仍用 `int` 并借 `infinity` 表示到不了，一条总长恰好等于 `infinity` 的合法路径会被误读成到不了，
+更长的还会溢出（本书决策 D-039）。
 
 三层循环的含义**不是**「随便循环三次」，而是**按中转站逐步扩大可用路径**：
 
@@ -275,11 +288,10 @@ for each via:       允许路径经过 via
 
 ```cpp
 std::optional<std::size_t> result;          // 空 = 还没找到合格的起点
-int smallest_eccentricity = infinity;
-
-for (std::size_t from = 0; from < shortest.size(); ++from) {
-    int largest_distance = 0;
-    for (int distance : shortest[from]) {   // 这一行的最大值 = 该起点的完成时间
+distance_type smallest_eccentricity = unreachable;
+for (std::size_t from = 0; from < people; ++from) {
+    distance_type largest_distance = 0;
+    for (distance_type distance : shortest[from]) {   // 这一行的最大值 = 该起点的完成时间
         largest_distance = distance > largest_distance ? distance : largest_distance;
     }
     if (largest_distance < smallest_eccentricity) {
@@ -292,8 +304,8 @@ return result;                              // 全都不可达时返回 std::nul
 
 这里的 **eccentricity（离心率）** 就是某起点到全部顶点的最短距离中的最大值。
 
-任何一行含 `infinity` 时，该行最大值也是 `infinity`，不会优于有限答案；
-若所有行都是 `infinity`，`result` 保持为空，函数返回 `std::nullopt`。
+任何一行含 `unreachable` 时，该行最大值也是 `unreachable`，不会优于有限答案；
+若所有行都含 `unreachable`，`result` 保持为空，函数返回 `std::nullopt`。
 
 **时间复杂度 $O(V^3)$，空间复杂度 $O(V^2)$。** 这适合顶点数少、又需要比较所有起点的场合；
 大图应该根据稀疏度和查询需求换别的最短路径算法（第 7 章）。

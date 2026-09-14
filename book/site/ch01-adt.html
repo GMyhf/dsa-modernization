@@ -457,7 +457,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <h4 id="类常量和构造函数"><a class="anchor" href="#类常量和构造函数">#</a>类、常量和构造函数</h4>
 <p><code>class RumorNetwork</code> 定义一种新类型。<code>public:</code> 以下是调用者可以使用的接口；<code>private:</code> 以下是 实现细节，调用者不能直接改写。</p>
 <div class="codeblock" data-lang="text"><pre><code>static constexpr int infinity = std::numeric_limits&lt;int&gt;::max() / 4;</code></pre></div>
-<p><code>static</code> 表示 <code>infinity</code> 属于类本身，而不是每个对象各存一份；<code>constexpr</code> 表示编译期常量。 取最大值的四分之一而非最大值，是为了计算 <code>a + b</code> 时仍留有余量，避免整数溢出。</p>
+<p><code>static</code> 表示 <code>infinity</code> 属于类本身，而不是每个对象各存一份；<code>constexpr</code> 表示编译期常量。 <code>infinity</code> 只用来表示「两人之间没有直接路线」，并规定每条路线的时间都必须小于它。 <strong>最短时间是若干段之和</strong>，可能超过 <code>int</code> 能表示的范围，所以求最短路时另用 64 位整数 <code>distance_type</code>，「到不了」则用它的最大值 <code>unreachable</code> 表示，不再借用 <code>infinity</code>—— 否则一条总长恰好等于 <code>infinity</code> 的合法路径会被误读成「到不了」（D-039）。</p>
 <div class="codeblock" data-lang="text"><pre><code>explicit RumorNetwork(std::size_t people)
     : distance_(people, std::vector&lt;int&gt;(people, infinity)) { ... }</code></pre></div>
 <p>这是构造函数：<code>RumorNetwork network(5)</code> 会调用它。冒号后的部分叫<strong>成员初始化列表</strong>，先创建 <code>distance_</code>，再进入花括号。它构造一个 5 行、每行 5 列的整数矩阵，初始全为 <code>infinity</code>。随后 循环把对角线改为 0，因为一个人到自己不需要传播时间。矩阵的第 <code>from</code> 行、第 <code>to</code> 列总是表示 从 <code>from</code> 到 <code>to</code> 的当前已知最短时间。</p>
@@ -465,19 +465,19 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <div class="codeblock" data-lang="text"><pre><code>void add_route(std::size_t from, std::size_t to, int cost)</code></pre></div>
 <p>这三个参数分别是起点编号、终点编号和直接传播时间。第一段 <code>if</code> 检查编号是否越界、时间是否为 负；不满足题目定义时抛出 <code>std::invalid_argument</code>，调用者可用 <code>try/catch</code> 处理。第二段 <code>if</code> 只在 新边更短时更新矩阵，所以即使重复添加同一方向的边，也保留较小的时间。</p>
 <h4 id="floyd-三重循环"><a class="anchor" href="#floyd-三重循环">#</a>Floyd 三重循环</h4>
-<p><code>auto shortest = distance_;</code> 复制输入矩阵。<code>auto</code> 让编译器自动推断类型，这里实际是 <code>std::vector&lt;std::vector&lt;int&gt;&gt;</code>。</p>
+<p><code>shortest</code> 是一个与 <code>distance_</code> 同样大小、元素为 <code>distance_type</code>（64 位整数）的矩阵： 有直接路线的位置抄入路线时间，没有的位置记为 <code>unreachable</code>。</p>
 <p>三层循环的含义不是“随便循环三次”，而是按中转站逐步扩大可用路径：</p>
 <div class="codeblock" data-lang="text"><pre><code>for each via:       允许路径经过 via
   for each from:    固定起点 from
     for each to:    固定终点 to
       比较 原来的 from-&gt;to 与 from-&gt;via-&gt;to</code></pre></div>
-<p>条件 <code>shortest[from][via] != infinity &amp;&amp; shortest[via][to] != infinity</code> 先确认两段都可达。 若 <code>from -&gt; via -&gt; to</code> 的总时间更小，就更新 <code>shortest[from][to]</code>。例如 B2 到 B4 没有直接边， 但 B2→B5 是 8、B5→B1 是 5、B1→B4 是 4，所以 Floyd 最终得到 B2→B4 是 <code>8 + 5 + 4 = 17</code>。</p>
+<p>条件 <code>shortest[from][via] != unreachable &amp;&amp; shortest[via][to] != unreachable</code> 先确认两段都可达。 若 <code>from -&gt; via -&gt; to</code> 的总时间更小，就更新 <code>shortest[from][to]</code>。例如 B2 到 B4 没有直接边， 但 B2→B5 是 8、B5→B1 是 5、B1→B4 是 4，所以 Floyd 最终得到 B2→B4 是 <code>8 + 5 + 4 = 17</code>。</p>
 <h4 id="从最短路矩阵选答案"><a class="anchor" href="#从最短路矩阵选答案">#</a>从最短路矩阵选答案</h4>
 <div class="codeblock" data-lang="text"><pre><code>std::optional&lt;std::size_t&gt; result;
-int smallest_eccentricity = infinity;</code></pre></div>
+distance_type smallest_eccentricity = unreachable;</code></pre></div>
 <p>默认构造的 <code>result</code> 是空值，表示“还没有找到合格起点”。<code>smallest_eccentricity</code> 保存目前见过的 最小完成时间。这里的 eccentricity（离心率）就是某起点到全部顶点的最短距离中的最大值。</p>
 <p>外层循环每次处理一行，即一个候选起点；内层循环扫描该行。三目表达式 <code>distance &gt; largest_distance ? distance : largest_distance</code> 等价于“若新值更大就采用新值，否则保留 旧值”，最终得到这行的最大值。若它比当前最佳值小，就同时更新最佳时间与 <code>result</code>。</p>
-<p>任何一行含 <code>infinity</code> 时，该行最大值也是 <code>infinity</code>，不会优于有限答案；若所有行都是 <code>infinity</code>，<code>result</code> 保持为空，函数返回 <code>std::nullopt</code>。<code>[[nodiscard]]</code> 提醒编译器：调用者不应 无意丢弃这个可能为空的重要返回值。</p>
+<p>任何一行含 <code>unreachable</code> 时，该行最大值也是 <code>unreachable</code>，不会优于有限答案；若所有行都含 <code>unreachable</code>，<code>result</code> 保持为空，函数返回 <code>std::nullopt</code>。<code>[[nodiscard]]</code> 提醒编译器：调用者不应 无意丢弃这个可能为空的重要返回值。</p>
 <h4 id="私有数据成员"><a class="anchor" href="#私有数据成员">#</a>私有数据成员</h4>
 <div class="codeblock" data-lang="text"><pre><code>std::vector&lt;std::vector&lt;int&gt;&gt; distance_;</code></pre></div>
 <p>外层 <code>vector</code> 是行，内层 <code>vector&lt;int&gt;</code> 是一行中的列，合起来是二维矩阵。末尾下划线是本教程的 约定，表示私有成员；它与函数参数 <code>distance</code> 或局部变量 <code>shortest</code> 不会混淆。</p>
@@ -486,6 +486,7 @@ int smallest_eccentricity = infinity;</code></pre></div>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch01/adt/modern.hpp">code/ch01/adt/modern.hpp</a></div><pre><code><span class="p">#pragma once</span>
 
 <span class="p">#include &lt;cstddef&gt;</span>
+<span class="p">#include &lt;cstdint&gt;</span>
 <span class="p">#include &lt;limits&gt;</span>
 <span class="p">#include &lt;optional&gt;</span>
 <span class="p">#include &lt;stdexcept&gt;</span>
@@ -497,6 +498,9 @@ int smallest_eccentricity = infinity;</code></pre></div>
 <span class="k">class</span> RumorNetwork {
 <span class="k">public</span>:
     <span class="k">static</span> <span class="k">constexpr</span> <span class="t">int</span> infinity = std::numeric_limits&lt;<span class="t">int</span>&gt;::max() / <span class="n">4</span>;
+    <span class="c">/// 最短时间是若干段之和，可能超过 int；用 64 位，「到不了」另用 unreachable（D-039）。</span>
+    <span class="k">using</span> distance_type = std::int64_t;
+    <span class="k">static</span> <span class="k">constexpr</span> distance_type unreachable = std::numeric_limits&lt;distance_type&gt;::max();
 
     <span class="k">explicit</span> RumorNetwork(std::<span class="t">size_t</span> people)
         : distance_(people, std::vector&lt;<span class="t">int</span>&gt;(people, infinity)) {
@@ -516,24 +520,36 @@ int smallest_eccentricity = infinity;</code></pre></div>
     }
 
     [[nodiscard]] std::optional&lt;std::<span class="t">size_t</span>&gt; best_source() <span class="k">const</span> {
-        <span class="k">auto</span> shortest = distance_;
-        <span class="k">for</span> (std::<span class="t">size_t</span> via = <span class="n">0</span>; via &lt; shortest.size(); ++via) {
-            <span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; shortest.size(); ++from) {
-                <span class="k">for</span> (std::<span class="t">size_t</span> to = <span class="n">0</span>; to &lt; shortest.size(); ++to) {
-                    <span class="k">if</span> (shortest[from][via] != infinity &amp;&amp;
-                        shortest[via][to] != infinity &amp;&amp;
+        <span class="c">// &gt;&gt;&gt; best-source-floyd</span>
+        <span class="k">const</span> std::<span class="t">size_t</span> people = distance_.size();
+        std::vector&lt;std::vector&lt;distance_type&gt;&gt; shortest(
+            people, std::vector&lt;distance_type&gt;(people, unreachable));
+        <span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; people; ++from) {
+            <span class="k">for</span> (std::<span class="t">size_t</span> to = <span class="n">0</span>; to &lt; people; ++to) {
+                <span class="k">if</span> (distance_[from][to] != infinity) {
+                    shortest[from][to] = distance_[from][to];
+                }
+            }
+        }
+        <span class="k">for</span> (std::<span class="t">size_t</span> via = <span class="n">0</span>; via &lt; people; ++via) {
+            <span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; people; ++from) {
+                <span class="k">for</span> (std::<span class="t">size_t</span> to = <span class="n">0</span>; to &lt; people; ++to) {
+                    <span class="k">if</span> (shortest[from][via] != unreachable &amp;&amp;
+                        shortest[via][to] != unreachable &amp;&amp;
                         shortest[from][to] &gt; shortest[from][via] + shortest[via][to]) {
                         shortest[from][to] = shortest[from][via] + shortest[via][to];
                     }
                 }
             }
         }
+        <span class="c">// &lt;&lt;&lt; best-source-floyd</span>
 
+        <span class="c">// &gt;&gt;&gt; best-source-pick</span>
         std::optional&lt;std::<span class="t">size_t</span>&gt; result;
-        <span class="t">int</span> smallest_eccentricity = infinity;
-        <span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; shortest.size(); ++from) {
-            <span class="t">int</span> largest_distance = <span class="n">0</span>;
-            <span class="k">for</span> (<span class="t">int</span> distance : shortest[from]) {
+        distance_type smallest_eccentricity = unreachable;
+        <span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; people; ++from) {
+            distance_type largest_distance = <span class="n">0</span>;
+            <span class="k">for</span> (distance_type distance : shortest[from]) {
                 largest_distance = distance &gt; largest_distance ? distance : largest_distance;
             }
             <span class="k">if</span> (largest_distance &lt; smallest_eccentricity) {
@@ -542,6 +558,7 @@ int smallest_eccentricity = infinity;</code></pre></div>
             }
         }
         <span class="k">return</span> result;
+        <span class="c">// &lt;&lt;&lt; best-source-pick</span>
     }
 
 <span class="k">private</span>:

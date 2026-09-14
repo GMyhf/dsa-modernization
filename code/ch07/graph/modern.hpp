@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <optional>
 #include <queue>
@@ -14,7 +15,13 @@ namespace dsa {
 // >>> graph
 class Graph {
 public:
+    /// 邻接矩阵里的「无边」。边权必须满足 0 <= weight < infinity。
     static constexpr int infinity = std::numeric_limits<int>::max() / 4;
+
+    /// 路径长度用 64 位，「到不了」另用 unreachable，不再借用 infinity（D-039）。
+    /// 简单路径至多 V-1 条边、每条 < infinity，总长远小于 unreachable：既不会溢出，也不会撞上哨兵。
+    using distance_type = std::int64_t;
+    static constexpr distance_type unreachable = std::numeric_limits<distance_type>::max();
 
     struct Edge {
         std::size_t from;
@@ -115,14 +122,14 @@ public:
     // <<< topological
 
     // >>> dijkstra
-    [[nodiscard]] std::vector<int> dijkstra(std::size_t source) const {
+    [[nodiscard]] std::vector<distance_type> dijkstra(std::size_t source) const {
         check_vertex(source);
-        std::vector<int> distance(vertices(), infinity);
+        std::vector<distance_type> distance(vertices(), unreachable);
         std::vector<bool> used(vertices());
         distance[source] = 0;
         for (std::size_t count = 0; count < vertices(); ++count) {
             const std::size_t from = nearest_unvisited(distance, used);
-            if (from == vertices() || distance[from] == infinity) {
+            if (from == vertices() || distance[from] == unreachable) {
                 break;
             }
             used[from] = true;
@@ -142,22 +149,21 @@ public:
     /// 源点自己、以及到不了的顶点，没有前一个顶点（`std::nullopt`）。
     struct ShortestPathTree {
         std::size_t source;
-        std::vector<int> distance;
+        std::vector<distance_type> distance;
         std::vector<std::optional<std::size_t>> predecessor;
     };
 
     /// 与 `dijkstra` 同一个算法，多记一个 `pre`：**只在松弛成功时**改前驱。
-    /// 溢出：两个加数都小于 infinity = INT_MAX/4，和小于 INT_MAX/2，不会溢出；
-    /// 代价是总长 >= infinity 的路径会被当成「到不了」。
+    /// 距离与 `dijkstra` 一样是 64 位，到不了是 `unreachable`（D-039）。
     [[nodiscard]] ShortestPathTree dijkstra_tree(std::size_t source) const {
         check_vertex(source);
-        ShortestPathTree tree{source, std::vector<int>(vertices(), infinity),
+        ShortestPathTree tree{source, std::vector<distance_type>(vertices(), unreachable),
                               std::vector<std::optional<std::size_t>>(vertices())};
         std::vector<bool> used(vertices());
         tree.distance[source] = 0;
         for (std::size_t count = 0; count < vertices(); ++count) {
             const std::size_t from = nearest_unvisited(tree.distance, used);
-            if (from == vertices() || tree.distance[from] == infinity) {
+            if (from == vertices() || tree.distance[from] == unreachable) {
                 break;
             }
             used[from] = true;
@@ -180,7 +186,7 @@ public:
         if (target >= count || tree.source >= count || tree.predecessor.size() != count) {
             throw std::out_of_range("vertex");
         }
-        if (tree.distance[target] == infinity) {
+        if (tree.distance[target] == unreachable) {
             return std::nullopt;
         }
         std::vector<std::size_t> path{target};
@@ -197,12 +203,20 @@ public:
     // <<< dijkstra-path
 
     // >>> floyd
-    [[nodiscard]] std::vector<std::vector<int>> floyd() const {
-        auto distance = adjacency_;
+    [[nodiscard]] std::vector<std::vector<distance_type>> floyd() const {
+        std::vector<std::vector<distance_type>> distance(
+            vertices(), std::vector<distance_type>(vertices(), unreachable));
+        for (std::size_t from = 0; from < vertices(); ++from) {
+            for (std::size_t to = 0; to < vertices(); ++to) {
+                if (adjacency_[from][to] < infinity) {
+                    distance[from][to] = adjacency_[from][to];
+                }
+            }
+        }
         for (std::size_t via = 0; via < vertices(); ++via) {
             for (std::size_t from = 0; from < vertices(); ++from) {
                 for (std::size_t to = 0; to < vertices(); ++to) {
-                    if (distance[from][via] < infinity && distance[via][to] < infinity) {
+                    if (distance[from][via] != unreachable && distance[via][to] != unreachable) {
                         distance[from][to] = std::min(
                             distance[from][to], distance[from][via] + distance[via][to]);
                     }
@@ -283,7 +297,9 @@ private:
         }
     }
 
-    [[nodiscard]] std::size_t nearest_unvisited(const std::vector<int>& distance,
+    // Dijkstra 传 64 位路径距离，Prim 传 int 边权，两者共用。
+    template <typename Distance>
+    [[nodiscard]] std::size_t nearest_unvisited(const std::vector<Distance>& distance,
                                                 const std::vector<bool>& used) const {
         std::size_t nearest = vertices();
         for (std::size_t vertex = 0; vertex < vertices(); ++vertex) {

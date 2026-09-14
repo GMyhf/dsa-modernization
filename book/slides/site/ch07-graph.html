@@ -156,8 +156,9 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 </tr>
 </tbody></table></div>
 <p><strong>「有环」「不连通」不是异常，是可预期的结果</strong>——所以 <code>topological_sort</code>、<code>prim</code>、<code>kruskal</code> 返回 <code>std::optional</code>，空值就是答案。</p>
-<p>原书【代码7.1】【代码7.2】的 ADT 声明残缺，标识符还被 OCR 的空格切断。 本书直接把运算定义在 <code>Graph</code> 上。</p></section><section class="slide" data-notes="&lt;p&gt;infinity 取 INT_MAX/4 而不是 INT_MAX——Floyd 里两个 infinity 会相加，
-用 INT_MAX 就溢出了，而有符号溢出是未定义行为。这一处第 1 章也讲过。
+<p>原书【代码7.1】【代码7.2】的 ADT 声明残缺，标识符还被 OCR 的空格切断。 本书直接把运算定义在 <code>Graph</code> 上。</p></section><section class="slide" data-notes="&lt;p&gt;infinity 在矩阵里只表示「无边」，边权必须小于它（add_edge 会拒绝）。
+路径长度是若干条边之和，Dijkstra/Floyd 用 64 位的 distance_type 存，到不了记 unreachable——
+否则总长恰为 infinity 的路径会被读成到不了，更长的还会溢出。这一处第 1 章也讲过。
 
 无向图加边要加两次，本书用 directed 参数表达。&lt;/p&gt;"><h1 id="731-相邻矩阵"><a class="anchor" href="#731-相邻矩阵">#</a>7.3.1 相邻矩阵</h1>
 <p>“相邻矩阵”是原书沿用的<strong>历史教材称呼</strong>；现代资料通常称<strong>邻接矩阵</strong>（adjacency matrix）。</p>
@@ -343,14 +344,14 @@ Dijkstra 可以看成 BFS 在带权图上的推广，把队列换成了优先队
 加常数会按路径的&lt;strong&gt;边数&lt;/strong&gt;增加不同的总量，边多的路径被罚得更重，
 最短路的次序因此会变。这是课程习题里的一道题。
 负权要用 Bellman-Ford。&lt;/p&gt;"><h1 id="dijkstra-的实现"><a class="anchor" href="#dijkstra-的实现">#</a>Dijkstra 的实现</h1>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#dijkstra</a></div><pre><code>[[nodiscard]] std::vector&lt;<span class="t">int</span>&gt; dijkstra(std::<span class="t">size_t</span> source) <span class="k">const</span> {
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#dijkstra</a></div><pre><code>[[nodiscard]] std::vector&lt;distance_type&gt; dijkstra(std::<span class="t">size_t</span> source) <span class="k">const</span> {
     check_vertex(source);
-    std::vector&lt;<span class="t">int</span>&gt; distance(vertices(), infinity);
+    std::vector&lt;distance_type&gt; distance(vertices(), unreachable);
     std::vector&lt;<span class="t">bool</span>&gt; used(vertices());
     distance[source] = <span class="n">0</span>;
     <span class="k">for</span> (std::<span class="t">size_t</span> count = <span class="n">0</span>; count &lt; vertices(); ++count) {
         <span class="k">const</span> std::<span class="t">size_t</span> from = nearest_unvisited(distance, used);
-        <span class="k">if</span> (from == vertices() || distance[from] == infinity) {
+        <span class="k">if</span> (from == vertices() || distance[from] == unreachable) {
             <span class="k">break</span>;
         }
         used[from] = <span class="k">true</span>;
@@ -365,12 +366,20 @@ Dijkstra 可以看成 BFS 在带权图上的推广，把队列换成了优先队
 }</code></pre></div>
 <p><strong>前提：边权非负。</strong> 有负权边时这个「挑最小就确定」的贪心不成立。</p></section><section class="slide" data-notes="&lt;p&gt;这是第 1 章那个股市传言问题用的算法，可以回头指一下。
 代价 O(V^3)，与边数无关，所以稠密图上比跑 V 次 Dijkstra 还划算。&lt;/p&gt;"><h1 id="752-每对顶点floyd"><a class="anchor" href="#752-每对顶点floyd">#</a>7.5.2 每对顶点：Floyd</h1>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#floyd</a></div><pre><code>[[nodiscard]] std::vector&lt;std::vector&lt;<span class="t">int</span>&gt;&gt; floyd() <span class="k">const</span> {
-    <span class="k">auto</span> distance = adjacency_;
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#floyd</a></div><pre><code>[[nodiscard]] std::vector&lt;std::vector&lt;distance_type&gt;&gt; floyd() <span class="k">const</span> {
+    std::vector&lt;std::vector&lt;distance_type&gt;&gt; distance(
+        vertices(), std::vector&lt;distance_type&gt;(vertices(), unreachable));
+    <span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; vertices(); ++from) {
+        <span class="k">for</span> (std::<span class="t">size_t</span> to = <span class="n">0</span>; to &lt; vertices(); ++to) {
+            <span class="k">if</span> (adjacency_[from][to] &lt; infinity) {
+                distance[from][to] = adjacency_[from][to];
+            }
+        }
+    }
     <span class="k">for</span> (std::<span class="t">size_t</span> via = <span class="n">0</span>; via &lt; vertices(); ++via) {
         <span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; vertices(); ++from) {
             <span class="k">for</span> (std::<span class="t">size_t</span> to = <span class="n">0</span>; to &lt; vertices(); ++to) {
-                <span class="k">if</span> (distance[from][via] &lt; infinity &amp;&amp; distance[via][to] &lt; infinity) {
+                <span class="k">if</span> (distance[from][via] != unreachable &amp;&amp; distance[via][to] != unreachable) {
                     distance[from][to] = std::min(
                         distance[from][to], distance[from][via] + distance[via][to]);
                 }
@@ -461,12 +470,12 @@ Dijkstra 树总权 5，MST 总权 4。&lt;/p&gt;"><h1 id="prim从点出发"><a c
 <p>邻接矩阵、邻接表和十字链表的布局用 C++ 展示；DFS、BFS、Dijkstra、Floyd 和生成树算法用 Python 复现，便于把注意力放在不变量上。</p>
 <div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.py">code/ch07/graph/modern.py#dijkstra</a></div><pre><code><span class="k">def</span> dijkstra(self, source: <span class="t">int</span>) -&gt; <span class="t">list</span>[<span class="t">int</span>]:
     self._check_vertex(source)
-    distance = [self.infinity] * self.vertices
+    distance = [self.unreachable] * self.vertices
     used = [<span class="k">False</span>] * self.vertices
     distance[source] = <span class="n">0</span>
     <span class="k">for</span> _ <span class="k">in</span> <span class="t">range</span>(self.vertices):
         vertex = self._nearest(distance, used)
-        <span class="k">if</span> vertex <span class="k">is</span> <span class="k">None</span> <span class="k">or</span> distance[vertex] == self.infinity:
+        <span class="k">if</span> vertex <span class="k">is</span> <span class="k">None</span> <span class="k">or</span> distance[vertex] == self.unreachable:
             <span class="k">break</span>
         used[vertex] = <span class="k">True</span>
         <span class="k">for</span> target <span class="k">in</span> <span class="t">range</span>(self.vertices):

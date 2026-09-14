@@ -9,6 +9,29 @@
 
 ---
 
+## D-039 · 2026-09-14 · 人已拍板：图的最短路径距离改用 64 位，`infinity` 只表示「无边」（T-078）
+
+**问题**：Codex 复核 T-074 报 P1——边权 ≥ `infinity` 被静默当成无边，已由 T-078 在 `add_edge`/`add_route` 拒绝。
+但更深的一层没解决：**单条边合法、路径总长达到 `infinity`** 时，`int` 距离与「无边/到不了」哨兵撞在一起。
+`add_edge(0,1,infinity-1); add_edge(1,2,1)` 后 `dijkstra(0)[2]`、`floyd()[0][2]` 报到不了，同一张图 `bfs(0)` 报可达（C++ 与 Python 实测一致）。
+
+**两个选项**：① 距离改 64 位；② 松弛时和 ≥ `infinity` 抛 `std::overflow_error`。Claude 推荐 ①，理由是调用方式不变、不引入新的异常路径。
+**人于 2026-09-14 选 ①。**
+
+**决定**：
+
+1. 边权仍是 `int`，仍要求 `0 <= weight < infinity`；邻接矩阵里 `infinity` **只表示「无边」**。
+2. 最短路径距离（Dijkstra、Floyd、`ShortestPathTree`，以及 `ch07/adjacency_list` 的 Dijkstra、`ch01/adt` 的 Floyd）改用 `std::int64_t`，
+   「到不了」用独立的哨兵 `unreachable = std::numeric_limits<std::int64_t>::max()`，不再借用 `infinity`。
+   任何简单路径至多 $V-1$ 条边、每条 < `infinity` ≈ $2^{29}$，总长 < $V\cdot 2^{29}$，$V < 2^{34}$ 时不可能碰到 `unreachable`，也不会溢出。
+3. Python 整数无上限，溢出本不存在，但**哨兵撞车同样存在**（距离恰好等于 `infinity` 时被读成到不了），所以同样引入 `Graph.unreachable`（取同一个数值 $2^{63}-1$，让共享用例两侧可比）。
+4. Prim 的「当前最近边」数组比较的是**单条边权**，不是路径和，保持 `int` 与 `infinity` 不变。
+
+**代价**：书稿与课件逐字印出的 `#dijkstra`、`#floyd`、`#dijkstra-path`、`#graph-list-dijkstra`、`#adt` 切片随之改变，ch01/ch07 课件 pptx 重排；
+`unit.json` 里算法7.8/7.9 的 `code_line` 随签名更新。
+
+---
+
 ## D-038 · 2026-09-05 · Claude 记录：闸门之外的检查等于没有闸门——courseware 接进主闸门
 
 **背景。** `courseware/` 是仓库里唯一允许第三方依赖的目录（python-pptx + Pillow，

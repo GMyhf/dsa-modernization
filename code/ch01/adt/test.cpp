@@ -69,6 +69,16 @@ void test_rumor_network() {
     dsa::adt::RumorNetwork pair(2);
     pair.add_route(0, 1, dsa::adt::RumorNetwork::infinity - 1);
     check(pair.best_source() == 0, "T-078 infinity-1 是合法的最大路线代价，Floyd 看得见它");
+    // D-039：离心率是若干段之和，可能达到甚至超过 infinity/INT_MAX；int 距离下前者被读成到不了，后者溢出。
+    dsa::adt::RumorNetwork brink(3);
+    brink.add_route(0, 1, dsa::adt::RumorNetwork::infinity - 1);
+    brink.add_route(1, 2, dsa::adt::RumorNetwork::infinity - 1);
+    check(brink.best_source() == 0, "D-039 离心率超过 infinity 的起点仍被选中");
+    dsa::adt::RumorNetwork chain(6);
+    for (std::size_t person = 0; person + 1 < 6; ++person) {
+        chain.add_route(person, person + 1, dsa::adt::RumorNetwork::infinity - 1);
+    }
+    check(chain.best_source() == 0, "D-039 离心率超过 INT_MAX 时不溢出、仍选对起点");
     bool bad_vertex = false;
     try {
         singleton.add_route(1, 0, 1);

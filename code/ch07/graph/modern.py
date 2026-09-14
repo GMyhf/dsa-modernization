@@ -26,6 +26,9 @@ class Graph:
     """邻接矩阵图；不存在的边以 infinity 表示。"""
 
     infinity = (2**31 - 1) // 4
+    # 路径的「到不了」另用 unreachable，不借用 infinity（D-039）。Python 整数不溢出，
+    # 但距离恰好等于 infinity 时照样会被误读成到不了；取与 C++ 相同的 2**63-1，共享用例两侧可比。
+    unreachable = 2**63 - 1
 
     # >>> graph-build
     def __init__(self, count: int) -> None:
@@ -112,12 +115,12 @@ class Graph:
     # >>> dijkstra
     def dijkstra(self, source: int) -> list[int]:
         self._check_vertex(source)
-        distance = [self.infinity] * self.vertices
+        distance = [self.unreachable] * self.vertices
         used = [False] * self.vertices
         distance[source] = 0
         for _ in range(self.vertices):
             vertex = self._nearest(distance, used)
-            if vertex is None or distance[vertex] == self.infinity:
+            if vertex is None or distance[vertex] == self.unreachable:
                 break
             used[vertex] = True
             for target in range(self.vertices):
@@ -131,13 +134,13 @@ class Graph:
     def dijkstra_tree(self, source: int) -> "ShortestPathTree":
         """与 dijkstra 同一个算法，多记原书 Dist 的 pre 域：只在松弛成功时改前驱。"""
         self._check_vertex(source)
-        distance = [self.infinity] * self.vertices
+        distance = [self.unreachable] * self.vertices
         predecessor: list[int | None] = [None] * self.vertices
         used = [False] * self.vertices
         distance[source] = 0
         for _ in range(self.vertices):
             vertex = self._nearest(distance, used)
-            if vertex is None or distance[vertex] == self.infinity:
+            if vertex is None or distance[vertex] == self.unreachable:
                 break
             used[vertex] = True
             for target in range(self.vertices):
@@ -153,7 +156,7 @@ class Graph:
         count = len(tree.distance)
         if not 0 <= target < count or not 0 <= tree.source < count or len(tree.predecessor) != count:
             raise IndexError("vertex")
-        if tree.distance[target] == Graph.infinity:
+        if tree.distance[target] == Graph.unreachable:
             return None
         path = [target]
         vertex = target
@@ -168,12 +171,13 @@ class Graph:
 
     # >>> floyd
     def floyd(self) -> list[list[int]]:
-        distance = [list(row) for row in self._adjacency]
+        distance = [[weight if weight < self.infinity else self.unreachable for weight in row]
+                    for row in self._adjacency]
         for via in range(self.vertices):
             for source in range(self.vertices):
                 for target in range(self.vertices):
-                    candidate = distance[source][via] + distance[via][target]
-                    if distance[source][via] < self.infinity and distance[via][target] < self.infinity:
+                    if distance[source][via] != self.unreachable and distance[via][target] != self.unreachable:
+                        candidate = distance[source][via] + distance[via][target]
                         distance[source][target] = min(distance[source][target], candidate)
         return distance
     # <<< floyd

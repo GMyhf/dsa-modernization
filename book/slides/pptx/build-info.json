@@ -1,6 +1,6 @@
 {
   "decks": {
-    "ch01-adt.pptx": 28,
+    "ch01-adt.pptx": 29,
     "ch02-linear-list.pptx": 35,
     "ch03-stack.pptx": 42,
     "ch04-string.pptx": 29,
@@ -13,5 +13,5 @@
     "ch11-index.pptx": 34,
     "ch12-advanced.pptx": 37
   },
-  "pages": 410
+  "pages": 411
 }

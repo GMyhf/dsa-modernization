@@ -93,7 +93,7 @@ $$E(G_2)=\{\langle v_0,v_1\rangle,\langle v_0,v_2\rangle,\langle v_2,v_3\rangle,
 | 任意两点最短路 | 顶点数较小 | Floyd 的距离矩阵 |
 | 连通所有点且总权最小 | 无向连通图 | Prim 或 Kruskal 的边集 |
 
-本单元用邻接矩阵。没有边记为 `infinity`（`int` 最大值的四分之一，给加法留余量）。环、非连通等正常失败用 `optional` 表达。DFS 仍是递归，深图有栈溢出风险。
+本单元用邻接矩阵。没有边记为 `infinity`（`int` 最大值的四分之一），边权必须小于它；最短路径的长度是若干条边之和，另用 64 位的 `Graph::distance_type` 存，到不了记为 `Graph::unreachable`，不与「无边」共用一个值（D-039）。环、非连通等正常失败用 `optional` 表达。DFS 仍是递归，深图有栈溢出风险。
 
 ## 7.2 图的抽象数据类型
 
@@ -230,7 +230,12 @@ for (Edge e = G.FirstEdge(v); G.IsEdge(e); e = G.NextEdge(e)) { /* 处理 e */ }
 /// 矩阵反而合适。**没有哪种表示法总是更好**，这正是本章要比较的东西。
 class GraphList {
 public:
+    /// 边权上限：0 <= weight < infinity，与邻接矩阵版 `Graph` 同口径。
     static constexpr int infinity = std::numeric_limits<int>::max() / 4;
+
+    /// 路径长度 64 位、「到不了」用 unreachable，与 `Graph` 相同（D-039）。
+    using distance_type = std::int64_t;
+    static constexpr distance_type unreachable = std::numeric_limits<distance_type>::max();
 
     struct Edge {
         std::size_t from;
@@ -250,7 +255,7 @@ public:
         if (weight < 0) {
             throw std::invalid_argument("negative edge");
         }
-        if (weight >= infinity) {  // Dijkstra 以 infinity 表示「到不了」，这么大的权会被静默当成没有边
+        if (weight >= infinity) {  // 与邻接矩阵版同口径：infinity 在那边表示「无边」，两种表示法才能逐项对拍
             throw std::invalid_argument("edge weight must be below GraphList::infinity");
         }
         put(from, to, weight);
@@ -372,8 +377,8 @@ int main() {
     }
     const auto distance = graph.dijkstra(0);
     std::printf("\n从 0 出发的最短距离:");
-    for (const int d : distance) {
-        std::printf(" %d", d);
+    for (const auto d : distance) {
+        std::printf(" %lld", static_cast<long long>(d));
     }
     const auto mst = graph.prim(0);
     int total = 0;
@@ -408,12 +413,12 @@ Dijkstra 是这一章里差别最大的一处。矩阵版每轮要扫一遍全�
 /// 矩阵版每轮要扫一遍全部顶点找最近的那个，是 $O(V^2)$；换成邻接表 + 堆之后，
 /// 「找最近顶点」由堆负责、「松弛」只走实际存在的边。**稀疏图上这才是该用的组合**。
 /// 堆是第 5 章的教学内容，这里作为基础设施使用（见 unit.json 的 d001_exceptions）。
-[[nodiscard]] std::vector<int> dijkstra(std::size_t source) const {
+[[nodiscard]] std::vector<distance_type> dijkstra(std::size_t source) const {
     check_vertex(source);
-    std::vector<int> distance(vertices(), infinity);
+    std::vector<distance_type> distance(vertices(), unreachable);
     distance[source] = 0;
 
-    using Item = std::pair<int, std::size_t>;  // (当前距离, 顶点)
+    using Item = std::pair<distance_type, std::size_t>;  // (当前距离, 顶点)
     std::priority_queue<Item, std::vector<Item>, std::greater<Item>> heap;
     heap.emplace(0, source);
     while (!heap.empty()) {
@@ -424,7 +429,7 @@ Dijkstra 是这一章里差别最大的一处。矩阵版每轮要扫一遍全�
         }
         for (const Edge& edge : adjacency_[from]) {
             ++scanned_;
-            const int relaxed = dist + edge.weight;
+            const distance_type relaxed = dist + edge.weight;
             if (relaxed < distance[edge.to]) {
                 distance[edge.to] = relaxed;
                 heap.emplace(relaxed, edge.to);
@@ -898,14 +903,14 @@ $D$ 的初始状态是：如果从 $s$ 到 $v$ 有弧，则 $D[v]$ 记为弧的�
 图 7.19　单源最短路径的示例。已确定的顶点集合每轮扩大一个：从「尚未确定」的顶点里挑距离最小的那个，它的距离**此后不会再变小**——因为任何绕道都要先经过一个距离不更小的顶点，而边权非负。这条论证正是 Dijkstra 要求非负权的地方，本书的实现因此在 `add_edge` 就拒绝负权。
 
 ```cpp file=code/ch07/graph/modern.hpp#dijkstra
-[[nodiscard]] std::vector<int> dijkstra(std::size_t source) const {
+[[nodiscard]] std::vector<distance_type> dijkstra(std::size_t source) const {
     check_vertex(source);
-    std::vector<int> distance(vertices(), infinity);
+    std::vector<distance_type> distance(vertices(), unreachable);
     std::vector<bool> used(vertices());
     distance[source] = 0;
     for (std::size_t count = 0; count < vertices(); ++count) {
         const std::size_t from = nearest_unvisited(distance, used);
-        if (from == vertices() || distance[from] == infinity) {
+        if (from == vertices() || distance[from] == unreachable) {
             break;
         }
         used[from] = true;
@@ -922,12 +927,12 @@ $D$ 的初始状态是：如果从 $s$ 到 $v$ 有弧，则 $D[v]$ 记为弧的�
 ```python file=code/ch07/graph/modern.py#dijkstra
 def dijkstra(self, source: int) -> list[int]:
     self._check_vertex(source)
-    distance = [self.infinity] * self.vertices
+    distance = [self.unreachable] * self.vertices
     used = [False] * self.vertices
     distance[source] = 0
     for _ in range(self.vertices):
         vertex = self._nearest(distance, used)
-        if vertex is None or distance[vertex] == self.infinity:
+        if vertex is None or distance[vertex] == self.unreachable:
             break
         used[vertex] = True
         for target in range(self.vertices):
@@ -943,29 +948,28 @@ def dijkstra(self, source: int) -> list[int]:
 
 `Graph::shortest_path` 从汇点出发，顺着前驱倒着走回源点，再把序列反转过来。到不了时返回空；汇点就是源点时，路径只有源点一个顶点。前驱链断了或者成环，说明传进来的树已经坏了，这时抛 `std::invalid_argument`。有好几条等长的最短路径时，返回哪一条取决于顶点的扫描次序，所以测试不断言具体路径，只断言路径合法：首尾是源点和汇点，每一步都是图里真实存在的边，边权之和等于 Floyd 算出的最短距离。这项检查在随机小图上跑，边权取 0 到 4，并列和零权边都会大量出现。
 
-关于溢出：本章用 `int` 存距离，「无穷大」取 `INT_MAX/4`。松弛时两个加数都小于这个值，和小于 `INT_MAX/2`，不会溢出。代价是总长达到 `INT_MAX/4` 的路径会被当成到不了。
+关于溢出：边权是 `int`，必须小于 `Graph::infinity`（`INT_MAX/4`，在矩阵里表示「无边」）；路径长度是若干条边之和，用 64 位的 `Graph::distance_type` 存，「到不了」记为 `Graph::unreachable`。一条简单路径至多 $V-1$ 条边，总长小于 $V\cdot2^{29}$，既不会溢出，也不会撞上 `unreachable`。早先用 `int` 存距离、以 `infinity` 兼任「到不了」时，一条总长恰好等于 `infinity` 的合法路径会被误读成到不了——同一张图上 BFS 却说走得到（D-039）。
 
 ```cpp file=code/ch07/graph/modern.hpp#dijkstra-path
 /// 原书 Dist 类的 `length` 与 `pre` 两个域：到各点的距离，和最短路径上的前一个顶点。
 /// 源点自己、以及到不了的顶点，没有前一个顶点（`std::nullopt`）。
 struct ShortestPathTree {
     std::size_t source;
-    std::vector<int> distance;
+    std::vector<distance_type> distance;
     std::vector<std::optional<std::size_t>> predecessor;
 };
 
 /// 与 `dijkstra` 同一个算法，多记一个 `pre`：**只在松弛成功时**改前驱。
-/// 溢出：两个加数都小于 infinity = INT_MAX/4，和小于 INT_MAX/2，不会溢出；
-/// 代价是总长 >= infinity 的路径会被当成「到不了」。
+/// 距离与 `dijkstra` 一样是 64 位，到不了是 `unreachable`（D-039）。
 [[nodiscard]] ShortestPathTree dijkstra_tree(std::size_t source) const {
     check_vertex(source);
-    ShortestPathTree tree{source, std::vector<int>(vertices(), infinity),
+    ShortestPathTree tree{source, std::vector<distance_type>(vertices(), unreachable),
                           std::vector<std::optional<std::size_t>>(vertices())};
     std::vector<bool> used(vertices());
     tree.distance[source] = 0;
     for (std::size_t count = 0; count < vertices(); ++count) {
         const std::size_t from = nearest_unvisited(tree.distance, used);
-        if (from == vertices() || tree.distance[from] == infinity) {
+        if (from == vertices() || tree.distance[from] == unreachable) {
             break;
         }
         used[from] = true;
@@ -988,7 +992,7 @@ struct ShortestPathTree {
     if (target >= count || tree.source >= count || tree.predecessor.size() != count) {
         throw std::out_of_range("vertex");
     }
-    if (tree.distance[target] == infinity) {
+    if (tree.distance[target] == unreachable) {
         return std::nullopt;
     }
     std::vector<std::size_t> path{target};
@@ -1007,13 +1011,13 @@ struct ShortestPathTree {
 def dijkstra_tree(self, source: int) -> "ShortestPathTree":
     """与 dijkstra 同一个算法，多记原书 Dist 的 pre 域：只在松弛成功时改前驱。"""
     self._check_vertex(source)
-    distance = [self.infinity] * self.vertices
+    distance = [self.unreachable] * self.vertices
     predecessor: list[int | None] = [None] * self.vertices
     used = [False] * self.vertices
     distance[source] = 0
     for _ in range(self.vertices):
         vertex = self._nearest(distance, used)
-        if vertex is None or distance[vertex] == self.infinity:
+        if vertex is None or distance[vertex] == self.unreachable:
             break
         used[vertex] = True
         for target in range(self.vertices):
@@ -1029,7 +1033,7 @@ def shortest_path(tree: "ShortestPathTree", target: int) -> list[int] | None:
     count = len(tree.distance)
     if not 0 <= target < count or not 0 <= tree.source < count or len(tree.predecessor) != count:
         raise IndexError("vertex")
-    if tree.distance[target] == Graph.infinity:
+    if tree.distance[target] == Graph.unreachable:
         return None
     path = [target]
     vertex = target
@@ -1077,12 +1081,20 @@ $path[i,j] = k$；如果当前没有最短路径，就将 $path[i,j]$ 置为 $-1
 图 7.20　每对顶点间最短路径的示例。Floyd 从相邻矩阵 $adj^{(0)}$ 出发，第 $k$ 轮允许把 $v_k$ 当中转点，得到 $adj^{(k)}$；$n$ 轮之后每一格就是最短路径长度（原书图 7.21 逐轮列出了这个迭代过程）。三重循环的次序不能换：**中转点必须在最外层**，否则 $adj^{(k)}$ 还没算完就被拿去用了。
 
 ```cpp file=code/ch07/graph/modern.hpp#floyd
-[[nodiscard]] std::vector<std::vector<int>> floyd() const {
-    auto distance = adjacency_;
+[[nodiscard]] std::vector<std::vector<distance_type>> floyd() const {
+    std::vector<std::vector<distance_type>> distance(
+        vertices(), std::vector<distance_type>(vertices(), unreachable));
+    for (std::size_t from = 0; from < vertices(); ++from) {
+        for (std::size_t to = 0; to < vertices(); ++to) {
+            if (adjacency_[from][to] < infinity) {
+                distance[from][to] = adjacency_[from][to];
+            }
+        }
+    }
     for (std::size_t via = 0; via < vertices(); ++via) {
         for (std::size_t from = 0; from < vertices(); ++from) {
             for (std::size_t to = 0; to < vertices(); ++to) {
-                if (distance[from][via] < infinity && distance[via][to] < infinity) {
+                if (distance[from][via] != unreachable && distance[via][to] != unreachable) {
                     distance[from][to] = std::min(
                         distance[from][to], distance[from][via] + distance[via][to]);
                 }
@@ -1094,12 +1106,13 @@ $path[i,j] = k$；如果当前没有最短路径，就将 $path[i,j]$ 置为 $-1
 ```
 ```python file=code/ch07/graph/modern.py#floyd
 def floyd(self) -> list[list[int]]:
-    distance = [list(row) for row in self._adjacency]
+    distance = [[weight if weight < self.infinity else self.unreachable for weight in row]
+                for row in self._adjacency]
     for via in range(self.vertices):
         for source in range(self.vertices):
             for target in range(self.vertices):
-                candidate = distance[source][via] + distance[via][target]
-                if distance[source][via] < self.infinity and distance[via][target] < self.infinity:
+                if distance[source][via] != self.unreachable and distance[via][target] != self.unreachable:
+                    candidate = distance[source][via] + distance[via][target]
                     distance[source][target] = min(distance[source][target], candidate)
     return distance
 ```

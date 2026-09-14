@@ -46,14 +46,14 @@
     },
     {
       "id": "算法7.8",
-      "code_line": "std::vector<int> dijkstra(std::size_t source) const",
-      "test": "算法7.8 unreachable stays infinity",
+      "code_line": "std::vector<distance_type> dijkstra(std::size_t source) const",
+      "test": "算法7.8 到不了是 unreachable",
       "py_code_line": "def dijkstra(self",
       "py_test": "算法7.8 Dijkstra matches 算法7.9 Floyd"
     },
     {
       "id": "算法7.9",
-      "code_line": "std::vector<std::vector<int>> floyd() const",
+      "code_line": "std::vector<std::vector<distance_type>> floyd() const",
       "test": "算法7.9 uses intermediate vertices",
       "py_code_line": "def floyd(self",
       "py_test": "算法7.9 uses intermediate vertices"

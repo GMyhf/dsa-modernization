@@ -44,7 +44,7 @@ void test_shortest_paths() {
     }
     check(floyd[0][4] == 7, "算法7.9 uses intermediate vertices");
     dsa::Graph disconnected(3); disconnected.add_edge(0, 1, 4);
-    check(disconnected.dijkstra(0)[2] == dsa::Graph::infinity, "算法7.8 unreachable stays infinity");
+    check(disconnected.dijkstra(0)[2] == dsa::Graph::unreachable, "算法7.8 到不了是 unreachable");
     bool rejected = false; try { disconnected.add_edge(1, 2, -1); } catch (const std::invalid_argument&) { rejected = true; }
     check(rejected, "代码7.3 rejects negative Dijkstra weight");
     // T-078：infinity 兼任「无边」，权 >= infinity 的边若被收下，所有算法都会把它当成不存在。
@@ -53,12 +53,30 @@ void test_shortest_paths() {
         rejected = false;
         try { graph.add_edge(0, 1, huge); } catch (const std::invalid_argument&) { rejected = true; }
         check(rejected, "T-078 权 >= infinity 被拒绝，而不是静默变成无边");
-        check(graph.dijkstra(0)[1] == dsa::Graph::infinity, "T-078 被拒绝的边没有写进矩阵");
+        check(graph.dijkstra(0)[1] == dsa::Graph::unreachable, "T-078 被拒绝的边没有写进矩阵");
     }
     dsa::Graph largest(2);
     largest.add_edge(0, 1, dsa::Graph::infinity - 1);
     check(largest.dijkstra(0)[1] == dsa::Graph::infinity - 1, "T-078 infinity-1 是合法的最大权，Dijkstra 看得见它");
     check(largest.dfs(0).size() == 2, "T-078 infinity-1 的边对周游也是边");
+
+    // D-039：路径总长达到 infinity 不再被读成「到不了」。int 距离下这里是 infinity == 哨兵。
+    dsa::Graph brink(3);
+    brink.add_edge(0, 1, dsa::Graph::infinity - 1);
+    brink.add_edge(1, 2, 1);
+    const dsa::Graph::distance_type exactly = dsa::Graph::infinity;
+    check(brink.dijkstra(0)[2] == exactly, "D-039 总长恰为 infinity 的路径 Dijkstra 算得出");
+    check(brink.floyd()[0][2] == exactly, "D-039 总长恰为 infinity 的路径 Floyd 算得出");
+    check(brink.bfs(0).size() == 3 && brink.shortest_path(brink.dijkstra_tree(0), 2).has_value(),
+          "D-039 可达性与 BFS 一致，路径取得出来");
+    // 6 顶点长链：总长 5*(infinity-1) = 2684354550 > INT_MAX，int 距离在这里溢出（UBSan 报 signed overflow）。
+    dsa::Graph chain(6);
+    for (std::size_t v = 0; v + 1 < 6; ++v) chain.add_edge(v, v + 1, dsa::Graph::infinity - 1);
+    const dsa::Graph::distance_type total = 5 * static_cast<dsa::Graph::distance_type>(dsa::Graph::infinity - 1);
+    check(total == 2684354550LL, "D-039 长链期望值自检");
+    check(chain.dijkstra(0)[5] == total, "D-039 长链总长超过 INT_MAX，Dijkstra 仍精确");
+    check(chain.floyd()[0][5] == total, "D-039 长链总长超过 INT_MAX，Floyd 仍精确");
+    check(chain.dijkstra_tree(0).distance[5] == total, "D-039 长链 dijkstra_tree 距离同样精确");
 }
 void test_minimum_spanning_trees() {
     dsa::Graph graph(5);
@@ -78,7 +96,7 @@ void test_minimum_spanning_trees() {
 // 平局允许任选一条，所以不断言具体路径，只断言路径合法：首尾对、每条边真实存在、边权和等于距离。
 using Weights = std::vector<std::vector<int>>;
 bool path_is_valid(const std::vector<std::size_t>& path, std::size_t source, std::size_t target,
-                   const Weights& weights, int distance) {
+                   const Weights& weights, dsa::Graph::distance_type distance) {
     if (path.empty() || path.front() != source || path.back() != target) return false;
     long long total = 0;
     for (std::size_t index = 1; index < path.size(); ++index) {
@@ -146,7 +164,7 @@ void test_shortest_path_reconstruction() {
             distances = distances && sample_tree.distance == floyd[source];
             for (std::size_t target = 0; target < count; ++target) {
                 const auto found = path_or_empty(sample_tree, target);
-                const bool reachable = floyd[source][target] < dsa::Graph::infinity;
+                const bool reachable = floyd[source][target] != dsa::Graph::unreachable;
                 reachability = reachability && found.has_value() == reachable;
                 if (found && reachable) {
                     ++paths;
@@ -201,8 +219,12 @@ int main() {
             }
             continue;
         }
-        check(graph.dijkstra(0) == dsa::shared_cases::integers(item.expected),
-              "T-047 graph distances");
+        // 期望距离可能超过 int（长链用例），按 64 位读，不走 integers() 的 stoi。
+        std::vector<dsa::Graph::distance_type> expected;
+        for (const auto& token : dsa::shared_cases::strings(item.expected)) {
+            expected.push_back(std::stoll(token));
+        }
+        check(graph.dijkstra(0) == expected, "T-047 graph distances");
     }
     std::printf("共享用例: %zu\n", shared.size());
     std::printf("Graph: %d 项断言，%d 失败\n", checks, failures);

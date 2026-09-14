@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <limits>
 #include <optional>
@@ -28,7 +29,12 @@ namespace dsa {
 /// 矩阵反而合适。**没有哪种表示法总是更好**，这正是本章要比较的东西。
 class GraphList {
 public:
+    /// 边权上限：0 <= weight < infinity，与邻接矩阵版 `Graph` 同口径。
     static constexpr int infinity = std::numeric_limits<int>::max() / 4;
+
+    /// 路径长度 64 位、「到不了」用 unreachable，与 `Graph` 相同（D-039）。
+    using distance_type = std::int64_t;
+    static constexpr distance_type unreachable = std::numeric_limits<distance_type>::max();
 
     struct Edge {
         std::size_t from;
@@ -48,7 +54,7 @@ public:
         if (weight < 0) {
             throw std::invalid_argument("negative edge");
         }
-        if (weight >= infinity) {  // Dijkstra 以 infinity 表示「到不了」，这么大的权会被静默当成没有边
+        if (weight >= infinity) {  // 与邻接矩阵版同口径：infinity 在那边表示「无边」，两种表示法才能逐项对拍
             throw std::invalid_argument("edge weight must be below GraphList::infinity");
         }
         put(from, to, weight);
@@ -173,12 +179,12 @@ public:
     /// 矩阵版每轮要扫一遍全部顶点找最近的那个，是 $O(V^2)$；换成邻接表 + 堆之后，
     /// 「找最近顶点」由堆负责、「松弛」只走实际存在的边。**稀疏图上这才是该用的组合**。
     /// 堆是第 5 章的教学内容，这里作为基础设施使用（见 unit.json 的 d001_exceptions）。
-    [[nodiscard]] std::vector<int> dijkstra(std::size_t source) const {
+    [[nodiscard]] std::vector<distance_type> dijkstra(std::size_t source) const {
         check_vertex(source);
-        std::vector<int> distance(vertices(), infinity);
+        std::vector<distance_type> distance(vertices(), unreachable);
         distance[source] = 0;
 
-        using Item = std::pair<int, std::size_t>;  // (当前距离, 顶点)
+        using Item = std::pair<distance_type, std::size_t>;  // (当前距离, 顶点)
         std::priority_queue<Item, std::vector<Item>, std::greater<Item>> heap;
         heap.emplace(0, source);
         while (!heap.empty()) {
@@ -189,7 +195,7 @@ public:
             }
             for (const Edge& edge : adjacency_[from]) {
                 ++scanned_;
-                const int relaxed = dist + edge.weight;
+                const distance_type relaxed = dist + edge.weight;
                 if (relaxed < distance[edge.to]) {
                     distance[edge.to] = relaxed;
                     heap.emplace(relaxed, edge.to);

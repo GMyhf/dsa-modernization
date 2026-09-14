@@ -192,7 +192,10 @@ static constexpr int infinity = std::numeric_limits<int>::max() / 4;
 ```
 
 `static` 表示 `infinity` 属于类本身，而不是每个对象各存一份；`constexpr` 表示编译期常量。
-取最大值的四分之一而非最大值，是为了计算 `a + b` 时仍留有余量，避免整数溢出。
+`infinity` 只用来表示「两人之间没有直接路线」，并规定每条路线的时间都必须小于它。
+**最短时间是若干段之和**，可能超过 `int` 能表示的范围，所以求最短路时另用 64 位整数
+`distance_type`，「到不了」则用它的最大值 `unreachable` 表示，不再借用 `infinity`——
+否则一条总长恰好等于 `infinity` 的合法路径会被误读成「到不了」（D-039）。
 
 ```text
 explicit RumorNetwork(std::size_t people)
@@ -216,8 +219,8 @@ void add_route(std::size_t from, std::size_t to, int cost)
 
 #### Floyd 三重循环
 
-`auto shortest = distance_;` 复制输入矩阵。`auto` 让编译器自动推断类型，这里实际是
-`std::vector<std::vector<int>>`。
+`shortest` 是一个与 `distance_` 同样大小、元素为 `distance_type`（64 位整数）的矩阵：
+有直接路线的位置抄入路线时间，没有的位置记为 `unreachable`。
 
 三层循环的含义不是“随便循环三次”，而是按中转站逐步扩大可用路径：
 
@@ -228,7 +231,7 @@ for each via:       允许路径经过 via
       比较 原来的 from->to 与 from->via->to
 ```
 
-条件 `shortest[from][via] != infinity && shortest[via][to] != infinity` 先确认两段都可达。
+条件 `shortest[from][via] != unreachable && shortest[via][to] != unreachable` 先确认两段都可达。
 若 `from -> via -> to` 的总时间更小，就更新 `shortest[from][to]`。例如 B2 到 B4 没有直接边，
 但 B2→B5 是 8、B5→B1 是 5、B1→B4 是 4，所以 Floyd 最终得到 B2→B4 是 `8 + 5 + 4 = 17`。
 
@@ -236,7 +239,7 @@ for each via:       允许路径经过 via
 
 ```text
 std::optional<std::size_t> result;
-int smallest_eccentricity = infinity;
+distance_type smallest_eccentricity = unreachable;
 ```
 
 默认构造的 `result` 是空值，表示“还没有找到合格起点”。`smallest_eccentricity` 保存目前见过的
@@ -246,8 +249,8 @@ int smallest_eccentricity = infinity;
 `distance > largest_distance ? distance : largest_distance` 等价于“若新值更大就采用新值，否则保留
 旧值”，最终得到这行的最大值。若它比当前最佳值小，就同时更新最佳时间与 `result`。
 
-任何一行含 `infinity` 时，该行最大值也是 `infinity`，不会优于有限答案；若所有行都是
-`infinity`，`result` 保持为空，函数返回 `std::nullopt`。`[[nodiscard]]` 提醒编译器：调用者不应
+任何一行含 `unreachable` 时，该行最大值也是 `unreachable`，不会优于有限答案；若所有行都含
+`unreachable`，`result` 保持为空，函数返回 `std::nullopt`。`[[nodiscard]]` 提醒编译器：调用者不应
 无意丢弃这个可能为空的重要返回值。
 
 #### 私有数据成员
@@ -268,6 +271,7 @@ std::vector<std::vector<int>> distance_;
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <optional>
 #include <stdexcept>
@@ -279,6 +283,9 @@ namespace dsa::adt {
 class RumorNetwork {
 public:
     static constexpr int infinity = std::numeric_limits<int>::max() / 4;
+    /// 最短时间是若干段之和，可能超过 int；用 64 位，「到不了」另用 unreachable（D-039）。
+    using distance_type = std::int64_t;
+    static constexpr distance_type unreachable = std::numeric_limits<distance_type>::max();
 
     explicit RumorNetwork(std::size_t people)
         : distance_(people, std::vector<int>(people, infinity)) {
@@ -298,24 +305,36 @@ public:
     }
 
     [[nodiscard]] std::optional<std::size_t> best_source() const {
-        auto shortest = distance_;
-        for (std::size_t via = 0; via < shortest.size(); ++via) {
-            for (std::size_t from = 0; from < shortest.size(); ++from) {
-                for (std::size_t to = 0; to < shortest.size(); ++to) {
-                    if (shortest[from][via] != infinity &&
-                        shortest[via][to] != infinity &&
+        // >>> best-source-floyd
+        const std::size_t people = distance_.size();
+        std::vector<std::vector<distance_type>> shortest(
+            people, std::vector<distance_type>(people, unreachable));
+        for (std::size_t from = 0; from < people; ++from) {
+            for (std::size_t to = 0; to < people; ++to) {
+                if (distance_[from][to] != infinity) {
+                    shortest[from][to] = distance_[from][to];
+                }
+            }
+        }
+        for (std::size_t via = 0; via < people; ++via) {
+            for (std::size_t from = 0; from < people; ++from) {
+                for (std::size_t to = 0; to < people; ++to) {
+                    if (shortest[from][via] != unreachable &&
+                        shortest[via][to] != unreachable &&
                         shortest[from][to] > shortest[from][via] + shortest[via][to]) {
                         shortest[from][to] = shortest[from][via] + shortest[via][to];
                     }
                 }
             }
         }
+        // <<< best-source-floyd
 
+        // >>> best-source-pick
         std::optional<std::size_t> result;
-        int smallest_eccentricity = infinity;
-        for (std::size_t from = 0; from < shortest.size(); ++from) {
-            int largest_distance = 0;
-            for (int distance : shortest[from]) {
+        distance_type smallest_eccentricity = unreachable;
+        for (std::size_t from = 0; from < people; ++from) {
+            distance_type largest_distance = 0;
+            for (distance_type distance : shortest[from]) {
                 largest_distance = distance > largest_distance ? distance : largest_distance;
             }
             if (largest_distance < smallest_eccentricity) {
@@ -324,6 +343,7 @@ public:
             }
         }
         return result;
+        // <<< best-source-pick
     }
 
 private:

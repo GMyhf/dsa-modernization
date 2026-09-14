@@ -225,7 +225,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <td style="text-align:left">Prim 或 Kruskal 的边集</td>
 </tr>
 </tbody></table></div>
-<p>本单元用邻接矩阵。没有边记为 <code>infinity</code>（<code>int</code> 最大值的四分之一，给加法留余量）。环、非连通等正常失败用 <code>optional</code> 表达。DFS 仍是递归，深图有栈溢出风险。</p>
+<p>本单元用邻接矩阵。没有边记为 <code>infinity</code>（<code>int</code> 最大值的四分之一），边权必须小于它；最短路径的长度是若干条边之和，另用 64 位的 <code>Graph::distance_type</code> 存，到不了记为 <code>Graph::unreachable</code>，不与「无边」共用一个值（D-039）。环、非连通等正常失败用 <code>optional</code> 表达。DFS 仍是递归，深图有栈溢出风险。</p>
 <h2 id="72-图的抽象数据类型"><a class="anchor" href="#72-图的抽象数据类型">#</a>7.2 图的抽象数据类型</h2>
 <p>和线性表、树一样，先说清楚图对外提供哪些运算，再谈怎么存。</p>
 <p>原书 7.2 节先强调了一件容易被忽略的事：<strong>图的顶点之间本来没有次序</strong>。从逻辑结构看，任何一个顶点都可以当作「第一个」顶点，一个顶点的若干邻接点之间也没有先后。可是一旦按某种存储结构把图建起来，次序就被存储结构定死了——邻接矩阵里的次序是列号，邻接表里的次序是链表的插入次序。所以下文所有「第一条边」「下一条边」说的都是存储结构给出的次序，不是图本身的性质；同一张图换个存法，DFS 的访问序列就可能不同。7.3 节把两种存储结构逐项对拍，正是把这点不确定性钉死：同一张图、同样的建图次序，两种实现必须给出同一个序列。</p>
@@ -476,7 +476,12 @@ public:
 <span class="c">/// 矩阵反而合适。**没有哪种表示法总是更好**，这正是本章要比较的东西。</span>
 <span class="k">class</span> GraphList {
 <span class="k">public</span>:
+    <span class="c">/// 边权上限：0 &lt;= weight &lt; infinity，与邻接矩阵版 `Graph` 同口径。</span>
     <span class="k">static</span> <span class="k">constexpr</span> <span class="t">int</span> infinity = std::numeric_limits&lt;<span class="t">int</span>&gt;::max() / <span class="n">4</span>;
+
+    <span class="c">/// 路径长度 64 位、「到不了」用 unreachable，与 `Graph` 相同（D-039）。</span>
+    <span class="k">using</span> distance_type = std::int64_t;
+    <span class="k">static</span> <span class="k">constexpr</span> distance_type unreachable = std::numeric_limits&lt;distance_type&gt;::max();
 
     <span class="k">struct</span> Edge {
         std::<span class="t">size_t</span> from;
@@ -496,7 +501,7 @@ public:
         <span class="k">if</span> (weight &lt; <span class="n">0</span>) {
             <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;negative edge&quot;</span>);
         }
-        <span class="k">if</span> (weight &gt;= infinity) {  <span class="c">// Dijkstra 以 infinity 表示「到不了」，这么大的权会被静默当成没有边</span>
+        <span class="k">if</span> (weight &gt;= infinity) {  <span class="c">// 与邻接矩阵版同口径：infinity 在那边表示「无边」，两种表示法才能逐项对拍</span>
             <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;edge weight must be below GraphList::infinity&quot;</span>);
         }
         put(from, to, weight);
@@ -610,8 +615,8 @@ public:
     }
     <span class="k">const</span> <span class="k">auto</span> distance = graph.dijkstra(<span class="n">0</span>);
     std::printf(<span class="s">&quot;\n从 0 出发的最短距离:&quot;</span>);
-    <span class="k">for</span> (<span class="k">const</span> <span class="t">int</span> d : distance) {
-        std::printf(<span class="s">&quot; %d&quot;</span>, d);
+    <span class="k">for</span> (<span class="k">const</span> <span class="k">auto</span> d : distance) {
+        std::printf(<span class="s">&quot; %lld&quot;</span>, <span class="k">static_cast</span>&lt;<span class="t">long</span> <span class="t">long</span>&gt;(d));
     }
     <span class="k">const</span> <span class="k">auto</span> mst = graph.prim(<span class="n">0</span>);
     <span class="t">int</span> total = <span class="n">0</span>;
@@ -636,12 +641,12 @@ public:
 <span class="c">/// 矩阵版每轮要扫一遍全部顶点找最近的那个，是 $O(V^2)$；换成邻接表 + 堆之后，</span>
 <span class="c">/// 「找最近顶点」由堆负责、「松弛」只走实际存在的边。**稀疏图上这才是该用的组合**。</span>
 <span class="c">/// 堆是第 5 章的教学内容，这里作为基础设施使用（见 unit.json 的 d001_exceptions）。</span>
-[[nodiscard]] std::vector&lt;<span class="t">int</span>&gt; dijkstra(std::<span class="t">size_t</span> source) <span class="k">const</span> {
+[[nodiscard]] std::vector&lt;distance_type&gt; dijkstra(std::<span class="t">size_t</span> source) <span class="k">const</span> {
     check_vertex(source);
-    std::vector&lt;<span class="t">int</span>&gt; distance(vertices(), infinity);
+    std::vector&lt;distance_type&gt; distance(vertices(), unreachable);
     distance[source] = <span class="n">0</span>;
 
-    <span class="k">using</span> Item = std::pair&lt;<span class="t">int</span>, std::<span class="t">size_t</span>&gt;;  <span class="c">// (当前距离, 顶点)</span>
+    <span class="k">using</span> Item = std::pair&lt;distance_type, std::<span class="t">size_t</span>&gt;;  <span class="c">// (当前距离, 顶点)</span>
     std::priority_queue&lt;Item, std::vector&lt;Item&gt;, std::greater&lt;Item&gt;&gt; heap;
     heap.emplace(<span class="n">0</span>, source);
     <span class="k">while</span> (!heap.empty()) {
@@ -652,7 +657,7 @@ public:
         }
         <span class="k">for</span> (<span class="k">const</span> Edge&amp; edge : adjacency_[from]) {
             ++scanned_;
-            <span class="k">const</span> <span class="t">int</span> relaxed = dist + edge.weight;
+            <span class="k">const</span> distance_type relaxed = dist + edge.weight;
             <span class="k">if</span> (relaxed &lt; distance[edge.to]) {
                 distance[edge.to] = relaxed;
                 heap.emplace(relaxed, edge.to);
@@ -987,14 +992,14 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
 <p>边权必须非负。</p>
 <figure><img loading="lazy" src="../assets/scan/fig-7-19.png" alt="图7.19 单源最短路径的示例"><figcaption>图7.19 单源最短路径的示例</figcaption></figure>
 <p>图 7.19　单源最短路径的示例。已确定的顶点集合每轮扩大一个：从「尚未确定」的顶点里挑距离最小的那个，它的距离<strong>此后不会再变小</strong>——因为任何绕道都要先经过一个距离不更小的顶点，而边权非负。这条论证正是 Dijkstra 要求非负权的地方，本书的实现因此在 <code>add_edge</code> 就拒绝负权。</p>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#dijkstra</a></div><pre><code>[[nodiscard]] std::vector&lt;<span class="t">int</span>&gt; dijkstra(std::<span class="t">size_t</span> source) <span class="k">const</span> {
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#dijkstra</a></div><pre><code>[[nodiscard]] std::vector&lt;distance_type&gt; dijkstra(std::<span class="t">size_t</span> source) <span class="k">const</span> {
     check_vertex(source);
-    std::vector&lt;<span class="t">int</span>&gt; distance(vertices(), infinity);
+    std::vector&lt;distance_type&gt; distance(vertices(), unreachable);
     std::vector&lt;<span class="t">bool</span>&gt; used(vertices());
     distance[source] = <span class="n">0</span>;
     <span class="k">for</span> (std::<span class="t">size_t</span> count = <span class="n">0</span>; count &lt; vertices(); ++count) {
         <span class="k">const</span> std::<span class="t">size_t</span> from = nearest_unvisited(distance, used);
-        <span class="k">if</span> (from == vertices() || distance[from] == infinity) {
+        <span class="k">if</span> (from == vertices() || distance[from] == unreachable) {
             <span class="k">break</span>;
         }
         used[from] = <span class="k">true</span>;
@@ -1009,12 +1014,12 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
 }</code></pre></div>
 <div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.py">code/ch07/graph/modern.py#dijkstra</a></div><pre><code><span class="k">def</span> dijkstra(self, source: <span class="t">int</span>) -&gt; <span class="t">list</span>[<span class="t">int</span>]:
     self._check_vertex(source)
-    distance = [self.infinity] * self.vertices
+    distance = [self.unreachable] * self.vertices
     used = [<span class="k">False</span>] * self.vertices
     distance[source] = <span class="n">0</span>
     <span class="k">for</span> _ <span class="k">in</span> <span class="t">range</span>(self.vertices):
         vertex = self._nearest(distance, used)
-        <span class="k">if</span> vertex <span class="k">is</span> <span class="k">None</span> <span class="k">or</span> distance[vertex] == self.infinity:
+        <span class="k">if</span> vertex <span class="k">is</span> <span class="k">None</span> <span class="k">or</span> distance[vertex] == self.unreachable:
             <span class="k">break</span>
         used[vertex] = <span class="k">True</span>
         <span class="k">for</span> target <span class="k">in</span> <span class="t">range</span>(self.vertices):
@@ -1025,27 +1030,26 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
 <h4 id="把路径本身取出来"><a class="anchor" href="#把路径本身取出来">#</a>把路径本身取出来</h4>
 <p>上面的 <code>dijkstra</code> 只给距离。要输出路径，就像前文说的那样多记一个 <code>pre</code> 域，也就是原书 <code>Dist</code> 类里的 <code>pre</code>。<code>Graph::dijkstra_tree</code> 和 <code>dijkstra</code> 是同一个算法，只多了一句：<strong>只在松弛成功时</strong>把 <code>to</code> 的前驱设为 <code>from</code>。如果不管松没松弛都去改前驱，距离数组照样正确，但顺着前驱走出来的路径和距离对不上，甚至会走成环。源点没有前驱，到不了的顶点也没有前驱，所以前驱数组用 <code>std::optional</code>。</p>
 <p><code>Graph::shortest_path</code> 从汇点出发，顺着前驱倒着走回源点，再把序列反转过来。到不了时返回空；汇点就是源点时，路径只有源点一个顶点。前驱链断了或者成环，说明传进来的树已经坏了，这时抛 <code>std::invalid_argument</code>。有好几条等长的最短路径时，返回哪一条取决于顶点的扫描次序，所以测试不断言具体路径，只断言路径合法：首尾是源点和汇点，每一步都是图里真实存在的边，边权之和等于 Floyd 算出的最短距离。这项检查在随机小图上跑，边权取 0 到 4，并列和零权边都会大量出现。</p>
-<p>关于溢出：本章用 <code>int</code> 存距离，「无穷大」取 <code>INT_MAX/4</code>。松弛时两个加数都小于这个值，和小于 <code>INT_MAX/2</code>，不会溢出。代价是总长达到 <code>INT_MAX/4</code> 的路径会被当成到不了。</p>
+<p>关于溢出：边权是 <code>int</code>，必须小于 <code>Graph::infinity</code>（<code>INT_MAX/4</code>，在矩阵里表示「无边」）；路径长度是若干条边之和，用 64 位的 <code>Graph::distance_type</code> 存，「到不了」记为 <code>Graph::unreachable</code>。一条简单路径至多 <span class="math">V<span class="bin">−</span><span class="upr">1</span></span> 条边，总长小于 <span class="math">V<span class="bin">⋅</span><span class="upr">2</span><sup><span class="upr">29</span></sup></span>，既不会溢出，也不会撞上 <code>unreachable</code>。早先用 <code>int</code> 存距离、以 <code>infinity</code> 兼任「到不了」时，一条总长恰好等于 <code>infinity</code> 的合法路径会被误读成到不了——同一张图上 BFS 却说走得到（D-039）。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#dijkstra-path</a></div><pre><code><span class="c">/// 原书 Dist 类的 `length` 与 `pre` 两个域：到各点的距离，和最短路径上的前一个顶点。</span>
 <span class="c">/// 源点自己、以及到不了的顶点，没有前一个顶点（`std::nullopt`）。</span>
 <span class="k">struct</span> ShortestPathTree {
     std::<span class="t">size_t</span> source;
-    std::vector&lt;<span class="t">int</span>&gt; distance;
+    std::vector&lt;distance_type&gt; distance;
     std::vector&lt;std::optional&lt;std::<span class="t">size_t</span>&gt;&gt; predecessor;
 };
 
 <span class="c">/// 与 `dijkstra` 同一个算法，多记一个 `pre`：**只在松弛成功时**改前驱。</span>
-<span class="c">/// 溢出：两个加数都小于 infinity = INT_MAX/4，和小于 INT_MAX/2，不会溢出；</span>
-<span class="c">/// 代价是总长 &gt;= infinity 的路径会被当成「到不了」。</span>
+<span class="c">/// 距离与 `dijkstra` 一样是 64 位，到不了是 `unreachable`（D-039）。</span>
 [[nodiscard]] ShortestPathTree dijkstra_tree(std::<span class="t">size_t</span> source) <span class="k">const</span> {
     check_vertex(source);
-    ShortestPathTree tree{source, std::vector&lt;<span class="t">int</span>&gt;(vertices(), infinity),
+    ShortestPathTree tree{source, std::vector&lt;distance_type&gt;(vertices(), unreachable),
                           std::vector&lt;std::optional&lt;std::<span class="t">size_t</span>&gt;&gt;(vertices())};
     std::vector&lt;<span class="t">bool</span>&gt; used(vertices());
     tree.distance[source] = <span class="n">0</span>;
     <span class="k">for</span> (std::<span class="t">size_t</span> count = <span class="n">0</span>; count &lt; vertices(); ++count) {
         <span class="k">const</span> std::<span class="t">size_t</span> from = nearest_unvisited(tree.distance, used);
-        <span class="k">if</span> (from == vertices() || tree.distance[from] == infinity) {
+        <span class="k">if</span> (from == vertices() || tree.distance[from] == unreachable) {
             <span class="k">break</span>;
         }
         used[from] = <span class="k">true</span>;
@@ -1068,7 +1072,7 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
     <span class="k">if</span> (target &gt;= count || tree.source &gt;= count || tree.predecessor.size() != count) {
         <span class="k">throw</span> std::out_of_range(<span class="s">&quot;vertex&quot;</span>);
     }
-    <span class="k">if</span> (tree.distance[target] == infinity) {
+    <span class="k">if</span> (tree.distance[target] == unreachable) {
         <span class="k">return</span> std::nullopt;
     }
     std::vector&lt;std::<span class="t">size_t</span>&gt; path{target};
@@ -1085,13 +1089,13 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
 <div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.py">code/ch07/graph/modern.py#dijkstra-path</a></div><pre><code><span class="k">def</span> dijkstra_tree(self, source: <span class="t">int</span>) -&gt; <span class="s">&quot;ShortestPathTree&quot;</span>:
     <span class="s">&quot;&quot;&quot;与 dijkstra 同一个算法，多记原书 Dist 的 pre 域：只在松弛成功时改前驱。&quot;&quot;&quot;</span>
     self._check_vertex(source)
-    distance = [self.infinity] * self.vertices
+    distance = [self.unreachable] * self.vertices
     predecessor: <span class="t">list</span>[<span class="t">int</span> | <span class="k">None</span>] = [<span class="k">None</span>] * self.vertices
     used = [<span class="k">False</span>] * self.vertices
     distance[source] = <span class="n">0</span>
     <span class="k">for</span> _ <span class="k">in</span> <span class="t">range</span>(self.vertices):
         vertex = self._nearest(distance, used)
-        <span class="k">if</span> vertex <span class="k">is</span> <span class="k">None</span> <span class="k">or</span> distance[vertex] == self.infinity:
+        <span class="k">if</span> vertex <span class="k">is</span> <span class="k">None</span> <span class="k">or</span> distance[vertex] == self.unreachable:
             <span class="k">break</span>
         used[vertex] = <span class="k">True</span>
         <span class="k">for</span> target <span class="k">in</span> <span class="t">range</span>(self.vertices):
@@ -1107,7 +1111,7 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
     count = <span class="t">len</span>(tree.distance)
     <span class="k">if</span> <span class="k">not</span> <span class="n">0</span> &lt;= target &lt; count <span class="k">or</span> <span class="k">not</span> <span class="n">0</span> &lt;= tree.source &lt; count <span class="k">or</span> <span class="t">len</span>(tree.predecessor) != count:
         <span class="k">raise</span> IndexError(<span class="s">&quot;vertex&quot;</span>)
-    <span class="k">if</span> tree.distance[target] == Graph.infinity:
+    <span class="k">if</span> tree.distance[target] == Graph.unreachable:
         <span class="k">return</span> <span class="k">None</span>
     path = [target]
     vertex = target
@@ -1129,12 +1133,20 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
 <p>具体到实现：Floyd 枚举中转点 <code>via</code>，比较 <code>from→to</code> 与 <code>from→via→to</code>。测试里五个源点的 Dijkstra 与 Floyd 逐项对拍。</p>
 <figure><img loading="lazy" src="../assets/scan/fig-7-20.png" alt="图7.20 每对顶点间的最短路径的示例"><figcaption>图7.20 每对顶点间的最短路径的示例</figcaption></figure>
 <p>图 7.20　每对顶点间最短路径的示例。Floyd 从相邻矩阵 <span class="math">adj<sup>(<span class="upr">0</span>)</sup></span> 出发，第 <span class="math">k</span> 轮允许把 <span class="math">v<sub>k</sub></span> 当中转点，得到 <span class="math">adj<sup>(k)</sup></span>；<span class="math">n</span> 轮之后每一格就是最短路径长度（原书图 7.21 逐轮列出了这个迭代过程）。三重循环的次序不能换：<strong>中转点必须在最外层</strong>，否则 <span class="math">adj<sup>(k)</sup></span> 还没算完就被拿去用了。</p>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#floyd</a></div><pre><code>[[nodiscard]] std::vector&lt;std::vector&lt;<span class="t">int</span>&gt;&gt; floyd() <span class="k">const</span> {
-    <span class="k">auto</span> distance = adjacency_;
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#floyd</a></div><pre><code>[[nodiscard]] std::vector&lt;std::vector&lt;distance_type&gt;&gt; floyd() <span class="k">const</span> {
+    std::vector&lt;std::vector&lt;distance_type&gt;&gt; distance(
+        vertices(), std::vector&lt;distance_type&gt;(vertices(), unreachable));
+    <span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; vertices(); ++from) {
+        <span class="k">for</span> (std::<span class="t">size_t</span> to = <span class="n">0</span>; to &lt; vertices(); ++to) {
+            <span class="k">if</span> (adjacency_[from][to] &lt; infinity) {
+                distance[from][to] = adjacency_[from][to];
+            }
+        }
+    }
     <span class="k">for</span> (std::<span class="t">size_t</span> via = <span class="n">0</span>; via &lt; vertices(); ++via) {
         <span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; vertices(); ++from) {
             <span class="k">for</span> (std::<span class="t">size_t</span> to = <span class="n">0</span>; to &lt; vertices(); ++to) {
-                <span class="k">if</span> (distance[from][via] &lt; infinity &amp;&amp; distance[via][to] &lt; infinity) {
+                <span class="k">if</span> (distance[from][via] != unreachable &amp;&amp; distance[via][to] != unreachable) {
                     distance[from][to] = std::min(
                         distance[from][to], distance[from][via] + distance[via][to]);
                 }
@@ -1144,12 +1156,13 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
     <span class="k">return</span> distance;
 }</code></pre></div>
 <div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.py">code/ch07/graph/modern.py#floyd</a></div><pre><code><span class="k">def</span> floyd(self) -&gt; <span class="t">list</span>[<span class="t">list</span>[<span class="t">int</span>]]:
-    distance = [<span class="t">list</span>(row) <span class="k">for</span> row <span class="k">in</span> self._adjacency]
+    distance = [[weight <span class="k">if</span> weight &lt; self.infinity <span class="k">else</span> self.unreachable <span class="k">for</span> weight <span class="k">in</span> row]
+                <span class="k">for</span> row <span class="k">in</span> self._adjacency]
     <span class="k">for</span> via <span class="k">in</span> <span class="t">range</span>(self.vertices):
         <span class="k">for</span> source <span class="k">in</span> <span class="t">range</span>(self.vertices):
             <span class="k">for</span> target <span class="k">in</span> <span class="t">range</span>(self.vertices):
-                candidate = distance[source][via] + distance[via][target]
-                <span class="k">if</span> distance[source][via] &lt; self.infinity <span class="k">and</span> distance[via][target] &lt; self.infinity:
+                <span class="k">if</span> distance[source][via] != self.unreachable <span class="k">and</span> distance[via][target] != self.unreachable:
+                    candidate = distance[source][via] + distance[via][target]
                     distance[source][target] = <span class="t">min</span>(distance[source][target], candidate)
     <span class="k">return</span> distance</code></pre></div>
 <h2 id="76-最小生成树"><a class="anchor" href="#76-最小生成树">#</a>7.6 最小生成树</h2>

@@ -92,8 +92,9 @@ void add_edge(std::size_t from, std::size_t to, int weight, bool directed = true
 ```
 
 <!-- 备注
-infinity 取 INT_MAX/4 而不是 INT_MAX——Floyd 里两个 infinity 会相加，
-用 INT_MAX 就溢出了，而有符号溢出是未定义行为。这一处第 1 章也讲过。
+infinity 在矩阵里只表示「无边」，边权必须小于它（add_edge 会拒绝）。
+路径长度是若干条边之和，Dijkstra/Floyd 用 64 位的 distance_type 存，到不了记 unreachable——
+否则总长恰为 infinity 的路径会被读成到不了，更长的还会溢出。这一处第 1 章也讲过。
 
 无向图加边要加两次，本书用 directed 参数表达。
 -->
@@ -324,14 +325,14 @@ Dijkstra 可以看成 BFS 在带权图上的推广，把队列换成了优先队
 # Dijkstra 的实现
 
 ```cpp file=code/ch07/graph/modern.hpp#dijkstra
-[[nodiscard]] std::vector<int> dijkstra(std::size_t source) const {
+[[nodiscard]] std::vector<distance_type> dijkstra(std::size_t source) const {
     check_vertex(source);
-    std::vector<int> distance(vertices(), infinity);
+    std::vector<distance_type> distance(vertices(), unreachable);
     std::vector<bool> used(vertices());
     distance[source] = 0;
     for (std::size_t count = 0; count < vertices(); ++count) {
         const std::size_t from = nearest_unvisited(distance, used);
-        if (from == vertices() || distance[from] == infinity) {
+        if (from == vertices() || distance[from] == unreachable) {
             break;
         }
         used[from] = true;
@@ -360,12 +361,20 @@ Dijkstra 可以看成 BFS 在带权图上的推广，把队列换成了优先队
 # 7.5.2 每对顶点：Floyd
 
 ```cpp file=code/ch07/graph/modern.hpp#floyd
-[[nodiscard]] std::vector<std::vector<int>> floyd() const {
-    auto distance = adjacency_;
+[[nodiscard]] std::vector<std::vector<distance_type>> floyd() const {
+    std::vector<std::vector<distance_type>> distance(
+        vertices(), std::vector<distance_type>(vertices(), unreachable));
+    for (std::size_t from = 0; from < vertices(); ++from) {
+        for (std::size_t to = 0; to < vertices(); ++to) {
+            if (adjacency_[from][to] < infinity) {
+                distance[from][to] = adjacency_[from][to];
+            }
+        }
+    }
     for (std::size_t via = 0; via < vertices(); ++via) {
         for (std::size_t from = 0; from < vertices(); ++from) {
             for (std::size_t to = 0; to < vertices(); ++to) {
-                if (distance[from][via] < infinity && distance[via][to] < infinity) {
+                if (distance[from][via] != unreachable && distance[via][to] != unreachable) {
                     distance[from][to] = std::min(
                         distance[from][to], distance[from][via] + distance[via][to]);
                 }
@@ -560,12 +569,12 @@ Dijkstra 每轮确定最小暂定距离，要求边权非负；Floyd 按中间�
 ```python file=code/ch07/graph/modern.py#dijkstra
 def dijkstra(self, source: int) -> list[int]:
     self._check_vertex(source)
-    distance = [self.infinity] * self.vertices
+    distance = [self.unreachable] * self.vertices
     used = [False] * self.vertices
     distance[source] = 0
     for _ in range(self.vertices):
         vertex = self._nearest(distance, used)
-        if vertex is None or distance[vertex] == self.infinity:
+        if vertex is None or distance[vertex] == self.unreachable:
             break
         used[vertex] = True
         for target in range(self.vertices):

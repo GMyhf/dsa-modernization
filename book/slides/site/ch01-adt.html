@@ -143,40 +143,46 @@ k 的含义是「只允许经过前 k 个顶点中转」，它必须是&lt;stron
 <p>对每一对 (i, j)，问「允许经过前 k 个顶点中转时，最短是多少」：</p>
 <div class="codeblock" data-lang="text"><pre><code>d[k][i][j] = min( d[k-1][i][j] ,  d[k-1][i][k] + d[k-1][k][j] )
                   不经过 k          经过 k</code></pre></div>
-<p>k 从 0 数到 V-1，答案就是 d[V-1]。代价 <span class="math">O(V<sup><span class="upr">3</span></sup>)</span>，<strong>与边数无关</strong>。</p></section><section class="slide" data-notes="&lt;p&gt;三处值得说：
-1. k（这里叫 via）在最外层；
-2. infinity 取的是 INT_MAX/4 而不是 INT_MAX——两个 infinity 相加会溢出，
-   而溢出是未定义行为；
-3. 返回 optional：图不连通时&lt;strong&gt;没有&lt;/strong&gt;这样的起点，那不是错误，是可预期状态。&lt;/p&gt;"><h1 id="实现两件事在一个函数里"><a class="anchor" href="#实现两件事在一个函数里">#</a>实现：两件事在一个函数里</h1>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch01/adt/modern.hpp">code/ch01/adt/modern.hpp#fn:best_source</a></div><pre><code>[[nodiscard]] std::optional&lt;std::<span class="t">size_t</span>&gt; best_source() <span class="k">const</span> {
-    <span class="k">auto</span> shortest = distance_;
-    <span class="k">for</span> (std::<span class="t">size_t</span> via = <span class="n">0</span>; via &lt; shortest.size(); ++via) {
-        <span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; shortest.size(); ++from) {
-            <span class="k">for</span> (std::<span class="t">size_t</span> to = <span class="n">0</span>; to &lt; shortest.size(); ++to) {
-                <span class="k">if</span> (shortest[from][via] != infinity &amp;&amp;
-                    shortest[via][to] != infinity &amp;&amp;
-                    shortest[from][to] &gt; shortest[from][via] + shortest[via][to]) {
-                    shortest[from][to] = shortest[from][via] + shortest[via][to];
-                }
+<p>k 从 0 数到 V-1，答案就是 d[V-1]。代价 <span class="math">O(V<sup><span class="upr">3</span></sup>)</span>，<strong>与边数无关</strong>。</p></section><section class="slide" data-notes="&lt;p&gt;1. k（这里叫 via）在最外层；
+2. infinity 只表示「没有直接路线」，每段时间都必须小于它；最短时间是若干段之和，
+   用 64 位的 distance_type 存、到不了记 unreachable——总长恰好等于 infinity 的路径
+   就不会被误读成到不了，更长的也不会溢出（有符号溢出是未定义行为）。&lt;/p&gt;"><h1 id="实现两件事在一个函数里"><a class="anchor" href="#实现两件事在一个函数里">#</a>实现：两件事在一个函数里</h1>
+<p>第一件事：先跑 Floyd，求出每对人之间的最短时间。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch01/adt/modern.hpp">code/ch01/adt/modern.hpp#best-source-floyd</a></div><pre><code><span class="k">const</span> std::<span class="t">size_t</span> people = distance_.size();
+std::vector&lt;std::vector&lt;distance_type&gt;&gt; shortest(
+    people, std::vector&lt;distance_type&gt;(people, unreachable));
+<span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; people; ++from) {
+    <span class="k">for</span> (std::<span class="t">size_t</span> to = <span class="n">0</span>; to &lt; people; ++to) {
+        <span class="k">if</span> (distance_[from][to] != infinity) {
+            shortest[from][to] = distance_[from][to];
+        }
+    }
+}
+<span class="k">for</span> (std::<span class="t">size_t</span> via = <span class="n">0</span>; via &lt; people; ++via) {
+    <span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; people; ++from) {
+        <span class="k">for</span> (std::<span class="t">size_t</span> to = <span class="n">0</span>; to &lt; people; ++to) {
+            <span class="k">if</span> (shortest[from][via] != unreachable &amp;&amp;
+                shortest[via][to] != unreachable &amp;&amp;
+                shortest[from][to] &gt; shortest[from][via] + shortest[via][to]) {
+                shortest[from][to] = shortest[from][via] + shortest[via][to];
             }
         }
     }
-
-    std::optional&lt;std::<span class="t">size_t</span>&gt; result;
-    <span class="t">int</span> smallest_eccentricity = infinity;
-    <span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; shortest.size(); ++from) {
-        <span class="t">int</span> largest_distance = <span class="n">0</span>;
-        <span class="k">for</span> (<span class="t">int</span> distance : shortest[from]) {
-            largest_distance = distance &gt; largest_distance ? distance : largest_distance;
-        }
-        <span class="k">if</span> (largest_distance &lt; smallest_eccentricity) {
-            smallest_eccentricity = largest_distance;
-            result = from;
-        }
+}</code></pre></div></section><section class="slide" data-notes="&lt;p&gt;返回 optional：图不连通时&lt;strong&gt;没有&lt;/strong&gt;这样的起点，那不是错误，是可预期状态。&lt;/p&gt;"><h1 id="实现续每行取最大再在所有起点里取最小"><a class="anchor" href="#实现续每行取最大再在所有起点里取最小">#</a>实现（续）：每行取最大，再在所有起点里取最小</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch01/adt/modern.hpp">code/ch01/adt/modern.hpp#best-source-pick</a></div><pre><code>std::optional&lt;std::<span class="t">size_t</span>&gt; result;
+distance_type smallest_eccentricity = unreachable;
+<span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; people; ++from) {
+    distance_type largest_distance = <span class="n">0</span>;
+    <span class="k">for</span> (distance_type distance : shortest[from]) {
+        largest_distance = distance &gt; largest_distance ? distance : largest_distance;
     }
-    <span class="k">return</span> result;
-}</code></pre></div>
-<p>先跑 Floyd，再对每个起点取<strong>这一行的最大值</strong>，最后在所有起点里取最小。</p></section><section class="slide" data-notes=""><h1 id="12-数据结构三个层次"><a class="anchor" href="#12-数据结构三个层次">#</a>1.2 数据结构：三个层次</h1>
+    <span class="k">if</span> (largest_distance &lt; smallest_eccentricity) {
+        smallest_eccentricity = largest_distance;
+        result = from;
+    }
+}
+<span class="k">return</span> result;</code></pre></div>
+<p>第二件事：对每个起点取<strong>这一行的最大值</strong>（它的完成时间），最后在所有起点里取最小。</p></section><section class="slide" data-notes=""><h1 id="12-数据结构三个层次"><a class="anchor" href="#12-数据结构三个层次">#</a>1.2 数据结构：三个层次</h1>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">层次</th>
 <th style="text-align:left">回答什么</th>
@@ -456,7 +462,7 @@ n 小的时候 O(n^2) 完全可能比 O(n log n) 快，这在第 8 章讲插入�
 <blockquote><p>全书的判据都是一样的：<strong>把实现改回错的写法，必须有一条断言会红。</strong></p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第1章 概论</div><div class="thumb"><div class="no">2</div>1.1 一个真问题：股市的传言</div><div class="thumb"><div class="no">3</div>先把问题抽象掉</div><div class="thumb"><div class="no">4</div>用什么存这张图</div><div class="thumb"><div class="no">5</div>算法：Floyd</div><div class="thumb"><div class="no">6</div>实现：两件事在一个函数里</div><div class="thumb"><div class="no">7</div>1.2 数据结构：三个层次</div><div class="thumb"><div class="no">8</div>逻辑结构的三分</div><div class="thumb"><div class="no">9</div>四种存储方法</div><div class="thumb"><div class="no">10</div>索引：逻辑有序，物理无序</div><div class="thumb"><div class="no">11</div>1.2.3 抽象数据类型</div><div class="thumb"><div class="no">12</div>1.3.1 什么才算「一个算法」</div><div class="thumb"><div class="no">13</div>1.3.2 步骤从哪来：六种设计方法</div><div class="thumb"><div class="no">14</div>1.4 算法分析：为什么要看增长趋势</div><div class="thumb"><div class="no">15</div>大 O、Ω、Θ</div><div class="thumb"><div class="no">16</div>最好、最坏、平均</div><div class="thumb"><div class="no">17</div>1.4.3 时间与空间的折衷</div><div class="thumb"><div class="no">18</div>1.4.4 怎么挑结构：先问运算，再问规模</div><div class="thumb"><div class="no">19</div>课堂讲解卡：从问题到算法</div><div class="thumb"><div class="no">20</div>课堂例题：五个城市的最短路</div><div class="thumb"><div class="no">21</div>课堂例题答案：Floyd 的三轮更新</div><div class="thumb"><div class="no">22</div>课末自检</div><div class="thumb"><div class="no">23</div>课末自检参考答案</div><div class="thumb"><div class="no">24</div>板书演算：Floyd 一次更新</div><div class="thumb"><div class="no">25</div>反例：只看直达边</div><div class="thumb"><div class="no">26</div>课堂练习与答案</div><div class="thumb"><div class="no">27</div>本章小结</div><div class="thumb"><div class="no">28</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第1章 概论</div><div class="thumb"><div class="no">2</div>1.1 一个真问题：股市的传言</div><div class="thumb"><div class="no">3</div>先把问题抽象掉</div><div class="thumb"><div class="no">4</div>用什么存这张图</div><div class="thumb"><div class="no">5</div>算法：Floyd</div><div class="thumb"><div class="no">6</div>实现：两件事在一个函数里</div><div class="thumb"><div class="no">7</div>实现（续）：每行取最大，再在所有起点里取最小</div><div class="thumb"><div class="no">8</div>1.2 数据结构：三个层次</div><div class="thumb"><div class="no">9</div>逻辑结构的三分</div><div class="thumb"><div class="no">10</div>四种存储方法</div><div class="thumb"><div class="no">11</div>索引：逻辑有序，物理无序</div><div class="thumb"><div class="no">12</div>1.2.3 抽象数据类型</div><div class="thumb"><div class="no">13</div>1.3.1 什么才算「一个算法」</div><div class="thumb"><div class="no">14</div>1.3.2 步骤从哪来：六种设计方法</div><div class="thumb"><div class="no">15</div>1.4 算法分析：为什么要看增长趋势</div><div class="thumb"><div class="no">16</div>大 O、Ω、Θ</div><div class="thumb"><div class="no">17</div>最好、最坏、平均</div><div class="thumb"><div class="no">18</div>1.4.3 时间与空间的折衷</div><div class="thumb"><div class="no">19</div>1.4.4 怎么挑结构：先问运算，再问规模</div><div class="thumb"><div class="no">20</div>课堂讲解卡：从问题到算法</div><div class="thumb"><div class="no">21</div>课堂例题：五个城市的最短路</div><div class="thumb"><div class="no">22</div>课堂例题答案：Floyd 的三轮更新</div><div class="thumb"><div class="no">23</div>课末自检</div><div class="thumb"><div class="no">24</div>课末自检参考答案</div><div class="thumb"><div class="no">25</div>板书演算：Floyd 一次更新</div><div class="thumb"><div class="no">26</div>反例：只看直达边</div><div class="thumb"><div class="no">27</div>课堂练习与答案</div><div class="thumb"><div class="no">28</div>本章小结</div><div class="thumb"><div class="no">29</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -469,7 +475,7 @@ n 小的时候 O(n^2) 完全可能比 O(n log n) 快，这在第 8 章讲插入�
 <b>第1章 概论</b><span>数据结构与算法：Python 讲可迁移算法，C++ 讲存储与工程实现</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 28</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 29</b>
 </div>
 <script>
 (function(){

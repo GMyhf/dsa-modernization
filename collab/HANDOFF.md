@@ -1,5 +1,44 @@
 # HANDOFF · 交接日志
 
+### 2026-09-14 · Claude → Codex · T-078 续：路径距离改 64 位（D-039，人拍板）
+
+上一条 T-078 交接里留作「待拍板」的路径总长撞哨兵，人选了 64 位距离，全文见 `DECISION_LOG.md` D-039。
+
+**改了什么**：`Graph`、`GraphList`、`RumorNetwork` 各加 `distance_type = std::int64_t` 与 `unreachable = INT64_MAX`；
+Dijkstra、`dijkstra_tree`、`shortest_path`、Floyd、`best_source` 用它们，`infinity` 只剩「无边」一个意思；Prim 仍比较 `int` 边权
+（`nearest_unvisited` 改成模板）。Python `Graph.unreachable = 2**63-1`。`unit.json` 算法7.8/7.9 的 `code_line` 随签名更新。
+
+| 单元 | 断言（前→后） | 变异（改回旧行为） |
+| --- | --- | --- |
+| ch07/graph | C++ 67→75，Py 60→66，共享 7→8（`long-chain`） | `unreachable = infinity` C++ 红、Py 红；`distance_type = int` 编译期红（`-Werror=overflow`） |
+| ch07/adjacency_list | 157→159 | `unreachable = infinity` 红 |
+| ch01/adt | 9→11 | `unreachable = infinity` 红 |
+
+**书与课件**：ch01/ch07 正文、两章课件备注改写，14 个印出代码块随 sync 更新。courseware 讲义 `DSA_CH01…md` 的 Floyd 摘录改成新代码
+（原摘录只剩 2/8 行能在 `code/` 里找到，第 9 项红）。**`courseware/content/ch01.py` 的课件页与第 1 章视频仍是 `int` 版**——
+闸门第 9 项只核讲义，看不见这处过期；改它要重排课件并重录 TTS，记在 PLAN T-078 待人决定。
+
+**首跑 `--verify` 连红三轮，逐个修**：① ch01 课件 `best_source` 页 40 行超密度守卫，拆成两页、各印新锚点切片，新页登记进
+`slide_coverage.json`；② D-039 没进 PLAN 决策索引；③ 拆页后课件 411 页，README 仍写 410。
+
+**闸门**（`python3 tools/handoff.py --verify`，EXIT=0，14/14 步，本机 Linux 完整档）：
+
+```text
+Ran 428 tests                                   OK
+✅ 台账一致：104/105 已现代化，1 退场，0 待办
+✅ 勘误台账一致：40 条，15 条有回归测试
+✅ 书稿体检通过：31 个文件，17 条规则
+✅ 正文保全度未回退：89 节，整体 88%，其中 1 节仍不足原书一半
+✅ book/site/ 与 book/*.md 一致（18 个页面）
+✅ 课件 .pptx 与课件源逐字节一致：12 份、411 页
+✅ courseware 闸门通过：第 1–9 项（渲染检查：12 份 PDF，共 378 页）
+✅ PDF 与源文件一致：678 页、18 章、217 张图，sha256 d859624617d1
+✅ 扫描件裁图一致：218 张 ｜ ✅ 插图集与底稿一致：292 张
+✅ 35/35 个单元通过（每个 2 种构建：debug+asan+ubsan, release-O2）
+```
+
+**请你重点看**：`NOTES-claude.md`「T-078 续」的 4 条（编译期变红、`stoll` 本地解析是否该进支持库、课件页/视频过期、拆页）。
+
 ### 2026-09-14 · Claude → Codex · T-078 修复你报的 P1；登记 T-077（pptx 在 PowerPoint 中被修复）
 
 **T-077（Backlog，未认领）**：你用原生 PowerPoint 打开 12 份 `book/slides/pptx` 全部显示 `[Repaired]`。

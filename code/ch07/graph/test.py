@@ -86,11 +86,27 @@ def test_add_edge() -> None:
         except ValueError:
             raised = True
         check(raised, "T-078 权 >= infinity 被拒绝，而不是静默变成无边")
-        check(graph.dijkstra(0)[1] == modern.Graph.infinity, "T-078 被拒绝的边没有写进矩阵")
+        check(graph.dijkstra(0)[1] == modern.Graph.unreachable, "T-078 被拒绝的边没有写进矩阵")
     largest = modern.Graph(2)
     largest.add_edge(0, 1, modern.Graph.infinity - 1)
     check(largest.dijkstra(0)[1] == modern.Graph.infinity - 1, "T-078 infinity-1 是合法的最大权，Dijkstra 看得见它")
     check(len(largest.dfs(0)) == 2, "T-078 infinity-1 的边对周游也是边")
+
+    # D-039：路径总长达到 infinity 不再被读成「到不了」。Python 不溢出，但原先哨兵照样撞车。
+    brink = modern.Graph(3)
+    brink.add_edge(0, 1, modern.Graph.infinity - 1)
+    brink.add_edge(1, 2, 1)
+    check(brink.dijkstra(0)[2] == modern.Graph.infinity, "D-039 总长恰为 infinity 的路径 Dijkstra 算得出")
+    check(brink.floyd()[0][2] == modern.Graph.infinity, "D-039 总长恰为 infinity 的路径 Floyd 算得出")
+    check(len(brink.bfs(0)) == 3 and modern.Graph.shortest_path(brink.dijkstra_tree(0), 2) is not None,
+          "D-039 可达性与 BFS 一致，路径取得出来")
+    chain = modern.Graph(6)
+    for vertex in range(5):
+        chain.add_edge(vertex, vertex + 1, modern.Graph.infinity - 1)
+    total = 5 * (modern.Graph.infinity - 1)
+    check(total == 2684354550, "D-039 长链期望值自检")
+    check(chain.dijkstra(0)[5] == total and chain.floyd()[0][5] == total,
+          "D-039 长链总长超过 INT_MAX，Dijkstra 与 Floyd 仍精确")
 
 
 def test_dfs_and_bfs_are_distinguishable() -> None:
@@ -150,8 +166,8 @@ def test_shortest_paths() -> None:
 
     lonely = modern.Graph(3)
     lonely.add_edge(0, 1, 5)
-    check(lonely.dijkstra(0)[2] == modern.Graph.infinity, "算法7.8 到不了的顶点是无穷")
-    check(lonely.floyd()[0][2] == modern.Graph.infinity, "算法7.9 到不了的顶点是无穷")
+    check(lonely.dijkstra(0)[2] == modern.Graph.unreachable, "算法7.8 到不了的顶点是 unreachable")
+    check(lonely.floyd()[0][2] == modern.Graph.unreachable, "算法7.9 到不了的顶点是 unreachable")
 
 
 def path_is_valid(path, source, target, weights, distance) -> bool:
@@ -227,7 +243,7 @@ def test_shortest_path_reconstruction() -> None:
             distances = distances and sample_tree.distance == floyd[source]
             for target in range(count):
                 found = path_or_none(sample_tree, target)
-                reachable = floyd[source][target] < modern.Graph.infinity
+                reachable = floyd[source][target] != modern.Graph.unreachable
                 reachability = reachability and (found is not None) == reachable
                 if found is not None and reachable:
                     paths += 1

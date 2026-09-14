@@ -29,8 +29,8 @@ int main() {
     }
     const auto distance = graph.dijkstra(0);
     std::printf("\n从 0 出发的最短距离:");
-    for (const int d : distance) {
-        std::printf(" %d", d);
+    for (const auto d : distance) {
+        std::printf(" %lld", static_cast<long long>(d));
     }
     const auto mst = graph.prim(0);
     int total = 0;
