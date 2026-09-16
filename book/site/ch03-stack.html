@@ -1410,26 +1410,68 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
 <div class="codeblock" data-lang="python"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/knapsack/modern.py">code/ch03/knapsack/modern.py#explicit-stack</a></div><pre><code><span class="k">def</span> knapsack_with_explicit_stack(capacity: <span class="t">int</span>, weights: <span class="t">list</span>[<span class="t">int</span>]) -&gt; <span class="t">list</span>[<span class="t">int</span>] | <span class="k">None</span>:
     <span class="s">&quot;&quot;&quot;算法3.11：用栈帧中的返回地址机械模拟递归。&quot;&quot;&quot;</span>
     _validate(capacity, weights)
+
+    <span class="c"># -------------------------------------------------------------</span>
+    <span class="c"># 1. 状态定义（模拟 CPU 的“程序计数器” PC / 返回地址 Return Address）</span>
+    <span class="c"># enter      : 函数入口点（开始执行当前层的逻辑）</span>
+    <span class="c"># after_rule1: 从“选择当前物品”的子调用返回后的恢复点</span>
+    <span class="c"># after_rule2: 从“不选当前物品”的子调用返回后的恢复点</span>
+    <span class="c"># -------------------------------------------------------------</span>
     enter, after_rule1, after_rule2 = <span class="t">range</span>(<span class="n">3</span>)
+
+    <span class="c"># 显式模拟调用栈：</span>
+    <span class="c"># 栈帧与递归版 solve(remaining, count) 的参数一一对应，再加上返回地址：</span>
+    <span class="c"># (当前剩余容量 remaining, 可选物品数 count, 当前执行阶段 stage)</span>
     stack = [(capacity, <span class="t">len</span>(weights), enter)]
+
+    <span class="c"># 记录最终被选中的物品索引（构成解的路径）</span>
     chosen: <span class="t">list</span>[<span class="t">int</span>] = []
+
+    <span class="c"># 模拟 CPU 的“返回值寄存器”（例如 x86 中的 RAX/EAX）</span>
+    <span class="c"># 子调用执行完毕后，将结果（True/False）写入此变量，交由父调用读取</span>
     child_result = <span class="k">False</span>
+
     <span class="k">while</span> stack:
+        <span class="c"># 弹出当前栈顶执行上下文，恢复该层的全部“局部变量”</span>
+        <span class="c"># count 表示当前还有前 count 个物品可选（对应下标 0 到 count - 1）</span>
         remaining, count, stage = stack.pop()
+
+        <span class="c"># ==================== 阶段 0：函数入口 ====================</span>
         <span class="k">if</span> stage == enter:
+            <span class="c"># Base Case 1: 恰好凑齐容量，递归成功</span>
             <span class="k">if</span> remaining == <span class="n">0</span>:
                 child_result = <span class="k">True</span>
+            <span class="c"># Base Case 2: 超过承重，或已无物品可选，递归失败</span>
             <span class="k">elif</span> remaining &lt; <span class="n">0</span> <span class="k">or</span> count == <span class="n">0</span>:
                 child_result = <span class="k">False</span>
             <span class="k">else</span>:
+                <span class="c"># 分支 1：尝试“选择”第 (count - 1) 个物品</span>
+                <span class="c"># [压栈操作 1 - 保存断点]：子调用结束后，需回到 after_rule1 处继续</span>
                 stack.append((remaining, count, after_rule1))
+                <span class="c"># [压栈操作 2 - 发起子调用]：扣减当前物品重量，可选物品数减 1，进入新的 enter</span>
                 stack.append((remaining - weights[count - <span class="n">1</span>], count - <span class="n">1</span>, enter))
+
+        <span class="c"># ==================== 阶段 1：分支 1 返回 ====================</span>
         <span class="k">elif</span> stage == after_rule1:
+            <span class="c"># 从“返回值寄存器”读取分支 1 的成败</span>
             <span class="k">if</span> child_result:
+                <span class="c"># 分支 1 成功：说明拿该物品能凑齐，将其记录进结果集中</span>
                 chosen.append(count - <span class="n">1</span>)
+                <span class="c"># 当前层任务完成，直接结束，准备弹出更上一层的断点</span>
             <span class="k">else</span>:
+                <span class="c"># 分支 1 失败：回溯，转入分支 2——尝试“不选”第 (count - 1) 个物品</span>
+                <span class="c"># [压栈操作 1 - 保存断点]：分支 2 结束后恢复到 after_rule2</span>
                 stack.append((remaining, count, after_rule2))
+                <span class="c"># [压栈操作 2 - 发起子调用]：容量不变，可选物品数减 1，发起新调用</span>
                 stack.append((remaining, count - <span class="n">1</span>, enter))
+
+        <span class="c"># ==================== 阶段 2：分支 2 返回 ====================</span>
+        <span class="c"># elif stage == after_rule2:</span>
+        <span class="c">#     pass</span>
+        <span class="c"># 说明：分支 2 的结果已经直接留存在 child_result 里了。</span>
+        <span class="c"># 这里无需额外代码，当前帧直接随 pop() 销毁，继续回溯上层。</span>
+
+    <span class="c"># 整个搜索结束后，若根调用成功则返回结果集，否则返回 None</span>
     <span class="k">return</span> chosen <span class="k">if</span> child_result <span class="k">else</span> <span class="k">None</span></code></pre></div>
 <p><code>Enter</code> / <code>AfterRule1</code> / <code>AfterRule2</code> 与原书的 label0 / label1 / label2 一一对应。 <strong>不用 goto 的理由是硬的</strong>：goto 跳进跳出会让编译器无法保证局部对象的构造与析构 配对，在有 RAII 的 C++ 里不能这么写。</p>
 <h4 id="优化让每层要记的东西更少"><a class="anchor" href="#优化让每层要记的东西更少">#</a>优化：让每层要记的东西更少</h4>
