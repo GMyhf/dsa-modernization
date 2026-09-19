@@ -269,7 +269,7 @@ class TestPartialVerificationIsSaidOnTheResultLine(unittest.TestCase):
 
         def fake_check(data, compiler="auto", out=print):
             if warning:
-                out("  ⚠ 本机工具链 apple-clang/libc++ 没有登记基线（已登记：gcc/libstdc++），跳过")
+                out("  ⚠ 本机工具链 exotic/libfoo 没有登记基线（已登记：gcc/libstdc++），跳过")
             return []
 
         authorsrc.check = fake_check

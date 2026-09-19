@@ -113,9 +113,9 @@ The gate is the architecture. Five arbiters, each answering a question documents
   own 2008 project code (an exam-allowed resource, byte-identical to `ref_…/SourceCodes/` except one
   file). `collab/authorsrc.json` maps each of the 105 listings to a file + symbol there, or records
   why the pack lacks it; `--check` pins the pack's sha256s and whether each of its 54 programs
-  compiles — recorded **per toolchain** (gcc/libstdc++, clang/libstdc++, clang/libc++; a toolchain with no
-  baseline, e.g. macOS Apple clang, only warns). Harnesses `code/**/author_diff.cpp` must pass on every
-  toolchain. The scan says what was *printed*; the pack — which the preface itself names
+  compiles — recorded **per toolchain** (gcc/libstdc++, clang/libstdc++, clang/libc++, apple-clang/libc++;
+  a toolchain with no recorded baseline only warns, and says "部分验证" on the result line).
+  Harnesses `code/**/author_diff.cpp` must pass on every toolchain. The scan says what was *printed*; the pack — which the preface itself names
   as the book's companion code (`dsa_raw.md:195`) — says what the authors *ran*. E.g. 代码3.2's `top()`
   collision is absent from the pack (`getTop`). Both are dated 2008-06, so which came first is unknown:
   say "the printed listing differs from the authors' code", never "introduced at print time".
