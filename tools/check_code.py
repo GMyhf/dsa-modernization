@@ -1037,6 +1037,9 @@ def main():
             if not ok_env:
                 broken[name] = env_out
     if broken:
+        # 一律按 PROFILES 的顺序列：开头与结尾两处提示要一字不差地对得上，
+        # 不能随「先查缺编译器、再查 sanitizer」的发现顺序变（2026-09-19 Codex 在 macOS 上撞出）
+        broken = {name: broken[name] for name, _ in PROFILES if name in broken}
         report = "\n".join(f"[{name}] {why}" for name, why in broken.items())
         if not opts.allow_degraded:
             print("❌ 编译环境自检失败——这不是某个单元的问题，是这台机器上跑不起来。")
@@ -1052,7 +1055,7 @@ def main():
             print("❌ 所有档都跑不了，降级也无从谈起。\n" + indent(report))
             sys.exit(2)
         degraded_note = (
-            f"⚠️  降级运行：跳过 {', '.join(broken)}（环境自检失败），"
+            f"⚠️  降级运行：跳过了 {', '.join(broken)}（环境自检失败），"
             "本次结果**不覆盖**这些档本该拦下的问题。\n" + indent(report, head=4, tail=6)
         )
         print(degraded_note + "\n")

@@ -356,6 +356,34 @@ class TestBothCompilers(unittest.TestCase):
         )
 
     @unittest.skipIf(__import__("shutil").which("g++") is None, "机器上没有 g++")
+    def test_mac_like_environment_lists_skips_consistently(self):
+        """复现 Codex 的 macOS：g++ 的 sanitizer 空探针也失败、又没有 clang——跳过三档。
+
+        2026-09-19 那次开头按发现顺序写「跳过 clang-asan+ubsan, clang-O2, debug+asan+ubsan」，
+        结尾按档序写「跳过了 debug+asan+ubsan, clang-asan+ubsan, clang-O2」，用例据此红了。
+        这里用一个遇到 -fsanitize 就失败的 g++ 包装器在任何机器上复现那个组合。
+        """
+        import os
+        import shutil
+        with tempfile.TemporaryDirectory() as tmp:
+            wrapper = Path(tmp) / "gxx-no-sanitizer"
+            wrapper.write_text(
+                "#!/bin/sh\ncase \"$*\" in *-fsanitize*) echo 'sanitizer broken' >&2; exit 1;; esac\n"
+                f"exec {shutil.which('g++')} \"$@\"\n", encoding="utf-8")
+            wrapper.chmod(0o755)
+            env = dict(os.environ, DSA_CXX_GCC=str(wrapper), DSA_CXX_CLANG="no-such-clang++-dsa")
+            proc = subprocess.run(
+                [sys.executable, str(ROOT / "tools" / "check_code.py"), "code/ch01/adt", "--allow-degraded"],
+                cwd=ROOT, capture_output=True, text=True, env=env, timeout=600,
+            )
+        out = proc.stdout + proc.stderr
+        self.assertEqual(proc.returncode, 0, out)
+        expected = "debug+asan+ubsan, clang-asan+ubsan, clang-O2"
+        self.assertIn(f"降级运行：跳过了 {expected}（", out)
+        self.assertIn(f"本次为降级运行，跳过了 {expected}——", out)
+        self.assertIn("每个 1 种构建：release-O2", out)
+
+    @unittest.skipIf(__import__("shutil").which("g++") is None, "机器上没有 g++")
     def test_missing_clang_is_an_environment_failure(self):
         proc = self.run_without_clang()
         self.assertEqual(proc.returncode, 2, proc.stdout + proc.stderr)
@@ -368,8 +396,16 @@ class TestBothCompilers(unittest.TestCase):
         out = proc.stdout + proc.stderr
         self.assertEqual(proc.returncode, 0, out)
         self.assertIn("降级运行", out)
-        self.assertIn("跳过了 clang-asan+ubsan, clang-O2", out)
-        self.assertIn("不代表内存与 UB 干净", out)
+        # 只断言「clang 两档被跳过」，不写死整串：在 macOS 上 g++ 的 sanitizer 档也会因
+        # ASan 空探针失败被跳过（2026-09-19 Codex 实测），跳过的档因机器而异。
+        summary = [line for line in out.splitlines() if line.startswith("⚠️  本次为降级运行")]
+        self.assertEqual(len(summary), 1, out)
+        self.assertIn("clang-asan+ubsan", summary[0])
+        self.assertIn("clang-O2", summary[0])
+        self.assertIn("不代表内存与 UB 干净", summary[0])
+        # 开头那条与结尾那条列出的档要一致（同一顺序）
+        skipped = summary[0].split("跳过了 ", 1)[1].split("——", 1)[0]
+        self.assertIn(f"降级运行：跳过了 {skipped}（", out)
 
 
 class TestTeachingAndDemoAreVerified(unittest.TestCase):
