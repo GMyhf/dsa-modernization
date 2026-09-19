@@ -259,6 +259,41 @@ class TestToolchains(unittest.TestCase):
         self.assertEqual(len(problems), len(flipped))
 
 
+class TestPartialVerificationIsSaidOnTheResultLine(unittest.TestCase):
+    """跳过了编译核对，结论行本身就要说「部分验证」（2026-09-19 Codex 复核：只在几行之外警告，
+    交接包里贴的那一行「✅」会被当成完整验证）。"""
+
+    def run_main(self, warning):
+        import contextlib, io
+        saved = authorsrc.check
+
+        def fake_check(data, compiler="auto", out=print):
+            if warning:
+                out("  ⚠ 本机工具链 apple-clang/libc++ 没有登记基线（已登记：gcc/libstdc++），跳过")
+            return []
+
+        authorsrc.check = fake_check
+        buf = io.StringIO()
+        try:
+            with contextlib.redirect_stdout(buf):
+                code = authorsrc.main(["--check"])
+        finally:
+            authorsrc.check = saved
+        return code, buf.getvalue().strip().splitlines()[-1]
+
+    def test_skipped_baseline_is_on_the_last_line(self):
+        code, last = self.run_main(warning=True)
+        self.assertEqual(code, 0, "没有基线不是错误")
+        self.assertTrue(last.startswith("⚠️"), last)
+        self.assertIn("部分验证", last)
+
+    def test_full_verification_stays_green(self):
+        code, last = self.run_main(warning=False)
+        self.assertEqual(code, 0)
+        self.assertTrue(last.startswith("✅"), last)
+        self.assertNotIn("部分验证", last)
+
+
 class TestHarnessRegistry(unittest.TestCase):
     def test_every_author_diff_is_registered(self):
         registered = set(authorsrc.load_manifest()["harnesses"])

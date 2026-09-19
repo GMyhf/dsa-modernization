@@ -1,5 +1,26 @@
 # HANDOFF · 交接日志
 
+### 2026-09-19 · Claude → Codex · T-080/T-079 复核两项：缺 clang 的自测改用环境变量模拟；作者包「部分验证」写进结论行
+
+| # | 你报的 | 我查到的 | 处理 |
+| --- | --- | --- | --- |
+| P1 | macOS 上 `test_degraded_without_clang_is_loud_not_silent` 失败、闸门退出 1 | 属实，是我的夹具错：为模拟「没有 clang」把 PATH 缩成临时目录、换了 HOME，Apple 的 g++ 包装器在那种环境里建不了临时文件，g++ 档跟着失败。我本机 Linux 的 g++ 不依赖这些，所以没撞到——**我交接的「469 tests OK」只在 Linux 上成立** | `check_code.py` 新增 `DSA_CXX_GCC` / `DSA_CXX_CLANG` 指定两族编译器；夹具只把 `DSA_CXX_CLANG` 指向不存在的名字，**其余环境原样保留**，不再动 PATH/HOME。缺 clang 的报错里会带上这个变量，方便看出是被指定的 |
+| P2 | 作者包 `--check` 在 Apple clang 下返回 0 但跳过了编译核对，应视为部分验证 | 同意 | 跳过时结论行本身改为 `⚠️ …；⚠ 部分验证：本机工具链没有登记编译基线，54 个程序逐个编译的核对被跳过`，退出码仍 0（缺基线不是错）；新增 2 项自测钉住。Apple clang 的基线仍需在你那台机器上 `--write-hashes --cxx g++` 补登 |
+| — | （顺带） | 自测从 25 秒涨到 48 秒：Ubuntu 默认 `DEBUGINFOD_URLS`，clang ASan 每份报告都**上网**取调试信息（一次 use-after-free 7–11 秒，本地 0.4 秒）。闸门不该碰网络，断网时可能卡住 | `check_code.py`、`authorsrc.py` 启动时为自己和子进程清掉该变量；新增 1 项自测。自测回到 23 秒 |
+
+**闸门**（`python3 tools/handoff.py --verify`，EXIT=0，15/15 步，**本机 Linux**，gcc 13.3 + clang 18.1.3；macOS 上请你复跑）：
+
+```text
+Ran 472 tests                                   OK
+✅ 台账一致：104/105 已现代化，1 退场，0 待办
+✅ 勘误台账一致：40 条，14 条有回归测试
+✅ 作者代码包：105 条清单已登记（包里有 99 条），139 个源文件哈希一致，54 个程序的程序清单一致，31 条结论逐条成立，4 个对拍程序通过
+✅ 书稿体检通过：32 个文件，17 条规则
+✅ 正文保全度未回退：89 节，整体 88%，其中 1 节仍不足原书一半
+✅ PDF 与源文件一致：700 页、19 章、217 张图，sha256 b7df940094a8
+✅ 35/35 个单元通过（每个 4 种构建：debug+asan+ubsan, clang-asan+ubsan, clang-O2, release-O2）
+```
+
 ### 2026-09-19 · Claude → Codex · T-080 闸门加 clang：每个单元 g++ 与 clang++ 各跑两档（D-041）
 
 人拍板「闸门也要用 clang 编译和测试每个单元」。`check_code.py` 由 2 档变 4 档：`debug+asan+ubsan`、`release-O2`（g++，沿用旧名）＋ `clang-asan+ubsan`、`clang-O2`。

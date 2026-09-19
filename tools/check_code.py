@@ -41,6 +41,12 @@ from repo import ROOT, rel_label  # noqa: E402  同目录工具
 
 CODE = ROOT / "code"
 
+# 闸门不许碰网络。Ubuntu 默认设了 DEBUGINFOD_URLS=https://debuginfod.ubuntu.com，
+# clang 的 ASan 报错时，llvm-symbolizer 会**逐个库上网取调试信息**：一个 use-after-free
+# 的报告从 0.4 秒拖到 7–11 秒，断网时更可能卡住（2026-09-19 查 T-080 自测变慢时量出）。
+# 符号化只需要本地的 -g 信息，所以对本进程及其所有子进程清掉它。
+os.environ.pop("DEBUGINFOD_URLS", None)
+
 BASE_FLAGS = ["-Wall", "-Wextra", "-Wpedantic", "-Werror"]
 SANITIZE_FLAGS = ["-O1", "-g", "-fsanitize=address,undefined", "-fno-sanitize-recover=all"]
 # (档名, 编译选项)。`release-O2` 排最后：测试里拿 PROFILES[-1] 当「最朴素、到处都能跑的一档」。
@@ -62,11 +68,19 @@ SANITIZER_PROFILES = ("debug+asan+ubsan", "clang-asan+ubsan")
 TIMEOUT_SEC = 120
 
 
+# 可用环境变量换掉某一族编译器（例如指定版本：DSA_CXX_CLANG=clang++-18）。
+# 测试也靠它模拟「这台机器没有 clang」：只换名字、不动 PATH 与其余环境——
+# 2026-09-19 Codex 在 macOS 上撞出，把 PATH/HOME 换掉会让 Apple 的 g++ 包装器连临时文件都建不了。
+COMPILER_ENV = {"g++": "DSA_CXX_GCC", "clang++": "DSA_CXX_CLANG"}
+
+
 def compiler(name=None):
     """某档的编译器；不带参数时返回任一可用的 C++ 编译器（给「这台机器能不能编 C++」的判断用）。"""
+    def resolve(default):
+        return shutil.which(os.environ.get(COMPILER_ENV[default]) or default)
     if name is not None:
-        return shutil.which(PROFILE_COMPILER.get(name, "g++"))
-    return shutil.which("g++") or shutil.which("clang++")
+        return resolve(PROFILE_COMPILER.get(name, "g++"))
+    return resolve("g++") or resolve("clang++")
 
 
 def compiler_identity(exe):
@@ -1014,7 +1028,9 @@ def main():
     broken = {}  # 档名 → 诊断
     for name, _ in PROFILES:
         if compiler(name) is None:
-            broken[name] = f"找不到 {PROFILE_COMPILER[name]}"
+            family = PROFILE_COMPILER[name]
+            asked = os.environ.get(COMPILER_ENV[family]) or family
+            broken[name] = f"找不到 {family}" + (f"（{COMPILER_ENV[family]}={asked}）" if asked != family else "")
     for name in SANITIZER_PROFILES:
         if name not in broken:
             ok_env, env_out = sanitizer_preflight(profile=name)

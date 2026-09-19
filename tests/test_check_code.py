@@ -144,6 +144,17 @@ class TestGateHasTeeth(unittest.TestCase):
         self.assertIn("release-O2", out)
 
 
+class TestGateStaysOffline(unittest.TestCase):
+    """闸门不许碰网络：debuginfod 会让 clang ASan 的每份报告上网取调试信息（7–11 秒，断网可能卡住）。"""
+
+    def test_debuginfod_is_cleared_for_children(self):
+        import os
+        self.assertNotIn("DEBUGINFOD_URLS", os.environ)
+        run = subprocess.run([sys.executable, "-c", "import os; print(os.environ.get('DEBUGINFOD_URLS'))"],
+                             capture_output=True, text=True)
+        self.assertEqual(run.stdout.strip(), "None")
+
+
 class TestD001StaticCheck(unittest.TestCase):
     """D-001 是人拍板的公约。公约要能被机器守住，否则第 10 个单元就开始漂。"""
 
@@ -332,24 +343,24 @@ class TestBothCompilers(unittest.TestCase):
         self.assertEqual(check_code.PROFILE_COMPILER["release-O2"], "g++")
 
     def run_without_clang(self, *extra):
-        """PATH 里只放 g++ 与 python3：模拟一台没装 clang 的机器。"""
-        import shutil
-        with tempfile.TemporaryDirectory() as tmp:
-            for tool in ("g++", "python3", "as", "ld", "cc1plus"):
-                found = shutil.which(tool)
-                if found:
-                    Path(tmp, tool).symlink_to(found)
-            env = {"PATH": tmp, "HOME": tempfile.gettempdir()}
-            return subprocess.run(
-                [sys.executable, str(ROOT / "tools" / "check_code.py"), "code/ch01/adt", *extra],
-                cwd=ROOT, capture_output=True, text=True, env=env, timeout=600,
-            )
+        """模拟一台没装 clang 的机器：只把 clang 那一族指向一个不存在的名字，其余环境原样保留。
+
+        不能靠缩 PATH、换 HOME 来模拟——2026-09-19 Codex 在 macOS 上跑，Apple 的 g++ 包装器
+        在那种环境里连临时文件都建不了，release-O2 跟着失败，这条用例就红了。"""
+        import os
+        env = dict(os.environ, DSA_CXX_CLANG="no-such-clang++-dsa")
+        env.pop("DSA_CXX_GCC", None)
+        return subprocess.run(
+            [sys.executable, str(ROOT / "tools" / "check_code.py"), "code/ch01/adt", *extra],
+            cwd=ROOT, capture_output=True, text=True, env=env, timeout=600,
+        )
 
     @unittest.skipIf(__import__("shutil").which("g++") is None, "机器上没有 g++")
     def test_missing_clang_is_an_environment_failure(self):
         proc = self.run_without_clang()
         self.assertEqual(proc.returncode, 2, proc.stdout + proc.stderr)
         self.assertIn("找不到 clang++", proc.stdout)
+        self.assertIn("DSA_CXX_CLANG=no-such-clang++-dsa", proc.stdout)
 
     @unittest.skipIf(__import__("shutil").which("g++") is None, "机器上没有 g++")
     def test_degraded_without_clang_is_loud_not_silent(self):

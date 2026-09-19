@@ -124,6 +124,8 @@ The gate is the architecture. Five arbiters, each answering a question documents
   UBSan aborts on in the debug build passes *silently* under `-O2`. Both compilers matter:
   `array_stack` once didn't compile on clang 18 while g++ stayed green. Units run in parallel
   (`--jobs`); a missing clang++ is an environment failure (exit 2), `--allow-degraded` skips loudly.
+  `DSA_CXX_GCC` / `DSA_CXX_CLANG` pick the compilers (e.g. `clang++-18`) — tests simulate a missing
+  clang this way, never by shrinking PATH/HOME (that breaks Apple's g++ shim on macOS).
 
 `tools/repo.py` exists only because `Path.relative_to(ROOT)` throws outside the repo and
 three tools each hit it independently.

@@ -48,6 +48,7 @@ import argparse
 import concurrent.futures
 import hashlib
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -63,6 +64,13 @@ PACK = ROOT / "site_visit" / "DSCode_ZWZ200806_CPP"
 TWIN = ROOT / "ref_数据结构与算法A 2021秋" / "SourceCodes"
 MANIFEST = ROOT / "collab" / "authorsrc.json"
 BUILD = ROOT / ".build" / "authorsrc"
+
+# 闸门不许碰网络。Ubuntu 默认设了 DEBUGINFOD_URLS=https://debuginfod.ubuntu.com，
+# clang 的 ASan 报错时，llvm-symbolizer 会**逐个库上网取调试信息**：一个 use-after-free
+# 的报告从 0.4 秒拖到 7–11 秒，断网时更可能卡住（2026-09-19 查 T-080 自测变慢时量出）。
+# 符号化只需要本地的 -g 信息，所以对本进程及其所有子进程清掉它。
+os.environ.pop("DEBUGINFOD_URLS", None)
+
 
 SOURCE_SUFFIXES = (".h", ".cpp")
 # 2021 版副本把 `ch03_StackQueue` 叫 `chap3_StackQueue`、`ch08_Sort` 叫 `Chap8_Sort`
@@ -297,7 +305,7 @@ def translation_unit_has_main(rel, files, seen=None):
         return True
     base = Path(rel).parent
     for target in LOCAL_INCLUDE_RE.findall(text):
-        resolved = Path(__import__("os").path.normpath(base / target)).as_posix()
+        resolved = Path(os.path.normpath(base / target)).as_posix()
         if translation_unit_has_main(resolved, files, seen):
             return True
     return False
@@ -429,7 +437,7 @@ def run_harness(compiler, rel, includes, sanitize=True):
     )
     if built.returncode != 0:
         return False, "编译失败：" + first_error(built.stderr)
-    env = dict(__import__("os").environ, ASAN_OPTIONS="detect_leaks=0", UBSAN_OPTIONS="print_stacktrace=1")
+    env = dict(os.environ, ASAN_OPTIONS="detect_leaks=0", UBSAN_OPTIONS="print_stacktrace=1")
     ran = subprocess.run([str(exe)], capture_output=True, text=True, env=env, timeout=300)
     lines = (ran.stdout + ran.stderr).strip().splitlines()
     if ran.returncode != 0:
@@ -985,7 +993,14 @@ def main(argv=None):
         return 0
     if args.check:
         compiler = find_compiler(args.cxx) if args.cxx else "auto"
-        problems = check(data, compiler)
+        skipped = []
+
+        def out(line):
+            print(line)
+            if "没有登记基线" in line or "找不到" in line:
+                skipped.append(line)
+
+        problems = check(data, compiler, out)
         for problem in problems:
             print(f"  ✗ {problem}")
         if problems:
@@ -993,9 +1008,13 @@ def main(argv=None):
             return 1
         listings = data.get("listings", {})
         mapped = sum(1 for e in listings.values() if "file" in e)
-        print(f"✅ 作者代码包：{len(listings)} 条清单已登记（包里有 {mapped} 条），"
+        # 跳过了逐个程序的编译核对就要在结论行里说出来：交接包只贴尾部几行，
+        # 一个「✅」加上几行之外的警告，读的人会当成完整验证（2026-09-19 Codex 复核 T-079 指出）。
+        partial = (f"；⚠ 部分验证：本机工具链没有登记编译基线，{len(data.get('programs', {}))} 个程序逐个编译的核对被跳过"
+                   if skipped else "")
+        print(f"{'⚠️' if skipped else '✅'} 作者代码包：{len(listings)} 条清单已登记（包里有 {mapped} 条），"
               f"{len(data.get('hashes', {}))} 个源文件哈希一致，{len(data.get('programs', {}))} 个程序的程序清单一致，"
-              f"{len(data.get('findings', []))} 条结论逐条成立，{len(data.get('harnesses', {}))} 个对拍程序通过")
+              f"{len(data.get('findings', []))} 条结论逐条成立，{len(data.get('harnesses', {}))} 个对拍程序通过{partial}")
         return 0
     return cmd_summary(data)
 
