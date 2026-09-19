@@ -52,3 +52,16 @@ lnkStack(int defSize){ top = NULL; size = 0; }
 链式结构最自然的写法是递归释放，但深链会爆栈——第 5 章有实测数字
 （`collab/UNVERIFIED-RISKS.md` 第一节）。这里用 `while` 逐个摘除，
 20 万结点的测试就是为这条兜底。拷贝构造同理，用尾插而非递归。
+
+## 作者代码包对照（2026-09-18）
+
+作者代码包 `site_visit/DSCode_ZWZ200806_CPP/`——原书前言（`dsa_raw.md:195`）称之为「与本书配套的代码包」，
+也是 2025 秋期末机考的考场资料——是代码3.4的第二证人。下表每一行在 `collab/authorsrc.json` 的
+findings 里都有一条带正则的结论，`tools/authorsrc.py --check` 在包的源码上逐条核对；
+看包里原文：`python3 tools/authorsrc.py --listing 3.4`。
+包与原书同为 2008 年 6 月，谁先谁后不可考：「包里没有」只说明**印出来的与作者的代码不一致**，不说明是排印时引入的。
+
+| 结论 | 缺陷 | 包里 | 说明 |
+| --- | --- | --- | --- |
+| E07 | `Link<T>* top` 与 `bool top(T&)` 重名 | 没有 | 包里链式栈同样用 `getTop(T*)` |
+| E22 | 有析构、无拷贝控制 | **也有** | 同原书 |

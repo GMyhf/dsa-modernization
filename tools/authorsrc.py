@@ -19,21 +19,25 @@
     源文件 → sha256                               # 包被改动时闸门变红
     程序   → 今天的 g++ 编译得过吗                 # 包在考场上能不能直接用
 
-`--check`（闸门用）核对五件事：
+`--check`（闸门用）核对六件事：
   1. 原书 105 条清单**每一条**都有登记——要么指到代码包里的文件与符号，要么写明
      「包里没有」的理由（与 exclusions.json 同一个规矩：不许悄悄漏掉）；
   2. 登记的文件存在、每个符号都能在文件里找到**定义**（不是声明）；
   3. 代码包源文件与登记的 sha256 一致——包是证据，证据不许手改；
   4. 与 `ref_数据结构与算法A 2021秋/SourceCodes/`（同一套代码的 2021 版副本）逐文件
      比对，只允许登记过的差异；
-  5. 每个带 `main` 的程序在今天的 g++（`-std=c++17 -fsyntax-only`）下编译得过或
-     编译不过，与登记一致。编译器缺失时这一项只提示不判红。
+  5. 结论（findings）：「这处缺陷作者包里有没有」每条都带正则，在包的源码上逐条成立；
+     `collab/errata.json` 里每条编译/运行/内存类勘误都必须有一条结论；
+  6. 每个带 `main` 的程序在今天的 g++（`-std=c++17 -fsyntax-only`）下编译得过或
+     编译不过，与登记一致；`code/**/author_diff.cpp` 对拍程序逐个编译（ASan/UBSan）
+     并运行，退出码 0。编译器缺失时这一项只提示不判红。
 
 用法:
   python3 tools/authorsrc.py                    # 概况：登记了几条、几条包里没有、编译情况
   python3 tools/authorsrc.py --listing 3.2      # 打印代码3.2 在作者包里的那一段（UTF-8）
   python3 tools/authorsrc.py --listing 代码3.2  # 同上
   python3 tools/authorsrc.py --compile          # 重跑编译扫描并打印（不写登记表）
+  python3 tools/authorsrc.py --diff             # 只跑 code/**/author_diff.cpp 对拍
   python3 tools/authorsrc.py --check            # 闸门用：五项核对，不一致退出码 1
   python3 tools/authorsrc.py --write-hashes     # 代码包更新后重记 sha256 与编译结果
   python3 tools/authorsrc.py --export DIR       # 把代码包转成 UTF-8 + LF 写到 DIR
@@ -330,6 +334,150 @@ def compile_sweep(compiler):
     return dict(sorted(results.items()))
 
 
+# ---------------------------------------------------------------- 对拍（code/**/author_diff.cpp）
+
+HARNESS_NAME = "author_diff.cpp"
+CODE = ROOT / "code"
+SANITIZE = ["-fsanitize=address,undefined", "-fno-sanitize-recover=undefined"]
+
+
+def harness_files():
+    return sorted(p.relative_to(ROOT).as_posix() for p in CODE.rglob(HARNESS_NAME)) if CODE.is_dir() else []
+
+
+def sanitizers_work(compiler) -> bool:
+    """本机 ASan/UBSan 能否真编真跑（UNVERIFIED-RISKS 记过某台机器上空探针失败）。"""
+    probe_dir = BUILD / "probe"
+    probe_dir.mkdir(parents=True, exist_ok=True)
+    src, exe = probe_dir / "probe.cpp", probe_dir / "probe"
+    src.write_text("int main() { return 0; }\n", encoding="utf-8")
+    built = subprocess.run([compiler, *SANITIZE, str(src), "-o", str(exe)], capture_output=True)
+    return built.returncode == 0 and subprocess.run([str(exe)], capture_output=True).returncode == 0
+
+
+def run_harness(compiler, rel, includes, sanitize=True):
+    """编译并运行一个对拍程序。作者代码用 UTF-8 副本；返回 (ok, 最后一行输出或错误)。
+
+    作者代码有意不查泄漏（findNext 的 new int[m]、setPos 的游离结点都从不释放——那正是
+    要记录的缺陷，不是对拍要拦的东西），所以 detect_leaks=0；越界与未定义行为照拦。
+    """
+    work = BUILD / "utf8"
+    exe = BUILD / "harness" / rel.replace("/", "__").replace(".cpp", "")
+    exe.parent.mkdir(parents=True, exist_ok=True)
+    flags = ["-std=c++17", "-w", "-fpermissive", "-O0", "-g", *(SANITIZE if sanitize else [])]
+    include_flags = [arg for inc in includes for arg in ("-I", str(work / inc))]
+    built = subprocess.run(
+        [compiler, *flags, *include_flags, str(ROOT / rel), "-o", str(exe)], capture_output=True, text=True
+    )
+    if built.returncode != 0:
+        return False, "编译失败：" + first_error(built.stderr)
+    env = dict(__import__("os").environ, ASAN_OPTIONS="detect_leaks=0", UBSAN_OPTIONS="print_stacktrace=1")
+    ran = subprocess.run([str(exe)], capture_output=True, text=True, env=env, timeout=300)
+    lines = (ran.stdout + ran.stderr).strip().splitlines()
+    if ran.returncode != 0:
+        detail = next((line for line in lines if "ERROR:" in line or "runtime error" in line or "✗" in line), "")
+        return False, f"退出码 {ran.returncode}：{detail or (lines[-1] if lines else '')}"
+    return True, lines[-1] if lines else ""
+
+
+def harness_registration_problems(data):
+    """code/**/author_diff.cpp 与登记表两边对得上：不许有没登记的对拍、也不许登记了却没有文件。"""
+    problems, registered, found = [], data.get("harnesses", {}), harness_files()
+    for rel in found:
+        if rel not in registered:
+            problems.append(f"{rel}：对拍程序未在 harnesses 里登记 include 目录")
+    for rel in registered:
+        if rel not in found:
+            problems.append(f"{rel}：登记了对拍程序，文件不存在")
+    return problems
+
+
+def check_harnesses(data, compiler, out=print):
+    problems, registered = harness_registration_problems(data), data.get("harnesses", {})
+    runnable = [rel for rel in harness_files() if rel in registered]
+    if not runnable:
+        return problems
+    sanitize = sanitizers_work(compiler)
+    if not sanitize:
+        out("  ⚠ 本机 ASan/UBSan 探针失败，对拍程序不带 sanitizer 编译——越界读写不会被拦下")
+    export(BUILD / "utf8")
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+        futures = {rel: pool.submit(run_harness, compiler, rel, registered[rel]["include"], sanitize) for rel in runnable}
+    for rel, future in futures.items():
+        ok, line = future.result()
+        if ok:
+            out(f"  {line}  ← {rel}")
+        else:
+            problems.append(f"{rel}：{line}")
+    return problems
+
+
+# ---------------------------------------------------------------- 结论（findings）
+
+VERDICTS = {
+    "same": "包里也有",          # 作者的代码本来就这样：不是排印或 OCR 造成的
+    "absent": "包里没有",        # 印出来的与作者代码不一致；包里是另一种（通常是对的）写法
+    "no_code": "包里无此代码",   # 包里根本没有对应的实现，无从比较
+    "pack_only": "只在包里",     # 原书没印或印对了，缺陷只在代码包里——考场上直接用包的人会踩
+}
+ERRATA = ROOT / "collab" / "errata.json"
+ERRATA_NEEDING_VERDICT = ("compile", "runtime", "memory")
+
+
+def load_errata():
+    if not ERRATA.is_file():
+        return []
+    return json.loads(ERRATA.read_text(encoding="utf-8")).get("errata", [])
+
+
+def as_list(value):
+    if value is None:
+        return []
+    return value if isinstance(value, list) else [value]
+
+
+def check_findings(data):
+    """每条结论的正则都要在代码包源码上成立；每条编译/运行/内存类勘误都要有结论。"""
+    problems, seen = [], set()
+    findings = data.get("findings", [])
+    errata = {e["id"]: e for e in load_errata()}
+    covered = set()
+    for item in findings:
+        fid = item.get("id", "?")
+        if fid in seen:
+            problems.append(f"结论 {fid}：编号重复")
+        seen.add(fid)
+        if item.get("verdict") not in VERDICTS:
+            problems.append(f"结论 {fid}：verdict 必须是 {'/'.join(VERDICTS)} 之一")
+        if not str(item.get("summary", "")).strip():
+            problems.append(f"结论 {fid}：缺 summary")
+        for eid in as_list(item.get("errata")):
+            if eid not in errata:
+                problems.append(f"结论 {fid}：勘误 {eid} 在 collab/errata.json 里不存在")
+            covered.add(eid)
+        harness = item.get("harness")
+        if harness and not (ROOT / harness).is_file():
+            problems.append(f"结论 {fid}：对拍程序 {harness} 不存在")
+        if not item.get("checks"):
+            problems.append(f"结论 {fid}：至少要有一条针对代码包源码的 checks")
+        for check_item in item.get("checks", []):
+            path = PACK / check_item.get("file", "")
+            if not path.is_file():
+                problems.append(f"结论 {fid}：文件不存在 {check_item.get('file')}")
+                continue
+            text = decode(path)
+            for pattern in check_item.get("match", []):
+                if not re.search(pattern, text, re.M):
+                    problems.append(f"结论 {fid}：{check_item['file']} 里找不到 /{pattern}/")
+            for pattern in check_item.get("no_match", []):
+                if re.search(pattern, text, re.M):
+                    problems.append(f"结论 {fid}：{check_item['file']} 里不该出现 /{pattern}/")
+    for eid, entry in errata.items():
+        if entry.get("kind") in ERRATA_NEEDING_VERDICT and eid not in covered:
+            problems.append(f"勘误 {eid}（{entry.get('kind')}）：没有「作者代码包里有没有」的结论")
+    return problems
+
+
 # ---------------------------------------------------------------- 核对
 
 
@@ -388,7 +536,10 @@ def check(data, compiler="auto", out=print):
                 where = rel_label(other) if other is not None else "（2021 版无对应目录）"
                 problems.append(f"{rel}：与 2021 版 {where} 不同，且不在 twin_deltas 里")
 
-    # 5. 编译结果
+    # 5. 结论：每条的正则在包上成立，编译/运行/内存类勘误都有结论
+    problems.extend(check_findings(data))
+
+    # 6. 编译结果与对拍
     if compiler == "auto":
         compiler = find_compiler()
     if compiler:
@@ -404,6 +555,7 @@ def check(data, compiler="auto", out=print):
         for rel in expected:
             if rel not in actual:
                 problems.append(f"{rel}：登记了编译结果，但它已不是含 main 的程序")
+        problems.extend(check_harnesses(data, compiler, out))
     elif compiler is not None:
         out("  ⚠ 找不到 g++/clang++，跳过编译核对")
     return problems
@@ -485,7 +637,8 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--listing", metavar="ID", help="打印某条清单在作者包里的源码，如 3.2 或 算法3.3")
-    group.add_argument("--check", action="store_true", help="闸门用：五项核对")
+    group.add_argument("--check", action="store_true", help="闸门用：六项核对")
+    group.add_argument("--diff", action="store_true", help="只跑对拍程序")
     group.add_argument("--compile", action="store_true", help="重跑编译扫描并打印")
     group.add_argument("--write-hashes", action="store_true", help="重记 sha256 与编译结果")
     group.add_argument("--export", metavar="DIR", help="把代码包转成 UTF-8 + LF 写到 DIR")
@@ -496,6 +649,15 @@ def main(argv=None):
         return cmd_listing(data, args.listing)
     if args.compile:
         return cmd_compile()
+    if args.diff:
+        compiler = find_compiler()
+        if not compiler:
+            print("找不到 g++/clang++", file=sys.stderr)
+            return 2
+        problems = check_harnesses(data, compiler)
+        for problem in problems:
+            print(f"  ✗ {problem}")
+        return 1 if problems else 0
     if args.write_hashes:
         return cmd_write_hashes(data)
     if args.export:
@@ -512,7 +674,8 @@ def main(argv=None):
         listings = data.get("listings", {})
         mapped = sum(1 for e in listings.values() if "file" in e)
         print(f"✅ 作者代码包：{len(listings)} 条清单已登记（包里有 {mapped} 条），"
-              f"{len(data.get('hashes', {}))} 个源文件哈希一致，{len(data.get('programs', {}))} 个程序编译结果与登记一致")
+              f"{len(data.get('hashes', {}))} 个源文件哈希一致，{len(data.get('programs', {}))} 个程序编译结果与登记一致，"
+              f"{len(data.get('findings', []))} 条结论逐条成立，{len(data.get('harnesses', {}))} 个对拍程序通过")
         return 0
     return cmd_summary(data)
 

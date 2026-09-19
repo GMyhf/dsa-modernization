@@ -83,3 +83,33 @@ error: assigning to 'Link<int> *' from 'const Link<int> *' discards qualifiers
 - 保留循链定位：`at`、`find`、指定位置插入/删除仍是 O(n)，没有伪装成随机存取。
 - 代码2.12 只给出双链结点而没有完整双链表操作；本单元也只实现结点类型，不虚构原书未给的
   双链表算法。完整双链表应另列任务与清单认领。
+
+## 作者代码包对照（2026-09-18）
+
+作者代码包 `site_visit/DSCode_ZWZ200806_CPP/`——原书前言（`dsa_raw.md:195`）称之为「与本书配套的代码包」，
+也是 2025 秋期末机考的考场资料——是代码2.6–算法2.11的第二证人。下表每一行在 `collab/authorsrc.json` 的
+findings 里都有一条带正则的结论，`tools/authorsrc.py --check` 在包的源码上逐条核对；
+看包里原文：`python3 tools/authorsrc.py --listing 2.9`。
+包与原书同为 2008 年 6 月，谁先谁后不可考：「包里没有」只说明**印出来的与作者的代码不一致**，不说明是排印时引入的。
+
+| 结论 | 缺陷 | 包里 | 说明 |
+| --- | --- | --- | --- |
+| E04 | `const Link*` 赋给 `Link*` | 没有 | 包里构造参数是 `Link* nextValue` |
+| R04 | `setPos` 从 `new` 出的游离结点起步 | **也有**，逐字相同 | 见下文：不止泄漏，还错一位 |
+| P03 | 删尾结点时二次释放 | **只在包里** | 包里 `del` 删尾结点时 `tail = p; delete q;` 之后又落进 `if (q != NULL)` 再 `delete q` 一次；原书算法2.11 用 `else if` 写对了 |
+| E22 | 有析构、无拷贝控制 | **也有** | 同原书 |
+
+**缺陷 3 此前少记了一半。** 上文把 `new Link<T>(head->next)` 记成「每次定位泄漏一个结点」，
+在作者包上真跑之后才看清它还是**定位错误**：`p` 起步就是那个新结点（它的 `next` 才是首结点），
+所以 `setPos(0)` 返回的是游离结点、`setPos(k)` 返回第 k-1 个结点。落到插入上：
+`insert(0, v)` 走 `setPos(-1)` 的特判，插对了；`insert(1, v)` 插在游离结点后面，**链表不变、调用却返回 true**；
+`insert(i≥2, v)` **早一格**。`author_diff.cpp` 用 2400 次随机插入对拍，作者的结果与这三条规则的预测逐项一致：
+
+```text
+$ python3 tools/authorsrc.py --diff
+  ✅ 单链表对拍：2400 次随机插入，作者 lnkList 的结果与「setPos 错一位」的预测逐项一致（insert(1, v) 静默丢失、insert(i≥2, v) 早一格）  ← code/ch02/linked_list/author_diff.cpp
+```
+
+包里这一句与扫描件第 37 页逐字相同，所以这是作者代码本身的错，《1–6 章勘误表》错误 4 的改法（`p` 直接指向 `head->next`）
+正好消掉这个错位。同页可见勘误表错误 9 的「多余分号」在循环体的 `}` 之后（`};`），是一条空语句，
+**不吞掉循环体**——`collab/errata.json` 已把 R09 从 runtime 改记为 prose，R04 的描述也按此更正。

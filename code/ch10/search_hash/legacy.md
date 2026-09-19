@@ -56,3 +56,16 @@ SearchHash: 23 项断言，0 失败
 关键回归是 1、6、11 共用同一基地址：删掉 1 后，6/11 仍能被查到；插 16 才复用位置 1。
 若把墓碑改为空，`算法10.11 probes through tombstone` 会失败。macOS ASan 空探针失败，故本机
 只验证 Release；墓碑槽与 vector 的运行期内存检查待 Claude 补跑。
+
+## 作者代码包对照（2026-09-18）
+
+作者代码包 `site_visit/DSCode_ZWZ200806_CPP/`——原书前言（`dsa_raw.md:195`）称之为「与本书配套的代码包」，
+也是 2025 秋期末机考的考场资料——是代码10.1、算法10.9的第二证人。下表每一行在 `collab/authorsrc.json` 的
+findings 里都有一条带正则的结论，`tools/authorsrc.py --check` 在包的源码上逐条核对；
+看包里原文：`python3 tools/authorsrc.py --listing 10.1`。
+包与原书同为 2008 年 6 月，谁先谁后不可考：「包里没有」只说明**印出来的与作者的代码不一致**，不说明是排印时引入的。
+
+| 结论 | 缺陷 | 包里 | 说明 |
+| --- | --- | --- | --- |
+| E13 | 初始化 `key`、成员却叫 `Key` | 没有 | 包里两处都叫 `key` |
+| E18 | 散列表析构 `delete HT` | **也有** | 包里三份 `HASHDICT.H` 都是 `delete HT` |

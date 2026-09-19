@@ -202,3 +202,17 @@ void clear() { delete [] aList; curLen = position = 0; aList = new T[maxSize]; }
 不是共享代码。这是有意的——每章的容器要能独立阅读，那是教学内容本身。
 代价是两份可能漂移，对冲手段是两边各有一条守门用例
 （`test_growth_moves_when_move_assignment_is_noexcept`），判据变了任一边都会红。
+
+## 作者代码包对照（2026-09-18）
+
+作者代码包 `site_visit/DSCode_ZWZ200806_CPP/`——原书前言（`dsa_raw.md:195`）称之为「与本书配套的代码包」，
+也是 2025 秋期末机考的考场资料——是代码2.1–算法2.5的第二证人。下表每一行在 `collab/authorsrc.json` 的
+findings 里都有一条带正则的结论，`tools/authorsrc.py --check` 在包的源码上逐条核对；
+看包里原文：`python3 tools/authorsrc.py --listing 2.3`。
+包与原书同为 2008 年 6 月，谁先谁后不可考：「包里没有」只说明**印出来的与作者的代码不一致**，不说明是排印时引入的。
+
+| 结论 | 缺陷 | 包里 | 说明 |
+| --- | --- | --- | --- |
+| E01 | 成员函数名叫 `delete` | 没有 | 在用的顺序表叫 `del(int p)`；只有 `alg2.1-5/lnkList.h` 这份不被 `main.cpp` 包含的旧稿还写 `bool delete(int p)`——原书印的正是那种写法 |
+| E02 | `class List` 没有 `public:` | **也有** | 包里同样全私有，只是没有代码经 `List` 调用这些运算，所以编译得过 |
+| E03 | 循环上界 `n` 未声明 | 没有 | 包里上界是成员 `curLen`，函数签名也不同（`int getPos(const T value)` 返回下标） |

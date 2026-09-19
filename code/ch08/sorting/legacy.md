@@ -57,3 +57,36 @@ Sorting: 44 项断言，0 失败
 
 `std::sort` 仅用于测试的 `std::is_sorted` 判定；实现文件没有排序 STL 委托。macOS ASan
 空探针仍失败，故该验证仅覆盖 Release 运行，不覆盖 sanitizer。
+
+## 作者代码包对照（2026-09-18）
+
+作者代码包 `site_visit/DSCode_ZWZ200806_CPP/`——原书前言（`dsa_raw.md:195`）称之为「与本书配套的代码包」，
+也是 2025 秋期末机考的考场资料——是第 8 章各排序的第二证人。下表每一行在 `collab/authorsrc.json` 的
+findings 里都有一条带正则的结论，`tools/authorsrc.py --check` 在包的源码上逐条核对；
+看包里原文：`python3 tools/authorsrc.py --listing 8.5`。
+包与原书同为 2008 年 6 月，谁先谁后不可考：「包里没有」只说明**印出来的与作者的代码不一致**，不说明是排印时引入的。
+
+| 结论 | 缺陷 | 包里 | 说明 |
+| --- | --- | --- | --- |
+| P01 | 包里 `MaxHeap` 的 `SiftDown` 越界 | **只在包里** | 判右孩子写 `j<CurrentSize`，应为 `j<CurrentSize-1`；n 为偶数时建堆读 `heapArray[n]`。原书没印 `MaxHeap`（算法8.4 只印调用它的 `sort`）；第 5 章 `MinHeap` 写对了 |
+| P02 | 冒泡排序 `j>=i` | **只在包里** | i=0 时比较 `Array[0]` 与 `Array[-1]`；原书算法8.5 印的 `j > i` 是对的 |
+| P05 | 桶排序包装写死 `max = 80` | **只在包里** | 驱动生成 `Random(32003)`，值 ≥ 80 即越界写 |
+| P06 | 计时驱动不排序 | **只在包里** | `SortMain.h` 里 `//sort<int>(&array[i], listsize);` 被注释掉——包里 12 个排序程序从没在这个驱动里真正排过 |
+
+四处缺陷都在原书之外：原书要么没印那段代码，要么印对了。它们之所以要记，是因为**这个包是考场资料**——
+直接拿包里的 `MaxHeap` 或 `BubbleSort` 去交题的人，会在偶数长度或第一趟比较上读到数组外面。
+`author_diff.cpp` 把包里 12 种排序逐个拿出来与本单元、与 `std::sort` 三方对拍（506 组输入）；
+两处越界用「在数组外垫一格」的办法让 ASan 放行、再单独断言「垫一格大数时结果被污染」，把缺陷钉成可复现的证据：
+
+```text
+$ python3 tools/authorsrc.py --diff
+  ✅ 排序对拍：12 种算法 × 各自的输入，共 506 组，作者版、本单元实现与 std::sort 三方一致  ← code/ch08/sorting/author_diff.cpp
+```
+
+不垫那一格时，第一次撞上的就是 `MaxHeap` 的越界读：
+
+```text
+==ERROR: AddressSanitizer: heap-buffer-overflow ... READ of size 4
+    #0 in a_heap::MaxHeap<int>::SiftDown(int) ch08_Sort/HeapSort/MaxHeap.h:76
+0x... is located 0 bytes after 8-byte region
+```

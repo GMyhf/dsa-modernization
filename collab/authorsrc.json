@@ -4,7 +4,9 @@
     "代码包：site_visit/DSCode_ZWZ200806_CPP（2025 秋期末机考考场可用资料，见 site_visit/README.md）。",
     "listings：清单号 → {file, symbols[, note, commented_out]} 或 {absent: 理由}。符号 `class X` 找类定义，其余找函数定义；`f@2` 取第 2 个定义。",
     "hashes / programs 由 --write-hashes 生成，不手改：前者是证据的指纹，后者是今天的 g++ -std=c++17 能不能编译每个带 main 的程序。",
-    "twin_deltas：与 ref_数据结构与算法A 2021秋/SourceCodes 的已知差异。"
+    "twin_deltas：与 ref_数据结构与算法A 2021秋/SourceCodes 的已知差异。",
+    "findings：勘误与包里缺陷的逐条结论。verdict ∈ same（包里也有）/ absent（包里没有）/ no_code（包里无此代码）/ pack_only（只在包里）；checks 里的正则必须在包的源码上成立。errata.json 中每条 compile/runtime/memory 勘误都必须被某条结论覆盖。",
+    "harnesses：code/**/author_diff.cpp 对拍程序 → 作者包里要加进 -I 的目录（UTF-8 副本）。--check 用 ASan/UBSan 编译运行，退出码 0。"
   ],
   "pack": "site_visit/DSCode_ZWZ200806_CPP",
   "listings": {
@@ -946,6 +948,692 @@
     },
     "ch12_AdvDS/AdvTree/SplayTree/splay.cpp": {
       "compiles": true
+    }
+  },
+  "findings": [
+    {
+      "id": "E01",
+      "listing": "代码2.1 / 代码2.2 / 算法2.5",
+      "verdict": "absent",
+      "errata": "E01",
+      "summary": "包里在用的顺序表与单链表都叫 del(int p)。只有 alg2.1-5/lnkList.h 这份没被 main.cpp 包含、从不参与编译的旧稿还写着 bool delete(int p)——原书印的正是这种写法",
+      "checks": [
+        {
+          "file": "ch02_LinearList/alg2.1-5/myList.h",
+          "match": [
+            "bool del\\(int p\\)"
+          ],
+          "no_match": [
+            "\\bdelete\\s*\\("
+          ]
+        },
+        {
+          "file": "ch02_LinearList/alg2.1-5/arrList.h",
+          "match": [
+            "arrList<T> :: del\\(int p\\)"
+          ]
+        },
+        {
+          "file": "ch02_LinearList/alg2.6-11/lnkList.h",
+          "match": [
+            "lnkList<T>:: del\\(int i\\)"
+          ]
+        },
+        {
+          "file": "ch02_LinearList/alg2.1-5/lnkList.h",
+          "match": [
+            "bool delete\\(int p\\)"
+          ]
+        },
+        {
+          "file": "ch02_LinearList/alg2.1-5/main.cpp",
+          "match": [
+            "#include \"arrList.h\""
+          ],
+          "no_match": [
+            "#include \"lnkList.h\""
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E02",
+      "listing": "代码2.1",
+      "verdict": "same",
+      "errata": "E02",
+      "summary": "包里的 class List 同样通篇没有 public:——只是包里没有任何代码通过 List 调用这些运算，所以编译得过",
+      "checks": [
+        {
+          "file": "ch02_LinearList/alg2.1-5/myList.h",
+          "match": [
+            "class List\\s*\\{"
+          ],
+          "no_match": [
+            "public\\s*:"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E03",
+      "listing": "算法2.3",
+      "verdict": "absent",
+      "errata": "E03",
+      "summary": "包里 getPos 的循环上界是成员 curLen，编译得过；原书印成未声明的 n",
+      "checks": [
+        {
+          "file": "ch02_LinearList/alg2.1-5/arrList.h",
+          "match": [
+            "for \\(i = 0; i < curLen; i\\+\\+\\)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E04",
+      "listing": "代码2.6",
+      "verdict": "absent",
+      "errata": "E04",
+      "summary": "包里 Link 的构造参数是 Link* nextValue，没有 const，不存在丢弃 const 的赋值",
+      "checks": [
+        {
+          "file": "ch02_LinearList/alg2.6-11/lnkList.h",
+          "match": [
+            "Link\\(Link\\* nextValue = NULL\\)"
+          ],
+          "no_match": [
+            "const Link\\s*\\*"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E05",
+      "listing": "代码3.2",
+      "verdict": "absent",
+      "errata": "E05",
+      "summary": "包里取栈顶叫 getTop(T*)，与 public 数据成员 int top 不重名，整个文件编译得过；原书印成 bool top(T&)",
+      "checks": [
+        {
+          "file": "ch03_StackQueue/alg3.5/arrStack.h",
+          "match": [
+            "bool getTop\\(T\\* item\\)",
+            "int\\s+top;"
+          ],
+          "no_match": [
+            "bool\\s+top\\s*\\("
+          ]
+        }
+      ],
+      "harness": "code/ch03/array_stack/author_diff.cpp"
+    },
+    {
+      "id": "E06",
+      "listing": "算法3.3",
+      "verdict": "no_code",
+      "errata": "E06",
+      "summary": "包里三份 arrStack.h 的 push 都是栈满就打印「栈满溢出」返回 false，没有翻倍扩容的版本，无从比较",
+      "checks": [
+        {
+          "file": "ch03_StackQueue/alg3.5/arrStack.h",
+          "match": [
+            "cout << \"栈满溢出\""
+          ],
+          "no_match": [
+            "new T\\s*\\[\\s*mSize\\s*\\*\\s*2"
+          ]
+        },
+        {
+          "file": "ch03_StackQueue/alg3.6-8/arrStack.h",
+          "match": [
+            "cout << \"栈满溢出\""
+          ],
+          "no_match": [
+            "mSize\\s*\\*\\s*2"
+          ]
+        },
+        {
+          "file": "ch03_StackQueue/alg3.9-11/arrStack.h",
+          "match": [
+            "cout << \"栈满溢出\""
+          ],
+          "no_match": [
+            "mSize\\s*\\*\\s*2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E07",
+      "listing": "代码3.4",
+      "verdict": "absent",
+      "errata": "E07",
+      "summary": "包里链式栈同样用 getTop(T*)，与 Link<T>* top 不重名",
+      "checks": [
+        {
+          "file": "ch03_StackQueue/alg3.4/lnkstack.h",
+          "match": [
+            "bool getTop\\(T\\* item\\)",
+            "Link<T>\\*\\s+top;"
+          ],
+          "no_match": [
+            "bool\\s+top\\s*\\("
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E08",
+      "listing": "算法3.5 / 算法3.9",
+      "verdict": "absent",
+      "errata": [
+        "E08",
+        "E20"
+      ],
+      "summary": "包里栈的 ADT 就是 pop(T* item)，算法里写 s.pop(&x) 与之一致、编译得过；原书把 ADT 印成了 pop(T&)，算法却照抄了包里的 pop(&x)",
+      "checks": [
+        {
+          "file": "ch03_StackQueue/alg3.5/myStack.h",
+          "match": [
+            "bool pop\\(T\\* item\\)"
+          ],
+          "no_match": [
+            "pop\\(T\\s*&"
+          ]
+        },
+        {
+          "file": "ch03_StackQueue/alg3.5/calc.h",
+          "match": [
+            "s\\.pop\\(&opd1\\)"
+          ]
+        },
+        {
+          "file": "ch03_StackQueue/alg3.6-8/fact.cpp",
+          "match": [
+            "s\\.pop\\(&tmp\\)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E09",
+      "listing": "算法3.11",
+      "verdict": "absent",
+      "errata": "E09",
+      "summary": "包里是 enum rdType {a, b, c} 与普通的 class knapNode，没有字面量枚举值，也没有 Java 式的 public class",
+      "checks": [
+        {
+          "file": "ch03_StackQueue/alg3.9-11/knap1.cpp",
+          "match": [
+            "enum rdType \\{a, b, c\\}",
+            "class knapNode \\{"
+          ],
+          "no_match": [
+            "public\\s+class"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E10",
+      "listing": "算法3.12",
+      "verdict": "absent",
+      "errata": "E10",
+      "summary": "包里 t = st.top 读的是 public 数据成员，取栈顶用 st.getTop(&tmp)，两者不重名",
+      "checks": [
+        {
+          "file": "ch03_StackQueue/alg3.9-11/knap1.cpp",
+          "match": [
+            "t = st\\.top;",
+            "st\\.getTop\\(&tmp\\)"
+          ],
+          "no_match": [
+            "st\\.top\\("
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E11",
+      "listing": "算法4.4",
+      "verdict": "same",
+      "errata": "E11",
+      "summary": "包里就是 assert(str != '\\0')——包里 alg4-5/main.cpp 今天编译不过，报的正是这一句（见 programs）",
+      "checks": [
+        {
+          "file": "ch04_String/alg4-5/myString.h",
+          "match": [
+            "assert\\(str != '\\\\0'\\)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E12",
+      "listing": "算法4.4",
+      "verdict": "same",
+      "errata": "E12",
+      "summary": "包里的构造函数就是 String(char *s)",
+      "checks": [
+        {
+          "file": "ch04_String/alg4-5/myString.h",
+          "match": [
+            "String\\(char \\*s\\)"
+          ],
+          "no_match": [
+            "String\\(const char"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E13",
+      "listing": "代码10.1",
+      "verdict": "absent",
+      "errata": "E13",
+      "summary": "包里初始化列表与数据成员都叫 key",
+      "checks": [
+        {
+          "file": "ch10_Search/algor1-3/algor1&2.cpp",
+          "match": [
+            "Item\\(Type value\\):key\\(value\\)",
+            "Type\\s+key;"
+          ],
+          "no_match": [
+            "\\bKey\\b"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E14",
+      "listing": "算法3.6 / 3.8 / 3.9",
+      "verdict": "same",
+      "errata": "E14",
+      "summary": "包里三版阶乘都是 long 连乘，不查溢出",
+      "checks": [
+        {
+          "file": "ch03_StackQueue/alg3.6-8/fact.cpp",
+          "match": [
+            "long factorial\\(long n\\)",
+            "m \\*= tmp;",
+            "m = m \\* i ;",
+            "return n \\* factorial\\(n-1\\);"
+          ],
+          "no_match": [
+            "LONG_MAX|overflow|numeric_limits"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E15",
+      "listing": "算法3.6",
+      "verdict": "same",
+      "errata": "E15",
+      "summary": "包里（整段注释掉的）递归版同样是 if (n <= 0) return 1",
+      "checks": [
+        {
+          "file": "ch03_StackQueue/alg3.6-8/fact.cpp",
+          "match": [
+            "if \\(n <= 0\\) \\n\\t\\treturn 1;"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E16",
+      "listing": "算法4.5",
+      "verdict": "same",
+      "errata": "E16",
+      "summary": "包里 Substr 越界同样 return NULL（经 String(char*) 构造，strlen(NULL)）",
+      "checks": [
+        {
+          "file": "ch04_String/alg4-5/myString.h",
+          "match": [
+            "if \\(pos >= size\\)[^\\n]*\\n\\s*return NULL;"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E17",
+      "listing": "算法4.6 / 算法4.8",
+      "verdict": "same",
+      "errata": [
+        "E17",
+        "E21",
+        "R10",
+        "R13"
+      ],
+      "summary": "包里朴素匹配与 KMP 都返回 j - pLen + 1：作者的代码本来就按 1 起始报位置，不是排印问题。对拍 407 组，找到时作者恒比 0 起始位置大 1",
+      "checks": [
+        {
+          "file": "ch04_String/alg6/naive.h",
+          "match": [
+            "return \\(j - pLen\\+1\\);"
+          ]
+        },
+        {
+          "file": "ch04_String/alg7-8/kmp.h",
+          "match": [
+            "return \\(j - pLen \\+ 1\\);"
+          ]
+        }
+      ],
+      "harness": "code/ch04/pattern_matching/author_diff.cpp"
+    },
+    {
+      "id": "E18",
+      "listing": "算法10.9",
+      "verdict": "same",
+      "errata": "E18",
+      "summary": "包里三份 HASHDICT.H 的析构都是 delete HT（HT 由 new Elem[sz] 分配）",
+      "checks": [
+        {
+          "file": "ch10_Search/hash_dict/HASHDICT.H",
+          "match": [
+            "~hashdict\\(\\) \\{ delete HT; \\}"
+          ]
+        },
+        {
+          "file": "ch10_Search/hash_tomb/HASHDICT.H",
+          "match": [
+            "~hashdict\\(\\) \\{ delete HT; \\}"
+          ]
+        },
+        {
+          "file": "ch10_Search/hash_tomb2/HASHDICT.H",
+          "match": [
+            "~hashdict\\(\\) \\{ delete HT; \\}"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E19",
+      "listing": "算法3.5",
+      "verdict": "same",
+      "errata": "E19",
+      "summary": "包里同样用 operand1 == 0.0 判除零",
+      "checks": [
+        {
+          "file": "ch03_StackQueue/alg3.5/calc.h",
+          "match": [
+            "if \\(operand1 == 0\\.0\\)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E22",
+      "listing": "顺序表/链表/顺序栈/链式栈/最小堆",
+      "verdict": "same",
+      "errata": "E22",
+      "summary": "包里这些类都有析构、都没有拷贝构造与拷贝赋值，拷贝一次即二次释放。（包里的 String 连析构都没有：不二次释放，但每个串都泄漏。）",
+      "checks": [
+        {
+          "file": "ch02_LinearList/alg2.1-5/arrList.h",
+          "match": [
+            "delete \\[\\] aList"
+          ],
+          "no_match": [
+            "arrList\\s*\\(\\s*const\\s+arrList",
+            "operator\\s*="
+          ]
+        },
+        {
+          "file": "ch02_LinearList/alg2.6-11/lnkList.h",
+          "match": [
+            "~lnkList\\(\\)"
+          ],
+          "no_match": [
+            "lnkList\\s*\\(\\s*const\\s+lnkList",
+            "operator\\s*="
+          ]
+        },
+        {
+          "file": "ch03_StackQueue/alg3.5/arrStack.h",
+          "match": [
+            "delete \\[\\] st;"
+          ],
+          "no_match": [
+            "arrStack\\s*\\(\\s*const\\s+arrStack",
+            "operator\\s*="
+          ]
+        },
+        {
+          "file": "ch03_StackQueue/alg3.4/lnkstack.h",
+          "match": [
+            "~lnkStack\\(\\)"
+          ],
+          "no_match": [
+            "lnkStack\\s*\\(\\s*const\\s+lnkStack",
+            "operator\\s*="
+          ]
+        },
+        {
+          "file": "ch05_BinaryTree/alg11MinHeap/MinHeap.h",
+          "match": [
+            "~MinHeap\\(\\)\\{delete \\[\\]heapArray;\\}"
+          ],
+          "no_match": [
+            "MinHeap\\s*\\(\\s*const\\s+MinHeap",
+            "operator\\s*="
+          ]
+        },
+        {
+          "file": "ch04_String/alg4-5/myString.h",
+          "no_match": [
+            "~String"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R04",
+      "listing": "算法2.9",
+      "verdict": "same",
+      "errata": "R04",
+      "summary": "包里 setPos 与印刷版逐字相同：p = new Link<T>(head->next)。不止泄漏——setPos(k) 返回第 k-1 个结点，insert(1, v) 静默丢失、insert(i≥2, v) 早一格；对拍 2400 次随机插入逐项吻合这个错位",
+      "checks": [
+        {
+          "file": "ch02_LinearList/alg2.6-11/lnkList.h",
+          "match": [
+            "p = new Link<T>\\(head->next\\);"
+          ]
+        }
+      ],
+      "harness": "code/ch02/linked_list/author_diff.cpp"
+    },
+    {
+      "id": "R07",
+      "listing": "算法3.12",
+      "verdict": "absent",
+      "errata": "R07",
+      "summary": "扫描件第 67 页印的是 while (tmp.s >= 0) && (tmp.s <= 0 || n0 > t)) {——少一个左括号；包里括号是配平的",
+      "checks": [
+        {
+          "file": "ch03_StackQueue/alg3.9-11/knap1.cpp",
+          "match": [
+            "while \\(\\(tmp\\.s >= 0\\) && \\(tmp\\.s <= 0 \\|\\| n0 > t\\)\\)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R12",
+      "listing": "算法4.7",
+      "verdict": "absent",
+      "errata": "R12",
+      "summary": "包里写的是 while (i < m) 加 if (i == m) break——break 是必需的；原书把条件印成 i < m-1 又留着 break，才显得多余",
+      "checks": [
+        {
+          "file": "ch04_String/alg7-8/kmp.h",
+          "match": [
+            "while \\(i < m\\) \\{",
+            "if \\(i == m\\) break;"
+          ],
+          "no_match": [
+            "i\\s*<\\s*m\\s*-\\s*1"
+          ]
+        }
+      ],
+      "harness": "code/ch04/pattern_matching/author_diff.cpp"
+    },
+    {
+      "id": "R15",
+      "listing": "算法5.x Parent",
+      "verdict": "same",
+      "errata": "R15",
+      "summary": "包里 Parent 的循环走完后直接落到函数末尾，没有 return NULL（找不到父结点时返回值未定义）",
+      "checks": [
+        {
+          "file": "ch05_BinaryTree/alg1-8BinaryTree/BinaryTree.h",
+          "match": [
+            "\\t\\t\\} //endwhile\\n\\t\\}//endif\\n\\}\\n"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P01",
+      "listing": "算法8.4（包里的 MaxHeap）",
+      "verdict": "pack_only",
+      "summary": "MaxHeap::SiftDown 判右孩子写 j<CurrentSize，应为 j<CurrentSize-1：n 为偶数时建堆读 heapArray[n]，越界一格，那格若更大还会被换进堆、再把 temp 写出界。原书没印 MaxHeap；第 5 章 MinHeap 与代码5.11 写对了。ASan 在对拍里当场报 heap-buffer-overflow",
+      "checks": [
+        {
+          "file": "ch08_Sort/HeapSort/MaxHeap.h",
+          "match": [
+            "if\\(\\(j<CurrentSize\\)&&\\(heapArray\\[j\\]<heapArray\\[j\\+1\\]\\)\\)"
+          ]
+        },
+        {
+          "file": "ch05_BinaryTree/alg11MinHeap/MinHeap.h",
+          "match": [
+            "if \\(\\(j < CurrentSize-1\\) && \\(heapArray\\[j\\]>heapArray\\[j \\+ 1\\]\\)\\)"
+          ]
+        }
+      ],
+      "harness": "code/ch08/sorting/author_diff.cpp"
+    },
+    {
+      "id": "P02",
+      "listing": "算法8.5",
+      "verdict": "pack_only",
+      "summary": "BubbleSort 内层循环写 j>=i：i=0 时比较 Array[0] 与 Array[-1]，越界一格；原书印的 j > i 是对的",
+      "checks": [
+        {
+          "file": "ch08_Sort/BubSort.cpp",
+          "match": [
+            "for \\(int j=n-1; j>=i; j--\\)"
+          ]
+        }
+      ],
+      "harness": "code/ch08/sorting/author_diff.cpp"
+    },
+    {
+      "id": "P03",
+      "listing": "算法2.11",
+      "verdict": "pack_only",
+      "summary": "lnkList::del 删尾结点时 tail = p; delete q; 之后又落进 if (q != NULL) { p->next = q->next; delete q; }——释放后使用加二次释放；原书用 else if 写对了，还多了 p == tail 的判断",
+      "checks": [
+        {
+          "file": "ch02_LinearList/alg2.6-11/lnkList.h",
+          "match": [
+            "tail = p;\\n\\t\\t  delete q;\\n    \\}\\n    if \\(q != NULL\\)  \\{"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P04",
+      "listing": "算法3.10",
+      "verdict": "pack_only",
+      "summary": "knap 最后一行是 else knap(s, n-1);——少了 return，结果被丢弃、函数从末尾流出（未定义行为）；原书印的 else return knap(s, n-1) 是对的",
+      "checks": [
+        {
+          "file": "ch03_StackQueue/alg3.9-11/knap1.cpp",
+          "match": [
+            "else knap\\(s, n-1\\);"
+          ],
+          "no_match": [
+            "else return knap"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P05",
+      "listing": "算法8.10（包里的驱动）",
+      "verdict": "pack_only",
+      "summary": "BucketSort.cpp 的 sort 包装写死 max = 80，而计时驱动 SortMain.h 生成 Random(32003)——值 ≥ 80 时 count[TempArray[i]] 越界写。只因驱动里的排序调用被注释掉（P06）才没炸",
+      "checks": [
+        {
+          "file": "ch08_Sort/BucketSort.cpp",
+          "match": [
+            "BucketSort\\(Array, n, 80\\)"
+          ]
+        },
+        {
+          "file": "ch08_Sort/SortMain.h",
+          "match": [
+            "Random\\(32003\\)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P06",
+      "listing": "第 8 章计时驱动",
+      "verdict": "pack_only",
+      "summary": "SortMain.h 的计时循环里 //sort<int>(&array[i], listsize); 被注释掉：包里 12 个排序程序跑起来只生成 1000 万个随机数、给空循环计时，随后逐对检查有序、打出成串 ERROR!!!——作者的排序从没在这个驱动里真正跑过",
+      "checks": [
+        {
+          "file": "ch08_Sort/SortMain.h",
+          "match": [
+            "^\\s*//sort<int>\\(&array\\[i\\], listsize\\);",
+            "cout << \"ERROR!!!\\\\n\";"
+          ]
+        }
+      ],
+      "harness": "code/ch08/sorting/author_diff.cpp"
+    },
+    {
+      "id": "P07",
+      "listing": "代码3.2",
+      "verdict": "same",
+      "summary": "无参构造 arrStack() 只设 top = -1，mSize 与 st 都未初始化，析构 delete [] st 释放野指针——与 array_stack/legacy.md 缺陷 3 记的印刷版同病",
+      "checks": [
+        {
+          "file": "ch03_StackQueue/alg3.5/arrStack.h",
+          "match": [
+            "arrStack\\(\\)\\{\\s*\\n\\s*top = -1;\\s*\\n\\s*\\}"
+          ]
+        }
+      ]
+    }
+  ],
+  "harnesses": {
+    "code/ch02/linked_list/author_diff.cpp": {
+      "include": [
+        "ch02_LinearList/alg2.6-11"
+      ]
+    },
+    "code/ch03/array_stack/author_diff.cpp": {
+      "include": [
+        "ch03_StackQueue/alg3.5"
+      ]
+    },
+    "code/ch04/pattern_matching/author_diff.cpp": {
+      "include": [
+        "ch04_String"
+      ]
+    },
+    "code/ch08/sorting/author_diff.cpp": {
+      "include": [
+        "ch08_Sort"
+      ]
     }
   }
 }

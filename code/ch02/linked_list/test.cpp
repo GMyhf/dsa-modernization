@@ -224,10 +224,12 @@ void test_append_does_not_walk_the_chain() {
 
 }  // namespace
 
-/// 算法2.9「寻找链表的第 i 个结点」的两处勘误都落在**循链定位**上：
-/// 错误 4 是 `p` 没有初始化就使用（应直接指向 `head->next`），
-/// 错误 9 是 `while (...)` 后面多了一个分号，把循环体整个吞掉——定位于是原地不动。
-/// 两者的后果一样：按位置读写会落在错误的结点上。这里逐个位置验一遍。
+/// 算法2.9「寻找链表的第 i 个结点」的勘误落在**循链定位**上：
+/// 错误 4——原书 `Link<T>* p = new Link<T>(head->next)` 让定位从一个新分配的游离结点起步，
+/// 于是 setPos(k) 返回的是第 k-1 个结点（勘误表的改法：p 直接指向 `head->next`）。
+/// 后果是按位置读写落在错误的结点上：insert(1, v) 静默丢失、insert(i≥2, v) 早一格——
+/// 这在作者代码包上真跑出来了，见同目录 author_diff.cpp。这里逐个位置验一遍本单元没有这个错位。
+/// （错误 9 的「多余分号」是循环体 `}` 之后的 `};`，扫描件第 37 页可见，无害，已改记为 prose。）
 void test_locate_by_position() {
     dsa::LinkedList<int> list;
     for (int i = 0; i < 8; ++i) {
@@ -237,12 +239,12 @@ void test_locate_by_position() {
     for (std::size_t pos = 0; pos < list.size(); ++pos) {
         all_right = all_right && list.at(pos) == static_cast<int>(pos) * 10;
     }
-    check(all_right, "勘误R04 勘误R09 算法2.9：每个位置都定位到正确的结点");
+    check(all_right, "勘误R04 算法2.9：每个位置都定位到正确的结点");
 
-    // 定位若原地不动，插入就会全挤在头部：这一条专盯「多余分号吞掉循环体」。
+    // 定位若错一位，insert(4, ·) 就会早一格落到第 3 个结点之前：这一条专盯 R04 的错位。
     list.insert(4, 999);
     check(list.at(4) == 999 && list.at(3) == 30 && list.at(5) == 40,
-          "勘误R09 算法2.9：按位置插入落在第 4 个结点之前，不是挤在头部");
+          "勘误R04 算法2.9：按位置插入落在第 4 个结点之前，不早一格");
     check(list.remove(4) == 999 && list.at(4) == 40, "勘误R04 算法2.9：按位置删除同样要先定位");
 }
 

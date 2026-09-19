@@ -159,5 +159,60 @@ class TestCheckGoesRed(unittest.TestCase):
         self.assertTrue(any("实际相同" in p for p in self.problems()))
 
 
+class TestFindings(unittest.TestCase):
+    """「包里有没有」的结论必须是 grep 结果，而不是一句需要人相信的话。"""
+
+    def setUp(self):
+        self.data = json.loads(json.dumps(authorsrc.load_manifest()))
+
+    def by_id(self, fid):
+        return next(item for item in self.data["findings"] if item["id"] == fid)
+
+    def test_real_findings_hold(self):
+        self.assertEqual(authorsrc.check_findings(self.data), [])
+
+    def test_pattern_that_no_longer_matches_is_red(self):
+        self.by_id("E05")["checks"][0]["match"] = ["bool top\\(T& item\\)"]
+        self.assertTrue(any("E05" in p and "找不到" in p for p in authorsrc.check_findings(self.data)))
+
+    def test_forbidden_pattern_is_red(self):
+        self.by_id("E05")["checks"][0]["no_match"] = ["getTop"]
+        self.assertTrue(any("E05" in p and "不该出现" in p for p in authorsrc.check_findings(self.data)))
+
+    def test_every_runtime_erratum_needs_a_verdict(self):
+        self.data["findings"] = [f for f in self.data["findings"] if f["id"] != "R04"]
+        self.assertTrue(any("R04" in p and "没有「作者代码包里有没有」" in p for p in authorsrc.check_findings(self.data)))
+
+    def test_prose_errata_do_not_need_a_verdict(self):
+        # R09 在 2026-09-18 按扫描件改记为 prose（`};` 是空语句），不再要求结论
+        kinds = {e["id"]: e["kind"] for e in authorsrc.load_errata()}
+        self.assertEqual(kinds["R09"], "prose")
+        covered = {eid for f in self.data["findings"] for eid in authorsrc.as_list(f.get("errata"))}
+        self.assertNotIn("R09", covered)
+
+    def test_unknown_verdict_is_red(self):
+        self.by_id("E01")["verdict"] = "maybe"
+        self.assertTrue(any("verdict" in p for p in authorsrc.check_findings(self.data)))
+
+
+class TestHarnessRegistry(unittest.TestCase):
+    def test_every_author_diff_is_registered(self):
+        registered = set(authorsrc.load_manifest()["harnesses"])
+        self.assertEqual(set(authorsrc.harness_files()), registered)
+        self.assertGreaterEqual(len(registered), 4)
+
+    def test_unregistered_harness_is_red(self):
+        data = json.loads(json.dumps(authorsrc.load_manifest()))
+        dropped = sorted(data["harnesses"])[0]
+        del data["harnesses"][dropped]
+        self.assertTrue(any(dropped in p and "未在 harnesses 里登记" in p
+                            for p in authorsrc.harness_registration_problems(data)))
+
+    def test_registered_but_missing_harness_is_red(self):
+        data = json.loads(json.dumps(authorsrc.load_manifest()))
+        data["harnesses"]["code/ch99/nowhere/author_diff.cpp"] = {"include": ["x"]}
+        self.assertTrue(any("ch99" in p and "文件不存在" in p
+                            for p in authorsrc.harness_registration_problems(data)))
+
 if __name__ == "__main__":
     unittest.main()

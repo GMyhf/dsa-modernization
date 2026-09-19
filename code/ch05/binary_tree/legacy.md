@@ -61,3 +61,15 @@ ASan 档会打印 `AddressSanitizer: stack-overflow` 并给出指到 `modern.hpp
 `destroy` 与 `clone` 是**隐式触发**的——一次普通析构或一次拷贝就会递归下去，
 调用方看不到任何迹象；而这两条恰恰**没有迭代版本**。
 完整复现方法、其余未验证风险与接手建议，见 `collab/UNVERIFIED-RISKS.md`。
+
+## 作者代码包对照（2026-09-18）
+
+作者代码包 `site_visit/DSCode_ZWZ200806_CPP/`——原书前言（`dsa_raw.md:195`）称之为「与本书配套的代码包」，
+也是 2025 秋期末机考的考场资料——是代码5.8的第二证人。下表每一行在 `collab/authorsrc.json` 的
+findings 里都有一条带正则的结论，`tools/authorsrc.py --check` 在包的源码上逐条核对；
+看包里原文：`python3 tools/authorsrc.py --listing 5.8`。
+包与原书同为 2008 年 6 月，谁先谁后不可考：「包里没有」只说明**印出来的与作者的代码不一致**，不说明是排印时引入的。
+
+| 结论 | 缺陷 | 包里 | 说明 |
+| --- | --- | --- | --- |
+| R15 | `Parent` 失败分支缺 `return NULL` | **也有** | 包里循环走完直接落到函数末尾 |
