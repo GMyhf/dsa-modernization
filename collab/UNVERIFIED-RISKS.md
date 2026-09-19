@@ -298,8 +298,10 @@ Debug+ASan/UBSan 与 Release `-O2` 两种构建下断言全过；ASan/LSan 未�
    上面第二节那两处就是例子。
 2. **栈深度。** 见第一节。ASan 能在事发后指出 stack-overflow，但没有任何测试
    会去逼近那个边界（逼近就意味着让闸门崩）。
-3. **别的编译器与平台。** 全部结论来自 Linux + gcc 13.3。clang、MSVC、
-   32 位、不同 `ulimit -s`，都没验过。
+3. **别的编译器与平台。** 结论来自 Linux 上的 gcc 13.3 与 clang 18（都用 libstdc++；D-041 起
+   `check_code.py` 两个编译器各跑 sanitizer 档与 `-O2` 档）。MSVC、macOS 的 Apple clang + libc++、
+   32 位、不同 `ulimit -s`，都没在闸门里跑。2026-09-18 手工试过 clang 18 + libc++ 跑作者包对拍，
+   没有给每个单元都试。
 4. **并发。** 所有容器都不是线程安全的，也没有任何测试涉及并发。
 5. **性能。** 只有两处规模守门（链表 `append` 的 O(1)、KMP 的线性性），
    靠的是"退化实现会撞上 120 秒超时"，不是真正的基准测试。

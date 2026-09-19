@@ -9,6 +9,28 @@
 
 ---
 
+## D-041 · 2026-09-19 · 人已拍板：闸门用 g++ 与 clang++ 各编各跑每个单元
+
+**背景。** 2026-09-18 Codex 在 macOS（Apple clang）上复核 T-079，作者包那一步红了。顺着查下去，
+`code/ch03/array_stack/modern.hpp` 在 Linux clang 18 下**根本编译不过**：带大小的对齐
+`operator delete(p, n, align_val_t)` 只在开了 sized deallocation 时才声明，clang 18 默认不开。
+`check_code.py` 一直只用 g++，所以闸门从没红过。Claude 问要不要让闸门也跑 clang，**人于 2026-09-19 答「要，每个单元都要」**。
+
+**决定**：
+
+1. `check_code.py` 的构建档从 2 个变 4 个：g++ 与 clang++ 各跑 `debug+asan+ubsan` 与 `-O2`
+   （clang 那两档叫 `clang-asan+ubsan`、`clang-O2`；g++ 两档沿用旧名，免得历史交接记录对不上）。
+   `-Wall -Wextra -Wpedantic -Werror` 两边一样，测试、教学版测试、demo 两边都跑。
+2. **缺 clang++ 是环境问题**：退出码 2，与代码问题（1）分开；`--allow-degraded` 可跳过跑不了的档，
+   降级写进输出、结论旁再喊一次（D-006 的规矩原样沿用）。
+3. 单元并行跑（`--jobs`，默认 min(8, CPU 数)）：四档串行要 5 分半，并行 1 分 18 秒，比原先两档串行还快。
+   单元之间不共享文件、测试里没有计时断言，并行不改结果——与串行输出逐字相同。
+4. clang 用它自己的默认标准库（Linux 上是 libstdc++）。libc++ **不进**闸门：Linux 上要另装，
+   macOS 上的 clang 默认就是 libc++，那边跑闸门自然覆盖。
+
+**代价**：每台跑闸门的机器都要装 clang；变异自检要在两个编译器下都看一眼（把带大小的 delete 改回去，
+恰好是 clang 两档红、g++ 两档绿）。
+
 ## D-040 · 2026-09-18 · 人已拍板：作者代码包是第二证人，不是权威（T-079）
 
 **背景。** 人把 2025 秋期末机考的考场资料放进 `site_visit/`，其中 `DSCode_ZhangWangZhao2008_06.zip` 是原书前言（`dsa_raw.md:195`）所说「与本书配套的代码包」。

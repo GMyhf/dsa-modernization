@@ -308,6 +308,59 @@ class TestSanitizerPreflight(unittest.TestCase):
         self.assertIn("不代表内存与 UB 干净", src)
 
 
+class TestBothCompilers(unittest.TestCase):
+    """D-041：每个单元在 g++ 与 clang++ 下各跑 sanitizer 档与 -O2 档。
+
+    缘由：2026-09-18 Codex 在 macOS clang 上复核时，顺着查出 array_stack 的 modern.hpp
+    在 clang 18 下**根本编译不过**（带大小的对齐 operator delete），闸门只用 g++，一直绿。
+    """
+
+    def test_every_compiler_gets_both_kinds_of_build(self):
+        by_compiler = {}
+        for name, flags in check_code.PROFILES:
+            by_compiler.setdefault(check_code.PROFILE_COMPILER[name], []).append(flags)
+        self.assertEqual(set(by_compiler), {"g++", "clang++"})
+        for cxx, flag_sets in by_compiler.items():
+            self.assertTrue(any("-fsanitize=address,undefined" in f for f in flag_sets), f"{cxx} 缺 sanitizer 档")
+            self.assertTrue(any("-O2" in f for f in flag_sets), f"{cxx} 缺 -O2 档")
+        self.assertEqual(set(check_code.SANITIZER_PROFILES),
+                         {n for n, f in check_code.PROFILES if "-fsanitize=address,undefined" in f})
+
+    def test_release_profile_stays_last(self):
+        # 别的用例拿 PROFILES[-1] 当「只要有 g++ 就能跑」的一档
+        self.assertEqual(check_code.PROFILES[-1][0], "release-O2")
+        self.assertEqual(check_code.PROFILE_COMPILER["release-O2"], "g++")
+
+    def run_without_clang(self, *extra):
+        """PATH 里只放 g++ 与 python3：模拟一台没装 clang 的机器。"""
+        import shutil
+        with tempfile.TemporaryDirectory() as tmp:
+            for tool in ("g++", "python3", "as", "ld", "cc1plus"):
+                found = shutil.which(tool)
+                if found:
+                    Path(tmp, tool).symlink_to(found)
+            env = {"PATH": tmp, "HOME": tempfile.gettempdir()}
+            return subprocess.run(
+                [sys.executable, str(ROOT / "tools" / "check_code.py"), "code/ch01/adt", *extra],
+                cwd=ROOT, capture_output=True, text=True, env=env, timeout=600,
+            )
+
+    @unittest.skipIf(__import__("shutil").which("g++") is None, "机器上没有 g++")
+    def test_missing_clang_is_an_environment_failure(self):
+        proc = self.run_without_clang()
+        self.assertEqual(proc.returncode, 2, proc.stdout + proc.stderr)
+        self.assertIn("找不到 clang++", proc.stdout)
+
+    @unittest.skipIf(__import__("shutil").which("g++") is None, "机器上没有 g++")
+    def test_degraded_without_clang_is_loud_not_silent(self):
+        proc = self.run_without_clang("--allow-degraded")
+        out = proc.stdout + proc.stderr
+        self.assertEqual(proc.returncode, 0, out)
+        self.assertIn("降级运行", out)
+        self.assertIn("跳过了 clang-asan+ubsan, clang-O2", out)
+        self.assertIn("不代表内存与 UB 干净", out)
+
+
 class TestTeachingAndDemoAreVerified(unittest.TestCase):
     """D-012 的教学版分层，闸门这一半有没有牙。
 

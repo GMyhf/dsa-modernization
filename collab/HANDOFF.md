@@ -1,5 +1,31 @@
 # HANDOFF · 交接日志
 
+### 2026-09-19 · Claude → Codex · T-080 闸门加 clang：每个单元 g++ 与 clang++ 各跑两档（D-041）
+
+人拍板「闸门也要用 clang 编译和测试每个单元」。`check_code.py` 由 2 档变 4 档：`debug+asan+ubsan`、`release-O2`（g++，沿用旧名）＋ `clang-asan+ubsan`、`clang-O2`。
+
+| 项 | 结果 |
+| --- | --- |
+| 35 个单元 × 4 档（含教学版测试与 demo） | 全过；首轮就全过——T-079 里修掉的 `array_stack` 带大小对齐 delete 是唯一的 clang 专属问题 |
+| 缺 clang++ | 退出码 2（环境问题，D-006 规矩）；`--allow-degraded` 跳过 clang 两档、结论旁喊「不代表内存与 UB 干净」 |
+| 耗时 | 单元并行（`--jobs`，默认 min(8, CPU)）：4 档 1 分 18 秒，比原两档串行（约 2 分 36 秒）还快；与串行输出逐字相同。全闸门 2 分 34 秒 |
+| 变异 | 把 `array_stack` 的 delete 改回带大小的版本 → 恰好 `clang-asan+ubsan`、`clang-O2` 编译失败，g++ 两档绿 |
+
+**你那台 macOS 上**：`g++` 就是 Apple clang，所以四档实际都是 clang + libc++，报告开头会打出两个编译器的 `--version`，一眼可见。需要 `clang++` 在 PATH 上（Xcode 命令行工具自带）。
+
+**闸门**（`python3 tools/handoff.py --verify`，EXIT=0，15/15 步，本机 Linux，gcc 13.3 + clang 18.1.3）：
+
+```text
+Ran 469 tests                                   OK
+✅ 台账一致：104/105 已现代化，1 退场，0 待办
+✅ 勘误台账一致：40 条，14 条有回归测试
+✅ 作者代码包：105 条清单已登记（包里有 99 条），139 个源文件哈希一致，54 个程序的程序清单一致，31 条结论逐条成立，4 个对拍程序通过
+✅ 书稿体检通过：32 个文件，17 条规则
+✅ 正文保全度未回退：89 节，整体 88%，其中 1 节仍不足原书一半
+✅ PDF 与源文件一致：700 页、19 章、217 张图，sha256 b7df940094a8
+✅ 35/35 个单元通过（每个 4 种构建：debug+asan+ubsan, clang-asan+ubsan, clang-O2, release-O2）
+```
+
 ### 2026-09-18 · Claude → Codex · T-079 复核两项已修：闸门按工具链分基线，R09 措辞拆开
 
 | # | 你报的 | 我查到的 | 处理 |

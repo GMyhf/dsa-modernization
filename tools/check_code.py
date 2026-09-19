@@ -9,6 +9,9 @@
      未使用参数、有符号/无符号比较，在这里全部是错误）
   2. Debug 构建带 ASan + UBSan，-fno-sanitize-recover=all：越界和 UB 当场崩
   3. Release 构建 -O2 再跑一遍：只在某个优化档下成立的测试不算数
+  3b. 以上两档在 g++ 与 clang++ 下**各跑一遍**（D-041）：只在一种编译器下成立的代码不算数。
+      2026-09-18 Codex 在 macOS clang 上复核，才发现 array_stack 在 clang 18 下根本编译不过——
+      闸门只用 g++，一直没红
   4. test.cpp 自带断言，退出码非 0 即失败
   5. D-025：单元若有 modern.py，还要跑 test.py 两档（默认档 / `-X dev -W error`），
      并按 D-025 的名单查「一行把这一章删掉」的标准库调用
@@ -20,8 +23,10 @@
 """
 import argparse
 import ast
+import concurrent.futures
 import io
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -37,18 +42,40 @@ from repo import ROOT, rel_label  # noqa: E402  同目录工具
 CODE = ROOT / "code"
 
 BASE_FLAGS = ["-Wall", "-Wextra", "-Wpedantic", "-Werror"]
+SANITIZE_FLAGS = ["-O1", "-g", "-fsanitize=address,undefined", "-fno-sanitize-recover=all"]
+# (档名, 编译选项)。`release-O2` 排最后：测试里拿 PROFILES[-1] 当「最朴素、到处都能跑的一档」。
 PROFILES = [
-    (
-        "debug+asan+ubsan",
-        ["-O1", "-g", "-fsanitize=address,undefined", "-fno-sanitize-recover=all"],
-    ),
+    ("debug+asan+ubsan", SANITIZE_FLAGS),
+    ("clang-asan+ubsan", SANITIZE_FLAGS),
+    ("clang-O2", ["-O2"]),
     ("release-O2", ["-O2"]),
 ]
+# 每档用哪个编译器（D-041）。沿用旧档名不加 gcc 前缀：交接记录与 README 里一年的
+# 「debug+asan+ubsan, release-O2」都指 g++ 那两档，改名只会让历史对不上。
+PROFILE_COMPILER = {
+    "debug+asan+ubsan": "g++",
+    "release-O2": "g++",
+    "clang-asan+ubsan": "clang++",
+    "clang-O2": "clang++",
+}
+SANITIZER_PROFILES = ("debug+asan+ubsan", "clang-asan+ubsan")
 TIMEOUT_SEC = 120
 
 
-def compiler():
+def compiler(name=None):
+    """某档的编译器；不带参数时返回任一可用的 C++ 编译器（给「这台机器能不能编 C++」的判断用）。"""
+    if name is not None:
+        return shutil.which(PROFILE_COMPILER.get(name, "g++"))
     return shutil.which("g++") or shutil.which("clang++")
+
+
+def compiler_identity(exe):
+    """`g++ --version` 的第一行。macOS 上 g++ 其实是 Apple clang，报告里要说清楚。"""
+    try:
+        out = subprocess.run([exe, "--version"], capture_output=True, text=True, timeout=30).stdout
+    except (OSError, subprocess.TimeoutExpired):
+        return "?"
+    return (out.strip().splitlines() or ["?"])[0]
 
 
 # D-001（collab/DECISION_LOG.md，人已拍板）里能被机器守住的两条：
@@ -723,10 +750,10 @@ def check_d001(unit_dir: Path, meta):
     return problems
 
 
-SANITIZER_PROFILE = "debug+asan+ubsan"
+SANITIZER_PROFILE = "debug+asan+ubsan"  # 旧名：g++ 那一档；两档 sanitizer 见 SANITIZER_PROFILES
 
 
-def sanitizer_preflight(std="c++17", flags=None, workdir=None):
+def sanitizer_preflight(std="c++17", flags=None, workdir=None, profile=SANITIZER_PROFILE):
     """先拿一个空程序试 sanitizer 能不能用。返回 (ok, 诊断输出)。
 
     存在的理由：红队那一轮在 macOS 上撞到 `sanitizer_malloc_mac.inc:189
@@ -734,14 +761,17 @@ def sanitizer_preflight(std="c++17", flags=None, workdir=None):
     都判红，读日志的人只会以为是自己的代码坏了。工具应当自己说清楚
     「是环境不可用」，而不是让人一个个单元去排除。
     """
-    flags = flags or dict(PROFILES)[SANITIZER_PROFILE]
+    flags = flags or dict(PROFILES)[profile]
+    cxx = compiler(profile)
+    if cxx is None:
+        return False, f"找不到 {PROFILE_COMPILER.get(profile)}（{profile} 档要用它）"
     tmp = workdir or tempfile.mkdtemp(prefix="dsa-preflight-")
     Path(tmp).mkdir(parents=True, exist_ok=True)
     src, binary = Path(tmp) / "preflight.cpp", Path(tmp) / "preflight"
     src.write_text("int main() { return 0; }\n", encoding="utf-8")
     try:
         build = subprocess.run(
-            [compiler(), f"-std={std}", *flags, str(src), "-o", str(binary)],
+            [cxx, f"-std={std}", *flags, str(src), "-o", str(binary)],
             capture_output=True, text=True, timeout=TIMEOUT_SEC,
         )
         if build.returncode != 0:
@@ -868,7 +898,7 @@ def build_and_run(unit_dir: Path, workdir: Path, keep=False, profiles=None, degr
             binary = workdir / f"{unit_dir.name}{suffix}-{name}"
             label = name if kind == "test" else f"{name}/{kind}"
             cmd = [
-                compiler(),
+                compiler(name),
                 f"-std={std}",
                 *BASE_FLAGS,
                 *flags,
@@ -960,7 +990,12 @@ def main():
     parser.add_argument(
         "--allow-degraded",
         action="store_true",
-        help="仅当 sanitizer 环境自检失败时生效：跳过该档、只跑 Release，并把降级大声记在输出里",
+        help="仅当环境自检失败（缺 clang++ 或某档 sanitizer 跑不起来）时生效：跳过跑不了的档，并把降级大声记在输出里",
+    )
+    parser.add_argument(
+        "--jobs", type=int, default=min(8, os.cpu_count() or 1),
+        help="并行跑几个单元（默认 min(8, CPU 数)）。单元之间不共享任何文件：产物名带单元名，"
+             "改坏用例表的自检在临时目录里做；测试里也没有计时断言，并行不会让结果变脆",
     )
     opts = parser.parse_args()
 
@@ -973,39 +1008,57 @@ def main():
         print("⚠️  code/ 下还没有单元，跳过（脚手架已就位，等第一个清单现代化）")
         return
 
-    # 先自检 sanitizer 环境。挂了就直说是环境挂了，别让人误以为是单元的代码坏了。
+    # 先自检环境：两个编译器都在、两档 sanitizer 都能跑空探针。挂了就直说是环境挂了，
+    # 别让人误以为是单元的代码坏了。
     profiles, degraded_note = PROFILES, None
-    ok_env, env_out = sanitizer_preflight()
-    if not ok_env:
+    broken = {}  # 档名 → 诊断
+    for name, _ in PROFILES:
+        if compiler(name) is None:
+            broken[name] = f"找不到 {PROFILE_COMPILER[name]}"
+    for name in SANITIZER_PROFILES:
+        if name not in broken:
+            ok_env, env_out = sanitizer_preflight(profile=name)
+            if not ok_env:
+                broken[name] = env_out
+    if broken:
+        report = "\n".join(f"[{name}] {why}" for name, why in broken.items())
         if not opts.allow_degraded:
-            print("❌ sanitizer 环境自检失败——这不是某个单元的问题，是这台机器上跑不起来。")
-            print(indent(env_out))
+            print("❌ 编译环境自检失败——这不是某个单元的问题，是这台机器上跑不起来。")
+            print(indent(report))
             print(
-                "\n本档用的是：" + " ".join(dict(PROFILES)[SANITIZER_PROFILE])
-                + "\n处理办法：换一台能跑 ASan 的机器，或确认无解后用 --allow-degraded"
-                + "（只跑 Release，降级会写进输出与交接包，不会悄悄变绿）。"
+                "\n闸门要 g++ 与 clang++ 各跑 sanitizer 档与 -O2 档（D-041）。"
+                "处理办法：装上缺的编译器（Ubuntu：apt install clang），换一台能跑 ASan 的机器，"
+                "或确认无解后用 --allow-degraded（跳过跑不了的档，降级会写进输出与交接包，不会悄悄变绿）。"
             )
             sys.exit(2)  # 2 = 环境问题，区别于 1 = 代码问题
-        profiles = [(n, f) for n, f in PROFILES if n != SANITIZER_PROFILE]
+        profiles = [(n, f) for n, f in PROFILES if n not in broken]
+        if not profiles:
+            print("❌ 所有档都跑不了，降级也无从谈起。\n" + indent(report))
+            sys.exit(2)
         degraded_note = (
-            "⚠️  降级运行：sanitizer 档已跳过（环境自检失败），本次结果**不覆盖内存与 UB 检查**。\n"
-            + indent(env_out, head=4, tail=6)
+            f"⚠️  降级运行：跳过 {', '.join(broken)}（环境自检失败），"
+            "本次结果**不覆盖**这些档本该拦下的问题。\n" + indent(report, head=4, tail=6)
         )
         print(degraded_note + "\n")
+    for exe in sorted({compiler(n) for n, _ in profiles}):
+        print(f"编译器 {exe}：{compiler_identity(exe)}")
 
     workdir = Path(ROOT / ".build") if opts.keep else Path(tempfile.mkdtemp(prefix="dsa-check-"))
     workdir.mkdir(parents=True, exist_ok=True)
     failed, blocks = [], []
-    for unit in units:
+
+    def one(unit):
         try:
-            ok, log = build_and_run(
-                unit, workdir, opts.keep, profiles, degraded=degraded_note is not None
-            )
+            return build_and_run(unit, workdir, opts.keep, profiles, degraded=degraded_note is not None)
         except subprocess.TimeoutExpired:
-            ok, log = False, [rel_label(unit), f"  ❌ 超过 {TIMEOUT_SEC}s 未结束"]
-        blocks.append("\n".join(log))
-        if not ok:
-            failed.append(rel_label(unit))
+            return False, [rel_label(unit), f"  ❌ 超过 {TIMEOUT_SEC}s 未结束"]
+
+    # D-041 把构建档从 2 个加到 4 个，串行要 5 分半；单元之间互不相干，并行跑、按原顺序报告。
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max(1, opts.jobs)) as pool:
+        for unit, (ok, log) in zip(units, pool.map(one, units)):
+            blocks.append("\n".join(log))
+            if not ok:
+                failed.append(rel_label(unit))
     if not opts.keep:
         shutil.rmtree(workdir, ignore_errors=True)
 
@@ -1022,7 +1075,10 @@ def main():
         )
     if degraded_note:
         # 降级必须在结论旁边再喊一次：交接包里只贴尾部几行的人不能被瞒过去。
-        print("⚠️  本次为降级运行，未跑 sanitizer 档——上面的绿不代表内存与 UB 干净。")
+        skipped = [n for n, _ in PROFILES if n not in dict(profiles)]
+        what = ("不代表内存与 UB 干净" if any(n in SANITIZER_PROFILES for n in skipped)
+                else "不代表这些档也干净")
+        print(f"⚠️  本次为降级运行，跳过了 {', '.join(skipped)}——上面的绿{what}。")
     if failed:
         print("失败: " + ", ".join(failed))
         sys.exit(1)

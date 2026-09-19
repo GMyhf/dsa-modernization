@@ -23,9 +23,9 @@
 书稿   32 个文件（12 章正文 + 总目录 + 习题 + 期中/期末复习题库 + 勘误 + 插图 + 考场代码包，加 13 套课件），17 条规则通过
 成品   PDF（book/pdf/，700 页）、网页版（book/site/，双击 index.html 即可读）
        与课件（book/slides/，411 页幻灯片；另出 12 份 .pptx）
-代码   35 个单元 × 2 种构建（Debug+ASan/UBSan、Release-O2）
+代码   35 个单元 × 4 种构建（g++ 与 clang++ 各跑 Debug+ASan/UBSan、Release-O2）
        其中 1 个单元另有 Python 实现，再跑 2 档（默认、-X dev -W error）
-自测   465 项（闸门自己的单元测试）
+自测   469 项（闸门自己的单元测试）
 ```
 
 `python3 tools/handoff.py --verify` 退出码 0。
@@ -57,7 +57,7 @@
 ```bash
 python3 tools/handoff.py --verify     # 完整闸门：工具自测 → 台账 → 书稿 → 真编译真运行
 python3 tools/ledger.py               # 105 条清单现在做到哪了
-python3 tools/check_code.py           # 只跑 code/：-Werror + ASan/UBSan + O2 双构建
+python3 tools/check_code.py           # 只跑 code/：-Werror + ASan/UBSan + O2，g++ 与 clang++ 各一遍
 python3 tools/check_doc.py            # 只跑 book/：OCR 残留、编号、插图、代码块一致性
 python3 tools/build_site.py           # 把书稿渲染成网页版 book/site/，入口 index.html
 python3 tools/build_slides.py         # 把 book/slides/*.md 渲染成课件 book/slides/site/
@@ -104,7 +104,7 @@ git add -A && git commit -m "..." && git push
 | `code/<章>/<单元>/` | 一个清单单元：`unit.json`（认领哪几条清单）、`legacy.md`（原书写法→缺陷证据→现代写法）、`modern.hpp`、`test.cpp` |
 | `code/support/` | 各章测试共用的故障注入探针（只放探针，不放任何数据结构实现） |
 | `tools/` | 闸门与脚手架，纯标准库。其中 `pdfref.py` 按节号把原版扫描件渲染成书页图，`fidelity.py` 量正文保全度，`figcrop.py` 从扫描件裁插图并记下裁法，`authorsrc.py` 把每条清单对到作者代码包（考场资料）里的那一段，`pptx_writer.py` + `build_pptx.py` 只用 `zipfile` 把课件排成 .pptx |
-| `tests/` | 闸门自身的单元测试，465 项 |
+| `tests/` | 闸门自身的单元测试，469 项 |
 | `collab/` | 协作事实源：PLAN / DECISION_LOG / HANDOFF / 双向 NOTES / 退场记录 |
 
 ## 五条闸门
@@ -186,7 +186,7 @@ Codex 所在的 macOS 环境，ASan 连**空探针程序**都起不来
 
 1. **没走到的路径**——sanitizer 是运行期工具，只看得见执行过的代码。
 2. **栈深度**——没有任何测试会去逼近那个边界（逼近就意味着让闸门崩）。
-3. **别的编译器与平台**——全部结论来自 Linux + gcc 13.3。
+3. **别的编译器与平台**——结论来自 Linux 上的 gcc 13.3 与 clang 18（libstdc++）。MSVC、macOS 的 Apple clang + libc++、32 位都没在闸门里跑。
 4. **并发**——所有容器都不是线程安全的，也没有任何测试涉及并发。
 5. **性能**——只有两处规模守门（链表 `append` 的 O(1)、KMP 的线性性），
    靠的是"退化实现会撞上 120 秒超时"，不是基准测试。

@@ -37,7 +37,7 @@ python3 tools/authorsrc.py --listing 3.2   # the authors' own 2008 source for a 
 python3 tools/authorsrc.py --check     # all 105 listings mapped into the author pack; pack bytes + compile results pinned
 python3 tools/errata.py                # errata → the assertion that goes red if it regresses
 python3 tools/errata.py --check        # same, verify only (non-zero exit on gaps)
-python3 tools/check_code.py [unit]     # -Werror + ASan/UBSan and -O2, both must run green
+python3 tools/check_code.py [unit]     # -Werror + ASan/UBSan and -O2, under g++ AND clang++ (4 builds), all green
 python3 tools/check_doc.py [file]      # book/ hygiene; --list-rules explains R1–R8
 python3 tools/sync_book.py --write     # push code/ sources into the book's code blocks
 python3 tools/build_site.py            # render book/*.md into the browsable site book/site/
@@ -48,7 +48,8 @@ python3 -m unittest tests.test_check_doc.TestR3IncludeContract -v   # a single t
 python3 tools/handoff.py --from claude --to codex   # generate the review packet
 ```
 
-Requires Python 3 (stdlib only) and g++/clang++ with C++17 + sanitizers. No third-party
+Requires Python 3 (stdlib only) and **both** g++ and clang++ with C++17 + sanitizers
+(Ubuntu: `apt install clang`). No third-party
 dependencies in `tools/` or `code/` — adding any is an architecture decision for `PLAN.md`.
 
 ## The style convention (D-001, signed off 2026-08-12)
@@ -118,9 +119,11 @@ The gate is the architecture. Five arbiters, each answering a question documents
   collision is absent from the pack (`getTop`). Both are dated 2008-06, so which came first is unknown:
   say "the printed listing differs from the authors' code", never "introduced at print time".
   The pack is GBK/CRLF (a few UTF-8-BOM files); always read it through the tool, never `cat`.
-- **`tools/check_code.py`** — compiles every unit twice (`-Werror` + ASan/UBSan, and
-  `-O2`) and runs it. Both profiles matter: a heap overflow that UBSan aborts on in the
-  debug build passes *silently* under `-O2`.
+- **`tools/check_code.py`** — compiles every unit four times — `-Werror` + ASan/UBSan and `-O2`,
+  each under **g++ and clang++** (D-041) — and runs it. Both profiles matter: a heap overflow that
+  UBSan aborts on in the debug build passes *silently* under `-O2`. Both compilers matter:
+  `array_stack` once didn't compile on clang 18 while g++ stayed green. Units run in parallel
+  (`--jobs`); a missing clang++ is an environment failure (exit 2), `--allow-degraded` skips loudly.
 
 `tools/repo.py` exists only because `Path.relative_to(ROOT)` throws outside the repo and
 three tools each hit it independently.
