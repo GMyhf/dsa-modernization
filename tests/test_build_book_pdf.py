@@ -119,7 +119,14 @@ class TestFontsArePinned(unittest.TestCase):
             used |= set(re.findall(r"\{([^{}]+)\}", block))
         self.assertTrue(used, "preamble 里没找到字体设置")
         self.assertLessEqual(used, required, f"用了但没列进 \\dsaRequireFont：{used - required}")
-        self.assertTrue(all(name.startswith("Noto ") for name in required), required)
+        self.assertTrue(all(name.startswith("Noto") for name in required), required)
+
+    def test_symbols2_is_named_by_postscript_name(self):
+        """家族名两边不一样（Ubuntu「Noto Sans Symbols2」、Google「Noto Sans Symbols 2」），PS 名一样。"""
+        body = self.PREAMBLE.split("\\newcommand")[1]
+        code = "\n".join(line.split("%")[0] for line in body.splitlines())
+        self.assertIn("NotoSansSymbols2-Regular", code)
+        self.assertNotIn("Noto Sans Symbols", code)
 
     def test_no_platform_fallback(self):
         for apple in ("Times New Roman", "Menlo", "Songti", "Heiti", "Liberation", "DejaVu", "Droid"):

@@ -1,5 +1,17 @@
 # HANDOFF · 交接日志
 
+### 2026-09-19 · Claude → Codex · 复核 `47a0107`：Mac 742 页采信；Symbols 2 改按 PostScript 名，两边都能排
+
+- **页数一致，D-042 的目的达到**：你 Mac 上排的是 742 页，与 Linux 相同。
+- **但 `47a0107` 把 Linux 排坏了**：同一款字体，Ubuntu `fonts-noto-core` 的家族名是「Noto Sans Symbols2」（无空格），
+  Google/Homebrew 版是「Noto Sans Symbols 2」。你改成带空格的，本机 `build_book_pdf.py` 立刻「缺字体」停机——
+  正好对称：`d161fb5` 坏的是你那边。改为按 **PostScript 名 `NotoSansSymbols2-Regular`** 引用，本机实测可用；
+  **请在 Mac 上确认一次**：`pdffonts book/pdf/数据结构与算法.pdf | grep Symbols2` 应显示 `NotoSansSymbols2-Regular`，且仍是 742 页。
+  新增 1 项自测：代码里只许出现 PS 名，不许出现任一种家族名写法。
+- 入库的 PDF 是本机按新 preamble 重排的（742 页，缺字 0 处）。
+
+**闸门**（`python3 tools/handoff.py --verify`，EXIT=0，15/15 步，本机 Linux）：`Ran 477 tests OK`；`PDF 与源文件一致：742 页`；`35/35 个单元通过（每个 4 种构建）`。
+
 ### 2026-09-19 · Claude → Codex · T-081 学生 PDF 字体钉死为 Noto（D-042）——请在 Mac 上装字体后复排
 
 人拍板：Mac、Linux 都用 Noto 排学生 PDF。`book/pdf/preamble.tex` 只认 6 款 Noto，**缺一款就停机报错，不再回退**。

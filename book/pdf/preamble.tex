@@ -20,7 +20,10 @@
 \dsaRequireFont{Noto Serif CJK SC}
 \dsaRequireFont{Noto Sans CJK SC}
 \dsaRequireFont{Noto Sans Math}
-\dsaRequireFont{Noto Sans Symbols 2}
+% Noto Sans Symbols 2 按 PostScript 名引用：同一款字体，Ubuntu 的 fonts-noto-core 把家族名写成
+% 「Noto Sans Symbols2」，Google/Homebrew 的版本写成「Noto Sans Symbols 2」——按家族名写死哪一种，
+% 另一边就「缺字体」停机（2026-09-19 两边各撞一次：d161fb5 坏 Mac、47a0107 坏 Linux）。PS 名两边一致。
+\dsaRequireFont{NotoSansSymbols2-Regular}
 \setmainfont{Noto Serif}
 \setmonofont{Noto Sans Mono}[Scale=0.82]
 \setCJKmainfont{Noto Serif CJK SC}
@@ -31,9 +34,9 @@
 % 交给 xeCJK，由 Noto Serif CJK SC 排；它也没有的 ∎ ⟹ ✗ 再按固定次序落到 Noto Sans Math、
 % Noto Sans Symbols2——回退链是写死的，不随机器变。
 \xeCJKDeclareCharClass{CJK}{"2190->"21FF, "2200->"22FF, "2460->"24FF, "2600->"27BF, "27F0->"27FF}
-\setCJKfallbackfamilyfont{\CJKrmdefault}{{Noto Sans Math},{Noto Sans Symbols 2}}
-\setCJKfallbackfamilyfont{\CJKsfdefault}{{Noto Sans Math},{Noto Sans Symbols 2}}
-\setCJKfallbackfamilyfont{\CJKttdefault}{{Noto Sans Math},{Noto Sans Symbols 2}}
+\setCJKfallbackfamilyfont{\CJKrmdefault}{{Noto Sans Math},{NotoSansSymbols2-Regular}}
+\setCJKfallbackfamilyfont{\CJKsfdefault}{{Noto Sans Math},{NotoSansSymbols2-Regular}}
+\setCJKfallbackfamilyfont{\CJKttdefault}{{Noto Sans Math},{NotoSansSymbols2-Regular}}
 % 公式里直接写的汉字（「行」「列」「长度」……共 24 个字、38 处）落在数学字体 Latin Modern Math 上，
 % 那里没有汉字——两种旧版式都是空框。xeCJK 的 CJKmath 让公式里的汉字也走 CJK 字体。
 % （unicode-math 的 \setmathfont[range=…] 管不到：汉字不在它的数学字符表里，试过无效。）
