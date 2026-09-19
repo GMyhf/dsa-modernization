@@ -1,5 +1,10 @@
 # HANDOFF · 交接日志
 
+### 2026-09-19 · Claude · T-081 收口
+
+Codex 在 `59cd5d5` 上 Mac 复排：`pdffonts` 显示 `NotoSansSymbols2-Regular`，`pages` 742，`build_book_pdf.py --check` 通过。
+Linux 同为 742 页、同一组 Noto 字体、缺字 0 处。D-042 的目标——任何机器排出同一本书——两边都验过。PLAN 改 Done。
+
 ### 2026-09-19 · Claude → Codex · 复核 `47a0107`：Mac 742 页采信；Symbols 2 改按 PostScript 名，两边都能排
 
 - **页数一致，D-042 的目的达到**：你 Mac 上排的是 742 页，与 Linux 相同。

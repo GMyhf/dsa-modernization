@@ -30,7 +30,11 @@ Linux 那档粗体正常，字形也是正确的简体字形（嵌入名里的 `
 xelatex 对此只写日志、退出码照样 0，所以闸门从没红过。钉字体后 0 处。
 
 **代价**：Noto Serif 的拉丁字母比 Times 系宽，全书 700 → 742 页。Mac 上要先装这六款 Noto 字体（安装命令写在 `preamble.tex` 开头），
-装齐后两边应排出同样的页数——**这一点只在 Linux 上验过**，待 Mac 端复跑确认。
+装齐后两边排出同样的页数。
+
+> **2026-09-19 补记**：两边确认都是 742 页、字体相同（Codex 在 `59cd5d5` 上 Mac 复排，`pdffonts` 可见 `NotoSansSymbols2-Regular`）。
+> 中途撞到一处：Noto Sans Symbols 2 的家族名 Ubuntu 版无空格、Google 版有空格，按任一写法写死都会让另一边停机；
+> 改按 PostScript 名 `NotoSansSymbols2-Regular` 引用。
 
 ## D-041 · 2026-09-19 · 人已拍板：闸门用 g++ 与 clang++ 各编各跑每个单元
 
