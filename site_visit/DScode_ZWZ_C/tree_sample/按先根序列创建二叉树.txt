@@ -1,0 +1,56 @@
+按先根序列创建二叉树
+
+/* 二叉树的定义 */
+struct BinTreeNode;
+typedef struct BinTreeNode *PBinTreeNode;
+
+struct BinTreeNode
+{
+    DataType info;
+    PBinTreeNode  llink;
+    PBinTreeNode  rlink;
+};
+
+typedef struct BinTreeNode *BinTree;
+typedef BinTree *PBinTree;
+
+/* 创建完整的二叉树 */
+PBinTree  create_BTree( void )
+{ 
+  PBinTree pbtree;
+  PBinTreeNode p;
+  pbtree = (BinTree *)malloc(sizeof(BinTree));
+  if (pbtree!=NULL)
+  {
+       p = createRest_BTree( );  /* 递归创建从根开始的二叉树 */
+       *pbtree = p;
+  }
+  return pbtree; 
+}
+
+
+/* 递归创建从根开始的二叉树 */
+PBinTreeNode createRest_BTree()
+{ 
+  PBinTreeNode  pbnode;
+  char ch;
+  scanf("%c",&ch);
+
+  if(ch=='@') pbnode=NULL;
+
+  else
+  { 
+    pbnode = (struct BinTreeNode *)malloc(sizeof(struct BinTreeNode));
+    if(pbnode==NULL)
+    { 
+       printf("Out of space!\n");
+       return pbnode;
+    }
+    pbnode->info=ch;
+
+    pbnode->llink=createRest_BTree();	/* 构造左子树 */
+    pbnode->rlink=createRest_BTree();	/* 构造右子树 */
+  }
+  return pbnode;
+
+}

@@ -1,0 +1,87 @@
+         HuffMan树构造的哈夫曼算法
+
+
+结构定义：
+#define MAXINT 2147483647
+#define MAXNUM 50   /*数组w中最多容纳的元素个数,m<=MAXNUM*/
+#define MAXNODE 100 
+
+  /*哈夫曼树中的最大结点数,注意2*m-1<MAXNODE*/
+struct HtNode /* 哈夫曼树结点的结构 */
+{ 
+    int ww; /* 权值 */
+    int parent； /* 父结点位置 */
+    int llink, rlink; /* 左右子女的位置 */
+}; 
+
+struct HtTree
+{ 
+    struct HtNode ht[MAXNODE];
+    int root;    /* 哈夫曼树根在数组中的位置 */ 
+}; 
+typedef struct HtTree *PHtTree;   /*哈夫曼树类型的指针类型*/ 
+
+
+/* 构造具有m个叶结点的哈夫曼树*/  
+
+/*变量w存放的是数组w中第一个元素w[0]的地址 */
+PHtTree Huffman(int m, int *w) 
+{ 
+    PHtTree pht; 
+    int i, j; 
+    int x1, x2;    /* 存放权值最小的两个结点的位置 */ 
+    pht = (PHtTree)malloc(sizeof (struct HtTree)); /* 创建空哈夫曼树 */ 
+    if (pht==NULL) 
+    {  
+
+        printf("Out of space!! \n");
+        return pht;
+    }
+    for( i=0; i<2*m - 1; i++ )   /* 置初态 */ 
+    { 
+        pht->ht[i].llink = -1;
+        pht->ht[i].rlink = -1;
+        pht->ht[i].parent = -1;
+        if (i<m) 
+            pht->ht[i].ww = w[i];
+        else 
+            pht->ht[i].ww = -1;
+    }
+    for( i=0; i < m - 1; i++ )   /* 每循环一次构造一个内部结点 */ 
+    { 
+        x1 = x2 = -1;
+        Select(pht, m+i, &x1, &x2); /* 选择最小、次小值作为其左右子女 */ 
+        pht->ht[x1].parent = m + i;  /* 构造一个内部结点 */ 
+        pht->ht[x2].parent = m + i; 
+        pht->ht[m+i].ww = pHT->ht[x1].ww + pHT->ht[x2].ww; 
+        pht->ht[m+i].llink = x1; 
+        pht->ht[m+i].rlink = x2; 
+        pht->root = m+i; 
+    } 
+    return pHT; 
+} 
+
+/* 从哈夫曼树中pos前选取两个无父结点并且权值最小的结点，并把结点位置
+存放在x1和x2指向的空间中 */ 
+void Select(PHtTree pht, int pos, int *x1, int *x2) 
+{ 
+    int m1 = MAXINT, m2 = MAXINT;    /* 相关变量赋初值 */ 
+    /* m1存放最小的，m2存放次小的 */　 
+    /* 注意该算法的应用（如何同时找最小的和次最小的值）*/
+    for(j=0; j<pos; j++) /* 找两个最小权的无父结点的结点 */ 
+    { 
+        if (pht->ht[j].ww<m1 && pht->ht[j].parent==-1) 
+        { 
+            m2 = m1; x2 = x1; /* 保留以前的最小到次小 */ 
+            m1 = pht->ht[j].ww; /* 改变新的最小 */ 
+            x1 = j; 
+        } 
+    /* 如果大于最小的，它是否小于次小的？ */
+        else if(pht->ht[j].ww<m2 && pht->ht[j].parent==-1) 
+        { 
+            m2 = pht->ht[j].ww;   /* 改变次小的 */ 
+            x2 = j; 
+        } 
+    } 
+} 
+

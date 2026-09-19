@@ -1,0 +1,41 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>快速排序算法</title>
+</head>
+
+<body>
+
+<p>　</p>
+<p align="center"><b><font size="7" face="华文新魏" color="#008000">快速排序算法</font></b></p>
+<p>　</p>
+<p><b><font size="5" face="Comic Sans MS">void  quickSort(SortObject * pvector, int l, int r)&nbsp;<br>
+{<br>
+&nbsp;&nbsp;&nbsp; int i, j;<br> 
+&nbsp;&nbsp;&nbsp; RecordNode temp;<br> 
+&nbsp;&nbsp;&nbsp; if(l>=r)  return;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#008000">&nbsp; 
+/*</font></font><font color="#008000" size="5">只有一个记录或无记录，则无需排序</font><font size="5" face="Comic Sans MS"><font color="#008000">*/</font><br>
+&nbsp;&nbsp;&nbsp; i=l;  j=r;  temp=pvector->record[i];<br> 
+&nbsp;&nbsp;&nbsp; while(i!=j)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#008000">/*</font></font><font color="#008000" size="5">寻找</font><font size="5" face="Comic Sans MS" color="#008000">R<sub>1</sub></font><font color="#008000" size="5">的最终位置</font><font size="5" face="Comic Sans MS"><font color="#008000">*/</font><br>
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; while( (pvector->record[j].key>=temp.key) &amp;&amp; (j>i) )<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; j--;&nbsp;<font color="#008000"> 
+/*</font></font><font color="#008000" size="5">从右到左扫描，查找第</font><font size="5" face="Comic Sans MS" color="#008000">1</font><font color="#008000" size="5">个排序码小于</font><font size="5" face="Comic Sans MS" color="#008000">temp.key</font><font color="#008000" size="5">的记录</font><font size="5" face="Comic Sans MS"><font color="#008000">*/</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(i&lt;j)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pvector->record[i++]= pvector->record [j];<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; while( (pvector->record[i].key&lt;=temp.key) &amp;&amp; (j>i) )<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i++;<font color="#008000">/*</font></font><font color="#008000" size="5">从左到右扫描，查找第</font><font size="5" face="Comic Sans MS" color="#008000">1</font><font color="#008000" size="5">个排序码大于</font><font size="5" face="Comic Sans MS" color="#008000">temp.key</font><font color="#008000" size="5">的记录</font><font size="5" face="Comic Sans MS"><font color="#008000">*/</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(i&lt;j)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pvector->record[j--]= pvector->record[i];<br> 
+&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; pvector->record[i]=temp;&nbsp; <font color="#008000">/*</font></font><font color="#008000"><font size="5">找到</font><font size="5" face="Comic Sans MS">R<sub>1</sub></font><font size="5">的最终位置</font></font><font size="5" face="Comic Sans MS"><font color="#008000">*/</font><br>
+&nbsp;&nbsp;&nbsp; quickSort(pvector,l,i-1);&nbsp;&nbsp; <font color="#008000">/*</font></font><font color="#008000"><font size="5">找到递归处理左区间</font></font><font size="5" face="Comic Sans MS"><font color="#008000">*/</font><br>
+&nbsp;&nbsp;&nbsp; quickSort(pvector,i+1,r);&nbsp;&nbsp; <font color="#008000">/*</font></font><font color="#008000"><font size="5">找到递归处理右区间</font></font><font size="5" face="Comic Sans MS"><font color="#008000">*/</font><br>
+}</font></b></p>
+
+</body>
+
+</html>

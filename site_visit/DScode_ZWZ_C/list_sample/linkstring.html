@@ -1,0 +1,474 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>New Page 1</title>
+</head>
+
+<body>
+
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p align="center" style="margin-top: 0; margin-bottom: 0"><b><font size="7" face="华文新魏" color="#008000">字符串链接存储基本运算实现</font></b></p>
+<p align="center" style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font face="Comic Sans MS" size="5"><br>
+#include "stdio.h"<br> 
+#include "malloc.h"<br> 
+<br>
+struct StrNode;<br> 
+typedef struct StrNode *PStrNode;<br> 
+struct StrNode&nbsp;<br>
+{<br>
+&nbsp;&nbsp;&nbsp; char c;<br> 
+&nbsp;&nbsp;&nbsp; PStrNode link;<br> 
+};<br>
+typedef struct StrNode *PLinkString;&nbsp;<br>
+</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font face="Comic Sans MS" size="5">PLinkString CreateNULLStr_link( void );<br> 
+PLinkString ConcatStr_link(PLinkString r1,PLinkString r2);<br> 
+PLinkString SubStr_link(PLinkString s, int i, int j );<br> 
+void DelSubString_link( PLinkString r, int i, int j );<br> 
+int InsertSubStr_link( PLinkString r, int i, PLinkString r1 );<br> 
+int  LocSubStr_link( PLinkString r1, PLinkString r2 );<br> 
+int LenStr_link( PLinkString s );<br> 
+int print (PLinkString pst);<br> 
+<br>
+/*<br>
+</font><font size="5">创建空串<br>
+联结两个串<br>
+取子串<br>
+删除子串<br>
+插入子串<br>
+求串长<br>
+子串定位</font><font face="Comic Sans MS" size="5">[</font><font size="5">模式匹配</font><font face="Comic Sans MS" size="5">]<br>
+*/<br>
+<br>
+main()<br>
+{&nbsp;<br>
+&nbsp;&nbsp;&nbsp; int i;<br> 
+&nbsp;&nbsp;&nbsp; PStrNode q1,q2,p;<br> 
+&nbsp;&nbsp;&nbsp; PLinkString ps1;<br> 
+&nbsp;&nbsp;&nbsp; char a[11]="abcdefghijk";int la=11;<br> 
+&nbsp;&nbsp;&nbsp; char b[4]="cdef";int lb=4;<br> 
+&nbsp;&nbsp;&nbsp; PLinkString psta,pstb;<br> 
+&nbsp;&nbsp;&nbsp; psta=CreateNULLStr_link( ); <font color="#008000">   //</font></font><font color="#008000"></font><font size="5"><font color="#008000">创建一个带头结点的空链串</font><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5"> 
+</font><font face="Comic Sans MS" size="5">q1=psta; <font color="#008000">           //</font></font><font color="#008000"><font size="5">令当前结点</font><font face="Comic Sans MS" size="5">q1</font><font size="5">指针为</font></font><font face="Comic Sans MS" size="5"><font color="#008000">psta<br>
+</font><br>
+&nbsp;&nbsp;&nbsp; for (i=1;i&lt;la+1;i++) <font color="#008000">     //</font></font><font color="#008000"><font size="5">创建一个指针</font><font face="Comic Sans MS" size="5">psta</font><font size="5">指向的链串<br>
+</font></font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5" color="#008000"> 
+</font><font face="Comic Sans MS" size="5">{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p=(PStrNode)malloc(sizeof(struct StrNode)); 
+<font color="#008000">   //</font></font><font color="#008000"></font><font size="5"><font color="#008000">创建一个新结点</font><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5">&nbsp;</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5"> 
+</font><font face="Comic Sans MS" size="5">if(p==NULL)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printf("out of space!!!\n");<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return(0);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p->c=a[i-1]; <font color="#008000">              //</font></font><font color="#008000"></font><font size="5"><font color="#008000">新结点的数据域赋值</font><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5">&nbsp;</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5"> 
+</font><font face="Comic Sans MS" size="5">q1->link=p; <font color="#008000">		         //</font></font><font color="#008000"><font size="5">当前结点</font><font face="Comic Sans MS" size="5">q1</font><font size="5">的指针指向新结点</font></font><font face="Comic Sans MS" size="5"><font color="#008000">p</font>&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; q1=p; <font color="#008000">                 //</font></font><font color="#008000"><font size="5">令当前结点</font><font face="Comic Sans MS" size="5">q1</font><font size="5">为新结点</font></font><font face="Comic Sans MS" size="5"><font color="#008000">p</font><br>
+&nbsp;&nbsp;&nbsp; }&nbsp;<br>
+&nbsp;&nbsp;&nbsp; q1->link=NULL; <font color="#008000">                //</font></font><font color="#008000"></font><font size="5"><font color="#008000">最后结点指针项为空</font><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5"> 
+</font><font face="Comic Sans MS" size="5">print (psta);<br> 
+<br>
+&nbsp;&nbsp;&nbsp; pstb=CreateNULLStr_link( ); <font color="#008000">   //</font></font><font color="#008000"></font><font size="5"><font color="#008000">创建一个带头结点的空链串</font><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5"> 
+</font><font face="Comic Sans MS" size="5">q2=pstb;<br>
+<br>
+&nbsp;&nbsp;&nbsp; for (i=1;i&lt;lb+1;i++)          //</font><font size="5">创建一个指针</font><font face="Comic Sans MS" size="5">pstb</font><font size="5">指向的链串<br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5"> 
+</font><font face="Comic Sans MS" size="5">{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p=(PStrNode)malloc(sizeof(struct StrNode));<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(p==NULL)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printf("out of space!!!\n");<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return(0);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; q2->link=p; <font color="#008000">          //</font></font><font color="#008000"></font><font size="5"><font color="#008000">新结点的数据域赋值</font><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5">&nbsp;&nbsp;&nbsp; 
+</font><font face="Comic Sans MS" size="5">p->c=b[i-1]; <font color="#008000">       //</font></font><font color="#008000"><font size="5">当前结点</font><font face="Comic Sans MS" size="5">q1</font><font size="5">的指针指向新结点</font></font><font face="Comic Sans MS" size="5"><font color="#008000">p&nbsp;</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; q2=p; <font color="#008000">           //</font></font><font color="#008000"><font size="5">令当前结点为新结点</font></font><font face="Comic Sans MS" size="5"><font color="#008000">p</font><br>
+&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; q2->link=NULL; <font color="#008000">      //</font></font><font color="#008000"></font><font size="5"><font color="#008000">最后结点指针项为空</font><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5"> 
+</font><font face="Comic Sans MS" size="5">print (pstb);</font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0"><b><font face="Comic Sans MS" size="5"><br>
+&nbsp;&nbsp;&nbsp; <font color="#008000">//</font></font><font color="#008000"><font size="5">将</font><font face="Comic Sans MS" size="5">psta 
+</font><font size="5"> 和</font><font face="Comic Sans MS" size="5">pstb</font><font size="5">指向的链串拼接为一个</font><font face="Comic Sans MS" size="5">ps1</font><font size="5">指向的串</font></font><font face="Comic Sans MS" size="5"><font color="#008000"><br>
+</font>&nbsp;&nbsp;&nbsp; ps1=ConcatStr_link(psta,pstb);&nbsp;</font><font size="5"><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5"> 
+</font><font face="Comic Sans MS" size="5">print (ps1);</font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0"><b><font face="Comic Sans MS" size="5"><br>
+&nbsp;&nbsp;&nbsp; <font color="#008000">//</font></font><font color="#008000"><font size="5">取子串</font><font face="Comic Sans MS" size="5">(</font><font size="5">从</font><font face="Comic Sans MS" size="5">psta</font><font size="5">指向的串中第</font><font face="Comic Sans MS" size="5">1</font><font size="5">个字符开始的连续</font><font face="Comic Sans MS" size="5">9</font><font size="5">个字符构成的子串</font></font><font face="Comic Sans MS" size="5"><font color="#008000">)<br>
+&nbsp;&nbsp;&nbsp; </font>ps1=SubStr_link(psta,1, 9);&nbsp;</font><font face="Comic Sans MS" size="5"><br>
+&nbsp;&nbsp;&nbsp; print (ps1);</font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0"><b><font face="Comic Sans MS" size="5"><br>
+&nbsp;&nbsp;&nbsp; <font color="#008000">//</font></font><font color="#008000"><font size="5">删除子串（从</font><font face="Comic Sans MS" size="5">psta</font><font size="5">指向的串中删除从第</font><font face="Comic Sans MS" size="5">1</font><font size="5">个字符开始的连续</font><font face="Comic Sans MS" size="5">3</font><font size="5">个字符）</font></font><font face="Comic Sans MS" size="5"><font color="#008000"><br>
+</font>&nbsp;&nbsp;&nbsp;<font color="#008000"> </font>DelSubString_link(psta, 1, 3);&nbsp;</font><font size="5"><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5"> 
+</font><font face="Comic Sans MS" size="5">print (psta);<br> 
+<br>
+&nbsp;&nbsp;&nbsp; i=LenStr_link(psta);<font color="#008000">   //</font></font><font color="#008000"><font size="5">计算</font><font face="Comic Sans MS" size="5">psta</font></font><font size="5"><font color="#008000">指向的串的长度</font><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5"> 
+</font><font face="Comic Sans MS" size="5">printf("%d\n",i);<br>
+<br>
+<font color="#008000">//</font></font><font color="#008000"><font size="5">插入子串（把</font><font face="Comic Sans MS" size="5">pstb</font><font size="5">指向的串插入到</font><font face="Comic Sans MS" size="5">psta</font><font size="5">指向的串中第</font><font face="Comic Sans MS" size="5">5</font></font><font size="5"><font color="#008000">个字符开始的位置上）</font><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5"> 
+</font><font face="Comic Sans MS" size="5">InsertSubStr_link(psta,5,pstb);&nbsp;<br>
+&nbsp;&nbsp;&nbsp; print (psta);<br> 
+&nbsp;&nbsp;&nbsp; print (pstb);<br> 
+<br>
+<font color="#008000">	/* </font></font><font color="#008000"><font size="5"> 子串定位</font><font face="Comic Sans MS" size="5">[</font><font size="5">模式匹配</font><font face="Comic Sans MS" size="5">]</font><font size="5">（ 求</font><font face="Comic Sans MS" size="5">pstb</font><font size="5">指向的串首次与</font><font face="Comic Sans MS" size="5">psta</font><font size="5">指向的串相同子串的起始位置，如果不存在这样的子串返回</font><font face="Comic Sans MS" size="5">0</font><font size="5">）</font></font><font face="Comic Sans MS" size="5"><font color="#008000">*/</font><br>
+&nbsp;&nbsp;&nbsp; i=LocSubStr_link(psta,pstb);<br>
+&nbsp;&nbsp;&nbsp; printf("%d\n",i);<br>
+<br>
+&nbsp;&nbsp;&nbsp; return(1);<br>
+}<br>
+<br>
+&nbsp;&nbsp;&nbsp; <font color="#008000">// </font></font><font color="#008000"></font><font size="5"><font color="#008000"> 创建一个带头结点的空链串</font><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5"> 
+</font><font face="Comic Sans MS" size="5">PLinkString CreateNULLStr_link( void )<br> 
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PLinkString pst;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pst = (PStrNode)malloc(sizeof(struct StrNode));&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (pst!=NULL)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pst->link= NULL;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return (pst);<br> 
+&nbsp;&nbsp;&nbsp; }&nbsp;<br>
+<br>
+&nbsp;<font color="#008000">//</font></font><font color="#008000"><font size="5">把</font><font face="Comic Sans MS" size="5">r1</font><font size="5">和</font><font face="Comic Sans MS" size="5">r2</font><font size="5">指向的两个串首尾相连成一个新串</font><font face="Comic Sans MS" size="5">r</font><font size="5">，其中</font><font face="Comic Sans MS" size="5">r1</font><font size="5">在前，</font><font face="Comic Sans MS" size="5">r2</font><font size="5">在</font></font><font face="Comic Sans MS" size="5">PLinkString ConcatStr_link(PLinkString r1,PLinkString r2)<br> 
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PStrNode p, q, s;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PLinkString r;<br> 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#008000"> //</font></font><font color="#008000"></font><font size="5"><font color="#008000">创建一个带头结点的新空链串</font><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5">&nbsp;&nbsp;&nbsp; 
+</font><font face="Comic Sans MS" size="5">r = CreateNULLStr_link();<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (r== NULL)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printf("</font><font size="5">没有足够的空间</font><font face="Comic Sans MS" size="5">!\n");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; q = r; <font color="#008000">              //q</font></font><font color="#008000"></font><font size="5"><font color="#008000">指向头结点</font><br>
+<br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;</font><font size="5"> 
+</font><font color="#008000"><font face="Comic Sans MS" size="5">//</font><font size="5">将</font><font face="Comic Sans MS" size="5">r1</font><font size="5">复制到</font></font><font face="Comic Sans MS" size="5"><font color="#008000">r</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p = r1->link; 
+<font color="#008000">                                //p</font></font><font color="#008000"><font size="5">指向</font><font face="Comic Sans MS" size="5">r1</font></font><font size="5"><font color="#008000">的第一个结点</font><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+</font><font face="Comic Sans MS" size="5">while (p)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+//</font><font size="5">为</font><font face="Comic Sans MS" size="5">r</font><font size="5">申请新结点<br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+</font><font face="Comic Sans MS" size="5">s = (PStrNode)malloc(sizeof(struct StrNode));<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+if (!s)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+</font><font face="Comic Sans MS" size="5">printf("</font><font size="5">没有足够空间</font><font face="Comic Sans MS" size="5">!\n");&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+q->link = NULL;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+return r;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#008000">//</font></font><font color="#008000"><font size="5">加入</font><font face="Comic Sans MS" size="5">r1</font><font size="5">的一个结点到</font><font face="Comic Sans MS" size="5">r</font><font size="5">，</font><font face="Comic Sans MS" size="5">q</font><font size="5">始终指向</font><font face="Comic Sans MS" size="5">r</font><font size="5">的最后一个结点&nbsp;<br>
+</font></font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5" color="#008000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+</font><font face="Comic Sans MS" size="5">s->c = p->c;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+q->link = s;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+q = s;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+p = p->link;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#008000">//</font></font><font color="#008000"><font size="5">将</font><font face="Comic Sans MS" size="5">r2</font><font size="5">复制到</font></font><font face="Comic Sans MS" size="5"><font color="#008000">r</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p = r2->link;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; while (p)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#008000">//</font></font><font color="#008000"><font size="5">为</font><font face="Comic Sans MS" size="5">r</font><font size="5">申请新结点<br>
+</font></font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5" color="#008000">&nbsp;&nbsp;&nbsp;&nbsp; 
+</font><font face="Comic Sans MS" size="5">s = (PStrNode)malloc(sizeof(struct StrNode));<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (!s)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font face="Comic Sans MS" size="5"> 
+printf("</font><font size="5">没有足够空间</font><font face="Comic Sans MS" size="5">!\n");&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; q->link = NULL;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return r;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }&nbsp;<br>
+&nbsp;&nbsp;&nbsp; <font color="#008000">//</font></font><font color="#008000"><font size="5">加入</font><font face="Comic Sans MS" size="5">r2</font><font size="5">的一个结点到</font><font face="Comic Sans MS" size="5">r</font><font size="5">，</font><font face="Comic Sans MS" size="5">q</font><font size="5">始终指向</font><font face="Comic Sans MS" size="5">r</font><font size="5">的最后一个结点&nbsp;<br>
+</font></font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5" color="#008000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+</font><font face="Comic Sans MS" size="5">s->c = p->c;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; q->link = s;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; q = s;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p = p->link;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; q->link = NULL;&nbsp;<font color="#008000"> 
+//</font></font><font color="#008000"><font size="5">最后结点指针项为空<br>
+</font></font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5" color="#008000">&nbsp;&nbsp; 
+</font><font face="Comic Sans MS" size="5">}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return r;</font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0"><b><font face="Comic Sans MS" size="5">}<br>
+<br>
+<br>
+<font color="#008000">//</font></font><font color="#008000"><font size="5">取子串</font><font face="Comic Sans MS" size="5">(</font><font size="5">从</font><font face="Comic Sans MS" size="5">s</font><font size="5">中第</font><font face="Comic Sans MS" size="5">i</font><font size="5">个字符开始的连续</font><font face="Comic Sans MS" size="5">j</font><font size="5">个字符构成的子串</font></font><font face="Comic Sans MS" size="5"><font color="#008000">)<br>
+</font>PLinkString SubStr_link( PLinkString s, int i, int j )<br> 
+{<br>
+&nbsp;&nbsp;&nbsp; PLinkString s1;<br> 
+&nbsp;&nbsp;&nbsp; PStrNode p, q, t;<br> 
+&nbsp;&nbsp;&nbsp; int k;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font face="Comic Sans MS" size="5"> 
+<font color="#008000">//</font></font><font color="#008000"><font size="5">创建带头结点新串</font></font><font face="Comic Sans MS" size="5"><font color="#008000">s1</font><br>
+&nbsp;&nbsp;&nbsp; s1 = CreateNULLStr_link();<br> 
+&nbsp;&nbsp;&nbsp; if (!s1)<br> 
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printf("</font><font size="5">没有足够的空间</font><font face="Comic Sans MS" size="5">!\n");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return NULL;<br> 
+&nbsp;&nbsp;&nbsp; }<br>
+<br>
+&nbsp;&nbsp;&nbsp; <font color="#008000">//</font></font><font color="#008000"><font size="5">如果</font><font face="Comic Sans MS" size="5">i,j</font></font><font size="5"><font color="#008000">值不合法，返回空串</font><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5"> 
+</font><font face="Comic Sans MS" size="5">if ( i &lt; 1 || j &lt; 1)     return s1;<br> 
+<br>
+&nbsp;&nbsp;&nbsp; <font color="#008000">//</font></font><font color="#008000"><font size="5">从头结点开始找第</font><font face="Comic Sans MS" size="5">i</font></font><font size="5"><font color="#008000">个结点</font><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5"> 
+</font><font face="Comic Sans MS" size="5">p = s; <font color="#008000">                                //p</font></font><font color="#008000"><font size="5">指向头结点<br>
+</font></font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5" color="#008000"> 
+</font><font face="Comic Sans MS" size="5">for (k = 1; k &lt;= i; k++)&nbsp; <font color="#008000">//</font></font><font color="#008000"><font size="5">找第</font><font face="Comic Sans MS" size="5">i</font><font size="5">个结点<br>
+</font></font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5" color="#008000"> 
+</font><font face="Comic Sans MS" size="5">{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (p!=NULL)        p = p->link;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else          return s1;<br> 
+&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; if (p==NULL)      return s1;<br> 
+<br>
+&nbsp;&nbsp;&nbsp; <font color="#008000">//</font></font><font color="#008000"><font size="5">从</font><font face="Comic Sans MS" size="5">s1</font><font size="5">的头结点开始连续取</font><font face="Comic Sans MS" size="5">j</font></font><font size="5"><font color="#008000">个字符</font><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5"> 
+</font><font face="Comic Sans MS" size="5">t = s1; <font color="#008000">                            //t</font></font><font color="#008000"><font size="5">指向</font><font face="Comic Sans MS" size="5">s1</font><font size="5">的头结点<br>
+</font></font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5" color="#008000"> 
+</font><font face="Comic Sans MS" size="5">for (k = 1; k&lt;=j; k++)<font color="#008000">    //</font></font><font color="#008000"><font size="5">连续取</font><font face="Comic Sans MS" size="5">j</font><font size="5">个字符<br>
+</font></font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5" color="#008000"> 
+</font><font face="Comic Sans MS" size="5">{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (p!=NULL)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#008000">&nbsp;&nbsp;&nbsp;</font> 
+<font color="#008000">//s1</font></font><font color="#008000"><font size="5">的新结点<br>
+</font></font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5" color="#008000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;</font><font size="5" color="#008000"> 
+</font><font face="Comic Sans MS" size="5">q = (PStrNode)malloc(sizeof(struct StrNode));<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (q==NULL)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+printf("</font><font size="5">没有足够的空间</font><font face="Comic Sans MS" size="5">!\n");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+break;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#008000">//</font></font><font color="#008000"><font size="5">将</font><font face="Comic Sans MS" size="5">p</font><font size="5">指向的结点加入到</font><font face="Comic Sans MS" size="5">s1</font><font size="5">中，</font><font face="Comic Sans MS" size="5">t</font><font size="5">始终指向</font><font face="Comic Sans MS" size="5">s1</font></font><font size="5"><font color="#008000">的最后结点</font><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+</font><font face="Comic Sans MS" size="5">q->c = p->c;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; q->link = NULL;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t->link = q;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t = q;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p = p->link;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; return s1;<br> 
+}&nbsp;<br>
+<br>
+<br>
+<font color="#008000">//</font></font><font color="#008000"><font size="5">删除子串（从串</font><font face="Comic Sans MS" size="5">r</font><font size="5">中删除从第</font><font face="Comic Sans MS" size="5">i</font><font size="5">个字符开始的连续</font><font face="Comic Sans MS" size="5">j</font><font size="5">个字符）<br>
+</font></font><font face="Comic Sans MS" size="5">void DelSubString_link( PLinkString r, int i, int j )<br> 
+{<br>
+&nbsp;&nbsp;&nbsp; int k;<br> 
+&nbsp;&nbsp;&nbsp; PStrNode p, q, s;<br> 
+<br>
+&nbsp;&nbsp;&nbsp; q = r; <font color="#008000">          //q</font></font><font color="#008000"><font size="5">指向</font><font face="Comic Sans MS" size="5">r</font></font><font size="5"><font color="#008000">的头结点</font><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5"> 
+</font><font face="Comic Sans MS" size="5">p = q->link; <font color="#008000">          //p</font></font><font color="#008000"><font size="5">指向</font><font face="Comic Sans MS" size="5">r</font></font><font size="5"><font color="#008000">的第一个结点</font><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5"> 
+</font><font face="Comic Sans MS" size="5">k = 1;<br> 
+&nbsp;&nbsp;&nbsp; while ( k &lt; i &amp;&amp; p != NULL )<br> 
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; q = p; <font color="#008000">       //q</font></font><font color="#008000"><font size="5">指向</font><font face="Comic Sans MS" size="5">p</font></font><font size="5"><font color="#008000">的前一个结点</font><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5">&nbsp;&nbsp;&nbsp; 
+</font><font face="Comic Sans MS" size="5">p = p->link;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; k++;<br>
+&nbsp;&nbsp;&nbsp; }<br>
+<br>
+&nbsp;&nbsp;&nbsp; if (p==NULL)        printf("i</font><font size="5">值不合法</font><font face="Comic Sans MS" size="5">!\n");<br>
+&nbsp;&nbsp;&nbsp; else <font color="#008000">                               //</font></font><font color="#008000"><font size="5">此时</font><font face="Comic Sans MS" size="5">p</font><font size="5">指向第</font><font face="Comic Sans MS" size="5">i</font><font size="5">个结点，</font><font face="Comic Sans MS" size="5">q</font></font><font size="5"><font color="#008000">指向其前驱结点</font>&nbsp;<br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5"> 
+</font><font face="Comic Sans MS" size="5">{<br>
+&nbsp;&nbsp;&nbsp; <font color="#008000">//</font></font><font color="#008000"><font size="5">查找</font><font face="Comic Sans MS" size="5">j</font><font size="5">个结点之后的结点<br>
+</font></font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5" color="#008000">&nbsp;&nbsp;&nbsp; 
+</font><font face="Comic Sans MS" size="5">k = 1;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; while ( k &lt; j  &amp;&amp;  p != NULL )<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p = p->link;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; k++;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (p==NULL)        printf("j</font><font size="5">值不合法！</font><font face="Comic Sans MS" size="5">\n");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else <font color="#008000">                                         //</font></font><font color="#008000"><font size="5">此时</font><font face="Comic Sans MS" size="5">p</font></font><font size="5"><font color="#008000">指向最后一个要删除的结点</font><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5">&nbsp;</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp; 
+</font><font face="Comic Sans MS" size="5">{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; s = q->link; <font color="#008000">                     //s</font></font><font color="#008000"></font><font size="5"><font color="#008000">指向要删除的子串的第一个结点</font><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5">&nbsp;&nbsp;&nbsp;&nbsp;</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5"> 
+</font><font face="Comic Sans MS" size="5">q->link = p->link; <font color="#008000">              //</font></font><font color="#008000"><font size="5">删除子串</font><font face="Comic Sans MS" size="5">[ 
+</font><font size="5"> 尚未完全删除</font></font><font face="Comic Sans MS" size="5"><font color="#008000">]</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p->link = NULL; 
+<font color="#008000">                //</font></font><font color="#008000"></font><font size="5"><font color="#008000">为要删除的子串设置结束标志</font><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5">&nbsp;&nbsp;&nbsp;&nbsp;</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5"> 
+</font><font face="Comic Sans MS" size="5">while ( s != NULL ) <font color="#008000">           //</font></font><font color="#008000"></font><font size="5"><font color="#008000">完全删除 子串中所有结点</font><br> 
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5">&nbsp;&nbsp;&nbsp;&nbsp;</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5"> 
+</font><font face="Comic Sans MS" size="5">{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+p = s->link;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+free(s);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+s = p;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; }<br>
+}<br>
+<br>
+<br>
+<font color="#008000">//</font></font><font color="#008000"><font size="5">插入子串（把串</font><font face="Comic Sans MS" size="5">r1</font><font size="5">插入到</font><font face="Comic Sans MS" size="5">r</font><font size="5">中第</font><font face="Comic Sans MS" size="5">i</font><font size="5">个字符开始的位置上）<br>
+</font></font><font face="Comic Sans MS" size="5">int InsertSubStr_link( PLinkString r, int i, PLinkString r1 )<br> 
+{<br>
+&nbsp;&nbsp;&nbsp; int k;<br> 
+&nbsp;&nbsp;&nbsp; PStrNode p,p1,q,s;<br> 
+<br>
+&nbsp;&nbsp;&nbsp; <font color="#008000">//</font></font><font color="#008000"><font size="5">寻找第</font><font face="Comic Sans MS" size="5">i</font><font size="5">个结点<br>
+</font></font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5" color="#008000"> 
+</font><font face="Comic Sans MS" size="5">p = r;<br> 
+&nbsp;&nbsp;&nbsp; k = 1;<br> 
+&nbsp;&nbsp;&nbsp; while ( k &lt; i  &amp;&amp; p != NULL )<br> 
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p = p->link;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; k++;<br>
+&nbsp;&nbsp;&nbsp; }<br>
+<br>
+&nbsp;&nbsp;&nbsp; if ( p == NULL)&nbsp;<br>
+&nbsp;&nbsp;&nbsp; {&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printf("i</font><font size="5">位置不合法</font><font face="Comic Sans MS" size="5">!\n");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return (0);<br> 
+&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; else<br>
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p1=p->link;&nbsp;<br>
+&nbsp;&nbsp;&nbsp; <font color="#008000">//</font></font><font color="#008000"><font size="5">此时</font><font face="Comic Sans MS" size="5">p</font><font size="5">指向第</font><font face="Comic Sans MS" size="5">i</font></font><font size="5"><font color="#008000">个结点</font><br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5">&nbsp;&nbsp; 
+</font><font face="Comic Sans MS" size="5">q = r1->link;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; while (q!=NULL)&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#008000">//</font></font><font color="#008000"><font size="5">为</font><font face="Comic Sans MS" size="5">r</font><font size="5">申请新结点<br>
+</font></font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5" color="#008000">&nbsp;&nbsp;&nbsp;&nbsp; 
+</font><font face="Comic Sans MS" size="5">s = (PStrNode)malloc(sizeof(struct StrNode));<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (s==NULL)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+printf("</font><font size="5">没有足够空间</font><font face="Comic Sans MS" size="5">!\n");&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+return (0);<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font face="Comic Sans MS" size="5">&nbsp;<br>
+&nbsp;&nbsp;&nbsp; <font color="#008000">//</font></font><font color="#008000"><font size="5">加入</font><font face="Comic Sans MS" size="5">r1</font><font size="5">的一个结点到</font><font face="Comic Sans MS" size="5">r</font><font size="5">，</font><font face="Comic Sans MS" size="5">p</font><font size="5">始终指向</font><font face="Comic Sans MS" size="5">r</font><font size="5">的最后一个结点&nbsp;<br>
+</font></font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5" color="#008000">&nbsp;</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5" color="#008000">&nbsp;&nbsp;&nbsp; 
+</font><font face="Comic Sans MS" size="5">s->c = q->c;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p->link = s;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p = s;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; q = q->link;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p->link=p1;<br>
+&nbsp;&nbsp;&nbsp; }&nbsp;<br>
+&nbsp;&nbsp;&nbsp; return (1);<br> 
+}<br>
+<br>
+<br>
+&nbsp;&nbsp;&nbsp; <font color="#008000">//</font></font><font color="#008000"><font size="5">求串长<br>
+</font></font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5" color="#008000"> 
+</font><font face="Comic Sans MS" size="5">int LenStr_link( PLinkString s )<br> 
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PStrNode p;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; int k;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#008000">//p</font></font><font color="#008000"><font size="5">指向</font><font face="Comic Sans MS" size="5">s</font><font size="5">的第一个结点<br>
+</font></font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5" color="#008000">&nbsp;&nbsp;&nbsp; 
+</font><font face="Comic Sans MS" size="5">p = s->link;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; k = 0;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; while (p!=NULL)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p = p->link;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; k++;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return k;<br> 
+&nbsp;&nbsp;&nbsp; }<br>
+<br>
+<br>
+<font color="#008000">//</font></font><font color="#008000"><font size="5">子串定位</font><font face="Comic Sans MS" size="5">[</font><font size="5">模式匹配</font><font face="Comic Sans MS" size="5">]</font><font size="5">（ 求</font><font face="Comic Sans MS" size="5">r1</font><font size="5">中首次与</font><font face="Comic Sans MS" size="5">r2</font><font size="5">相同子串的起始位置，如果不存在这样的子串返回</font><font face="Comic Sans MS" size="5">0</font><font size="5">）<br>
+</font></font><font face="Comic Sans MS" size="5">int  LocSubStr_link( PLinkString r1, PLinkString r2 )<br> 
+{<br>
+&nbsp;&nbsp;&nbsp; PStrNode p, p1, q, q1,p2;<br> 
+&nbsp;&nbsp;&nbsp; int i = 1;<br> 
+<br>
+<font color="#008000">       //p</font></font><font color="#008000"><font size="5">指向</font><font face="Comic Sans MS" size="5">r1</font><font size="5">的第一个结点</font><font face="Comic Sans MS" size="5">, 
+</font><font size="5"> 循环扫描</font><font face="Comic Sans MS" size="5">r1</font><font size="5">的每个结点<br>
+</font></font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5" color="#008000"> 
+</font><font face="Comic Sans MS" size="5">p = r1->link;<br> 
+&nbsp;&nbsp;&nbsp; while (p != NULL)<br> 
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p2=p->link;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<font color="#008000">&nbsp;&nbsp;&nbsp;</font> <font color="#008000">//q</font></font><font color="#008000"><font size="5">指向</font><font face="Comic Sans MS" size="5">r2</font><font size="5">的第一个结点</font><font face="Comic Sans MS" size="5">, 
+</font><font size="5"> 依次扫描</font><font face="Comic Sans MS" size="5">r2</font><font size="5">的每个结点<br>
+</font></font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5" color="#008000">&nbsp;&nbsp;&nbsp; 
+</font><font face="Comic Sans MS" size="5">q = r2->link;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#008000">//</font></font><font color="#008000"><font size="5">判断</font><font face="Comic Sans MS" size="5">p</font><font size="5">与</font><font face="Comic Sans MS" size="5">q</font><font size="5">是否相同</font><font face="Comic Sans MS" size="5">,</font><font size="5">如果相同</font><font face="Comic Sans MS" size="5">,</font><font size="5">则继续判断后面的结点是否也相同<br>
+</font></font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5">&nbsp;&nbsp;&nbsp; 
+</font><font face="Comic Sans MS" size="5">while (q != NULL &amp;&amp; p->c == q->c)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p1 = p->link;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; q1 = q->link;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p=p1;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; q=q1;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<font color="#008000">&nbsp;&nbsp;&nbsp;</font> <font color="#008000">//</font></font><font color="#008000"><font size="5">如果</font><font face="Comic Sans MS" size="5">r2</font><font size="5">已经结束，表示匹配成功</font><font face="Comic Sans MS" size="5">!</font><font size="5">直接返回</font><font face="Comic Sans MS" size="5">r1</font><font size="5">中子串</font><font face="Comic Sans MS" size="5">r2</font><font size="5">的起始位置。<br>
+</font></font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5" color="#008000">&nbsp;&nbsp;&nbsp; 
+</font><font face="Comic Sans MS" size="5">if ( q== NULL)    return i;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#008000">//</font></font><font color="#008000"><font size="5">继续</font><font face="Comic Sans MS" size="5">r1</font><font size="5">的下一个结点<br>
+</font></font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;</font><font size="5" color="#008000">&nbsp;&nbsp;&nbsp; 
+</font><font face="Comic Sans MS" size="5">{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p = p2;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i++;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; return i;<br> 
+}<br>
+<br>
+</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font face="Comic Sans MS" size="5" color="#008000">//</font><font size="5" color="#008000">打印链串的每一个结点</font><font face="Comic Sans MS" size="5"><br>
+int print (PLinkString pst)<br> 
+{<br>
+&nbsp;&nbsp;&nbsp; PStrNode p;<br> 
+&nbsp;&nbsp;&nbsp; p=pst->link;<br>
+&nbsp;&nbsp;&nbsp; while (p!=NULL)<br> 
+&nbsp;&nbsp;&nbsp; {&nbsp;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp;&nbsp; 
+</font><font face="Comic Sans MS" size="5">printf ("  %c",p->c);<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p=p->link;<br>
+&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; printf ("\n");<br> 
+&nbsp;&nbsp;&nbsp; return (0);<br> 
+}</font></b></p>
+
+</body>
+
+</html>

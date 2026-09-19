@@ -1,0 +1,77 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>Prim算法</title>
+</head>
+
+<body>
+
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0" align="center"><font size="7" face="华文新魏" color="#008000"><b>Prim算法</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="center">　</p>
+<p style="margin-top: 0; margin-bottom: 0" align="center">　</p>
+<p style="margin-top: 0; margin-bottom: 0" align="center">　</p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">void prim(Graph * pGraph, Edge mst[])<br> 
+{&nbsp;<br>
+&nbsp;&nbsp;&nbsp; int&nbsp; i, j, min, vx, vy;<br> 
+&nbsp;&nbsp;&nbsp; float&nbsp;&nbsp;&nbsp;&nbsp; weight, minweight;<br> 
+&nbsp;&nbsp;&nbsp; Edge&nbsp;&nbsp;&nbsp;&nbsp;  edge;<br> 
+&nbsp;&nbsp;&nbsp; for(i=0; i&lt;pGraph->n-1; i++)<br> 
+&nbsp;&nbsp;&nbsp; {&nbsp;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp; 
+mst[i].start_vex=0;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; mst[i].stop_vex=i+1;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; mst[i].weight=pGraph->arcs[0][i+1];&nbsp;<br>
+&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; for(i=0; i&lt;pGraph->n-1; i++)&nbsp;&nbsp;&nbsp;&nbsp;<font color="#008000"> 
+/* </font></font><font color="#008000"><font size="5"> 共</font><font size="5" face="Comic Sans MS">n-1</font><font size="5">条边 
+</font></font><font size="5" face="Comic Sans MS"><font color="#008000"> */</font><br>
+&nbsp;&nbsp;&nbsp; {&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; minweight=MAX;    min=i;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#008000">/* 
+</font></font><font color="#008000"><font size="5"> 从所有边</font><font size="5" face="Comic Sans MS">(vx,vy)(vx∈U,vy∈V-U)</font><font size="5">中选出最短的边 
+</font></font><font size="5" face="Comic Sans MS"><font color="#008000"> */</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; for(j=i; j&lt;pGraph->n-1; j++)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(mst[j].weight&lt;minweight)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+minweight=mst[j].weight;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+min = j;</font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#008000">/* mst[min]</font></font><font color="#008000"><font size="5">是最短的边</font><font size="5" face="Comic Sans MS">(vx,vy)(vx∈U, vy∈V-U)</font><font size="5">，</font><font size="5" face="Comic Sans MS">*/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* </font><font size="5"> 将</font><font size="5" face="Comic Sans MS">mst[min]</font><font size="5">加入最小生成树 
+</font></font><font size="5" face="Comic Sans MS"><font color="#008000">                                  */<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>edge=mst[min];     mst[min]=mst[i];      mst[i]=edge;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; vx=mst[i].stop_vex;&nbsp;&nbsp;&nbsp; 
+<font color="#008000">/* vx</font></font><font color="#008000"><font size="5">为刚加入最小生成树的顶点下标 
+</font></font><font size="5" face="Comic Sans MS"><font color="#008000"> */</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; for(j=i+1; j&lt;pGraph->n-1; j++)  /* 
+</font><font size="5"> 调整</font><font size="5" face="Comic Sans MS">mst[i+1]</font><font size="5">到</font><font size="5" face="Comic Sans MS">mst[n-1] */<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font size="5" face="Comic Sans MS"> 
+vy=mst[j].stop_vex;&nbsp;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+</font><font size="5" face="Comic Sans MS">weight=pGraph->arcs[vx][vy];<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(weight&lt;mst[j].weight)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {&nbsp;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+</font><font size="5" face="Comic Sans MS">mst[j].weight=weight;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+</font><font size="5" face="Comic Sans MS">mst[j].start_vex=vx;&nbsp;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+</font><font size="5" face="Comic Sans MS">}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; }<br>
+}</font></b><br>
+</p>
+
+</body>
+
+</html>

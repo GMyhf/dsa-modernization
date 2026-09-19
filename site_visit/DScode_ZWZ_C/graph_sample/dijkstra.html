@@ -1,0 +1,89 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="zh-cn">
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>Dijkstra算法</title>
+</head>
+
+<body>
+
+<p align="center" style="margin-top: 0; margin-bottom: 0">　</p>
+<p align="center" style="margin-top: 0; margin-bottom: 0">　</p>
+<p align="center" style="margin-top: 0; margin-bottom: 0">　</p>
+<p align="center" style="margin-top: 0; margin-bottom: 0"><b><font face="华文新魏" size="7" color="#008000">Dijkstra算法</font></b></p>
+<p align="center" style="margin-top: 0; margin-bottom: 0">　</p>
+<p align="center" style="margin-top: 0; margin-bottom: 0">　</p>
+<p align="center" style="margin-top: 0; margin-bottom: 0">　</p>
+<p align="left" style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">#define  
+MAX 1e+38</font></b></p> 
+<p align="left" style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">void dijkstra(Graph graph, Path dist[])<br>  
+{&nbsp;</font></b></p>
+<p align="left" style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS"> 
+int&nbsp; i, j, minvex;<br>  
+&nbsp;&nbsp;&nbsp; AdjType min;<br>  
+&nbsp;&nbsp;&nbsp; dist[0].length=0;<br> 
+&nbsp;&nbsp;&nbsp; dist[0].prevex=0;<br> 
+&nbsp;&nbsp;&nbsp; dist[0].vertex=graph.vexs[0];<br> 
+&nbsp;&nbsp;&nbsp; graph.arcs[0][0]=1;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#008000">/*  
+</font></font><font color="#008000"><font size="5"> 表示顶点</font><font size="5" face="Comic Sans MS">v<sub>0</sub></font><font size="5">在集合</font><font size="5" face="Comic Sans MS">U</font><font size="5">中  
+</font></font><font size="5" face="Comic Sans MS"><font color="#008000"> */</font><br>
+&nbsp;&nbsp;&nbsp;</font><font size="5"> </font><font size="5" face="Comic Sans MS">for(i=1; i&lt;graph.n; i++)&nbsp;&nbsp;&nbsp;<font color="#008000">  
+/* </font></font><font color="#008000"><font size="5"> 初始化集合</font><font size="5" face="Comic Sans MS">V-U</font><font size="5">中顶点的距离值  
+</font></font><font size="5" face="Comic Sans MS"><font color="#008000"> */</font><br>
+&nbsp;&nbsp;&nbsp; {&nbsp;</font></b></p> 
+<p align="left" style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;  
+dist[i].length=graph.arcs[0][i];<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; dist[i].vertex=graph.vexs[i];<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(dist[i].length!=MAX)    dist[i].prevex=0;<br>  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else dist[i].preve= -1;<br>  
+&nbsp;&nbsp;&nbsp; }</font></b></p> 
+<p align="left" style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;  
+for(i=1; i&lt;graph.n; i++)<br>  
+&nbsp;&nbsp;&nbsp; {&nbsp;</font></b></p> 
+<p align="left" style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;  
+min=MAX;&nbsp;&nbsp;&nbsp;&nbsp; minvex=0;<br>  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; for(j=1; j&lt;graph.n; j++)&nbsp;&nbsp;&nbsp;  
+<font color="#008000">/*</font></font><font color="#008000"><font size="5">在</font><font size="5" face="Comic Sans MS">V-U</font><font size="5">中选出距离值最小顶点</font></font><font size="5" face="Comic Sans MS"><font color="#008000">*/</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if( (graph.arcs[j][j]==0) &amp;&amp; (dist[j].length&lt;min) )<br>  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {&nbsp;</font></b></p> 
+<p align="left" style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+min=dist[j].length;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; minvex=j;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(minvex==0) 	break;&nbsp;&nbsp;&nbsp;&nbsp;  
+<font color="#008000">/* </font></font><font color="#008000"><font size="5"> 从</font><font size="5" face="Comic Sans MS">v<sub>0</sub></font><font size="5">没有路径可通往集合</font><font size="5" face="Comic Sans MS">V-U</font><font size="5">中的顶点  
+</font></font><font size="5" face="Comic Sans MS"><font color="#008000"> */</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; graph.arcs[minvex][minvex]=1;&nbsp;&nbsp;&nbsp;&nbsp;  
+<font color="#008000">/* V-U</font></font><font color="#008000"><font size="5">路径最小顶点</font></font><font size="5" face="Comic Sans MS"><font color="#008000">minvex */</font><br>  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; for(j=1; j&lt;graph.n; j++)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#008000">  
+/* </font></font><font color="#008000"><font size="5"> 调整集合</font><font size="5" face="Comic Sans MS">V-U</font><font size="5">中的顶点的最短路径  
+</font></font><font size="5" face="Comic Sans MS"><font color="#008000"> */</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {</font></b></p> 
+<p align="left" style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+if(graph.arcs[j][j]==1)        continue;<br>  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(dist[j].length>dist[minvex].length+graph.arcs[minvex][j])<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {&nbsp;</font></b></p> 
+<p align="left" style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+dist[j].length = dist[minvex].length+graph.arcs[minvex][j];<br>  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+dist[j].prevex = minvex;<br>  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br> 
+&nbsp;&nbsp;&nbsp; }<br> 
+}<br>
+</font></b></p>
+
+<p align="left" style="margin-top: 0; margin-bottom: 0">　</p>
+
+<p align="left" style="margin-top: 0; margin-bottom: 0"><b><font size="5">算法初始化部分的时间复杂度为</font><font size="5" face="Comic Sans MS">O(n)</font><font size="5">，求最短路径部分由一个大循环组成，其中外循环运行</font><font size="5" face="Comic Sans MS">n-1</font><font size="5">次，内循环为两个，均运行</font><font size="5" face="Comic Sans MS">n-1</font><font size="5">次。</font></b></p>
+
+<p align="left" style="margin-top: 0; margin-bottom: 0"><b><font size="5">算法的时间复杂度为</font><font size="5" face="Comic Sans MS">O(n<sup>2</sup>)
+<br>
+</font></b></p>
+
+</body>
+
+</html>

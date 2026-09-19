@@ -1,0 +1,237 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>New Page 1</title>
+</head>
+
+<body bgcolor="#000000" text="#FFFFFF">
+
+<p>　</p>
+<p align="center" style="margin-top: 0; margin-bottom: 0"><b><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><font face="华文新魏" size="7" color="#33CC33">根据非纯集合<span lang="EN-US" style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体; mso-fareast-language: ZH-CN">B</span></font></span></b></p>
+<p align="center" style="margin-top: 0; margin-bottom: 0"><b><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><font face="华文新魏" size="7" color="#33CC33">构造一个纯集合<span lang="EN-US" style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体; mso-fareast-language: ZH-CN">A</span>的单链表实现</font></span></b><b><font face="华文新魏" size="7" color="#33CC33"><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体">2</span></font></b></p>
+<p align="center" style="margin-top: 0; margin-bottom: 0">　</p>
+<p align="left" style="margin-top: 0; margin-bottom: 0">　</p>
+<p align="left" style="margin-top: 0; margin-bottom: 0">　</p>
+<p align="left" style="margin-top: 0; margin-bottom: 0"><font face="Comic Sans MS"><b><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><font color="#33CC33" size="5">/*******************************************************************</font></span></b></font></p>
+<p align="left" style="margin-top: 0; margin-bottom: 0"><font size="5" color="#33CC33"><b><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><span style="font-family: 宋体; mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体">已知一个非纯集合</span><span lang="EN-US" style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体; mso-fareast-language: ZH-CN">B</span><span style="font-family: 宋体; mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体">，构造一个纯集合</span><span lang="EN-US" style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体; mso-fareast-language: ZH-CN">A</span><span style="font-family: 宋体; mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体">，使</span><span lang="EN-US" style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体; mso-fareast-language: ZH-CN">A</span><span style="font-family: 宋体; mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体">中包含</span><span lang="EN-US" style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体; mso-fareast-language: ZH-CN">B</span><span style="font-family: 宋体; mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体">中各不相同的元素</span></span></b></font></p>
+<p:colorscheme
+ colors="#FFFFFF,#000000,#666699,#000000,#9BB0CB,#D1E0CE,#8EA642,#CCCC00"/>
+<p align="left" style="margin-top: 0; margin-bottom: 0"><font size="5" color="#33CC33" face="Comic Sans MS"><b><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体">********************************************************************</span></b></font></p>
+<p align="left" style="margin-top: 0; margin-bottom: 0">　</p>
+<p><b><font size="5" face="Comic Sans MS"># include "stdio.h"<br> 
+# include "malloc.h"<br> 
+typedef int DataType;<br> 
+#define SPECIAL 2147483647<br> 
+<br>
+struct Node;<br> 
+typedef struct Node *PNode;<br> 
+struct Node<br> 
+{&nbsp;</font></b></p>
+<p><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp; DataType info;<br> 
+&nbsp;&nbsp;&nbsp; PNode link;<br> 
+};<br>
+typedef struct Node *PLinkList;<br> 
+void purgelink (PLinkList palist,PLinkList pblist);<br> 
+PNode  find_link( PLinkList pllist, int i) ;<br> 
+int  insert_link( PLinkList pllist, int i, DataType x);<br> 
+int print (PLinkList pllist);<br> 
+PLinkList createNulllist_Link (void);<br> 
+int length_link(PLinkList pllist);<br> 
+int isNullList_link(PLinkList pllist);<br> 
+<br>
+main()<br>
+{&nbsp;<br>
+&nbsp;&nbsp;&nbsp; int i;<br> 
+&nbsp;&nbsp;&nbsp; PNode q,p;<br> 
+&nbsp;&nbsp;&nbsp; int b[10]={2,3,5,6,7,8,11,5,8,9};<br> 
+&nbsp;&nbsp;&nbsp; int lb=10;<br> 
+&nbsp;&nbsp;&nbsp; PLinkList palist,pblist;<br> 
+&nbsp;&nbsp;&nbsp; pblist=createNulllist_Link();<br>
+&nbsp;&nbsp;&nbsp; q=pblist;<br>
+<br>
+&nbsp;&nbsp;&nbsp; for (i=1;i&lt;lb+1;i++)<br> 
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p=(PNode)malloc(sizeof(struct Node));<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(p==NULL)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printf("out of space!!!\n");<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return(0);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p->info=b[i-1];<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; q->link=p;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; q=p;<br>
+&nbsp;&nbsp;&nbsp; }&nbsp;<br>
+&nbsp;&nbsp;&nbsp; q->link=NULL;<br>
+&nbsp;&nbsp;&nbsp; print (pblist);<br> 
+<br>
+&nbsp;&nbsp;&nbsp; palist=createNulllist_Link ( );<br> 
+&nbsp;&nbsp;&nbsp; purgelink(palist,pblist);<br>
+&nbsp;&nbsp;&nbsp; print (palist);<br> 
+&nbsp;&nbsp;&nbsp; return(1);<br>
+}<br>
+<br>
+<br>
+</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font color="#33CC33" size="5" face="Comic Sans MS">/***************************************************************</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" color="#33CC33">依次输出单链表</font><font size="5" face="Comic Sans MS" color="#33CC33">pllist</font><font size="5" color="#33CC33">每个结点的值,输出结束返回1</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS" color="#33CC33">***************************************************************/</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">int 
+print (PLinkList pllist)<br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp; PNode p;<br>
+&nbsp;&nbsp;&nbsp;&nbsp; p=pllist-&gt;link;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#33CC33"> 
+//</font></font><font color="#33CC33"><font size="5">初始化</font><font size="5" face="Comic Sans MS">p</font><font size="5">为的第一个结点</font></font><font color="#33CC33" size="5"><br>
+</font><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp; while 
+(p!=NULL)<br>
+&nbsp;&nbsp;&nbsp;&nbsp; {&nbsp;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+printf (&quot;&nbsp;&nbsp; %d &quot;,p-&gt;info);&nbsp;&nbsp;&nbsp;&nbsp; <font color="#33CC33">//</font></font><font color="#33CC33" size="5">输出结点</font><font size="5" face="Comic Sans MS" color="#33CC33">p</font><font color="#33CC33" size="5">的数据域<br>
+</font><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+p=p-&gt;link;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<font color="#33CC33">//P</font></font><font color="#33CC33" size="5">指向后继结点<br>
+</font><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp; printf (&quot;\n&quot;);<br>
+&nbsp;&nbsp;&nbsp;&nbsp; return (1);<br>
+}</font></b></p>
+<p>　</p>
+<p><b><font size="5" face="Comic Sans MS"><br>
+<font face="Comic Sans MS" size="5" color="#33CC33">/********************************************************************</font></font><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><font size="5" color="#33CC33">已知单链表</font></span><font face="Comic Sans MS" size="5" color="#33CC33"><span lang="EN-US" style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体; mso-fareast-language: ZH-CN">pblist</span></font><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><font size="5" color="#33CC33">中包含集合</font></span><font face="Comic Sans MS" size="5" color="#33CC33"><span lang="EN-US" style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体; mso-fareast-language: ZH-CN">B</span></font><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><font size="5" color="#33CC33">中所有元素，构造单链表</font></span><font size="5" face="Comic Sans MS"><font face="Comic Sans MS"><span lang="EN-US" style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体; mso-fareast-language: ZH-CN"><font color="#33CC33">palist</font></span></font><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><font color="#33CC33"><font face="Comic Sans MS"><span style="mso-fareast-language: ZH-CN" lang="EN-US">,</span></font></font></span></font><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><font color="#33CC33" size="5">使</font></span><font face="Comic Sans MS" size="5" color="#33CC33"><span lang="EN-US" style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体; mso-fareast-language: ZH-CN">palist</span></font><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><font size="5" color="#33CC33">中只包含</font></span><font face="Comic Sans MS" size="5" color="#33CC33"><span lang="EN-US" style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体; mso-fareast-language: ZH-CN">pblist</span></font><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><font size="5" color="#33CC33">中不同的元素。</font></span><font size="5" color="#33CC33"><br>
+</font><font size="5" face="Comic Sans MS"><font color="#33CC33" face="Comic Sans MS" size="5">********************************************************************/</font><br>
+void purgelink(PLinkList palist,PLinkList pblist)<br> 
+{&nbsp;<br>
+&nbsp;&nbsp;&nbsp; PNode q,qq; int i;<br> 
+&nbsp;&nbsp;&nbsp; DataType x,xn;<br> 
+&nbsp;&nbsp;&nbsp; int lb; int la=0;<br> 
+&nbsp;&nbsp;&nbsp; lb=length_link(pblist);<br>
+<br>
+&nbsp;&nbsp;&nbsp; for(i=0;i&lt;lb;i++)<br>
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; q=find_link(pblist,i);&nbsp;&nbsp;<font color="#33CC33"> 
+/*</font></font><font color="#33CC33"><font size="5">从线性表</font><font size="5" face="Comic Sans MS">B</font><font size="5">中依次取得每个元素</font></font><font size="5" face="Comic Sans MS"><font color="#33CC33">*/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>x=q->info;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (isNullList_Link(palist)||x!=xn)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; insert_link(palist,la,x) ;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; la++;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }&nbsp;&nbsp; <font color="#33CC33">//palist 
+</font></font><font color="#33CC33"><font size="5"> 中不存在和</font><font size="5" face="Comic Sans MS">x</font><font size="5">相同的元素，插入之<br>
+</font></font><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+xn=x;<br>
+&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+} <font color="#33CC33">// purgelink<br> 
+</font><br>
+<br>
+</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font color="#33CC33"><font size="5" face="Comic Sans MS">/******************************************************************</font><font size="5">在</font><font size="5" face="Comic Sans MS">pllist</font><font size="5">带头结点的单链表中求下标为</font><font size="5" face="Comic Sans MS">i</font><font size="5">的</font><font size="5" face="Comic Sans MS">(</font><font size="5">第</font><font size="5" face="Comic Sans MS">i+1)</font><font size="5">个结点的存储位置</font><font size="5" face="Comic Sans MS">,<br>
+</font><font size="5">当表中无下标为</font><font size="5" face="Comic Sans MS">i</font><font size="5">的</font><font size="5" face="Comic Sans MS">(</font><font size="5">第</font><font size="5" face="Comic Sans MS">i+1)</font><font size="5">元素时，返回值为</font><font size="5" face="Comic Sans MS">NULL&nbsp;</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS"><font color="#33CC33">*******************************************************************/<br>
+</font>PNode find_link( PLinkList pllist, int i)&nbsp;<br>
+{&nbsp;&nbsp;&nbsp;&nbsp; PNode p;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; int j;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(i&lt;0)&nbsp;&nbsp;&nbsp; <font color="#33CC33">/* 
+</font></font><font color="#33CC33"><font size="5">检查</font><font size="5" face="Comic Sans MS">i</font><font size="5">的值</font></font><font size="5" face="Comic Sans MS"><font color="#33CC33">*/<br>
+</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printf (&quot; The value 
+of i= %d is not reasonable. \n&quot;,i);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return(NULL);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p=pllist;<br>
+&nbsp;&nbsp;&nbsp;&nbsp; for(j=0; j&lt;=i;j++)<br>
+&nbsp;&nbsp;&nbsp;&nbsp; {&nbsp;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+p=p-&gt;link;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(p==NULL) return (NULL);<br>
+&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp; return(p);&nbsp;<br>
+}<br>
+<br>
+<br>
+</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font color="#33CC33"><font size="5" face="Comic Sans MS">/******************************************************************</font><font size="5">在</font><font size="5" face="Comic Sans MS">pllist</font><font size="5">带头结点的单链表中下标为</font><font size="5" face="Comic Sans MS">i(</font><font size="5">第</font><font size="5" face="Comic Sans MS">i+1</font><font size="5">个</font><font size="5" face="Comic Sans MS">)</font><font size="5">的结点前插入一个值为ｘ的元素，<br>
+并返回插入成功与否的标志。</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" color="#33CC33">*******************************************************************</font><font size="5" face="Comic Sans MS"><font color="#33CC33">/<br>
+</font>int insert_link( PLinkList pllist, int i, DataType x)&nbsp;<br>
+{&nbsp;<br>
+&nbsp;&nbsp;&nbsp; PNode p,q;<br>
+&nbsp;&nbsp;&nbsp; int j=0;<br>
+&nbsp;&nbsp;&nbsp; p= pllist;&nbsp;<br>
+&nbsp;&nbsp;&nbsp; while(p!=NULL &amp;&amp; j &lt;i)&nbsp;&nbsp;&nbsp;<font color="#33CC33"> 
+/*</font></font><font color="#33CC33"><font size="5">查找</font><font size="5" face="Comic Sans MS">i</font><font size="5">的前驱</font></font><font size="5" face="Comic Sans MS"><font color="#33CC33">*/<br>
+&nbsp;&nbsp;&nbsp; </font>{&nbsp;&nbsp;&nbsp;&nbsp;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+p=p-&gt;link;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+j++;&nbsp;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp; 
+}<br>
+&nbsp;&nbsp;&nbsp; if(j!=i)&nbsp;&nbsp;&nbsp;&nbsp; <font color="#33CC33">/*</font></font><font size="5" color="#33CC33">查找失败</font><font size="5" face="Comic Sans MS"><font color="#33CC33">*/</font><br>
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printf(&quot;i=%d is not 
+reasonable.\n&quot;,i);&nbsp;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+return 0;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp; }&nbsp;<br>
+&nbsp;&nbsp;&nbsp; q = (PNode)malloc( sizeof( struct Node ) );&nbsp;&nbsp;&nbsp;<font color="#33CC33"> 
+/*</font></font><font size="5" color="#33CC33">申请新结点</font><font size="5" face="Comic Sans MS"><font color="#33CC33">*/<br>
+&nbsp;&nbsp;&nbsp; </font>if ( q == NULL )&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#33CC33"> 
+/*</font></font><font size="5" color="#33CC33">申请失败</font><font size="5" face="Comic Sans MS"><font color="#33CC33">*/</font><br>
+&nbsp;&nbsp;&nbsp; {&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printf( &quot;Out of space!!!\n&quot; );&nbsp;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+return 0;&nbsp;<br>
+&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; else&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#33CC33"> /*</font></font><font size="5" color="#33CC33">插入链表中</font><font size="5" face="Comic Sans MS"><font color="#33CC33">*/<br>
+&nbsp;&nbsp;&nbsp; </font>{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; q-&gt;info = x;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; q-&gt;link = p-&gt;link;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p-&gt;link = q;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return 1;&nbsp;<br>
+&nbsp;&nbsp;&nbsp; }<br>
+}</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font color="#33CC33" size="5">/*******************************************************************创建一个带头结点的空链表</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font color="#33CC33" size="5">********************************************************************<font face="Comic Sans MS">/<br>
+</font></font><font face="Comic Sans MS" size="5">PLinkList createNulllist_Link 
+(void)<br>
+{&nbsp;<br>
+&nbsp;&nbsp;&nbsp; PLinkList pllist;<br>
+&nbsp;&nbsp;&nbsp; pllist =(PLinkList) malloc (sizeof(struct Node) ); <font color="#33CC33">/*</font></font><font size="5" color="#33CC33">申请表头结点空间</font><font face="Comic Sans MS" size="5"><font color="#33CC33">*/<br>
+&nbsp;&nbsp;&nbsp; </font>if(pllist!=NULL) pllist -&gt; link = NULL;<br>
+&nbsp;&nbsp;&nbsp; return (pllist);<br>
+}<br>
+<br>
+</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font color="#33CC33"><font face="Comic Sans MS" size="5">/******************************************************************* 
+</font><font size="5">求单链表</font><font face="Comic Sans MS" size="5">pllist</font><font size="5">的长度</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" color="#33CC33">*******************************************************************</font><font face="Comic Sans MS" size="5"><font color="#33CC33">/<br>
+</font>int length_link(PLinkList pllist)<br>
+{<br>
+&nbsp;&nbsp; PNode p;<br>
+&nbsp;&nbsp; int ll=0;&nbsp;<br>
+&nbsp;&nbsp; p=pllist-&gt;link;<br>
+&nbsp;&nbsp; while(p!=NULL)<br>
+&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p=p-&gt;link;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ll++;<br>
+&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; return(ll);<br>
+}<br>
+</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">int isNullList_link(PLinkList pllist)<br> 
+/* </font><font size="5"> 判断</font><font size="5" face="Comic Sans MS">pllist</font><font size="5">带有头结点的单链表是否为空</font><font size="5" face="Comic Sans MS">*/<br>
+{<br>
+	if(pllist==NULL)<br>
+		return(1);<br>
+	else<br>
+		return(pllist->link==NULL);<br>
+}<br>
+<br>
+</font></b></p>
+
+</body>
+
+</html>

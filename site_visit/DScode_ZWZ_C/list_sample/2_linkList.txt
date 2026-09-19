@@ -1,0 +1,88 @@
+//-------------------------------
+//linkList.h
+//-------------------------------
+
+/* 单链表结点类型 */
+struct  Node;
+typedef  struct Node  *PNode;	
+struct  Node 
+{ 
+	DataType  info;
+	PNode  link;
+};
+
+/* 单链表类型定义 */
+struct LinkList		
+{
+	PNode  head; //指向单链表中的第一个结点
+};
+
+typedef  struct LinkList  * PLinkList;	/* 指向单链表的指针类型 */
+
+
+/* 创建带头结点的空循环链表*/
+PLinkList  createNullList_clink( void )
+{ 
+	PLinkList pclist;
+  	PNode p;
+  	pclist = (PLinkList)malloc( sizeof( struct LinkList ) );
+  	if( pclist != NULL )
+  	{ 
+	 	p = (PNode)malloc(sizeof(struct Node));	/* 申请头结点 */
+   	  	if (p!=NULL)
+	 	{
+		  pclist->head = p;
+	   	  p->link = NULL;
+	  	}
+	 	else
+	     	  pclist->head = NULL;
+ 	 }
+  	else
+   	 	printf( "Out of space!!\n" );
+
+  	return pclist;
+}
+
+/* 在pclist所指的循环单链表中最后一个结点ｐ的后面插入元素ｘ */
+int  insert_clink( PLinkList pclist, DataType x, PNode p )
+{
+	PNode q;
+	q = (PNode)malloc( sizeof( struct Node ) );
+	if( q == NULL )
+	{
+		printf( "Out of space!!! \n" );
+	 	return ( FALSE );
+	}
+  	else
+	{
+	    q->info = x;
+  	    q->link = pclist->head->link;
+  	    p->link = q;
+	    return ( TRUE );
+         }
+}
+
+/* 求循环单链表中p指针所指向节点的后继 */
+PNode  next_clink( PNode p )
+{
+	return p->link; /////??????
+}
+
+/* 在带有头结点的循环单链表clist中求第i(i>0)个结点的位置 */
+PNode  find_clink( PLinkList pclist, int i )
+{ 
+	PNode p;
+	int j;
+	p = pclist->head->link;
+	if (i<1)
+	{
+	   printf("The value of i=%d is not reasonable.\n",i);
+	   return NULL;
+	}
+
+	if( p == NULL ) return NULL;
+
+ 	for ( j=1;j<i;j++ ) p = p->link; /////???
+	
+	return p;
+}

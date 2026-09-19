@@ -1,0 +1,67 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>表插入排序</title>
+</head>
+
+<body>
+
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p align="center" style="margin-top: 0; margin-bottom: 0"><b><font face="华文新魏" size="7" color="#008000">表插入排序</font></b></p>
+<p align="center" style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5"><br>
+</font><font color="#008000"><font size="5" face="Comic Sans MS">/* </font><font size="5"> 对链表按递增序进行表插入排序，链表中第一个结点为表头结点。 
+</font></font><font size="5" face="Comic Sans MS"><font color="#008000"> */</font><br>
+void listSort(LinkList * plist)&nbsp;<br>
+{<br>
+&nbsp;&nbsp;&nbsp; ListNode *now, *pre, *p, *q, *head;<br> 
+&nbsp;&nbsp;&nbsp; head=*plist;<br>
+&nbsp;&nbsp;&nbsp; pre=head->next;  now=pre->next;<br> 
+&nbsp;&nbsp;&nbsp; if(pre==NULL || now==NULL) return;</font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<font color="#008000">/* </font></font><font color="#008000"><font size="5"> 为空链表或链表中只有一个结点 
+</font></font><font size="5" face="Comic Sans MS"><font color="#008000"> */</font><br>
+&nbsp;&nbsp;&nbsp; while( now!=NULL)<br> 
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; q=head;		p=head->next;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; while(p!=now &amp;&amp; p->key&lt;=now->key)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {&nbsp;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+q=p;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+p=p->next;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+}&nbsp;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<font color="#008000">/* </font></font><font color="#008000"><font size="5"> 本循环结束时，已经找到了</font><font size="5" face="Comic Sans MS">now</font><font size="5">的插入位置 
+</font></font><font size="5" face="Comic Sans MS"><font color="#008000"> */</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(p==now)&nbsp;&nbsp;&nbsp; <font color="#008000">/* now</font></font><font color="#008000"><font size="5">应放在原位置 
+</font></font><font size="5" face="Comic Sans MS"><font color="#008000"> */</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+pre=pre->next;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+now=pre->next;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+continue;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pre->next=now->next;&nbsp;&nbsp;&nbsp;&nbsp; 
+<font color="#008000">/* </font></font><font color="#008000"><font size="5"> 使</font><font size="5" face="Comic Sans MS">now</font><font size="5">记录脱链 
+</font></font><font size="5" face="Comic Sans MS"><font color="#008000"> */</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; q->next=now;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; now->next=p;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#008000">&nbsp; 
+/* </font></font><font color="#008000"><font size="5"> 将</font><font size="5" face="Comic Sans MS">now</font><font size="5">记录插入链表中 
+</font></font><font size="5" face="Comic Sans MS"><font color="#008000"> */</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; now=pre->next;<br>
+&nbsp;&nbsp;&nbsp; }<br>
+}</font></b><br>
+</p>
+
+</body>
+
+</html>

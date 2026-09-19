@@ -1,0 +1,48 @@
+　
+////////////////////////////////////////////////
+//按宽度方向周游树的算法
+///////////////////////////////////////////////
+
+//核心：队列管理
+
+void levelOrder(Tree t)
+
+{  
+
+   Node c;
+
+   Queue q;          //队列元素的类型为Node
+
+   q = createEmptyQueue();     //建立空队列 
+
+   c = root(t);
+
+   if (c==NULL)    return;
+
+   enQueue(q, c);                  //根入队列
+
+   while (!isEmptyQueue(q))      //队列非空
+
+   {   c = frontQueue(q);             //访问并删除结点
+
+        deQueue(q);
+
+        visit(c);
+
+        c = leftChild(c);                 //获取该结点的长子
+
+          //然后将该结点的子女按照从左往右的次序加入队列
+
+        while (c!=NULL)
+
+        {  
+
+            enQueue(q, c);              //入队列
+
+            c = rightSibling(c);        //右兄弟
+
+        }
+
+   }
+
+}

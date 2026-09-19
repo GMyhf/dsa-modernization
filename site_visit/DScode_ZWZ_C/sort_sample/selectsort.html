@@ -1,0 +1,48 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>直接选择排序</title>
+</head>
+
+<body>
+
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p align="center" style="margin-top: 0; margin-bottom: 0"><b><font size="7" face="华文新魏" color="#339933">直接选择排序</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">void  selectSort(SortObject * pvector)  
+<font color="#339933">		  		/* </font></font><font color="#339933" size="5"> 按递增序进行直接选择排序  
+</font><font size="5" face="Comic Sans MS"><font color="#339933"> */</font><br>
+{<br>
+&nbsp;&nbsp;&nbsp; int i, j, k;<br>  
+&nbsp;&nbsp;&nbsp; RecordNode temp;<br>  
+&nbsp;&nbsp;&nbsp; for( i = 0; i &lt; pvector->n-1; i++ )&nbsp;&nbsp; <font color="#339933">/*  
+</font></font><font color="#339933" size="5">做</font><font size="5" face="Comic Sans MS" color="#339933">n-1</font><font color="#339933" size="5">趟选择排序</font><font size="5" face="Comic Sans MS"><font color="#339933">*/</font><br>
+&nbsp;&nbsp;&nbsp; {<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; k=i;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; for(j=i+1; j&lt;pvector->n; j++)&nbsp;</font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#339933"><font size="5" face="Comic Sans MS"> 
+/*</font><font size="5">在无序区内找出排序码最小的记录</font></font><font size="5" face="Comic Sans MS"><font color="#339933">R<sub>k</sub> 
+*/</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(pvector->record[j].key&lt;pvector->record[k].key)  k=j;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(k!=i)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<font color="#339933">/*</font></font><font color="#339933" size="5">记录</font><font color="#339933"><font size="5" face="Comic Sans MS">R<sub>k</sub> 
+</font><font size="5">与</font><font size="5" face="Comic Sans MS">R<sub>i </sub></font><font size="5">互换</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; temp=pvector->record[i];<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pvector->record [i]= pvector->record [k];<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pvector->record [k]=temp;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }&nbsp;<br>
+&nbsp;&nbsp;&nbsp; }<br>
+}</font></b></p>
+
+</body>
+
+</html>

@@ -1,0 +1,101 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>New Page 1</title>
+</head>
+
+<body>
+
+<p style="margin-top: 0; margin-bottom: 0"></p>
+
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+
+<p style="margin-top: 0; margin-bottom: 0" align="center"><b><font face="华文新魏" size="7" color="#008000">按先根次序周游树的算法</font></b></p>
+
+<p style="margin-top: 0; margin-bottom: 0" align="center">　</p>
+
+<p style="margin-top: 0; margin-bottom: 0" align="center">　</p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font color="#008000"><font size="5" face="Comic Sans MS">//</font><font size="5">递归算法</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>void   
+preOrder(Node p)</b></font></p>    
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>{&nbsp;&nbsp;</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;   
+Node c;</b></font></p>    
+<p style="margin-top: 0; margin-bottom: 0"> <font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;   
+visit(p);</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"> <b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp; c     
+= leftChild(q);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#008000">&nbsp;     
+/*</font></font><font size="5" color="#008000">获取该结点的长子*/</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   
+<font color="#008000">//</font></font><font color="#008000"><font size="5">然后按照从左往右的次序先根遍历该结点的子女</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;   
+&nbsp;     
+while (c!=NULL)</b></font></p>   
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;   
+&nbsp;     
+{&nbsp;&nbsp; preOrder(     
+c);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   
+<font color="#008000">//</font></font><font color="#008000"><font size="5">先根遍历</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c = rightSibling(c);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#008000">   
+//</font></font><font color="#008000"><font size="5">右兄弟</font></font></b></p>   
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp; }</b></font></p>   
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>}</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5">　</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font color="#008000"><font size="5" face="Comic Sans MS">//</font><font size="5">非递归算法</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" color="#008000">/*每访问一个结点，都将该结点入栈，然后按从左往右次序依次周游这个</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font color="#008000"><font size="5">结点的</font><font size="5">各个子树，当以该结点为根的子树周游完后，从栈顶找到该结点，</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><font color="#008000"><b><font size="5">通过</font><font size="5" face="Comic Sans MS">rightSibling</font><font size="5">函数找到下一个兄弟结点继续处理。*/</font></b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>Void 
+npreOrder(Node p)</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<font size="5" face="Comic Sans MS"><b> 
+Node c;</b></font></p>  
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;  
+Stack s;&nbsp;&nbsp;&nbsp; <font color="#008000">/* </font></font><font color="#008000" size="5">栈元素的类型是</font><font size="5" face="Comic Sans MS" color="#008000">Node  
+*/</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;  
+s = createEmptyStack();&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#008000">  
+//</font></font><font color="#008000"><font size="5">创建空栈</font></font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;  
+c   
+= root(p);</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;  
+do</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;  
+{&nbsp;&nbsp;&nbsp; while (c!=NULL)</font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0"><b><font color="#008000"><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp; //</font><font size="5">顺长子链一直下去，边走边访问，并压入栈，便于今后右兄弟的访问</font></font></b></p>  
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;&nbsp;&nbsp;&nbsp;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+visit(c);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#008000"> 
+//</font></font><font color="#008000"><font size="5">访问该结点</font></font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;push(s,   
+c);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#008000"> 
+//</font></font><font color="#008000"><font size="5">将该结点压入栈</font></font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; c = leftChild(c);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+<font color="#008000">//</font></font><font color="#008000"><font size="5">获取该结点的长子</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while ((c==NULL) &amp;&amp; (!isEmptyStack(s)))</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+{&nbsp;&nbsp;&nbsp;&nbsp;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+c = rightSibling(top(s));</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pop(s);</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+}</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; }  
+while (c!=NULL);</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">}</font><font size="5">　</font></b></p>
+
+</body>
+
+</html>

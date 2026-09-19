@@ -1,0 +1,34 @@
+按对称序线索化二叉树
+void thread(PThrTree t)  
+{ PThrTreeNode  s[MAXNODE];  /*栈元素的类型为PThrTreeNode*/
+  PThrTreeNode  p;   		/*指向当前正在访问的结点*/
+  PThrTreeNode  pr;  		/*指向p的对称序的前驱结点*/
+  int       top; 			/* 当前栈顶的位置 */
+  if (t==NULL || *t ==NULL) return ;
+  top = -1;
+  p = *t;
+  pr = NULL;
+  do 
+  { while (p!=NULL) /* 遇到结点推入栈中,然后处理其左子树 */
+    { top++;
+      s[top] = p;
+	  p = p->llink;
+	}
+    while ( p==NULL && top!=-1 ) /* 左子树处理完,从栈顶托出结点并访问 */
+	{ p = s[top];
+	  top--;
+	  if (pr!=NULL)
+	  { if (pr->rlink==NULL) /* 检查前驱结点的右指针 */
+		{ pr->rlink = p;
+		  pr->rtag = 1;
+		}
+	    if (p->llink==NULL) /* 检查该结点的左指针 */
+		{ p->llink = pr;
+		  p->ltag = 1;
+		}
+	  }
+	  pr = p;
+	  p = p->rlink;  /* 处理右子树 */
+	}
+  } while ( top!=-1 || p!=NULL );
+}

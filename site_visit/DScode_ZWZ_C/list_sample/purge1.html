@@ -1,0 +1,204 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>根据非纯集合B构造一个纯集合A的顺序表实现</title>
+</head>
+
+<body bgcolor="#000000" text="#FFFFFF">
+
+<p:colorscheme
+ colors="#FFFFFF,#000000,#666699,#000000,#9BB0CB,#D1E0CE,#8EA642,#CCCC00"/>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p align="center" style="margin-top: 0; margin-bottom: 0">　</p>
+<p align="center" style="margin-top: 0; margin-bottom: 0"><b><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><font face="华文新魏" size="7" color="#33CC33">根据非纯集合<span lang="EN-US" style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体; mso-fareast-language: ZH-CN">B</span></font></span></b></p>
+<p align="center" style="margin-top: 0; margin-bottom: 0"><b><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><font face="华文新魏" size="7" color="#33CC33">构造一个纯集合<span lang="EN-US" style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体; mso-fareast-language: ZH-CN">A</span>的顺序表实现1</font></span></b></p>
+<p align="center" style="margin-top: 0; margin-bottom: 0">　</p>
+<p align="left" style="margin-top: 0; margin-bottom: 0">　</p>
+<p align="left" style="margin-top: 0; margin-bottom: 0">　</p>
+<p align="left" style="margin-top: 0; margin-bottom: 0"><font face="Comic Sans MS"><b><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><font color="#33CC33" size="5">/*******************************************************************</font></span></b></font></p>
+<p align="left" style="margin-top: 0; margin-bottom: 0"><font size="5" color="#33CC33"><b><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><span style="font-family: 宋体; mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体">已知一个非纯集合</span><span lang="EN-US" style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体; mso-fareast-language: ZH-CN">B</span><span style="font-family: 宋体; mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体">，构造一个纯集合</span><span lang="EN-US" style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体; mso-fareast-language: ZH-CN">A</span><span style="font-family: 宋体; mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体">，使</span><span lang="EN-US" style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体; mso-fareast-language: ZH-CN">A</span><span style="font-family: 宋体; mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体">中包含</span><span lang="EN-US" style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体; mso-fareast-language: ZH-CN">B</span><span style="font-family: 宋体; mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体">中各不相同的元素</span></span></b></font></p>
+<p:colorscheme
+ colors="#FFFFFF,#000000,#666699,#000000,#9BB0CB,#D1E0CE,#8EA642,#CCCC00"/>
+<p align="left" style="margin-top: 0; margin-bottom: 0"><font size="5" color="#33CC33" face="Comic Sans MS"><b><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体">********************************************************************</span></b></font></p>
+<p align="left" style="margin-top: 0; margin-bottom: 0">　</p>
+<p align="left" style="margin-top: 0; margin-bottom: 0">　</p>
+<p:colorscheme
+ colors="#FFFFFF,#000000,#666699,#000000,#9BB0CB,#D1E0CE,#8EA642,#CCCC00"/>
+<div v:shape="_x0000_s1026" class="O">
+  <div style="mso-line-spacing:&quot;100 20 0&quot;;mso-margin-left-alt:216;mso-char-wrap:
+1;mso-kinsoku-overflow:1">
+    <font size="5" color="#33CC33"><span style="mso-special-format: bullet; mso-color-index: 4; position: absolute; left: -3.47%; font-family: Wingdings">l</span></font>
+  </div>
+</div>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS"># include "stdio.h"<br>    
+# include "malloc.h"<br>    
+#define MAXNUM 100<br>    
+typedef int DataType;<br>    
+#define SPECIAL 2147483647<br>    
+<br>
+struct SeqList<br>    
+{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font></b></p>
+
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;   
+DataType element[MAXNUM];<br>    
+&nbsp;&nbsp;&nbsp;&nbsp; int n;<br>    
+};<br>
+<br>
+typedef struct SeqList *PSeqList;<br>    
+void purge(PSeqList palist,PSeqList pblist);<br>    
+DataType retrieve_seq(PSeqList palist,int p);<br>    
+PSeqList creatNullList_seq();<br>    
+int locate_seq (PSeqList palist,DataType x );<br>    
+int insert_seq( PSeqList palist,int p,DataType x );    
+</font></b></p>
+
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS"> 
+<br>
+main()<br>
+{&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp; int i;<br>    
+&nbsp;&nbsp;&nbsp;&nbsp; struct SeqList blist = {{2,3,5,6,7,8,11,5,8,9},10};<br>    
+&nbsp;&nbsp;&nbsp;&nbsp; PSeqList palist,pblist;<br>    
+&nbsp;&nbsp;&nbsp;&nbsp; pblist=&amp;blist;<br>  
+&nbsp;&nbsp;&nbsp;&nbsp; for (i=0;i&lt;pblist->n;i++)<br>   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printf(&quot;&nbsp;&nbsp;   
+%d&quot;,pblist->element[i]);&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp; printf("\n");<br>  
+&nbsp;&nbsp;&nbsp;&nbsp; palist=creatNullList_seq();<br>  
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp; purge(palist,pblist);<br>  
+&nbsp;&nbsp;&nbsp;&nbsp; for (i=0;i&lt;palist->n;i++)<br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printf(&quot;%d&quot;,palist->element[i]);<br>  
+&nbsp;&nbsp;&nbsp;&nbsp; printf("\n");<br>  
+}<br>
+<br>
+<br>
+<font color="#33CC33">/*******************************************************************</font></font></b></p>
+
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" color="#33CC33">创建空顺序表</font></b></p>
+
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS"><font color="#33CC33">*******************************************************************/
+<br>
+</font>
+PSeqList  creatNullList_seq()<br>    
+{&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp; PSeqList palist ;<br>    
+&nbsp;&nbsp;&nbsp;&nbsp; palist=(PSeqList) malloc (sizeof(struct SeqList));<br>    
+&nbsp;&nbsp;&nbsp;&nbsp; if(palist!=NULL)<br>  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; palist->n=0; <font color="#33CC33">      /*   
+</font></font><font size="5" color="#33CC33"> 空表长度为</font><font size="5" face="Comic Sans MS"><font color="#33CC33">0*/</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp; else<br>  
+&nbsp;&nbsp;&nbsp;&nbsp; printf("Out of space!!\n");&nbsp;&nbsp;<font color="#33CC33">   
+/* </font> </font><font size="5" color="#33CC33"> 存储分配失败</font><font size="5" face="Comic Sans MS"><font color="#33CC33">*/<br>  
+</font><font color="#33CC33">&nbsp;&nbsp;&nbsp;&nbsp; </font>return(palist);<br>
+}<br>
+<br>
+<br>
+<font color="#33CC33"> 
+/****************************************************************** </font> </font><font color="#33CC33"><font size="5"> 求</font><font size="5" face="Comic Sans MS">x</font><font size="5">在</font><font size="5" face="Comic Sans MS">palist</font><font size="5">所指顺序表中的下标</font></font></b></p>
+
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" color="#33CC33">******************************************************************</font><font size="5" face="Comic Sans MS"><font color="#33CC33">/<br>
+</font>
+int locate_seq (PSeqList palist,DataType x )<br>    
+{&nbsp;&nbsp; int q;<br>    
+&nbsp;&nbsp;&nbsp; for (q=0;q&lt;palist->n;q++)<br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if((palist->element[q])==x)&nbsp; return (q);<br>    
+&nbsp;&nbsp;&nbsp; return(SPECIAL);<br>  
+}&nbsp;<br>
+<br>
+</font></b></p>
+
+<p style="margin-top: 0; margin-bottom: 0"><b><font color="#33CC33"><font size="5" face="Comic Sans MS"> 
+ /******************************************************************* </font><font size="5"> 在</font><font size="5" face="Comic Sans MS">palist</font><font size="5">所指顺序表中，寻找下标为ｐ的元素，并将该元素的值作为函数值返回，<br>   
+     若找不到则返回一个特殊的值。</font></font></b></p>
+
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" color="#33CC33">*******************************************************************</font><font size="5" face="Comic Sans MS"><font color="#33CC33">/</font><br>
+DataType  retrieve_seq( PSeqList palist,int p )<br>    
+{&nbsp;<br>
+&nbsp;&nbsp;&nbsp; if(p>=0 &amp;&amp; p&lt;palist->n)<br>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return (palist->element[p]);<br>    
+&nbsp;&nbsp;&nbsp; printf("not exist.\n");<br>    
+&nbsp;&nbsp;&nbsp; return(SPECIAL);<br>  
+}&nbsp;<br>
+<br>
+<font color="#33CC33">/********************************************************************</font></font><font color="#33CC33"><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><font size="5">已知线性表</font></span></font></b><font size="5" color="#33CC33"><font face="Comic Sans MS"><span lang="EN-US" style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体; mso-fareast-language: ZH-CN"><b>pblist</b></span><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><b></b></span></font><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><b>中包含集合</b></span><font face="Comic Sans MS"><span lang="EN-US" style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体; mso-fareast-language: ZH-CN"><b>B</b></span><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><b></b></span></font><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><b>中所有元素，构造线性表</b></span><font face="Comic Sans MS"><span lang="EN-US" style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体; mso-fareast-language: ZH-CN"><b>palist</b></span><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><b></b></span></font><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><b>使</b></span><font face="Comic Sans MS"><span lang="EN-US" style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体; mso-fareast-language: ZH-CN"><b>palist</b></span><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><b></b></span></font><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><b>中只包含</b></span><font face="Comic Sans MS"><span lang="EN-US" style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体; mso-fareast-language: ZH-CN"><b>pblist</b></span><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><b></b></span></font><span style="mso-fareast-font-family: 宋体; mso-hansi-font-family: 宋体"><b>中不同的元素。</b></span></font><b><font color="#33CC33" size="5">
+<br>
+</font>
+<font size="5" face="Comic Sans MS"><font color="#33CC33">
+********************************************************************/</font>
+<br>
+void purge(PSeqList palist,PSeqList pblist)<br>    
+{<br>
+</font></b>&nbsp;&nbsp;&nbsp;&nbsp; 
+<font size="5" face="Comic Sans MS"><b>int i=0;<br> 
+&nbsp;&nbsp;&nbsp; DataType x;<br> 
+&nbsp;&nbsp;&nbsp; for ( i=0;i&lt;pblist->n;i++)<br> 
+&nbsp;&nbsp;&nbsp; {&nbsp;&nbsp;&nbsp;&nbsp;</b></font></p> 
+
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+</b></font><b>
+<font size="5" face="Comic Sans MS">x= retrieve_seq( pblist, i ) ;&nbsp;&nbsp; <font color="#33CC33">//</font></font><font color="#33CC33" size="5">取</font><font size="5" face="Comic Sans MS">pblist</font><font color="#33CC33" size="5">中序号为</font><font size="5" face="Comic Sans MS">i</font><font color="#33CC33" size="5">的元素赋给</font><font size="5" face="Comic Sans MS"><font color="#33CC33">x<br>
+</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if ( locate_seq( palist,x)== SPECIAL) 
+insert_seq(palist, palist->n, x);<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#33CC33">//palist 
+</font></font><font color="#33CC33" size="5"> 中不存在和</font><font size="5" face="Comic Sans MS">x</font><font color="#33CC33" size="5">相同的元素，插入之<br>
+</font><font size="5" face="Comic Sans MS"><font color="#33CC33">&nbsp;&nbsp;&nbsp; 
+</font>}<font color="#33CC33">//for</font><br>
+}<font color="#33CC33">// purge</font></font></b></p>  
+
+<p style="margin-top: 0; margin-bottom: 0">　</p> 
+
+<p style="margin-top: 0; margin-bottom: 0">　</p> 
+
+<p style="margin-top: 0; margin-bottom: 0">　</p> 
+
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+
+<p style="margin-top: 0; margin-bottom: 0"><b><font color="#33CC33" size="5" face="Comic Sans MS">/******************************************************************* 
+</font><font color="#33CC33"><font size="5">在</font><font size="5" face="Comic Sans MS">palist</font><font size="5">所指顺序表中下标为</font><font size="5" face="Comic Sans MS">p</font><font size="5">的位置上插入一个值为ｘ的元素，<br>
+并返回插入成功与否的标志。此运算在</font><font size="5" face="Comic Sans MS">0≤p≤ 
+palist-&gt;n</font><font size="5">时有意义&nbsp;</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b><font color="#33CC33">********************************************************************/</font><br>
+</b></font><b><font size="5" face="Comic Sans MS">int insert_seq( PSeqList 
+palist,int p,DataType x )<br>
+{&nbsp;&nbsp;&nbsp; int q;<br>
+&nbsp;&nbsp;&nbsp;&nbsp; if ( palist-&gt;n == MAXNUM )&nbsp;&nbsp;&nbsp;&nbsp;<font color="#33CC33"> 
+/* </font></font><font color="#33CC33" size="5">溢出 </font><font size="5" face="Comic Sans MS"><font color="#33CC33">*/<br>
+&nbsp;&nbsp;&nbsp;&nbsp; </font>{&nbsp;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+printf(&quot;Overflow!\n&quot;);</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+return (0);</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp; 
+}<br>
+&nbsp;&nbsp;&nbsp;&nbsp; if ( p&lt;0 || p &gt;palist-&gt;n )&nbsp;&nbsp;&nbsp;<font color="#33CC33"> 
+/*</font></font><font color="#33CC33" size="5">不存在下标为ｐ的元素 </font><font size="5" face="Comic Sans MS"><font color="#33CC33">*/<br>
+&nbsp;&nbsp;&nbsp;&nbsp; </font>{</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+printf(&quot;not exist! \n&quot;);</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+return (0);</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp; 
+}<br>
+<br>
+<font color="#33CC33">/* </font></font><font color="#33CC33" size="5">将ｐ及以后的元素后移一个位置 
+</font><font size="5" face="Comic Sans MS"><font color="#33CC33">*/<br>
+&nbsp;&nbsp;&nbsp; </font>for(q=palist-&gt;n - 1; q&gt;=p; q--)&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; palist-&gt;element[q+1] = 
+palist-&gt;element[q];<br>
+&nbsp;&nbsp;&nbsp; palist-&gt;element[p] = x;&nbsp;&nbsp;&nbsp;<font color="#33CC33"> 
+/* </font></font><font color="#33CC33" size="5">在</font><font size="5" face="Comic Sans MS" color="#33CC33">p</font><font color="#33CC33" size="5">下标位置上放元素</font><font size="5" face="Comic Sans MS"><font color="#33CC33">x 
+*/<br>
+</font>&nbsp;&nbsp;&nbsp; palist-&gt;n = palist-&gt;n + 1;&nbsp;&nbsp;&nbsp; <font color="#33CC33">/* 
+</font></font><font color="#33CC33" size="5">元素个数加１ </font><font size="5" face="Comic Sans MS"><font color="#33CC33">*/<br>
+</font>&nbsp;&nbsp;&nbsp; return (1);<br>
+}<br>
+<br>
+</font></b></p>
+
+</body>
+
+</html>

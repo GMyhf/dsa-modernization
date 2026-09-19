@@ -1,0 +1,178 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>后序遍历二叉树非递归算法</title>
+</head>
+
+<body>
+
+<p style="margin-top: 0; margin-bottom: 0" align="center">　</p>
+
+<p style="margin-top: 0; margin-bottom: 0" align="center">　</p>
+
+<p style="margin-top: 0; margin-bottom: 0" align="center"><b><font face="华文新魏" size="7" color="#339933">后序遍历二叉树非递归算法</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5"><br>
+</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><font size="5" face="Comic Sans MS" color="#339933"><b>/*******************************************************************</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font color="#339933"><font size="5">思想：<br>
+</font></font><font size="5"><font color="#339933">后根次序周游二叉树时，一个结点要进出栈各两次，第一次出栈的目的是表明已经周游玩其左子树，由该结点找到其右子女结点，对该结点并不做任何处理，因此出栈后需再次进栈，只有在它第二次出栈后，才表明其右子树也周游完了，可以访问该结点。为了区分同一结点的两次出栈，设置一标志量tag,tag定义为：</font>
+</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font color="#339933" size="5">tag=1&nbsp;&nbsp;&nbsp;  
+第一次出栈，结点不能访问</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font color="#339933" size="5">&nbsp;&nbsp;&nbsp;  
+2&nbsp;&nbsp;&nbsp; 第二次出栈，结点可以访问</font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0" align="left">　</p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">　</p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">　</p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">　</p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5" face="Comic Sans MS">typedef  
+struct</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;  
+{</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+BNode ptr;&nbsp; <font color="#339933">/*</font></font><font color="#339933"><font size="5">进栈结点</font><font size="5" face="Comic Sans MS">*/</font></font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+int tag;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#339933">/*</font></font><font color="#339933"><font size="5">标记</font><font size="5" face="Comic Sans MS">*/</font></font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp; 
+}Elem;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">　</p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5"><br>
+</font></b><font size="5" face="Comic Sans MS"><b>void nPostOrder1(BTree t)</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0" align="left"><font size="5" face="Comic Sans MS"><b>{</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp; 
+Stack st;&nbsp;&nbsp; <font color="#339933"> /*</font></font><font color="#339933"><font size="5"> 
+ 栈中元素类型为</font><font size="5" face="Comic Sans MS">Elem&nbsp; */</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; 
+Elem stnode;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp; 
+BNode p;&nbsp;&nbsp; <font color="#339933">/*</font></font><font color="#339933"><font size="5">周游时当前要处理的结点</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; 
+char continueflag;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;  
+<font color="#339933">/*</font></font><font color="#339933"><font size="5">表明是否要继续退栈，当右子树返回时，则要在访问完根之后继续退栈</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp; <font size="5" face="Comic Sans MS"><b>  
+if(t==NULL)&nbsp; return;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS">  
+st=creatEmptyStack(); <font color="#339933">/ *</font></font><font color="#339933"><font size="5">创建栈</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp; 
+p=root(t);&nbsp; <font color="#339933">/*</font></font><font color="#339933"><font size="5">从根结点开始</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp; 
+do&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#339933">&nbsp; /*</font></font><font color="#339933"><font size="5">每执行一次大循环进入一棵由</font><font size="5" face="Comic Sans MS">p</font><font size="5">指出根的子树去周游</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp; <font size="5" face="Comic Sans MS"><b>  
+{</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+while(p!=NULL) <font color="#339933">/*</font></font><font color="#339933"><font size="5">反复地把遇到的结点进栈，并进入它的左子树</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+{</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+stnode.ptr=p;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+stnode.tag=1;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+push(st,stnode);</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+p=leftChild(p);</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+}</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; 
+}</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp; <font size="5" face="Comic Sans MS"><b>  
+continueflag='t';</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; 
+while((continueflag=='t')&amp;&amp;(!isEmptyStack(st)))</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp; <font size="5" face="Comic Sans MS"><b>  
+{</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp; <font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+stnode=top(st);</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp;&nbsp; <font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp; 
+pop(st);</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp; <font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+p=stnode.ptr;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+if(stnode.tag==1)</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp; 
+<font color="#339933">&nbsp; /*</font></font><font color="#339933"><font size="5">如果是从左子树回来，则改标志重新进栈，停止进栈，并进入右子树</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp; {</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+stnode.tag=2;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp; <font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+push(st,stnode);</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp; <font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+continueflag='f';</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp; <font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+p=rightChild(p);</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp; <font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+}</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp; <font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+else visit(p);</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp; <font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp; 
+}</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS">  
+}while(!isEmptyStack(st));&nbsp; <font color="#339933"> /*</font></font><font color="#339933"><font size="5">栈为空时，全部周游完</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><font size="5" face="Comic Sans MS"><b>}</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">　</p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">　</p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">　</p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><font size="5" face="Comic Sans MS" color="#339933"><b>/*******************************************************************</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5" color="#339933">思想：把二叉树的后根序列按逆序全部压入栈中，即先压入根结点，然后递归地压入右子树的所有结点，最后递归压入左子树的所有结点，然后，再从栈中按后根序列逐个弹出，这样从栈中弹出的结点正好与后根次序周游的要求一致。</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">　</p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><font size="5" face="Comic Sans MS" color="#339933"><b>*******************************************************************/</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5" face="Comic Sans MS">void 
+nPostOrder2(BTree t)</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5" face="Comic Sans MS">{</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">　</p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS">  
+Stack st;&nbsp; /<font color="#339933">* </font></font><font color="#339933"><font size="5">栈中元素类型为</font><font size="5" face="Comic Sans MS">BNode*/</font></font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;  
+BNode p;</font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;  
+if(t==NULL)&nbsp; return;</font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS"> 
+&nbsp; st=creatEmptyStack();</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<font size="5" face="Comic Sans MS"> 
+ <b>p=root(t);</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS"> 
+ stackChild(st,p);&nbsp; <font color="#339933">/*</font></font><font color="#339933"><font size="5">把二叉树中的结点全部压入栈中</font><font size="5" face="Comic Sans MS">*/</font></font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS"> 
+&nbsp; while(!isEmptyStack(st))&nbsp; <font color="#339933"> /*</font></font><font color="#339933"><font size="5">从栈中弹出元素并访问之</font><font size="5" face="Comic Sans MS">*/</font></font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS">  
+{</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;  
+visit(top(st));</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;  
+pop(st);</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS">  
+}</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5" face="Comic Sans MS">}</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">　</p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">　</p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">　</p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5" face="Comic Sans MS">void 
+stackChild(PStack st,BNode p)</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font color="#339933"><font size="5" face="Comic Sans MS">/*</font><font size="5">将以</font><font size="5" face="Comic Sans MS">p</font><font size="5">为根的二叉树中的结点全部压入栈</font><font size="5" face="Comic Sans MS">st</font><font size="5">中</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5" face="Comic Sans MS">{</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS"> 
+if(p==NULL) return;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS"> 
+push(st,p);</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS"> 
+if(rightChild(p)!=NULL)</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp; 
+stackChild(st,rightChild(p));</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS"> 
+if(leftChild(p)!=NULL)</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp; 
+stackChild(st,leftChild(p));</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5" face="Comic Sans MS">}</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">　</p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><font size="5" face="Comic Sans MS"><b>&nbsp; 
+</b></font></p>
+
+</body>
+
+</html>

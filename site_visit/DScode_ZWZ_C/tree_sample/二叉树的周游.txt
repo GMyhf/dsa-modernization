@@ -1,0 +1,51 @@
+struct BinTreeNode;		/* 二叉树中的结点*/
+
+typedef struct BinTreeNode  *PBinTreeNode;  
+/* 指向二叉树结点的指针类型 */
+
+struct BinTreeNode	/* 二叉树中每个结点的结构 */
+{ 
+	DataType      info;		/* 数据域 */
+	PBinTreeNode  llink;		/* 指向左子女 */
+	PBinTreeNode  rlink;	/* 指向右子女 */
+};
+typedef struct  BinTreeNode  *BinTree; /* 二叉树类型的定义 */
+typedef BinTree  *PBinTree;	/* 二叉树类型的指针类型 */
+
+
+//二叉树先根周游的递归算法
+void preOrder(PBinTreeNode t)
+{
+  if (t==NULL) return;
+  visit(t);
+  preOrder(t->llink);
+  preOrder(t->rlink);
+}
+
+
+//二叉树对称序周游的递归算法
+void inOrder(PBinTreeNode t)
+{
+ if (t==NULL) return;
+  inOrder(t->llink);
+  visit(t);
+  inOrder(t->rlink);
+}
+
+//二叉树后根周游的递归算法
+void postOrder(PBinTreeNode t)
+{ 
+  if (t==NULL) return;
+  postOrder(t->llink);
+  postOrder(t->rlink);
+  visit(t);
+}
+
+
+函数调用：
+针对PBinTreeNode类型的变量进行递归处理
+给的应是一个指向二叉树类型的指针变量，
+假设是PBinTree  pbt
+preOrder(*pbt); 
+inOrder(*pbt); 
+postOrder(*pbt);

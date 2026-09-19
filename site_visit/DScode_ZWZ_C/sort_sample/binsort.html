@@ -1,0 +1,50 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>二分法插入排序</title>
+</head>
+
+<body>
+
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0" align="center">　</p>
+<p style="margin-top: 0; margin-bottom: 0" align="center"><b><font face="华文新魏" size="7" color="#008000">二分法插入排序</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="center">　</p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5"><br>
+</font><font size="5" face="Comic Sans MS">void  binSort(SortObject * pvector)<font color="#008000">  		/* 
+</font></font><font color="#008000"><font size="5"> 按递增序进行二分法插入排序 
+</font></font><font size="5" face="Comic Sans MS"><font color="#008000"> */</font><br>
+{<br>
+&nbsp;&nbsp;&nbsp; int i, j, left, mid, right;<br> 
+&nbsp;&nbsp;&nbsp; RecordNode temp;<br> 
+&nbsp;&nbsp;&nbsp; for( i = 1; i &lt; pvector->n; i++ )<br> 
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; temp = pvector->record[i];<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; left = 0;  right = i - 1;&nbsp; <font color="#008000">/*</font></font><font color="#008000" size="5">置已排序区间的上、下界初值</font><font size="5" face="Comic Sans MS"><font color="#008000"> 
+*/&nbsp;</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; while (left &lt;= right)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; mid=(left+right)/2;&nbsp; 
+<font color="#008000">/*mid</font></font><font color="#008000"><font size="5">指向已排序区间的中间位置</font></font><font size="5" face="Comic Sans MS"><font color="#008000">*/</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (temp.key&lt;pvector->record[mid].key)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+right=mid-1;&nbsp;&nbsp; <font color="#008000">/*</font></font><font color="#008000"><font size="5">插入元素应在左子区间</font></font><font size="5" face="Comic Sans MS"><font color="#008000">*/</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+left=mid+1;&nbsp;&nbsp;&nbsp; <font color="#008000">/*</font></font><font color="#008000"><font size="5">插入元素应在右子区间</font></font><font size="5" face="Comic Sans MS"><font color="#008000">*/</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; for(j=i-1;  j>=left;  j--)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pvector->record[j+1] = pvector->record[j];</font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#008000"> 
+/*</font></font><font color="#008000" size="5">将排序码大于</font><font color="#008000"><font size="5" face="Comic Sans MS">K<sub>i</sub></font><font size="5">的记录后移</font><font size="5" face="Comic Sans MS">*/</font></font><font size="5" face="Comic Sans MS"><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(left!=i) pvector->record[left] = temp;<br> 
+&nbsp;&nbsp;&nbsp; }<br>
+}</font></b></p>
+
+</body>
+
+</html>

@@ -1,0 +1,62 @@
+索引表结构
+
+
+typedef struct
+{ 
+
+    KeyType maxkey;    /* 块中最大关键字 */
+    int pos_1rec;     /* 块的第一个元素的位置 */
+} IndexNode;
+
+typedef struct
+{ 
+
+    IndexNode idx_block[MAXNUM];    /* 块索引表 */
+    int num_block;   /* 实际块数 */
+} *Pindex; 
+
+
+typedef int KeyType;
+typedef int DataType;
+typedef struct 
+{ 
+
+    KeyType key;    /* 字典元素的关键码字段*/
+    DataType other;   /* 字典元素的属性字段*/
+}DicElement;
+typedef struct 
+{ 
+
+    DicElement element[MAXNUM];
+    int n; /* n<MAXNUM，为字典中元素的个数 */
+} SeqDictionary;
+
+
+/*为了描述简单，将KeyType和DataType定义为int类型*/
+
+　
+
+int BlockSearch(SeqDictionary *pdic, Pindex idx, KeyType key, int *pos)
+{ 
+
+    int i=0, j, last_j;
+    /* 在块索引表中确定块 */
+    while (i<idx->num_block && key > idx->idx_block[i].maxkey) 
+        i++;
+    if (i > idx->num_block) *pos = -1; /* 块间检索失败 */
+    else
+    { /* 块内顺序检索 */
+        j = idx->idx_block[i].pos_1rec; /* 起始记录 */
+        if (i == idx->num_block) last_j = pdic->n-1; /* 终止记录 */
+        else last_j = idx->idx_block[i+1].pos_1rec-1;
+        while (j <= last_j && key != pdic->element[j].key) 
+            j++;
+        if ( j > last_j) *pos = -1; /* 块内检索失败 */
+        else *pos = j; /* 检索成功 */
+    }
+    /* 检索成功或失败 */
+    if (*pos > -1) return TRUE;
+    else return FALSE;
+}
+
+

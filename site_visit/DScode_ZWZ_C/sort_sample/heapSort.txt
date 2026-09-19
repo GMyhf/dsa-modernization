@@ -1,0 +1,82 @@
+//堆排序算法
+
+　
+void heapSort( SortObject *pvector) /*对记录R0到Rn-1进行堆排序*/
+{
+
+    int i,n;
+
+    RecordNode temp;
+
+    n=pvector->n;
+
+    for(i=n/2-1;i>0;i--)
+
+       sift(pvector,i,n);     /* 建立初始堆*/
+
+    for (i=n-1;i>0;i--)    /*进行n-1趟堆排序*/
+
+    {
+
+        temp=pvector->record[0]; /* 当前堆顶记录和最后一个记录互换*/
+
+        pvector->record[0]=pvector->record[i];
+
+        pvector->record[i]=temp;
+
+        sift(pvector,0,i);  /* 从R0到Ri-1重建堆  */
+
+    }
+
+}
+
+* 设排序码集合为{k0,k1,...,kn-1},以kj为根的子树均满足堆的定义(j=i+1,i+2,...,n/2-1),筛选算法结束后以ki为根的子树也满足堆的定义。n个记录存放在数组record中*/　
+
+#define leftchild(i) 2*(i)+1
+
+void sift(SortObject *pvector, int i, int n)
+{
+
+    int child;
+
+    RecordNode temp;
+
+    temp=pvector->record[i];
+
+    child=leftchild(i);    /*Rchild是R0的左子女*/
+
+    while(child <n)
+
+    {
+
+        if((child<n-1)&&(pvector->record[child].key<pvector->record[child+1].key))
+
+            child++;  /* child 指向Ri的左、右子女中排序码较大的结点*/
+
+        if(temp.key<pvector->record[child].key)
+
+        {
+
+            pvector->record[i]=pvector->record[child];
+
+             /*将Rchild换到父结点位置，进入下一层继续调整*/
+
+            i=child;child=leftchild(i);
+
+        }
+
+        else break;  /*调整结束*/
+
+    }
+
+    pvector->record[i]=temp;  /*将记录Ri放入正确位置*/
+
+}
+
+/*完全二叉树中，若结点没有左子女，则必是叶结点，调整结束。对于任意排序码集合，只要从n/2-1到0反复调用sift算法，就可以使R0到Rn-1构成一个大根堆。*/
+
+　
+
+　
+
+

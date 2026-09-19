@@ -1,0 +1,116 @@
+
+//链队列的实现
+
+#include <malloc.h>
+#include <stdio.h>
+
+/* 结构定义 */
+typedef char DataType;
+
+struct Node ;
+typedef struct Node *PNode;
+
+/* 结点结构 */
+struct Node
+{
+    DataType info;
+    PNode  link;
+};
+
+/* 将队列封装,链接队列类型定义 */
+struct LinkQueue
+{ 
+    PNode  f;   /* 头指针 */
+    PNode  r;  /* 尾指针 */ 
+}; 
+typedef struct LinkQueue *PLinkQueue; 
+
+
+/******************************************************************** 
+  创建一个空队列，返回指向空队列的指针  
+********************************************************************/
+PLinkQueue createEmptyQueue_link( )
+{
+    PLinkQueue plqu;
+   /* 申请队列结构*/
+   plqu = (struct LinkQueue *)malloc(sizeof(struct LinkQueue));
+    if (plqu != NULL)
+    {
+        plqu->f = NULL;    /* 头尾指针皆指向空 */
+        plqu->r = NULL;
+    }
+   else printf("Out of space!! \n");
+   return (plqu);
+}
+
+
+/*********************************************************************
+  判断plqu所指的队列是否为空队列，当队列为空时，返回1，否则返回0  
+*********************************************************************/
+int isEmptyQueue_link( PLinkQueue plqu ) 
+{
+
+    /* 队头指针指向空为空队列 */
+    return (plqu->f == NULL); 
+} 
+
+
+/********************************************************************* 
+进队列运算, 表示往plqu所指的队列中插入一个值为ｘ的元素 
+*********************************************************************/
+
+void enQueue_link( PLinkQueue plqu, DataType x )
+{
+
+     PNode p;
+    /*申请结点*/
+   p = (PNode)malloc( sizeof( struct Node ) );
+    if ( p == NULL ) printf("空间不够!");
+    else
+    {
+        /* 最后一个元素，其无后继 */
+        p->info = x;
+        p->link = NULL;
+        if (plqu->f == NULL)   /* 原来为空队列 */
+        {
+            /* 头尾指针皆指向p */
+            plqu->f = p;
+            plqu->r = p;
+        }
+        else
+        {
+            /* 在尾指针所指结点后插入，并修改尾指针 */
+            plqu->r->link = p;
+            plqu->r = p;
+        }
+    }
+}
+
+
+/******************************************************************** 
+  表示从plqu所指的队列中删除一个元素  
+********************************************************************/  
+void deQueue_link( PLinkQueue plqu )
+{
+    PNode p;
+    /*首先判断队列是否为空，空队列不能删除*/
+   if( plqu->f == NULL ) printf( "Empty queue.\n " ); 
+    else
+    {
+        /* 删除头指针指向的结点，并且修改头指针 */
+        p = plqu->f;
+        plqu->f = plqu->f->link;
+        free(p);
+    }
+}
+
+/********************************************************************
+
+  当plqu所指的队列不空时，求队列头部元素的值，队列保持不变  
+
+********************************************************************/  
+DataType frontQueue_link( PLinkQueue plqu )
+{
+    /* 只取队头指针指向结点的值，不改变头指针 */
+    return plqu->f->info;
+} 

@@ -1,0 +1,48 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>起泡排序算法</title>
+</head>
+
+<body>
+
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0" align="center"><b><font size="7" face="华文新魏" color="#008000">起泡排序算法</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5"><br>
+</font><font size="5" face="Comic Sans MS">void  bubbleSort(SortObject * pvector)<br> 
+{<br>
+&nbsp;&nbsp;&nbsp; int i, j, noswap;<br> 
+&nbsp;&nbsp;&nbsp; RecordNode temp;<br> 
+&nbsp;&nbsp;&nbsp; for(i=0; i&lt;pvector->n-1; i++)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#008000"> 
+/* </font></font><font color="#008000"><font size="5"> 做</font><font size="5" face="Comic Sans MS">n-1</font><font size="5">次起泡 
+</font></font><font size="5" face="Comic Sans MS"><font color="#008000"> */</font><br>
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; noswap=TRUE;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; for(j=0; j&lt;pvector->n-i; j++)&nbsp;&nbsp;&nbsp;<font color="#008000"> 
+/*</font></font><font color="#008000" size="5">置交换标志</font><font size="5" face="Comic Sans MS"><font color="#008000">*/</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(pvector->record[j+1].key&lt;pvector->record[j].key)</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#008000"> 
+/*</font></font><font color="#008000"><font size="5">从前向后扫描</font><font size="5" face="Comic Sans MS">*/</font></font><font size="5" face="Comic Sans MS"><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+temp=pvector->record[j];<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+pvector->record[j]=pvector->record[j+1];<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+pvector->record[j+1]=temp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+noswap=FALSE;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(noswap)  break;&nbsp;<font color="#008000"> 
+/*</font></font><font color="#008000" size="5">本趟起泡未发生记录交换，算法结束</font><font size="5" face="Comic Sans MS"><font color="#008000">*/</font><br>
+&nbsp;&nbsp;&nbsp; }<br>
+}</font></b></p>
+
+</body>
+
+</html>

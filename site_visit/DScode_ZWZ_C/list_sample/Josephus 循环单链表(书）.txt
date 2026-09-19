@@ -1,0 +1,109 @@
+#include <malloc.h>
+#include <stdio.h>
+#include <stdlib.h> 
+
+
+#define  FALSE   0
+#define  TRUE    1
+typedef  int  DataType;	/* 定义元素类型为整型，也可定义为其他类型 */
+
+struct  Node;	/* 单链表结点类型 */
+typedef  struct Node  *PNode;	/* 结点指针类型 */
+
+struct  Node 		/* 单链表结点结构 */
+{ 
+	DataType  info;
+	PNode  link;
+};
+
+typedef struct Node *LinkList;
+typedef LinkList *PLinkList;
+
+int  init_clink(PLinkList pplist,int n)
+/* 创建带头结点的空循环链表*/
+{
+  PNode p,q; int i;
+  q = (PNode)malloc( sizeof(struct Node ) );
+  if(q == NULL) return(FALSE);
+  *pplist=q;
+  q->info=1;
+  q->link=q;
+  if(n ==1) return(TRUE);
+  for(i=2;i<n+1;i++)
+  {  p = (PNode)malloc(sizeof(struct Node));		/* 申请头结点 */
+     if (p!=NULL)
+	 { 
+		p->info= i;
+		p->link=q->link;
+		q->link=p;
+	    q=p;
+	  }
+	  else
+	     return(FALSE);
+  }
+  return (TRUE);
+}
+
+void josephus_clink(PLinkList pplist, int s,int m )
+{ PNode p,pre;
+  int i;
+  p=*pplist;
+  if(s==1)
+  {
+	  pre=p;
+	  p=p->link;
+	  while(p!=*pplist)
+	  {
+		  pre=p;
+		  p=p->link;
+	  }
+
+  }
+  else for(i=1;i<s;i++)
+  {
+	  pre=p;
+	  p=p->link;
+  }
+
+  if (p==NULL)    /* 无第s个结点 */
+    { printf(" s = %d  not exit.\n ",s);
+	  exit(1);
+    }
+
+  while (p!=p->link)
+   { for (i=1;i<m;i++)  /* 找第m个结点 */
+       { pre = p;
+	     p = p->link;
+       }
+	 printf(" out element: %i \n",p->info);  /* 输出该结点 */
+	 if(*pplist == p)
+		 *pplist=p->link;
+	 pre->link = p->link;
+	 free(p);
+	 p=pre->link;
+   }
+   printf(" out element: %i \n",p->info);  /* 输出最后一个节点 */
+   *pplist=NULL;
+   free(p);
+}
+
+
+main( )
+{ 
+	LinkList jos_clist;
+    int n,s,m;
+
+    printf("\n please input the values of n = ");
+    scanf("%d",&n);
+    printf(" please input the values of s = ");
+    scanf("%d",&s);
+    printf(" please input the values of m = ");
+    scanf("%d",&m);
+    if(init_clink(&jos_clist,n))	/* 创建空循环链表 */
+       josephus_clink(&jos_clist,s,m);
+	else
+		printf("Out of space!");
+
+	return(TRUE);
+
+}

@@ -1,0 +1,31 @@
+散列表的检索算法
+-用线性探查法解决碰撞
+typedef struct 
+{	DicElement element[REGION_LEN];
+	int m;					/* m=REGION_LEN，为基本区域长度 */
+} HashDictionary;
+
+
+/////////////////////////////////////////////////////////////////////////////
+int linearSearch(HashDictionary * phash, KeyType key, int *position)  
+{
+	int d, inc;
+	d=h(key);  	/* d为散列地址，散列函数为h(key) */
+	for(inc=0; inc<phash->m; inc++)
+	{
+  		if(phash->element[d].key==key)  
+ 		 {
+   			*position=d;	/* 检索成功 */
+    			return(TRUE);
+  		  }
+ 		 else if(phash->element[d].key==nil)
+  		{
+   			 *position=d;	/* 检索失败，找到插入位置 */
+    			return(FALSE);
+  		}
+  		d=(d+1)%phash->m;
+	}
+	*position=-1;	/* 散列表溢出 */
+	return(FALSE);
+}
+

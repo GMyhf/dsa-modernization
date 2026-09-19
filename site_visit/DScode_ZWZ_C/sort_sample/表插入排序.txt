@@ -1,0 +1,22 @@
+表插入排序
+/* 对链表按递增序进行表插入排序，链表中第一个结点为表头结点。 */
+void listSort(LinkList * plist) 	
+{
+ListNode *now, *pre, *p, *q, *head;
+
+	  head=*plist;
+pre=head->next;  now=pre->next;
+if(pre==NULL || now==NULL) return;			/* 为空链表或链表中只有一个结点 */
+while( now!=NULL)
+{
+  q=head;		p=head->next;
+  while(p!=now && p->key<=now->key)
+  	  {  q=p;  p=p->next;  }			/* 本循环结束时，已经找到了now的插入位置 */
+  if(p==now)							/* now应放在原位置 */
+    {  pre=pre->next;	now=pre->next; continue;  }
+  pre->next=now->next;					/* 使now记录脱链 */
+  q->next=now;	
+	now->next=p;							/* 将now记录插入链表中 */
+  now=pre->next;
+}
+}

@@ -1,0 +1,21 @@
+二叉排序树的检索算法
+int searchNode(PBinTree ptree, KeyType key, PBinNode *position)
+{
+       PBinNode p, q;
+       p=*ptree;  q=p;
+	while(p!=NULL)
+	{
+	  q=p;
+	  if(p->key==key)  	/* 检索成功 */
+	  {
+	    *position=p;
+	    return(TRUE);
+	  }
+	  else if(p->key>key)	/* 进入左子树继续检索 */
+	    	p=p->llink;
+	  	else		/* 进入右子树继续检索 */
+	    		p=p->rlink;
+	}
+	*position=q;
+         return(FALSE);	 /* 检索失败 */
+}

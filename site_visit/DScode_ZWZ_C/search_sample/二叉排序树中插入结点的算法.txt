@@ -1,0 +1,20 @@
+二叉排序树中插入结点的算法
+void insertNode(PBinTree ptree, KeyType key)
+{
+   PBinNode p, q, *position;
+   position=&q;
+   if(searchNode(ptree,key,position)==TRUE) 
+/* 已存在关键码为key的结点 */
+	  return;
+   
+   p=(PBinNode)malloc(sizeof(BinNode));	 /* 申请新结点 */
+	if(p==NULL)  {  printf("Error\n");  exit(1);  }		/* 申请空间出错 */
+	p->key=key;
+	p->llink=p->rlink=NULL;
+	
+   if(*position==NULL)							/* 原树为空树 */
+	  *ptree=p;
+	else if(key<(*position)->key)
+	   (*position)->llink=p;							/* 插入position的左子树 */
+	  else  (*position)->rlink=p;						/* 插入position的右子树 */
+}

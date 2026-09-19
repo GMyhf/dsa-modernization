@@ -1,0 +1,52 @@
+　
+
+　
+
+二叉排序树的删除算法
+
+　
+
+/*给出第一种删除方法的算法。
+设在二叉排序树中删除关键码为key的结点。*/
+
+void deleteNode(PBinTree ptree, KeyType key)
+{
+    PBinTreeNode parentp, p, r;
+    p=*ptree; parentp=NULL;
+    while(p!=NULL)
+    {
+        if(p->key==key) break;   /* 找到了关键码为key的结点 */
+        parentp=p;
+        if(p->key>key) p=p->llink;     /* 进入左子树 */
+        else p=p->rlink;     /* 进入右子树 */
+    }
+    if(p==NULL) return;  /* 二叉排序树中无关键码为key的结点 */
+    if(p->llink==NULL)     /* 结点*p无左子树 */
+    {
+        if(parentp==NULL) 
+        *ptree=p->rlink;   /* 被删除的结点是原二叉排序树的根结点*/
+        else if(parentp->llink==p)    /* *p是其父结点的左子女 */
+                parentp->llink=p->rlink;
+
+                            /* 将*p的右子树链到其父结点的左链上 */
+             else
+                parentp->rlink=p->rlink; 
+
+                            /* 将*p的右子树链到其父结点的右链上 */
+    }
+    else /* 结点*p有左子树 */
+    {
+        r=p->llink;
+        while(r->rlink!=NULL) r=r->rlink; 
+
+                             /* 在*p的左子树中找最右下结点*r */
+        r->rlink=p->rlink;    /* 用*r的右指针指向*p的右子女 */
+        if(parentp==NULL) *ptree=p->llink;
+        else   if(parentp->llink==p)        /* 用*p的左子女代替*p */
+                    parentp->llink=p->llink;
+                else
+                    parentp->rlink=p->llink;
+    }
+    free(p); /* 释放被删除结点 */
+}
+

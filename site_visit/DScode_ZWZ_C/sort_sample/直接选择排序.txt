@@ -1,0 +1,24 @@
+
+直接选择排序
+
+
+void selectSort(SortObject * pvector) /* 按递增序进行直接选择排序 */
+{
+    int i, j, k;
+    RecordNode temp;
+    for( i = 0; i < pvector->n-1; i++ )   /* 做n-1趟选择排序*/
+    {
+        k=i;
+        for(j=i+1; j<pvector->n; j++) 
+
+                             /*在无序区内找出排序码最小的记录Rk */
+            if(pvector->record[j].key<pvector->record[k].key) k=j;
+        if(k!=i)                          /*记录Rk 与Ri 互换*/
+
+        {
+            temp=pvector->record[i];
+            pvector->record [i]= pvector->record [k];
+            pvector->record [k]=temp;
+        } 
+    }
+}

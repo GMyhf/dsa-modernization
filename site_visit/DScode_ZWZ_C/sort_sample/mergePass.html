@@ -1,0 +1,74 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="zh-cn">
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>一趟归并算法</title>
+</head>
+
+<body>
+
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0" align="center"><b><font size="7" face="华文新魏" color="#008000">一趟归并算法</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS" color="#008000">/*</font><font size="5" color="#008000">对</font><font size="5" face="Comic Sans MS" color="#008000">r</font><font size="5" color="#008000">做一趟归并</font><font size="5" face="Comic Sans MS" color="#008000">,</font><font size="5" color="#008000">结果放在</font><font size="5" face="Comic Sans MS" color="#008000">r1</font><font size="5" color="#008000">中</font><font size="5" face="Comic Sans MS" color="#008000">*/</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>void mergePass(RecordNode r[] ,RecordNode r1[ ],int n,int length)</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></font> </p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;<font color="#008000">/*length 
+</font></font><font color="#008000"><font size="5"> 为本趟归并的有序子文件的长度</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; int i,j;</b></font></p> 
+
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; 
+i=0;</b></font></p>
+
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; 
+while(i+2*length-1&lt;n)</b></font></p>
+
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; 
+{</b></font></p>
+
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+merge(r,r1,i,i+length-1,i+2*length-1);</b></font></p>
+
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<font color="#008000">/* </font></font><font color="#008000"><font size="5">归并长度为</font><font size="5" face="Comic Sans MS">length</font><font size="5">的两个子文件</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+i+=2*length;</b></font></p>
+
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; 
+}</b></font></p>
+
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; 
+if(i+length-1&lt;n-1)</b></font></p>
+
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<font color="#008000"> /*</font></font><font color="#008000"><font size="5">剩下两个子文件</font><font size="5" face="Comic Sans MS">,</font><font size="5">其中一个长度小于</font><font size="5" face="Comic Sans MS">length 
+*/</font></font></b></p>
+
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+merge(r,r1,i,i+length-1,n-1)</b></font></p>
+
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; 
+else</b></font></p>
+
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+for(j=i;j&lt;n;j++)&nbsp;&nbsp; <font color="#008000">&nbsp; / *</font></font><font color="#008000"><font size="5">将最后一个子文件复制到数组</font><font size="5" face="Comic Sans MS">r1</font><font size="5">中</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+r1[j]=r[j];</b></font></p>
+
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>}</b></font></p>
+
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+
+</body>
+
+</html>

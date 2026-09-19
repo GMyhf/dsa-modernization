@@ -1,0 +1,83 @@
+/* 二叉树的定义 */
+
+struct BinTreeNode;
+
+typedef struct BinTreeNode *PBinTreeNode;
+
+struct BinTreeNode
+{
+    DataType info;
+
+      PBinTreeNode  llink;
+    PBinTreeNode  rlink;
+};
+
+typedef struct BinTreeNode *BinTree;
+
+typedef BinTree *PBinTree;
+
+
+typedef SeqStack Stack;
+
+
+
+
+PBinTree createBTree(void)
+
+/*创建完整的二叉树*/
+{
+    PBinTree pbtree;
+
+    pbtree=(PBinTree)malloc(sizeof(BinTree));
+
+    if(pbtree!=NULL)
+
+        *pbtree=creatRest_Btree();
+
+                                /*递归创建从根开始的二叉树*/
+
+    return pbtree;
+
+}
+
+　
+
+　
+
+PBinTreeNode creatRest_BTree()
+
+/*递归创建从根开始的二叉树*/
+
+{
+
+    PBinTreeNode pbnode;
+
+    char ch;
+   scanf("%c", &ch);
+   if(ch =='@') pbnode = NULL;
+
+    else
+    {
+        pbnode = (PBinTreeNode)malloc(sizeof(struct BinTreeNode));
+
+            if(pbnode==NULL)
+
+          {
+
+                printf("Out of space!\n");
+
+                return pbnode;
+
+          }
+
+          pbnode->info=ch;
+
+          pbnode->llink=creatRest_Btree(); /*构造左子树*/
+
+          pbnode->rlink=creatRest_bTree(); /*构造右子树*/
+
+    }
+
+   return pbnode;
+
+}

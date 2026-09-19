@@ -1,0 +1,81 @@
+//-------------------------------
+//Josehpus_linkList.cpp
+//-------------------------------
+
+#include "linkList.h"
+
+#define  FALSE   0
+#define  TRUE    1
+typedef  int  DataType;	/* 定义元素类型为整型*/
+
+
+void josephus_clink( PLinkList pclist, int s,int m )
+{ 
+  PNode p,pre,tp;
+  int i;
+  p = find_clink(pclist,s);  /* 找第s个结点 */
+  if (p==NULL)    /* 无第s个结点 */
+  {
+	printf(" s = %d  not exit.\n ",s);
+	exit(1);
+   }
+
+   while (pclist->head->link!=NULL)
+   { 
+     for (i=1;i<m;i++)  /* 找第m个结点 */
+     {
+	pre = p;
+	p = p->link;
+      }
+     printf(" out element: %i \n",p->info);  /* 输出该结点 */
+
+     if (pre!=p)  /* 当表中元素个数大于1时，删除该结点 */
+     { 
+	pre->link = p->link;
+	tp = p;
+	p = p->link;
+	free(tp);
+     }
+     else    /* 当表中元素个数等于1时，将头结点指针置空 */
+     {
+	free(pre);
+	pclist->head->link = NULL;
+      }
+
+    }
+
+    free(pclist->head);
+    free(pclist);
+}
+
+
+main( )
+{  
+
+    PLinkList jos_clist;
+    PNode p;
+    int i,n,s,m,k;
+
+    printf("\n please input the values of n = ");
+    scanf("%d",&n);
+    printf(" please input the values of s = ");
+    scanf("%d",&s);
+    printf(" please input the values of m = ");
+    scanf("%d",&m);
+
+    jos_clist = createNullList_clink( ); /* 创建空循环链表 */
+
+    if (jos_clist==NULL || jos_clist->head==NULL)
+	 return ( FALSE);
+
+    p = jos_clist->head ;
+    for( i = 1; i <= n; i++ )   /* 创建循环链表 */
+    { 
+	k = insert_clink( jos_clist,i, P );
+	if (k==FALSE) return(FALSE);
+	p = next_clink( p );
+    }
+
+    josephus_clink(jos_clist,s,m);
+	return (TRUE);
+}

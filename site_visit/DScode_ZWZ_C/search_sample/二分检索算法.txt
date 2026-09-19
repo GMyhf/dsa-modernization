@@ -1,0 +1,27 @@
+　
+
+二分法检索算法
+
+
+/* 在字典中用二分法查找关键码为key的元素 */
+int binarySearch(SeqDictionary * pdic, KeyType key, int *position) 
+{
+    int low, mid, high;
+    low=0; high=pdic->n-1;
+    while(low<=high)
+    {
+    mid=(low+high)/2;     /* 当前检索的中间位置 */ 
+    if(pdic->element[mid].key==key)  /* 检索成功 */
+
+     {
+        *position=mid;
+        return(TRUE);
+    }
+    else if(pdic->element[mid].key>key) 
+            high=mid-1;        /* 要检索的元素在左半区 */
+          else low=mid+1;    /* 要检索的元素在右半区 */ 
+    }
+    *position=low;
+    return(FALSE);    /* 检索失败 */
+}
+

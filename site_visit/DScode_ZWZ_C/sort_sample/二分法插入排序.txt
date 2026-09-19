@@ -1,0 +1,23 @@
+二分法插入排序
+void  binSort(SortObject * pvector)  		/* 按递增序进行二分法插入排序 */
+{
+int i, j, left, mid, right;
+RecordNode temp;
+
+   for( i = 1; i < pvector->n; i++ )
+       {
+          temp = pvector->record[i];
+	  left = 0;  right = i - 1;
+      while (left <= right)
+  {
+		mid=(left+right)/2;
+		if (temp.key<pvector->record[mid].key)
+			right=mid-1;
+		else
+			left=mid+1;
+	  }
+	  for(j=i-1;  j>=left;  j--)
+           pvector->record[j+1] = pvector->record[j];
+      if(left!=i) pvector->record[left] = temp;
+   }
+}

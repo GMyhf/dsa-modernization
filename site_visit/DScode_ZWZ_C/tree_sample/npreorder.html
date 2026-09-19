@@ -1,0 +1,91 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>先根遍历二叉树非递归算法</title>
+</head>
+
+<body>
+
+<p style="margin-top: 0; margin-bottom: 0" align="center"><b><font size="5"><br>
+</font><font face="华文新魏" size="7" color="#339933">先序遍历二叉树非递归算法</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5"><br>
+</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><font size="5" face="Comic Sans MS" color="#339933"><b>/*******************************************************************</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5"><font color="#339933">思想：<br>
+从根结点开始，令变量<font face="Times New Roman">p</font>为根结点，访问当前结点<font face="Times New Roman">p</font>，并把<font face="Times New Roman">p</font>压入栈中，然后令<font face="Times New Roman">p</font>为当前结点的左子女结点。若<font face="Times New Roman">p</font>不为空结点，继续访问当前结点<font face="Times New Roman">p</font>，并将p压入栈中。如此重复进行，直到p为空，从栈中弹出栈顶元素赋给变量p，并令p为它当前指向结点的右子女结点。重复上述过程，当p为空时并且栈也为空时，周游结束。</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0" align="left">　</p>
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5"><font color="#339933">对于先根次序周游加进适当判断，可以减少进出栈的次数：</font></font></b><font size="5" face="宋体" color="#339933"><span style="mso-ascii-font-family: 楷体_GB2312; mso-fareast-font-family: 楷体_GB2312; mso-hansi-font-family: Tahoma"><b>访问一个结点之后，仅当该结点左、右子女结点都不空时才把结点的右子女结点推进栈。这样可以节省算法的时间与空间开销。</b></span></font></p> 
+<p style="margin-top: 0; margin-bottom: 0" align="left">　</p> 
+<p style="margin-top: 0; margin-bottom: 0" align="left">　</p> 
+<p style="margin-top: 0; margin-bottom: 0" align="left">　</p> 
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font face="Comic Sans MS" size="5">struct BinTreeNode&nbsp;<font color="#339933">&nbsp;&nbsp;   
+/* </font>   
+</font><font size="5"> 二叉树中结点 </font><font face="Comic Sans MS" size="5"> <font color="#339933"> */</font><br>  
+typedef struct BinTreeNode *PBinTreeNode;&nbsp;<font color="#339933">&nbsp; /*</font></font><font size="5">结点的指针类型</font><font face="Comic Sans MS" size="5"><font color="#339933">*/</font><br>  
+struct BinTreeNode<br>     
+{&nbsp; </font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp;<b><font face="Comic Sans MS" size="5">&nbsp;    
+DataType info;&nbsp;&nbsp;&nbsp; <font color="#339933">/* </font></font><font size="5"> 数据域 </font><font face="Comic Sans MS" size="5"> <font color="#339933"> */</font><br>  
+&nbsp;&nbsp;&nbsp; PBinTreeNode llink;&nbsp;<font color="#339933">&nbsp; /* </font> </font><font size="5"> 指向左子女 </font><font face="Comic Sans MS" size="5"> <font color="#339933"> */</font><br>  
+&nbsp;&nbsp;&nbsp; PBinTreeNode rlink;&nbsp;<font color="#339933">&nbsp; /* </font> </font><font size="5"> 指向右子女 </font><font face="Comic Sans MS" size="5"> <font color="#339933"> */</font><br>  
+};<br>
+typedef struct BinTreeNode *BinTree;&nbsp;&nbsp;&nbsp;<font color="#339933"> /*</font></font><font size="5">二叉树定义</font><font face="Comic Sans MS" size="5"><font color="#339933">*/</font><br>  
+typedef BinTree *PBinTRee;<font color="#339933">&nbsp; /* </font> </font><font color="#339933"><font size="5"> 二叉树类型的指针类型     
+</font><font face="Comic Sans MS" size="5"> */</font></font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0" align="left">　</p> 
+<p style="margin-top: 0; margin-bottom: 0" align="left"></p> 
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5" face="Comic Sans MS">#define MAXNUM  1000&nbsp;&nbsp;&nbsp; 
+<font color="#339933">/* </font></font><font color="#339933" size="5"> 栈中最大元素个数 
+</font><font size="5" face="Comic Sans MS"><font color="#339933"> */</font><br>
+   struct  SeqStack&nbsp;&nbsp;<font color="#339933">&nbsp; /*</font></font><font color="#339933" size="5">顺序栈类型定义</font><font size="5" face="Comic Sans MS"><font color="#339933">*/</font><br>
+   {&nbsp;<br>
+</font><font face="Comic Sans MS" size="5">&nbsp;&nbsp;&nbsp; PBinTreeNode </font><font size="5" face="Comic Sans MS"> 
+s[MAXNUM];<br>
+&nbsp;&nbsp;&nbsp; int top;&nbsp;&nbsp; <font color="#339933">/* </font></font><font color="#339933" size="5"> 指示栈顶位置，空栈</font><font size="5" face="Comic Sans MS"><font color="#339933">=-1 */</font><br> 
+   }<br>
+   typedef struct SeqStack, *PSeqStack;&nbsp;&nbsp;&nbsp; <font color="#339933">/*</font></font><font color="#339933" size="5">顺序栈类型的指针类型</font><font size="5" face="Comic Sans MS"><font color="#339933">*/<br>
+</font><br>
+</font></b>　</p> 
+<p style="margin-top: 0; margin-bottom: 0" align="left"><b><font size="5" face="Comic Sans MS">void    
+npreOrder</font><font size="5" face="Comic Sans MS">(PBinTreeNode t)<br>    
+{</font></b></p>  
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;<b><font size="5" face="Comic Sans MS"> 
+</font><font face="Comic Sans MS" size="5"> PSeqStack st;<br>
+&nbsp;&nbsp;&nbsp;</font><font size="5" face="Comic Sans MS">PBinTreeNode p;&nbsp;&nbsp;&nbsp;<font color="#339933">&nbsp;      
+//</font></font><font color="#339933"></font><font size="5"><font color="#339933">栈中存放各个右子树根结点</font><br>
+&nbsp;&nbsp;&nbsp; </font><font size="5">&nbsp;</font><font size="5" face="Comic Sans MS">p = t;<br>      
+&nbsp;&nbsp;&nbsp;do&nbsp;<br> 
+&nbsp;&nbsp;&nbsp;{&nbsp;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; while (p != NULL)<br>      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; visit(p);&nbsp;&nbsp;&nbsp;&nbsp;      
+<font color="#339933">//</font></font><font color="#339933"></font><font size="5"><font color="#339933">访问根结点<br>
+</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     
+&nbsp;&nbsp; </font><font size="5" face="Comic Sans MS">if (p->rlink != NULL )&nbsp;<br>   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></b></p>     
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     
+&nbsp; push_seq(st,p-&gt;rlink);</font></b></p>   
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    
+}&nbsp;&nbsp;&nbsp;&nbsp;<font color="#339933"> //</font></font><font color="#339933"></font><font size="5"><font color="#339933">右子树根结点进栈<br>    
+&nbsp;&nbsp;&nbsp;</font>&nbsp;</font><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;</font><font size="5">&nbsp; 
+</font><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;</font><font size="5" face="Comic Sans MS">&nbsp; 
+</font><font size="5" face="Comic Sans MS">p = p->llink;&nbsp;&nbsp; <font color="#339933">//</font></font><font color="#339933"><font size="5">继续搜索</font><font size="5" face="Comic Sans MS">p</font></font><font size="5"><font color="#339933">的左子树&nbsp;<br>    
+</font></font><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;</font><font color="#339933" size="5">&nbsp;&nbsp;&nbsp; 
+</font><font size="5" face="Comic Sans MS">&nbsp; }</font></b></p>  
+
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;  
+p=top_seq(st);<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pop(st); <font color="#339933">          //</font></font><font color="#339933"></font><font size="5"><font color="#339933">右子树根结点出栈，转到搜索右子树    
+</font> </font></b></p>
+
+<p style="margin-top: 0; margin-bottom: 0" align="left">&nbsp;<b><font size="5">&nbsp;&nbsp;&nbsp; </font><font size="5" face="Comic Sans MS">} while 
+(!isEmptyStack(st));<br>  
+}<br>
+</font></b></p>
+
+</body>
+
+</html>

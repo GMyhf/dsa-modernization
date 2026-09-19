@@ -1,0 +1,132 @@
+
+#include <malloc.h>
+#include <stdio.h>
+
+/* 结构定义 */
+#define ERROR 0
+#define OK 1
+#define NULL 0
+
+typedef char DataType;
+
+
+struct Node
+{
+    DataType info;
+    PNode link;
+}
+typedef struct Node *PNode;
+
+struct LinkStack
+{
+    PNode top;  /* 栈顶指针，其link项指向栈顶结点 */
+
+};
+typedef struct LinkStack *PLinkStack;　　
+
+
+/* 创建一空链接栈，返回指向空链接栈的指针。 */
+
+PLinkStack CreateEmptyStack( void )
+{
+    PLinkStack plstack;
+　    /* 申请头指针 */
+
+    plstack = (PLinkStack)malloc( sizeof(struct LinkStack));
+    if (plstack != NULL)
+    {
+        /* 栈顶指针指向空 */
+
+        plstack->top = NULL;
+    }
+    else
+        printf("空间不够! \n");
+
+        return plstack;
+    }
+
+　
+
+
+/* 判断plstack所指的栈是否为空栈， 当plstack所指的栈为空栈时，则返回1，否则返回0。*/
+
+int isEmptyStack_link( PLinkStack plstack )
+{
+    /* 栈顶指针指向空结点 */
+
+    return (plstack->top == NULL);
+}　
+
+
+/* 表示往plstack所指的栈中插入（或称推入）一个值为ｘ的元素。 */
+
+int push_link( PLinkStack plstack, DataType x )
+{
+    PNode p;　
+
+    /* 申请新结点 */
+
+    p = (PNode)malloc( sizeof( struct Node ) );
+
+    if(p==NULL)
+
+    {
+
+        printf("Out of space!\n");
+
+        return ERROR;
+    /* 确认p已经申请到 *//* 在栈顶指针与原栈顶结点之间插入新结点 */
+
+    else
+
+    {
+
+         p->info = x;
+        p->link = plstack->top;
+        plstack->top = p;
+        return OK;
+    }
+}
+
+
+　
+
+/* 表示从plstack所指的栈中删除（或称弹出）一个元素。 */ 
+
+int pop_link( PLinkStack plstack)
+{
+    PNode p;
+
+    /* 首先判断空栈否？*/
+
+    if(isEmptyStack_link( plstack ) )
+
+    {
+
+        printf("Empty stack pop. \n");
+        return ERROR;
+
+    }
+    else
+    {
+        /*修改栈顶指针 */
+
+        p = plstack->top;
+       plstack->top = plstack->top->link;
+       free(p);
+       return OK;
+    }
+}
+
+
+
+
+/* 当plstack所指的栈不空时，求栈顶元素的值，栈保持不变。 */
+
+DataType GetTop( PLinkStack plstack )
+{
+    /* 只取值，不修改栈顶指针 */
+
+    return plstack->top->info;
+}
+

@@ -1,0 +1,142 @@
+//-------------------------------
+//seqList.h
+//-------------------------------
+
+#include<iostream.h>
+
+const int  MAXNUM=100;
+const int SPECIAL= -1;
+enum Boolean { FALSE,TRUE };
+typedef  int  DataType;
+
+
+///////////////////////////////////////////////
+
+
+class seqList  
+{
+public:
+	char  *element; //element[MAXNUM];
+	int  n;
+
+public:
+	seqList(int size=MAXNUM);
+	virtual ~seqList();
+
+ 	int insert_seq(char x, int p );
+	int  delete_seq(int p );
+	int  first_seq(void);
+	int  locate_seq( char x );
+	char  retrieve_seq( int p );
+   	int  next_seq( int p );
+	int  previous_seq( int p );
+	int  isNullList_seq(void );
+
+};
+
+
+seqList::seqList(int size)
+{
+	element = new char[size];
+  	if (element!=0)
+ 		n = 0;
+  	else
+		cout<<"Out of space!!\n"<<endl;
+
+}
+
+seqList::~seqList()
+{
+	
+}
+
+
+int seqList::insert_seq(char x, int p )
+{
+	int q;
+  	if (n == MAXNUM )	/* 溢出 */
+     	{ 
+		cout<<"Overflow!"<<endl;
+      		return ( 0 );
+    	 }
+   	if (p<0 || p>n  )/* 不存在下标为ｐ的元素 */
+     	{
+		cout<<"not exist!"<<endl;
+       		return ( 0 );
+     	}
+   	for(q=n - 1; q>=p; q--)  /* 将ｐ及以后的元素后移一个下标位置 */
+     		element[q+1] = element[q];
+  	
+	element[p] = x;	    /* 在p下标位置上放元素x */
+   	n = n + 1;  /* 元素个数加１ */
+   	return (1);
+
+}
+
+int  seqList::delete_seq(int p )
+{
+	int q;
+ 	if (  p<0  ||  p>n-1 )	/* 不存在下标为ｐ的元素 */
+	{ 
+		cout<<"not exist! "<<endl;
+	  	return  (FALSE);
+	}
+  	for(q=p; q<n-1; q++) 	/* 将ｐ以后的元素前移一个位置 */
+		element[q] = element[q+1];
+  	
+	n = n-1;	/* 元素个数减１ */
+  	return ( 1);
+
+}
+int  seqList::first_seq(void)
+{
+	if ( n == 0 )
+		return -1;
+  	else
+		return 0;
+
+}
+
+int  seqList::locate_seq(char x )
+{
+	int  q;
+  	for ( q=0; q<n ; q++)
+		if ( element[q] == x)
+			return (q);
+  	return  (-1);
+
+}
+
+char  seqList::retrieve_seq( int p )
+{
+	if (p>0 && p<=n  )  /* 存在下标为ｐ-1的元素 */
+    		return ( element[p-1] );
+  	
+	cout<<"not exist! "<<endl;
+	return (SPECIAL);   /* 返回一个顺序表中没有的特殊元素值 */
+
+}
+
+int  seqList::next_seq( int p )
+{
+	if (( p>=0 )&&( p<n - 1 ))
+		return ( p + 1 );
+ 	else
+		return ( -1 );
+
+}
+
+int  seqList::previous_seq( int p )
+{
+	if ( p>0  &&  p<n  ) 
+		return ( p - 1 );
+  	else
+		return ( -1 );
+
+}
+int  seqList::isNullList_seq(void )
+{
+	return ( n == 0 );
+
+}
+

@@ -1,0 +1,95 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>PLinkQueue createEmptyQueue</title>
+</head>
+
+<body>
+
+<p align="center" style="margin-top: 0; margin-bottom: 0">　</p>
+<p align="center" style="margin-top: 0; margin-bottom: 0">　</p>
+<p align="center" style="margin-top: 0; margin-bottom: 0"><b><font face="华文新魏" size="7" color="#008000">图的广度优先周游算法</font></b></p>
+<p align="center" style="margin-top: 0; margin-bottom: 0">　</p>
+<p align="center" style="margin-top: 0; margin-bottom: 0">　</p>
+<p align="center" style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">PLinkQueue  createEmptyQueue_link(  );&nbsp;<br>
+<font color="#008000">/* </font></font><font color="#008000"><font size="5"> 表示创建一个空队列 
+</font></font><font size="5" face="Comic Sans MS"><font color="#008000"> */</font><br>
+int  isEmptyQueue_link( PLinkQueue plqu );<br> 
+<font color="#008000">/*</font></font><font color="#008000"><font size="5">判断</font><font size="5" face="Comic Sans MS">plqu</font><font size="5">所指的队列是否为空队列，当</font><font size="5" face="Comic Sans MS">plqu</font><font size="5">所指的队列为空队列时，则返回</font><font size="5" face="Comic Sans MS">1</font><font size="5">，否则返回</font></font><font size="5" face="Comic Sans MS"><font color="#008000">0*/</font><br>
+void  enQueue_link( PLinkQueue plqu, Datatype x );<br> 
+<font color="#008000">/*</font></font><font color="#008000"><font size="5">表示往</font><font size="5" face="Comic Sans MS">plqu</font><font size="5">所指的队列中插入一个值为ｘ的元素</font></font><font size="5" face="Comic Sans MS"><font color="#008000">*/</font><br>
+void  deQueue_link( PLinkQueue plqu );&nbsp;<br>
+<font color="#008000">/*</font></font><font color="#008000"><font size="5">表示从</font><font size="5" face="Comic Sans MS">plqu</font><font size="5">所指的队列中删除队列头部元素</font><font size="5" face="Comic Sans MS">*/<br>
+</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font color="#008000"><font size="5" face="Comic Sans MS">/* 
+</font><font size="5"> 从</font><font size="5" face="Comic Sans MS">vi</font><font size="5">出发进行广度优先搜索，图用邻接表表示法表示 
+</font></font><font size="5" face="Comic Sans MS"><font color="#008000"> */</font><br>
+void bFSInList(GraphList *pgraphlist, int visited[], int i)<br> 
+{<br>
+&nbsp;&nbsp;&nbsp; PLinkQueue pq;<br> 
+&nbsp;&nbsp;&nbsp; PEdgeNode p;<br> 
+&nbsp;&nbsp;&nbsp; int j;<br> 
+&nbsp;&nbsp;&nbsp; pq=creatEmptyQueue_link();&nbsp;&nbsp;&nbsp;<font color="#008000"> 
+/* </font></font><font color="#008000"><font size="5"> 置队列为空 </font></font><font size="5" face="Comic Sans MS"><font color="#008000"> */</font><br>
+&nbsp;&nbsp;&nbsp; printf(“node:%c\n”,pgraphlist->vexs[i].vertex);<br>
+&nbsp;&nbsp;&nbsp; visited[i]=TRUE;<br>
+&nbsp;&nbsp;&nbsp; enQueue_link(pq,i);&nbsp;&nbsp;&nbsp; <font color="#008000">/* 
+</font></font><font color="#008000"><font size="5"> 将顶点序号进队 </font></font><font size="5" face="Comic Sans MS"><font color="#008000"> */</font><br>
+&nbsp;&nbsp;&nbsp; while (!isEmptyQueue_link(pq) )&nbsp;&nbsp;&nbsp;&nbsp; <font color="#008000">/* 
+</font></font><font color="#008000"><font size="5"> 队列非空时执行 </font></font><font size="5" face="Comic Sans MS"><font color="#008000"> */</font><br>
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; j=deQueue_link(pq);&nbsp;&nbsp;&nbsp;&nbsp;<font color="#008000"> 
+/* </font></font><font color="#008000"><font size="5"> 队头顶点出队 </font></font><font size="5" face="Comic Sans MS"><font color="#008000"> */</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p=pgraphlist->vexs[j].edgelist;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; while( p!=NULL)</font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+{</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+if (!visited[p->endvex])&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<font color="#008000">/*</font></font><font color="#008000"><font size="5">访问相邻接的未被访问过的顶点 
+</font><font size="5" face="Comic Sans MS"> */&nbsp;&nbsp;&nbsp;</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+{</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;</b></font> 
+<font size="5" face="Comic Sans MS"><b>printf(“node:%c\n”,pgraphlist->vexs[p->endvex].vertex);</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+visited[p->endvex]=TRUE;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+enQueue_link(pq,p->endvex);&nbsp;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<font color="#008000">/*</font></font><font color="#008000"><font size="5">访问的顶点入队 
+</font><font size="5" face="Comic Sans MS"> */</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+}</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+p=p->nextedge;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+}</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS"> 
+}</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">}</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>traverBFS(GraphList *pgraphlist)&nbsp;<br>
+{<br>
+&nbsp;&nbsp;&nbsp; int visited[MAXVEX];<br> 
+&nbsp;&nbsp;&nbsp; int i,n;<br> 
+&nbsp;&nbsp;&nbsp; n=pgraphlist->n;&nbsp;<br>
+&nbsp;&nbsp;&nbsp; for(i=0;i&lt;n;i++)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; visited[i]=FALSE;<br>
+&nbsp;&nbsp;&nbsp; for(i=0; i&lt;n; i++)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(visited[i]==FALSE)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bFSInList(pgraphlist,visited,i);&nbsp;<br>
+}<br>
+</b></font></p>
+
+</body>
+
+</html>

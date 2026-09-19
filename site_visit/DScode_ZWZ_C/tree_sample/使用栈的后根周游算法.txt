@@ -1,0 +1,34 @@
+使用栈的后根周游算法
+void nPostorder(PBinTree t)
+{	StackType s[MAXNODE];
+	PBinTreeNode  p;		/* 周游时当前要处理结点的位置 */
+    	char flag;		/* 结点p的标志量 */
+	char  continueflag; /* 表明是否要继续退栈，当从右子树返回时，则要在访问完根之后继续退栈 */
+
+	int   top;		/* 当前栈顶的位置 */
+	if (t==NULL || *t ==NULL) return;
+	top = -1;  /* 初始化栈 */
+	p = t->root;		/* 从根结点开始 */
+	do	/* 每执行一次大循环进入一棵由p指出根的子树去周游 */
+	{ while (p!=NULL)	/* 反复地把遇到的结点进栈并进入它的左子树 */
+		{ top++;
+		  s[top].ptr = p;
+		  s[top].tag = '1';
+		   p = p->llink;
+		}
+	   continueflag = '1';
+	  while ( continueflag=='1' && top!=-1 ) 
+		{ p = s[top].ptr;
+		  flag = s[top].tag;
+		    top--;		/* 退栈 */
+		  if (flag=='1')	/* 如果是从左子树回来，则改标志重新进栈，停止退栈并进入右子树 */
+			{ top++;
+		    	   s[top].ptr = p;
+			   s[top].tag = 'r';
+			   continueflag = '0';
+			   p = p->rlink;
+			}
+		  else visit(p);
+		}
+	} while (top!=-1);	/* 栈为空时，全部周游完 */
+}

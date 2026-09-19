@@ -1,0 +1,27 @@
+　
+
+快速排序算法　
+
+void quickSort(SortObject * pvector, int l, int r) 
+{
+    int i, j;
+    RecordNode temp;
+    if(l>=r) return;       /*只有一个记录或无记录，则无需排序*/
+    i=l; j=r; temp=pvector->record[i];
+    while(i!=j)         /*寻找R1的最终位置*/
+    {
+        while( (pvector->record[j].key>=temp.key) && (j>i) )
+            j--;  /*从右到左扫描，查找第1个排序码小于temp.key的记录*/
+        if(i<j)
+            pvector->record[i++]= pvector->record [j];
+
+        while( (pvector->record[i].key<=temp.key) && (j>i) )
+            i++;/*从左到右扫描，查找第1个排序码大于temp.key的记录*/
+        if(i<j)
+            pvector->record[j--]= pvector->record[i];
+    }
+    pvector->record[i]=temp;  /*找到R1的最终位置*/
+
+    quickSort(pvector,l,i-1);   /*找到递归处理左区间*/
+    quickSort(pvector,i+1,r);   /*找到递归处理右区间*/
+}

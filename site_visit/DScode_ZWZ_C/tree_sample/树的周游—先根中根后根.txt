@@ -1,0 +1,150 @@
+　
+
+按先根次序周游树的算法
+
+//递归算法
+
+void preOrder(Node p)
+
+{  
+
+    Node c;
+
+    visit(p);
+
+    c = leftChild(q);        /*获取该结点的长子*/
+
+                    //然后按照从左往右的次序先根遍历该结点的子女
+
+     while (c!=NULL)
+
+     {   preOrder( c);                 //先根遍历
+
+         c = rightSibling(c);        //右兄弟
+
+     }
+
+}
+
+　
+
+//非递归算法
+
+/*每访问一个结点，都将该结点入栈，然后按从左往右次序依次周游这个
+
+结点的各个子树，当以该结点为根的子树周游完后，从栈顶找到该结点，
+
+通过rightSibling函数找到下一个兄弟结点继续处理。*/
+
+Void npreOrder(Node p)
+
+{       
+
+    Node c;
+
+   Stack s;    /* 栈元素的类型是Node */
+
+   s = createEmptyStack();        //创建空栈
+
+   c = root(p);
+
+   do
+
+   {    while (c!=NULL)
+
+    //顺长子链一直下去，边走边访问，并压入栈，便于今后右兄弟的访问
+
+        {    
+
+             visit(c);                   //访问该结点
+
+             push(s, c);               //将该结点压入栈
+
+             c = leftChild(c);                //获取该结点的长子
+
+         }
+
+         while ((c==NULL) && (!isEmptyStack(s)))
+
+         {    
+
+              c = rightSibling(top(s));
+
+             pop(s);
+
+         }
+
+    } while (c!=NULL);
+
+}　
+
+
+
+////////////////////////////////////////////////////////
+
+按中根次序周游树的递归算法　
+
+void inOrder(Node p)
+
+{  
+
+   Node c;
+
+    c = leftChild(q);                //获取该结点的长子
+
+   if (c==NULL)   
+
+        visit(p);                //不存在，访问该结点
+
+  else
+
+   {   
+
+       inOrder(c);                 //中根遍历长子
+
+       visit(p);                      //访问根
+
+       c = rightSibling(c);    //中根遍历其它子女
+
+       while (c!=NULL)
+
+       {    
+
+            inorder(c);
+
+            c = rightSibling(c);
+
+       }
+
+    }
+
+}
+
+//////////////////////////////////////////////////
+
+按后根次序周游树的递归算法　
+
+void postOrder(Node p)
+
+{  Node c;
+
+    c = leftChild(q);          //获取该结点的长子
+
+        //然后按照从左往右的次序后根遍历该结点的所有子女
+
+     while (c!=NULL)
+
+     {  
+
+          postOrder( c);                //后根遍历
+
+         c = rightSibling(c);        //继续后根遍历右兄弟
+
+     }
+
+     visit(p);                        //最后访问根
+
+}
+
+　
+

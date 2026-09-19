@@ -1,0 +1,96 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>二叉树的实现</title>
+</head>
+
+<body>
+
+<p align="center" style="margin-top: 0; margin-bottom: 0">　</p>
+<p align="center" style="margin-top: 0; margin-bottom: 0"><b><font face="华文新魏" size="7" color="#339933">二叉树的生成</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font color="#339933"><font size="5" face="Comic Sans MS">/*  
+</font><font size="5"> 二叉树的定义 </font><font size="5" face="Comic Sans MS"> */</font></font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">struct BinTreeNode;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">typedef 
+struct BinTreeNode *PBinTreeNode;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">struct  
+BinTreeNode<br>
+{<br>
+&nbsp;&nbsp;&nbsp; DataType info;</font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;&nbsp;<font size="5" face="Comic Sans MS"><b>&nbsp; 
+PBinTreeNode&nbsp; llink;<br> 
+&nbsp;&nbsp;&nbsp; PBinTreeNode&nbsp; rlink;<br> 
+};</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>typedef 
+struct BinTreeNode *BinTree;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>typedef 
+BinTree *PBinTree;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b><br>
+typedef SeqStack Stack;</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS"><br>
+</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">PBinTree 
+createBTree(void)</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font color="#339933"><font size="5" face="Comic Sans MS">/*</font></font><font color="#339933" size="5">创建完整的二叉树</font><font size="5" face="Comic Sans MS"><font color="#339933">*/<br>
+</font>{<br>
+&nbsp;&nbsp;&nbsp; PBinTree pbtree;</font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS"> 
+ pbtree=(PBinTree)malloc(sizeof(BinTree));</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS"> 
+if(pbtree!=NULL)</font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;  
+*pbtree=creatRest_Btree();</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#339933"> 
+/*</font></font><font color="#339933"><font size="5">递归创建从根开始的二叉树</font><font size="5" face="Comic Sans MS">*/</font></font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS"> 
+return pbtree;</font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">}</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">PBinTreeNode  
+creatRest_BTree()</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS" color="#339933">/*</font><font size="5" color="#339933">递归创建从根开始的二叉树</font><font size="5" face="Comic Sans MS" color="#339933">*/</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">{</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS"> 
+PBinTreeNode pbnode;</font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS"> 
+char ch;<br> 
+&nbsp;&nbsp; scanf(&quot;%c", &amp;ch);<br>  
+&nbsp;&nbsp; if(ch =='@') pbnode = NULL;</font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;  
+else<br>
+&nbsp;&nbsp;&nbsp; {<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pbnode = (PBinTreeNode)malloc(sizeof(struct  
+BinTreeNode));</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;  
+if(pbnode==NULL)</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+{</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp;  
+printf(&quot;Out of space!\n&quot;);</font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp;  
+return pbnode;</font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+}</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+pbnode-&gt;info=ch;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+pbnode-&gt;llink=creatRest_Btree(); <font color="#339933">/*</font></font><font color="#339933"><font size="5">构造左子树</font><font size="5" face="Comic Sans MS">*/</font></font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+pbnode-&gt;rlink=creatRest_bTree(); <font color="#339933">/*</font></font><font color="#339933"><font size="5">构造右子树</font><font size="5" face="Comic Sans MS">*/</font></font></b></p> 
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp; 
+}</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp; <b><font size="5" face="Comic Sans MS"> 
+return pbnode;</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">}</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+
+</body>
+
+</html>

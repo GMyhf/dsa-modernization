@@ -1,0 +1,23 @@
+　
+
+起泡排序算法
+
+
+void bubbleSort(SortObject * pvector)
+{
+    int i, j, noswap;
+    RecordNode temp;
+    for(i=0; i<pvector->n-1; i++)       /* 做n-1次起泡 */
+    {
+        noswap=TRUE;
+        for(j=0; j<pvector->n-i-1; j++)    /*置交换标志*/
+            if(pvector->record[j+1].key<pvector->record[j].key)          /*从前向后扫描*/
+            {
+                temp=pvector->record[j];
+                pvector->record[j]=pvector->record[j+1];
+                pvector->record[j+1]=temp;
+                noswap=FALSE;
+            }
+        if (noswap) break;  /*本趟起泡未发生记录交换，算法结束*/
+    }
+}

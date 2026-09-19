@@ -1,0 +1,151 @@
+#include "stdio.h"
+#include "malloc.h"
+#include "stdlib.h"
+/*  单链表 示意图 
+-------------------
+| data   |   next |
+-------------------
+data : 数据域，存放数据
+next : 指针域，指向直接后继 
+*/
+typedef char DataType;
+struct node 
+{
+ DataType data; //以字符为演示
+ struct node * next;
+};
+typedef struct node ListNode; 
+typedef struct node * LinkList;
+
+LinkList CreateListF() //头插法建链表
+{
+ printf("请输入要创建的链表数据(头插法)：");
+ char ch;
+ LinkList head=NULL;
+ ListNode * s;
+ scanf("%c",&ch);
+ while (ch!='n') 
+ {
+  s=(ListNode *)malloc(sizeof(ListNode));
+  if (s==NULL)
+  {
+   printf("分配内存空间失败！");
+   return NULL;
+  }
+  s->data=ch;
+  s->next=head;
+  head=s;
+  ch=getchar();
+ }
+ return head;
+}
+
+LinkList CreateListR()//尾插法建链表
+{
+ printf("请输入要创建的链表数据(尾插法)：");
+ char ch;
+ LinkList head=NULL;
+ ListNode * s=NULL, * r=NULL;
+ while ((ch=getchar())!='n')
+ {
+  s=(ListNode *)malloc(sizeof(ListNode));
+  if (s==NULL)
+  {
+   printf("分配内存空间失败！");
+   return NULL;
+  }
+  s->data=ch;
+  if (head==NULL) //头为空，则说明没表，直接插入即可
+   head=s;
+  else
+   r->next=s;
+  r=s; //直接放尾部
+ }
+ if (r!=NULL)
+  r->next=NULL;
+ return head;
+}
+
+void DispList(ListNode * p)//显示出链表的数据
+{
+ printf("\n当前链表的内容:");
+ int ret=0;
+ while (p!=NULL)
+ {
+  printf("%d -> %c ；",ret,p->data);
+  p=p->next;
+  ret++;
+ }
+ printf("\n=======================\n");
+}
+
+ListNode * GetNode(LinkList head,int pos)//按位置/序号查找
+{
+ int cur_pos=0; //当前位置
+ ListNode * p=head;
+ while (p->next && cur_pos<pos) 
+ {
+  p=p->next;
+  cur_pos++;
+ }
+ if (pos==cur_pos) 
+  return p;
+ else
+  return NULL;
+}
+
+ListNode * LocateNode(ListNode * head,DataType key)//按数据查找
+{
+ ListNode * p=head->next;
+ while (p && p->data!=key)
+  p=p->next;
+ return p; 
+}
+void InsertNode(LinkList head,DataType x,int i)
+{
+ ListNode * p=GetNode(head,i-1);
+ if (p==NULL)
+ {
+  printf("插入位置错误n");
+  return;
+ }
+ ListNode * s=(ListNode *)malloc(sizeof(ListNode));
+ s->data=x;
+ s->next=p->next; // 插入新节点
+ p->next=s;
+}
+
+void DeleteNode(LinkList head,int pos)
+{
+ ListNode * p, * r;
+ p=GetNode(head,pos-1);
+ if (p==NULL || p->next==NULL)
+ {
+  printf("删除位置错误n");
+  return;
+ }
+ r=p->next;
+ p->next=r->next;
+ free(r);
+}
+
+
+//some demo 
+void main()
+{
+ printf("=============== 链表演示程序 ================\n");
+ LinkList p=CreateListR();
+ DispList(p);
+ ListNode * nod=GetNode(p,2);
+ if (nod!=NULL)
+  printf("n查找到的第2个数据为：[%c] \n",nod->data);
+ ListNode * nod2=LocateNode(&(*p),'c');
+ if (nod2!=NULL)
+  printf("n查找到的['C']数据为：[%c] \n",nod2->data);
+ printf("在位置[3]处插入数据['@']后的链表:");
+ InsertNode(p,'@',3);
+ DispList(p);
+ printf("删除位置[4]后的链表:");
+ DeleteNode(p,4);
+ DispList(p);
+}

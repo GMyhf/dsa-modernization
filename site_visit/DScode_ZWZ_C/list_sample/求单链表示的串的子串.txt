@@ -1,0 +1,36 @@
+// 求单链表示的串的子串
+/* 求从s所指的链串中第i(i>0)个字符开始连续j个字符所构成的子串 */
+PLinkString subStr_link(PLinkString s,int i,int j)
+{
+ PLinkString s1;
+ PStrNode p,q,t;
+ int k，re_in;
+
+ s1 = createNullStr_link( );  /* 创建空链串 */
+ if( s1 == NULL ) 
+ {
+    printf( "Out of space!\n" );
+    return NULL;
+ }
+
+ if (i<1 || j<1 ) return(s1);	/* i,j值不合适，返回空串 */
+
+ p = find_link(s,k); /*找开始字符 P33*/
+ if (p==NULL) return(s1);
+
+ t=s1;
+  for (k=1;k<=j;k++)  /*连续取j个字符*/
+  {
+    if (p!=null)
+    {
+	q=(PStrNode)malloc(sizeof(struct StrNode));
+	if(q == null)
+	  { printf("Out of space!!\n"); return(s1); }
+	q->c=p->c;
+	q->link=null;
+	t->link=q;
+	t=q;
+	p = p->link;		
+  }
+  return(s1);
+ }

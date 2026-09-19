@@ -1,0 +1,54 @@
+//-------------------------------
+//Josehpus_seqList.cpp
+//-------------------------------
+
+#include "seqList.h"
+
+#define  MAXNUM  100
+#define  FALSE   0
+#define  TRUE    1
+typedef  int  DataType;
+
+josephus_seq( PSeqList palist, int s, int m)
+{ 
+	int s1, i, w;
+	s1 = s;
+	for( i = palist->n; i>0; i--)  /* 找出列的元素 */
+	{
+  	  s1 = ( s1 + m - 1 ) % i ;
+	  if ( s1 == 0 )  s1 = i;
+	  w = retrieve_seq(palist,s1);    /* 求第s1个（下标为s1-1的）元素的值 */
+      	  printf("Out element %d \n",w);  /* 元素出列 */
+	  delete_seq(palist,s1-1);        /* 删除出列的元素 */
+	}
+
+};
+
+int main( )
+{ 
+    PSeqList jos_alist;
+    int i，k;
+    int n,s,m;
+
+    printf("\n please input the values(<100) of n = ");
+    scanf("%d",&n);
+    printf(" please input the values of s = ");
+    scanf("%d",&s);
+    printf(" please input the values of m = ");
+    scanf("%d",&m);
+
+    jos_alist=createNullList_seq( ); /* 创建空顺序表 */
+
+    if (jos_alist==NULL)
+	 return (FALSE);
+    for( i = 0; i < n; i++ )    /* 线性表赋值 */
+    {
+	  k=insert_seq( jos_alist,i+1, i );
+	  if (k==FALSE)
+		return (FALSE);
+    }
+
+    josephus_seq(jos_alist,s,m);
+
+    return (TRUE);
+}

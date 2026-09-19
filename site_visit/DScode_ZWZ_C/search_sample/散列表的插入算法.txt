@@ -1,0 +1,17 @@
+散列表的插入算法
+-用线性探查法解决碰撞
+int linearInsert(HashDictionary *phash, KeyType key)
+{
+	int position;
+  	if(linearSearch(phash, key, &position) ==TRUE )
+				  /* 散列表中已有关键码为key 的结点 */
+  		  printf("Find\n");
+
+  	else if(position!=-1)	
+       			phash->element[position].key=key;/* 插入结点 */
+  	     else  return(FALSE);  /* 散列表溢出 */
+
+ 	return(TRUE);
+}
+
+

@@ -1,0 +1,28 @@
+　
+
+直接插入排序
+
+void insertSort(SortObject * pvector)
+
+ /* 按递增序进行直接插入排序 */
+{ 
+    int i, j;
+    RecordNode temp;
+    for( i = 1; i < pvector->n; i++ )
+
+                        /*依次插入记录R1,R2,....Rn-1*/
+    {
+        temp = pvector->record[i];
+        j = i-1;
+        while ((temp.key < pvector->record[j].key)&&(j>=0) )
+
+                        /*由后向前找插入位置*/
+        {
+            pvector->record[j+1] = pvector->record[j];
+
+                    /*将排序码大于Ki的记录后移*/
+            j--;
+        }
+        if( j!=(i-1) ) pvector->record[j+1] = temp;
+    }
+}

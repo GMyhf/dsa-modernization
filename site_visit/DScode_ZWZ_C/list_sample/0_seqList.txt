@@ -1,0 +1,120 @@
+//-------------------------------
+//seqList.h
+//-------------------------------
+
+
+//顺序表的定义	
+struct  SeqList
+{
+	DataType  element[MAXNUM];
+	int  n;
+};
+
+typedef  struct SeqList  *PSeqList;
+
+
+// 创建空线性表
+PSeqList create( void )
+{ 
+	PSeqList palist;
+  	palist = (PSeqList)malloc(sizeof(struct SeqList));
+  	if (palist!=NULL)
+ 		palist ->n = 0;
+  	else
+    		printf("Out of space!!\n");    
+  	return palist;
+};
+
+/* 在palist所指顺序表中下标为ｐ的位置上插入元素ｘ */ 
+ int insert_seq( PSeqList palist, DataType x, int p )
+{ 
+	int q;
+  	if ( palist->n == MAXNUM )	/* 溢出 */
+     	{ 
+		printf("Overflow!\n");
+      		return ( 0 );
+    	 }
+   	if (p<0 || p>palist->n  )/* 不存在下标为ｐ的元素 */
+     	{
+		printf("not exist! \n");
+       		return ( 0 );
+     	}
+   	for(q=palist->n - 1; q>=p; q--)  /* 将ｐ及以后的元素后移一个下标位置 */
+     		palist->element[q+1] = palist->element[q];
+  	
+	palist->element[p] = x;	    /* 在p下标位置上放元素x */
+   	palist->n = palist->n + 1;  /* 元素个数加１ */
+   	return ( 1);
+}
+
+/* 在palist所指顺序表中删除下标为ｐ的元素 */
+int  delete_seq( PSeqList palist, int p )
+{ 
+	int q;
+ 	if (  p<0  ||  p>palist->n – 1 )	/* 不存在下标为ｐ的元素 */
+	{ 
+		printf("not exist!\n ");
+	  	return  (FALSE);
+	}
+  	for(q=p; q<palist->n-1; q++) 	/* 将ｐ以后的元素前移一个位置 */
+		palist->element[q] = palist->element[q+1];
+  	
+	palist->n = palist->n - 1;	/* 元素个数减１ */
+  	return ( 1);
+};   
+
+//求第一个元素的下标位置    
+int  first_seq( PSeqList palist ) 
+{
+	if ( palist->n == 0 )
+		return -1;
+  	else
+		return 0;
+}
+
+/* 求ｘ在palist所指顺序表中的下标位置 */
+int  locate_seq( PSeqList palist, DataType x )
+{
+	int  q;
+  	for ( q=0; q<palist->n ; q++)
+		if ( palist->element[q] == x)
+			return (q);
+  	return  (-1);
+}
+  
+/* 求palist所指顺序表中第ｐ个（即下标为p-1）的元素的值 */  
+DataType  retrieve_seq( PSeqList palist, int p )
+{ 
+	if (p>0 && p<=palist->n  )  /* 存在下标为ｐ-1的元素 */
+    		return ( palist->element[p-1] );
+  	
+	printf("Not exist.\n ");
+	return (SPECIAL);   /* 返回一个顺序表中没有的特殊元素值 */
+};
+  
+/* 求palist所指顺序表中下标为p的元素的后继元素的下标位置 */ 
+int  next_seq( PSeqList palist, int p )
+{ 
+	if (( p>=0 )&&( p<palist->n - 1 ))
+		return ( p + 1 );
+ 	else
+		return ( -1 );
+}
+
+/* 求palist所指顺序表中下标为p的元素的前驱元素的下标位置 */
+int  previous_seq( PSeqList palist, int p )
+{
+	 if ( p>0  &&  p<palist->n  ) 
+		return ( p - 1 );
+  	else
+		return ( -1 );
+}
+ 
+
+//判断线性表是否为空
+int  isNullList_seq( PSeqList palist )
+{
+  return ( palist->n == 0 )
+}
+   
+

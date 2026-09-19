@@ -1,0 +1,133 @@
+
+
+#include <malloc.h>
+#include <stdio.h>
+
+/* 顺序栈类型定义 */
+#define MAXNUM 100
+#define ERROR 0
+#define OK 1
+#define NULL 0
+
+typedef char DataType;
+
+struct SeqStack
+{
+    DataType *s; //DataType s[MAXNUM];
+    int t;
+};
+typedef struct SeqStack *PSeqStack;
+
+
+/* 创建一个空栈 */
+/*
+PSeqStack createEmptyStack_seq( void )
+{
+     PSeqStack pastack;
+    /* 申请空间 */
+     pastack = (PSeqStack)malloc(sizeof(struct SeqStack));
+    if (pastack==NULL)
+        printf("Out space!! \n");
+    else
+        pastack->t=-1;            /* 设置栈顶指针 */
+    return (pastack);
+}
+
+*/
+
+
+/* 创建一个空栈 */
+PSeqStack createEmptyStack_seq(int  m) 
+{
+     PSeqStack pastack;    //PSeqList palist;
+     pastack =(PSeqStack ) malloc (sizeof (struct SeqStack ) );
+     if (pastack ! = null)  
+     {
+	 pastack -> element = (DataType *) malloc (sizeof (DataType ) *m); 
+         if (pastack -> element ! = NULL)  
+         { 
+              palist -> t = -1 ;  
+              return (pastack ); 
+          }
+	 else free(pastack );
+      }  
+      printf(“out of space!\n”); 
+     return (NULL); 
+}
+
+
+
+/* 判断pastack所指的栈是否为空栈，
+
+   当pastack所指的栈为空栈时，则返回1，否则返回0。 */
+int isEmptyStack_seq( PSeqStack pastack )
+{
+
+        /* 栈顶指针为 -1 ？*/
+        return ( pastack->t == -1 );
+}
+
+
+
+/* 表示往pastack所指的栈中插入（或称推入）一个值为ｘ的元素。*/
+int push_seq( PSeqStack pastack, DataType x )
+{
+
+        /* 满否？ */
+        if( pastack->t >= MAXNUM - 1 )
+
+        {
+
+              printf("overflow!\n");
+              return ERROR;
+
+        }
+        else
+        {
+
+                /* 压入 */
+                pastack->t = pastack->t + 1;  /* 先变化指针，再插入 */
+                pastack->s[pastack->t] = x;
+                return OK;
+        }
+}
+
+
+
+/* 表示从pastack所指的栈中删除（或称弹出）一个元素。 */
+void pop_seq(PSeqStack pastack)
+{
+          /* 空否？*/
+        if(pastack->t ==-1)
+
+        {
+                printf("Underflow!\n"); 
+
+        }
+        else
+        {
+                pastack->t = pastack->t-1;
+             
+        }
+}
+
+
+
+/* 当pastack所指的栈不为空栈时，求栈顶元素的值，栈保持不变。 */
+Datatype pop_seq(PSeqStack pastack)
+{
+       Datatype temp;
+       if (pastack->t ==-1)   /* 空否？*/
+        {
+                printf("Underflow!\n");       
+                return ERROR;
+        }
+        else    /* 弹出 */
+        {
+	       temp=pastack->s[pastack->t];
+               pastack->t = pastack->t-1;
+               return temp;
+        }
+}
+
+

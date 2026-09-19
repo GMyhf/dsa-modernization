@@ -1,0 +1,146 @@
+
+#include <stdio.h> 
+#include <malloc.h>
+
+#define MAXNUM 100
+typedef int DataType;
+
+struct  SeqQueue	/* 顺序队列类型定义 */
+{
+	DataType  q[MAXNUM];
+  	int  f,r;
+};
+
+typedef  struct SeqQueue  *PSeqQueue; /* 顺序队列类型的指针类型 */
+PSeqQueue  paqu;	/* paqu是指向顺序队列的一个指针变量 */
+
+PSeqQueue initSeqQueue()
+{
+	PSeqQueue paqu;
+	paqu=(PSeqQueue)malloc(sizeof(struct SeqQueue));
+	if(paqu == NULL)
+		printf("out of space!\n");
+	else
+	{
+		paqu->f=0;
+		paqu->r=0;
+	}
+	return(paqu);
+}
+
+/* 在队列中插入一元素x */
+void  enQueue_seq( PSeqQueue paqu, DataType x )
+{
+  if( (paqu->r + 1) % MAXNUM == paqu->f  )
+      printf( "Full queue.\n" );
+  else
+	{
+	  paqu->q[paqu->r] = x;
+	  paqu->r = (paqu->r + 1) % MAXNUM;
+	 }
+}
+
+/* 删除队列头部元素 */
+void  deQueue_seq( PSeqQueue paqu )
+{
+ 	 	if( paqu->f == paqu->r )
+			printf( "Empty Queue.\n" );
+  		else
+			paqu->f = (paqu->f + 1) % MAXNUM;
+}
+
+int isEmptySeqQueue(PSeqQueue paqu)
+{
+	return(paqu->f == paqu->r);
+
+}
+
+DataType frontQueue_seq(PSeqQueue paqu)
+{
+	return(paqu->q[paqu->f]);
+}
+
+///////////////////////////////
+int farmer(int location)
+  { return (0 != (location & 0x08));  }
+
+int wolf(int location)
+  { return (0 != (location & 0x04));  }
+
+int cabbage(int location)
+  { return (0 != (location & 0x02));  }
+
+int goat(int location)
+  { return (0 != (location & 0x01));  }
+
+///////////////////////
+int safe(int location)
+{ if((goat(location) == cabbage(location))&&
+  (goat(location) != farmer(location))) //羊吃白菜
+		return (0);
+ if((wolf(location) == goat(location)) &&
+   (wolf(location) != farmer(location))) //狼吃羊
+		return (0);
+ return(1); //其他状态是安全的
+}
+
+int printf_bin (int x)//////////////////
+{ 
+	if(x/2 > 0)  return(10*printf_bin(x/2)+x%2);
+	return(x);
+}
+
+
+void farmerProblem()
+{
+	int movers,location,newlocation;
+	int route[16]; //记录已经考虑的状态
+
+	/*准备初值*/
+	PSeqQueue moveTo;
+	moveTo = initSeqQueue();
+	enQueue_seq(moveTo,0x00);
+	for(int i=0;i<16;i++)
+		route[i] = -1;
+	route[0] = 0;
+
+	/*开始移动*/
+	while(!isEmptySeqQueue(moveTo) && route[15]==-1)
+	{
+		location=frontQueue_seq(moveTo);
+		deQueue_seq(moveTo);
+		for(movers=1;movers<=8;movers = movers<<1)
+		{
+			if((0 !=(location & 0x08))==(0!=(location & movers)))
+			{
+				//农夫总是在移动，随着农夫移动的也只能是农夫同侧的东西
+				newlocation = location^(0x08|movers);
+				if(safe(newlocation) && (route[newlocation]== -1))
+				{
+					route[newlocation]=location;
+					enQueue_seq(moveTo,newlocation);
+				}
+			}
+		}
+	}
+	//print
+	if(route[15] != -1)
+	{
+		printf("the reverse path is:\n");
+		for(location=15;location>=0;location=route[location])
+		{
+			printf("The location is:%2d---",location);
+			printf("%4d",printf_bin(location));
+			printf("\n");
+			if(location==0) break;
+		}
+	}
+	else
+		printf("No sulution.\n");
+}
+
+main()
+{
+	farmerProblem();
+	return (1);
+}

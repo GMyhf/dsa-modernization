@@ -1,0 +1,110 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="zh-cn">
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>基数排序算法</title>
+</head>
+
+<body>
+
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+
+<p style="margin-top: 0; margin-bottom: 0" align="center"><b><font size="7" face="华文新魏" color="#339933">基数排序算法</font></b></p>
+
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS"># define D 3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<font color="#339933">/* D</font></font><font color="#339933"><font size="5">为排序码的最大位数</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS"># define R 
+10&nbsp;&nbsp;&nbsp;&nbsp; <font color="#339933">/* R</font></font><font color="#339933"><font size="5">为基数</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">struct Node;&nbsp;&nbsp;<font color="#339933">&nbsp; 
+/* </font></font><font color="#339933"><font size="5"> 单链表结点类型</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>{&nbsp;&nbsp;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<font size="5" face="Comic Sans MS"><b> 
+KeyType key[D];</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp; DataType info;</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp; RadixNode&nbsp; *next;</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>};</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>typedef RadixNode *RadixList;</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>typedef struct QueueNode</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>{</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp; RadixNode *f;&nbsp;&nbsp;&nbsp;&nbsp; 
+<font color="#339933">/*</font></font><font color="#339933"><font size="5">队列的头指针</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp; RadixNode *e;&nbsp;&nbsp;&nbsp;<font color="#339933"> 
+/*</font></font><font color="#339933"><font size="5">队列的尾指针</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>}Queue;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>Queue queue[R];</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5">　</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font color="#339933"><font size="5" face="Comic Sans MS">/* 
+</font><font size="5"> 
+对链表按不减顺序进行基数排序，链表中第一个结点为表头结点</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>void radixSort( RadixList *plist,int d, int r)</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>{</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; int i,j,k;</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; RadixNode *p,*head;</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; head=(*plist)-&gt;next;</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp; for(j=d-1;j&gt;=0;j--)&nbsp;&nbsp;&nbsp; 
+<font color="#339933">/*</font></font><font color="#339933"><font size="5">进行</font><font size="5" face="Comic Sans MS">d</font><font size="5">次分配和收集</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; {</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p=head;</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; for (i=0;i&lt;r;i++)</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+queue[i].f=NULL;&nbsp;&nbsp; <font color="#339933">/*</font></font><font color="#339933"><font size="5">清队列</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+queue[i].e=NULL;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; while(p!=NULL)</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; {</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; k=p-&gt;key[j];</b></font></p> 
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+if(queue[k].f==NULL)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#339933">&nbsp;/*</font></font><font color="#339933"><font size="5">按排序码的第</font><font size="5" face="Comic Sans MS">j</font><font size="5">个分量进行分配</font><font size="5" face="Comic Sans MS">*/</font></font></b> 
+</p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5">　&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+</font><font size="5">&nbsp; </font><font size="5" face="Comic Sans MS">queue[k].f=p;&nbsp;&nbsp;&nbsp;&nbsp; 
+<font color="#339933">/*</font></font><font color="#339933"><font size="5">若第</font><font size="5" face="Comic Sans MS">k</font><font size="5">个堆为空</font><font size="5" face="Comic Sans MS">,</font><font size="5">则当前记录为队头</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5">&nbsp;&nbsp;&nbsp;&nbsp; 
+</font><font size="5">&nbsp;&nbsp; </font><font size="5" face="Comic Sans MS">else</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+(queue[k].e)-&gt;next=p;&nbsp; <font color="#339933"> /*</font></font><font color="#339933"><font size="5">否则当前记录链接到第</font><font size="5" face="Comic Sans MS">k</font><font size="5">队的队尾</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+queue[k].e=p;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+p=p-&gt;next;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+}</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+i=0;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+while(queue[i].f==NULL) i++;&nbsp; <font color="#339933"> /* </font></font><font color="#339933"><font size="5">从</font><font size="5" face="Comic Sans MS">r</font><font size="5">个队列中找出第一个非空的队列</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+p=queue[i].e;head=queue[i].f;&nbsp; <font color="#339933">/* head</font></font><font color="#339933"><font size="5">为收集链表的头指针</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+for(i=0; i&lt;r;i++)</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+if(queue[i].f!=NULL)</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+{&nbsp; p-&gt;next=queue[i].f; p=queue[i].e;}&nbsp; <font color="#339933">/*</font></font><font color="#339933"><font size="5">收集非空队列</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+p-&gt;next=NULL;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; 
+}</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; 
+(*plist)-&gt;next=head;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>} 
+</b></font></p>
+
+</body>
+
+</html>

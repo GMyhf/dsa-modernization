@@ -1,0 +1,14 @@
+顺序检索算法
+int seqSearch(SeqDictionary * pdic, KeyType key, int * position) 
+/*在字典中顺序检索关键码为key的元素*/
+{			
+  int i;
+  for(i=0; i<pdic->n; i++)			/* 从头开始向后扫描	*/
+  if(pdic->element[i].key==key)  
+  {
+	*position=i;
+	return(TRUE);				/* 检索成功 */
+   }
+	*position=i;
+	return(FALSE);				/* 检索失败 */
+}

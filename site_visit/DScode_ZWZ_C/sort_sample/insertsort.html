@@ -1,0 +1,45 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>直接插入排序</title>
+</head>
+
+<body>
+
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0" align="center"><b><font size="7" face="华文新魏" color="#339933">直接插入排序</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5"><br>
+</font><font size="5" face="Comic Sans MS">void  insertSort(SortObject * pvector)</font></b></p>  
+<p style="margin-top: 0; margin-bottom: 0"><b><font color="#339933"><font size="5" face="Comic Sans MS">&nbsp;/*  
+</font><font size="5"> 按递增序进行直接插入排序 </font></font><font size="5" face="Comic Sans MS"><font color="#339933"> */</font><br> 
+{&nbsp;<br>
+&nbsp;&nbsp;&nbsp; int i, j;<br>  
+&nbsp;&nbsp;&nbsp; RecordNode temp;<br>  
+&nbsp;&nbsp;&nbsp; for( i = 1; i &lt; pvector->n; i++ )</font></b></p>  
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<font color="#339933">/*</font></font><font color="#339933"><font size="5">依次插入记录</font></font><font size="5" face="Comic Sans MS"><font color="#339933">R<sub>1</sub>,R<sub>2</sub>,....R<sub>n-1</sub>*/</font><br> 
+&nbsp;&nbsp;&nbsp; {<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; temp = pvector->record[i];<br>  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; j = i-1;<br>  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; while ((temp.key &lt; pvector->record[j].key)&amp;&amp;(j>=0) )</font></b></p>  
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<font color="#339933">/*</font></font><font color="#339933" size="5">由后向前找插入位置</font><font size="5" face="Comic Sans MS"><font color="#339933">*/</font><br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pvector->record[j+1] = pvector->record[j];</font></b></p>  
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<font color="#339933">/*</font></font><font color="#339933"><font size="5">将排序码大于</font><font size="5" face="Comic Sans MS">K<sub>i</sub></font><font size="5">的记录后移</font></font><font size="5" face="Comic Sans MS"><font color="#339933">*/</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; j--;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if( j!=(i-1) ) pvector->record[j+1] = temp;<br>  
+&nbsp;&nbsp;&nbsp; }<br> 
+}</font></b></p>
+
+</body>
+
+</html>

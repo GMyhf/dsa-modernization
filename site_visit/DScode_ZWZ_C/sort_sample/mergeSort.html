@@ -1,0 +1,47 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="zh-cn">
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>二路归并算法</title>
+</head>
+
+<body>
+
+<p>　</p>
+<p align="center"><font size="7" face="华文新魏" color="#008000"><b>二路归并算法</b></font></p>
+<p>　</p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>void 
+mergeSort(SortObject&nbsp; *pvector)</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>{</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; 
+RecordNode record[MAXNUM];</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; 
+int length;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; 
+length=1;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; 
+while(length&lt;pvector-&gt;n)</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; 
+{</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+mergePass(pvector-&gt;record,record,pvector-&gt;n,length);</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<font color="#008000">/*</font></font><font color="#008000"><font size="5">一趟归并</font><font size="5" face="Comic Sans MS">,</font><font size="5">结果存放在数组</font><font size="5" face="Comic Sans MS">r1</font><font size="5">中</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+length*=2;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+mergePass(record,pvector-&gt;record,pvector-&gt;n,length);</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<font color="#008000">&nbsp; /*</font></font><font color="#008000"><font size="5">一趟归并</font><font size="5" face="Comic Sans MS">,</font><font size="5">结果存放在数组</font><font size="5" face="Comic Sans MS">r</font><font size="5">中</font><font size="5" face="Comic Sans MS">*/</font></font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+length*=2;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp; 
+}</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>}</b></font></p>
+
+</body>
+
+</html>

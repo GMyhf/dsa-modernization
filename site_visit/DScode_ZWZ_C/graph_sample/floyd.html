@@ -1,0 +1,69 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>最短路径及长度存储结构 typedef struct</title>
+</head>
+
+<body>
+
+<p align="center" style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></font></p>
+<p align="center" style="margin-top: 0; margin-bottom: 0"><b><font face="华文新魏" size="7" color="#008000">Floyd算法</font></b></p>
+<p align="center" style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5"><font color="#008000">最短路径及长度存储结构</font><br>
+</font><font size="5" face="Comic Sans MS">typedef struct<br> 
+{<font color="#008000">&nbsp;&nbsp; /* </font></font><font color="#008000"><font size="5"> 存放每对顶点间最短路径长度 
+</font></font><font size="5" face="Comic Sans MS"><font color="#008000"> */</font><br>
+&nbsp;&nbsp;&nbsp; AdjType a[MAXVEX][MAXVEX];&nbsp;<br>
+&nbsp;&nbsp;&nbsp; <font color="#008000">/* nextvex[i][j]</font></font><font color="#008000"><font size="5">存放</font><font size="5" face="Comic Sans MS">v<sub>i</sub></font><font size="5">到</font><font size="5" face="Comic Sans MS">v<sub>j</sub></font><font size="5">最短路径上</font><font size="5" face="Comic Sans MS">v<sub>i</sub></font><font size="5">的后继顶点的下标值 
+</font></font><font size="5" face="Comic Sans MS"><font color="#008000"> */</font><br>
+&nbsp;&nbsp; int nextvex[MAXVX][MAXVEX];<br>
+}ShortPath;<br>
+<br>
+void floyd(Graph * pGraph, ShortPath * ppath)<br> 
+{</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp; 
+int&nbsp;&nbsp;i, j, k;<br> 
+&nbsp;&nbsp;&nbsp; for(i=0; i&lt;pGraph->n; i++)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; for(j=0; j&lt;pGraph->n; j++)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<b><font size="5" face="Comic Sans MS">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+if(pGraph->arcs[i][j]!=MAX)   ppath->nextvex[i][j]=j;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else                          		ppath->nextvex[i][j]= -1;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ppath->a[i][j]=pGraph->arcs[i][j];<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0"><font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+for(k=0; k&lt;pGraph->n; k++)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; for(i=0; i&lt;pGraph->n; i++)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+for(j=0; j&lt;pGraph->n; j++)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+{&nbsp;</b></font></p>
+<p style="margin-top: 0; margin-bottom: 0">&nbsp;&nbsp;&nbsp;<font size="5" face="Comic Sans MS"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+</b></font><font size="5" face="Comic Sans MS"><b>if( (ppath->a[i][k]>=MAX)||(ppath->a[k][j]>=MAX) )<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+continue;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+if(ppath->a[i][j]>(ppath->a[i][k]+ ppath->a[k][j]) )<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ppath->a[i][j]= ppath->a[i][k]+ ppath->a[k][j];<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ppath->nextvex[i][j]=ppath->nextvex[i][k];<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+}<br>
+}</b></font></p>
+
+<p style="margin-top: 0; margin-bottom: 0">　</p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5">算法的初始化部分由一个循环构成，</font><font face="Comic Sans MS" size="5">O(n<sup>2</sup>)</font></b></p>
+<p style="margin-top: 0; margin-bottom: 0"><b><font size="5">迭代生成关系矩阵</font><font face="Comic Sans MS" size="5">A</font><font size="5">和路径</font><font face="Comic Sans MS" size="5">nextvex</font><font size="5">的部分分为三个循环的嵌套，其时间复杂度为</font><font face="Comic Sans MS" size="5">O(n<sup>3</sup>).</font></b></p>
+
+</body>
+
+</html>

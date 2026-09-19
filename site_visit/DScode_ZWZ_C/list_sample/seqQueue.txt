@@ -1,0 +1,126 @@
+
+//顺序（环形）队列的实现
+
+//（尾指针+1)%MAXNUM=头指针 => 满
+// 尾指针 = 头指针 => 空
+
+#include <malloc.h>
+#include <stdio.h>
+
+/* 顺序队列类型定义 */
+// #define Que_MAXNUM 2048
+#define NULL 0
+
+typedef char DataType;
+
+struct  SeqQueue       /*顺序队列类型定义*/
+{  
+      DataType *q;        // DataType q[MAXNUM];
+      int f, r;
+};
+ 
+typedef struct SeqQueue *PSeqQueue; /*顺序队列类型的指针类型*/
+
+
+/********************************************************************
+
+ 创建一个空队列，返回指向空队列的指针。 
+
+********************************************************************/ 
+/*
+PSeqQueue createEmptyQueue_seq( void )
+{
+    PSeqQueue paqu;  
+	/* 申请队列结构 */
+   paqu = (struct SeqQueue *)malloc(sizeof(struct SeqQueue));
+    if (paqu==NULL) printf("空间不够! \n");
+    else
+    {
+		paqu->f = 0; 
+		paqu->r = 0;
+	} /* 头尾指针皆指向0 */
+
+    return paqu;
+}
+
+*/
+
+PSeqQueue createEmptyQueue_seq(int  m)  //m==MAXMUM
+{
+     PSeqQueue paqu;  //PSeqList palist;
+     paqu=( PSeqQueue ) malloc (sizeof (struct SeqQueue) );
+     if (paqu! = null) 
+    {
+       paqu-> element = (DataType *) malloc (sizeof (DataType ) *m); 
+       if paqu-> element ! = NULL) 
+       { 
+		paqu->f = 0; 
+		paqu->r = 0;   
+                return paqu; 
+	}
+	else free( paqu);
+     }  
+     printf(“out of space!\n”); 
+     return (NULL); 
+}
+
+
+/******************************************************************** 
+
+判断paqu所指的队列是否为空队列，当队列为空时，则返回1，否则返回0 
+
+*********************************************************************/
+int isEmptyQueue_seq( PSeqQueue paqu )
+{
+    /* 头尾指针相同否？ */ 
+    return (paqu->f == paqu->r);
+}
+
+
+
+/********************************************************************
+
+ 进队列运算,当队列不满时,将元素x插入paqu所指的队列中
+
+*******************************************************************/
+
+void enQueue_seq( PSeqQueue paqu, DataType x )
+{
+    /* 满队列不能再插入 */ 
+    if( (paqu->r + 1) % Que_MAXNUM == paqu->f )
+        printf( "队列已经满，不能再插入！\n" );
+    else
+    {
+        /* 在队尾处插入，并且修改队尾指针 */ 
+        paqu->q[paqu->r] = x;
+        paqu->r = (paqu->r + 1) % Que_MAXNUM;
+    }
+}
+
+
+/*******************************************************************
+
+出队列运算,当队列不空时,从paqu所指的队列中删除一个元素 
+
+*******************************************************************/
+
+void deQueue_seq( PSeqQueue paqu )
+{
+    /* 空队列不能再删除，非空队列只需要修改对头指针即可 */ 
+    if( paqu->f == paqu->r ) printf( "Empty Queue.\n" );
+    else paqu->f = (paqu->f + 1) % Que_MAXNUM; 
+}
+
+
+
+/*******************************************************************
+
+当paqu所指的队列不空时，求队列头部元素的值，队列保持不变 
+
+********************************************************************/
+DataType frontQueue_seq( PSeqQueue paqu )
+{
+    /* 只取值，不改变队头指针 */ 
+    return paqu->q[paqu->f];
+}
+
