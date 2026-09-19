@@ -33,6 +33,8 @@ python3 tools/fidelity.py              # prose-preservation ledger: how much of 
 python3 tools/fidelity.py --check      # ratchet: a section thinned below its baseline turns the gate red
 python3 tools/pdfref.py --section 8.4  # render the original scan's pages for that section (needs the PDF)
 python3 tools/figcrop.py --check       # every assets/scan/ figure still matches its recorded crop + hash
+python3 tools/authorsrc.py --listing 3.2   # the authors' own 2008 source for a listing (second witness)
+python3 tools/authorsrc.py --check     # all 105 listings mapped into the author pack; pack bytes + compile results pinned
 python3 tools/errata.py                # errata → the assertion that goes red if it regresses
 python3 tools/errata.py --check        # same, verify only (non-zero exit on gaps)
 python3 tools/check_code.py [unit]     # -Werror + ASan/UBSan and -O2, both must run green
@@ -105,6 +107,15 @@ The gate is the architecture. Five arbiters, each answering a question documents
   sha256 so a hand-edited figure turns the gate red. This replaced `book/assets/combined/`, whose
   images were re-stitched from OCR fragments with the sub-captions **redrawn by a script** —
   correct, but our typesetting, our layout, and no record of either (D-035).
+- **`tools/authorsrc.py`** — the second witness. `site_visit/DSCode_ZWZ200806_CPP/` is the authors'
+  own 2008 project code (an exam-allowed resource, byte-identical to `ref_…/SourceCodes/` except one
+  file). `collab/authorsrc.json` maps each of the 105 listings to a file + symbol there, or records
+  why the pack lacks it; `--check` pins the pack's sha256s and whether each of its 40 programs
+  compiles on today's g++. The scan says what was *printed*; the pack — which the preface itself names
+  as the book's companion code (`dsa_raw.md:195`) — says what the authors *ran*. E.g. 代码3.2's `top()`
+  collision is absent from the pack (`getTop`). Both are dated 2008-06, so which came first is unknown:
+  say "the printed listing differs from the authors' code", never "introduced at print time".
+  The pack is GBK/CRLF (a few UTF-8-BOM files); always read it through the tool, never `cat`.
 - **`tools/check_code.py`** — compiles every unit twice (`-Werror` + ASan/UBSan, and
   `-O2`) and runs it. Both profiles matter: a heap overflow that UBSan aborts on in the
   debug build passes *silently* under `-O2`.

@@ -1,0 +1,951 @@
+{
+  "_doc": [
+    "作者代码包登记表：原书每条清单在作者当年的工程里是哪一段。由 tools/authorsrc.py 读写，--check 进闸门。",
+    "代码包：site_visit/DSCode_ZWZ200806_CPP（2025 秋期末机考考场可用资料，见 site_visit/README.md）。",
+    "listings：清单号 → {file, symbols[, note, commented_out]} 或 {absent: 理由}。符号 `class X` 找类定义，其余找函数定义；`f@2` 取第 2 个定义。",
+    "hashes / programs 由 --write-hashes 生成，不手改：前者是证据的指纹，后者是今天的 g++ -std=c++17 能不能编译每个带 main 的程序。",
+    "twin_deltas：与 ref_数据结构与算法A 2021秋/SourceCodes 的已知差异。"
+  ],
+  "pack": "site_visit/DSCode_ZWZ200806_CPP",
+  "listings": {
+    "算法1.1": {
+      "file": "ch01_Intro/alg1.1/stockbroker.cpp",
+      "symbols": [
+        "BrokerToPassRomour"
+      ]
+    },
+    "代码1.2": {
+      "absent": "抽象数据类型的通用模板（className/Type 占位符），不是可编译程序，包里无对应文件"
+    },
+    "代码2.1": {
+      "file": "ch02_LinearList/alg2.1-5/myList.h",
+      "symbols": [
+        "class List"
+      ]
+    },
+    "代码2.2": {
+      "file": "ch02_LinearList/alg2.1-5/arrList.h",
+      "symbols": [
+        "class arrList"
+      ]
+    },
+    "算法2.3": {
+      "file": "ch02_LinearList/alg2.1-5/arrList.h",
+      "symbols": [
+        "getPos"
+      ]
+    },
+    "算法2.4": {
+      "file": "ch02_LinearList/alg2.1-5/arrList.h",
+      "symbols": [
+        "insert"
+      ]
+    },
+    "算法2.5": {
+      "file": "ch02_LinearList/alg2.1-5/arrList.h",
+      "symbols": [
+        "del"
+      ],
+      "note": "包里函数名是 del；原书印作 delete（C++ 关键字，不能作函数名）"
+    },
+    "代码2.6": {
+      "file": "ch02_LinearList/alg2.6-11/lnkList.h",
+      "symbols": [
+        "class Link"
+      ]
+    },
+    "代码2.7": {
+      "file": "ch02_LinearList/alg2.6-11/lnkList.h",
+      "symbols": [
+        "class lnkList"
+      ]
+    },
+    "算法2.8": {
+      "file": "ch02_LinearList/alg2.6-11/lnkList.h",
+      "symbols": [
+        "lnkList",
+        "~lnkList"
+      ]
+    },
+    "算法2.9": {
+      "file": "ch02_LinearList/alg2.6-11/lnkList.h",
+      "symbols": [
+        "setPos"
+      ]
+    },
+    "算法2.10": {
+      "file": "ch02_LinearList/alg2.6-11/lnkList.h",
+      "symbols": [
+        "insert"
+      ]
+    },
+    "算法2.11": {
+      "file": "ch02_LinearList/alg2.6-11/lnkList.h",
+      "symbols": [
+        "del"
+      ],
+      "note": "包里函数名是 del；原书印作 delete（C++ 关键字，不能作函数名）"
+    },
+    "代码2.12": {
+      "absent": "双链表：包里 ch02 只有顺序表与单链表，没有双链表结点"
+    },
+    "代码3.1": {
+      "file": "ch03_StackQueue/alg3.5/myStack.h",
+      "symbols": [
+        "class Stack"
+      ]
+    },
+    "代码3.2": {
+      "file": "ch03_StackQueue/alg3.5/arrStack.h",
+      "symbols": [
+        "class arrStack"
+      ],
+      "note": "包里取栈顶叫 getTop(T*)，与成员变量 int top 不重名；原书印作 top(T&)，与之重名，编译不过"
+    },
+    "算法3.3": {
+      "absent": "改进的进栈（满则容量翻倍）：包里三份 arrStack.h 的 push 都是栈满即报错返回 false，没有翻倍版本"
+    },
+    "代码3.4": {
+      "file": "ch03_StackQueue/alg3.4/lnkstack.h",
+      "symbols": [
+        "class lnkStack"
+      ]
+    },
+    "算法3.5": {
+      "file": "ch03_StackQueue/alg3.5/calc.h",
+      "symbols": [
+        "class Calculator",
+        "GetTwoOperands",
+        "Compute",
+        "Run"
+      ]
+    },
+    "算法3.6": {
+      "file": "ch03_StackQueue/alg3.6-8/fact.cpp",
+      "symbols": [
+        "factorial@1"
+      ],
+      "note": "递归版在 fact.cpp 里整段注释掉了，与迭代版一起留作对照",
+      "commented_out": true
+    },
+    "算法3.7": {
+      "file": "ch03_StackQueue/alg3.6-8/fact.cpp",
+      "symbols": [
+        "main"
+      ]
+    },
+    "算法3.8": {
+      "file": "ch03_StackQueue/alg3.6-8/fact.cpp",
+      "symbols": [
+        "factorial@2"
+      ],
+      "note": "迭代版在 fact.cpp 里整段注释掉了",
+      "commented_out": true
+    },
+    "算法3.9": {
+      "file": "ch03_StackQueue/alg3.6-8/fact.cpp",
+      "symbols": [
+        "factorial"
+      ],
+      "note": "fact.cpp 里唯一未注释的版本：用栈模拟递归"
+    },
+    "算法3.10": {
+      "file": "ch03_StackQueue/alg3.9-11/knap1.cpp",
+      "symbols": [
+        "knap"
+      ]
+    },
+    "算法3.11": {
+      "file": "ch03_StackQueue/alg3.9-11/knap1.cpp",
+      "symbols": [
+        "nonRecKnap"
+      ]
+    },
+    "算法3.12": {
+      "file": "ch03_StackQueue/alg3.9-11/knap1.cpp",
+      "symbols": [
+        "nonRecKnapOpt"
+      ]
+    },
+    "代码3.13": {
+      "file": "ch03_StackQueue/alg3.13-14/myQueue.h",
+      "symbols": [
+        "class Queue"
+      ]
+    },
+    "代码3.14": {
+      "file": "ch03_StackQueue/alg3.13-14/arrQueue.h",
+      "symbols": [
+        "class arrQueue"
+      ]
+    },
+    "代码3.15": {
+      "file": "ch03_StackQueue/alg3.13-14/lnkQueue.h",
+      "symbols": [
+        "class lnkQueue"
+      ]
+    },
+    "代码4.1": {
+      "absent": "字符串的抽象数据类型定义（成员用 … 占位），不是可编译程序"
+    },
+    "代码4.2": {
+      "absent": "印的是标准库 std::basic_string 的模板声明，不是作者的代码"
+    },
+    "算法4.3": {
+      "file": "ch04_String/alg3/strcmp.cpp",
+      "symbols": [
+        "strcmp"
+      ]
+    },
+    "算法4.4": {
+      "file": "ch04_String/alg4-5/myString.h",
+      "symbols": [
+        "String"
+      ]
+    },
+    "算法4.5": {
+      "file": "ch04_String/alg4-5/myString.h",
+      "symbols": [
+        "Substr"
+      ]
+    },
+    "算法4.6": {
+      "file": "ch04_String/alg6/naive.h",
+      "symbols": [
+        "NaiveStrMatching"
+      ]
+    },
+    "算法4.7": {
+      "file": "ch04_String/alg7-8/kmp.h",
+      "symbols": [
+        "findNext"
+      ]
+    },
+    "算法4.8": {
+      "file": "ch04_String/alg7-8/kmp.h",
+      "symbols": [
+        "KMPStrMatching"
+      ]
+    },
+    "代码5.1": {
+      "file": "ch05_BinaryTree/alg1-8BinaryTree/BinaryTreeNode.h",
+      "symbols": [
+        "class BinaryTreeNode"
+      ]
+    },
+    "代码5.2": {
+      "file": "ch05_BinaryTree/alg1-8BinaryTree/BinaryTree.h",
+      "symbols": [
+        "class BinaryTree"
+      ]
+    },
+    "算法5.3": {
+      "file": "ch05_BinaryTree/alg1-8BinaryTree/BinaryTree.h",
+      "symbols": [
+        "PreOrder",
+        "InOrder",
+        "PostOrder"
+      ]
+    },
+    "算法5.4": {
+      "file": "ch05_BinaryTree/alg1-8BinaryTree/BinaryTree.h",
+      "symbols": [
+        "PreOrderWithoutRecursion"
+      ]
+    },
+    "算法5.5": {
+      "file": "ch05_BinaryTree/alg1-8BinaryTree/BinaryTree.h",
+      "symbols": [
+        "InOrderWithoutRecursion"
+      ]
+    },
+    "算法5.6": {
+      "file": "ch05_BinaryTree/alg1-8BinaryTree/BinaryTree.h",
+      "symbols": [
+        "class StackElement",
+        "PostOrderWithoutRecursion"
+      ]
+    },
+    "算法5.7": {
+      "file": "ch05_BinaryTree/alg1-8BinaryTree/BinaryTree.h",
+      "symbols": [
+        "LevelOrder"
+      ]
+    },
+    "代码5.8": {
+      "file": "ch05_BinaryTree/alg1-8BinaryTree/BinaryTree.h",
+      "symbols": [
+        "isEmpty",
+        "Parent",
+        "LeftSibling",
+        "RightSibling",
+        "CreateTree",
+        "DeleteBinaryTree"
+      ]
+    },
+    "算法5.9": {
+      "file": "ch05_BinaryTree/alg9-10binarysearchtree/BinarySearchTree.h",
+      "symbols": [
+        "InsertNode"
+      ]
+    },
+    "算法5.10": {
+      "file": "ch05_BinaryTree/alg9-10binarysearchtree/BinarySearchTree.h",
+      "symbols": [
+        "DeleteNodeEx"
+      ]
+    },
+    "代码5.11": {
+      "file": "ch05_BinaryTree/alg11MinHeap/MinHeap.h",
+      "symbols": [
+        "class MinHeap",
+        "SiftDown",
+        "SiftUp"
+      ]
+    },
+    "代码5.12": {
+      "file": "ch05_BinaryTree/alg12HuffmanTree/HuffmanTree.h",
+      "symbols": [
+        "class HuffmanTree",
+        "HuffmanTree"
+      ]
+    },
+    "代码6.1": {
+      "file": "ch06_Tree/tree(alg_1-7)/TreeNode.h",
+      "symbols": [
+        "class TreeNode"
+      ]
+    },
+    "代码6.2": {
+      "file": "ch06_Tree/tree(alg_1-7)/Tree.h",
+      "symbols": [
+        "class Tree"
+      ]
+    },
+    "算法6.3": {
+      "file": "ch06_Tree/tree(alg_1-7)/Tree.h",
+      "symbols": [
+        "RootFirstTraverse"
+      ]
+    },
+    "算法6.4": {
+      "file": "ch06_Tree/tree(alg_1-7)/Tree.h",
+      "symbols": [
+        "RootLastTraverse"
+      ]
+    },
+    "算法6.5": {
+      "file": "ch06_Tree/tree(alg_1-7)/Tree.h",
+      "symbols": [
+        "WidthTraverse"
+      ]
+    },
+    "代码6.6": {
+      "file": "ch06_Tree/tree(alg_1-7)/TreeNode.h",
+      "symbols": [
+        "InsertFirst",
+        "InsertNext"
+      ]
+    },
+    "代码6.7": {
+      "file": "ch06_Tree/tree(alg_1-7)/Tree.h",
+      "symbols": [
+        "Parent",
+        "PrevSibling",
+        "DeleteSubTree"
+      ]
+    },
+    "代码6.8": {
+      "file": "ch06_Tree/unionfind(alg_8-9)/ParTree.h",
+      "symbols": [
+        "class ParTree",
+        "Find",
+        "Union"
+      ]
+    },
+    "算法6.9": {
+      "file": "ch06_Tree/unionfind(alg_8-9)/ParTree.h",
+      "symbols": [
+        "FindPC"
+      ]
+    },
+    "算法6.10": {
+      "file": "ch06_Tree/DualTagFirstroot(alg6_10)/dualtagtree_firstroot.cpp",
+      "symbols": [
+        "class DualTagTreeNode",
+        "Tree"
+      ]
+    },
+    "代码7.1": {
+      "file": "ch07_Graph/graph_matrix/Graph.h",
+      "symbols": [
+        "class Graph"
+      ],
+      "note": "包里只有一个 Graph 类：原书把 ADT（代码7.1）与基类（代码7.2）分成两段印"
+    },
+    "代码7.2": {
+      "file": "ch07_Graph/graph_matrix/Graph.h",
+      "symbols": [
+        "class Edge",
+        "class Graph"
+      ]
+    },
+    "代码7.3": {
+      "file": "ch07_Graph/graph_matrix/Graphm.h",
+      "symbols": [
+        "class Graphm"
+      ]
+    },
+    "代码7.4": {
+      "file": "ch07_Graph/Graph_Link/Graphl.h",
+      "symbols": [
+        "class Graphl"
+      ]
+    },
+    "算法7.5": {
+      "file": "ch07_Graph/graph_matrix/Graphm.h",
+      "symbols": [
+        "DFS"
+      ]
+    },
+    "算法7.6": {
+      "file": "ch07_Graph/graph_matrix/Graphm.h",
+      "symbols": [
+        "BFS"
+      ]
+    },
+    "算法7.7": {
+      "file": "ch07_Graph/TopologicalSorting/topological_sorting.cpp",
+      "symbols": [
+        "TopsortbyQueue"
+      ]
+    },
+    "算法7.8": {
+      "file": "ch07_Graph/Graph_Dijkstra/Dijkstra.cpp",
+      "symbols": [
+        "class Dist",
+        "Dijkstra"
+      ]
+    },
+    "算法7.9": {
+      "file": "ch07_Graph/Graph_Floyd/Floyd.cpp",
+      "symbols": [
+        "Floyd"
+      ]
+    },
+    "算法7.10": {
+      "file": "ch07_Graph/Graph_Prim/Prim.cpp",
+      "symbols": [
+        "minVertex",
+        "Prim"
+      ]
+    },
+    "算法7.11": {
+      "file": "ch07_Graph/Graph_Kruskal/Kruskal.cpp",
+      "symbols": [
+        "Kruskal"
+      ]
+    },
+    "算法8.1": {
+      "file": "ch08_Sort/InsSort.cpp",
+      "symbols": [
+        "InsertSort"
+      ]
+    },
+    "算法8.2": {
+      "file": "ch08_Sort/ShellSort/ShSort2.cpp",
+      "symbols": [
+        "ShellSort",
+        "ModInsSort"
+      ],
+      "note": "ShSort3.cpp 是增量每次除以 3 的变体，原书没有印"
+    },
+    "算法8.3": {
+      "file": "ch08_Sort/SelSort.cpp",
+      "symbols": [
+        "SelectSort"
+      ]
+    },
+    "算法8.4": {
+      "file": "ch08_Sort/HeapSort/HeapSort.cpp",
+      "symbols": [
+        "sort"
+      ],
+      "note": "堆排序主体在 sort() 里，堆本身见 HeapSort/MaxHeap.h"
+    },
+    "算法8.5": {
+      "file": "ch08_Sort/BubSort.cpp",
+      "symbols": [
+        "BubbleSort"
+      ]
+    },
+    "算法8.6": {
+      "file": "ch08_Sort/QuickSort/QuickSort.cpp",
+      "symbols": [
+        "QuickSort",
+        "SelectPivot",
+        "Partition"
+      ]
+    },
+    "算法8.7": {
+      "file": "ch08_Sort/QuickSort/ModQuickSort.cpp",
+      "symbols": [
+        "ModQuickSort"
+      ]
+    },
+    "算法8.8": {
+      "file": "ch08_Sort/MergeSort/MergeSort.cpp",
+      "symbols": [
+        "MergeSort",
+        "Merge"
+      ]
+    },
+    "算法8.9": {
+      "file": "ch08_Sort/MergeSort/ModMergeSort.cpp",
+      "symbols": [
+        "ModMergeSort",
+        "ModMerge"
+      ]
+    },
+    "算法8.10": {
+      "file": "ch08_Sort/BucketSort.cpp",
+      "symbols": [
+        "BucketSort"
+      ]
+    },
+    "算法8.11": {
+      "file": "ch08_Sort/RadixSort/RadixSort_Bin.cpp",
+      "symbols": [
+        "RadixSort"
+      ]
+    },
+    "代码8.12": {
+      "file": "ch08_Sort/RadixSort/LinkRadixSort.h",
+      "symbols": [
+        "class StaticQueue"
+      ]
+    },
+    "算法8.13": {
+      "file": "ch08_Sort/RadixSort/LinkRadixSort.h",
+      "symbols": [
+        "RadixSort",
+        "Distribute",
+        "Collect"
+      ]
+    },
+    "算法8.14": {
+      "file": "ch08_Sort/AddSort_Insert.cpp",
+      "symbols": [
+        "IndexSort"
+      ],
+      "note": "文件开头还有一个整段注释掉的 IndexSort(Array, n)（内部 new 索引数组、结尾不 delete）；原书印的是带 IndexArray 参数的这一版"
+    },
+    "算法8.15": {
+      "file": "ch08_Sort/AddSort_Insert.cpp",
+      "symbols": [
+        "AdjustRecord"
+      ]
+    },
+    "代码8.16": {
+      "file": "ch08_Sort/sort.h",
+      "symbols": [
+        "Randomize",
+        "Random"
+      ]
+    },
+    "代码8.17": {
+      "file": "ch08_Sort/sort.h",
+      "symbols": [
+        "Settime",
+        "Gettime"
+      ]
+    },
+    "算法9.1": {
+      "file": "ch09_ExternalSort/alg9_1 replacementSelection/ReplacementSelection.cpp",
+      "symbols": [
+        "replacementSelection"
+      ]
+    },
+    "代码9.2": {
+      "file": "ch09_ExternalSort/alg9_2WinnerTree/WinnerTree.h",
+      "symbols": [
+        "class WinnerTree"
+      ]
+    },
+    "代码9.3": {
+      "file": "ch09_ExternalSort/alg9_3LoserTree/LoserTree.h",
+      "symbols": [
+        "class LoserTree"
+      ]
+    },
+    "代码10.1": {
+      "file": "ch10_Search/algor1-3/algor1&2.cpp",
+      "symbols": [
+        "class Item"
+      ]
+    },
+    "算法10.2": {
+      "file": "ch10_Search/algor1-3/algor1&2.cpp",
+      "symbols": [
+        "SeqSearch"
+      ]
+    },
+    "算法10.3": {
+      "file": "ch10_Search/algor1-3/algor1&2.cpp",
+      "symbols": [
+        "BinSearch"
+      ]
+    },
+    "代码10.4": {
+      "file": "ch10_Search/BitSet/setm.h",
+      "symbols": [
+        "class mySet"
+      ]
+    },
+    "算法10.5": {
+      "file": "ch10_Search/BitSet/setm.h",
+      "symbols": [
+        "set"
+      ]
+    },
+    "算法10.6": {
+      "file": "ch10_Search/BitSet/setm.h",
+      "symbols": [
+        "operator&"
+      ]
+    },
+    "算法10.7": {
+      "file": "ch10_Search/BitSet/setm.h",
+      "symbols": [
+        "operator>"
+      ]
+    },
+    "算法10.8": {
+      "file": "ch10_Search/hash_dict/HASHDICT.H",
+      "symbols": [
+        "ELFhash"
+      ]
+    },
+    "算法10.9": {
+      "file": "ch10_Search/hash_dict/HASHDICT.H",
+      "symbols": [
+        "class hashdict"
+      ]
+    },
+    "算法10.10": {
+      "file": "ch10_Search/hash_dict/HASHDICT.CPP",
+      "symbols": [
+        "hashInsert"
+      ]
+    },
+    "算法10.11": {
+      "file": "ch10_Search/hash_dict/HASHDICT.CPP",
+      "symbols": [
+        "hashSearch"
+      ]
+    },
+    "算法10.12": {
+      "file": "ch10_Search/hash_tomb2/HASHDICT.CPP",
+      "symbols": [
+        "hashDelete"
+      ]
+    },
+    "算法10.13": {
+      "file": "ch10_Search/hash_tomb2/HASHDICT.CPP",
+      "symbols": [
+        "hashInsert"
+      ],
+      "note": "hash_tomb 与 hash_tomb2 两版：tomb2 记下第一个墓碑位置（insplace）再插入，与原书一致"
+    },
+    "算法12.1": {
+      "absent": "可利用空间表（重载 LinkNode 的 new/delete）：包里 ch12 只有广义表、稀疏矩阵、AVL、伸展树与最佳 BST"
+    },
+    "算法12.2": {
+      "file": "ch12_AdvDS/AdvTree/BestBST/OptimalBST.cpp",
+      "symbols": [
+        "OptimalBST"
+      ]
+    }
+  },
+  "twin_deltas": {
+    "ch07_Graph/Graph_Dijkstra/Graph_matrix.h": "考场版把 Edge 的 to 初始化为 -1（构造函数与 IniGraphm 两处）；2021 版未初始化"
+  },
+  "hashes": {
+    "ch01_Intro/alg1.1/Floyd.h": "82532a0ee83b3cef168378aac178f27b3b2a42e381e19f088bbe0837e7e7826c",
+    "ch01_Intro/alg1.1/Graph.h": "eeb345663d724600f902f6f8ed37c83f0afa849df811d72da8ceb082b696d2c9",
+    "ch01_Intro/alg1.1/Graphm.h": "792b54442f67df6d27baabf84195f61e9bf965e8952513d221553b0de1a186ed",
+    "ch01_Intro/alg1.1/stockbroker.cpp": "33060338797baf0c838645b3c5a51fd2a0f199887baaca49b8899df5477d449f",
+    "ch02_LinearList/alg2.1-5/arrList.h": "be0f6473a6593adf094c9ec3634894977c4a8c7a18206ab5be01ef0ab9133070",
+    "ch02_LinearList/alg2.1-5/lnkList.h": "f16db901dc3f8d6c1daf448518d5bf3d3748cb2ef5b4aac0e1f3e00d00d9f9c3",
+    "ch02_LinearList/alg2.1-5/main.cpp": "9aa5e2bec58d4a8d688bab87246af065305fdb0faa7ee299126f4c753486450c",
+    "ch02_LinearList/alg2.1-5/myList.h": "99a929277f2f3f455bf6c5258a6959712e212e31da09715d830e7822bfc90938",
+    "ch02_LinearList/alg2.6-11/lnkList.h": "f0d5b3e1ad79f1ced4ab402ac302d041ccff70785324d84cf3ecb06f8b76c7bb",
+    "ch02_LinearList/alg2.6-11/main.cpp": "b938bde702215aacfb86161ca60669c1958c7a8728a71460867eb37f39d393c2",
+    "ch02_LinearList/alg2.6-11/myList.h": "99a929277f2f3f455bf6c5258a6959712e212e31da09715d830e7822bfc90938",
+    "ch03_StackQueue/alg3.12/Link.h": "4ce4b5bcf7bca8d3484c184128bc0c3277c9d1929cf68c9e038f4610e0339045",
+    "ch03_StackQueue/alg3.12/lnkQueue.h": "8e58a755d4eb8dc0f0941382e8d8bc432dc60025cb257be4b50410d3b0933d75",
+    "ch03_StackQueue/alg3.12/main.cpp": "ca7a4341c00acc79fccc190413517c82b6be7dc6bc51ba037ff74760d246d1cf",
+    "ch03_StackQueue/alg3.12/myQueue.h": "a52b5ad3577d55a93618e0e7f5d72d13f64551d6c32236434446ab767d112ce5",
+    "ch03_StackQueue/alg3.12/queue.h": "3ab1ff50bf6a2054b21d1ed525278a0c7f5ac76d98c9beb1130c436fde54d8ff",
+    "ch03_StackQueue/alg3.13-14/arrQueue.h": "6bdf94a6facc86afbb4b7512830866075828d96604ff054c40dae129553532f6",
+    "ch03_StackQueue/alg3.13-14/lnkQueue.h": "d8559db3400c652bf2d6635a4cc6adb1be95e6411684162267374c048ff8b26a",
+    "ch03_StackQueue/alg3.13-14/main.cpp": "66992031f8813a2d3dff2982d47ea328ea2fcd33d1d3da40a1ca42d294620c97",
+    "ch03_StackQueue/alg3.13-14/myQueue.h": "f617d2d88d06d381c5b357003c5deb2f65ddf0f272ead3523abca9aafb2b4756",
+    "ch03_StackQueue/alg3.4/Link.h": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+    "ch03_StackQueue/alg3.4/lnkstack.h": "18f4f871cdba41b6c25deda543b004561e5ffd8f3a600ecbe147e5b5abb38965",
+    "ch03_StackQueue/alg3.4/main.cpp": "eeb8987de9bb1610b0ed8ed6fddd28ef6cae1bad12b50ddc4ae616601431370d",
+    "ch03_StackQueue/alg3.4/myStack.h": "c7caf905c281afdcc5bd63b4f585ff30d1fedbbe46abbfb4243838a89745f2a2",
+    "ch03_StackQueue/alg3.5/arrStack.h": "e40148762e9239e32bb3656c92a68fcc452eb4671e813e194101692aa0832704",
+    "ch03_StackQueue/alg3.5/calc.h": "e4fa9fa62f8213ad496cbbf61c7e6ef462a75423a5ce6e8b049cf9c4d499c56c",
+    "ch03_StackQueue/alg3.5/main.cpp": "b30963adcecb9a83a3879f619af8ac2db1746846abb0c62b9c68de77c02c672d",
+    "ch03_StackQueue/alg3.5/myStack.h": "97542598ce55915bc1e729b776770ad760157ef766d2a32888d0bc6f3434a3fe",
+    "ch03_StackQueue/alg3.6-8/arrStack.h": "017f97256dad1443874d54ba9b7f8006a8f789524e0619fff6129a3592d1fbd5",
+    "ch03_StackQueue/alg3.6-8/fact.cpp": "0dc921c1e9f7f1666713a2b273b886a8fe48b18b280fff0af27b51322023b849",
+    "ch03_StackQueue/alg3.6-8/myStack.h": "97542598ce55915bc1e729b776770ad760157ef766d2a32888d0bc6f3434a3fe",
+    "ch03_StackQueue/alg3.9-11/arrStack.h": "1c0251db2952bf48a770a8d62410bf49df73f0b4b70cad47f91a630db22242b2",
+    "ch03_StackQueue/alg3.9-11/knap1.cpp": "32aae409632305823e41c744bc0f9904c1739a0d17271e01197cb8c8b2856a65",
+    "ch03_StackQueue/alg3.9-11/myStack.h": "739216e679dd678fd804b59e90c400a25aa2041839b5216d49f8aad0c5674ccd",
+    "ch04_String/alg3/strcmp.cpp": "83725a9156dd4e0c0de76e0a47c1ed1cf9de8ac95a5abcd60f9c10c25c768e88",
+    "ch04_String/alg4-5/main.cpp": "0de55eca0161fc2bc085dedc5140650348109ca9e05c2574bdeb197965ee9c89",
+    "ch04_String/alg4-5/myString.h": "9f50b5264146757a3fb7ee3c13fe3c995d86df3ea82e32931a979660273a7947",
+    "ch04_String/alg6/main.cpp": "33c591fc18e212d339e4de4acd94b0f8220f784e76a340903271b579eddc0f5f",
+    "ch04_String/alg6/naive.h": "e84d9b995dec124d0363ece745d64519a0fd7463d84fbb26724f01fa97fe0379",
+    "ch04_String/alg7-8/kmp.h": "ffd04baa15ba22d11d3f7b3ce8fb7ad5d2278d3a8f80be0e3965746cd01b7d09",
+    "ch04_String/alg7-8/main-kmp.cpp": "5c84effe3f6b139b39ff7ab74176bead35d1cc3b61ef6ab77292ff8d28da18a9",
+    "ch05_BinaryTree/alg1-8BinaryTree/BinaryTree.cpp": "f8f58399042f238e2707ba97d6113cdb1be0eab1e427e6aa0a7d43d53782ec66",
+    "ch05_BinaryTree/alg1-8BinaryTree/BinaryTree.h": "834cb97ae0656bdb301abbf98c32879bc5badf4fbac17ccef62edc7ef4b6ec4d",
+    "ch05_BinaryTree/alg1-8BinaryTree/BinaryTreeNode.h": "3c3f60a7c0ebc105150cf63dc7feca0636eab0fd27a650d833b663b4423eb77a",
+    "ch05_BinaryTree/alg11MinHeap/MinHeap.cpp": "fd3a6056daee158d97f14feb30db8a4e027f26a1f1130fa1c91c3fbecf2083ab",
+    "ch05_BinaryTree/alg11MinHeap/MinHeap.h": "5ab3156b8fc5ad5b6da591ce0b124e3a5d69928926792e4e29961f387928f7e8",
+    "ch05_BinaryTree/alg12HuffmanTree/HuffmanTree.cpp": "308fa93295953881f2f8db36cff1381b0d64f645f93646664c4308583e44dd67",
+    "ch05_BinaryTree/alg12HuffmanTree/HuffmanTree.h": "628d8e827feff552ad3eb3c953b9b4b8d00c9412eeafa8b0183a269da988f6a1",
+    "ch05_BinaryTree/alg12HuffmanTree/MinHeap.h": "f31c0e37deab3f9cc75f8ae818767c34b64062553724557e234b292d1df0cea8",
+    "ch05_BinaryTree/alg9-10binarysearchtree/BinarySearchTree.h": "80cf3fc878f0d85540e804d2b10d59d61baf91e2f77fc9dda3d10765f9bde21e",
+    "ch05_BinaryTree/alg9-10binarysearchtree/BinaryTree.h": "36d40a95ab3111c532f89113200c900ec11f05b2ea70e41367fae03284b58ce0",
+    "ch05_BinaryTree/alg9-10binarysearchtree/BinaryTreeNode.h": "233566e59ef4ae75102537aa539682b2422ecad49c6420bf78e427c2fd920436",
+    "ch05_BinaryTree/alg9-10binarysearchtree/binarysearchtree.cpp": "0d35ee29b3261de259eafd6d01c7f94fe7ef99d472d5008e5989eaf61cb45190",
+    "ch06_Tree/DualTagFirstroot(alg6_10)/dualtagtree_firstroot.cpp": "5e6a7156b5e737fe81d05f47731d6be9ca35d8b61c93e48f2a18d36390ad31ff",
+    "ch06_Tree/DualTagWidth(alg6_11)/dualtagtree_Width.cpp": "6283cb7fdd4fdde9f429fa134461a880a3c6bb76f1cb794e4b9420a5481f7d7a",
+    "ch06_Tree/tree(alg_1-7)/Tree.h": "3551511c6771544d32037e8dcacedfdc6248e93a06935f3d5d4acbf0686d05f5",
+    "ch06_Tree/tree(alg_1-7)/TreeNode.h": "c1d1318c97fcb7043dddf9d5c0347e19023129c0bb529a5ad59bd04d31c386b7",
+    "ch06_Tree/tree(alg_1-7)/tree.cpp": "5c6059ee37e054009e09c016438683b9b07718f82a594923762f621fe8bfbcc3",
+    "ch06_Tree/unionfind(alg_8-9)/ParTree.h": "79faef3f705f023d36546673b0852737a350fc9596f8cd4bdf8c0ff00211aa98",
+    "ch06_Tree/unionfind(alg_8-9)/ParTreeNode.h": "bab6da35e4001b23630cff6896628292c723f51061fe1145acc5cb63a2c52a07",
+    "ch06_Tree/unionfind(alg_8-9)/unionfind.cpp": "dd8f3c366e5127edf1142f80281c8fe666372401509e3e73281719e3dbf1f46e",
+    "ch07_Graph/Graph_Dijkstra/Dijkstra.cpp": "ef21f4c2f16c41ffe9484efbd29a944ad44ec16ed0eebde473a0789e7a8af3bc",
+    "ch07_Graph/Graph_Dijkstra/Graph_matrix.h": "0c92a76376dca467a1dfcbde9adf29be300054e89849549cfc84b7e091b4f311",
+    "ch07_Graph/Graph_Dijkstra/MinHeap.h": "9b8494c8922cd6f909f1a09e9c4396d1dfb4ce693f79d30940fafb7d7a7eb412",
+    "ch07_Graph/Graph_Floyd/Floyd.cpp": "279d3614e522bfba3c9476b9d079d7b369e3143a8f5648737d347f2fd5ebe9f3",
+    "ch07_Graph/Graph_Floyd/Graph.h": "a87f1090b79763d27baab64f5bb3b5eb0190ee74a11da8e4f76be79381ad1f71",
+    "ch07_Graph/Graph_Floyd/Graphm.h": "de2e2b0705f1143a29919d7e6ec6646452dcdab795b439c2a89387ec4e481095",
+    "ch07_Graph/Graph_Kruskal/Graph.h": "3376db343697e07b9024da9ba5ec2733c1237ab41fb0d04a7e19ba52f1a6cf4a",
+    "ch07_Graph/Graph_Kruskal/Graphm.h": "8ea0c4e5d367a8c54a873172f27afabdc13a01760812b91d9de3c1f6d4355691",
+    "ch07_Graph/Graph_Kruskal/Kruskal.cpp": "91eb7233ac1ca7e874236dba428f1c9534b14fdc9911894fd9de3682794eb45b",
+    "ch07_Graph/Graph_Kruskal/MinHeap.h": "caea87aa5d8a9025be3e8e1a068ebd4e46f2a3e7907c21be0863ea1ff5d7e503",
+    "ch07_Graph/Graph_Kruskal/ParTree.h": "046acec8207bfad4429457722a1bf224366b32124d2195349059921018ae922a",
+    "ch07_Graph/Graph_Link/Graph.h": "24c83c54d34be90f19430cad14e6d230332b102f2e7b686efd83ef112f6793c7",
+    "ch07_Graph/Graph_Link/Graphl.h": "ef0889e695931856fed84fc006d20b135b6038c689d93c9a41b89f24aa77156a",
+    "ch07_Graph/Graph_Link/link.cpp": "6228afbdb09af15f84cfcad63e51bf8d6416cf3a568e9fc95c310ab9ac6ae77a",
+    "ch07_Graph/Graph_Prim/Graph.h": "5085f63ac3a83d52abbe71ea7af3b3173b285e38e0dd82bb683fc0c05446667e",
+    "ch07_Graph/Graph_Prim/Graphm.h": "8ea0c4e5d367a8c54a873172f27afabdc13a01760812b91d9de3c1f6d4355691",
+    "ch07_Graph/Graph_Prim/Prim.cpp": "a5f31b414729927f1856a4be2d43714b4d5859f5bff4541788f5073ae9ddaad0",
+    "ch07_Graph/TopologicalSorting/Graph.h": "24c83c54d34be90f19430cad14e6d230332b102f2e7b686efd83ef112f6793c7",
+    "ch07_Graph/TopologicalSorting/Graphm.h": "8516c15be77275aaf501ba2c1e6f43066ac27b465bfaa8fff667a1e2543f42c8",
+    "ch07_Graph/TopologicalSorting/topological_sorting.cpp": "bbbac48ab6629a411aa44e3c0f421b4a65c1496bfbd02564d9ab9a50f9241613",
+    "ch07_Graph/graph_matrix/Graph.h": "24c83c54d34be90f19430cad14e6d230332b102f2e7b686efd83ef112f6793c7",
+    "ch07_Graph/graph_matrix/Graphm.h": "33a636758014a0978a25462ba624eb4ca015e48335007bcebb2466661257836b",
+    "ch07_Graph/graph_matrix/matrix.cpp": "f87ff873b7682233f65cc6d5e0357cb7ebc80112ce656cc334f15a47804515bb",
+    "ch08_Sort/AddSort_Insert.cpp": "5fdcf35bb288e46af920e6a9227ba420cd1f82e89e1073dc2fe7c0ca2952b097",
+    "ch08_Sort/BubSort.cpp": "ffe2341d61a54864ece241b55984c68472487abc957f990890f74e86be0f12c6",
+    "ch08_Sort/BucketSort.cpp": "365b54826df698b3d41ca588cb588ba19c46b21516272a935e1b813711d16215",
+    "ch08_Sort/HeapSort/HeapSort.cpp": "9a942c4e1451a1ee9c1ff6bce29646e64dfa8c60e169ff9cb6d5278de55d103b",
+    "ch08_Sort/HeapSort/MaxHeap.h": "66a9b7cf8f0368963352fbc4321cce65a0b06543d3b3dcf93d8c1524bceb9f75",
+    "ch08_Sort/InsSort.cpp": "7d7b5de94c88733c91a8e11899c3f625bd18ac860b823f77f03ba64ffdc7b02e",
+    "ch08_Sort/MergeSort/MergeSort.cpp": "207b7cab980241174f476befd726b84183b3d559091d824c3cd501136a83894b",
+    "ch08_Sort/MergeSort/ModMergeSort.cpp": "4ab798eac9e611ee185aef4709b78b665e507086958899e12007d6c32bb8d7df",
+    "ch08_Sort/QuickSort/ModQuickSort.cpp": "eb2a97304d69a7b549f5e4ecb8c2e7b9b57c65623f12ea2c4e47118a7e76ee66",
+    "ch08_Sort/QuickSort/QuickSort.cpp": "9791d752ecc6982e71d108c625063fcb6d1cbecd3c1537a7ad2d53f9ff51ac75",
+    "ch08_Sort/RadixSort/LinkRadixSort.cpp": "81421edd10c09bbc80c9aef31d3ba586e8c891122e33de0d3794ff6cf2bad9d4",
+    "ch08_Sort/RadixSort/LinkRadixSort.h": "1b000cc27d668db89781681bd8de9652fd3c1e9938a3fdaeb52cee0aaa845331",
+    "ch08_Sort/RadixSort/LinkSort.h": "09edcac462cf077ccf08a5b0af29799a5595f6609d2cecdd8021d96deff65cc1",
+    "ch08_Sort/RadixSort/LinkSortMain.cpp": "d3f6a2af67c9f691a741c03f5a0a63944e89b88cababb5972e8ad50f2146e512",
+    "ch08_Sort/RadixSort/RadixSort_Bin.cpp": "9b43e6d5fa01e48dedcd6c39e3b28fee8c0770ae985d58f169c5bb86dfc27297",
+    "ch08_Sort/SelSort.cpp": "3d432b059484f170eedc8a596fda6ddaab14b25b954616a488132abf774cda7b",
+    "ch08_Sort/ShellSort/ShSort2.cpp": "13d74cc49ab69c10e74f5955def81c277a4ca907ec0fa31b7e5c0fe007e8be16",
+    "ch08_Sort/ShellSort/ShSort3.cpp": "54e20eb86748be8e8955a06dc98c99e9bd0f401c07dc6c3d5bf52b0cc8d4eb80",
+    "ch08_Sort/SortMain.h": "a61b00db6a2ace54749a279a730dd5f748dd24c82bded0ef629ff372c16d9928",
+    "ch08_Sort/sort.h": "a2fa754d3978b8c4138ea9d0e81d3aa1e1eeb98734508211ee883e0a28b4c8e3",
+    "ch09_ExternalSort/alg9_1 replacementSelection/Buffer.h": "4109e2ffc939afea08e7bbda09a4048014fb9cae01e4ff016704e3a921b10410",
+    "ch09_ExternalSort/alg9_1 replacementSelection/MinHeap.h": "da4c8fef2bd7a1a1cf70569c5f763a80aadda18eb65256280903fa9b9edf7442",
+    "ch09_ExternalSort/alg9_1 replacementSelection/ReplacementSelection.cpp": "1587bf95a950541e07e6dbd858b096e1c27c2f97deab4d78e0442744bb72653c",
+    "ch09_ExternalSort/alg9_2WinnerTree/WinnerTree.cpp": "e0ab1473960ea308f2a4cf4748d78fe02ac0c27b8fb253eb55292656268ad7f6",
+    "ch09_ExternalSort/alg9_2WinnerTree/WinnerTree.h": "cddace62e4d1d78764c05e1d758b16904113319e04b60a0f9882df8ba792436b",
+    "ch09_ExternalSort/alg9_3LoserTree/LoserTree.cpp": "997862640f3ebda0ea527bd91dbeccfb1a227fed38a91a782d1d1443bfd0c538",
+    "ch09_ExternalSort/alg9_3LoserTree/LoserTree.h": "ba06ca9eafae8ccad818d282ac572689a8c7591b175c1d3025770390a487e8ec",
+    "ch10_Search/BitSet/bag.cpp": "43ac62a2a3f83283dc3507782732e1dfad18ff7498c9b422378d2b1d0074d1cb",
+    "ch10_Search/BitSet/setm.h": "baec9ed4315c5327e3891ce8b7767efab4541f0c1a9f25b2d2899d66158bd60e",
+    "ch10_Search/BitSet/test.cpp": "a0199996d05f5ad5c0c1d9cc6099b2bfa15fc35b6dc4d52f27908e6f78414119",
+    "ch10_Search/COMPARE.H": "073440e929454fba4baf3e134061af5b1bcd4982039bcecbaee7912ca668fc1e",
+    "ch10_Search/algor1-3/algor1&2.cpp": "fb54c5a2139a1ac66147efd5d2d129e96584514c82f4e2d0a137c96b5e5251bc",
+    "ch10_Search/hash_dict/HASHDICT.CPP": "66b3ecbf49e71967705ac6296c35c46f5818dff0b0f4aa2a53559573598c8803",
+    "ch10_Search/hash_dict/HASHDICT.H": "2628a97434bd0d32fed8140c0751bf9239ebc7035ba6dc6e30c3ea9b9ed21634",
+    "ch10_Search/hash_dict/Int.h": "283fe3ef44b370fad328bf50e125bb5abd8a181b4b42777ce7d2a77480ae2a3f",
+    "ch10_Search/hash_tomb/HASHDICT.CPP": "836fe617ed65a6bc40735471da265813a23cc086db6d4a65384c03c6f7e2b85c",
+    "ch10_Search/hash_tomb/HASHDICT.H": "cbd1fd2f168b3285ba18c10118835eb7e1c2e1f2a41fed4f147819f3752e5a0d",
+    "ch10_Search/hash_tomb/Int.h": "283fe3ef44b370fad328bf50e125bb5abd8a181b4b42777ce7d2a77480ae2a3f",
+    "ch10_Search/hash_tomb2/HASHDICT.CPP": "4c039f2ac1a77575e39046c334471c69a057bfa146e7b4fd4fbb974c98991572",
+    "ch10_Search/hash_tomb2/HASHDICT.H": "cbd1fd2f168b3285ba18c10118835eb7e1c2e1f2a41fed4f147819f3752e5a0d",
+    "ch10_Search/hash_tomb2/Int.h": "283fe3ef44b370fad328bf50e125bb5abd8a181b4b42777ce7d2a77480ae2a3f",
+    "ch12_AdvDS/AdvList/GenList/Example.cpp": "afb0077b9e1fa99758ec7e4fb068c74612e5f0e0e713266dbe62949360fbebca",
+    "ch12_AdvDS/AdvList/GenList/GenFunction.h": "8db741a63b7ef535f4497eaf225b22b07f6f3f85cd3d980cf586b3775a83bad0",
+    "ch12_AdvDS/AdvList/GenList/GenList.h": "16fb46a43ee1323fccb38b136127dbd31f49a53e32ab594489efbc330090670b",
+    "ch12_AdvDS/AdvList/GenList_ReEntrant/Example.cpp": "568a1beaca3676e39f08dc4a8a48ec51f317b62e3a201ef1c761d844aca1fc3c",
+    "ch12_AdvDS/AdvList/GenList_ReEntrant/GenFunction.h": "a9f68fb33a933a401c76f2492c67495333a02ce4b8b68ac6fd3c7e25ed88550d",
+    "ch12_AdvDS/AdvList/GenList_ReEntrant/GenList.h": "f25c1ae6f4963b65bf804a0e9713008f6881885947d48b6f24d9ffdfb4109588",
+    "ch12_AdvDS/AdvList/SparseMatrix/Example.cpp": "0277988b0b2f129c3572ea4be2a5edd13ba83a701ffac2078094bfbfc8697cc4",
+    "ch12_AdvDS/AdvList/SparseMatrix/SMatrix.h": "21a7b673aa8fca7a30082d7b0ef147bc613dfdc897a9c4363ffa9932a95700d9",
+    "ch12_AdvDS/AdvTree/AVLTree/AVLNode.h": "45f60c7f8b200cddbaa0768d55b3c36f092f9ec121476b1d015af08db662b051",
+    "ch12_AdvDS/AdvTree/AVLTree/AVLTree.h": "67ca1690c3e396a88716c9aeb305d264ee2336adfd400a5c7b0aa5b776e5b7dc",
+    "ch12_AdvDS/AdvTree/AVLTree/Example.cpp": "6ba5b4b78ee77b2e61414234bcd537b3aecde1b6f2f6853b255b52009b7f72ad",
+    "ch12_AdvDS/AdvTree/BestBST/OptimalBST.cpp": "4df9f45eca81e447931da07a27b26ac517473cab2db20536ae04306d3d398c93",
+    "ch12_AdvDS/AdvTree/SplayTree/Splay.h": "8d6a16a033a7603339813d8044a3dbedc7048420ba51971db49c9491970c7f47",
+    "ch12_AdvDS/AdvTree/SplayTree/splay.cpp": "501203a05eaf180266a15c004b1dff905ff4618d1c114c8a27ef9a57b16497ce"
+  },
+  "programs": {
+    "ch02_LinearList/alg2.1-5/main.cpp": {
+      "compiles": true
+    },
+    "ch02_LinearList/alg2.6-11/main.cpp": {
+      "compiles": true
+    },
+    "ch03_StackQueue/alg3.12/main.cpp": {
+      "compiles": true
+    },
+    "ch03_StackQueue/alg3.13-14/main.cpp": {
+      "compiles": true
+    },
+    "ch03_StackQueue/alg3.4/main.cpp": {
+      "compiles": true
+    },
+    "ch03_StackQueue/alg3.5/main.cpp": {
+      "compiles": true
+    },
+    "ch03_StackQueue/alg3.6-8/fact.cpp": {
+      "compiles": true
+    },
+    "ch03_StackQueue/alg3.9-11/knap1.cpp": {
+      "compiles": true
+    },
+    "ch04_String/alg3/strcmp.cpp": {
+      "compiles": true
+    },
+    "ch04_String/alg4-5/main.cpp": {
+      "compiles": false,
+      "error": "ISO C++ forbids comparison between pointer and integer [-fpermissive]"
+    },
+    "ch04_String/alg6/main.cpp": {
+      "compiles": true
+    },
+    "ch04_String/alg7-8/main-kmp.cpp": {
+      "compiles": true
+    },
+    "ch05_BinaryTree/alg1-8BinaryTree/BinaryTree.cpp": {
+      "compiles": false,
+      "error": "‘::main’ must return ‘int’"
+    },
+    "ch05_BinaryTree/alg11MinHeap/MinHeap.cpp": {
+      "compiles": true
+    },
+    "ch05_BinaryTree/alg12HuffmanTree/HuffmanTree.cpp": {
+      "compiles": true
+    },
+    "ch05_BinaryTree/alg9-10binarysearchtree/binarysearchtree.cpp": {
+      "compiles": false,
+      "error": "‘::main’ must return ‘int’"
+    },
+    "ch06_Tree/DualTagFirstroot(alg6_10)/dualtagtree_firstroot.cpp": {
+      "compiles": false,
+      "error": "‘::main’ must return ‘int’"
+    },
+    "ch06_Tree/DualTagWidth(alg6_11)/dualtagtree_Width.cpp": {
+      "compiles": false,
+      "error": "‘::main’ must return ‘int’"
+    },
+    "ch06_Tree/tree(alg_1-7)/tree.cpp": {
+      "compiles": true
+    },
+    "ch06_Tree/unionfind(alg_8-9)/unionfind.cpp": {
+      "compiles": false,
+      "error": "‘::main’ must return ‘int’"
+    },
+    "ch07_Graph/Graph_Dijkstra/Dijkstra.cpp": {
+      "compiles": true
+    },
+    "ch07_Graph/Graph_Floyd/Floyd.cpp": {
+      "compiles": false,
+      "error": "extra qualification ‘Graphm::’ on member ‘IniGraphm’ [-fpermissive]"
+    },
+    "ch07_Graph/Graph_Kruskal/Kruskal.cpp": {
+      "compiles": true
+    },
+    "ch07_Graph/Graph_Link/link.cpp": {
+      "compiles": false,
+      "error": "‘::main’ must return ‘int’"
+    },
+    "ch07_Graph/Graph_Prim/Prim.cpp": {
+      "compiles": false,
+      "error": "‘::main’ must return ‘int’"
+    },
+    "ch07_Graph/TopologicalSorting/topological_sorting.cpp": {
+      "compiles": true
+    },
+    "ch07_Graph/graph_matrix/matrix.cpp": {
+      "compiles": false,
+      "error": "‘::main’ must return ‘int’"
+    },
+    "ch08_Sort/RadixSort/LinkSortMain.cpp": {
+      "compiles": true
+    },
+    "ch09_ExternalSort/alg9_1 replacementSelection/ReplacementSelection.cpp": {
+      "compiles": false,
+      "error": "reference to ‘less’ is ambiguous"
+    },
+    "ch09_ExternalSort/alg9_2WinnerTree/WinnerTree.cpp": {
+      "compiles": false,
+      "error": "‘cout’ was not declared in this scope; did you mean ‘std::cout’?"
+    },
+    "ch09_ExternalSort/alg9_3LoserTree/LoserTree.cpp": {
+      "compiles": false,
+      "error": "‘cout’ was not declared in this scope; did you mean ‘std::cout’?"
+    },
+    "ch10_Search/BitSet/bag.cpp": {
+      "compiles": true
+    },
+    "ch10_Search/BitSet/test.cpp": {
+      "compiles": true
+    },
+    "ch10_Search/algor1-3/algor1&2.cpp": {
+      "compiles": true
+    },
+    "ch12_AdvDS/AdvList/GenList/Example.cpp": {
+      "compiles": true
+    },
+    "ch12_AdvDS/AdvList/GenList_ReEntrant/Example.cpp": {
+      "compiles": true
+    },
+    "ch12_AdvDS/AdvList/SparseMatrix/Example.cpp": {
+      "compiles": false,
+      "error": "afxtempl.h: No such file or directory"
+    },
+    "ch12_AdvDS/AdvTree/AVLTree/Example.cpp": {
+      "compiles": false,
+      "error": "redeclaration of ‘avlNode<T>::avlNode(T, avlNode<T>*, avlNode<T>*, int)’ may not have default arguments [-fpermissive]"
+    },
+    "ch12_AdvDS/AdvTree/BestBST/OptimalBST.cpp": {
+      "compiles": true
+    },
+    "ch12_AdvDS/AdvTree/SplayTree/splay.cpp": {
+      "compiles": true
+    }
+  }
+}

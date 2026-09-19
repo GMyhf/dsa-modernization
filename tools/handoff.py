@@ -161,6 +161,9 @@ def verify_steps(py_files=None):
         ["python3", "tools/ledger.py", "--check"],
         # 2b. 勘误台账：每条「跑起来是错的」勘误都要指得出那句会红的断言。
         ["python3", "tools/errata.py", "--check"],
+        # 2c. 作者代码包：105 条清单在作者当年的工程里各是哪一段（或写明包里没有），
+        #     包的字节与登记一致，今天的 g++ 能否编译每个程序也与登记一致。
+        ["python3", "tools/authorsrc.py", "--check"],
         # 3. 书稿：OCR 残留、编号、插图、以及「书上代码 == code/ 里的代码」。
         ["python3", "tools/check_doc.py"],
         # 3a. 正文保全度棘轮：R10 只问「同号的节在不在」，这一步问「原书的话还在不在」。

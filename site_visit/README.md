@@ -32,7 +32,7 @@ ch07_Graph/Graph_Dijkstra/Graph_matrix.h（考场版） vs chap7_Graph/Graph_Dij
 
 ## 编码
 
-作者包是 **GBK + CRLF**（2008 年 VC6 的默认），直接 `cat` 中文注释会乱码：
+作者包大多是 **GBK + CRLF**（2008 年 VC6 的默认），第 10、12 章另有几个带 BOM 的 UTF-8 文件。直接 `cat` 中文注释会乱码；用 `tools/authorsrc.py --export DIR` 统一转成 UTF-8，或单个文件：
 
 ```bash
 iconv -f GBK -t UTF-8 site_visit/DSCode_ZWZ200806_CPP/ch03_StackQueue/alg3.5/arrStack.h | tr -d '\r'
@@ -40,7 +40,21 @@ iconv -f GBK -t UTF-8 site_visit/DSCode_ZWZ200806_CPP/ch03_StackQueue/alg3.5/arr
 
 ## 它在本项目里的地位
 
+原书前言（`dsa_raw.md:195`）明说：「教材中只给出了最主要的算法和代码，完整的实现方法可参考
+教学网站上提供的与本书配套的代码包。」这就是那个包。
+
 **它不是「原书印了什么」的凭据**——那是扫描件（`tools/pdfref.py`），`dsa_raw.md` 是扫描件的 OCR。
-代码包是作者**印刷前**的工程版本，和印出来的清单会有出入（例：代码3.2 印的是与成员变量 `top`
+代码包是作者**实际编译运行过**的工程，和印出来的清单会有出入（例：代码3.2 印的是与成员变量 `top`
 同名的 `top(T&)`，编译不过；代码包里叫 `getTop(T*)`，编译得过）。所以它的用处是**第二证人**：
-帮我们分辨一处错误是作者写错、排印时引入，还是 OCR 造成的。
+一处错误若包里没有，就不是「作者的算法错了」，而是印出来的版本与作者的代码不一致；
+若包里也有，才是作者代码本身的缺陷；若扫描件没有而 `dsa_raw.md` 有，是 OCR 造成的。
+
+**先后次序不可考**：包名里的 `200806` 与原书版权页的「2008 年 6 月第 1 版第 1 次印刷」是同一个月。
+所以只能说「印出来的与包里的不一致」，**不能**说「排印时引入」。
+
+逐条清单的对照用 `tools/authorsrc.py`（登记表 `collab/authorsrc.json`）：
+
+```bash
+python3 tools/authorsrc.py --listing 3.2    # 代码3.2 在作者包里的那一段，已转 UTF-8
+python3 tools/authorsrc.py                  # 概况：105 条里包里有几条、40 个程序今天能编译几个
+```
