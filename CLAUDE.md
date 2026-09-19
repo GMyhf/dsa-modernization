@@ -40,6 +40,7 @@ python3 tools/errata.py --check        # same, verify only (non-zero exit on gap
 python3 tools/check_code.py [unit]     # -Werror + ASan/UBSan and -O2, under g++ AND clang++ (4 builds), all green
 python3 tools/check_doc.py [file]      # book/ hygiene; --list-rules explains R1–R8
 python3 tools/sync_book.py --write     # push code/ sources into the book's code blocks
+python3 tools/build_book_pdf.py        # student PDF; fonts pinned to Noto (D-042), fails on any missing glyph
 python3 tools/build_site.py            # render book/*.md into the browsable site book/site/
 python3 tools/build_site.py --check    # same, verify only — the gate's "site is stale" arbiter
 python3 tools/vendor_figures.py <md>   # download remote figures into book/assets/

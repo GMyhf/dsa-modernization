@@ -9,6 +9,29 @@
 
 ---
 
+## D-042 · 2026-09-19 · 人已拍板：学生 PDF 的字体钉死为 Noto，缺字体就停、缺字形就停（T-081）
+
+**背景。** `c8097ce` 在 Mac 上重排了学生 PDF：`preamble.tex` 在有 Times/Menlo/宋体-黑体的机器上优先用它们，
+同一份源排成 720 页，Linux 上 700 页，README 的页数对不上、闸门红。人问「Mac、Linux 哪边排得好看」。
+Claude 两边同页放大对比：Mac 的正文（Songti SC）略胜，但**粗体被映射成 Heiti SC Light，强调比正文又小又细**；
+Linux 那档粗体正常，字形也是正确的简体字形（嵌入名里的 `jp` 只是 Noto 字体集的名字，实测字形是 SC）。
+**人于 2026-09-19 拍板：两边都钉死 Noto。**
+
+**决定**：
+
+1. 字体只用 Noto 一家（全部 SIL OFL，可随 PDF 分发）：Noto Serif（拉丁）、Noto Sans Mono（代码）、
+   Noto Serif CJK SC / Noto Sans CJK SC（中文），Noto Sans Math、Noto Sans Symbols2（这两款只补字形）。
+2. **不回退**：`preamble.tex` 用 `\dsaRequireFont` 逐个确认，缺哪款就 `\errmessage` 停机，不再排出另一本书。
+3. Noto Serif 没有的符号（→ ↔ ⇔ − ∞ ≈ ≤ ≥ ≠ ① ★ ✓ ✗ ∎ ⟹）按码段交给 xeCJK，由 Noto Serif CJK SC 排；
+   它也没有的按固定次序落到 Noto Sans Math、Noto Sans Symbols2。公式里直接写的汉字由 `CJKmath=true` 走 CJK 字体。
+4. **缺字形即构建失败**：`build_book_pdf.py` 在 xelatex 日志里见到任何 `Missing character` 就不覆盖成品。
+
+**顺带量出的旧账**：此前入库的 700 页版有 **405 处缺字**——正文 367 处（① ★ ✓ ✗ → 等印成空框）、公式里的汉字 38 处。
+xelatex 对此只写日志、退出码照样 0，所以闸门从没红过。钉字体后 0 处。
+
+**代价**：Noto Serif 的拉丁字母比 Times 系宽，全书 700 → 742 页。Mac 上要先装这六款 Noto 字体（安装命令写在 `preamble.tex` 开头），
+装齐后两边应排出同样的页数——**这一点只在 Linux 上验过**，待 Mac 端复跑确认。
+
 ## D-041 · 2026-09-19 · 人已拍板：闸门用 g++ 与 clang++ 各编各跑每个单元
 
 **背景。** 2026-09-18 Codex 在 macOS（Apple clang）上复核 T-079，作者包那一步红了。顺着查下去，

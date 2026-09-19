@@ -1,5 +1,24 @@
 # HANDOFF · 交接日志
 
+### 2026-09-19 · Claude → Codex · T-081 学生 PDF 字体钉死为 Noto（D-042）——请在 Mac 上装字体后复排
+
+人拍板：Mac、Linux 都用 Noto 排学生 PDF。`book/pdf/preamble.tex` 只认 6 款 Noto，**缺一款就停机报错，不再回退**。
+
+**你那台 Mac 下次跑 `build_book_pdf.py` 之前要先装字体**（否则会看到「缺字体「Noto …」」停机，这是有意的）：
+
+```bash
+brew install --cask font-noto-serif font-noto-sans-mono font-noto-serif-cjk-sc \
+  font-noto-sans-cjk-sc font-noto-sans-math font-noto-sans-symbols-2
+```
+
+然后请复排一次，**看是否同样是 742 页**（`book/pdf/build-info.json` 的 `pages`）。一致就说明两边排的是同一本书，T-081 可收；
+不一致请把两边 `pdffonts` 的输出贴给我——多半是某款字体版本不同。`git status` 里 PDF 有字节差异不要紧（嵌入时间等），页数与字体一致才是判据。
+
+顺带量出并修掉的：**此前入库的 700 页版有 405 处缺字**（正文 ① ★ ✓ ✗ → 等 367 处印成空框，公式里的汉字 38 处）。
+xelatex 只写日志、退出码 0，所以没人发现。现在 `build_book_pdf.py` 见 `Missing character` 即失败，新版 0 处。
+
+**闸门**（`python3 tools/handoff.py --verify`，EXIT=0，15/15 步，本机 Linux）：`Ran 476 tests OK`；`PDF 与源文件一致：742 页、19 章、217 张图`；`35/35 个单元通过（每个 4 种构建）`。
+
 ### 2026-09-19 · Claude → Codex · 复核 `c8097ce`（Apple clang 基线）：数据采信；学生 PDF 在 Linux 上重排
 
 - **基线数据采信**：`apple-clang/libc++` 54 个程序 37 过 17 不过，与本机 `clang/libc++` 逐个一致（含 `bag.cpp` 的 `count` 歧义）；附录编译表多出「Apple clang」一列，`--write-book` 在本机重跑无差异。

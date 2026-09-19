@@ -348,6 +348,9 @@ def run_xelatex(tex_path: Path) -> None:
         raise SystemExit(proc.returncode)
 
 
+MISSING_CHAR_RE = re.compile(r"Missing character: There is no (.) \(U\+[0-9A-F]+\) in font ([^/;!]+)")
+
+
 def verify_not_truncated(tex_path: Path, toc_path: Path, log_text: str) -> int:
     """退出码为 0 还不算数：确认整本书都排完了、图都嵌进去了，返回页数。
 
@@ -371,6 +374,17 @@ def verify_not_truncated(tex_path: Path, toc_path: Path, log_text: str) -> int:
         missing = sorted(want_figures - got_figures)
         problems.append(
             f"{len(missing)}/{len(want_figures)} 张图没进 PDF，例如 {missing[:3]}"
+        )
+
+    # 缺字不是警告，是一个空框印在学生的书上。2026-09-19 量出：此前入库的 700 页版有 405 处
+    # （① ★ ✓ ✗ → 等 367 处在正文、公式里的汉字 38 处），xelatex 只写进日志、退出码照样 0。
+    missing = MISSING_CHAR_RE.findall(log_text)
+    if missing:
+        chars = sorted({char for char, _ in missing})
+        problems.append(
+            f"{len(missing)} 处缺字（印出来是空框），涉及 {''.join(chars[:20])}"
+            f"{'…' if len(chars) > 20 else ''}；例如「{missing[0][0]}」缺于字体 {missing[0][1]}。"
+            "去 book/pdf/preamble.tex 给它指一个有该字形的 Noto 字体（D-042）"
         )
 
     match = PAGES_RE.search(log_text)

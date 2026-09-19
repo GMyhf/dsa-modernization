@@ -92,6 +92,42 @@ class TestVerifyNotTruncated(unittest.TestCase):
         self.assertIsNone(pages)
         self.assertIn("1/3 张图没进 PDF", err)
 
+    def test_missing_glyph_is_caught(self):
+        """缺字 xelatex 只记日志、退出码照样 0；此前入库的 700 页版就带着 405 个空框（2026-09-19 量出）。"""
+        log = FULL_LOG + "Missing character: There is no ★ (U+2605) in font Liberation Serif/OT:script=latn;!\n"
+        pages, err = verify(log=log)
+        self.assertIsNone(pages)
+        self.assertIn("1 处缺字", err)
+        self.assertIn("★", err)
+        self.assertIn("Liberation Serif", err)
+
+
+class TestFontsArePinned(unittest.TestCase):
+    """D-042：学生 PDF 的字体钉死为 Noto 一家，任何机器排出同一本书；缺字体就停，不回退。
+
+    此前 preamble 在 macOS 上用 Times/Menlo/宋体-黑体、别处逐级回退：同一份源 Mac 上 720 页、
+    Linux 上 700 页，Mac 那档的粗体还映射成 Heiti SC Light。
+    """
+
+    PREAMBLE = (Path(__file__).resolve().parent.parent / "book" / "pdf" / "preamble.tex").read_text(encoding="utf-8")
+
+    def test_every_font_used_is_required_and_noto(self):
+        import re
+        required = set(re.findall(r"\\dsaRequireFont\{([^}]+)\}", self.PREAMBLE))
+        used = set(re.findall(r"\\set(?:main|mono|CJKmain|CJKsans|CJKmono)font\{([^}]+)\}", self.PREAMBLE))
+        for block in re.findall(r"\\setCJKfallbackfamilyfont\{[^}]+\}\{(.*)\}", self.PREAMBLE):
+            used |= set(re.findall(r"\{([^{}]+)\}", block))
+        self.assertTrue(used, "preamble 里没找到字体设置")
+        self.assertLessEqual(used, required, f"用了但没列进 \\dsaRequireFont：{used - required}")
+        self.assertTrue(all(name.startswith("Noto ") for name in required), required)
+
+    def test_no_platform_fallback(self):
+        for apple in ("Times New Roman", "Menlo", "Songti", "Heiti", "Liberation", "DejaVu", "Droid"):
+            self.assertNotIn(apple, self.PREAMBLE.split("\\newcommand")[1], f"{apple} 又回来了")
+        # 唯一允许的 \IfFontExistsTF 在 \dsaRequireFont 里，且缺字体就 \errmessage
+        self.assertEqual(self.PREAMBLE.count("\\IfFontExistsTF"), 1)
+        self.assertIn("\\errmessage", self.PREAMBLE)
+
 
 class TestBuildInfoSidecar(unittest.TestCase):
     """页数只有 xelatex 的日志知道；网页版的下载卡片靠这份 sidecar 读到它。"""
