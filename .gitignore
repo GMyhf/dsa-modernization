@@ -16,3 +16,28 @@ build/
 # 出处，但它不入库：体积大，而且整本扫描件与仓库里已有的 OCR 底稿不是一回事。
 # 需要时把它放回仓库根目录，或用 DSA_PDF 指向别处；缺它时 pdfref.py --check 只提示不判红。
 数据结构与算法 (张铭) (Z-Library).pdf
+
+# site_visit/：2025 秋期末机考「考场可用资料」（dsa.openjudge.cn/2025final），说明见 site_visit/README.md。
+# 入库的只有两份代码包里的可读源文件。下面这些不入库：
+#  - cppreference 离线手册（69MB）与 Weiss 英文教材 PDF：体积大、有版权，且本仓库不引用其内容；
+#  - 作者当年留在包里的编译产物、VC6 工程文件、编辑器备份和空的输出文件
+#    （与 `ref_数据结构与算法A 2021秋/SourceCodes/` 的收录口径一致，见 参考资料说明.md「收录边界」）。
+site_visit/201810cplusplus/
+site_visit/DSAlgoWeissMark.pdf
+site_visit/**/a.out
+site_visit/**/*~
+site_visit/**/*.[dD][sS][pP]
+site_visit/**/*.[dD][sS][wW]
+site_visit/DSCode_ZWZ200806_CPP/ch09_ExternalSort/alg9_1 replacementSelection/file_out.txt
+site_visit/DSCode_ZWZ200806_CPP/ch10_Search/algor1-3/algor
+site_visit/DSCode_ZWZ200806_CPP/ch10_Search/BitSet/bag
+site_visit/DSCode_ZWZ200806_CPP/ch10_Search/BitSet/test
+site_visit/DSCode_ZWZ200806_CPP/ch10_Search/BitSet/x
+site_visit/DSCode_ZWZ200806_CPP/ch10_Search/hash_dict/hashdict
+site_visit/DSCode_ZWZ200806_CPP/ch10_Search/hash_tomb/hashtomb
+site_visit/DSCode_ZWZ200806_CPP/ch10_Search/hash_tomb2/hashtomb
+site_visit/DSCode_ZWZ200806_CPP/ch12_AdvDS/AdvList/GenList/GenList
+site_visit/DSCode_ZWZ200806_CPP/ch12_AdvDS/AdvList/GenList_ReEntrant/GenList
+site_visit/DSCode_ZWZ200806_CPP/ch12_AdvDS/AdvTree/AVLTree/AVLTree
+site_visit/DSCode_ZWZ200806_CPP/ch12_AdvDS/AdvTree/BestBST/OptimalBST
+site_visit/DSCode_ZWZ200806_CPP/ch12_AdvDS/AdvTree/SplayTree/splaytree
