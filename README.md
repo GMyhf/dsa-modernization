@@ -20,12 +20,12 @@
 
 ```
 台账   104 已现代化 / 1 退场 / 0 待办  = 105 条清单
-书稿   31 个文件（12 章正文 + 总目录 + 习题 + 期中/期末复习题库 + 勘误 + 插图，加 13 套课件），17 条规则通过
-成品   PDF（book/pdf/，678 页）、网页版（book/site/，双击 index.html 即可读）
+书稿   32 个文件（12 章正文 + 总目录 + 习题 + 期中/期末复习题库 + 勘误 + 插图 + 考场代码包，加 13 套课件），17 条规则通过
+成品   PDF（book/pdf/，696 页）、网页版（book/site/，双击 index.html 即可读）
        与课件（book/slides/，411 页幻灯片；另出 12 份 .pptx）
 代码   35 个单元 × 2 种构建（Debug+ASan/UBSan、Release-O2）
        其中 1 个单元另有 Python 实现，再跑 2 档（默认、-X dev -W error）
-自测   457 项（闸门自己的单元测试）
+自测   460 项（闸门自己的单元测试）
 ```
 
 `python3 tools/handoff.py --verify` 退出码 0。
@@ -66,7 +66,7 @@ python3 tools/check_courseware.py      # courseware/ 那套讲义+课件+视频�
 ```
 
 网页版在线可读：**<https://gmyhf.github.io/dsa-modernization/>**，
-首页顶上有整本 PDF 的下载卡片（678 页 / 8.0 MB，卡片上的数字由构建器读文件得出，不是手写的）。
+首页顶上有整本 PDF 的下载卡片（696 页 / 8.0 MB，卡片上的数字由构建器读文件得出，不是手写的）。
 本地读就双击 `book/site/index.html`，或 `python3 -m http.server -d book` 后打开
 `http://localhost:8000/site/`。它是 `book/*.md` 的产物，闸门里有一条
 `build_site.py --check` 盯着两者不许脱节。
@@ -100,11 +100,11 @@ git add -A && git commit -m "..." && git push
 | 路径 | 是什么 |
 | --- | --- |
 | `dsa_raw.md` | OCR 底稿，**只读**。1MB / 11978 行 / 12 章 / 105 条清单 / 292 张外链插图 |
-| `book/` | 现代化后的书稿：12 章正文 + [总目录](book/数据结构与算法.md) + [原书勘误](book/勘误.md) + [插图](book/插图.md)。正文与课件用的 218 张插图**全部直接裁自原版扫描件**，裁法（书页 + 裁剪框 + dpi + sha256）记在 `collab/figures_scan.json`（`book/assets/scan/`）；`book/assets/` 下那 292 张上游 OCR 图库作为底稿记录保留，见[插图](book/插图.md)——**它只在仓库与网页版里，不进学生 PDF**（正文的图已是扫描件裁图，图册再进来等于每张图印两遍）。发给学生的带书签 PDF：[`book/pdf/数据结构与算法.pdf`](book/pdf/数据结构与算法.pdf)（`python3 tools/build_book_pdf.py` 重编）；浏览器版：[`book/site/index.html`](book/site/index.html)（`python3 tools/build_site.py` 重编） |
+| `book/` | 现代化后的书稿：12 章正文 + [总目录](book/数据结构与算法.md) + [原书勘误](book/勘误.md) + [插图](book/插图.md) + [考场代码包](book/考场代码包.md)（2025 秋期末机考可带的作者代码包：105 条清单在包里的位置、今天的 g++ 能否编译、包里独有的坑）。正文与课件用的 218 张插图**全部直接裁自原版扫描件**，裁法（书页 + 裁剪框 + dpi + sha256）记在 `collab/figures_scan.json`（`book/assets/scan/`）；`book/assets/` 下那 292 张上游 OCR 图库作为底稿记录保留，见[插图](book/插图.md)——**它只在仓库与网页版里，不进学生 PDF**（正文的图已是扫描件裁图，图册再进来等于每张图印两遍）。发给学生的带书签 PDF：[`book/pdf/数据结构与算法.pdf`](book/pdf/数据结构与算法.pdf)（`python3 tools/build_book_pdf.py` 重编）；浏览器版：[`book/site/index.html`](book/site/index.html)（`python3 tools/build_site.py` 重编） |
 | `code/<章>/<单元>/` | 一个清单单元：`unit.json`（认领哪几条清单）、`legacy.md`（原书写法→缺陷证据→现代写法）、`modern.hpp`、`test.cpp` |
 | `code/support/` | 各章测试共用的故障注入探针（只放探针，不放任何数据结构实现） |
 | `tools/` | 闸门与脚手架，纯标准库。其中 `pdfref.py` 按节号把原版扫描件渲染成书页图，`fidelity.py` 量正文保全度，`figcrop.py` 从扫描件裁插图并记下裁法，`authorsrc.py` 把每条清单对到作者代码包（考场资料）里的那一段，`pptx_writer.py` + `build_pptx.py` 只用 `zipfile` 把课件排成 .pptx |
-| `tests/` | 闸门自身的单元测试，457 项 |
+| `tests/` | 闸门自身的单元测试，460 项 |
 | `collab/` | 协作事实源：PLAN / DECISION_LOG / HANDOFF / 双向 NOTES / 退场记录 |
 
 ## 五条闸门

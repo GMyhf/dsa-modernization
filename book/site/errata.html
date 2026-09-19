@@ -153,7 +153,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
     · <a href="errata.html">原书勘误</a></p>
 </div></header>
 <div class="layout">
-<nav class="book"><b>导读</b><a href="index.html">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="midterm-review.html">期中复习题库（第 1—6 章）</a><a href="final-review.html">期末复习题库（第 7—12 章）</a><a href="figures.html">原书插图</a><a href="errata.html" class="here">原书勘误</a></nav>
+<nav class="book"><b>导读</b><a href="index.html">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="midterm-review.html">期中复习题库（第 1—6 章）</a><a href="final-review.html">期末复习题库（第 7—12 章）</a><a href="figures.html">原书插图</a><a href="errata.html" class="here">原书勘误</a><a href="exam-codepack.html">考场代码包</a></nav>
 <main>
 
 <blockquote><p>《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）印刷清单里， <strong>按原样进编译器会失败，或对拍后算法结果确定是错的</strong>条目。 每条都指向某个单元的 <code>legacy.md</code>，那里有命令和真实输出。</p>
@@ -296,6 +296,165 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <li><code>int</code> 当下标与容量：有符号溢出是未定义行为。</li>
 </ul>
 <p>现代实现按 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/collab/DECISION_LOG.md" class="ext">D-001</a> 处理：显式五法则、<code>std::optional</code> 表达空、真错误抛标准异常。</p>
+<h2 id="作者代码包里有没有"><a class="anchor" href="#作者代码包里有没有">#</a>作者代码包里有没有</h2>
+<p>对照原书配套的作者代码包（2025 秋期末机考的考场资料之一，见附录「考场代码包」），上面每条编译不过或跑起来错的勘误都能再问一句：<strong>作者自己的代码里也这样吗？</strong></p>
+<ul>
+<li><strong>包里也有</strong>：作者的代码本来就这样，不是排印或 OCR 造成的；</li>
+<li><strong>包里没有</strong>：印出来的与作者的代码不一致，包里是另一种（通常能编译的）写法。包与原书同为 2008 年 6 月，谁先谁后不可考，所以只说「不一致」，不说「排印时引入」；</li>
+<li><strong>包里无此代码</strong>：包里没有对应的实现，无从比较。</li>
+</ul>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">勘误</th>
+<th style="text-align:left">清单</th>
+<th style="text-align:left">包里</th>
+<th style="text-align:left">说明</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">E01</td>
+<td style="text-align:left">代码2.1 / 代码2.2 / 算法2.5</td>
+<td style="text-align:left">包里没有</td>
+<td style="text-align:left">包里在用的顺序表与单链表都叫 <code>del(int p)</code>。只有 <code>alg2.1-5/lnkList.h</code> 这份没被 <code>main.cpp</code> 包含、从不参与编译的旧稿还写着 <code>bool delete(int p)</code>——原书印的正是这种写法</td>
+</tr>
+<tr>
+<td style="text-align:left">E02</td>
+<td style="text-align:left">代码2.1</td>
+<td style="text-align:left">包里也有</td>
+<td style="text-align:left">包里的 <code>class List</code> 同样通篇没有 <code>public:</code>——只是包里没有任何代码通过 <code>List</code> 调用这些运算，所以编译得过</td>
+</tr>
+<tr>
+<td style="text-align:left">E03</td>
+<td style="text-align:left">算法2.3</td>
+<td style="text-align:left">包里没有</td>
+<td style="text-align:left">包里 <code>getPos</code> 的循环上界是成员 <code>curLen</code>，编译得过；原书印成未声明的 <code>n</code></td>
+</tr>
+<tr>
+<td style="text-align:left">E04</td>
+<td style="text-align:left">代码2.6</td>
+<td style="text-align:left">包里没有</td>
+<td style="text-align:left">包里 <code>Link</code> 的构造参数是 <code>Link* nextValue</code>，没有 <code>const</code>，不存在丢弃 <code>const</code> 的赋值</td>
+</tr>
+<tr>
+<td style="text-align:left">E05</td>
+<td style="text-align:left">代码3.2</td>
+<td style="text-align:left">包里没有</td>
+<td style="text-align:left">包里取栈顶叫 <code>getTop(T*)</code>，与 public 数据成员 <code>int top</code> 不重名，整个文件编译得过；原书印成 <code>bool top(T&amp;)</code></td>
+</tr>
+<tr>
+<td style="text-align:left">E06</td>
+<td style="text-align:left">算法3.3</td>
+<td style="text-align:left">包里无此代码</td>
+<td style="text-align:left">包里三份 <code>arrStack.h</code> 的 <code>push</code> 都是栈满就打印「栈满溢出」返回 <code>false</code>，没有翻倍扩容的版本，无从比较</td>
+</tr>
+<tr>
+<td style="text-align:left">E07</td>
+<td style="text-align:left">代码3.4</td>
+<td style="text-align:left">包里没有</td>
+<td style="text-align:left">包里链式栈同样用 <code>getTop(T*)</code>，与 <code>Link&lt;T&gt;* top</code> 不重名</td>
+</tr>
+<tr>
+<td style="text-align:left">E08 / E20</td>
+<td style="text-align:left">算法3.5 / 算法3.9</td>
+<td style="text-align:left">包里没有</td>
+<td style="text-align:left">包里栈的 ADT 就是 <code>pop(T* item)</code>，算法里写 <code>s.pop(&amp;x)</code> 与之一致、编译得过；原书把 ADT 印成了 <code>pop(T&amp;)</code>，算法却照抄了包里的 <code>pop(&amp;x)</code></td>
+</tr>
+<tr>
+<td style="text-align:left">E09</td>
+<td style="text-align:left">算法3.11</td>
+<td style="text-align:left">包里没有</td>
+<td style="text-align:left">包里是 <code>enum rdType {a, b, c}</code> 与普通的 <code>class knapNode</code>，没有字面量枚举值，也没有 Java 式的 <code>public class</code></td>
+</tr>
+<tr>
+<td style="text-align:left">E10</td>
+<td style="text-align:left">算法3.12</td>
+<td style="text-align:left">包里没有</td>
+<td style="text-align:left">包里 <code>t = st.top</code> 读的是 public 数据成员，取栈顶用 <code>st.getTop(&amp;tmp)</code>，两者不重名</td>
+</tr>
+<tr>
+<td style="text-align:left">E11</td>
+<td style="text-align:left">算法4.4</td>
+<td style="text-align:left">包里也有</td>
+<td style="text-align:left">包里就是 <code>assert(str != &#x27;\0&#x27;)</code>——包里 <code>alg4-5/main.cpp</code> 今天编译不过，报的正是这一句（见附录「考场代码包」）</td>
+</tr>
+<tr>
+<td style="text-align:left">E12</td>
+<td style="text-align:left">算法4.4</td>
+<td style="text-align:left">包里也有</td>
+<td style="text-align:left">包里的构造函数就是 <code>String(char *s)</code></td>
+</tr>
+<tr>
+<td style="text-align:left">E13</td>
+<td style="text-align:left">代码10.1</td>
+<td style="text-align:left">包里没有</td>
+<td style="text-align:left">包里初始化列表与数据成员都叫 <code>key</code></td>
+</tr>
+<tr>
+<td style="text-align:left">E14</td>
+<td style="text-align:left">算法3.6 / 3.8 / 3.9</td>
+<td style="text-align:left">包里也有</td>
+<td style="text-align:left">包里三版阶乘都是 <code>long</code> 连乘，不查溢出</td>
+</tr>
+<tr>
+<td style="text-align:left">E15</td>
+<td style="text-align:left">算法3.6</td>
+<td style="text-align:left">包里也有</td>
+<td style="text-align:left">包里（整段注释掉的）递归版同样是 <code>if (n &lt;= 0) return 1</code></td>
+</tr>
+<tr>
+<td style="text-align:left">E16</td>
+<td style="text-align:left">算法4.5</td>
+<td style="text-align:left">包里也有</td>
+<td style="text-align:left">包里 <code>Substr</code> 越界同样 <code>return NULL</code>（经 <code>String(char*)</code> 构造，<code>strlen(NULL)</code>）</td>
+</tr>
+<tr>
+<td style="text-align:left">E17 / E21 / R10 / R13</td>
+<td style="text-align:left">算法4.6 / 算法4.8</td>
+<td style="text-align:left">包里也有</td>
+<td style="text-align:left">包里朴素匹配与 KMP 都返回 <code>j - pLen + 1</code>：作者的代码本来就按 1 起始报位置，不是排印问题。对拍 407 组，找到时作者恒比 0 起始位置大 1</td>
+</tr>
+<tr>
+<td style="text-align:left">E18</td>
+<td style="text-align:left">算法10.9</td>
+<td style="text-align:left">包里也有</td>
+<td style="text-align:left">包里三份 <code>HASHDICT.H</code> 的析构都是 <code>delete HT</code>（<code>HT</code> 由 <code>new Elem[sz]</code> 分配）</td>
+</tr>
+<tr>
+<td style="text-align:left">E19</td>
+<td style="text-align:left">算法3.5</td>
+<td style="text-align:left">包里也有</td>
+<td style="text-align:left">包里同样用 <code>operand1 == 0.0</code> 判除零</td>
+</tr>
+<tr>
+<td style="text-align:left">E22</td>
+<td style="text-align:left">顺序表/链表/顺序栈/链式栈/最小堆</td>
+<td style="text-align:left">包里也有</td>
+<td style="text-align:left">包里这些类都有析构、都没有拷贝构造与拷贝赋值，拷贝一次即二次释放。（包里的 <code>String</code> 连析构都没有：不二次释放，但每个串都泄漏。）</td>
+</tr>
+<tr>
+<td style="text-align:left">R04</td>
+<td style="text-align:left">算法2.9</td>
+<td style="text-align:left">包里也有</td>
+<td style="text-align:left">包里 <code>setPos</code> 与印刷版逐字相同：<code>p = new Link&lt;T&gt;(head-&gt;next)</code>。不止泄漏——<code>setPos(k)</code> 返回第 k-1 个结点，<code>insert(1, v)</code> 静默丢失、<code>insert(i, v)</code>（i ≥ 2）早一格；对拍 2400 次随机插入逐项吻合这个错位</td>
+</tr>
+<tr>
+<td style="text-align:left">R07</td>
+<td style="text-align:left">算法3.12</td>
+<td style="text-align:left">包里没有</td>
+<td style="text-align:left">扫描件第 67 页印的 <code>while</code> 条件少一个左括号（OCR 又把 <code>&amp;&amp;</code> 读成了 <code>&amp;</code>，那是另一回事）；包里同一句以 <code>while ((tmp.s &gt;= 0) &amp;&amp;</code> 开头，括号配平、编译得过</td>
+</tr>
+<tr>
+<td style="text-align:left">R12</td>
+<td style="text-align:left">算法4.7</td>
+<td style="text-align:left">包里没有</td>
+<td style="text-align:left">包里写的是 <code>while (i &lt; m)</code> 加 <code>if (i == m) break</code>——<code>break</code> 是必需的；原书把条件印成 <code>i &lt; m-1</code> 又留着 <code>break</code>，才显得多余</td>
+</tr>
+<tr>
+<td style="text-align:left">R15</td>
+<td style="text-align:left">算法5.x Parent</td>
+<td style="text-align:left">包里也有</td>
+<td style="text-align:left">包里 <code>Parent</code> 的循环走完后直接落到函数末尾，没有 <code>return NULL</code>（找不到父结点时返回值未定义）</td>
+</tr>
+</tbody></table></div>
+<p>只在包里、原书没有的缺陷见附录「考场代码包」的「包里的坑」。</p>
 <h2 id="曾经误判已撤回"><a class="anchor" href="#曾经误判已撤回">#</a>曾经误判、已撤回</h2>
 <p>第 1 章股市传言的印刷矩阵里，B1 / B5 的最大最短路一度被读成 8，并据此声称「原书应返回 B1 而非正文的 B3」。那些 <code>8</code> 是 OCR 把 <code>∞</code> 认错；选起点用的图1.3 是图片，从未被 OCR。按正文还原，<strong>原书这个样例是对的</strong>。详见 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch01/adt/legacy.md" class="ext">adt/legacy.md</a>。</p>
 <h2 id="还没收进本表的"><a class="anchor" href="#还没收进本表的">#</a>还没收进本表的</h2>
@@ -342,9 +501,9 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 </tr>
 </tbody></table></div>
 <p>这些条目是参考勘误的内容性摘要，不替代原 PDF 的页码和完整记录。</p>
-<div class="pagenav"><a href="figures.html"><span class="dir">← 上一篇</span>原书插图</a><span></span></div>
+<div class="pagenav"><a href="figures.html"><span class="dir">← 上一篇</span>原书插图</a><a href="exam-codepack.html" style="text-align:right"><span class="dir">下一篇 →</span>考场代码包</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#怎么读">怎么读</a><a href="#编译不过">编译不过</a><a href="#能编译跑起来是错的">能编译、跑起来是错的</a><a href="#书内自相矛盾">书内自相矛盾</a><a href="#反复出现但单独一条通常还能跑两下">反复出现、但单独一条通常还能「跑两下」</a><a href="#曾经误判已撤回">曾经误判、已撤回</a><a href="#还没收进本表的">还没收进本表的</a><a href="#参考勘误表补充前六章">参考勘误表补充（前六章）</a></nav>
+<nav class="page"><b>本页</b><a href="#怎么读">怎么读</a><a href="#编译不过">编译不过</a><a href="#能编译跑起来是错的">能编译、跑起来是错的</a><a href="#书内自相矛盾">书内自相矛盾</a><a href="#反复出现但单独一条通常还能跑两下">反复出现、但单独一条通常还能「跑两下」</a><a href="#作者代码包里有没有">作者代码包里有没有</a><a href="#曾经误判已撤回">曾经误判、已撤回</a><a href="#还没收进本表的">还没收进本表的</a><a href="#参考勘误表补充前六章">参考勘误表补充（前六章）</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/勘误.md</code> 生成

@@ -195,6 +195,23 @@ class TestFindings(unittest.TestCase):
         self.assertTrue(any("verdict" in p for p in authorsrc.check_findings(self.data)))
 
 
+class TestBookSections(unittest.TestCase):
+    """附录「考场代码包」三节与勘误里的一节由登记表生成；登记表改了书稿没重写，闸门要红。"""
+
+    def test_book_is_fresh(self):
+        self.assertEqual(authorsrc.check_book(authorsrc.load_manifest()), [])
+
+    def test_changed_finding_makes_book_stale(self):
+        data = json.loads(json.dumps(authorsrc.load_manifest()))
+        data["findings"][0]["summary"] += "（改过）"
+        self.assertTrue(any("已过期" in p and "勘误.md" in p for p in authorsrc.check_book(data)))
+
+    def test_code_outside_backticks_is_rejected(self):
+        with self.assertRaises(ValueError):
+            authorsrc._cell("包里是 Link<T>* top")  # <T> 会被当成 HTML 标签吞掉
+        self.assertEqual(authorsrc._cell("包里是 `Link<T>* top`"), "包里是 `Link<T>* top`")
+
+
 class TestHarnessRegistry(unittest.TestCase):
     def test_every_author_diff_is_registered(self):
         registered = set(authorsrc.load_manifest()["harnesses"])

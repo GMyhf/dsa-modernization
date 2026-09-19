@@ -27,7 +27,8 @@
   4. 与 `ref_数据结构与算法A 2021秋/SourceCodes/`（同一套代码的 2021 版副本）逐文件
      比对，只允许登记过的差异；
   5. 结论（findings）：「这处缺陷作者包里有没有」每条都带正则，在包的源码上逐条成立；
-     `collab/errata.json` 里每条编译/运行/内存类勘误都必须有一条结论；
+     `collab/errata.json` 里每条编译/运行/内存类勘误都必须有一条结论；书稿里由登记表
+     生成的几节（`book/考场代码包.md` 三节、`book/勘误.md` 一节）与登记表逐字一致；
   6. 每个带 `main` 的程序在今天的 g++（`-std=c++17 -fsyntax-only`）下编译得过或
      编译不过，与登记一致；`code/**/author_diff.cpp` 对拍程序逐个编译（ASan/UBSan）
      并运行，退出码 0。编译器缺失时这一项只提示不判红。
@@ -38,6 +39,7 @@
   python3 tools/authorsrc.py --listing 代码3.2  # 同上
   python3 tools/authorsrc.py --compile          # 重跑编译扫描并打印（不写登记表）
   python3 tools/authorsrc.py --diff             # 只跑 code/**/author_diff.cpp 对拍
+  python3 tools/authorsrc.py --write-book       # 重写书稿里由登记表生成的节（附录「考场代码包」与勘误的一节）
   python3 tools/authorsrc.py --check            # 闸门用：五项核对，不一致退出码 1
   python3 tools/authorsrc.py --write-hashes     # 代码包更新后重记 sha256 与编译结果
   python3 tools/authorsrc.py --export DIR       # 把代码包转成 UTF-8 + LF 写到 DIR
@@ -478,6 +480,193 @@ def check_findings(data):
     return problems
 
 
+# ---------------------------------------------------------------- 书稿里由本工具生成的节
+#
+# 书稿里有几节**整节由登记表生成**：清单在包里的位置、编译结果、包里的坑、勘误在包里有没有。
+# 手抄一份迟早和登记表分叉，所以这几节归本工具所有：从 `## 标题` 那一行之后、到下一个
+# `## ` 之前的正文，由 --write-book 重写，--check 逐字比对。节外的文字照常手写。
+# （不用 HTML 注释当标记：build_site 的渲染器是自己写的，不认注释。）
+
+BOOK = ROOT / "book"
+APPENDIX = BOOK / "考场代码包.md"
+ERRATA_PAGE = BOOK / "勘误.md"
+
+COMPILE_HINTS = [
+    (r"‘::main’ must return ‘int’", "`void main()` 改成 `int main()`"),
+    (r"‘cout’ was not declared", "补 `using namespace std;`，或写 `std::cout`"),
+    (r"extra qualification", "类内声明去掉 `Graphm::` 前缀"),
+    (r"comparison between pointer and integer", "`assert(str != '\\0')` 改为 `assert(str != NULL)`（勘误 E11）"),
+    (r"reference to ‘less’ is ambiguous", "自定义的 `less` 与 `std::less` 撞名：改名，或去掉 `using namespace std;`"),
+    (r"afxtempl\.h", "VC6 的 MFC 头文件，g++ 没有：换成标准库容器"),
+    (r"may not have default arguments", "默认参数只留在类内声明，类外定义处删掉"),
+]
+
+
+def _cell(text: str) -> str:
+    text = str(text).replace("\n", " ").strip()
+    if "|" in text:
+        # build_site 的表格按 | 直接切分，不认 \| 转义：生成的格子里一个 | 就会把表拆坏
+        raise ValueError(f"表格单元里不能有 |：{text}")
+    prose = re.sub(r"`[^`]*`", "", text)
+    if re.search(r"[<>*\[\]_]", prose):
+        # `Link<T>*` 不加反引号：<T> 会被 HTML 当标签吞掉，成对的 * 会变成斜体
+        raise ValueError(f"代码片段要放进反引号：{text}")
+    return text
+
+
+def _code(text: str) -> str:
+    """整格就是一段代码或路径：直接包进反引号。"""
+    text = str(text).replace("\n", " ").strip()
+    if "|" in text or "`" in text:
+        raise ValueError(f"代码格里不能有 | 或反引号：{text}")
+    return f"`{text}`"
+
+
+def compile_hint(error: str) -> str:
+    for pattern, hint in COMPILE_HINTS:
+        if re.search(pattern, error):
+            return hint
+    return "—"
+
+
+def section_listing_map(data):
+    lines = [
+        "",
+        "原书 105 条清单在包里的去处。符号是函数或类名；同一文件里有几个同名版本时注明第几个。",
+        "",
+        "| 清单 | 包里的文件 | 符号 |",
+        "| --- | --- | --- |",
+    ]
+    for item in ledger.parse_inventory():
+        entry = data.get("listings", {}).get(item["id"])
+        if entry is None:  # 未登记：--check 的第 1 项会报，这里别先崩
+            lines.append(f"| {item['id']} | 未登记 | — |")
+            continue
+        if "absent" in entry:
+            lines.append(f"| {item['id']} | 包里没有 | {_cell(entry['absent'])} |")
+            continue
+        symbols = []
+        for symbol in entry["symbols"]:
+            name, _, nth = symbol.partition("@")
+            symbols.append(f"`{name}`" + (f"（第 {nth} 个）" if nth else ""))
+        note = "；" + _cell(entry["note"]) if entry.get("note") else ""
+        lines.append(f"| {item['id']} | {_code(entry['file'])} | {'、'.join(symbols)}{note} |")
+    return lines
+
+
+def section_compile(data):
+    programs_ = data.get("programs", {})
+    ok = [rel for rel, e in programs_.items() if e.get("compiles")]
+    bad = [(rel, e) for rel, e in programs_.items() if not e.get("compiles")]
+    lines = [
+        "",
+        f"包里带 `main` 的程序共 {len(programs_)} 个。按 `g++ -std=c++17` 只做语法检查"
+        f"（先把源码转成 UTF-8）：**{len(ok)} 个编译得过，{len(bad)} 个编译不过**。"
+        "编译不过的几乎全是 2008 年 VC6 能容忍、今天的 g++ 不再接受的写法，不是算法错；"
+        "下表给出第一条报错和改法。OpenJudge 用的正是 g++。",
+        "",
+        "| 程序 | 第一条报错 | 改法 |",
+        "| --- | --- | --- |",
+    ]
+    for rel, entry in bad:
+        error = entry.get("error", "")
+        lines.append(f"| {_code(rel)} | {_code(error)} | {compile_hint(error)} |")
+    lines += ["", "编译得过的：" + "、".join(_code(rel) for rel in ok) + "。"]
+    return lines
+
+
+def section_traps(data):
+    lines = [
+        "",
+        "下面几处缺陷**原书没有**——要么原书没印那段代码，要么印对了——只在包里。"
+        "考场上直接拿包里的代码交题，会在这些地方读写到数组外面或得到错的结果。",
+        "",
+        "| 编号 | 位置 | 缺陷 |",
+        "| --- | --- | --- |",
+    ]
+    for item in data.get("findings", []):
+        if item.get("verdict") == "pack_only":
+            files = "、".join(_code(c["file"]) for c in item["checks"][:1])
+            lines.append(f"| {item['id']} | {_cell(item['listing'])}，{files} | {_cell(item['summary'])} |")
+    same_traps = [i for i in data.get("findings", []) if i.get("verdict") == "same" and not i.get("errata")]
+    if same_traps:
+        lines += ["", "另有与原书同病、但不在勘误表里的："]
+        for item in same_traps:
+            lines.append(f"- **{item['id']}**（{_cell(item['listing'])}）：{_cell(item['summary'])}")
+    lines += [
+        "",
+        "与原书同病的那些（印出来就错、包里也错）见书末「原书勘误」的「作者代码包里有没有」一节。",
+    ]
+    return lines
+
+
+def section_errata(data):
+    lines = [
+        "",
+        "对照原书配套的作者代码包（2025 秋期末机考的考场资料之一，见附录「考场代码包」），"
+        "上面每条编译不过或跑起来错的勘误都能再问一句：**作者自己的代码里也这样吗？**",
+        "",
+        "- **包里也有**：作者的代码本来就这样，不是排印或 OCR 造成的；",
+        "- **包里没有**：印出来的与作者的代码不一致，包里是另一种（通常能编译的）写法。"
+        "包与原书同为 2008 年 6 月，谁先谁后不可考，所以只说「不一致」，不说「排印时引入」；",
+        "- **包里无此代码**：包里没有对应的实现，无从比较。",
+        "",
+        "| 勘误 | 清单 | 包里 | 说明 |",
+        "| --- | --- | --- | --- |",
+    ]
+    for item in data.get("findings", []):
+        ids = as_list(item.get("errata"))
+        if not ids:
+            continue
+        lines.append(
+            f"| {' / '.join(ids)} | {_cell(item['listing'])} | {VERDICTS[item['verdict']]} | {_cell(item['summary'])} |"
+        )
+    lines += ["", "只在包里、原书没有的缺陷见附录「考场代码包」的「包里的坑」。"]
+    return lines
+
+
+OWNED_SECTIONS = [
+    (APPENDIX, "## 清单在包里的位置", section_listing_map),
+    (APPENDIX, "## 今天的 g++ 编译得过吗", section_compile),
+    (APPENDIX, "## 包里的坑", section_traps),
+    (ERRATA_PAGE, "## 作者代码包里有没有", section_errata),
+]
+
+
+def render_owned(text: str, heading: str, body_lines) -> str:
+    """把 text 里 heading 这一节的正文换成 body_lines；heading 不存在时抛错。"""
+    lines = text.split("\n")
+    try:
+        start = lines.index(heading)
+    except ValueError:
+        raise ValueError(f"找不到节标题 {heading!r}")
+    end = next((i for i in range(start + 1, len(lines)) if lines[i].startswith("## ")), len(lines))
+    tail = lines[end:]
+    new_body = body_lines + ([""] if tail else [])
+    return "\n".join(lines[: start + 1] + new_body + tail)
+
+
+def book_sections(data):
+    """{路径: 生成后的全文}。"""
+    out = {}
+    for path, heading, builder in OWNED_SECTIONS:
+        text = out.get(path) or path.read_text(encoding="utf-8")
+        out[path] = render_owned(text, heading, builder(data))
+    return out
+
+
+def check_book(data):
+    problems = []
+    try:
+        rendered = book_sections(data)
+    except (OSError, ValueError) as err:
+        return [f"书稿生成节：{err}"]
+    for path, text in rendered.items():
+        if path.read_text(encoding="utf-8") != text:
+            problems.append(f"{rel_label(path)}：由登记表生成的节已过期，运行 python3 tools/authorsrc.py --write-book")
+    return problems
+
+
 # ---------------------------------------------------------------- 核对
 
 
@@ -536,8 +725,9 @@ def check(data, compiler="auto", out=print):
                 where = rel_label(other) if other is not None else "（2021 版无对应目录）"
                 problems.append(f"{rel}：与 2021 版 {where} 不同，且不在 twin_deltas 里")
 
-    # 5. 结论：每条的正则在包上成立，编译/运行/内存类勘误都有结论
+    # 5. 结论：每条的正则在包上成立，编译/运行/内存类勘误都有结论；书稿里的生成节与登记表一致
     problems.extend(check_findings(data))
+    problems.extend(check_book(data))
 
     # 6. 编译结果与对拍
     if compiler == "auto":
@@ -639,6 +829,7 @@ def main(argv=None):
     group.add_argument("--listing", metavar="ID", help="打印某条清单在作者包里的源码，如 3.2 或 算法3.3")
     group.add_argument("--check", action="store_true", help="闸门用：六项核对")
     group.add_argument("--diff", action="store_true", help="只跑对拍程序")
+    group.add_argument("--write-book", action="store_true", help="重写书稿里由登记表生成的节")
     group.add_argument("--compile", action="store_true", help="重跑编译扫描并打印")
     group.add_argument("--write-hashes", action="store_true", help="重记 sha256 与编译结果")
     group.add_argument("--export", metavar="DIR", help="把代码包转成 UTF-8 + LF 写到 DIR")
@@ -649,6 +840,11 @@ def main(argv=None):
         return cmd_listing(data, args.listing)
     if args.compile:
         return cmd_compile()
+    if args.write_book:
+        for path, text in book_sections(data).items():
+            path.write_text(text, encoding="utf-8")
+            print(f"已重写 {rel_label(path)} 里由登记表生成的节")
+        return 0
     if args.diff:
         compiler = find_compiler()
         if not compiler:

@@ -84,6 +84,7 @@ PAGES = [
     ("期末复习题库.md", "final-review.html", "back"),
     ("插图.md", "figures.html", "back"),
     ("勘误.md", "errata.html", "back"),
+    ("考场代码包.md", "exam-codepack.html", "back"),
 ]
 MD_TO_HTML = {md: out for md, out, _ in PAGES}
 GROUP_LABEL = {"front": "导读", "body": "正文", "back": "附录"}

@@ -48,7 +48,7 @@
       "symbols": [
         "del"
       ],
-      "note": "包里函数名是 del；原书印作 delete（C++ 关键字，不能作函数名）"
+      "note": "包里函数名是 `del`；原书印作 `delete`（C++ 关键字，不能作函数名）"
     },
     "代码2.6": {
       "file": "ch02_LinearList/alg2.6-11/lnkList.h",
@@ -86,7 +86,7 @@
       "symbols": [
         "del"
       ],
-      "note": "包里函数名是 del；原书印作 delete（C++ 关键字，不能作函数名）"
+      "note": "包里函数名是 `del`；原书印作 `delete`（C++ 关键字，不能作函数名）"
     },
     "代码2.12": {
       "absent": "双链表：包里 ch02 只有顺序表与单链表，没有双链表结点"
@@ -102,10 +102,10 @@
       "symbols": [
         "class arrStack"
       ],
-      "note": "包里取栈顶叫 getTop(T*)，与成员变量 int top 不重名；原书印作 top(T&)，与之重名，编译不过"
+      "note": "包里取栈顶叫 `getTop(T*)`，与成员变量 `int top` 不重名；原书印作 `top(T&)`，与之重名，编译不过"
     },
     "算法3.3": {
-      "absent": "改进的进栈（满则容量翻倍）：包里三份 arrStack.h 的 push 都是栈满即报错返回 false，没有翻倍版本"
+      "absent": "改进的进栈（满则容量翻倍）：包里三份 `arrStack.h` 的 `push` 都是栈满即报错返回 `false`，没有翻倍版本"
     },
     "代码3.4": {
       "file": "ch03_StackQueue/alg3.4/lnkstack.h",
@@ -127,7 +127,7 @@
       "symbols": [
         "factorial@1"
       ],
-      "note": "递归版在 fact.cpp 里整段注释掉了，与迭代版一起留作对照",
+      "note": "递归版在 `fact.cpp` 里整段注释掉了，与迭代版一起留作对照",
       "commented_out": true
     },
     "算法3.7": {
@@ -141,7 +141,7 @@
       "symbols": [
         "factorial@2"
       ],
-      "note": "迭代版在 fact.cpp 里整段注释掉了",
+      "note": "迭代版在 `fact.cpp` 里整段注释掉了",
       "commented_out": true
     },
     "算法3.9": {
@@ -149,7 +149,7 @@
       "symbols": [
         "factorial"
       ],
-      "note": "fact.cpp 里唯一未注释的版本：用栈模拟递归"
+      "note": "`fact.cpp` 里唯一未注释的版本：用栈模拟递归"
     },
     "算法3.10": {
       "file": "ch03_StackQueue/alg3.9-11/knap1.cpp",
@@ -191,7 +191,7 @@
       "absent": "字符串的抽象数据类型定义（成员用 … 占位），不是可编译程序"
     },
     "代码4.2": {
-      "absent": "印的是标准库 std::basic_string 的模板声明，不是作者的代码"
+      "absent": "印的是标准库 `std::basic_string` 的模板声明，不是作者的代码"
     },
     "算法4.3": {
       "file": "ch04_String/alg3/strcmp.cpp",
@@ -202,8 +202,9 @@
     "算法4.4": {
       "file": "ch04_String/alg4-5/myString.h",
       "symbols": [
-        "String"
-      ]
+        "String@2"
+      ],
+      "note": "`myString.h` 里第 1 个 `String(...)` 是无参构造，原书这一条是第 2 个 `String(char *s)`"
     },
     "算法4.5": {
       "file": "ch04_String/alg4-5/myString.h",
@@ -383,7 +384,7 @@
       "symbols": [
         "class Graph"
       ],
-      "note": "包里只有一个 Graph 类：原书把 ADT（代码7.1）与基类（代码7.2）分成两段印"
+      "note": "包里只有一个 `Graph` 类：原书把 ADT（代码7.1）与基类（代码7.2）分成两段印"
     },
     "代码7.2": {
       "file": "ch07_Graph/graph_matrix/Graph.h",
@@ -460,7 +461,7 @@
         "ShellSort",
         "ModInsSort"
       ],
-      "note": "ShSort3.cpp 是增量每次除以 3 的变体，原书没有印"
+      "note": "`ShSort3.cpp` 是增量每次除以 3 的变体，原书没有印"
     },
     "算法8.3": {
       "file": "ch08_Sort/SelSort.cpp",
@@ -473,7 +474,7 @@
       "symbols": [
         "sort"
       ],
-      "note": "堆排序主体在 sort() 里，堆本身见 HeapSort/MaxHeap.h"
+      "note": "堆排序主体在 `sort()` 里，堆本身见 `HeapSort/MaxHeap.h`"
     },
     "算法8.5": {
       "file": "ch08_Sort/BubSort.cpp",
@@ -540,7 +541,7 @@
       "symbols": [
         "IndexSort"
       ],
-      "note": "文件开头还有一个整段注释掉的 IndexSort(Array, n)（内部 new 索引数组、结尾不 delete）；原书印的是带 IndexArray 参数的这一版"
+      "note": "文件开头还有一个整段注释掉的 `IndexSort(Array, n)`（内部 `new` 索引数组、结尾不 `delete`）；原书印的是带 `IndexArray` 参数的这一版"
     },
     "算法8.15": {
       "file": "ch08_Sort/AddSort_Insert.cpp",
@@ -657,7 +658,7 @@
       "symbols": [
         "hashInsert"
       ],
-      "note": "hash_tomb 与 hash_tomb2 两版：tomb2 记下第一个墓碑位置（insplace）再插入，与原书一致"
+      "note": "`hash_tomb` 与 `hash_tomb2` 两版：`tomb2` 记下第一个墓碑位置（`insplace`）再插入，与原书一致"
     },
     "算法12.1": {
       "absent": "可利用空间表（重载 LinkNode 的 new/delete）：包里 ch12 只有广义表、稀疏矩阵、AVL、伸展树与最佳 BST"
@@ -956,7 +957,7 @@
       "listing": "代码2.1 / 代码2.2 / 算法2.5",
       "verdict": "absent",
       "errata": "E01",
-      "summary": "包里在用的顺序表与单链表都叫 del(int p)。只有 alg2.1-5/lnkList.h 这份没被 main.cpp 包含、从不参与编译的旧稿还写着 bool delete(int p)——原书印的正是这种写法",
+      "summary": "包里在用的顺序表与单链表都叫 `del(int p)`。只有 `alg2.1-5/lnkList.h` 这份没被 `main.cpp` 包含、从不参与编译的旧稿还写着 `bool delete(int p)`——原书印的正是这种写法",
       "checks": [
         {
           "file": "ch02_LinearList/alg2.1-5/myList.h",
@@ -1001,7 +1002,7 @@
       "listing": "代码2.1",
       "verdict": "same",
       "errata": "E02",
-      "summary": "包里的 class List 同样通篇没有 public:——只是包里没有任何代码通过 List 调用这些运算，所以编译得过",
+      "summary": "包里的 `class List` 同样通篇没有 `public:`——只是包里没有任何代码通过 `List` 调用这些运算，所以编译得过",
       "checks": [
         {
           "file": "ch02_LinearList/alg2.1-5/myList.h",
@@ -1019,7 +1020,7 @@
       "listing": "算法2.3",
       "verdict": "absent",
       "errata": "E03",
-      "summary": "包里 getPos 的循环上界是成员 curLen，编译得过；原书印成未声明的 n",
+      "summary": "包里 `getPos` 的循环上界是成员 `curLen`，编译得过；原书印成未声明的 `n`",
       "checks": [
         {
           "file": "ch02_LinearList/alg2.1-5/arrList.h",
@@ -1034,7 +1035,7 @@
       "listing": "代码2.6",
       "verdict": "absent",
       "errata": "E04",
-      "summary": "包里 Link 的构造参数是 Link* nextValue，没有 const，不存在丢弃 const 的赋值",
+      "summary": "包里 `Link` 的构造参数是 `Link* nextValue`，没有 `const`，不存在丢弃 `const` 的赋值",
       "checks": [
         {
           "file": "ch02_LinearList/alg2.6-11/lnkList.h",
@@ -1052,7 +1053,7 @@
       "listing": "代码3.2",
       "verdict": "absent",
       "errata": "E05",
-      "summary": "包里取栈顶叫 getTop(T*)，与 public 数据成员 int top 不重名，整个文件编译得过；原书印成 bool top(T&)",
+      "summary": "包里取栈顶叫 `getTop(T*)`，与 public 数据成员 `int top` 不重名，整个文件编译得过；原书印成 `bool top(T&)`",
       "checks": [
         {
           "file": "ch03_StackQueue/alg3.5/arrStack.h",
@@ -1072,7 +1073,7 @@
       "listing": "算法3.3",
       "verdict": "no_code",
       "errata": "E06",
-      "summary": "包里三份 arrStack.h 的 push 都是栈满就打印「栈满溢出」返回 false，没有翻倍扩容的版本，无从比较",
+      "summary": "包里三份 `arrStack.h` 的 `push` 都是栈满就打印「栈满溢出」返回 `false`，没有翻倍扩容的版本，无从比较",
       "checks": [
         {
           "file": "ch03_StackQueue/alg3.5/arrStack.h",
@@ -1108,7 +1109,7 @@
       "listing": "代码3.4",
       "verdict": "absent",
       "errata": "E07",
-      "summary": "包里链式栈同样用 getTop(T*)，与 Link<T>* top 不重名",
+      "summary": "包里链式栈同样用 `getTop(T*)`，与 `Link<T>* top` 不重名",
       "checks": [
         {
           "file": "ch03_StackQueue/alg3.4/lnkstack.h",
@@ -1130,7 +1131,7 @@
         "E08",
         "E20"
       ],
-      "summary": "包里栈的 ADT 就是 pop(T* item)，算法里写 s.pop(&x) 与之一致、编译得过；原书把 ADT 印成了 pop(T&)，算法却照抄了包里的 pop(&x)",
+      "summary": "包里栈的 ADT 就是 `pop(T* item)`，算法里写 `s.pop(&x)` 与之一致、编译得过；原书把 ADT 印成了 `pop(T&)`，算法却照抄了包里的 `pop(&x)`",
       "checks": [
         {
           "file": "ch03_StackQueue/alg3.5/myStack.h",
@@ -1160,7 +1161,7 @@
       "listing": "算法3.11",
       "verdict": "absent",
       "errata": "E09",
-      "summary": "包里是 enum rdType {a, b, c} 与普通的 class knapNode，没有字面量枚举值，也没有 Java 式的 public class",
+      "summary": "包里是 `enum rdType {a, b, c}` 与普通的 `class knapNode`，没有字面量枚举值，也没有 Java 式的 `public class`",
       "checks": [
         {
           "file": "ch03_StackQueue/alg3.9-11/knap1.cpp",
@@ -1179,7 +1180,7 @@
       "listing": "算法3.12",
       "verdict": "absent",
       "errata": "E10",
-      "summary": "包里 t = st.top 读的是 public 数据成员，取栈顶用 st.getTop(&tmp)，两者不重名",
+      "summary": "包里 `t = st.top` 读的是 public 数据成员，取栈顶用 `st.getTop(&tmp)`，两者不重名",
       "checks": [
         {
           "file": "ch03_StackQueue/alg3.9-11/knap1.cpp",
@@ -1198,7 +1199,7 @@
       "listing": "算法4.4",
       "verdict": "same",
       "errata": "E11",
-      "summary": "包里就是 assert(str != '\\0')——包里 alg4-5/main.cpp 今天编译不过，报的正是这一句（见 programs）",
+      "summary": "包里就是 `assert(str != '\\0')`——包里 `alg4-5/main.cpp` 今天编译不过，报的正是这一句（见附录「考场代码包」）",
       "checks": [
         {
           "file": "ch04_String/alg4-5/myString.h",
@@ -1213,7 +1214,7 @@
       "listing": "算法4.4",
       "verdict": "same",
       "errata": "E12",
-      "summary": "包里的构造函数就是 String(char *s)",
+      "summary": "包里的构造函数就是 `String(char *s)`",
       "checks": [
         {
           "file": "ch04_String/alg4-5/myString.h",
@@ -1231,7 +1232,7 @@
       "listing": "代码10.1",
       "verdict": "absent",
       "errata": "E13",
-      "summary": "包里初始化列表与数据成员都叫 key",
+      "summary": "包里初始化列表与数据成员都叫 `key`",
       "checks": [
         {
           "file": "ch10_Search/algor1-3/algor1&2.cpp",
@@ -1250,7 +1251,7 @@
       "listing": "算法3.6 / 3.8 / 3.9",
       "verdict": "same",
       "errata": "E14",
-      "summary": "包里三版阶乘都是 long 连乘，不查溢出",
+      "summary": "包里三版阶乘都是 `long` 连乘，不查溢出",
       "checks": [
         {
           "file": "ch03_StackQueue/alg3.6-8/fact.cpp",
@@ -1271,7 +1272,7 @@
       "listing": "算法3.6",
       "verdict": "same",
       "errata": "E15",
-      "summary": "包里（整段注释掉的）递归版同样是 if (n <= 0) return 1",
+      "summary": "包里（整段注释掉的）递归版同样是 `if (n <= 0) return 1`",
       "checks": [
         {
           "file": "ch03_StackQueue/alg3.6-8/fact.cpp",
@@ -1286,7 +1287,7 @@
       "listing": "算法4.5",
       "verdict": "same",
       "errata": "E16",
-      "summary": "包里 Substr 越界同样 return NULL（经 String(char*) 构造，strlen(NULL)）",
+      "summary": "包里 `Substr` 越界同样 `return NULL`（经 `String(char*)` 构造，`strlen(NULL)`）",
       "checks": [
         {
           "file": "ch04_String/alg4-5/myString.h",
@@ -1306,7 +1307,7 @@
         "R10",
         "R13"
       ],
-      "summary": "包里朴素匹配与 KMP 都返回 j - pLen + 1：作者的代码本来就按 1 起始报位置，不是排印问题。对拍 407 组，找到时作者恒比 0 起始位置大 1",
+      "summary": "包里朴素匹配与 KMP 都返回 `j - pLen + 1`：作者的代码本来就按 1 起始报位置，不是排印问题。对拍 407 组，找到时作者恒比 0 起始位置大 1",
       "checks": [
         {
           "file": "ch04_String/alg6/naive.h",
@@ -1328,7 +1329,7 @@
       "listing": "算法10.9",
       "verdict": "same",
       "errata": "E18",
-      "summary": "包里三份 HASHDICT.H 的析构都是 delete HT（HT 由 new Elem[sz] 分配）",
+      "summary": "包里三份 `HASHDICT.H` 的析构都是 `delete HT`（`HT` 由 `new Elem[sz]` 分配）",
       "checks": [
         {
           "file": "ch10_Search/hash_dict/HASHDICT.H",
@@ -1355,7 +1356,7 @@
       "listing": "算法3.5",
       "verdict": "same",
       "errata": "E19",
-      "summary": "包里同样用 operand1 == 0.0 判除零",
+      "summary": "包里同样用 `operand1 == 0.0` 判除零",
       "checks": [
         {
           "file": "ch03_StackQueue/alg3.5/calc.h",
@@ -1370,7 +1371,7 @@
       "listing": "顺序表/链表/顺序栈/链式栈/最小堆",
       "verdict": "same",
       "errata": "E22",
-      "summary": "包里这些类都有析构、都没有拷贝构造与拷贝赋值，拷贝一次即二次释放。（包里的 String 连析构都没有：不二次释放，但每个串都泄漏。）",
+      "summary": "包里这些类都有析构、都没有拷贝构造与拷贝赋值，拷贝一次即二次释放。（包里的 `String` 连析构都没有：不二次释放，但每个串都泄漏。）",
       "checks": [
         {
           "file": "ch02_LinearList/alg2.1-5/arrList.h",
@@ -1435,7 +1436,7 @@
       "listing": "算法2.9",
       "verdict": "same",
       "errata": "R04",
-      "summary": "包里 setPos 与印刷版逐字相同：p = new Link<T>(head->next)。不止泄漏——setPos(k) 返回第 k-1 个结点，insert(1, v) 静默丢失、insert(i≥2, v) 早一格；对拍 2400 次随机插入逐项吻合这个错位",
+      "summary": "包里 `setPos` 与印刷版逐字相同：`p = new Link<T>(head->next)`。不止泄漏——`setPos(k)` 返回第 k-1 个结点，`insert(1, v)` 静默丢失、`insert(i, v)`（i ≥ 2）早一格；对拍 2400 次随机插入逐项吻合这个错位",
       "checks": [
         {
           "file": "ch02_LinearList/alg2.6-11/lnkList.h",
@@ -1451,7 +1452,7 @@
       "listing": "算法3.12",
       "verdict": "absent",
       "errata": "R07",
-      "summary": "扫描件第 67 页印的是 while (tmp.s >= 0) && (tmp.s <= 0 || n0 > t)) {——少一个左括号；包里括号是配平的",
+      "summary": "扫描件第 67 页印的 `while` 条件少一个左括号（OCR 又把 `&&` 读成了 `&`，那是另一回事）；包里同一句以 `while ((tmp.s >= 0) &&` 开头，括号配平、编译得过",
       "checks": [
         {
           "file": "ch03_StackQueue/alg3.9-11/knap1.cpp",
@@ -1466,7 +1467,7 @@
       "listing": "算法4.7",
       "verdict": "absent",
       "errata": "R12",
-      "summary": "包里写的是 while (i < m) 加 if (i == m) break——break 是必需的；原书把条件印成 i < m-1 又留着 break，才显得多余",
+      "summary": "包里写的是 `while (i < m)` 加 `if (i == m) break`——`break` 是必需的；原书把条件印成 `i < m-1` 又留着 `break`，才显得多余",
       "checks": [
         {
           "file": "ch04_String/alg7-8/kmp.h",
@@ -1486,7 +1487,7 @@
       "listing": "算法5.x Parent",
       "verdict": "same",
       "errata": "R15",
-      "summary": "包里 Parent 的循环走完后直接落到函数末尾，没有 return NULL（找不到父结点时返回值未定义）",
+      "summary": "包里 `Parent` 的循环走完后直接落到函数末尾，没有 `return NULL`（找不到父结点时返回值未定义）",
       "checks": [
         {
           "file": "ch05_BinaryTree/alg1-8BinaryTree/BinaryTree.h",
@@ -1500,7 +1501,7 @@
       "id": "P01",
       "listing": "算法8.4（包里的 MaxHeap）",
       "verdict": "pack_only",
-      "summary": "MaxHeap::SiftDown 判右孩子写 j<CurrentSize，应为 j<CurrentSize-1：n 为偶数时建堆读 heapArray[n]，越界一格，那格若更大还会被换进堆、再把 temp 写出界。原书没印 MaxHeap；第 5 章 MinHeap 与代码5.11 写对了。ASan 在对拍里当场报 heap-buffer-overflow",
+      "summary": "`MaxHeap` 的 `SiftDown` 判右孩子写 `j<CurrentSize`，应为 `j<CurrentSize-1`：n 为偶数时建堆读 `heapArray[n]`，越界一格，那格若更大还会被换进堆、再把 `temp` 写出界。原书没印 `MaxHeap`；第 5 章 `MinHeap` 与代码5.11 写对了。ASan 在对拍里当场报 heap-buffer-overflow",
       "checks": [
         {
           "file": "ch08_Sort/HeapSort/MaxHeap.h",
@@ -1521,7 +1522,7 @@
       "id": "P02",
       "listing": "算法8.5",
       "verdict": "pack_only",
-      "summary": "BubbleSort 内层循环写 j>=i：i=0 时比较 Array[0] 与 Array[-1]，越界一格；原书印的 j > i 是对的",
+      "summary": "`BubbleSort` 内层循环写 `j>=i`：i=0 时比较 `Array[0]` 与 `Array[-1]`，越界一格；原书印的 `j > i` 是对的",
       "checks": [
         {
           "file": "ch08_Sort/BubSort.cpp",
@@ -1536,7 +1537,7 @@
       "id": "P03",
       "listing": "算法2.11",
       "verdict": "pack_only",
-      "summary": "lnkList::del 删尾结点时 tail = p; delete q; 之后又落进 if (q != NULL) { p->next = q->next; delete q; }——释放后使用加二次释放；原书用 else if 写对了，还多了 p == tail 的判断",
+      "summary": "`lnkList` 的 `del` 删尾结点时 `tail = p; delete q;` 之后又落进 `if (q != NULL) { p->next = q->next; delete q; }`——释放后使用加二次释放；原书用 `else if` 写对了，还多了 `p == tail` 的判断",
       "checks": [
         {
           "file": "ch02_LinearList/alg2.6-11/lnkList.h",
@@ -1550,7 +1551,7 @@
       "id": "P04",
       "listing": "算法3.10",
       "verdict": "pack_only",
-      "summary": "knap 最后一行是 else knap(s, n-1);——少了 return，结果被丢弃、函数从末尾流出（未定义行为）；原书印的 else return knap(s, n-1) 是对的",
+      "summary": "`knap` 最后一行是 `else knap(s, n-1);`——少了 `return`，结果被丢弃、函数从末尾流出（未定义行为）；原书印的 `else return knap(s, n-1)` 是对的",
       "checks": [
         {
           "file": "ch03_StackQueue/alg3.9-11/knap1.cpp",
@@ -1567,7 +1568,7 @@
       "id": "P05",
       "listing": "算法8.10（包里的驱动）",
       "verdict": "pack_only",
-      "summary": "BucketSort.cpp 的 sort 包装写死 max = 80，而计时驱动 SortMain.h 生成 Random(32003)——值 ≥ 80 时 count[TempArray[i]] 越界写。只因驱动里的排序调用被注释掉（P06）才没炸",
+      "summary": "`BucketSort.cpp` 的 `sort` 包装写死 `max = 80`，而计时驱动 `SortMain.h` 生成 `Random(32003)`——值 ≥ 80 时 `count[TempArray[i]]` 越界写。只因驱动里的排序调用被注释掉（P06）才没炸",
       "checks": [
         {
           "file": "ch08_Sort/BucketSort.cpp",
@@ -1587,7 +1588,7 @@
       "id": "P06",
       "listing": "第 8 章计时驱动",
       "verdict": "pack_only",
-      "summary": "SortMain.h 的计时循环里 //sort<int>(&array[i], listsize); 被注释掉：包里 12 个排序程序跑起来只生成 1000 万个随机数、给空循环计时，随后逐对检查有序、打出成串 ERROR!!!——作者的排序从没在这个驱动里真正跑过",
+      "summary": "`SortMain.h` 的计时循环里 `//sort<int>(&array[i], listsize);` 被注释掉：包里 12 个排序程序跑起来只生成 1000 万个随机数、给空循环计时，随后逐对检查有序、打出成串 `ERROR!!!`——作者的排序从没在这个驱动里真正跑过",
       "checks": [
         {
           "file": "ch08_Sort/SortMain.h",
@@ -1603,7 +1604,7 @@
       "id": "P07",
       "listing": "代码3.2",
       "verdict": "same",
-      "summary": "无参构造 arrStack() 只设 top = -1，mSize 与 st 都未初始化，析构 delete [] st 释放野指针——与 array_stack/legacy.md 缺陷 3 记的印刷版同病",
+      "summary": "无参构造 `arrStack()` 只设 `top = -1`，`mSize` 与 `st` 都未初始化，析构时 `delete [] st` 释放野指针——原书代码3.2 的无参构造同病",
       "checks": [
         {
           "file": "ch03_StackQueue/alg3.5/arrStack.h",

@@ -1,0 +1,881 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>考场代码包 · 数据结构与算法：Python 讲算法，C++ 讲实现</title>
+<meta name="description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，示例统一为可编译、可测试的 C++17；讲算法的章节另给一份同样跑过测试的 Python 实现。">
+<meta property="og:title" content="考场代码包">
+<meta property="og:description" content="《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008）的现代化重编：保留原书章节脉络与算法思想，示例统一为可编译、可测试的 C++17；讲算法的章节另给一份同样跑过测试的 Python 实现。">
+<meta property="og:type" content="article">
+<style>
+:root{color-scheme:light;
+  --ink:#1a2230;--muted:#68758a;--faint:#93a0b3;--line:#dde3ec;--bg:#f3f5f9;--panel:#fff;
+  --soft:#eef1f7;--accent:#2f5fd0;--accent-soft:#e5ecfb;--warn:#b06a1c;--danger:#c0392b;
+  --kw:#8b2fa0;--ty:#0f6f8c;--st:#177245;--cm:#7d8899;--pp:#a3572a}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;
+  --ink:#e3e8f0;--muted:#98a3b5;--faint:#6f7c90;--line:#2b3342;--bg:#12151b;--panel:#171b22;
+  --soft:#1e232c;--accent:#84a9f5;--accent-soft:#1c2740;--warn:#dcae72;--danger:#e08a80;
+  --kw:#d79ae8;--ty:#7cc7dd;--st:#8fd0a4;--cm:#7b8598;--pp:#e0a97b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.8 system-ui,-apple-system,"Segoe UI","Noto Sans CJK SC","PingFang SC",sans-serif}
+a{color:var(--accent)}
+.masthead{background:var(--panel);border-bottom:1px solid var(--line);padding:30px 26px 24px}
+.masthead .inner{max-width:1440px;margin:0 auto}
+.masthead .eyebrow{font-size:13px;color:var(--muted);letter-spacing:.06em;margin:0 0 6px}
+.masthead .eyebrow a{text-decoration:none}
+.masthead h1{margin:0;font-size:clamp(23px,3.4vw,34px);line-height:1.25;letter-spacing:-.01em}
+.masthead p.sub{margin:10px 0 0;color:var(--muted);font-size:15px;max-width:62ch}
+.masthead .meta{margin:12px 0 0;font-size:13.5px;color:var(--muted)}
+.layout{max-width:1440px;margin:0 auto;padding:0 26px 80px;display:grid;
+  grid-template-columns:228px minmax(0,1fr) 208px;gap:40px;align-items:start}
+nav.book,nav.page{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;
+  padding:22px 0;font-size:14px;line-height:1.55}
+nav b{display:block;color:var(--faint);font-size:11.5px;letter-spacing:.1em;
+  text-transform:uppercase;margin:16px 0 8px}
+nav b:first-child{margin-top:0}
+nav a{display:block;padding:5px 10px;border-left:2px solid transparent;
+  color:var(--ink);text-decoration:none;border-radius:0 5px 5px 0}
+nav a:hover{background:var(--soft);color:var(--accent)}
+nav.book a.here{background:var(--accent-soft);border-left-color:var(--accent);
+  color:var(--accent);font-weight:600}
+nav.page a{color:var(--muted);font-size:13.5px;padding:4px 10px}
+nav.page a.sub{padding-left:22px;font-size:13px;color:var(--faint)}
+nav.page a.active{border-left-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+main{min-width:0;padding-top:24px}
+h1,h2,h3,h4{scroll-margin-top:16px}
+h2{font-size:24px;margin:48px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+h3{font-size:18.5px;margin:30px 0 10px}
+h4{font-size:16px;margin:22px 0 8px;color:var(--muted)}
+.anchor{float:left;margin-left:-1.05em;padding-right:.3em;color:transparent;
+  text-decoration:none;font-weight:400}
+h2:hover .anchor,h3:hover .anchor,h4:hover .anchor{color:var(--faint)}
+p{margin:0 0 15px}
+code{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  background:var(--soft);padding:2px 6px;border-radius:4px;word-break:break-word}
+.codeblock{position:relative;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px;margin:0 0 18px;overflow:hidden}
+.codeblock .srcbar{border-bottom:1px solid var(--line);background:var(--soft);
+  padding:6px 12px;font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+.codeblock .srcbar a{color:var(--muted);text-decoration:none}
+.codeblock .srcbar a:hover{color:var(--accent);text-decoration:underline}
+.codeblock pre{margin:0;padding:14px 16px;overflow:auto}
+.codeblock code{background:none;padding:0;font-size:13px;line-height:1.65;white-space:pre}
+.codeblock[data-lang=console] pre,.codeblock[data-lang=bash] pre{background:var(--soft)}
+.codeblock[data-lang=text]::after{content:"原书印刷";position:absolute;top:8px;right:10px;
+  font-size:11px;color:var(--faint);letter-spacing:.05em}
+.copy{position:absolute;top:6px;right:8px;border:1px solid var(--line);background:var(--panel);
+  color:var(--muted);border-radius:6px;font-size:12px;padding:2px 8px;cursor:pointer;opacity:0}
+.codeblock:hover .copy{opacity:1}
+.copy:hover{color:var(--accent);border-color:var(--accent)}
+.codeblock .srcbar~.copy{top:34px}
+.k{color:var(--kw)}.t{color:var(--ty)}.s{color:var(--st)}.c{color:var(--cm);font-style:italic}
+.n{color:var(--warn)}.p{color:var(--pp)}
+blockquote{margin:0 0 18px;padding:12px 18px;border-left:3px solid var(--accent);
+  background:var(--soft);border-radius:0 7px 7px 0}
+blockquote p:last-child{margin-bottom:0}
+.table-wrap{overflow-x:auto;margin:0 0 18px}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--panel)}
+th,td{border:1px solid var(--line);padding:8px 11px;vertical-align:top}
+th{background:var(--soft);font-weight:650}
+ul,ol{margin:0 0 15px;padding-left:26px}
+li{margin:6px 0}
+hr{border:0;border-top:1px solid var(--line);margin:34px 0}
+figure{margin:0 0 22px;padding:12px;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px}
+img{max-width:100%;height:auto}
+figure img{max-width:min(100%,760px);display:block;margin:0 auto;border-radius:4px;
+  background:#fff}
+figcaption{margin-top:9px;color:var(--muted);font-size:13.5px;text-align:center}
+.gallery-page{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:18px;align-items:start}
+.gallery-page>figure{margin:0}
+.gallery-page>h2,.gallery-page>h3,.gallery-page>p,.gallery-page>blockquote,
+.gallery-page>hr,.gallery-page>.pagenav{grid-column:1/-1}
+.math{font-family:"Latin Modern Math","Cambria Math",Georgia,serif;font-style:italic}
+.math .upr,.math .mono,.math .bold{font-style:normal}
+.math .mono{font-family:ui-monospace,Menlo,monospace}
+.math .bold{font-weight:700}
+.math sup,.math sub{font-size:.72em}
+.math .rel{margin:0 .28em;font-style:normal}
+.math .bin{margin:0 .16em;font-style:normal}
+.math-display{display:block;text-align:center;margin:18px 0;font-size:17px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+  font-size:.85em;line-height:1.15}
+.frac .num{border-bottom:1px solid currentColor;padding:0 .25em}
+.frac .den{padding:0 .25em}
+.sqrt{border-top:1px solid currentColor}
+.sqrt::before{content:"√";border-top:0}
+.tex-raw{border-bottom:1px dotted var(--danger);font-style:normal}
+.download{display:flex;align-items:center;gap:14px;margin:4px 0 26px;padding:14px 16px;
+  background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:9px;text-decoration:none;color:var(--ink)}
+.download:hover{background:var(--accent-soft);border-color:var(--accent)}
+.dl-badge{flex:none;background:var(--accent-soft);color:var(--accent);border-radius:6px;
+  padding:6px 9px;font:700 12.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.06em}
+.dl-body{display:block;min-width:0}
+.dl-body b{display:block;font-size:15.5px}
+.dl-meta{display:block;color:var(--muted);font-size:13px;line-height:1.5;margin-top:2px}
+.dl-arrow{margin-left:auto;color:var(--accent);font-size:19px}
+.pagenav{display:flex;justify-content:space-between;gap:16px;margin:50px 0 0;
+  border-top:1px solid var(--line);padding-top:18px;font-size:14.5px}
+.pagenav a{text-decoration:none;max-width:46%}
+.pagenav .dir{display:block;color:var(--faint);font-size:12px}
+footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
+  font-size:13.5px;border-top:1px solid var(--line)}
+@media(max-width:1180px){
+  .layout{grid-template-columns:212px minmax(0,1fr);gap:32px}
+  nav.page{display:none}
+}
+@media(max-width:820px){
+  .layout{grid-template-columns:1fr;gap:0;padding:0 18px 60px}
+  nav.book{position:static;max-height:none;border-bottom:1px solid var(--line);
+    margin-bottom:14px;padding:14px 0}
+  .masthead{padding:22px 18px 18px}
+}
+@media print{
+  nav,.pagenav,.copy{display:none}
+  .layout{display:block;max-width:none}
+  body{background:#fff}
+  a{color:inherit;text-decoration:none}
+  .codeblock,figure,table{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header class="masthead"><div class="inner">
+<p class="eyebrow"><a href="index.html">数据结构与算法：Python 讲算法，C++ 讲实现</a></p>  <h1>考场代码包</h1>
+
+  <p class="meta"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/book/考场代码包.md">Markdown 源文件</a>
+    · <a href="https://github.com/GMyhf/dsa-modernization">GitHub 仓库</a>
+    · <a href="errata.html">原书勘误</a></p>
+</div></header>
+<div class="layout">
+<nav class="book"><b>导读</b><a href="index.html">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="midterm-review.html">期中复习题库（第 1—6 章）</a><a href="final-review.html">期末复习题库（第 7—12 章）</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a><a href="exam-codepack.html" class="here">考场代码包</a></nav>
+<main>
+
+<p>2025 秋「数据结构与算法」期末机考（<code>dsa.openjudge.cn/2025final</code>）的考场说明列出四份<strong>考场可以使用</strong>的资料： 本书作者的 C++ 代码包、一份 C 语言代码包、C++ 离线手册（cppreference）和 Weiss 的英文教材。 本附录只讲与本书直接相关的第一份：<code>DSCode_ZhangWangZhao2008_06.zip</code>。</p>
+<p>原书前言说：「教材中只给出了最主要的算法和代码，完整的实现方法可参考教学网站上提供的与本书配套的代码包。」 这就是那个包。它是作者<strong>实际编译运行过</strong>的工程，每章一个目录，每个算法一两个文件。</p>
+<h2 id="它和书上印的不是同一份"><a class="anchor" href="#它和书上印的不是同一份">#</a>它和书上印的不是同一份</h2>
+<p>包名里的 <code>200806</code> 与原书「2008 年 6 月第 1 版第 1 次印刷」是同一个月，但包里的代码和书上印的<strong>不总是一致</strong>， 而且两边各有对错：</p>
+<ul>
+<li><strong>多数时候包里是对的。</strong> 原书第 3 章的顺序栈按印刷原样编译不过——数据成员 <code>int top</code> 与成员函数 <code>bool top(T&amp;)</code> 重名； 包里那个函数叫 <code>getTop(T*)</code>，编译得过。第 2 章的 <code>delete</code> 作函数名、第 3 章背包问题的 <code>enum rdType {0,1,2}</code> 也是这样。</li>
+<li><strong>也有书上对、包里错的时候。</strong> 原书算法8.5 冒泡排序的内层循环写 <code>j &gt; i</code>，包里写成 <code>j &gt;= i</code>，第一趟就读到 <code>Array[-1]</code>； 原书算法2.11 的单链表删除写对了，包里删尾结点时会把同一个结点释放两次。</li>
+<li><strong>还有两边都错的。</strong> 算法2.9 的 <code>setPos</code> 用 <code>new</code> 出一个多余的结点起步，书上和包里逐字相同； 算法4.6、4.8 的模式匹配都按 1 起始报位置，而正文说下标从 0 起。</li>
+</ul>
+<p>所以考场上拿包里的代码来用，<strong>先在本书里查一下那一条</strong>：原书 105 条清单，本书逐条登记了它在包里的位置； 每条「编译不过」或「跑起来是错的」勘误，都查过包里有没有；第 2、3、4、8 章还把包里的实现与本书的实现 在同一批输入上真跑了对拍。逐条结论见本附录后三节与书末「原书勘误」。</p>
+<h2 id="用之前要知道的三件事"><a class="anchor" href="#用之前要知道的三件事">#</a>用之前要知道的三件事</h2>
+<ol>
+<li><strong>编码。</strong> 包里大多数文件是 GBK 编码、Windows 换行（2008 年 VC6 的默认），第 1、10、12 章另有几个带 BOM 的 UTF-8 文件。 用 UTF-8 打开 GBK 文件，中文注释会是乱码——换成 GBK 重新打开即可，代码本身不受影响。</li>
+<li><strong>编译器。</strong> 包是 VC6 年代写的，有些写法今天的 g++ 不再接受，最常见的是 <code>void main()</code>。 OpenJudge 的 C++ 用 g++ 编译，交题前按「今天的 g++ 编译得过吗」一节改掉。</li>
+<li><strong>容器会自己打印。</strong> 包里的栈、队列、线性表在出错时直接 <code>cout</code> 一句中文提示（「栈满溢出」「栈为空，不能出栈操作」）， 题目要求严格输出格式时，这些提示会让答案错。</li>
+</ol>
+<h2 id="清单在包里的位置"><a class="anchor" href="#清单在包里的位置">#</a>清单在包里的位置</h2>
+<p>原书 105 条清单在包里的去处。符号是函数或类名；同一文件里有几个同名版本时注明第几个。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">清单</th>
+<th style="text-align:left">包里的文件</th>
+<th style="text-align:left">符号</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">算法1.1</td>
+<td style="text-align:left"><code>ch01_Intro/alg1.1/stockbroker.cpp</code></td>
+<td style="text-align:left"><code>BrokerToPassRomour</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码1.2</td>
+<td style="text-align:left">包里没有</td>
+<td style="text-align:left">抽象数据类型的通用模板（className/Type 占位符），不是可编译程序，包里无对应文件</td>
+</tr>
+<tr>
+<td style="text-align:left">代码2.1</td>
+<td style="text-align:left"><code>ch02_LinearList/alg2.1-5/myList.h</code></td>
+<td style="text-align:left"><code>class List</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码2.2</td>
+<td style="text-align:left"><code>ch02_LinearList/alg2.1-5/arrList.h</code></td>
+<td style="text-align:left"><code>class arrList</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法2.3</td>
+<td style="text-align:left"><code>ch02_LinearList/alg2.1-5/arrList.h</code></td>
+<td style="text-align:left"><code>getPos</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法2.4</td>
+<td style="text-align:left"><code>ch02_LinearList/alg2.1-5/arrList.h</code></td>
+<td style="text-align:left"><code>insert</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法2.5</td>
+<td style="text-align:left"><code>ch02_LinearList/alg2.1-5/arrList.h</code></td>
+<td style="text-align:left"><code>del</code>；包里函数名是 <code>del</code>；原书印作 <code>delete</code>（C++ 关键字，不能作函数名）</td>
+</tr>
+<tr>
+<td style="text-align:left">代码2.6</td>
+<td style="text-align:left"><code>ch02_LinearList/alg2.6-11/lnkList.h</code></td>
+<td style="text-align:left"><code>class Link</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码2.7</td>
+<td style="text-align:left"><code>ch02_LinearList/alg2.6-11/lnkList.h</code></td>
+<td style="text-align:left"><code>class lnkList</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法2.8</td>
+<td style="text-align:left"><code>ch02_LinearList/alg2.6-11/lnkList.h</code></td>
+<td style="text-align:left"><code>lnkList</code>、<code>~lnkList</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法2.9</td>
+<td style="text-align:left"><code>ch02_LinearList/alg2.6-11/lnkList.h</code></td>
+<td style="text-align:left"><code>setPos</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法2.10</td>
+<td style="text-align:left"><code>ch02_LinearList/alg2.6-11/lnkList.h</code></td>
+<td style="text-align:left"><code>insert</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法2.11</td>
+<td style="text-align:left"><code>ch02_LinearList/alg2.6-11/lnkList.h</code></td>
+<td style="text-align:left"><code>del</code>；包里函数名是 <code>del</code>；原书印作 <code>delete</code>（C++ 关键字，不能作函数名）</td>
+</tr>
+<tr>
+<td style="text-align:left">代码2.12</td>
+<td style="text-align:left">包里没有</td>
+<td style="text-align:left">双链表：包里 ch02 只有顺序表与单链表，没有双链表结点</td>
+</tr>
+<tr>
+<td style="text-align:left">代码3.1</td>
+<td style="text-align:left"><code>ch03_StackQueue/alg3.5/myStack.h</code></td>
+<td style="text-align:left"><code>class Stack</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码3.2</td>
+<td style="text-align:left"><code>ch03_StackQueue/alg3.5/arrStack.h</code></td>
+<td style="text-align:left"><code>class arrStack</code>；包里取栈顶叫 <code>getTop(T*)</code>，与成员变量 <code>int top</code> 不重名；原书印作 <code>top(T&amp;)</code>，与之重名，编译不过</td>
+</tr>
+<tr>
+<td style="text-align:left">算法3.3</td>
+<td style="text-align:left">包里没有</td>
+<td style="text-align:left">改进的进栈（满则容量翻倍）：包里三份 <code>arrStack.h</code> 的 <code>push</code> 都是栈满即报错返回 <code>false</code>，没有翻倍版本</td>
+</tr>
+<tr>
+<td style="text-align:left">代码3.4</td>
+<td style="text-align:left"><code>ch03_StackQueue/alg3.4/lnkstack.h</code></td>
+<td style="text-align:left"><code>class lnkStack</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法3.5</td>
+<td style="text-align:left"><code>ch03_StackQueue/alg3.5/calc.h</code></td>
+<td style="text-align:left"><code>class Calculator</code>、<code>GetTwoOperands</code>、<code>Compute</code>、<code>Run</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法3.6</td>
+<td style="text-align:left"><code>ch03_StackQueue/alg3.6-8/fact.cpp</code></td>
+<td style="text-align:left"><code>factorial</code>（第 1 个）；递归版在 <code>fact.cpp</code> 里整段注释掉了，与迭代版一起留作对照</td>
+</tr>
+<tr>
+<td style="text-align:left">算法3.7</td>
+<td style="text-align:left"><code>ch03_StackQueue/alg3.6-8/fact.cpp</code></td>
+<td style="text-align:left"><code>main</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法3.8</td>
+<td style="text-align:left"><code>ch03_StackQueue/alg3.6-8/fact.cpp</code></td>
+<td style="text-align:left"><code>factorial</code>（第 2 个）；迭代版在 <code>fact.cpp</code> 里整段注释掉了</td>
+</tr>
+<tr>
+<td style="text-align:left">算法3.9</td>
+<td style="text-align:left"><code>ch03_StackQueue/alg3.6-8/fact.cpp</code></td>
+<td style="text-align:left"><code>factorial</code>；<code>fact.cpp</code> 里唯一未注释的版本：用栈模拟递归</td>
+</tr>
+<tr>
+<td style="text-align:left">算法3.10</td>
+<td style="text-align:left"><code>ch03_StackQueue/alg3.9-11/knap1.cpp</code></td>
+<td style="text-align:left"><code>knap</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法3.11</td>
+<td style="text-align:left"><code>ch03_StackQueue/alg3.9-11/knap1.cpp</code></td>
+<td style="text-align:left"><code>nonRecKnap</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法3.12</td>
+<td style="text-align:left"><code>ch03_StackQueue/alg3.9-11/knap1.cpp</code></td>
+<td style="text-align:left"><code>nonRecKnapOpt</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码3.13</td>
+<td style="text-align:left"><code>ch03_StackQueue/alg3.13-14/myQueue.h</code></td>
+<td style="text-align:left"><code>class Queue</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码3.14</td>
+<td style="text-align:left"><code>ch03_StackQueue/alg3.13-14/arrQueue.h</code></td>
+<td style="text-align:left"><code>class arrQueue</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码3.15</td>
+<td style="text-align:left"><code>ch03_StackQueue/alg3.13-14/lnkQueue.h</code></td>
+<td style="text-align:left"><code>class lnkQueue</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码4.1</td>
+<td style="text-align:left">包里没有</td>
+<td style="text-align:left">字符串的抽象数据类型定义（成员用 … 占位），不是可编译程序</td>
+</tr>
+<tr>
+<td style="text-align:left">代码4.2</td>
+<td style="text-align:left">包里没有</td>
+<td style="text-align:left">印的是标准库 <code>std::basic_string</code> 的模板声明，不是作者的代码</td>
+</tr>
+<tr>
+<td style="text-align:left">算法4.3</td>
+<td style="text-align:left"><code>ch04_String/alg3/strcmp.cpp</code></td>
+<td style="text-align:left"><code>strcmp</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法4.4</td>
+<td style="text-align:left"><code>ch04_String/alg4-5/myString.h</code></td>
+<td style="text-align:left"><code>String</code>（第 2 个）；<code>myString.h</code> 里第 1 个 <code>String(...)</code> 是无参构造，原书这一条是第 2 个 <code>String(char *s)</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法4.5</td>
+<td style="text-align:left"><code>ch04_String/alg4-5/myString.h</code></td>
+<td style="text-align:left"><code>Substr</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法4.6</td>
+<td style="text-align:left"><code>ch04_String/alg6/naive.h</code></td>
+<td style="text-align:left"><code>NaiveStrMatching</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法4.7</td>
+<td style="text-align:left"><code>ch04_String/alg7-8/kmp.h</code></td>
+<td style="text-align:left"><code>findNext</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法4.8</td>
+<td style="text-align:left"><code>ch04_String/alg7-8/kmp.h</code></td>
+<td style="text-align:left"><code>KMPStrMatching</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码5.1</td>
+<td style="text-align:left"><code>ch05_BinaryTree/alg1-8BinaryTree/BinaryTreeNode.h</code></td>
+<td style="text-align:left"><code>class BinaryTreeNode</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码5.2</td>
+<td style="text-align:left"><code>ch05_BinaryTree/alg1-8BinaryTree/BinaryTree.h</code></td>
+<td style="text-align:left"><code>class BinaryTree</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法5.3</td>
+<td style="text-align:left"><code>ch05_BinaryTree/alg1-8BinaryTree/BinaryTree.h</code></td>
+<td style="text-align:left"><code>PreOrder</code>、<code>InOrder</code>、<code>PostOrder</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法5.4</td>
+<td style="text-align:left"><code>ch05_BinaryTree/alg1-8BinaryTree/BinaryTree.h</code></td>
+<td style="text-align:left"><code>PreOrderWithoutRecursion</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法5.5</td>
+<td style="text-align:left"><code>ch05_BinaryTree/alg1-8BinaryTree/BinaryTree.h</code></td>
+<td style="text-align:left"><code>InOrderWithoutRecursion</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法5.6</td>
+<td style="text-align:left"><code>ch05_BinaryTree/alg1-8BinaryTree/BinaryTree.h</code></td>
+<td style="text-align:left"><code>class StackElement</code>、<code>PostOrderWithoutRecursion</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法5.7</td>
+<td style="text-align:left"><code>ch05_BinaryTree/alg1-8BinaryTree/BinaryTree.h</code></td>
+<td style="text-align:left"><code>LevelOrder</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码5.8</td>
+<td style="text-align:left"><code>ch05_BinaryTree/alg1-8BinaryTree/BinaryTree.h</code></td>
+<td style="text-align:left"><code>isEmpty</code>、<code>Parent</code>、<code>LeftSibling</code>、<code>RightSibling</code>、<code>CreateTree</code>、<code>DeleteBinaryTree</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法5.9</td>
+<td style="text-align:left"><code>ch05_BinaryTree/alg9-10binarysearchtree/BinarySearchTree.h</code></td>
+<td style="text-align:left"><code>InsertNode</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法5.10</td>
+<td style="text-align:left"><code>ch05_BinaryTree/alg9-10binarysearchtree/BinarySearchTree.h</code></td>
+<td style="text-align:left"><code>DeleteNodeEx</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码5.11</td>
+<td style="text-align:left"><code>ch05_BinaryTree/alg11MinHeap/MinHeap.h</code></td>
+<td style="text-align:left"><code>class MinHeap</code>、<code>SiftDown</code>、<code>SiftUp</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码5.12</td>
+<td style="text-align:left"><code>ch05_BinaryTree/alg12HuffmanTree/HuffmanTree.h</code></td>
+<td style="text-align:left"><code>class HuffmanTree</code>、<code>HuffmanTree</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码6.1</td>
+<td style="text-align:left"><code>ch06_Tree/tree(alg_1-7)/TreeNode.h</code></td>
+<td style="text-align:left"><code>class TreeNode</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码6.2</td>
+<td style="text-align:left"><code>ch06_Tree/tree(alg_1-7)/Tree.h</code></td>
+<td style="text-align:left"><code>class Tree</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法6.3</td>
+<td style="text-align:left"><code>ch06_Tree/tree(alg_1-7)/Tree.h</code></td>
+<td style="text-align:left"><code>RootFirstTraverse</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法6.4</td>
+<td style="text-align:left"><code>ch06_Tree/tree(alg_1-7)/Tree.h</code></td>
+<td style="text-align:left"><code>RootLastTraverse</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法6.5</td>
+<td style="text-align:left"><code>ch06_Tree/tree(alg_1-7)/Tree.h</code></td>
+<td style="text-align:left"><code>WidthTraverse</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码6.6</td>
+<td style="text-align:left"><code>ch06_Tree/tree(alg_1-7)/TreeNode.h</code></td>
+<td style="text-align:left"><code>InsertFirst</code>、<code>InsertNext</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码6.7</td>
+<td style="text-align:left"><code>ch06_Tree/tree(alg_1-7)/Tree.h</code></td>
+<td style="text-align:left"><code>Parent</code>、<code>PrevSibling</code>、<code>DeleteSubTree</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码6.8</td>
+<td style="text-align:left"><code>ch06_Tree/unionfind(alg_8-9)/ParTree.h</code></td>
+<td style="text-align:left"><code>class ParTree</code>、<code>Find</code>、<code>Union</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法6.9</td>
+<td style="text-align:left"><code>ch06_Tree/unionfind(alg_8-9)/ParTree.h</code></td>
+<td style="text-align:left"><code>FindPC</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法6.10</td>
+<td style="text-align:left"><code>ch06_Tree/DualTagFirstroot(alg6_10)/dualtagtree_firstroot.cpp</code></td>
+<td style="text-align:left"><code>class DualTagTreeNode</code>、<code>Tree</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码7.1</td>
+<td style="text-align:left"><code>ch07_Graph/graph_matrix/Graph.h</code></td>
+<td style="text-align:left"><code>class Graph</code>；包里只有一个 <code>Graph</code> 类：原书把 ADT（代码7.1）与基类（代码7.2）分成两段印</td>
+</tr>
+<tr>
+<td style="text-align:left">代码7.2</td>
+<td style="text-align:left"><code>ch07_Graph/graph_matrix/Graph.h</code></td>
+<td style="text-align:left"><code>class Edge</code>、<code>class Graph</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码7.3</td>
+<td style="text-align:left"><code>ch07_Graph/graph_matrix/Graphm.h</code></td>
+<td style="text-align:left"><code>class Graphm</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码7.4</td>
+<td style="text-align:left"><code>ch07_Graph/Graph_Link/Graphl.h</code></td>
+<td style="text-align:left"><code>class Graphl</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法7.5</td>
+<td style="text-align:left"><code>ch07_Graph/graph_matrix/Graphm.h</code></td>
+<td style="text-align:left"><code>DFS</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法7.6</td>
+<td style="text-align:left"><code>ch07_Graph/graph_matrix/Graphm.h</code></td>
+<td style="text-align:left"><code>BFS</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法7.7</td>
+<td style="text-align:left"><code>ch07_Graph/TopologicalSorting/topological_sorting.cpp</code></td>
+<td style="text-align:left"><code>TopsortbyQueue</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法7.8</td>
+<td style="text-align:left"><code>ch07_Graph/Graph_Dijkstra/Dijkstra.cpp</code></td>
+<td style="text-align:left"><code>class Dist</code>、<code>Dijkstra</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法7.9</td>
+<td style="text-align:left"><code>ch07_Graph/Graph_Floyd/Floyd.cpp</code></td>
+<td style="text-align:left"><code>Floyd</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法7.10</td>
+<td style="text-align:left"><code>ch07_Graph/Graph_Prim/Prim.cpp</code></td>
+<td style="text-align:left"><code>minVertex</code>、<code>Prim</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法7.11</td>
+<td style="text-align:left"><code>ch07_Graph/Graph_Kruskal/Kruskal.cpp</code></td>
+<td style="text-align:left"><code>Kruskal</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法8.1</td>
+<td style="text-align:left"><code>ch08_Sort/InsSort.cpp</code></td>
+<td style="text-align:left"><code>InsertSort</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法8.2</td>
+<td style="text-align:left"><code>ch08_Sort/ShellSort/ShSort2.cpp</code></td>
+<td style="text-align:left"><code>ShellSort</code>、<code>ModInsSort</code>；<code>ShSort3.cpp</code> 是增量每次除以 3 的变体，原书没有印</td>
+</tr>
+<tr>
+<td style="text-align:left">算法8.3</td>
+<td style="text-align:left"><code>ch08_Sort/SelSort.cpp</code></td>
+<td style="text-align:left"><code>SelectSort</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法8.4</td>
+<td style="text-align:left"><code>ch08_Sort/HeapSort/HeapSort.cpp</code></td>
+<td style="text-align:left"><code>sort</code>；堆排序主体在 <code>sort()</code> 里，堆本身见 <code>HeapSort/MaxHeap.h</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法8.5</td>
+<td style="text-align:left"><code>ch08_Sort/BubSort.cpp</code></td>
+<td style="text-align:left"><code>BubbleSort</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法8.6</td>
+<td style="text-align:left"><code>ch08_Sort/QuickSort/QuickSort.cpp</code></td>
+<td style="text-align:left"><code>QuickSort</code>、<code>SelectPivot</code>、<code>Partition</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法8.7</td>
+<td style="text-align:left"><code>ch08_Sort/QuickSort/ModQuickSort.cpp</code></td>
+<td style="text-align:left"><code>ModQuickSort</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法8.8</td>
+<td style="text-align:left"><code>ch08_Sort/MergeSort/MergeSort.cpp</code></td>
+<td style="text-align:left"><code>MergeSort</code>、<code>Merge</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法8.9</td>
+<td style="text-align:left"><code>ch08_Sort/MergeSort/ModMergeSort.cpp</code></td>
+<td style="text-align:left"><code>ModMergeSort</code>、<code>ModMerge</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法8.10</td>
+<td style="text-align:left"><code>ch08_Sort/BucketSort.cpp</code></td>
+<td style="text-align:left"><code>BucketSort</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法8.11</td>
+<td style="text-align:left"><code>ch08_Sort/RadixSort/RadixSort_Bin.cpp</code></td>
+<td style="text-align:left"><code>RadixSort</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码8.12</td>
+<td style="text-align:left"><code>ch08_Sort/RadixSort/LinkRadixSort.h</code></td>
+<td style="text-align:left"><code>class StaticQueue</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法8.13</td>
+<td style="text-align:left"><code>ch08_Sort/RadixSort/LinkRadixSort.h</code></td>
+<td style="text-align:left"><code>RadixSort</code>、<code>Distribute</code>、<code>Collect</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法8.14</td>
+<td style="text-align:left"><code>ch08_Sort/AddSort_Insert.cpp</code></td>
+<td style="text-align:left"><code>IndexSort</code>；文件开头还有一个整段注释掉的 <code>IndexSort(Array, n)</code>（内部 <code>new</code> 索引数组、结尾不 <code>delete</code>）；原书印的是带 <code>IndexArray</code> 参数的这一版</td>
+</tr>
+<tr>
+<td style="text-align:left">算法8.15</td>
+<td style="text-align:left"><code>ch08_Sort/AddSort_Insert.cpp</code></td>
+<td style="text-align:left"><code>AdjustRecord</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码8.16</td>
+<td style="text-align:left"><code>ch08_Sort/sort.h</code></td>
+<td style="text-align:left"><code>Randomize</code>、<code>Random</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码8.17</td>
+<td style="text-align:left"><code>ch08_Sort/sort.h</code></td>
+<td style="text-align:left"><code>Settime</code>、<code>Gettime</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法9.1</td>
+<td style="text-align:left"><code>ch09_ExternalSort/alg9_1 replacementSelection/ReplacementSelection.cpp</code></td>
+<td style="text-align:left"><code>replacementSelection</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码9.2</td>
+<td style="text-align:left"><code>ch09_ExternalSort/alg9_2WinnerTree/WinnerTree.h</code></td>
+<td style="text-align:left"><code>class WinnerTree</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码9.3</td>
+<td style="text-align:left"><code>ch09_ExternalSort/alg9_3LoserTree/LoserTree.h</code></td>
+<td style="text-align:left"><code>class LoserTree</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码10.1</td>
+<td style="text-align:left"><code>ch10_Search/algor1-3/algor1&amp;2.cpp</code></td>
+<td style="text-align:left"><code>class Item</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法10.2</td>
+<td style="text-align:left"><code>ch10_Search/algor1-3/algor1&amp;2.cpp</code></td>
+<td style="text-align:left"><code>SeqSearch</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法10.3</td>
+<td style="text-align:left"><code>ch10_Search/algor1-3/algor1&amp;2.cpp</code></td>
+<td style="text-align:left"><code>BinSearch</code></td>
+</tr>
+<tr>
+<td style="text-align:left">代码10.4</td>
+<td style="text-align:left"><code>ch10_Search/BitSet/setm.h</code></td>
+<td style="text-align:left"><code>class mySet</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法10.5</td>
+<td style="text-align:left"><code>ch10_Search/BitSet/setm.h</code></td>
+<td style="text-align:left"><code>set</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法10.6</td>
+<td style="text-align:left"><code>ch10_Search/BitSet/setm.h</code></td>
+<td style="text-align:left"><code>operator&amp;</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法10.7</td>
+<td style="text-align:left"><code>ch10_Search/BitSet/setm.h</code></td>
+<td style="text-align:left"><code>operator&gt;</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法10.8</td>
+<td style="text-align:left"><code>ch10_Search/hash_dict/HASHDICT.H</code></td>
+<td style="text-align:left"><code>ELFhash</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法10.9</td>
+<td style="text-align:left"><code>ch10_Search/hash_dict/HASHDICT.H</code></td>
+<td style="text-align:left"><code>class hashdict</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法10.10</td>
+<td style="text-align:left"><code>ch10_Search/hash_dict/HASHDICT.CPP</code></td>
+<td style="text-align:left"><code>hashInsert</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法10.11</td>
+<td style="text-align:left"><code>ch10_Search/hash_dict/HASHDICT.CPP</code></td>
+<td style="text-align:left"><code>hashSearch</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法10.12</td>
+<td style="text-align:left"><code>ch10_Search/hash_tomb2/HASHDICT.CPP</code></td>
+<td style="text-align:left"><code>hashDelete</code></td>
+</tr>
+<tr>
+<td style="text-align:left">算法10.13</td>
+<td style="text-align:left"><code>ch10_Search/hash_tomb2/HASHDICT.CPP</code></td>
+<td style="text-align:left"><code>hashInsert</code>；<code>hash_tomb</code> 与 <code>hash_tomb2</code> 两版：<code>tomb2</code> 记下第一个墓碑位置（<code>insplace</code>）再插入，与原书一致</td>
+</tr>
+<tr>
+<td style="text-align:left">算法12.1</td>
+<td style="text-align:left">包里没有</td>
+<td style="text-align:left">可利用空间表（重载 LinkNode 的 new/delete）：包里 ch12 只有广义表、稀疏矩阵、AVL、伸展树与最佳 BST</td>
+</tr>
+<tr>
+<td style="text-align:left">算法12.2</td>
+<td style="text-align:left"><code>ch12_AdvDS/AdvTree/BestBST/OptimalBST.cpp</code></td>
+<td style="text-align:left"><code>OptimalBST</code></td>
+</tr>
+</tbody></table></div>
+<h2 id="今天的-g-编译得过吗"><a class="anchor" href="#今天的-g-编译得过吗">#</a>今天的 g++ 编译得过吗</h2>
+<p>包里带 <code>main</code> 的程序共 40 个。按 <code>g++ -std=c++17</code> 只做语法检查（先把源码转成 UTF-8）：<strong>25 个编译得过，15 个编译不过</strong>。编译不过的几乎全是 2008 年 VC6 能容忍、今天的 g++ 不再接受的写法，不是算法错；下表给出第一条报错和改法。OpenJudge 用的正是 g++。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">程序</th>
+<th style="text-align:left">第一条报错</th>
+<th style="text-align:left">改法</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><code>ch04_String/alg4-5/main.cpp</code></td>
+<td style="text-align:left"><code>ISO C++ forbids comparison between pointer and integer [-fpermissive]</code></td>
+<td style="text-align:left"><code>assert(str != &#x27;\0&#x27;)</code> 改为 <code>assert(str != NULL)</code>（勘误 E11）</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ch05_BinaryTree/alg1-8BinaryTree/BinaryTree.cpp</code></td>
+<td style="text-align:left"><code>‘::main’ must return ‘int’</code></td>
+<td style="text-align:left"><code>void main()</code> 改成 <code>int main()</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ch05_BinaryTree/alg9-10binarysearchtree/binarysearchtree.cpp</code></td>
+<td style="text-align:left"><code>‘::main’ must return ‘int’</code></td>
+<td style="text-align:left"><code>void main()</code> 改成 <code>int main()</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ch06_Tree/DualTagFirstroot(alg6_10)/dualtagtree_firstroot.cpp</code></td>
+<td style="text-align:left"><code>‘::main’ must return ‘int’</code></td>
+<td style="text-align:left"><code>void main()</code> 改成 <code>int main()</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ch06_Tree/DualTagWidth(alg6_11)/dualtagtree_Width.cpp</code></td>
+<td style="text-align:left"><code>‘::main’ must return ‘int’</code></td>
+<td style="text-align:left"><code>void main()</code> 改成 <code>int main()</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ch06_Tree/unionfind(alg_8-9)/unionfind.cpp</code></td>
+<td style="text-align:left"><code>‘::main’ must return ‘int’</code></td>
+<td style="text-align:left"><code>void main()</code> 改成 <code>int main()</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ch07_Graph/Graph_Floyd/Floyd.cpp</code></td>
+<td style="text-align:left"><code>extra qualification ‘Graphm::’ on member ‘IniGraphm’ [-fpermissive]</code></td>
+<td style="text-align:left">类内声明去掉 <code>Graphm::</code> 前缀</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ch07_Graph/Graph_Link/link.cpp</code></td>
+<td style="text-align:left"><code>‘::main’ must return ‘int’</code></td>
+<td style="text-align:left"><code>void main()</code> 改成 <code>int main()</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ch07_Graph/Graph_Prim/Prim.cpp</code></td>
+<td style="text-align:left"><code>‘::main’ must return ‘int’</code></td>
+<td style="text-align:left"><code>void main()</code> 改成 <code>int main()</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ch07_Graph/graph_matrix/matrix.cpp</code></td>
+<td style="text-align:left"><code>‘::main’ must return ‘int’</code></td>
+<td style="text-align:left"><code>void main()</code> 改成 <code>int main()</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ch09_ExternalSort/alg9_1 replacementSelection/ReplacementSelection.cpp</code></td>
+<td style="text-align:left"><code>reference to ‘less’ is ambiguous</code></td>
+<td style="text-align:left">自定义的 <code>less</code> 与 <code>std::less</code> 撞名：改名，或去掉 <code>using namespace std;</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ch09_ExternalSort/alg9_2WinnerTree/WinnerTree.cpp</code></td>
+<td style="text-align:left"><code>‘cout’ was not declared in this scope; did you mean ‘std::cout’?</code></td>
+<td style="text-align:left">补 <code>using namespace std;</code>，或写 <code>std::cout</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ch09_ExternalSort/alg9_3LoserTree/LoserTree.cpp</code></td>
+<td style="text-align:left"><code>‘cout’ was not declared in this scope; did you mean ‘std::cout’?</code></td>
+<td style="text-align:left">补 <code>using namespace std;</code>，或写 <code>std::cout</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ch12_AdvDS/AdvList/SparseMatrix/Example.cpp</code></td>
+<td style="text-align:left"><code>afxtempl.h: No such file or directory</code></td>
+<td style="text-align:left">VC6 的 MFC 头文件，g++ 没有：换成标准库容器</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ch12_AdvDS/AdvTree/AVLTree/Example.cpp</code></td>
+<td style="text-align:left"><code>redeclaration of ‘avlNode&lt;T&gt;::avlNode(T, avlNode&lt;T&gt;*, avlNode&lt;T&gt;*, int)’ may not have default arguments [-fpermissive]</code></td>
+<td style="text-align:left">默认参数只留在类内声明，类外定义处删掉</td>
+</tr>
+</tbody></table></div>
+<p>编译得过的：<code>ch02_LinearList/alg2.1-5/main.cpp</code>、<code>ch02_LinearList/alg2.6-11/main.cpp</code>、<code>ch03_StackQueue/alg3.12/main.cpp</code>、<code>ch03_StackQueue/alg3.13-14/main.cpp</code>、<code>ch03_StackQueue/alg3.4/main.cpp</code>、<code>ch03_StackQueue/alg3.5/main.cpp</code>、<code>ch03_StackQueue/alg3.6-8/fact.cpp</code>、<code>ch03_StackQueue/alg3.9-11/knap1.cpp</code>、<code>ch04_String/alg3/strcmp.cpp</code>、<code>ch04_String/alg6/main.cpp</code>、<code>ch04_String/alg7-8/main-kmp.cpp</code>、<code>ch05_BinaryTree/alg11MinHeap/MinHeap.cpp</code>、<code>ch05_BinaryTree/alg12HuffmanTree/HuffmanTree.cpp</code>、<code>ch06_Tree/tree(alg_1-7)/tree.cpp</code>、<code>ch07_Graph/Graph_Dijkstra/Dijkstra.cpp</code>、<code>ch07_Graph/Graph_Kruskal/Kruskal.cpp</code>、<code>ch07_Graph/TopologicalSorting/topological_sorting.cpp</code>、<code>ch08_Sort/RadixSort/LinkSortMain.cpp</code>、<code>ch10_Search/BitSet/bag.cpp</code>、<code>ch10_Search/BitSet/test.cpp</code>、<code>ch10_Search/algor1-3/algor1&amp;2.cpp</code>、<code>ch12_AdvDS/AdvList/GenList/Example.cpp</code>、<code>ch12_AdvDS/AdvList/GenList_ReEntrant/Example.cpp</code>、<code>ch12_AdvDS/AdvTree/BestBST/OptimalBST.cpp</code>、<code>ch12_AdvDS/AdvTree/SplayTree/splay.cpp</code>。</p>
+<h2 id="包里的坑"><a class="anchor" href="#包里的坑">#</a>包里的坑</h2>
+<p>下面几处缺陷<strong>原书没有</strong>——要么原书没印那段代码，要么印对了——只在包里。考场上直接拿包里的代码交题，会在这些地方读写到数组外面或得到错的结果。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">编号</th>
+<th style="text-align:left">位置</th>
+<th style="text-align:left">缺陷</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">P01</td>
+<td style="text-align:left">算法8.4（包里的 MaxHeap），<code>ch08_Sort/HeapSort/MaxHeap.h</code></td>
+<td style="text-align:left"><code>MaxHeap</code> 的 <code>SiftDown</code> 判右孩子写 <code>j&lt;CurrentSize</code>，应为 <code>j&lt;CurrentSize-1</code>：n 为偶数时建堆读 <code>heapArray[n]</code>，越界一格，那格若更大还会被换进堆、再把 <code>temp</code> 写出界。原书没印 <code>MaxHeap</code>；第 5 章 <code>MinHeap</code> 与代码5.11 写对了。ASan 在对拍里当场报 heap-buffer-overflow</td>
+</tr>
+<tr>
+<td style="text-align:left">P02</td>
+<td style="text-align:left">算法8.5，<code>ch08_Sort/BubSort.cpp</code></td>
+<td style="text-align:left"><code>BubbleSort</code> 内层循环写 <code>j&gt;=i</code>：i=0 时比较 <code>Array[0]</code> 与 <code>Array[-1]</code>，越界一格；原书印的 <code>j &gt; i</code> 是对的</td>
+</tr>
+<tr>
+<td style="text-align:left">P03</td>
+<td style="text-align:left">算法2.11，<code>ch02_LinearList/alg2.6-11/lnkList.h</code></td>
+<td style="text-align:left"><code>lnkList</code> 的 <code>del</code> 删尾结点时 <code>tail = p; delete q;</code> 之后又落进 <code>if (q != NULL) { p-&gt;next = q-&gt;next; delete q; }</code>——释放后使用加二次释放；原书用 <code>else if</code> 写对了，还多了 <code>p == tail</code> 的判断</td>
+</tr>
+<tr>
+<td style="text-align:left">P04</td>
+<td style="text-align:left">算法3.10，<code>ch03_StackQueue/alg3.9-11/knap1.cpp</code></td>
+<td style="text-align:left"><code>knap</code> 最后一行是 <code>else knap(s, n-1);</code>——少了 <code>return</code>，结果被丢弃、函数从末尾流出（未定义行为）；原书印的 <code>else return knap(s, n-1)</code> 是对的</td>
+</tr>
+<tr>
+<td style="text-align:left">P05</td>
+<td style="text-align:left">算法8.10（包里的驱动），<code>ch08_Sort/BucketSort.cpp</code></td>
+<td style="text-align:left"><code>BucketSort.cpp</code> 的 <code>sort</code> 包装写死 <code>max = 80</code>，而计时驱动 <code>SortMain.h</code> 生成 <code>Random(32003)</code>——值 ≥ 80 时 <code>count[TempArray[i]]</code> 越界写。只因驱动里的排序调用被注释掉（P06）才没炸</td>
+</tr>
+<tr>
+<td style="text-align:left">P06</td>
+<td style="text-align:left">第 8 章计时驱动，<code>ch08_Sort/SortMain.h</code></td>
+<td style="text-align:left"><code>SortMain.h</code> 的计时循环里 <code>//sort&lt;int&gt;(&amp;array[i], listsize);</code> 被注释掉：包里 12 个排序程序跑起来只生成 1000 万个随机数、给空循环计时，随后逐对检查有序、打出成串 <code>ERROR!!!</code>——作者的排序从没在这个驱动里真正跑过</td>
+</tr>
+</tbody></table></div>
+<p>另有与原书同病、但不在勘误表里的：</p>
+<ul>
+<li><strong>P07</strong>（代码3.2）：无参构造 <code>arrStack()</code> 只设 <code>top = -1</code>，<code>mSize</code> 与 <code>st</code> 都未初始化，析构时 <code>delete [] st</code> 释放野指针——原书代码3.2 的无参构造同病</li>
+</ul>
+<p>与原书同病的那些（印出来就错、包里也错）见书末「原书勘误」的「作者代码包里有没有」一节。</p>
+<div class="pagenav"><a href="errata.html"><span class="dir">← 上一篇</span>原书勘误</a><span></span></div>
+</main>
+<nav class="page"><b>本页</b><a href="#它和书上印的不是同一份">它和书上印的不是同一份</a><a href="#用之前要知道的三件事">用之前要知道的三件事</a><a href="#清单在包里的位置">清单在包里的位置</a><a href="#今天的-g-编译得过吗">今天的 g++ 编译得过吗</a><a href="#包里的坑">包里的坑</a></nav>
+</div>
+<footer>
+  本页由 <code>tools/build_site.py</code> 从 <code>book/考场代码包.md</code> 生成
+  —— Markdown 是唯一事实源，请勿手改此文件。正文中的 C++ 代码块与 <code>code/</code> 下
+  通过测试的源码逐字一致（由 <code>tools/check_doc.py</code> 的 R3 保证）。
+</footer>
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('nav.page a'));
+  if(links.length){
+    var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a});
+    var seen=[];
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        var id=e.target.id;
+        if(e.isIntersecting){if(seen.indexOf(id)<0)seen.push(id)}
+        else{var i=seen.indexOf(id);if(i>=0)seen.splice(i,1)}
+      });
+      links.forEach(function(a){a.classList.remove('active')});
+      if(seen.length&&map[seen[0]])map[seen[0]].classList.add('active');
+    },{rootMargin:'0px 0px -75% 0px'});
+    [].slice.call(document.querySelectorAll('h2[id],h3[id]')).forEach(function(h){io.observe(h)});
+  }
+  [].slice.call(document.querySelectorAll('.codeblock')).forEach(function(block){
+    var button=document.createElement('button');
+    button.className='copy';button.type='button';button.textContent='复制';
+    button.addEventListener('click',function(){
+      var text=block.querySelector('code').textContent;
+      var done=function(){button.textContent='已复制';
+        setTimeout(function(){button.textContent='复制'},1200)};
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done,function(){button.textContent='复制失败'});
+      }else{
+        var area=document.createElement('textarea');area.value=text;document.body.appendChild(area);
+        area.select();try{document.execCommand('copy');done()}catch(e){button.textContent='复制失败'}
+        document.body.removeChild(area);
+      }
+    });
+    block.appendChild(button);
+  });
+})();
+</script>
+</body>
+</html>

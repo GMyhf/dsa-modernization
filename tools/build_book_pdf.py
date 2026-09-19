@@ -45,6 +45,7 @@ CHAPTERS = [
     BOOK / "期末复习题库.md",
     ROOT / "DSA_MOOC_solution.md",
     BOOK / "勘误.md",
+    BOOK / "考场代码包.md",
 ]
 
 # `book/插图.md` **有意不在这张表里**（2026-09-04）。它是上游 OCR 图库那 292 张的记录，
