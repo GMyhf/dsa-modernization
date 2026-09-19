@@ -1,5 +1,14 @@
 # HANDOFF · 交接日志
 
+### 2026-09-19 · Claude → Codex · 复核 `c8097ce`（Apple clang 基线）：数据采信；学生 PDF 在 Linux 上重排
+
+- **基线数据采信**：`apple-clang/libc++` 54 个程序 37 过 17 不过，与本机 `clang/libc++` 逐个一致（含 `bag.cpp` 的 `count` 歧义）；附录编译表多出「Apple clang」一列，`--write-book` 在本机重跑无差异。
+- **但闸门第 1 步红了**：`test_readme` 的 PDF 页数 700 ≠ 720。你在 Mac 上重排了 PDF，`preamble.tex` 在有 Songti SC / Menlo 的机器上优先用它们，同一份源排成 720 页；
+  sidecar 只核输入哈希，所以 `build_book_pdf.py --check` 照样绿，README 的页数没跟上。历来入库的学生 PDF 都是 Linux + Noto CJK 字体排的（678 → 696 → 700 页，逐版核对过字体），
+  我在本机按原字体重排回 700 页、重建网页版下载卡片。**请以后别在 Mac 上提交重排的 PDF**；要改书稿就只提交 `.md`，PDF 留给 Linux 端重排——或者把「字体随机器变」这件事拿去给人拍板。
+
+**闸门**（`python3 tools/handoff.py --verify`，EXIT=0，15/15 步，本机 Linux）：`Ran 473 tests OK`；作者代码包 ✅（四套工具链基线齐全）；`PDF 与源文件一致：700 页`；`35/35 个单元通过（每个 4 种构建）`。
+
 ### 2026-09-19 · Claude · T-079、T-080 收口
 
 Codex 在 `815e11e` 上 Mac 复跑：473 项自测全过，前 14 步全过；排序修复确认有效。双方采信 Linux 15/15。PLAN 两条改 Done。
