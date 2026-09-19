@@ -24,6 +24,12 @@
 
 #include "modern.hpp"
 
+// 下面几处前置声明同一个原因：作者的排序都是「先调用、后定义」（ModInsSort、Partition、Merge、
+// ModMerge、AdjustRecord），实参是 int*，ADL 找不到，按两阶段查找的标准在模板定义处必须可见。
+// clang 照标准报错，g++ 放行——作者包自己的这些程序因此只在 g++/VC6 下编译得过（见 programs 的
+// clang 基线）。对拍这里只补声明，不改作者代码。（2026-09-18 Codex 在 macOS clang 上复核 T-079 撞出）
+template <class Record>
+int Partition(Record Array[], int left, int right);
 #define main author_main_quick
 #include "QuickSort/QuickSort.cpp"
 #undef main
@@ -36,6 +42,8 @@ namespace a_ins {
 #undef main
 #define main author_main_shell
 namespace a_shell {
+template <class Record>
+void ModInsSort(Record Array[], int n, int delta);
 #include "ShellSort/ShSort2.cpp"
 }
 #undef main
@@ -61,11 +69,15 @@ namespace a_modquick {
 #undef main
 #define main author_main_merge
 namespace a_merge {
+template <class Record>
+void Merge(Record Array[], Record TempArray[], int left, int right, int middle);
 #include "MergeSort/MergeSort.cpp"
 }
 #undef main
 #define main author_main_modmerge
 namespace a_modmerge {
+template <class Record>
+void ModMerge(Record Array[], Record TempArray[], int left, int right, int middle);
 #include "MergeSort/ModMergeSort.cpp"
 }
 #undef main
@@ -81,6 +93,8 @@ namespace a_radix {
 #undef main
 #define main author_main_index
 namespace a_index {
+template <class Record>
+void AdjustRecord(Record Array[], int IndexArray[], int n);
 #include "AddSort_Insert.cpp"
 }
 #undef main

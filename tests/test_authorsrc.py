@@ -91,7 +91,7 @@ class TestDecode(unittest.TestCase):
 
 
 class TestRealManifest(unittest.TestCase):
-    """仓库里那份登记表本身。编译核对慢（40 个程序），这里跳过，闸门的 --check 会跑。"""
+    """仓库里那份登记表本身。编译核对慢（54 个程序），这里跳过，闸门的 --check 会跑。"""
 
     def test_manifest_is_consistent(self):
         self.assertEqual(authorsrc.check(authorsrc.load_manifest(), compiler=None), [])
@@ -210,6 +210,53 @@ class TestBookSections(unittest.TestCase):
         with self.assertRaises(ValueError):
             authorsrc._cell("包里是 Link<T>* top")  # <T> 会被当成 HTML 标签吞掉
         self.assertEqual(authorsrc._cell("包里是 `Link<T>* top`"), "包里是 `Link<T>* top`")
+
+
+class TestToolchains(unittest.TestCase):
+    """包的编译结果随工具链而变（2026-09-18 Codex 在 macOS clang + libc++ 上撞出闸门红）。"""
+
+    def test_programs_follow_local_includes(self):
+        # 第 8 章的排序 .cpp 自己不写 main，main 在 #include "SortMain.h" 里
+        progs = authorsrc.programs()
+        self.assertIn("ch08_Sort/ShellSort/ShSort2.cpp", progs)
+        self.assertIn("ch08_Sort/QuickSort/QuickSort.cpp", progs)
+        self.assertNotIn("ch08_Sort/sort.h", progs)
+
+    def test_manifest_programs_match_detection(self):
+        self.assertEqual(sorted(authorsrc.load_manifest()["programs"]), sorted(authorsrc.programs()))
+
+    def test_baselines_are_per_toolchain(self):
+        data = authorsrc.load_manifest()
+        self.assertIn("gcc/libstdc++", authorsrc.recorded_toolchains(data))
+        self.assertEqual(authorsrc.recorded_toolchains(data)[0], "gcc/libstdc++", "g++ 列排第一：OpenJudge 用它")
+        bag = data["programs"]["ch10_Search/BitSet/bag.cpp"]
+        self.assertTrue(bag["gcc/libstdc++"]["compiles"])
+        if "clang/libc++" in bag:
+            self.assertFalse(bag["clang/libc++"]["compiles"], "libc++ 下全局 count 与 std::count 撞名")
+
+    def test_unknown_toolchain_warns_instead_of_failing(self):
+        data = json.loads(json.dumps(authorsrc.load_manifest()))
+        saved = authorsrc.toolchain_key
+        authorsrc.toolchain_key = lambda compiler: "exotic/libfoo"
+        warnings = []
+        try:
+            problems = authorsrc.check_programs(data, ["whatever"], out=warnings.append)
+        finally:
+            authorsrc.toolchain_key = saved
+        self.assertEqual(problems, [])
+        self.assertTrue(any("没有登记基线" in w for w in warnings))
+
+    def test_recorded_mismatch_is_red(self):
+        data = json.loads(json.dumps(authorsrc.load_manifest()))
+        saved_key, saved_sweep = authorsrc.toolchain_key, authorsrc.compile_sweep
+        authorsrc.toolchain_key = lambda compiler: "gcc/libstdc++"
+        flipped = {rel: {"compiles": not e["gcc/libstdc++"]["compiles"]} for rel, e in data["programs"].items()}
+        authorsrc.compile_sweep = lambda compiler: flipped
+        try:
+            problems = authorsrc.check_programs(data, ["g++"], out=lambda *_: None)
+        finally:
+            authorsrc.toolchain_key, authorsrc.compile_sweep = saved_key, saved_sweep
+        self.assertEqual(len(problems), len(flipped))
 
 
 class TestHarnessRegistry(unittest.TestCase):

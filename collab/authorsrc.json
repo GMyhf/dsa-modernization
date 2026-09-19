@@ -816,139 +816,647 @@
   },
   "programs": {
     "ch02_LinearList/alg2.1-5/main.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch02_LinearList/alg2.6-11/main.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch03_StackQueue/alg3.12/main.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch03_StackQueue/alg3.13-14/main.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch03_StackQueue/alg3.4/main.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch03_StackQueue/alg3.5/main.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch03_StackQueue/alg3.6-8/fact.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch03_StackQueue/alg3.9-11/knap1.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch04_String/alg3/strcmp.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch04_String/alg4-5/main.cpp": {
-      "compiles": false,
-      "error": "ISO C++ forbids comparison between pointer and integer [-fpermissive]"
+      "clang/libc++": {
+        "compiles": false,
+        "error": "comparison between pointer and integer ('char *' and 'char')"
+      },
+      "clang/libstdc++": {
+        "compiles": false,
+        "error": "comparison between pointer and integer ('char *' and 'char')"
+      },
+      "gcc/libstdc++": {
+        "compiles": false,
+        "error": "ISO C++ forbids comparison between pointer and integer [-fpermissive]"
+      }
     },
     "ch04_String/alg6/main.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch04_String/alg7-8/main-kmp.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch05_BinaryTree/alg1-8BinaryTree/BinaryTree.cpp": {
-      "compiles": false,
-      "error": "‘::main’ must return ‘int’"
+      "clang/libc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
+      "clang/libstdc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
+      "gcc/libstdc++": {
+        "compiles": false,
+        "error": "‘::main’ must return ‘int’"
+      }
     },
     "ch05_BinaryTree/alg11MinHeap/MinHeap.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch05_BinaryTree/alg12HuffmanTree/HuffmanTree.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch05_BinaryTree/alg9-10binarysearchtree/binarysearchtree.cpp": {
-      "compiles": false,
-      "error": "‘::main’ must return ‘int’"
+      "clang/libc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
+      "clang/libstdc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
+      "gcc/libstdc++": {
+        "compiles": false,
+        "error": "‘::main’ must return ‘int’"
+      }
     },
     "ch06_Tree/DualTagFirstroot(alg6_10)/dualtagtree_firstroot.cpp": {
-      "compiles": false,
-      "error": "‘::main’ must return ‘int’"
+      "clang/libc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
+      "clang/libstdc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
+      "gcc/libstdc++": {
+        "compiles": false,
+        "error": "‘::main’ must return ‘int’"
+      }
     },
     "ch06_Tree/DualTagWidth(alg6_11)/dualtagtree_Width.cpp": {
-      "compiles": false,
-      "error": "‘::main’ must return ‘int’"
+      "clang/libc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
+      "clang/libstdc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
+      "gcc/libstdc++": {
+        "compiles": false,
+        "error": "‘::main’ must return ‘int’"
+      }
     },
     "ch06_Tree/tree(alg_1-7)/tree.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch06_Tree/unionfind(alg_8-9)/unionfind.cpp": {
-      "compiles": false,
-      "error": "‘::main’ must return ‘int’"
+      "clang/libc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
+      "clang/libstdc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
+      "gcc/libstdc++": {
+        "compiles": false,
+        "error": "‘::main’ must return ‘int’"
+      }
     },
     "ch07_Graph/Graph_Dijkstra/Dijkstra.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch07_Graph/Graph_Floyd/Floyd.cpp": {
-      "compiles": false,
-      "error": "extra qualification ‘Graphm::’ on member ‘IniGraphm’ [-fpermissive]"
+      "clang/libc++": {
+        "compiles": false,
+        "error": "extra qualification on member 'IniGraphm'"
+      },
+      "clang/libstdc++": {
+        "compiles": false,
+        "error": "extra qualification on member 'IniGraphm'"
+      },
+      "gcc/libstdc++": {
+        "compiles": false,
+        "error": "extra qualification ‘Graphm::’ on member ‘IniGraphm’ [-fpermissive]"
+      }
     },
     "ch07_Graph/Graph_Kruskal/Kruskal.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch07_Graph/Graph_Link/link.cpp": {
-      "compiles": false,
-      "error": "‘::main’ must return ‘int’"
+      "clang/libc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
+      "clang/libstdc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
+      "gcc/libstdc++": {
+        "compiles": false,
+        "error": "‘::main’ must return ‘int’"
+      }
     },
     "ch07_Graph/Graph_Prim/Prim.cpp": {
-      "compiles": false,
-      "error": "‘::main’ must return ‘int’"
+      "clang/libc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
+      "clang/libstdc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
+      "gcc/libstdc++": {
+        "compiles": false,
+        "error": "‘::main’ must return ‘int’"
+      }
     },
     "ch07_Graph/TopologicalSorting/topological_sorting.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch07_Graph/graph_matrix/matrix.cpp": {
-      "compiles": false,
-      "error": "‘::main’ must return ‘int’"
+      "clang/libc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
+      "clang/libstdc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
+      "gcc/libstdc++": {
+        "compiles": false,
+        "error": "‘::main’ must return ‘int’"
+      }
+    },
+    "ch08_Sort/AddSort_Insert.cpp": {
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
+    },
+    "ch08_Sort/BubSort.cpp": {
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
+    },
+    "ch08_Sort/BucketSort.cpp": {
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
+    },
+    "ch08_Sort/HeapSort/HeapSort.cpp": {
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
+    },
+    "ch08_Sort/InsSort.cpp": {
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
+    },
+    "ch08_Sort/MergeSort/MergeSort.cpp": {
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
+    },
+    "ch08_Sort/MergeSort/ModMergeSort.cpp": {
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
+    },
+    "ch08_Sort/QuickSort/ModQuickSort.cpp": {
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
+    },
+    "ch08_Sort/QuickSort/QuickSort.cpp": {
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
+    },
+    "ch08_Sort/RadixSort/LinkRadixSort.cpp": {
+      "clang/libc++": {
+        "compiles": false,
+        "error": "use of undeclared identifier 'i'"
+      },
+      "clang/libstdc++": {
+        "compiles": false,
+        "error": "use of undeclared identifier 'i'"
+      },
+      "gcc/libstdc++": {
+        "compiles": false,
+        "error": "‘i’ was not declared in this scope"
+      }
     },
     "ch08_Sort/RadixSort/LinkSortMain.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
+    },
+    "ch08_Sort/RadixSort/RadixSort_Bin.cpp": {
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
+    },
+    "ch08_Sort/SelSort.cpp": {
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
+    },
+    "ch08_Sort/ShellSort/ShSort2.cpp": {
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
+    },
+    "ch08_Sort/ShellSort/ShSort3.cpp": {
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch09_ExternalSort/alg9_1 replacementSelection/ReplacementSelection.cpp": {
-      "compiles": false,
-      "error": "reference to ‘less’ is ambiguous"
+      "clang/libc++": {
+        "compiles": false,
+        "error": "reference to 'less' is ambiguous"
+      },
+      "clang/libstdc++": {
+        "compiles": false,
+        "error": "reference to 'less' is ambiguous"
+      },
+      "gcc/libstdc++": {
+        "compiles": false,
+        "error": "reference to ‘less’ is ambiguous"
+      }
     },
     "ch09_ExternalSort/alg9_2WinnerTree/WinnerTree.cpp": {
-      "compiles": false,
-      "error": "‘cout’ was not declared in this scope; did you mean ‘std::cout’?"
+      "clang/libc++": {
+        "compiles": false,
+        "error": "use of undeclared identifier 'cout'; did you mean 'std::cout'?"
+      },
+      "clang/libstdc++": {
+        "compiles": false,
+        "error": "use of undeclared identifier 'cout'; did you mean 'std::cout'?"
+      },
+      "gcc/libstdc++": {
+        "compiles": false,
+        "error": "‘cout’ was not declared in this scope; did you mean ‘std::cout’?"
+      }
     },
     "ch09_ExternalSort/alg9_3LoserTree/LoserTree.cpp": {
-      "compiles": false,
-      "error": "‘cout’ was not declared in this scope; did you mean ‘std::cout’?"
+      "clang/libc++": {
+        "compiles": false,
+        "error": "use of undeclared identifier 'cout'; did you mean 'std::cout'?"
+      },
+      "clang/libstdc++": {
+        "compiles": false,
+        "error": "use of undeclared identifier 'cout'; did you mean 'std::cout'?"
+      },
+      "gcc/libstdc++": {
+        "compiles": false,
+        "error": "‘cout’ was not declared in this scope; did you mean ‘std::cout’?"
+      }
     },
     "ch10_Search/BitSet/bag.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": false,
+        "error": "reference to 'count' is ambiguous"
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch10_Search/BitSet/test.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch10_Search/algor1-3/algor1&2.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch12_AdvDS/AdvList/GenList/Example.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch12_AdvDS/AdvList/GenList_ReEntrant/Example.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch12_AdvDS/AdvList/SparseMatrix/Example.cpp": {
-      "compiles": false,
-      "error": "afxtempl.h: No such file or directory"
+      "clang/libc++": {
+        "compiles": false,
+        "error": "'afxtempl.h' file not found"
+      },
+      "clang/libstdc++": {
+        "compiles": false,
+        "error": "'afxtempl.h' file not found"
+      },
+      "gcc/libstdc++": {
+        "compiles": false,
+        "error": "afxtempl.h: No such file or directory"
+      }
     },
     "ch12_AdvDS/AdvTree/AVLTree/Example.cpp": {
-      "compiles": false,
-      "error": "redeclaration of ‘avlNode<T>::avlNode(T, avlNode<T>*, avlNode<T>*, int)’ may not have default arguments [-fpermissive]"
+      "clang/libc++": {
+        "compiles": false,
+        "error": "default arguments cannot be added to an out-of-line definition of a member of a class template"
+      },
+      "clang/libstdc++": {
+        "compiles": false,
+        "error": "default arguments cannot be added to an out-of-line definition of a member of a class template"
+      },
+      "gcc/libstdc++": {
+        "compiles": false,
+        "error": "redeclaration of ‘avlNode<T>::avlNode(T, avlNode<T>*, avlNode<T>*, int)’ may not have default arguments [-fpermissive]"
+      }
     },
     "ch12_AdvDS/AdvTree/BestBST/OptimalBST.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     },
     "ch12_AdvDS/AdvTree/SplayTree/splay.cpp": {
-      "compiles": true
+      "clang/libc++": {
+        "compiles": true
+      },
+      "clang/libstdc++": {
+        "compiles": true
+      },
+      "gcc/libstdc++": {
+        "compiles": true
+      }
     }
   },
   "findings": [

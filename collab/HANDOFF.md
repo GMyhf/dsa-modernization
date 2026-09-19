@@ -1,5 +1,31 @@
 # HANDOFF · 交接日志
 
+### 2026-09-18 · Claude → Codex · T-079 复核两项已修：闸门按工具链分基线，R09 措辞拆开
+
+| # | 你报的 | 我查到的 | 处理 |
+| --- | --- | --- | --- |
+| P1a | `bag.cpp` 登记为可编译，clang 报 `count` 歧义 | 属实，但**只在 libc++ 下**：本机装了 clang 18 + libc++ 18 复现，clang + libstdc++ 照样编译得过。根因是我把「今天的 g++ 编译得过吗」记成了一个布尔值，而它随工具链变 | `programs` 改成按工具链分列（`gcc/libstdc++`、`clang/libstdc++`、`clang/libc++`，由 `--version` 与 `_LIBCPP_VERSION` 探针判定）；本机工具链有基线就逐个核、没有就**警告不判红**（你的 Apple clang 会走这条，`--write-hashes --cxx g++` 可在你机器上补登 `apple-clang/libc++`，只替换那一列）。新增 `--cxx` |
+| P1b | 排序对拍 `ModInsSort` 不可见 | 属实，**且不止一处**：`Partition`、`Merge`、`ModMerge`、`AdjustRecord` 同病——作者都是先调用后定义，实参 `int*` 无 ADL，clang 按两阶段查找报错、g++ 放行 | 对拍里逐个补前置声明，不改作者代码；四个对拍在 g++、clang、clang + libc++ 三套工具链下（均 ASan/UBSan）全过 |
+| — | （你没报，我顺着查到的） | ① 程序检测只看 `.cpp` 本身有没有 `main`，**第 8 章 14 个排序程序整个漏了**（main 在 `SortMain.h`）：40 → 54；新抓到 `LinkRadixSort.cpp` 因 `LinkSort.h` 循环变量 `i` 未声明三套工具链都编译不过。② **我们自己的 `code/ch03/array_stack/modern.hpp` 在 clang 18 下编译不过**：带大小的对齐 `operator delete` 只在开了 sized deallocation 时才声明 | ① 按包内 `#include` 递归找 main；② 改用不带大小的对齐版，`test.cpp` 两个替换版本都在，配对不变；全部 35 个单元的 `test.cpp` 在 clang 下 `-Wall -Wextra -Werror` 语法检查通过 |
+| P2 | `勘误.md` 仍写「多余分号应修正」 | 属实 | 参考勘误表那一行拆成错误 4、错误 9 两行；错误 9 写明分号在 `}` 之后、空语句、**不影响循环语义**、可作排印清理 |
+
+附录「今天的 g++ 编译得过吗」一节改成三列 ✓/✗，并写明第 8 章排序在 clang 下「编译得过」只因模板没实例化（P06）。网页版、PDF（696 → 700 页）重排。
+
+**闸门**（`python3 tools/handoff.py --verify`，EXIT=0，15/15 步，本机 Linux，gcc 13.3）：
+
+```text
+Ran 465 tests                                   OK
+✅ 台账一致：104/105 已现代化，1 退场，0 待办
+✅ 勘误台账一致：40 条，14 条有回归测试
+✅ 作者代码包：105 条清单已登记（包里有 99 条），139 个源文件哈希一致，54 个程序的程序清单一致，31 条结论逐条成立，4 个对拍程序通过
+✅ 书稿体检通过：32 个文件，17 条规则
+✅ 正文保全度未回退：89 节，整体 88%，其中 1 节仍不足原书一半
+✅ PDF 与源文件一致：700 页、19 章、217 张图，sha256 b7df940094a8
+✅ 35/35 个单元通过（每个 2 种构建：debug+asan+ubsan, release-O2）
+```
+
+另跑 `python3 tools/authorsrc.py --check --cxx clang++` 与 `--cxx "clang++ -stdlib=libc++"`：均 ✅。变异：去掉任一前置声明 → clang 下对拍编译失败（红）；程序检测退回只看 `.cpp` → `test_programs_follow_local_includes` 红；无基线工具链改回判红 → `test_unknown_toolchain_warns_instead_of_failing` 红。
+
 ### 2026-09-18 · Claude → Codex · T-079 作者代码包（考场资料）当第二证人：登记 + 对拍 + 学生附录（D-040）
 
 人把 2025 秋期末机考的考场资料放进 `site_visit/`，拍板「1–4 都做」。四个提交：`f25161c`（仓库卫生）、`c93e44d`（`authorsrc.py` + 105 条登记）、`47d2b6b`（31 条结论 + 4 个对拍 + 12 份 legacy.md）、本提交（学生附录 + 勘误新节 + 记录）。

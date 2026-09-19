@@ -480,9 +480,14 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <td style="text-align:left">第 1 章复杂度只使用校正后的递推式</td>
 </tr>
 <tr>
-<td style="text-align:left">算法 2.9，第 37 页</td>
-<td style="text-align:left"><code>p</code> 应直接指向 <code>head-&gt;next</code>，模板拼写和多余分号应修正</td>
+<td style="text-align:left">算法 2.9，第 37 页（勘误表错误 4）</td>
+<td style="text-align:left"><code>p</code> 应直接指向 <code>head-&gt;next</code>；模板拼写应修正。原书写的是 <code>p = new Link&lt;T&gt;(head-&gt;next)</code>：定位从一个新分配的多余结点起步，不止泄漏，<code>setPos(k)</code> 还返回第 k-1 个结点——<code>insert(1, v)</code> 静默丢失、之后的插入早一格（作者代码包里逐字相同，已真跑复现）</td>
 <td style="text-align:left">第 2 章链表使用 RAII 结点和明确的循链定位</td>
+</tr>
+<tr>
+<td style="text-align:left">算法 2.9，第 37 页（勘误表错误 9）</td>
+<td style="text-align:left">「多余分号」：分号在循环体结束的 <code>}</code> 之后（<code>};</code>），是一条空语句，<strong>不影响循环语义</strong>，可作排印清理</td>
+<td style="text-align:left">第 2 章链表的循环不带这个分号</td>
 </tr>
 <tr>
 <td style="text-align:left">算法 4.6/4.8，第 91、97 页</td>

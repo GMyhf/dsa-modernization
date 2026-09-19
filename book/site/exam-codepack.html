@@ -706,89 +706,155 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 </tr>
 </tbody></table></div>
 <h2 id="今天的-g-编译得过吗"><a class="anchor" href="#今天的-g-编译得过吗">#</a>今天的 g++ 编译得过吗</h2>
-<p>包里带 <code>main</code> 的程序共 40 个。按 <code>g++ -std=c++17</code> 只做语法检查（先把源码转成 UTF-8）：<strong>25 个编译得过，15 个编译不过</strong>。编译不过的几乎全是 2008 年 VC6 能容忍、今天的 g++ 不再接受的写法，不是算法错；下表给出第一条报错和改法。OpenJudge 用的正是 g++。</p>
+<p>包里能单独编译成程序的 <code>.cpp</code> 共 54 个（自身或它包含的头文件里有 <code>main</code>；第 8 章的排序都把 <code>main</code> 放在 <code>SortMain.h</code> 里）。先把源码转成 UTF-8，再按 <code>-std=c++17</code> 只做语法检查：g++（gcc/libstdc++）38 个编译得过；clang（clang/libstdc++）38 个编译得过；clang + libc++（clang/libc++）37 个编译得过。<strong>编译结果随工具链而变</strong>：OpenJudge 的 C++ 用 g++；macOS 上的 <code>g++</code> 其实是 Apple clang + libc++，最接近「clang + libc++」那一列。</p>
+<p>编译不过的几乎全是 2008 年 VC6 能容忍、今天的编译器不再接受的写法，不是算法错。下表列出在任一工具链下编译不过的程序（✓ 编译得过，✗ 编译不过），报错取第一个失败工具链的第一条。</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">程序</th>
+<th style="text-align:left">g++</th>
+<th style="text-align:left">clang</th>
+<th style="text-align:left">clang + libc++</th>
 <th style="text-align:left">第一条报错</th>
 <th style="text-align:left">改法</th>
 </tr></thead><tbody>
 <tr>
 <td style="text-align:left"><code>ch04_String/alg4-5/main.cpp</code></td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
 <td style="text-align:left"><code>ISO C++ forbids comparison between pointer and integer [-fpermissive]</code></td>
 <td style="text-align:left"><code>assert(str != &#x27;\0&#x27;)</code> 改为 <code>assert(str != NULL)</code>（勘误 E11）</td>
 </tr>
 <tr>
 <td style="text-align:left"><code>ch05_BinaryTree/alg1-8BinaryTree/BinaryTree.cpp</code></td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
 <td style="text-align:left"><code>‘::main’ must return ‘int’</code></td>
 <td style="text-align:left"><code>void main()</code> 改成 <code>int main()</code></td>
 </tr>
 <tr>
 <td style="text-align:left"><code>ch05_BinaryTree/alg9-10binarysearchtree/binarysearchtree.cpp</code></td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
 <td style="text-align:left"><code>‘::main’ must return ‘int’</code></td>
 <td style="text-align:left"><code>void main()</code> 改成 <code>int main()</code></td>
 </tr>
 <tr>
 <td style="text-align:left"><code>ch06_Tree/DualTagFirstroot(alg6_10)/dualtagtree_firstroot.cpp</code></td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
 <td style="text-align:left"><code>‘::main’ must return ‘int’</code></td>
 <td style="text-align:left"><code>void main()</code> 改成 <code>int main()</code></td>
 </tr>
 <tr>
 <td style="text-align:left"><code>ch06_Tree/DualTagWidth(alg6_11)/dualtagtree_Width.cpp</code></td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
 <td style="text-align:left"><code>‘::main’ must return ‘int’</code></td>
 <td style="text-align:left"><code>void main()</code> 改成 <code>int main()</code></td>
 </tr>
 <tr>
 <td style="text-align:left"><code>ch06_Tree/unionfind(alg_8-9)/unionfind.cpp</code></td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
 <td style="text-align:left"><code>‘::main’ must return ‘int’</code></td>
 <td style="text-align:left"><code>void main()</code> 改成 <code>int main()</code></td>
 </tr>
 <tr>
 <td style="text-align:left"><code>ch07_Graph/Graph_Floyd/Floyd.cpp</code></td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
 <td style="text-align:left"><code>extra qualification ‘Graphm::’ on member ‘IniGraphm’ [-fpermissive]</code></td>
 <td style="text-align:left">类内声明去掉 <code>Graphm::</code> 前缀</td>
 </tr>
 <tr>
 <td style="text-align:left"><code>ch07_Graph/Graph_Link/link.cpp</code></td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
 <td style="text-align:left"><code>‘::main’ must return ‘int’</code></td>
 <td style="text-align:left"><code>void main()</code> 改成 <code>int main()</code></td>
 </tr>
 <tr>
 <td style="text-align:left"><code>ch07_Graph/Graph_Prim/Prim.cpp</code></td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
 <td style="text-align:left"><code>‘::main’ must return ‘int’</code></td>
 <td style="text-align:left"><code>void main()</code> 改成 <code>int main()</code></td>
 </tr>
 <tr>
 <td style="text-align:left"><code>ch07_Graph/graph_matrix/matrix.cpp</code></td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
 <td style="text-align:left"><code>‘::main’ must return ‘int’</code></td>
 <td style="text-align:left"><code>void main()</code> 改成 <code>int main()</code></td>
 </tr>
 <tr>
+<td style="text-align:left"><code>ch08_Sort/RadixSort/LinkRadixSort.cpp</code></td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left"><code>‘i’ was not declared in this scope</code></td>
+<td style="text-align:left"><code>LinkSort.h</code> 的 <code>PrintAddr</code> 里循环变量 <code>i</code> 没声明：写成 <code>for (int i=0; ...)</code></td>
+</tr>
+<tr>
 <td style="text-align:left"><code>ch09_ExternalSort/alg9_1 replacementSelection/ReplacementSelection.cpp</code></td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
 <td style="text-align:left"><code>reference to ‘less’ is ambiguous</code></td>
 <td style="text-align:left">自定义的 <code>less</code> 与 <code>std::less</code> 撞名：改名，或去掉 <code>using namespace std;</code></td>
 </tr>
 <tr>
 <td style="text-align:left"><code>ch09_ExternalSort/alg9_2WinnerTree/WinnerTree.cpp</code></td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
 <td style="text-align:left"><code>‘cout’ was not declared in this scope; did you mean ‘std::cout’?</code></td>
 <td style="text-align:left">补 <code>using namespace std;</code>，或写 <code>std::cout</code></td>
 </tr>
 <tr>
 <td style="text-align:left"><code>ch09_ExternalSort/alg9_3LoserTree/LoserTree.cpp</code></td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
 <td style="text-align:left"><code>‘cout’ was not declared in this scope; did you mean ‘std::cout’?</code></td>
 <td style="text-align:left">补 <code>using namespace std;</code>，或写 <code>std::cout</code></td>
 </tr>
 <tr>
+<td style="text-align:left"><code>ch10_Search/BitSet/bag.cpp</code></td>
+<td style="text-align:left">✓</td>
+<td style="text-align:left">✓</td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left"><code>reference to &#x27;count&#x27; is ambiguous</code></td>
+<td style="text-align:left">全局变量 <code>count</code> 与 <code>std::count</code> 撞名（只在 libc++ 下）：改名，或去掉 <code>using namespace std;</code></td>
+</tr>
+<tr>
 <td style="text-align:left"><code>ch12_AdvDS/AdvList/SparseMatrix/Example.cpp</code></td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
 <td style="text-align:left"><code>afxtempl.h: No such file or directory</code></td>
 <td style="text-align:left">VC6 的 MFC 头文件，g++ 没有：换成标准库容器</td>
 </tr>
 <tr>
 <td style="text-align:left"><code>ch12_AdvDS/AdvTree/AVLTree/Example.cpp</code></td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
+<td style="text-align:left">✗</td>
 <td style="text-align:left"><code>redeclaration of ‘avlNode&lt;T&gt;::avlNode(T, avlNode&lt;T&gt;*, avlNode&lt;T&gt;*, int)’ may not have default arguments [-fpermissive]</code></td>
 <td style="text-align:left">默认参数只留在类内声明，类外定义处删掉</td>
 </tr>
 </tbody></table></div>
-<p>编译得过的：<code>ch02_LinearList/alg2.1-5/main.cpp</code>、<code>ch02_LinearList/alg2.6-11/main.cpp</code>、<code>ch03_StackQueue/alg3.12/main.cpp</code>、<code>ch03_StackQueue/alg3.13-14/main.cpp</code>、<code>ch03_StackQueue/alg3.4/main.cpp</code>、<code>ch03_StackQueue/alg3.5/main.cpp</code>、<code>ch03_StackQueue/alg3.6-8/fact.cpp</code>、<code>ch03_StackQueue/alg3.9-11/knap1.cpp</code>、<code>ch04_String/alg3/strcmp.cpp</code>、<code>ch04_String/alg6/main.cpp</code>、<code>ch04_String/alg7-8/main-kmp.cpp</code>、<code>ch05_BinaryTree/alg11MinHeap/MinHeap.cpp</code>、<code>ch05_BinaryTree/alg12HuffmanTree/HuffmanTree.cpp</code>、<code>ch06_Tree/tree(alg_1-7)/tree.cpp</code>、<code>ch07_Graph/Graph_Dijkstra/Dijkstra.cpp</code>、<code>ch07_Graph/Graph_Kruskal/Kruskal.cpp</code>、<code>ch07_Graph/TopologicalSorting/topological_sorting.cpp</code>、<code>ch08_Sort/RadixSort/LinkSortMain.cpp</code>、<code>ch10_Search/BitSet/bag.cpp</code>、<code>ch10_Search/BitSet/test.cpp</code>、<code>ch10_Search/algor1-3/algor1&amp;2.cpp</code>、<code>ch12_AdvDS/AdvList/GenList/Example.cpp</code>、<code>ch12_AdvDS/AdvList/GenList_ReEntrant/Example.cpp</code>、<code>ch12_AdvDS/AdvTree/BestBST/OptimalBST.cpp</code>、<code>ch12_AdvDS/AdvTree/SplayTree/splay.cpp</code>。</p>
+<p>还有一件事语法检查看不出来：第 8 章这些排序程序在 clang 下「编译得过」，只因为计时驱动里的排序调用被注释掉了（见「包里的坑」P06），模板从没被实例化。真去调用 <code>ShellSort</code>、<code>QuickSort</code>、<code>MergeSort</code> 时，clang 会按标准报「函数在模板定义处不可见」——作者都是先调用、后定义（<code>ModInsSort</code>、<code>Partition</code>、<code>Merge</code>……），只有 g++ 放行。在 clang 下用它们，把被调函数的定义挪到前面，或先写一行声明。</p>
+<p>所有工具链下都编译得过的：<code>ch02_LinearList/alg2.1-5/main.cpp</code>、<code>ch02_LinearList/alg2.6-11/main.cpp</code>、<code>ch03_StackQueue/alg3.12/main.cpp</code>、<code>ch03_StackQueue/alg3.13-14/main.cpp</code>、<code>ch03_StackQueue/alg3.4/main.cpp</code>、<code>ch03_StackQueue/alg3.5/main.cpp</code>、<code>ch03_StackQueue/alg3.6-8/fact.cpp</code>、<code>ch03_StackQueue/alg3.9-11/knap1.cpp</code>、<code>ch04_String/alg3/strcmp.cpp</code>、<code>ch04_String/alg6/main.cpp</code>、<code>ch04_String/alg7-8/main-kmp.cpp</code>、<code>ch05_BinaryTree/alg11MinHeap/MinHeap.cpp</code>、<code>ch05_BinaryTree/alg12HuffmanTree/HuffmanTree.cpp</code>、<code>ch06_Tree/tree(alg_1-7)/tree.cpp</code>、<code>ch07_Graph/Graph_Dijkstra/Dijkstra.cpp</code>、<code>ch07_Graph/Graph_Kruskal/Kruskal.cpp</code>、<code>ch07_Graph/TopologicalSorting/topological_sorting.cpp</code>、<code>ch08_Sort/AddSort_Insert.cpp</code>、<code>ch08_Sort/BubSort.cpp</code>、<code>ch08_Sort/BucketSort.cpp</code>、<code>ch08_Sort/HeapSort/HeapSort.cpp</code>、<code>ch08_Sort/InsSort.cpp</code>、<code>ch08_Sort/MergeSort/MergeSort.cpp</code>、<code>ch08_Sort/MergeSort/ModMergeSort.cpp</code>、<code>ch08_Sort/QuickSort/ModQuickSort.cpp</code>、<code>ch08_Sort/QuickSort/QuickSort.cpp</code>、<code>ch08_Sort/RadixSort/LinkSortMain.cpp</code>、<code>ch08_Sort/RadixSort/RadixSort_Bin.cpp</code>、<code>ch08_Sort/SelSort.cpp</code>、<code>ch08_Sort/ShellSort/ShSort2.cpp</code>、<code>ch08_Sort/ShellSort/ShSort3.cpp</code>、<code>ch10_Search/BitSet/test.cpp</code>、<code>ch10_Search/algor1-3/algor1&amp;2.cpp</code>、<code>ch12_AdvDS/AdvList/GenList/Example.cpp</code>、<code>ch12_AdvDS/AdvList/GenList_ReEntrant/Example.cpp</code>、<code>ch12_AdvDS/AdvTree/BestBST/OptimalBST.cpp</code>、<code>ch12_AdvDS/AdvTree/SplayTree/splay.cpp</code>。</p>
 <h2 id="包里的坑"><a class="anchor" href="#包里的坑">#</a>包里的坑</h2>
 <p>下面几处缺陷<strong>原书没有</strong>——要么原书没印那段代码，要么印对了——只在包里。考场上直接拿包里的代码交题，会在这些地方读写到数组外面或得到错的结果。</p>
 <div class="table-wrap"><table><thead><tr>

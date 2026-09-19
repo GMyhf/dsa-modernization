@@ -251,12 +251,14 @@ private:
         return static_cast<T*>(raw);
     }
 
-    static void deallocate(T* block, size_type count) noexcept {
+    // 归还用不带大小的对齐版：带大小的 `operator delete(p, bytes, align_val_t)`
+    // 只在编译器开了 sized deallocation 时才有声明，clang 18 及以前默认不开，
+    // 那样这一行直接编译不过（2026-09-18 Codex 复核 T-079 时撞出）。大小只是给分配器的提示。
+    static void deallocate(T* block, size_type /*count*/) noexcept {
         if (block == nullptr) {
             return;
         }
-        ::operator delete(static_cast<void*>(block), count * sizeof(T),
-                          std::align_val_t{alignof(T)});
+        ::operator delete(static_cast<void*>(block), std::align_val_t{alignof(T)});
     }
 
     /// 在第 index 个槽位上就地构造一个 T。槽位在此之前是**生存储，不是对象**。

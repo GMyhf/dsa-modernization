@@ -585,12 +585,14 @@ clear() 之后：存活 1024 个，仍持有 204800 字节（逻辑长度已经�
     <span class="k">return</span> <span class="k">static_cast</span>&lt;T*&gt;(raw);
 }
 
-<span class="k">static</span> <span class="t">void</span> deallocate(T* block, size_type count) <span class="k">noexcept</span> {
+<span class="c">// 归还用不带大小的对齐版：带大小的 `operator delete(p, bytes, align_val_t)`</span>
+<span class="c">// 只在编译器开了 sized deallocation 时才有声明，clang 18 及以前默认不开，</span>
+<span class="c">// 那样这一行直接编译不过（2026-09-18 Codex 复核 T-079 时撞出）。大小只是给分配器的提示。</span>
+<span class="k">static</span> <span class="t">void</span> deallocate(T* block, size_type <span class="c">/*count*/</span>) <span class="k">noexcept</span> {
     <span class="k">if</span> (block == <span class="k">nullptr</span>) {
         <span class="k">return</span>;
     }
-    ::<span class="k">operator</span> <span class="k">delete</span>(<span class="k">static_cast</span>&lt;<span class="t">void</span>*&gt;(block), count * <span class="k">sizeof</span>(T),
-                      std::align_val_t{<span class="k">alignof</span>(T)});
+    ::<span class="k">operator</span> <span class="k">delete</span>(<span class="k">static_cast</span>&lt;<span class="t">void</span>*&gt;(block), std::align_val_t{<span class="k">alignof</span>(T)});
 }
 
 <span class="c">/// 在第 index 个槽位上就地构造一个 T。槽位在此之前是**生存储，不是对象**。</span>

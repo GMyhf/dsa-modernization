@@ -56,5 +56,5 @@ iconv -f GBK -t UTF-8 site_visit/DSCode_ZWZ200806_CPP/ch03_StackQueue/alg3.5/arr
 
 ```bash
 python3 tools/authorsrc.py --listing 3.2    # 代码3.2 在作者包里的那一段，已转 UTF-8
-python3 tools/authorsrc.py                  # 概况：105 条里包里有几条、40 个程序今天能编译几个
+python3 tools/authorsrc.py                  # 概况：105 条里包里有几条、54 个程序在各工具链下能编译几个
 ```

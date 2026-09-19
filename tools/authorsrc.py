@@ -279,10 +279,40 @@ def slices_for(entry):
 # ---------------------------------------------------------------- 编译扫描
 
 
+LOCAL_INCLUDE_RE = re.compile(r'^\s*#\s*include\s*"([^"]+)"', re.M)
+
+
+def translation_unit_has_main(rel, files, seen=None):
+    """rel 连同它 `#include "..."` 进来的包内文件里有没有 main。
+
+    第 8 章每个排序 .cpp 自己不写 main，末尾 `#include "SortMain.h"`——只看 .cpp 本身会把
+    12 个排序程序整个漏掉（2026-09-18 Codex 复核 T-079 时才发现，原先的「40 个程序」少算了它们）。
+    """
+    seen = set() if seen is None else seen
+    if rel in seen or rel not in files:
+        return False
+    seen.add(rel)
+    text = _mask_keep_includes(decode(files[rel]))
+    if MAIN_RE.search(_mask(decode(files[rel]))):
+        return True
+    base = Path(rel).parent
+    for target in LOCAL_INCLUDE_RE.findall(text):
+        resolved = Path(__import__("os").path.normpath(base / target)).as_posix()
+        if translation_unit_has_main(resolved, files, seen):
+            return True
+    return False
+
+
+def _mask_keep_includes(text: str) -> str:
+    """去掉注释但保留字符串（#include "x" 的文件名在字符串里）。"""
+    text = re.sub(r"/\*.*?\*/", lambda m: re.sub(r"[^\n]", " ", m.group(0)), text, flags=re.S)
+    return re.sub(r"//[^\n]*", "", text)
+
+
 def programs(files=None):
-    """包里含 main 的源文件（相对路径列表）。"""
+    """包里能单独编译成程序的 .cpp（自身或其包含的包内文件里有 main）。"""
     files = source_files(PACK) if files is None else files
-    return [rel for rel, path in files.items() if rel.endswith(".cpp") and MAIN_RE.search(_mask(decode(path)))]
+    return [rel for rel in files if rel.endswith(".cpp") and translation_unit_has_main(rel, files)]
 
 
 def export(dest: Path):
@@ -298,11 +328,33 @@ def export(dest: Path):
     return count
 
 
-def find_compiler():
+def find_compiler(spec=None):
+    """返回编译器命令行（list）。spec 形如 "clang++ -stdlib=libc++"；缺省依次找 g++、clang++。"""
+    if spec:
+        argv = spec.split()
+        return argv if shutil.which(argv[0]) else None
     for name in ("g++", "clang++"):
         if shutil.which(name):
-            return name
+            return [name]
     return None
+
+
+def toolchain_key(compiler) -> str:
+    """编译器族 / 标准库，例如 gcc/libstdc++、clang/libc++、apple-clang/libc++。
+
+    包的编译结果**随工具链而变**，不是一个布尔值：第 8 章的排序先调用、后定义（ModInsSort、
+    Partition……），clang 照两阶段查找的标准报错、g++ 放行；BitSet/bag.cpp 的全局 count
+    在 libc++ 下与 std::count 撞名。macOS 上的 `g++` 其实是 Apple clang + libc++。
+    所以编译结果按这个键分开登记，谁的机器就对谁的基线。
+    """
+    version = subprocess.run([*compiler, "--version"], capture_output=True, text=True).stdout
+    family = "apple-clang" if "Apple" in version else "clang" if "clang" in version else "gcc"
+    probe = subprocess.run(
+        [*compiler, "-std=c++17", "-x", "c++", "-E", "-dM", "-"],
+        input="#include <cstddef>\n", capture_output=True, text=True,
+    ).stdout
+    library = "libc++" if "_LIBCPP_VERSION" in probe else "libstdc++"
+    return f"{family}/{library}"
 
 
 def first_error(stderr: str) -> str:
@@ -313,7 +365,9 @@ def first_error(stderr: str) -> str:
 
 
 def compile_sweep(compiler):
-    """{程序相对路径: {"compiles": bool, "error": 首条 error 文本}}；在 UTF-8 副本上编译。"""
+    """{程序相对路径: {"compiles": bool, "error": 首条 error 文本}}；在 UTF-8 副本上编译。
+
+    compiler 是命令行 list；结果只对这一个工具链成立（见 toolchain_key）。"""
     work = BUILD / "utf8"
     export(work)
     results = {}
@@ -321,7 +375,7 @@ def compile_sweep(compiler):
     def one(rel):
         src = work / rel
         proc = subprocess.run(
-            [compiler, "-std=c++17", "-w", "-fsyntax-only", "-I", str(src.parent), str(src)],
+            [*compiler, "-std=c++17", "-w", "-fsyntax-only", "-I", str(src.parent), str(src)],
             capture_output=True,
             text=True,
         )
@@ -353,7 +407,7 @@ def sanitizers_work(compiler) -> bool:
     probe_dir.mkdir(parents=True, exist_ok=True)
     src, exe = probe_dir / "probe.cpp", probe_dir / "probe"
     src.write_text("int main() { return 0; }\n", encoding="utf-8")
-    built = subprocess.run([compiler, *SANITIZE, str(src), "-o", str(exe)], capture_output=True)
+    built = subprocess.run([*compiler, *SANITIZE, str(src), "-o", str(exe)], capture_output=True)
     return built.returncode == 0 and subprocess.run([str(exe)], capture_output=True).returncode == 0
 
 
@@ -364,12 +418,14 @@ def run_harness(compiler, rel, includes, sanitize=True):
     要记录的缺陷，不是对拍要拦的东西），所以 detect_leaks=0；越界与未定义行为照拦。
     """
     work = BUILD / "utf8"
-    exe = BUILD / "harness" / rel.replace("/", "__").replace(".cpp", "")
+    exe = BUILD / "harness" / "_".join(compiler).replace("/", "_") / rel.replace("/", "__").replace(".cpp", "")
     exe.parent.mkdir(parents=True, exist_ok=True)
-    flags = ["-std=c++17", "-w", "-fpermissive", "-O0", "-g", *(SANITIZE if sanitize else [])]
+    # -fpermissive 只有 g++ 认；clang 会拒绝未知选项，所以按编译器族给
+    permissive = ["-fpermissive"] if toolchain_key(compiler).startswith("gcc") else []
+    flags = ["-std=c++17", "-w", *permissive, "-O0", "-g", *(SANITIZE if sanitize else [])]
     include_flags = [arg for inc in includes for arg in ("-I", str(work / inc))]
     built = subprocess.run(
-        [compiler, *flags, *include_flags, str(ROOT / rel), "-o", str(exe)], capture_output=True, text=True
+        [*compiler, *flags, *include_flags, str(ROOT / rel), "-o", str(exe)], capture_output=True, text=True
     )
     if built.returncode != 0:
         return False, "编译失败：" + first_error(built.stderr)
@@ -492,14 +548,23 @@ APPENDIX = BOOK / "考场代码包.md"
 ERRATA_PAGE = BOOK / "勘误.md"
 
 COMPILE_HINTS = [
-    (r"‘::main’ must return ‘int’", "`void main()` 改成 `int main()`"),
-    (r"‘cout’ was not declared", "补 `using namespace std;`，或写 `std::cout`"),
+    # g++ 与 clang 的措辞不同，正则两边都要认
+    (r"main.{0,3} must return .int", "`void main()` 改成 `int main()`"),
+    (r"\bcout\b", "补 `using namespace std;`，或写 `std::cout`"),
     (r"extra qualification", "类内声明去掉 `Graphm::` 前缀"),
     (r"comparison between pointer and integer", "`assert(str != '\\0')` 改为 `assert(str != NULL)`（勘误 E11）"),
-    (r"reference to ‘less’ is ambiguous", "自定义的 `less` 与 `std::less` 撞名：改名，或去掉 `using namespace std;`"),
+    (r"reference to .less. is ambiguous", "自定义的 `less` 与 `std::less` 撞名：改名，或去掉 `using namespace std;`"),
+    (r"reference to .count. is ambiguous", "全局变量 `count` 与 `std::count` 撞名（只在 libc++ 下）：改名，或去掉 `using namespace std;`"),
     (r"afxtempl\.h", "VC6 的 MFC 头文件，g++ 没有：换成标准库容器"),
-    (r"may not have default arguments", "默认参数只留在类内声明，类外定义处删掉"),
+    (r"default arguments|may not have default arguments", "默认参数只留在类内声明，类外定义处删掉"),
+    (r"undeclared identifier .i.|.i. was not declared", "`LinkSort.h` 的 `PrintAddr` 里循环变量 `i` 没声明：写成 `for (int i=0; ...)`"),
 ]
+TOOLCHAIN_LABEL = {
+    "gcc/libstdc++": "g++",
+    "clang/libstdc++": "clang",
+    "clang/libc++": "clang + libc++",
+    "apple-clang/libc++": "Apple clang",
+}
 
 
 def _cell(text: str) -> str:
@@ -556,22 +621,41 @@ def section_listing_map(data):
 
 def section_compile(data):
     programs_ = data.get("programs", {})
-    ok = [rel for rel, e in programs_.items() if e.get("compiles")]
-    bad = [(rel, e) for rel, e in programs_.items() if not e.get("compiles")]
+    keys = recorded_toolchains(data)
+    primary = "gcc/libstdc++" if "gcc/libstdc++" in keys else (keys[0] if keys else "")
+    counts = "；".join(
+        f"{TOOLCHAIN_LABEL.get(k, k)}（{k}）{sum(1 for e in programs_.values() if e.get(k, {}).get('compiles'))} 个编译得过"
+        for k in keys
+    )
+    bad = [(rel, e) for rel, e in programs_.items() if any(not r.get("compiles") for r in e.values())]
+    ok = [rel for rel, e in programs_.items() if all(r.get("compiles") for r in e.values())]
     lines = [
         "",
-        f"包里带 `main` 的程序共 {len(programs_)} 个。按 `g++ -std=c++17` 只做语法检查"
-        f"（先把源码转成 UTF-8）：**{len(ok)} 个编译得过，{len(bad)} 个编译不过**。"
-        "编译不过的几乎全是 2008 年 VC6 能容忍、今天的 g++ 不再接受的写法，不是算法错；"
-        "下表给出第一条报错和改法。OpenJudge 用的正是 g++。",
+        f"包里能单独编译成程序的 `.cpp` 共 {len(programs_)} 个（自身或它包含的头文件里有 `main`；"
+        "第 8 章的排序都把 `main` 放在 `SortMain.h` 里）。先把源码转成 UTF-8，再按 `-std=c++17` 只做语法检查："
+        f"{counts}。**编译结果随工具链而变**：OpenJudge 的 C++ 用 g++；macOS 上的 `g++` 其实是 Apple clang + libc++，"
+        "最接近「clang + libc++」那一列。",
         "",
-        "| 程序 | 第一条报错 | 改法 |",
-        "| --- | --- | --- |",
+        "编译不过的几乎全是 2008 年 VC6 能容忍、今天的编译器不再接受的写法，不是算法错。下表列出在任一工具链下编译不过的程序"
+        "（✓ 编译得过，✗ 编译不过），报错取第一个失败工具链的第一条。",
+        "",
+        "| 程序 | " + " | ".join(TOOLCHAIN_LABEL.get(k, k) for k in keys) + " | 第一条报错 | 改法 |",
+        "| --- | " + " | ".join("---" for _ in keys) + " | --- | --- |",
     ]
     for rel, entry in bad:
-        error = entry.get("error", "")
-        lines.append(f"| {_code(rel)} | {_code(error)} | {compile_hint(error)} |")
-    lines += ["", "编译得过的：" + "、".join(_code(rel) for rel in ok) + "。"]
+        marks = " | ".join("✓" if entry.get(k, {}).get("compiles") else "✗" for k in keys)
+        failing = [k for k in ([primary] + keys) if k in entry and not entry[k].get("compiles")]
+        error = entry[failing[0]].get("error", "")
+        lines.append(f"| {_code(rel)} | {marks} | {_code(error)} | {compile_hint(error)} |")
+    lines += [
+        "",
+        "还有一件事语法检查看不出来：第 8 章这些排序程序在 clang 下「编译得过」，只因为计时驱动里的排序调用被注释掉了"
+        "（见「包里的坑」P06），模板从没被实例化。真去调用 `ShellSort`、`QuickSort`、`MergeSort` 时，"
+        "clang 会按标准报「函数在模板定义处不可见」——作者都是先调用、后定义（`ModInsSort`、`Partition`、`Merge`……），"
+        "只有 g++ 放行。在 clang 下用它们，把被调函数的定义挪到前面，或先写一行声明。",
+        "",
+        "所有工具链下都编译得过的：" + "、".join(_code(rel) for rel in ok) + "。",
+    ]
     return lines
 
 
@@ -670,6 +754,42 @@ def check_book(data):
 # ---------------------------------------------------------------- 核对
 
 
+TOOLCHAIN_ORDER = ("gcc/libstdc++", "clang/libstdc++", "clang/libc++", "apple-clang/libc++")
+
+
+def recorded_toolchains(data):
+    """已登记基线的工具链，g++ 在前（OpenJudge 用的是它）。"""
+    keys = {key for entry in data.get("programs", {}).values() for key in entry}
+    rank = {key: i for i, key in enumerate(TOOLCHAIN_ORDER)}
+    return sorted(keys, key=lambda k: (rank.get(k, len(rank)), k))
+
+
+def check_programs(data, compiler, out=print):
+    """程序清单全工具链一致；本工具链若有基线，逐个程序的编译结果要与之一致。"""
+    problems = []
+    expected = data.get("programs", {})
+    actual_list = programs()
+    for rel in actual_list:
+        if rel not in expected:
+            problems.append(f"{rel}：程序未登记编译结果")
+    for rel in expected:
+        if rel not in actual_list:
+            problems.append(f"{rel}：登记了编译结果，但它已不是含 main 的程序")
+    key = toolchain_key(compiler)
+    if not any(key in entry for entry in expected.values()):
+        out(f"  ⚠ 本机工具链 {key} 没有登记基线（已登记：{'、'.join(recorded_toolchains(data)) or '无'}），"
+            f"跳过逐个程序的编译核对；要登记就运行 --write-hashes --cxx \"{' '.join(compiler)}\"")
+        return problems
+    for rel, entry in compile_sweep(compiler).items():
+        want = expected.get(rel, {}).get(key)
+        if want is None:
+            problems.append(f"{rel}：{key} 下未登记编译结果")
+        elif want.get("compiles") != entry["compiles"]:
+            verdict = "编译得过" if entry["compiles"] else f"编译不过：{entry.get('error', '')}"
+            problems.append(f"{rel}：{key} 下登记为 compiles={want.get('compiles')}，实测{verdict}")
+    return problems
+
+
 def check(data, compiler="auto", out=print):
     """返回问题列表（空 = 全部一致）。"""
     problems = []
@@ -733,18 +853,7 @@ def check(data, compiler="auto", out=print):
     if compiler == "auto":
         compiler = find_compiler()
     if compiler:
-        expected = data.get("programs", {})
-        actual = compile_sweep(compiler)
-        for rel, entry in actual.items():
-            want = expected.get(rel)
-            if want is None:
-                problems.append(f"{rel}：程序未登记编译结果")
-            elif want.get("compiles") != entry["compiles"]:
-                verdict = "编译得过" if entry["compiles"] else f"编译不过：{entry.get('error', '')}"
-                problems.append(f"{rel}：登记为 compiles={want.get('compiles')}，实测{verdict}")
-        for rel in expected:
-            if rel not in actual:
-                problems.append(f"{rel}：登记了编译结果，但它已不是含 main 的程序")
+        problems.extend(check_programs(data, compiler, out))
         problems.extend(check_harnesses(data, compiler, out))
     elif compiler is not None:
         out("  ⚠ 找不到 g++/clang++，跳过编译核对")
@@ -767,11 +876,14 @@ def cmd_summary(data):
         for lid in absent:
             print(f"  - {lid}：{listings[lid]['absent']}")
     progs = data.get("programs", {})
-    ok = sum(1 for p in progs.values() if p.get("compiles"))
-    print(f"\n含 main 的程序 {len(progs)} 个：今天的 g++ -std=c++17 编译得过 {ok} 个，编译不过 {len(progs) - ok} 个")
+    print(f"\n能单独编译的程序 {len(progs)} 个，-std=c++17 语法检查：")
+    for key in recorded_toolchains(data):
+        ok = sum(1 for p in progs.values() if p.get(key, {}).get("compiles"))
+        print(f"  {key}：编译得过 {ok} 个，编译不过 {len(progs) - ok} 个")
     for rel, entry in progs.items():
-        if not entry.get("compiles"):
-            print(f"  ✗ {rel}：{entry.get('error', '')}")
+        bad = [f"{key}：{r.get('error', '')}" for key, r in entry.items() if not r.get("compiles")]
+        if bad:
+            print(f"  ✗ {rel}\n      " + "\n      ".join(bad))
     return 0
 
 
@@ -798,8 +910,8 @@ def cmd_listing(data, raw_id):
     return 0
 
 
-def cmd_compile():
-    compiler = find_compiler()
+def cmd_compile(spec=None):
+    compiler = find_compiler(spec)
     if not compiler:
         print("找不到 g++/clang++", file=sys.stderr)
         return 2
@@ -807,19 +919,29 @@ def cmd_compile():
     ok = sum(1 for r in results.values() if r["compiles"])
     for rel, entry in results.items():
         print(("  ✓ " if entry["compiles"] else "  ✗ ") + rel + ("" if entry["compiles"] else f"：{entry['error']}"))
-    print(f"\n{compiler} -std=c++17：{ok}/{len(results)} 编译得过")
+    print(f"\n{' '.join(compiler)}（{toolchain_key(compiler)}）-std=c++17：{ok}/{len(results)} 编译得过")
     return 0
 
 
-def cmd_write_hashes(data):
-    compiler = find_compiler()
+def cmd_write_hashes(data, spec=None):
+    """重记哈希，并**只替换本工具链**那一列编译结果；别的工具链的基线原样保留。"""
+    compiler = find_compiler(spec)
     if not compiler:
-        print("找不到 g++/clang++，编译结果无法重记", file=sys.stderr)
+        print("找不到编译器，编译结果无法重记", file=sys.stderr)
         return 2
+    key = toolchain_key(compiler)
     data["hashes"] = {rel: sha256_of(path) for rel, path in source_files(PACK).items()}
-    data["programs"] = compile_sweep(compiler)
+    results = compile_sweep(compiler)
+    old = data.get("programs", {})
+    merged = {}
+    for rel in results:
+        entry = {k: v for k, v in old.get(rel, {}).items() if k != key}
+        entry[key] = results[rel]
+        merged[rel] = dict(sorted(entry.items()))
+    data["programs"] = merged
     save_manifest(data)
-    print(f"已重记 {len(data['hashes'])} 个源文件的 sha256、{len(data['programs'])} 个程序的编译结果")
+    ok = sum(1 for r in results.values() if r["compiles"])
+    print(f"已重记 {len(data['hashes'])} 个源文件的 sha256；{key} 下 {len(results)} 个程序 {ok} 个编译得过")
     return 0
 
 
@@ -833,35 +955,37 @@ def main(argv=None):
     group.add_argument("--compile", action="store_true", help="重跑编译扫描并打印")
     group.add_argument("--write-hashes", action="store_true", help="重记 sha256 与编译结果")
     group.add_argument("--export", metavar="DIR", help="把代码包转成 UTF-8 + LF 写到 DIR")
+    parser.add_argument("--cxx", metavar="CMD", help='指定编译器命令行，如 "clang++ -stdlib=libc++"（缺省找 g++，再找 clang++）')
     args = parser.parse_args(argv)
     data = load_manifest()
 
     if args.listing:
         return cmd_listing(data, args.listing)
     if args.compile:
-        return cmd_compile()
+        return cmd_compile(args.cxx)
     if args.write_book:
         for path, text in book_sections(data).items():
             path.write_text(text, encoding="utf-8")
             print(f"已重写 {rel_label(path)} 里由登记表生成的节")
         return 0
     if args.diff:
-        compiler = find_compiler()
+        compiler = find_compiler(args.cxx)
         if not compiler:
-            print("找不到 g++/clang++", file=sys.stderr)
+            print("找不到编译器", file=sys.stderr)
             return 2
         problems = check_harnesses(data, compiler)
         for problem in problems:
             print(f"  ✗ {problem}")
         return 1 if problems else 0
     if args.write_hashes:
-        return cmd_write_hashes(data)
+        return cmd_write_hashes(data, args.cxx)
     if args.export:
         count = export(Path(args.export))
         print(f"已导出 {count} 个源文件到 {args.export}（UTF-8 + LF）")
         return 0
     if args.check:
-        problems = check(data)
+        compiler = find_compiler(args.cxx) if args.cxx else "auto"
+        problems = check(data, compiler)
         for problem in problems:
             print(f"  ✗ {problem}")
         if problems:
@@ -870,7 +994,7 @@ def main(argv=None):
         listings = data.get("listings", {})
         mapped = sum(1 for e in listings.values() if "file" in e)
         print(f"✅ 作者代码包：{len(listings)} 条清单已登记（包里有 {mapped} 条），"
-              f"{len(data.get('hashes', {}))} 个源文件哈希一致，{len(data.get('programs', {}))} 个程序编译结果与登记一致，"
+              f"{len(data.get('hashes', {}))} 个源文件哈希一致，{len(data.get('programs', {}))} 个程序的程序清单一致，"
               f"{len(data.get('findings', []))} 条结论逐条成立，{len(data.get('harnesses', {}))} 个对拍程序通过")
         return 0
     return cmd_summary(data)
