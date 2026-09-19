@@ -816,6 +816,9 @@
   },
   "programs": {
     "ch02_LinearList/alg2.1-5/main.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -827,6 +830,9 @@
       }
     },
     "ch02_LinearList/alg2.6-11/main.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -838,6 +844,9 @@
       }
     },
     "ch03_StackQueue/alg3.12/main.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -849,6 +858,9 @@
       }
     },
     "ch03_StackQueue/alg3.13-14/main.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -860,6 +872,9 @@
       }
     },
     "ch03_StackQueue/alg3.4/main.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -871,6 +886,9 @@
       }
     },
     "ch03_StackQueue/alg3.5/main.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -882,6 +900,9 @@
       }
     },
     "ch03_StackQueue/alg3.6-8/fact.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -893,6 +914,9 @@
       }
     },
     "ch03_StackQueue/alg3.9-11/knap1.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -904,6 +928,9 @@
       }
     },
     "ch04_String/alg3/strcmp.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -915,6 +942,10 @@
       }
     },
     "ch04_String/alg4-5/main.cpp": {
+      "apple-clang/libc++": {
+        "compiles": false,
+        "error": "comparison between pointer and integer ('char *' and 'char')"
+      },
       "clang/libc++": {
         "compiles": false,
         "error": "comparison between pointer and integer ('char *' and 'char')"
@@ -929,6 +960,9 @@
       }
     },
     "ch04_String/alg6/main.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -940,6 +974,9 @@
       }
     },
     "ch04_String/alg7-8/main-kmp.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -951,6 +988,10 @@
       }
     },
     "ch05_BinaryTree/alg1-8BinaryTree/BinaryTree.cpp": {
+      "apple-clang/libc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
       "clang/libc++": {
         "compiles": false,
         "error": "'main' must return 'int'"
@@ -965,6 +1006,9 @@
       }
     },
     "ch05_BinaryTree/alg11MinHeap/MinHeap.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -976,6 +1020,9 @@
       }
     },
     "ch05_BinaryTree/alg12HuffmanTree/HuffmanTree.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -987,6 +1034,10 @@
       }
     },
     "ch05_BinaryTree/alg9-10binarysearchtree/binarysearchtree.cpp": {
+      "apple-clang/libc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
       "clang/libc++": {
         "compiles": false,
         "error": "'main' must return 'int'"
@@ -1001,6 +1052,10 @@
       }
     },
     "ch06_Tree/DualTagFirstroot(alg6_10)/dualtagtree_firstroot.cpp": {
+      "apple-clang/libc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
       "clang/libc++": {
         "compiles": false,
         "error": "'main' must return 'int'"
@@ -1015,6 +1070,10 @@
       }
     },
     "ch06_Tree/DualTagWidth(alg6_11)/dualtagtree_Width.cpp": {
+      "apple-clang/libc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
       "clang/libc++": {
         "compiles": false,
         "error": "'main' must return 'int'"
@@ -1029,6 +1088,9 @@
       }
     },
     "ch06_Tree/tree(alg_1-7)/tree.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -1040,6 +1102,10 @@
       }
     },
     "ch06_Tree/unionfind(alg_8-9)/unionfind.cpp": {
+      "apple-clang/libc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
       "clang/libc++": {
         "compiles": false,
         "error": "'main' must return 'int'"
@@ -1054,6 +1120,9 @@
       }
     },
     "ch07_Graph/Graph_Dijkstra/Dijkstra.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -1065,6 +1134,10 @@
       }
     },
     "ch07_Graph/Graph_Floyd/Floyd.cpp": {
+      "apple-clang/libc++": {
+        "compiles": false,
+        "error": "extra qualification on member 'IniGraphm'"
+      },
       "clang/libc++": {
         "compiles": false,
         "error": "extra qualification on member 'IniGraphm'"
@@ -1079,6 +1152,9 @@
       }
     },
     "ch07_Graph/Graph_Kruskal/Kruskal.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -1090,6 +1166,10 @@
       }
     },
     "ch07_Graph/Graph_Link/link.cpp": {
+      "apple-clang/libc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
       "clang/libc++": {
         "compiles": false,
         "error": "'main' must return 'int'"
@@ -1104,6 +1184,10 @@
       }
     },
     "ch07_Graph/Graph_Prim/Prim.cpp": {
+      "apple-clang/libc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
       "clang/libc++": {
         "compiles": false,
         "error": "'main' must return 'int'"
@@ -1118,6 +1202,9 @@
       }
     },
     "ch07_Graph/TopologicalSorting/topological_sorting.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -1129,6 +1216,10 @@
       }
     },
     "ch07_Graph/graph_matrix/matrix.cpp": {
+      "apple-clang/libc++": {
+        "compiles": false,
+        "error": "'main' must return 'int'"
+      },
       "clang/libc++": {
         "compiles": false,
         "error": "'main' must return 'int'"
@@ -1143,6 +1234,9 @@
       }
     },
     "ch08_Sort/AddSort_Insert.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -1154,6 +1248,9 @@
       }
     },
     "ch08_Sort/BubSort.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -1165,6 +1262,9 @@
       }
     },
     "ch08_Sort/BucketSort.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -1176,6 +1276,9 @@
       }
     },
     "ch08_Sort/HeapSort/HeapSort.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -1187,6 +1290,9 @@
       }
     },
     "ch08_Sort/InsSort.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -1198,6 +1304,9 @@
       }
     },
     "ch08_Sort/MergeSort/MergeSort.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -1209,6 +1318,9 @@
       }
     },
     "ch08_Sort/MergeSort/ModMergeSort.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -1220,6 +1332,9 @@
       }
     },
     "ch08_Sort/QuickSort/ModQuickSort.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -1231,6 +1346,9 @@
       }
     },
     "ch08_Sort/QuickSort/QuickSort.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -1242,6 +1360,10 @@
       }
     },
     "ch08_Sort/RadixSort/LinkRadixSort.cpp": {
+      "apple-clang/libc++": {
+        "compiles": false,
+        "error": "use of undeclared identifier 'i'"
+      },
       "clang/libc++": {
         "compiles": false,
         "error": "use of undeclared identifier 'i'"
@@ -1256,6 +1378,9 @@
       }
     },
     "ch08_Sort/RadixSort/LinkSortMain.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -1267,6 +1392,9 @@
       }
     },
     "ch08_Sort/RadixSort/RadixSort_Bin.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -1278,6 +1406,9 @@
       }
     },
     "ch08_Sort/SelSort.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -1289,6 +1420,9 @@
       }
     },
     "ch08_Sort/ShellSort/ShSort2.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -1300,6 +1434,9 @@
       }
     },
     "ch08_Sort/ShellSort/ShSort3.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -1311,6 +1448,10 @@
       }
     },
     "ch09_ExternalSort/alg9_1 replacementSelection/ReplacementSelection.cpp": {
+      "apple-clang/libc++": {
+        "compiles": false,
+        "error": "reference to 'less' is ambiguous"
+      },
       "clang/libc++": {
         "compiles": false,
         "error": "reference to 'less' is ambiguous"
@@ -1325,6 +1466,10 @@
       }
     },
     "ch09_ExternalSort/alg9_2WinnerTree/WinnerTree.cpp": {
+      "apple-clang/libc++": {
+        "compiles": false,
+        "error": "use of undeclared identifier 'cout'; did you mean 'std::cout'?"
+      },
       "clang/libc++": {
         "compiles": false,
         "error": "use of undeclared identifier 'cout'; did you mean 'std::cout'?"
@@ -1339,6 +1484,10 @@
       }
     },
     "ch09_ExternalSort/alg9_3LoserTree/LoserTree.cpp": {
+      "apple-clang/libc++": {
+        "compiles": false,
+        "error": "use of undeclared identifier 'cout'; did you mean 'std::cout'?"
+      },
       "clang/libc++": {
         "compiles": false,
         "error": "use of undeclared identifier 'cout'; did you mean 'std::cout'?"
@@ -1353,6 +1502,10 @@
       }
     },
     "ch10_Search/BitSet/bag.cpp": {
+      "apple-clang/libc++": {
+        "compiles": false,
+        "error": "reference to 'count' is ambiguous"
+      },
       "clang/libc++": {
         "compiles": false,
         "error": "reference to 'count' is ambiguous"
@@ -1365,6 +1518,9 @@
       }
     },
     "ch10_Search/BitSet/test.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -1376,6 +1532,9 @@
       }
     },
     "ch10_Search/algor1-3/algor1&2.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -1387,6 +1546,9 @@
       }
     },
     "ch12_AdvDS/AdvList/GenList/Example.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -1398,6 +1560,9 @@
       }
     },
     "ch12_AdvDS/AdvList/GenList_ReEntrant/Example.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -1409,6 +1574,10 @@
       }
     },
     "ch12_AdvDS/AdvList/SparseMatrix/Example.cpp": {
+      "apple-clang/libc++": {
+        "compiles": false,
+        "error": "'afxtempl.h' file not found"
+      },
       "clang/libc++": {
         "compiles": false,
         "error": "'afxtempl.h' file not found"
@@ -1423,6 +1592,10 @@
       }
     },
     "ch12_AdvDS/AdvTree/AVLTree/Example.cpp": {
+      "apple-clang/libc++": {
+        "compiles": false,
+        "error": "default arguments cannot be added to an out-of-line definition of a member of a class template"
+      },
       "clang/libc++": {
         "compiles": false,
         "error": "default arguments cannot be added to an out-of-line definition of a member of a class template"
@@ -1437,6 +1610,9 @@
       }
     },
     "ch12_AdvDS/AdvTree/BestBST/OptimalBST.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
@@ -1448,6 +1624,9 @@
       }
     },
     "ch12_AdvDS/AdvTree/SplayTree/splay.cpp": {
+      "apple-clang/libc++": {
+        "compiles": true
+      },
       "clang/libc++": {
         "compiles": true
       },
