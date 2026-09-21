@@ -2219,7 +2219,18 @@ public:
         return empty() ? nullptr : &data_[front_];
     }
 
-    void clear() noexcept { front_ = rear_ = 0; }
+    /// 清空：把存活元素逐个 move 进临时量再析构，释放其持有的资源（如 string 的堆
+    /// 缓冲区）。槽位本身留在 moved-from 状态，等 ~ArrayQueue 的 delete[] 统一回收。
+    /// 注意：因为底层是 new T[]（非原始存储），无法像 ArrayStack 那样直接调 ~T()——
+    /// 否则 delete[] 会二次析构。move-from 是对非平凡 T 最安全的折中。
+    void clear() noexcept {
+        while (front_ != rear_) {
+            T tmp = std::move(data_[front_]);
+            (void)tmp;
+            front_ = (front_ + 1) % slots_;
+        }
+        front_ = rear_ = 0;
+    }
 
 private:
     std::size_t slots_{0};   // 数组格数 = 容量 + 1

@@ -1,5 +1,7 @@
 """字符串模式匹配的 Python 实现（D-025）。"""
 
+from __future__ import annotations
+
 
 # >>> naive
 def naive_search(text: str, pattern: str) -> int | None:

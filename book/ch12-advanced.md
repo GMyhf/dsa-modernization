@@ -1098,20 +1098,6 @@ class Trie:
     # <<< trie-longest-prefix
 ```
 
-```python file=code/ch12/trie/modern.py#trie-longest-prefix
-def longest_prefix_of(self, text: str) -> str:
-    """text 的哪个前缀是树里最长的那个键。走不动就回退到最近一次的词尾。"""
-    node = self.root
-    best = 0
-    for i, c in enumerate(text):
-        if c not in node.children:
-            break
-        node = node.children[c]
-        if node.terminal:
-            best = i + 1
-    return text[:best]
-```
-
 ```python file=code/ch12/trie/modern.py#patricia-bits
 def bit_of(key: str, index: int) -> bool:
     """键的第 index 位（从最高位数起）。超出键长一律当 0——

@@ -1,5 +1,7 @@
 """邻接矩阵图与图算法的 Python 实现（D-025）。"""
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 

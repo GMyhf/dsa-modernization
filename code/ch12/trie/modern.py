@@ -9,6 +9,8 @@ Patricia 把「只有一个孩子」的那些层全部压掉，内部结点只�
 Patricia 用「降到叶子 → 求第一个不同的位 → 在正确的高度插入内部结点」。
 """
 
+from __future__ import annotations
+
 
 class _Node:
     """Trie 的结点：孩子表、是否是一个键的终点、经过它的键数。"""

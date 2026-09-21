@@ -18,7 +18,14 @@ class DoublyLinkedList {
 
 public:
     DoublyLinkedList() = default;
-    DoublyLinkedList(const DoublyLinkedList& other) { for (const T& item : other) push_back(item); }
+    DoublyLinkedList(const DoublyLinkedList& other) {
+        try {
+            for (const T& item : other) push_back(item);
+        } catch (...) {
+            clear();
+            throw;
+        }
+    }
     DoublyLinkedList& operator=(const DoublyLinkedList& other) { if (this != &other) { DoublyLinkedList copy(other); swap(copy); } return *this; }
     DoublyLinkedList(DoublyLinkedList&& other) noexcept { take(other); }
     DoublyLinkedList& operator=(DoublyLinkedList&& other) noexcept { if (this != &other) { clear(); take(other); } return *this; }

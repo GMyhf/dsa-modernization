@@ -1,5 +1,7 @@
 """背包问题的 Python 实现（D-025）。"""
 
+from __future__ import annotations
+
 
 def _validate(capacity: int, weights: list[int]) -> None:
     if capacity < 0:
