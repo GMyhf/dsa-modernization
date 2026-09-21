@@ -7,6 +7,18 @@ namespace {
 int checks = 0;
 int failures = 0;
 
+struct ClearProbe {
+    static int destructions;
+    explicit ClearProbe(int value) : value(value) {}
+    ClearProbe(const ClearProbe&) = default;
+    ClearProbe& operator=(const ClearProbe&) = default;
+    ClearProbe(ClearProbe&&) { throw 1; }
+    int value;
+    ~ClearProbe() { ++destructions; }
+};
+
+int ClearProbe::destructions = 0;
+
 void check(bool condition, const char* name) {
     ++checks;
     if (!condition) {
@@ -42,6 +54,15 @@ void test_array_queue() {
     dsa::ArrayQueue<int>& alias = copy;
     copy = alias;
     check(copy.dequeue() == 8, "代码3.13 array self assignment");
+
+    ClearProbe::destructions = 0;
+    dsa::ArrayQueue<ClearProbe> probe_queue(1);
+    ClearProbe probe(9);
+    check(probe_queue.enqueue(probe), "代码3.14 raw storage accepts non-default T");
+    const int before_clear = ClearProbe::destructions;
+    probe_queue.clear();
+    check(probe_queue.empty() && ClearProbe::destructions == before_clear + 1,
+          "代码3.14 clear destroys elements without moving them");
 }
 
 void test_linked_queue() {

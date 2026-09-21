@@ -2134,15 +2134,25 @@ template <typename T>
 class ArrayQueue {
 public:
     explicit ArrayQueue(std::size_t capacity)
-        : slots_(capacity + 1), data_(slots_ ? new T[slots_] : nullptr) {}
+        : slots_(capacity + 1), data_(allocator_.allocate(slots_)) {}
 
     ArrayQueue(const ArrayQueue& other)
         : slots_(other.slots_),
           front_(other.front_),
           rear_(other.rear_),
-          data_(other.slots_ ? new T[other.slots_] : nullptr) {
-        for (std::size_t i = front_; i != rear_; i = (i + 1) % slots_) {
-            data_[i] = other.data_[i];
+          data_(other.slots_ ? allocator_.allocate(other.slots_) : nullptr) {
+        std::size_t constructed = 0;
+        try {
+            for (std::size_t i = front_; i != rear_; i = (i + 1) % slots_) {
+                allocator_traits::construct(allocator_, data_ + i, other.data_[i]);
+                ++constructed;
+            }
+        } catch (...) {
+            for (std::size_t i = 0; i < constructed; ++i) {
+                allocator_traits::destroy(allocator_, data_ + ((front_ + i) % slots_));
+            }
+            if (data_ != nullptr) allocator_.deallocate(data_, slots_);
+            throw;
         }
     }
 
@@ -2164,7 +2174,10 @@ public:
         return *this;
     }
 
-    ~ArrayQueue() { delete[] data_; }
+    ~ArrayQueue() {
+        clear();
+        if (data_ != nullptr) allocator_.deallocate(data_, slots_);
+    }
 
     void swap(ArrayQueue& other) noexcept {
         using std::swap;
@@ -2190,7 +2203,7 @@ public:
         if (full()) {
             return false;
         }
-        data_[rear_] = value;
+        allocator_traits::construct(allocator_, data_ + rear_, value);
         rear_ = (rear_ + 1) % slots_;
         return true;
     }
@@ -2199,7 +2212,7 @@ public:
         if (full()) {
             return false;
         }
-        data_[rear_] = std::move(value);
+        allocator_traits::construct(allocator_, data_ + rear_, std::move(value));
         rear_ = (rear_ + 1) % slots_;
         return true;
     }
@@ -2210,6 +2223,7 @@ public:
             return std::nullopt;
         }
         T value = std::move(data_[front_]);
+        allocator_traits::destroy(allocator_, data_ + front_);
         front_ = (front_ + 1) % slots_;
         return value;
     }
@@ -2219,20 +2233,19 @@ public:
         return empty() ? nullptr : &data_[front_];
     }
 
-    /// 清空：把存活元素逐个 move 进临时量再析构，释放其持有的资源（如 string 的堆
-    /// 缓冲区）。槽位本身留在 moved-from 状态，等 ~ArrayQueue 的 delete[] 统一回收。
-    /// 注意：因为底层是 new T[]（非原始存储），无法像 ArrayStack 那样直接调 ~T()——
-    /// 否则 delete[] 会二次析构。move-from 是对非平凡 T 最安全的折中。
+    /// 清空：逐个销毁存活元素，释放其持有的资源；槽位本身保留为原始存储。
     void clear() noexcept {
         while (front_ != rear_) {
-            T tmp = std::move(data_[front_]);
-            (void)tmp;
+            allocator_traits::destroy(allocator_, data_ + front_);
             front_ = (front_ + 1) % slots_;
         }
         front_ = rear_ = 0;
     }
 
 private:
+    using allocator_type = std::allocator<T>;
+    using allocator_traits = std::allocator_traits<allocator_type>;
+    allocator_type allocator_;
     std::size_t slots_{0};   // 数组格数 = 容量 + 1
     std::size_t front_{0};
     std::size_t rear_{0};
