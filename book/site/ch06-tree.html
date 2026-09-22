@@ -256,7 +256,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <figure><img loading="lazy" src="../assets/scan/fig-6-8.png" alt="图 6.8 使用静态“左子/右兄”实现对树的归并"><figcaption>图 6.8 使用静态“左子/右兄”实现对树的归并</figcaption></figure>
 <p>图 6.8　静态数组中的左子、右兄链接和树的归并。</p>
 <h3 id="623-动态表示法"><a class="anchor" href="#623-动态表示法">#</a>6.2.3 动态表示法</h3>
-<p><strong>问题的根子在于「度不固定」。</strong> 树中的结点可以有任意的度数，并且各结点的子结点数随时可能发生 变化，这种动态性给树的实现带来了困难。当然，可以采取一种不太灵活的方式，即限定树的度数， 在实现树的时候只需要给树的每一个结点分配确定数目的指针域即可；很明显，<strong>这种存储方法对度数 小的结点会浪费存储空间，而超过限制时增加结点会非常不方便</strong>。</p>
+<p><strong>问题的根源在于「度不固定」。</strong> 树中的结点可以有任意的度数，并且各结点的子结点数随时可能发生 变化，这种动态性给树的实现带来了困难。当然，可以采取一种不太灵活的方式，即限定树的度数， 在实现树的时候只需要给树的每一个结点分配确定数目的指针域即可；很明显，<strong>这种存储方法对度数 小的结点会浪费存储空间，而超过限制时增加结点会非常不方便</strong>。</p>
 <p>另外一种实现方法是<strong>为每个结点分配可变的存储空间</strong>：每一个结点都存储一个子结点指针表，其子 结点的数目也存储在该结点中。使用这样的存储方式可以避免上述不足——即使子结点数目发生变化， 也只需给该结点重新分配一个大小合适的存储空间即可，因此这种途径更具有灵活性。这种表示法 <strong>本质上与「子结点表」表示法相同，但是它可以动态地分配结点空间，而不是把所有结点分配在同一个 数组中</strong>；树的大小事先未知、会频繁长出新结点时更合适。图 6.9(a) 是树形结构，图 6.9(b) 展开了 每个结点的动态孩子表。</p>
 <figure><img loading="lazy" src="../assets/scan/fig-6-9.png" alt="图 6.9 树的动态表示法：(a) 树；(b) 树的实现"><figcaption>图 6.9 树的动态表示法：(a) 树；(b) 树的实现</figcaption></figure>
 <p>图 6.9　树的动态表示法：(a) 的每个结点在 (b) 里都是一块单独分配的空间，里面存着孩子数和一张长度可变的孩子指针表。</p>
@@ -681,13 +681,13 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>图 6.14　先根序列配合右链下标还原树形。</p>
 <h3 id="632-带双标记的先根次序表示"><a class="anchor" href="#632-带双标记的先根次序表示">#</a>6.3.2 带双标记的先根次序表示</h3>
 <p>右链要用一个整型下标。若改成两个布尔标记——<code>ltag</code>「有没有孩子」、<code>rtag</code>「有没有下一个兄弟」—— 理论上只需两位信息，更省。<strong>但普通 C++ <code>bool</code> 成员通常按字节存储，并不保证每位只占 1 bit</strong>； 只有显式位压缩或位域实现才可讨论这种空间节省。它是早期教材常见的顺序编码，今天主要用于理解 树的序列化思想，不是通用工程接口。</p>
-<p>以原书图6.5(a) 那片森林为例，它的双标记先根次序表示（图6.15）是：</p>
+<p>以原书图6.5(a) 那片森林为例，它的双标记先根次序表示（图 6.15）是：</p>
 <figure><img loading="lazy" src="../assets/scan/fig-6-15.png" alt="图 6.15 带双标记的先根次序表示法"><figcaption>图 6.15 带双标记的先根次序表示法</figcaption></figure>
 <p>图 6.15　双标记先根次序表示法的原书示例。</p>
 <div class="codeblock" data-lang="text"><pre><code>先根次序   A  B  C  E  F  D  G  H  J  I
 ltag       0  1  0  1  1  1  0  0  1  1     0 = 有孩子
 rtag       0  0  0  0  1  1  1  0  1  1     0 = 有下一个兄弟</code></pre></div>
-<blockquote><p><strong>照抄这张图很容易把两行读反。</strong> 图 6.15 的三行从上到下是 <code>rtag</code> / <code>info</code> / <code>ltag</code>—— <code>ltag</code> 在<strong>最下面</strong>，不在最上面。按定义核一遍就知道哪行是哪行：<code>B</code> 在图6.5(a) 里是叶结点， 它的 <code>ltag</code> 必须是 1；<code>B</code> 有兄弟 <code>C</code>，它的 <code>rtag</code> 必须是 0。 两行一旦互换，还原出来的是<strong>另一片森林</strong>（<code>C</code> 会变成 <code>B</code> 的孩子而不是兄弟）， 而它的<strong>先根序列恰好还是 <code>A B C E F D G H J I</code></strong>——所以只对先根序列是查不出来的， 得同时对后根序列（<code>B E F C D A J H I G</code>）。本书的测试两条都对。</p></blockquote>
+<blockquote><p><strong>照抄这张图很容易把两行读反。</strong> 图 6.15 的三行从上到下是 <code>rtag</code> / <code>info</code> / <code>ltag</code>—— <code>ltag</code> 在<strong>最下面</strong>，不在最上面。按定义核一遍就知道哪行是哪行：<code>B</code> 在图 6.5(a) 里是叶结点， 它的 <code>ltag</code> 必须是 1；<code>B</code> 有兄弟 <code>C</code>，它的 <code>rtag</code> 必须是 0。 两行一旦互换，还原出来的是<strong>另一片森林</strong>（<code>C</code> 会变成 <code>B</code> 的孩子而不是兄弟）， 而它的<strong>先根序列恰好还是 <code>A B C E F D G H J I</code></strong>——所以只对先根序列是查不出来的， 得同时对后根序列（<code>B E F C D A J H I G</code>）。本书的测试两条都对。</p></blockquote>
 <p><strong>光靠这三行就能把链恢复出来</strong>，靠的是先根次序的一条性质：任何结点的子树都紧跟在它后面， 子树排完才轮到它的下一个兄弟。于是「谁是某个结点的右兄弟」要等它整棵子树扫完才知道—— 用一把栈记着：扫到 <code>rtag == 0</code> 的结点就压栈，扫到 <code>ltag == 1</code> 的结点（没有孩子，说明子树到头） 就弹一个出来，把刚建的结点接成它的右兄弟。</p>
 <p>【算法6.10】带双标记位先根次序树构造算法。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp">code/ch06/general_tree/modern.hpp#dual-tag</a></div><pre><code><span class="c">/// 【算法6.10】带双标记位的先根次序表示 → 「左子/右兄」链式树。</span>
@@ -823,8 +823,8 @@ rtag       0  0  0  0  1  1  1  0  1  1     0 = 有下一个兄弟</code></pre><
 <li>一个高度为 <span class="math">L</span> 的 <span class="math">K</span> 叉树，如果按层次顺序对树中所有结点从 1 开始编号，问：(1) 编号为 <span class="math">N</span> 的 结点的父结点（若存在）编号是多少？(2) 编号为 <span class="math">N</span> 的结点的第 <span class="math">i</span> 个子结点（若存在）编号是多少？ (3) 编号为 <span class="math">N</span> 的结点有右兄弟的条件是什么，其编号是多少？</li>
 <li>画出图 6.20 所示二叉树对应森林的左子/右兄法存储表示、带右链的先根次序存储表示、带左链的 层次次序存储表示和带度数的后根次序存储表示。</li>
 </ol>
-<figure><img loading="lazy" src="../assets/scan/fig-6-20.png" alt="图 6.20 习题 10 的图示"><figcaption>图 6.20 习题 10 的图示</figcaption></figure>
-<p>图 6.20　习题 10 的图示</p>
+<figure><img loading="lazy" src="../assets/scan/fig-6-20.png" alt="图 6.20 习题 11 的图示"><figcaption>图 6.20 习题 11 的图示</figcaption></figure>
+<p>图 6.20　习题 11 的图示</p>
 <ol>
 <li>设计一个算法，将一个用带度数的后根次序法表示的森林转换为左子/右兄法表示。</li>
 <li>设计一个算法，将一个用带右链的先根次序法表示的森林转换为用带度数的后根次序法表示。</li>

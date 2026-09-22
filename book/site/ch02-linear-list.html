@@ -1350,7 +1350,7 @@ p-&gt;next = q;  q-&gt;next-&gt;prev = q;</code></pre></div>
 <p>双链表比单链表多一根指针的空间开销，换来的是给定元素时能在 <span class="math">O(<span class="upr">1</span>)</span> 时间内找到它的前驱。</p>
 <p>【本书补充实现结束】</p>
 <h3 id="233-循环链表"><a class="anchor" href="#233-循环链表">#</a>2.3.3 循环链表</h3>
-<p>循环链表把尾结点的 <code>next</code> 接回首结点，因而没有 <code>nullptr</code> 作为终点。它适合轮转调度、循环缓冲区等“处理完最后一个又回到第一个”的场景。空表仍用 <code>tail == nullptr</code> 表示；非空时首结点是 <code>tail-&gt;next</code>。</p>
+<p>循环链表把尾结点的 <code>next</code> 接回首结点，因而没有 <code>nullptr</code> 作为终点。它适合轮转调度、循环缓冲区等“处理完最后一个又回到第一个”的场景。空表（没有任何结点时）仍用 <code>tail == nullptr</code> 表示——这是唯一出现 <code>nullptr</code> 的情形；非空时首结点是 <code>tail-&gt;next</code>。</p>
 <p>原书举的例子是进程轮转：多个进程在一段时间内访问同一个资源，为了让每个进程公平分享，把它们串成一个环，用一个 <code>current</code> 指针指向下一个要激活的进程，指针往前走一步就轮到下一个。</p>
 <figure><img loading="lazy" src="../assets/scan/fig-2-13.png" alt="图2.13 循环链表示意图"><figcaption>图2.13 循环链表示意图</figcaption></figure>
 <p>图 2.13　循环链表示意图。<code>current</code> 指向将要激活的结点，走一圈回到自己。</p>

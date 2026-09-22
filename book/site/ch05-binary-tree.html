@@ -218,9 +218,10 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 </ul>
 <p>析构用的是「右旋到没有左孩子，再沿右链逐个删」的经典办法：额外空间 O(1)，不分配内存，所以能保持 <code>noexcept</code>。深拷贝用堆上的显式栈代替调用栈。改完之后，纯左链 500 万结点的析构与深拷贝都不再崩（原先分别在 100 万、50 万段错误）；测试里有一个百万深链的用例专门守着这条，改回递归它就会报 <code>stack-overflow</code>。</p>
 <h3 id="512-满二叉树完全二叉树扩充二叉树"><a class="anchor" href="#512-满二叉树完全二叉树扩充二叉树">#</a>5.1.2 满二叉树、完全二叉树、扩充二叉树</h3>
-<p>任何结点或者是叶，或者左右子树都非空，叫做满二叉树（full binary tree）。深度为 <span class="math">k</span> 的满二叉树共有 <span class="math"><span class="upr">2</span><sup>k<span class="bin">+</span><span class="upr">1</span></sup><span class="bin">−</span><span class="upr">1</span></span> 个结点，叶在同一层。</p>
-<p>完全二叉树（complete binary tree）不要求每个内部结点都有两个孩子，但所有叶只出现在最下两层，且最下层的结点从左到右连续排列、没有空洞。堆正是利用这个条件按层编号存进数组：编号关系见 5.1.3。满二叉树一定完全，但完全二叉树不一定满。</p>
-<figure><img loading="lazy" src="../assets/scan/fig-5-2.png" alt="图5.2 满二叉树和完全二叉树示例"><figcaption>图5.2 满二叉树和完全二叉树示例</figcaption></figure>
+<p>任何结点或者是叶，或者左右子树都非空，叫做满二叉树（full binary tree）。这个定义只要求<strong>没有度为 1 的结点</strong>，不要求叶在同一层，结点数也不固定——图 5.2(a) 的叶 C 在第 1 层、D 在第 2 层、F 和 G 在第 3 层。</p>
+<p>注意口径：有些教材所说的「满二叉树」是指<strong>每一层都排满</strong>（英文 perfect binary tree），深度为 <span class="math">k</span> 时恰有 <span class="math"><span class="upr">2</span><sup>k<span class="bin">+</span><span class="upr">1</span></sup><span class="bin">−</span><span class="upr">1</span></span> 个结点、叶全在第 <span class="math">k</span> 层。它是本书满二叉树的特例；答题时先说清用的是哪种定义。</p>
+<p>完全二叉树（complete binary tree）不要求每个内部结点都有两个孩子，但所有叶只出现在最下两层，且最下层的结点从左到右连续排列、没有空洞。堆正是利用这个条件按层编号存进数组：编号关系见 5.1.3。满二叉树与完全二叉树<strong>互不包含</strong>：图 5.2(a) 是满的，但 C 没有孩子，第 2 层缺了两个位置，而下面还有第 3 层，所以不完全；图 5.2(b) 是完全的，但 F 只有一个孩子，所以不满。每层都排满的二叉树（perfect）才既满又完全。</p>
+<figure><img loading="lazy" src="../assets/scan/fig-5-2.png" alt="图 5.2 满二叉树和完全二叉树示例"><figcaption>图 5.2 满二叉树和完全二叉树示例</figcaption></figure>
 <p>图 5.2　(a) 满二叉树；(b) 完全二叉树。</p>
 <p>把普通二叉树的每个空子树位置都补成一个“外部叶”，所得树叫扩充二叉树（extended binary tree），原来的结点叫内部结点。若原树有 <span class="math">n</span> 个内部结点，则扩充树有 <span class="math">n<span class="bin">+</span><span class="upr">1</span></span> 个外部叶。</p>
 <figure><img loading="lazy" src="../assets/scan/fig-5-3.png" alt="图 5.3 扩充二叉树"><figcaption>图 5.3 扩充二叉树</figcaption></figure>
@@ -295,7 +296,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 层次: ABCDE
 BST 中序: 1 3 4 6 7 8 10 14
 含 6? 是  删 3 后含 3? 否</code></pre></div>
-<p><code>create_tree(value, left, right)</code> 接管两棵子树。参数是右值，表示所有权被移走；<code>left_leaf</code> 在 <code>std::move</code> 之后变空，不会和 <code>left</code> 抢着析构同一结点。</p>
+<p><code>create_tree(value, left, right)</code> 接管两棵子树。参数是右值引用，表示所有权被移走；<code>left</code> 和 <code>right</code> 在调用之后变空，不会和新建的树抢着析构同一批结点。</p>
 <h3 id="522-深度优先周游二叉树"><a class="anchor" href="#522-深度优先周游二叉树">#</a>5.2.2 深度优先周游二叉树</h3>
 <p>二叉树的逻辑结构只有三个基本单元：根结点、左子树、右子树。</p>
 <figure><img loading="lazy" src="../assets/scan/fig-5-4.png" alt="图 5.4 二叉树的基本结构"><figcaption>图 5.4 二叉树的基本结构</figcaption></figure>
@@ -534,7 +535,7 @@ BST 中序: 1 3 4 6 7 8 10 14
         }
     }
 }</code></pre></div>
-<p>每个结点入队、出队各一次，时间同样是 <span class="math">O(n)</span>。空间由结点最多的那一层决定：最坏是满的完全二叉树，队列最长时装着最下面一整层，约 <span class="math">(n<span class="bin">+</span><span class="upr">1</span>)/<span class="upr">2</span></span> 个结点。这与深度优先的空间代价（正比于树高）正好互补——树越平衡，深度优先越省；树越接近一条链，广度优先越省。</p>
+<p>每个结点入队、出队各一次，时间同样是 <span class="math">O(n)</span>。空间由结点最多的那一层决定：最坏是每层都排满的二叉树（perfect），队列最长时装着最下面一整层，约 <span class="math">(n<span class="bin">+</span><span class="upr">1</span>)/<span class="upr">2</span></span> 个结点。这与深度优先的空间代价（正比于树高）正好互补——树越平衡，深度优先越省；树越接近一条链，广度优先越省。</p>
 <h2 id="53-二叉树的存储结构"><a class="anchor" href="#53-二叉树的存储结构">#</a>5.3 二叉树的存储结构</h2>
 <h3 id="为什么这一节没有-python-版"><a class="anchor" href="#为什么这一节没有-python-版">#</a>为什么这一节没有 Python 版</h3>
 <p>本节讲的是结点的动态存储和树的所有权：析构要遍历并释放每个结点，拷贝要深复制，移动要转移根指针，还要考虑递归实现的栈边界。Python 的对象引用和垃圾回收不会给出 C++ 五法则或强异常保证的对应练习；用嵌套 <code>list</code> 表示树更会把结点布局抹掉。因此这里的教学实现只提供 C++，算法层的周游和搜索才适合做双语言对照。</p>
@@ -580,7 +581,7 @@ BST 中序: 1 3 4 6 7 8 10 14
 <td style="text-align:left">L</td>
 </tr>
 </tbody></table></div>
-<p>图 5.10　图 5.9 的顺序存储结构。结点间的关系不再靠指针，而是<strong>隐含在下标里</strong>：下标 <span class="math">i</span> 的左右孩子是 <span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">1</span></span> 和 <span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">2</span></span>，父结点是 <span class="math">⌊(i<span class="bin">−</span><span class="upr">1</span>)/<span class="upr">2</span>⌋</span>——正是 5.1.3 的性质。一个指针都不用存，这是完全二叉树最省空间的存法；5.5 节的堆和 8.3.2 节的堆排序都用它。<strong>但它只对完全二叉树划算</strong>：树一旦有空洞，数组里就要留出同样多的空位。</p>
+<p>上图就是图 5.9 的顺序存储结构。结点间的关系不再靠指针，而是<strong>隐含在下标里</strong>：下标 <span class="math">i</span> 的左右孩子是 <span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">1</span></span> 和 <span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">2</span></span>，父结点是 <span class="math">⌊(i<span class="bin">−</span><span class="upr">1</span>)/<span class="upr">2</span>⌋</span>——正是 5.1.3 的性质。一个指针都不用存，这是完全二叉树最省空间的存法；5.5 节的堆和 8.3.2 节的堆排序都用它。<strong>但它只对完全二叉树划算</strong>：树一旦有空洞，数组里就要留出同样多的空位。</p>
 <p>第 6 章会介绍一般情况下树的顺序存储；由于二叉树与树能够进行等价转换，因此一般情况下的二叉树 也可以采用类似的顺序存储结构方法。</p>
 <p><strong>在不同的存储结构中，不仅空间开销有差异，实现二叉树操作的方法也不同。</strong> 因此在具体应用中 采取什么存储结构，除了根据二叉树的形态之外，还应该考虑时间、空间复杂度和算法的简洁性。</p>
 <h4 id="教学版完整实现"><a class="anchor" href="#教学版完整实现">#</a>教学版：完整实现</h4>
@@ -1324,11 +1325,11 @@ BST 中序: 1 3 4 6 7 8 10 14
 <p>图 5.16　在图 5.14 的最小堆里删除 14：末端元素填进空出来的位置，再与较小的那个孩子逐层交换下沉，直到它不大于自己的孩子。</p>
 <h3 id="551a-建堆为什么是-on-而不是-onlog-n"><a class="anchor" href="#551a-建堆为什么是-on-而不是-onlog-n">#</a>5.5.1a 建堆为什么是 <span class="math">O(n)</span> 而不是 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span></h3>
 <p>把一个无序序列变成堆，做法是<strong>从最后一个非叶结点起，倒着对每个结点做一次下沉</strong>：</p>
-<figure><img loading="lazy" src="../assets/scan/fig-5-17.png" alt="图5.17 建堆过程示例"><figcaption>图5.17 建堆过程示例</figcaption></figure>
+<figure><img loading="lazy" src="../assets/scan/fig-5-17.png" alt="图 5.17 建堆过程示例"><figcaption>图 5.17 建堆过程示例</figcaption></figure>
 <p>图 5.17　建堆过程示例（原书图 5.17 的筛选法）。倒着做的理由是：对某个结点下沉时，它的两棵子树必须已经是堆——从最后一个非叶结点往前扫，正好保证这一点。叶结点本身就是堆，所以后一半结点一次都不用碰。</p>
 <p>粗看这是 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>：<code>sift_down</code> 一次最多走一条树高那么长的路，是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>； 非叶结点大约 <span class="math">n/<span class="upr">2</span></span> 个，乘起来就是 <span class="math">n/<span class="upr">2</span><span class="bin">⋅</span>&thinsp;<span class="upr">log</span>&thinsp;n</span>。<strong>原书特意说这只是一个粗略的上界。</strong></p>
 <p>细算要用到一件事：<strong>下沉的代价不是 <span class="math"><span class="upr">log</span>&thinsp;n</span>，而是「这个结点到最底层还有多远」</strong>。 越靠近底层的结点越多，而它们能下沉的距离越短——两者正好互相抵消。</p>
-<p><strong>先把这个堆放大成一棵满二叉树。</strong> 设堆的高度为 <span class="math">h<span class="rel">=</span>⌊<span class="upr">log</span><sub><span class="upr">2</span></sub>n⌋</span>（根在第 0 层）。 高度同为 <span class="math">h</span> 的满二叉树有 <span class="math"><span class="upr">2</span><sup>h<span class="bin">+</span><span class="upr">1</span></sup><span class="bin">−</span><span class="upr">1</span><span class="rel">≥</span>n</span> 个结点，每一层都排满， 而且每个结点能下沉的距离都不比原堆里对应位置的短。 <strong>所以在这棵满树上算出来的总代价，是原堆的一个上界</strong>—— 这一步是必要的，因为一般的 <span class="math">n</span> 下堆的最后一层未必满，层数也要取整， 直接把「共 <span class="math"><span class="upr">log</span>&thinsp;n</span> 层」当等式用是不严谨的。</p>
+<p><strong>先把这个堆放大成一棵每层都排满的二叉树（perfect）。</strong> 设堆的高度为 <span class="math">h<span class="rel">=</span>⌊<span class="upr">log</span><sub><span class="upr">2</span></sub>n⌋</span>（根在第 0 层）。 高度同为 <span class="math">h</span>、每层都排满的二叉树有 <span class="math"><span class="upr">2</span><sup>h<span class="bin">+</span><span class="upr">1</span></sup><span class="bin">−</span><span class="upr">1</span><span class="rel">≥</span>n</span> 个结点， 而且每个结点能下沉的距离都不比原堆里对应位置的短。 <strong>所以在这棵满树上算出来的总代价，是原堆的一个上界</strong>—— 这一步是必要的，因为一般的 <span class="math">n</span> 下堆的最后一层未必满，层数也要取整， 直接把「共 <span class="math"><span class="upr">log</span>&thinsp;n</span> 层」当等式用是不严谨的。</p>
 <p>满树的第 <span class="math">i</span> 层<strong>恰有</strong> <span class="math"><span class="upr">2</span><sup>i</sup></span> 个结点，其中的结点最多下沉 <span class="math">h<span class="bin">−</span>i</span> 层，于是</p>
 <div class="math math-display"><span class="upr">建堆代价</span> <span class="rel">≤</span> ∑<sub>i<span class="rel">=</span><span class="upr">0</span></sub><sup>h</sup><span class="upr">2</span><sup>i</sup> (h<span class="bin">−</span>i)</div>
 <p>令 <span class="math">j<span class="rel">=</span>h<span class="bin">−</span>i</span> 代入：</p>

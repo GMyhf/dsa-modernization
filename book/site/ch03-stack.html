@@ -1943,15 +1943,25 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
 <span class="k">class</span> ArrayQueue {
 <span class="k">public</span>:
     <span class="k">explicit</span> ArrayQueue(std::<span class="t">size_t</span> capacity)
-        : slots_(capacity + <span class="n">1</span>), data_(slots_ ? <span class="k">new</span> T[slots_] : <span class="k">nullptr</span>) {}
+        : slots_(capacity + <span class="n">1</span>), data_(allocator_.allocate(slots_)) {}
 
     ArrayQueue(<span class="k">const</span> ArrayQueue&amp; other)
         : slots_(other.slots_),
           front_(other.front_),
           rear_(other.rear_),
-          data_(other.slots_ ? <span class="k">new</span> T[other.slots_] : <span class="k">nullptr</span>) {
-        <span class="k">for</span> (std::<span class="t">size_t</span> i = front_; i != rear_; i = (i + <span class="n">1</span>) % slots_) {
-            data_[i] = other.data_[i];
+          data_(other.slots_ ? allocator_.allocate(other.slots_) : <span class="k">nullptr</span>) {
+        std::<span class="t">size_t</span> constructed = <span class="n">0</span>;
+        <span class="k">try</span> {
+            <span class="k">for</span> (std::<span class="t">size_t</span> i = front_; i != rear_; i = (i + <span class="n">1</span>) % slots_) {
+                allocator_traits::construct(allocator_, data_ + i, other.data_[i]);
+                ++constructed;
+            }
+        } <span class="k">catch</span> (...) {
+            <span class="k">for</span> (std::<span class="t">size_t</span> i = <span class="n">0</span>; i &lt; constructed; ++i) {
+                allocator_traits::destroy(allocator_, data_ + ((front_ + i) % slots_));
+            }
+            <span class="k">if</span> (data_ != <span class="k">nullptr</span>) allocator_.deallocate(data_, slots_);
+            <span class="k">throw</span>;
         }
     }
 
@@ -1973,7 +1983,10 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
         <span class="k">return</span> *<span class="k">this</span>;
     }
 
-    ~ArrayQueue() { <span class="k">delete</span>[] data_; }
+    ~ArrayQueue() {
+        clear();
+        <span class="k">if</span> (data_ != <span class="k">nullptr</span>) allocator_.deallocate(data_, slots_);
+    }
 
     <span class="t">void</span> swap(ArrayQueue&amp; other) <span class="k">noexcept</span> {
         <span class="k">using</span> std::swap;
@@ -1999,7 +2012,7 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
         <span class="k">if</span> (full()) {
             <span class="k">return</span> <span class="k">false</span>;
         }
-        data_[rear_] = value;
+        allocator_traits::construct(allocator_, data_ + rear_, value);
         rear_ = (rear_ + <span class="n">1</span>) % slots_;
         <span class="k">return</span> <span class="k">true</span>;
     }
@@ -2008,7 +2021,7 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
         <span class="k">if</span> (full()) {
             <span class="k">return</span> <span class="k">false</span>;
         }
-        data_[rear_] = std::move(value);
+        allocator_traits::construct(allocator_, data_ + rear_, std::move(value));
         rear_ = (rear_ + <span class="n">1</span>) % slots_;
         <span class="k">return</span> <span class="k">true</span>;
     }
@@ -2019,6 +2032,7 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
             <span class="k">return</span> std::nullopt;
         }
         T value = std::move(data_[front_]);
+        allocator_traits::destroy(allocator_, data_ + front_);
         front_ = (front_ + <span class="n">1</span>) % slots_;
         <span class="k">return</span> value;
     }
@@ -2028,9 +2042,19 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
         <span class="k">return</span> empty() ? <span class="k">nullptr</span> : &amp;data_[front_];
     }
 
-    <span class="t">void</span> clear() <span class="k">noexcept</span> { front_ = rear_ = <span class="n">0</span>; }
+    <span class="c">/// 清空：逐个销毁存活元素，释放其持有的资源；槽位本身保留为原始存储。</span>
+    <span class="t">void</span> clear() <span class="k">noexcept</span> {
+        <span class="k">while</span> (front_ != rear_) {
+            allocator_traits::destroy(allocator_, data_ + front_);
+            front_ = (front_ + <span class="n">1</span>) % slots_;
+        }
+        front_ = rear_ = <span class="n">0</span>;
+    }
 
 <span class="k">private</span>:
+    <span class="k">using</span> allocator_type = std::allocator&lt;T&gt;;
+    <span class="k">using</span> allocator_traits = std::allocator_traits&lt;allocator_type&gt;;
+    allocator_type allocator_;
     std::<span class="t">size_t</span> slots_{<span class="n">0</span>};   <span class="c">// 数组格数 = 容量 + 1</span>
     std::<span class="t">size_t</span> front_{<span class="n">0</span>};
     std::<span class="t">size_t</span> rear_{<span class="n">0</span>};

@@ -889,6 +889,8 @@ LR（左右，先左旋再右旋）      RL（右左，先右旋再左旋）
 
 图 12.36　删除的例子（原书跨两页，(a)(b) 一页、(c)(d)(e) 一页）：(a) 删有两个孩子的结点 c，先用它的中序前驱 m 顶替，再删到叶那一层；(b) 删结点 g 之后 m 失衡；(c) 需要对 m 作 LL 旋转；(d) 转完 m 之后回溯，父结点 a 又失衡，再以 a 为根作一次 LL 旋转；(e) 调整完毕，整棵树重新平衡。**一次删除可能引发从被删结点一路到根的多次旋转**，这是它与插入最大的不同。
 
+注意：图中用**中序前驱**（左子树最大）顶替被删结点，而 `code/ch12/balanced_trees/modern.hpp` 的 `remove` 用的是**中序后继**（右子树最小）。两种做法都保持 BST 性质、都正确，只是互为镜像；用代码复现这张图时，被顶替的结点和随后失衡的位置会与图不同。
+
 ![图 12.37 最接近于不平衡的 AVL 树](assets/scan/fig-12-37.png)
 
 图 12.37　「最瘦」的 AVL 树——每个结点的左右高度差都取到允许的极限。设高度为 $h$ 的这种树最少有 $N(h)$ 个结点，则 $N(h)=N(h-1)+N(h-2)+1$（Fibonacci 递推），由此可推出 AVL 树的高度不超过约 $1.44\log_2 n$：**AVL 的平衡不是完美平衡，但足以保证 $O(\log n)$**。
@@ -900,7 +902,7 @@ LR（左右，先左旋再右旋）      RL（右左，先右旋再左旋）
 
 ### 12.4.3 伸展树
 
-**伸展树**（splaying tree）由 John Edward Hopcroft 和 Robert Endre Tarjan 于 1985 年共同发明，
+**伸展树**（splaying tree）由 Daniel Dominic Sleator 和 Robert Endre Tarjan 提出（论文 *Self-Adjusting Binary Search Trees* 于 1985 年发表；原书误作 Hopcroft 和 Tarjan），
 与第 10.1 节提到的线性表调整技术同属于**自调整数据结构**（self-adjusting data structure）。
 
 **与 AVL 不同的是：伸展树的一次访问不一定会使树结构更加平衡，也不能保证最终树高平衡；但它能

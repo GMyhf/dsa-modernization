@@ -2,8 +2,8 @@
   "voice": "zh-CN-YunyangNeural",
   "rate": "+0%",
   "total": "21:19",
-  "source_pptx_sha256": "91dfc551b3c55bb344069dd6b52697a08dcb08cc3259f494938133975afe46dd",
-  "source_script_sha256": "f336e9f0878529f4f7787b7d978a881d2e4a8ad040fc98375916cce187d89b12",
+  "source_pptx_sha256": "5583935f46fe197495b4ccb659edc629011fdeb25d8b7932810ed4f5b37592bc",
+  "source_script_sha256": "a4cb9e0a1255b80746e87504029c25eb3417b555e1f56c0c67ecf8272a575fb7",
   "sections": [
     {
       "page": 1,
@@ -210,8 +210,8 @@
       "title": "12.4.3 伸展树，以及第 11 章的呼应",
       "start": "18:05",
       "end": "19:01",
-      "seconds": 55.3,
-      "chars": 294
+      "seconds": 55.2,
+      "chars": 293
     },
     {
       "page": 27,
