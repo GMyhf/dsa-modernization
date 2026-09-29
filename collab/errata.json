@@ -69,6 +69,11 @@
     {"id": "E22", "source": "book/勘误.md · 反复出现", "listing": "顺序表/链表/顺序栈/链式栈/字符串/最小堆",
      "summary": "有析构、无拷贝构造与拷贝赋值：拷贝一次就二次释放（违反五法则）",
      "kind": "memory"},
+    {"id": "E23", "source": "book/勘误.md · 正文说法有误", "listing": "第 4.2.1 节",
+     "summary": "「字符数组是用字符指针定义的」：数组不是指针；char[] 之间 s1 = s2 编译不过，只有 char* 才编译通过并只复制地址",
+     "kind": "prose",
+     "reason": "是原书正文的概念表述问题，不对应任何清单。g++/clang++ 对数组赋值分别报 incompatible types in assignment / array type is not assignable；char* 赋值后两指针同址。正文 4.2.1 节已改写并注明勘误 E23。",
+     "by": "claude", "date": "2026-09-29"},
 
     {"id": "R00", "source": "教材《1-6 章勘误表》错误 0", "listing": "第 1.4.2 节",
      "summary": "连续有序子数组的长度条件应为 j2 - j1 + 1",

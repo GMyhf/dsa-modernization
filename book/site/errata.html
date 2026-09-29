@@ -288,6 +288,19 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <td style="text-align:left">图4.12 只画过程、没给返回值，所以印出来没人发现</td>
 </tr>
 </tbody></table></div>
+<h2 id="正文说法有误"><a class="anchor" href="#正文说法有误">#</a>正文说法有误</h2>
+<p>代码之外、正文里的概念性错误。它们不对应某条清单，但照着字面去写代码会得到与书中所说不同的结果。</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">位置</th>
+<th style="text-align:left">错在哪</th>
+<th style="text-align:left">证据</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">第 4.2.1 节，图 4.1 之后</td>
+<td style="text-align:left">「C++ 中的字符数组是用字符指针定义的」：数组不是指针。对图 4.1 的 <code>char s1[12]</code>、<code>char s2[8]</code>，<code>s1 = s2</code> 不是「悄悄没复制内容」，而是<strong>编译不过</strong>；只有 <code>char*</code> 才会编译通过并只复制地址</td>
+<td style="text-align:left"><code>error: array type &#x27;char[12]&#x27; is not assignable</code>（clang++）· 第 4 章 4.2.1 节</td>
+</tr>
+</tbody></table></div>
 <h2 id="反复出现但单独一条通常还能跑两下"><a class="anchor" href="#反复出现但单独一条通常还能跑两下">#</a>反复出现、但单独一条通常还能「跑两下」</h2>
 <p>这些不是某一条清单独有，而是同一类所有权错误在多章重复。编译能过，拷贝一次就二次释放。</p>
 <ul>
@@ -508,7 +521,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>这些条目是参考勘误的内容性摘要，不替代原 PDF 的页码和完整记录。</p>
 <div class="pagenav"><a href="figures.html"><span class="dir">← 上一篇</span>原书插图</a><a href="exam-codepack.html" style="text-align:right"><span class="dir">下一篇 →</span>考场代码包</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#怎么读">怎么读</a><a href="#编译不过">编译不过</a><a href="#能编译跑起来是错的">能编译、跑起来是错的</a><a href="#书内自相矛盾">书内自相矛盾</a><a href="#反复出现但单独一条通常还能跑两下">反复出现、但单独一条通常还能「跑两下」</a><a href="#作者代码包里有没有">作者代码包里有没有</a><a href="#曾经误判已撤回">曾经误判、已撤回</a><a href="#还没收进本表的">还没收进本表的</a><a href="#参考勘误表补充前六章">参考勘误表补充（前六章）</a></nav>
+<nav class="page"><b>本页</b><a href="#怎么读">怎么读</a><a href="#编译不过">编译不过</a><a href="#能编译跑起来是错的">能编译、跑起来是错的</a><a href="#书内自相矛盾">书内自相矛盾</a><a href="#正文说法有误">正文说法有误</a><a href="#反复出现但单独一条通常还能跑两下">反复出现、但单独一条通常还能「跑两下」</a><a href="#作者代码包里有没有">作者代码包里有没有</a><a href="#曾经误判已撤回">曾经误判、已撤回</a><a href="#还没收进本表的">还没收进本表的</a><a href="#参考勘误表补充前六章">参考勘误表补充（前六章）</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/勘误.md</code> 生成
