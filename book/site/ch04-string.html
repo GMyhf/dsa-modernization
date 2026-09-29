@@ -188,7 +188,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <div class="codeblock" data-lang="console"><pre><code>拼接后: Hello C++
 子串: C++
 首次出现 C 的下标: 6</code></pre></div>
-<p>缓冲区仍是手写的 <code>char*</code>，换成 <code>std::string</code> 这一节就没了。<code>find</code> 找不到时返回空 optional，不用 <code>-1</code> 和位置 0 抢同一个数字。</p>
+<p><code>String</code> 的缓冲区仍是手写的 <code>char*</code>：4.2 节要讲的正是变长串的分配、<code>&#x27;\0&#x27;</code> 结尾和深复制，若内部直接用 <code>std::string</code>，这些都被标准库藏起来了。<code>find</code> 找不到时返回空 optional，不用 <code>-1</code> 和位置 0 抢同一个数字。</p>
 <p>图4.12 自己的那对串，原书两个匹配算法都返回 11，正确答案是 10：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/pattern_matching/demo.cpp">code/ch04/pattern_matching/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
 
