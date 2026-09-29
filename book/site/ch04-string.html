@@ -756,6 +756,23 @@ std::string::find 对照         = 2</code></pre></div>
 </tbody></table></div>
 <p>这与原书图4.11 最后一行完全一致。</p>
 <blockquote><p><strong>注意原书正文与图 4.11 不一致。</strong> 正文写的是 <code>next = {-1,0,0,0,0,-1,1,0,0,3,0}</code>，数一下是 <strong>11 个值</strong>， 而模式只有 <strong>10 个字符</strong>。图 4.11 给的是 10 个值，与算法实算的结果相符。 正文里多出来的那个 0 是错的。本书的测试逐个比对图 4.11 的十个值， 并单独断言&quot;模式只有 10 个字符&quot;，把这处矛盾钉住。</p></blockquote>
+<h4 id="优化版-next-与常见的-lps-表是什么关系"><a class="anchor" href="#优化版-next-与常见的-lps-表是什么关系">#</a>优化版 next 与常见的 lps 表是什么关系</h4>
+<p>很多教材和网上的 KMP 用的是另一张表：<strong>lps</strong>（longest proper prefix which is also suffix）， <code>lps[i]</code> 是 <code>P[0..i]</code>（<strong>含</strong> <code>P[i]</code>）最长的相等真前后缀长度，初值全 0。它和本书的 <code>border_lengths</code>（见 4.3.3 节后面求最小循环节的部分）是同一张表。原书的优化版 next 与它并不矛盾， 可以由它<strong>两步</strong>推出来：</p>
+<div class="codeblock" data-lang="text"><pre><code>i            0   1   2   3   4   5   6   7   8   9
+P[i]         a   b   c   d   a   a   b   c   a   b
+lps          0   0   0   0   1   1   2   3   1   2
+next        -1   0   0   0   0   1   1   2   3   1    ← 第一步：右移一格
+优化版 next  -1   0   0   0  -1   1   0   0   3   0    ← 第二步：原书算法4.7 / 图 4.11</code></pre></div>
+<p><strong>第一步：<code>next[i] = lps[i-1]</code>，<code>next[0] = -1</code>。</strong> 两张表回答的问题不同：<code>lps[i]</code> 问的是 「<code>P[0..i]</code> 的最长前后缀」；<code>next[i]</code> 问的是「<code>P[i]</code> 与目标失配时，模式下标退到哪里」。 <code>P[i]</code> 刚失配，能利用的只有它前面已经配上的 <code>P[0..i-1]</code>，所以取 <code>lps[i-1]</code>——整张表右移一格。 <code>P[0]</code> 前面什么都没有，退无可退，记作 −1，意思是「不必再比，目标前进一格」，对应 KMP 匹配里 <code>i == -1</code> 时的 <code>++i; ++j</code>。用 lps 表写匹配时要写 <code>i = lps[i-1]</code> 并单独处理 <code>i == 0</code>； 原书把这个「减 1」和特判都折进了表里。</p>
+<p><strong>第二步：跳过注定失败的回退。</strong> 设 <code>P[i]</code> 与 <code>T[j]</code> 失配，按未优化的 next 应退到 <code>k = next[i]</code>、 接着比 <code>P[k]</code> 与 <code>T[j]</code>。若 <code>P[k] == P[i]</code>，这次比较不用做就知道结果——<code>T[j]</code> 刚和 <code>P[i]</code> 不等， 也就一定和 <code>P[k]</code> 不等。于是直接借用 <code>next[k]</code>：这就是上面代码里的 <code>next[i] = (P[i] == P[k]) ? next[k] : k</code>。<code>next[k]</code> 本身已经优化过，所以一串相同字符会一步跳到底。 对照上表：<code>i = 4</code> 处 <code>P[4] = P[0] = &#x27;a&#x27;</code>，0 变成 <code>next[0] = -1</code>；<code>i = 6, 7, 9</code> 同理塌成 0； <code>i = 8</code> 处 <code>P[8] = &#x27;a&#x27;</code> 而 <code>P[3] = &#x27;d&#x27;</code>，不同，保留 3。</p>
+<p>模式 <code>&quot;aaaab&quot;</code> 最能看出差别：</p>
+<div class="codeblock" data-lang="text"><pre><code>i            0   1   2   3   4
+lps          0   1   2   3   0
+next        -1   0   1   2   3
+优化版 next  -1  -1  -1  -1   3</code></pre></div>
+<p>在 <code>i = 3</code> 处与一个不是 <code>&#x27;a&#x27;</code> 的字符失配时，未优化的 next 会依次退到 2、1、0、−1，白比三次 <code>&#x27;a&#x27;</code>；优化版一步退到 −1。</p>
+<p>对照原书代码：里层 <code>while</code> 的 <code>k = next[k]</code> 就是 lps 写法里的 <code>length = lps[length - 1]</code>； <code>++i; ++k</code> 之后，<code>k</code> 恰是 <code>P[0..i-1]</code> 的最长前后缀长度，也就是未优化的 <code>next[i]</code>；最后那个 三目运算是第二步。所谓「初始化为 −1」，起作用的其实是 <code>next[0] = -1</code> 和 <code>k = -1</code> 两个初值—— 第一次 <code>++k</code> 后 <code>k</code> 正好是 0。回退时用的是<strong>已优化</strong>的 <code>next[k]</code>，结果照样正确：被跳过的位置 与 <code>P[k]</code> 是同一个字符，本来也会失配。本章测试在 {a,b} 上长度 1–10 的全部 2046 个串上验证了 「右移一格、再跳过同字符回退」与算法4.7 逐项相同。</p>
+<p>代价是：<strong>优化版 next 只能拿来做匹配</strong>，它的值已不再是前后缀长度（上表 <code>i = 4</code> 是 −1）。 需要前后缀长度本身时——例如 4.3.3 节后面求最小循环节——必须用 lps / <code>border_lengths</code>。</p>
 <p>关于所有权：原书 <code>findNext</code> 用 <code>new int[m]</code> 返回裸数组，而书中调用它的地方 ——算法4.8 的 <code>N</code> 参数、正文的示例——<strong>一次都没有出现配对的 <code>delete[]</code></strong>。 每匹配一个模式就漏一个数组。本书返回一个拥有所有权的容器，计算过程一字未改。</p>
 <h3 id="433-kmp-模式匹配算法"><a class="anchor" href="#433-kmp-模式匹配算法">#</a>4.3.3 KMP 模式匹配算法</h3>
 <p>有了特征向量，匹配过程与朴素算法几乎一样，只有失配那一步不同： 不再把模式退回开头，而是退到 <code>next[i]</code>。</p>

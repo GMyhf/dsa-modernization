@@ -88,6 +88,24 @@ check(power_bad == 0, "T-072 repetition_count / is_repetition 穷举对拍")
 check(border_bad == 0, "T-072 border_lengths 每个前缀对拍")
 check(next_wrong > 1000, "陷阱：优化版 next 在上千个前缀上给出错误周期")
 
+
+
+# 4.3.2 节的三表对照：优化版 next = 右移一格的 lps（border）表，再跳过同字符回退。
+def next_from_border(s: str) -> list[int]:
+    border = modern.border_lengths(s)
+    nx = [-1] + border[:-1]
+    for i in range(1, len(s)):
+        k = nx[i]
+        if k >= 0 and s[i] == s[k]:
+            nx[i] = nx[k]
+    return nx
+
+
+check(modern.border_lengths("abcdaabcab") == [0, 0, 0, 0, 1, 1, 2, 3, 1, 2], "4.3.2 三表对照 lps")
+check(modern.build_next("aaaab") == [-1, -1, -1, -1, 3], "4.3.2 三表对照 aaaab")
+check(all(modern.build_next(s) == next_from_border(s) for s in all_strings if s),
+      "4.3.2 三表对照：优化版 next == 右移的 lps 再跳过同字符回退")
+
 check(modern.build_next("aaaa") == [-1, -1, -1, -1], "aaaa 的优化版 next 全是 -1")
 check(3 - modern.build_next("aaaa")[3] == 4, "陷阱：用优化版 next 算前缀 aaa 的周期得 4")
 check(3 - modern.border_lengths("aaaa")[2] == 1, "用未优化的边界长度得 1")

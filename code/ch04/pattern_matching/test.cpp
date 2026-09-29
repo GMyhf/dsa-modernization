@@ -269,6 +269,43 @@ void test_optimized_next_gives_wrong_periods() {
     check(right_count == 0, "未优化的 border_lengths 在同一批前缀上一个都不错");
 }
 
+// 4.3.2 节的三表对照：优化版 next 可以由 border（即常见的 lps 表）两步推出——
+// 先右移一格（next[i] = border[i−1]，next[0] = −1），再把「P[i] == P[k]」的回退
+// 跳到 next[k]。这里按这两步独立推一遍，与 build_next 逐项比。
+std::vector<dsa::next_type> next_from_border(std::string_view s) {
+    const auto border = dsa::border_lengths(s);
+    std::vector<dsa::next_type> nx(s.size());
+    for (std::size_t i = 0; i < s.size(); ++i) {
+        nx[i] = i == 0 ? -1 : static_cast<dsa::next_type>(border[i - 1]);
+    }
+    for (std::size_t i = 1; i < s.size(); ++i) {
+        const auto k = nx[i];
+        if (k >= 0 && s[i] == s[static_cast<std::size_t>(k)]) nx[i] = nx[static_cast<std::size_t>(k)];
+    }
+    return nx;
+}
+
+void test_optimized_next_is_shifted_border_with_skips() {
+    const std::vector<std::size_t> border_book{0, 0, 0, 0, 1, 1, 2, 3, 1, 2};
+    check(dsa::border_lengths("abcdaabcab") == border_book, "4.3.2 三表对照：\"abcdaabcab\" 的 lps 表");
+    const std::vector<std::size_t> border_a{0, 1, 2, 3, 0};
+    const std::vector<dsa::next_type> next_a{-1, -1, -1, -1, 3};
+    check(dsa::border_lengths("aaaab") == border_a, "4.3.2 三表对照：\"aaaab\" 的 lps 表");
+    check(dsa::build_next("aaaab") == next_a, "4.3.2 三表对照：\"aaaab\" 的优化版 next");
+
+    std::size_t bad = 0;
+    for (std::size_t len = 1; len <= 10; ++len) {
+        for (std::size_t mask = 0; mask < (std::size_t{1} << len); ++mask) {
+            std::string s;
+            for (std::size_t i = 0; i < len; ++i) s += ((mask >> i) & 1U) ? 'b' : 'a';
+            if (dsa::build_next(s) != next_from_border(s)) {
+                if (++bad <= 3) std::printf("    三表对照不成立: \"%s\"\n", s.c_str());
+            }
+        }
+    }
+    check(bad == 0, "4.3.2 三表对照：优化版 next == 右移一格的 lps 再跳过同字符回退（2046 个串）");
+}
+
 // 陷阱二：边界为 0 时 p == n，n % n == 0 恒成立，但这不是循环串。
 void test_zero_border_is_not_a_repetition() {
     check(dsa::border_lengths("abcd").back() == 0, "\"abcd\" 的整串边界为 0");
@@ -297,6 +334,7 @@ int main() {
     test_no_console_output();
     test_minimal_period_brute_force();
     test_optimized_next_gives_wrong_periods();
+    test_optimized_next_is_shifted_border_with_skips();
     test_zero_border_is_not_a_repetition();
     const auto shared = dsa::shared_cases::load();
     for (const auto& item : shared) {
