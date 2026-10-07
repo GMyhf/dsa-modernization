@@ -300,6 +300,11 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <td style="text-align:left">「C++ 中的字符数组是用字符指针定义的」：数组不是指针。对图 4.1 的 <code>char s1[12]</code>、<code>char s2[8]</code>，<code>s1 = s2</code> 不是「悄悄没复制内容」，而是<strong>编译不过</strong>；只有 <code>char*</code> 才会编译通过并只复制地址</td>
 <td style="text-align:left"><code>error: array type &#x27;char[12]&#x27; is not assignable</code>（clang++）· 第 4 章 4.2.1 节</td>
 </tr>
+<tr>
+<td style="text-align:left">第 4.3.1 节，朴素匹配的平均代价</td>
+<td style="text-align:left">「运用马尔科夫链可以估算一个更好的比较次数 <span class="math"><span class="upr">2</span><sup>m<span class="bin">+</span><span class="upr">1</span></sup><span class="bin">−</span><span class="upr">2</span></span>」（<span class="math">m</span> 为模式长度），通式 <span class="math">(a<sup>m<span class="bin">+</span><span class="upr">1</span></sup><span class="bin">−</span>a)/(a<span class="bin">−</span><span class="upr">1</span>)</span>（<span class="math">a</span> 为字符种数）也称「平均比较次数」：这两个式子算的是<strong>模式在随机目标串里首次出现的期望位置</strong>，与目标串长度无关、随 <span class="math">m</span> 指数增长，谈不上比「平均不到两倍目标串长」更好；且只对 <code>aa…a</code> 这类自身重叠最多的模式成立。同段「比较 <span class="math">m</span> 次的概率为 <span class="math"><span class="upr">2</span><sup><span class="bin">−</span>m</sup></span>」在比满整个模式时漏了配串成功的情形，应为 <span class="math"><span class="upr">2</span><sup><span class="bin">−</span>(m<span class="bin">−</span><span class="upr">1</span>)</sup></span>（结论「每趟不到 2 次」不变）</td>
+<td style="text-align:left">两状态马尔科夫链手算：<code>&quot;00&quot;</code> 期望位置 6、<code>&quot;01&quot;</code> 为 4；随机模拟 <code>&quot;000&quot;</code> 14.0、<code>&quot;001&quot;</code> 8.0（公式都给 14）· 第 4 章 4.3.1 节</td>
+</tr>
 </tbody></table></div>
 <h2 id="反复出现但单独一条通常还能跑两下"><a class="anchor" href="#反复出现但单独一条通常还能跑两下">#</a>反复出现、但单独一条通常还能「跑两下」</h2>
 <p>这些不是某一条清单独有，而是同一类所有权错误在多章重复。编译能过，拷贝一次就二次释放。</p>
