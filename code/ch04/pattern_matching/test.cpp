@@ -76,9 +76,9 @@ void test_next_matches_the_book_figure() {
     const std::vector<dsa::next_type> from_figure{-1, 0, 0, 0, -1, 1, 0, 0, 3, 0};
     check(next.size() == 10, "next 数组长度等于模式长度");
     check(next == from_figure, "勘误R12 算法4.7：next 数组与书中图4.11 最后一行逐个一致");
-    // 注意：书中**正文**写的是 {-1,0,0,0,0,-1,1,0,0,3,0}，11 个值，比模式还长一位。
-    // 正文与图4.11 自相矛盾，算法实算的结果站在图这一边。详见 legacy.md 缺陷 4。
-    check(from_figure.size() == 10, "模式 \"abcdaabcab\" 只有 10 个字符，正文那 11 个值必有一处错");
+    // 原书正文两处与图4.11 印的都是这 10 个值（扫描件第 95 页）；OCR 底稿里多出的一个 0
+    // 是识别噪声，不是原书矛盾。详见 legacy.md 缺陷 4 的更正。
+    check(from_figure.size() == 10, "模式 \"abcdaabcab\" 有 10 个字符，next 也是 10 个值");
 }
 
 void test_next_basic_properties() {

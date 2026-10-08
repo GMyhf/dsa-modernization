@@ -63,7 +63,8 @@ class IntSet:
 def elf_hash(text):
     value = 0
     for character in text:
-        value = (value << 4) + ord(character)
+        # 截到 32 位：ELFhash 按 32 位定义，否则进位会越过第 32 位、与 C++ 版分叉
+        value = ((value << 4) + ord(character)) & 0xFFFFFFFF
         high = value & 0xF0000000
         if high:
             value ^= high >> 24

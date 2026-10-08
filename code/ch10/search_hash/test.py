@@ -39,6 +39,7 @@ check(left.intersection(right).size() == 2, "算法10.6 交集")
 check(not left.includes(right), "算法10.7 包含关系")
 check(left.erase(1) and not left.erase(1), "代码10.4 删除状态")
 check(modern.elf_hash("abc") != modern.elf_hash("abd"), "算法10.8 邻近串散列不同")
+check(modern.elf_hash("\x0f" * 7 + " ") == 0x10, "算法10.8 ELFhash 中间值按 32 位截断")
 
 table = modern.HashTable(7)
 check(table.capacity() == 7 and table.size() == 0, "算法10.9 容量与计数")

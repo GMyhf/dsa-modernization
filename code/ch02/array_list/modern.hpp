@@ -132,7 +132,7 @@ public:
     /// 位置非法抛 std::out_of_range；容量不足自动翻倍。
     ///
     /// 时间代价仍是 O(n)——pos 之后的元素都要右移一位。这是顺序表的固有代价，
-    /// 也是第 2.3 节要拿它和链表对比的地方，没有被"优化"掉。
+    /// 也是第 2.4 节要拿它和链表对比的地方，没有被"优化"掉。
     void insert(size_type pos, const T& value) {
         make_gap(pos);
         data_[pos] = value;

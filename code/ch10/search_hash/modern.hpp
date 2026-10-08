@@ -2,6 +2,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -78,11 +79,13 @@ private:
 
 // >>> elf-hash
 // 算法10.8：ELFhash，逐字节处理，不把 char 的符号性带入散列。
+// 中间值固定为 32 位：ELFhash 按 32 位定义，用 64 位 size_t 时 hash << 4 再加一个字节
+// 可能进位到第 32 位，那一位永远不会被清掉，结果就和经典 ELFhash 分叉。
 inline std::size_t elf_hash(const std::string& text) noexcept {
-    std::size_t hash = 0;
+    std::uint32_t hash = 0;
     for (unsigned char character : text) {
         hash = (hash << 4U) + character;
-        const std::size_t high_bits = hash & 0xF0000000U;
+        const std::uint32_t high_bits = hash & 0xF0000000U;
         if (high_bits != 0) hash ^= high_bits >> 24U;
         hash &= ~high_bits;
     }

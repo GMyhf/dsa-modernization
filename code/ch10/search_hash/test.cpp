@@ -45,6 +45,8 @@ void test_hash_and_tombstones() {
     check(dsa::search::elf_hash("abc") != dsa::search::elf_hash("abd"), "算法10.8 ELFhash distinguishes nearby strings");
     check(dsa::search::elf_hash("") == 0, "算法10.8 empty string hash");
     check(dsa::search::elf_hash("abc") == dsa::search::elf_hash("abc"), "算法10.8 deterministic hash");
+    // 0x0FFFFFFF 左移 4 位再加 0x20 会进位到第 32 位；32 位 ELFhash 的结果是 0x10。
+    check(dsa::search::elf_hash(std::string(7, '\x0f') + " ") == 0x10U, "算法10.8 ELFhash 中间值按 32 位截断");
     dsa::search::HashTable table(5);
     check(table.insert(1) && table.insert(6) && table.insert(11), "算法10.10 linear collision insertion");
     check(table.size() == 3 && table.capacity() == 5, "算法10.9 table accounting");

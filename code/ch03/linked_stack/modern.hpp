@@ -39,9 +39,9 @@ public:
     // >>> rule-of-five
     // 原书有 `~lnkStack(){ clear(); }` 却没有拷贝构造与拷贝赋值：
     // 一次 `lnkStack<int> b = a;` 之后两个栈共享同一串结点，各自析构一次 → 二次释放。
-    // 与顺序栈、顺序表、链表、字符串是同一个错误，本书第五次遇到它。
+    // 与顺序栈、顺序表、链表、字符串是同一个错误，按章节顺序这是本书第四次遇到它。
     LinkedStack(const LinkedStack& other) {
-        // 先按原序收集，再逆序压回，避免递归拷贝（深链会爆栈，见 UNVERIFIED-RISKS.md）
+        // 用尾指针按原序逐个复制，不用递归拷贝（深链会爆栈，见 UNVERIFIED-RISKS.md）
         Node* source = other.top_;
         Node** tail = &top_;
         try {

@@ -216,7 +216,7 @@ void test_huffman_rejects_bad_input() {
 
 // ---- Huffman 编码与译码 ---------------------------------------------------
 
-// 原书 4.567 节那个例子：电文 abbaaadc。
+// 原书 5.6.2 节那个例子：电文 abbaaadc。
 // 定长编码要 2 位一个字符、共 16 位；Huffman 按频率给短码，应当更短。
 void test_huffman_encode_is_shorter_than_fixed_length() {
     const char symbols[] = {'a', 'b', 'c', 'd'};
