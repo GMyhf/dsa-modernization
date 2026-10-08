@@ -216,7 +216,7 @@ inline std::size_t elf_hash(const std::string& text) {
 中文等非 ASCII 字节会变成负数，一进位运算就带出符号扩展，散列值随平台而变。
 
 教学版的测试里有一条拿 UTF-8 的「中」（E4 B8 AD）做输入：
-按无符号读得到 0xF02D，按有符号读会被符号扩展成 0xFFFFFF000FFF00DD。
+按无符号读得到 0xF02D，按有符号读会被符号扩展，得 0x0FFF00DD。
 -->
 
 ---

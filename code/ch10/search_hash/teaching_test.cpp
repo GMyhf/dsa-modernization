@@ -121,7 +121,8 @@ void test_elf_hash() {
 
     // 非 ASCII 字节（UTF-8 的「中」= E4 B8 AD）：按 unsigned char 读得到 0xF02D。
     // 若把它当有符号 char 读，负值会被符号扩展成 0xFFFFFF... 一路带进后续运算，
-    // 本机实测结果是 0xFFFFFF000FFF00DD——两者天差地别，所以这一条能分辨两种写法。
+    // 中间值按 32 位截断后实测结果是 0x0FFF00DD（截断前的 64 位版本是 0xFFFFFF000FFF00DD）
+    // ——两者都与 0xF02D 天差地别，所以这一条能分辨两种写法。
     check(elf_hash("\xE4\xB8\xAD") == 0xF02Du, "非 ASCII 字节按无符号处理");
     // 0x0FFFFFFF 左移 4 位再加 0x20 会进位到第 32 位；按 32 位截断后结果是 0x10。
     check(elf_hash(std::string(7, '\x0f') + " ") == 0x10u, "中间值按 32 位截断，不让进位越过第 32 位");

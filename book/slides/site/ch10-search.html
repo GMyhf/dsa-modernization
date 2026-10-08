@@ -208,7 +208,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 中文等非 ASCII 字节会变成负数，一进位运算就带出符号扩展，散列值随平台而变。
 
 教学版的测试里有一条拿 UTF-8 的「中」（E4 B8 AD）做输入：
-按无符号读得到 0xF02D，按有符号读会被符号扩展成 0xFFFFFF000FFF00DD。&lt;/p&gt;"><h1 id="1031-散列函数"><a class="anchor" href="#1031-散列函数">#</a>10.3.1 散列函数</h1>
+按无符号读得到 0xF02D，按有符号读会被符号扩展，得 0x0FFF00DD。&lt;/p&gt;"><h1 id="1031-散列函数"><a class="anchor" href="#1031-散列函数">#</a>10.3.1 散列函数</h1>
 <p>好的散列函数要<strong>算得快</strong>，并且<strong>把地址铺匀</strong>。</p>
 <p>常见做法：除留余数（<span class="math">h(k)<span class="rel">=</span>k&thinsp;<span class="upr">bmod</span>&thinsp;m</span>，m 取素数）、折叠、平方取中。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch10/search_hash/teaching.hpp">code/ch10/search_hash/teaching.hpp#fn:elf_hash</a></div><pre><code><span class="c">// 【算法10.8】ELF 散列：把字符串搅成一个整数。</span>
