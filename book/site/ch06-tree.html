@@ -216,7 +216,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 </ul>
 <p>原因就在转换关系里：森林 <span class="math">F</span> 的第一棵树 <span class="math">T<sub><span class="upr">1</span></sub></span> 的诸子树 <span class="math">T<sub><span class="upr">11</span></sub>,T<sub><span class="upr">12</span></sub>,⋯,T<sub><span class="upr">1</span>m</sub></span> 对应 <span class="math">B(F)</span> 的 左子树，而 <span class="math">F</span> 中其余的树 <span class="math">T<sub><span class="upr">2</span></sub>,⋯,T<sub>n</sub></span> 对应于 <span class="math">B(F)</span> 的右子树；森林的后根次序周游过程是 先周游 <span class="math">{T<sub><span class="upr">11</span></sub>,⋯,T<sub><span class="upr">1</span>m</sub>}</span>、再访问 <span class="math">T<sub><span class="upr">1</span></sub></span> 的根结点、最后周游 <span class="math">{T<sub><span class="upr">2</span></sub>,⋯,T<sub>n</sub>}</span>——这恰好是 二叉树 <span class="math">B(F)</span> 的中序周游过程。以图 6.5 那个森林为例：先根次序得到 <code>A B C E F D G H J I</code>， 后根次序得到 <code>B E F C D A J H I G</code>。</p>
 <p><strong>广度优先</strong>（breadth-first）周游也称「宽度优先周游」或「层次周游」：从树的第 0 层（根结点）开始， 自上至下逐层周游；在同一层中，则按照从左到右的顺序对结点逐一访问。同样以图 6.5(a) 的森林为例， 按广度方向周游得到 <code>A G B C D H I E F J</code>。<strong>注意森林的层次序列与其对应二叉树的层次次序不同</strong>： 按广度方向周游森林对应的二叉树时，不是简单地按照离二叉树根从近到远地遍历，而是<strong>沿着二叉树 右链访问的过程，左指针起到承上启下的作用</strong>。</p>
-<p>对本节的例子：</p>
+<p>对 6.1.1 节末尾那棵小树（A 的孩子是 B、C、D，B 的孩子是 E、F；6.2.4 节的 <code>demo.cpp</code> 建的就是它）：</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">周游</th>
 <th style="text-align:left">顺序</th>
@@ -557,18 +557,21 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <div class="math math-display">[x]<sub>R</sub><span class="rel">=</span>{y<span class="rel">∈</span>S:(x,y)<span class="rel">∈</span>R}.</div>
 <p>所有等价类互不相交，它们的并正好是 <span class="math">S</span>，因此等价关系就是对 <span class="math">S</span> 的一种划分。</p>
 <p>给定 <span class="math">n</span> 个元素和若干等价偶对 <span class="math">(x,y)</span>，划分过程从 <span class="math">n</span> 个单元素集合开始。依次读入每个偶对，先查找 <span class="math">x</span>、<span class="math">y</span> 所在子集；若两个根不同，就把这两个子集合并成一个。最后剩下的非空子集就是由这些偶对确定的等价类。实现这一过程需要三种操作：为每个元素建立独立集合；找到元素所在子集的标识（根）；把两个子集归并。</p>
-<p>用父指针表示时，把每个子集看成一棵树，森林中的每棵树代表一个子集，树根就是该集合的标识符。<code>find</code> 沿父链找到根，<code>union</code> 只需把一棵树的根指向另一棵树的根；因此不必搬动集合中的所有元素。</p>
+<p>用父指针表示时，把每个子集看成一棵树，森林中的每棵树代表一个子集，树根就是该集合的标识符。<code>find</code> 沿父链找到根，<code>union</code> 只需把一棵树的根指向另一棵树的根；因此不必搬动集合中的所有元素。例如图 6.11(a)、(b) 的两棵树分别表示子集 <span class="math">S<sub><span class="upr">1</span></sub><span class="rel">=</span>{<span class="upr">1</span>,<span class="upr">3</span>,<span class="upr">5</span>,<span class="upr">7</span>}</span> 和 <span class="math">S<sub><span class="upr">2</span></sub><span class="rel">=</span>{<span class="upr">2</span>,<span class="upr">4</span>,<span class="upr">6</span>,<span class="upr">8</span>}</span>，(c) 把 <span class="math">S<sub><span class="upr">1</span></sub></span> 的根 1 指向 <span class="math">S<sub><span class="upr">2</span></sub></span> 的根 2，就得到 <span class="math">S<sub><span class="upr">3</span></sub><span class="rel">=</span>S<sub><span class="upr">1</span></sub><span class="bin">∪</span>S<sub><span class="upr">2</span></sub></span>。（这两个子集一样大，挂法本可任选；本书下面的实现在并列时把值大的根挂到值小的根下，会得到 2 挂在 1 下，与图相反。）</p>
+<p>每次合并前都要做两次查找。合并本身只改一个指针，是 <span class="math">O(<span class="upr">1</span>)</span>；查找的时间则由树的高度决定。最坏情况下，合并会让 <span class="math">n</span> 个结点的树退化成一条链：把图 6.12(a) 的 <span class="math">n</span> 个单元素集合依次合并，若每次都让含元素多的根指向含元素少的根，经过 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 次合并后树高为 <span class="math">n</span>（按第 5 章的口径数层数），如图 6.12(b) 所示——这时对最底下的结点做一次 <code>find</code> 要走 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 步。为了防止树退化为单链，应该让每个结点到根的距离尽可能小，可以做下面两种改进。</p>
 <figure><img loading="lazy" src="../assets/scan/fig-6-10.png" alt="图 6.10 父指针表示法"><figcaption>图 6.10 父指针表示法</figcaption></figure>
 <p>图 6.10　用每个结点的父指针表示树。</p>
 <figure><img loading="lazy" src="../assets/scan/fig-6-11.png" alt="图 6.11 集合的表示方法：(a) 子集 $S_1$；(b) 子集 $S_2$；(c) 并集 $S_3$"><figcaption>图 6.11 集合的表示方法：(a) 子集 <span class="math">S<sub><span class="upr">1</span></sub></span>；(b) 子集 <span class="math">S<sub><span class="upr">2</span></sub></span>；(c) 并集 <span class="math">S<sub><span class="upr">3</span></sub></span></figcaption></figure>
 <p>图 6.11　集合的父指针表示与并集：(a) 子集 <span class="math">S<sub><span class="upr">1</span></sub></span>、(b) 子集 <span class="math">S<sub><span class="upr">2</span></sub></span> 各是一棵树，(c) 合并后 <span class="math">S<sub><span class="upr">1</span></sub></span> 的根挂到了 <span class="math">S<sub><span class="upr">2</span></sub></span> 的根下。</p>
-<p><strong>第一条是【重量权衡合并规则】</strong>(weighted union rule)：合并时看两个集合的<strong>元素个数</strong>， 「令含元素少的子集的树根指向含元素多的子集的根」。原书【代码6.8】的结点里那个 <code>int nCount; //子树元素数目</code> 就是为它准备的。小树挂到大树下，能把整体深度限制在 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>—— 理由是每次合并树高最多加 1，而元素个数至少翻倍，所以任何结点的深度最多增加 <span class="math"><span class="upr">log</span>&thinsp;n</span> 次。</p>
+<p><strong>第一条是【重量权衡合并规则】</strong>(weighted union rule)：合并时看两个集合的<strong>元素个数</strong>， 「令含元素少的子集的树根指向含元素多的子集的根」。原书【代码6.8】的结点里那个 <code>int nCount; //子树元素数目</code> 就是为它准备的。小树挂到大树下，能把整体深度限制在 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>， 每次 <code>find</code> 也就只需 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span> 时间。理由要盯住<strong>某一个结点</strong> <span class="math">x</span> 看：<span class="math">x</span> 到根的距离只在它所在的树 作为<strong>较小</strong>（或一样大）的一方被挂到另一棵树下时才加 1；而这时 <span class="math">x</span> 所在集合的元素个数至少翻倍。 集合最多 <span class="math">n</span> 个元素，翻倍至多 <span class="math">⌊<span class="upr">log</span><sub><span class="upr">2</span></sub>n⌋</span> 次，所以任何结点到根的距离都不超过 <span class="math">⌊<span class="upr">log</span><sub><span class="upr">2</span></sub>n⌋</span>。这个上界是达得到的：<span class="math"><span class="upr">2</span><sup>k</sup></span> 个元素两两合并、再把得到的两元素集合两两合并…… 最后最深的结点离根恰好 <span class="math">k</span> 步。</p>
 <blockquote><p><strong>注意别和「按秩合并」混了。</strong> 按秩比的是<strong>树高</strong>，按重量比的是<strong>元素个数</strong>。 两者复杂度同阶，但在同一组等价对上会长出<strong>形状不同</strong>的树。本书按原书口径用重量， 课程第 6 章习题 8 要求「使用重量权衡合并规则与路径压缩」并画出父指针数组， 换成按秩就对不上答案。并列时本书让<strong>值大的根挂到值小的根下</strong>—— 原书没规定这一条，这个口径取自那道习题的原话，好让书里的实现能直接用来核对。</p></blockquote>
 <figure><img loading="lazy" src="../assets/scan/fig-6-12.png" alt="图 6.12 合并操作的一个极端情况：(a) $n$ 个集合；(b) 合并操作"><figcaption>图 6.12 合并操作的一个极端情况：(a) <span class="math">n</span> 个集合；(b) 合并操作</figcaption></figure>
 <p>图 6.12　不采用重量权衡时，反复合并可能形成极端退化的树：(a) 起初是 <span class="math">n</span> 个单元素集合，(b) 每次都把大树挂到小树下，最后退化成一条长链。</p>
 <p><strong>第二条是路径压缩</strong>：<code>find</code> 在返回根之前，把沿途每个结点的父指针都直接改成根。</p>
 <figure><img loading="lazy" src="../assets/scan/fig-6-13.png" alt="图 6.13 路径压缩示例：(a) 路径压缩之前；(b) 路径压缩之后"><figcaption>图 6.13 路径压缩示例：(a) 路径压缩之前；(b) 路径压缩之后</figcaption></figure>
-<p>图 6.13　查找根结点时把沿途父指针直接改到根：(a) 是压缩之前的树，(b) 是对结点 7 调用一次 <code>find</code> 之后的样子——路径 7→5→2 上的结点都被直接改挂到根 1 下，而 9、10 仍留在 7 下面。</p>
+<p>图 6.13　查找根结点时把沿途父指针直接改到根：(a) 是压缩之前的树，(b) 是对结点 7 调用一次 <code>find</code> 之后的样子——路径 7→5→2→1 上的 7 和 5 都被直接改挂到根 1 下（2 本来就是根的孩子），而 9、10 仍留在 7 下面。</p>
+<p>图 6.13(a) 是依次合并集合 <span class="math">{<span class="upr">7</span>,<span class="upr">9</span>,<span class="upr">10</span>}</span>、<span class="math">{<span class="upr">5</span>,<span class="upr">6</span>,<span class="upr">8</span>}</span>、<span class="math">{<span class="upr">2</span>,<span class="upr">4</span>}</span> 和 <span class="math">{<span class="upr">1</span>,<span class="upr">3</span>}</span> 后形成的树。注意它为了造出一条够长的路径， 是把先合并出的大树挂到后来集合的根下面，<strong>并没有遵守重量权衡规则</strong>；按重量权衡合并同样这些集合， 树不会这么深。路径压缩本身与合并规则无关，所以拿它演示仍然合适。</p>
+<p>原书【算法6.9】用递归实现带路径压缩的查找（<code>FindPC</code>）：结点没有父结点就返回自己；否则先递归找到 父结点的根，把自己的父指针改成这个根，再返回它。递归返回的途中，路径上每个结点都被改指到根。 下面 <code>DisjointSet::find</code> 里标着【算法6.9】的那一行就是这个做法。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch06/general_tree/modern.hpp">code/ch06/general_tree/modern.hpp#disjoint-set</a></div><pre><code><span class="c">/// 【代码6.8】树的父指针表示与 union/find。</span>
 <span class="c">///</span>
 <span class="c">/// 合并用原书的**重量权衡合并规则**(weighted union rule)：</span>
@@ -629,6 +632,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
     std::vector&lt;std::<span class="t">size_t</span>&gt; parent_;
     std::vector&lt;std::<span class="t">size_t</span>&gt; size_;  <span class="c">// 原书 nCount：子树元素数目</span>
 };</code></pre></div>
+<p><strong>两条改进合起来有多快。</strong> 路径压缩大大加速了 <code>find</code>。合并时总是小树挂到大树下、查找时再做路径压缩， 可以证明（Tarjan，1975）：在 <span class="math">n</span> 个元素上执行 <span class="math">m</span> 次（<span class="math">m<span class="rel">≥</span>n</span>）交错的合并和查找，总时间是 <span class="math">O(m α(m,n))</span>；原书把它简写成「<span class="math">n</span> 次 <code>find</code> 至多需要 <span class="math">O(nα(n))</span> 时间」。其中 <span class="math">α</span> 是 Ackermann 函数的反函数，增长速度比 <span class="math"><span class="upr">log</span>&thinsp;n</span> 慢得多，但又不是常数；对实际能遇到的任何 <span class="math">n</span>， <span class="math">α(n)</span> 都不超过 4（原书写作「往往小于 4」，具体取值随 Ackermann 函数定义的版本略有出入）。 因此，执行一串交错的合并和查找操作所需的时间，几乎与操作次数成线性关系——这是<strong>均摊</strong>意义上的 结论，单次 <code>find</code> 仍可能走 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span> 步。重量权衡加路径压缩是目前最有效的并查集实现方法。 另外，由于重量权衡已把树深限制在 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>，上面递归版 <code>find</code> 的递归深度也不超过 <span class="math"><span class="upr">log</span><sub><span class="upr">2</span></sub>n</span>， 不会有第 5 章那种栈溢出的风险。</p>
 <h4 id="顺带数出连通分量和连通点对"><a class="anchor" href="#顺带数出连通分量和连通点对">#</a>顺带数出连通分量和连通点对</h4>
 <p>并查集最常见的用法是<strong>动态连通性</strong>：图的边一条条加进来，每加一条就要回答「现在有几个连通分量」「现在有多少对顶点互相连通」。两个数都不必重新数，合并时顺手维护即可：</p>
 <ul>
@@ -672,11 +676,17 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 };</code></pre></div>
 <h2 id="63-树的顺序存储结构"><a class="anchor" href="#63-树的顺序存储结构">#</a>6.3 树的顺序存储结构</h2>
 <p><strong>顺序存储表示法存储树，要求把树中的结点按照一定的顺序存储到一片连续的存储单元中；为了能够 显示出树的逻辑结构，需要在结点表中包含足够的结构信息。</strong> 链式存储每个结点单独分配，指针占空间， 也不利于整块读写；而把结点按某一种周游次序排进数组，再用很少的附加信息记下「谁是下一个兄弟」 或「有几个孩子」，就能在连续空间里还原整棵树。</p>
-<p>下面介绍与树和森林的<strong>遍历次序</strong>相关的几种典型的顺序存储结构，都以图 6.5(a) 中所示的森林为例。 原书给了四种，思路都对；本章不另写一套未验证的实现，只把还原办法说清楚。</p>
+<p>下面介绍与树和森林的<strong>遍历次序</strong>相关的几种典型的顺序存储结构，都以图 6.5(a) 中所示的森林为例。 原书给了四种，思路都对。除 6.3.2 节的【算法6.10】（双标记先根次序 → 左子/右兄链表）有本书的实现和测试外， 其余三种本章不另写一套未验证的实现，只把还原办法说清楚。</p>
 <h3 id="631-带右链的先根次序表示"><a class="anchor" href="#631-带右链的先根次序表示">#</a>6.3.1 带右链的先根次序表示</h3>
 <p>图 6.5(a) 所示森林的先根次序序列是 <code>A B C E F D G H J I</code>。<strong>在先根序列中，任何结点的子树的所有 结点都直接跟在该结点之后，任何一个分支结点后面紧跟的是其第一个子结点</strong>——这条性质是下面几种 表示法共同的基础。</p>
 <p>在「带右链的先根次序表示」中，每个结点包括结点本身数据以及附加的两个表示结构信息的域 <code>ltag</code> 和 <code>rlink</code>，结点的形式为 <code>[ltag | info | rlink]</code>。其中 <code>info</code> 是结点的数据；<code>rlink</code> 是右指针， 指向结点的下一个兄弟，即树或森林所对应的二叉树中结点的右子结点；<code>ltag</code> 是一个标记位， 当结点是叶结点（即对应的二叉树中没有左子结点）时 <code>ltag</code> 为 1，否则为 0。</p>
 <p><strong>为什么用 <code>ltag</code> 而不是再存一个左链？</strong> 为了节省存储单元，「带右链的先根次序表示」用 <code>ltag</code> 代替 了 <code>llink</code>：从结点的次序和 <code>ltag</code> 的值完全可以推知 <code>llink</code>——<code>ltag</code> 为 0 的结点有左子结点，其 <code>llink</code> 就指向存储区中该结点的下一个结点；<code>ltag</code> 为 1 的结点没有左子结点，<code>llink</code> 为空。 所以顺着数组往下走、再靠右链跳过整棵子树，就能还原所有父子和兄弟关系。</p>
+<p>对图 6.5(a) 的森林，三行内容如下（下标从 0 起；<code>rlink</code> 写成兄弟结点的下标，<code>-</code> 表示空）：</p>
+<div class="codeblock" data-lang="text"><pre><code>下标       0  1  2  3  4  5  6  7  8  9
+先根次序   A  B  C  E  F  D  G  H  J  I
+ltag       0  1  0  1  1  1  0  0  1  1     0 = 有孩子
+rlink      6  2  5  4  -  -  -  9  -  -     A→G、B→C、C→D、E→F、H→I</code></pre></div>
+<p>例如 <code>C</code> 的 <code>ltag</code> 为 0，所以它的第一个孩子是紧跟其后的 <code>E</code>；<code>C</code> 的 <code>rlink</code> 为 5，越过它的整棵子树 （<code>E</code>、<code>F</code>）直接指到兄弟 <code>D</code>。</p>
 <figure><img loading="lazy" src="../assets/scan/fig-6-14.png" alt="图 6.14 带右链的先根次序表示法"><figcaption>图 6.14 带右链的先根次序表示法</figcaption></figure>
 <p>图 6.14　先根序列配合右链下标还原树形。</p>
 <h3 id="632-带双标记的先根次序表示"><a class="anchor" href="#632-带双标记的先根次序表示">#</a>6.3.2 带双标记的先根次序表示</h3>
@@ -775,7 +785,13 @@ rtag       0  0  0  0  1  1  1  0  1  1     0 = 有下一个兄弟</code></pre><
 <p>图 6.17　层次次序配合双标记记录孩子和兄弟关系。</p>
 <p>图 6.5(a) 所示森林的层次次序序列为 <code>A G B C D H I E F J</code>。<strong>这种层次次序的序列也同样表现了森林 的一些结构信息</strong>：森林中处于同一层的结点在序列中都聚集在一起，任何一个结点只要它有右兄弟， 那么在序列中它的右兄弟就排在该结点后面。</p>
 <p>类似于带双标记的先根次序表示，引入带双标记的层次次序表示法，结点形式为 <code>[ltag | info | rtag]</code>： 当结点没有左子结点时 <code>ltag</code> 为 1，否则为 0；当结点没有下一个兄弟时 <code>rtag</code> 为 1，否则为 0。</p>
+<p>对图 6.5(a) 的森林，各结点的标记如下：</p>
+<div class="codeblock" data-lang="text"><pre><code>层次次序   A  G  B  C  D  H  I  E  F  J
+ltag       0  0  1  0  1  0  1  1  1  1     0 = 有孩子
+rtag       0  1  0  0  1  0  1  0  1  1     0 = 有下一个兄弟</code></pre></div>
+<blockquote><p><strong>图 6.17 的行序和图 6.15 相反。</strong> 图 6.17 没有标行名，按定义核对可知它的三行从上到下是 <code>ltag</code> / <code>info</code> / <code>rtag</code>（<code>B</code> 是叶结点，上行为 1；<code>G</code> 是最后一棵树的根、没有下一个兄弟，下行为 1）， 而图 6.15 是 <code>rtag</code> 在上、<code>ltag</code> 在下。两张图对照着看时别套用同一种读法。</p></blockquote>
 <p><strong>怎么还原。</strong> 由层次次序的性质可知，任何结点的子结点都排在该结点的所有兄弟结点后面，并且任何 结点的最后一个兄弟结点都不会再有下一个兄弟，即最后一个兄弟的 <code>rtag</code> 为 1。<code>rlink</code> 的值很容易 确定：结点的 <code>rtag</code> 为 1 则 <code>rlink</code> 为空，<code>rtag</code> 为 0 则 <code>rlink</code> 指向该结点紧邻的下一个结点。 <code>llink</code> 要靠队列来定：顺序扫描层次序列，若结点的 <code>ltag</code> 值为 1 则置其 <code>llink</code> 为空，否则把该结点 放入队列；遇到 <code>rtag</code> 为 1 的结点时，说明这一条兄弟结点链已经扫描完毕，下一个结点就是队头结点 的最左子结点——<strong>队列在这里起的正是「承上启下」的作用</strong>。适合需要按层处理的外部存储。</p>
+<p>拿上表走一遍：<code>A</code>（<code>ltag</code> 0）入队，<code>rtag</code> 0，下一个 <code>G</code> 是它的兄弟；<code>G</code> 入队，<code>rtag</code> 1——两棵树的根 排完了，下一个结点 <code>B</code> 是队头 <code>A</code> 的最左孩子，<code>A</code> 出队；<code>B</code>、<code>C</code>、<code>D</code> 依次是兄弟，其中 <code>C</code> 入队， <code>D</code> 的 <code>rtag</code> 为 1，于是 <code>H</code> 是队头 <code>G</code> 的最左孩子；<code>H</code> 入队、<code>I</code> 的 <code>rtag</code> 为 1，<code>E</code> 成为队头 <code>C</code> 的最左 孩子；<code>F</code> 的 <code>rtag</code> 为 1，<code>J</code> 成为队头 <code>H</code> 的最左孩子。扫完时恰好还原出图 6.5(a)。</p>
 <p><strong>现代视角：紧凑树编码。</strong> 如果目标是工程中的紧凑存储或高速导航，通常会考虑 <strong>LOUDS</strong>、平衡括号（balanced parentheses） 等 succinct tree 编码，而不是直接照搬本节的双标记结构。它们同样把树压成位串， 但会明确规定位级布局、秩/选择（rank/select）操作和随机访问边界。本节的右链、双标记、带度数表示 应视为经典编码对照，用来理解「结构信息如何随周游序列保存」即可。</p>
 <h2 id="64-k叉树"><a class="anchor" href="#64-k叉树">#</a>6.4 K叉树</h2>
 <p>有些应用里每个结点的孩子数有固定上限 <span class="math">K</span>，例如三子棋的博弈树、某些 B 树的内存模拟。这时不必走「任意度 + 兄弟链」，可以规定每个结点至多 <span class="math">K</span> 个孩子，叫做 <span class="math">K</span> 叉树。</p>
@@ -798,16 +814,16 @@ rtag       0  0  0  0  1  1  1  0  1  1     0 = 有下一个兄弟</code></pre><
 <li>用并查集判断变量方程组 <code>a==b</code>、<code>a!=b</code> 是否有解，并分别分析无优化、按秩合并和路径压缩的复杂度。</li>
 <li>给定一棵树的左孩子/右兄弟表示，写出其森林的先根序列和带度数后根序列。</li>
 <li>画出三棵树组成的森林转换成的二叉树，再转换回去，验证互逆。</li>
-<li>对树 <code>A(B(E,F),C(G),D(H,I,J))</code>（6.1.1 的括号表示法）写出先根、后根、层次序列。</li>
+<li>对用 6.1.1 节嵌套括号表示法给出的树 <code>A(B(E,F),C(G),D(H,I,J))</code>，写出先根、后根、层次序列。</li>
 <li>度为 2 的有序树和二叉树差在哪里？举一个「左空右不空」的例子。</li>
 <li>用带度数的后根次序表示一棵小树，并说明扫描时栈如何弹出孩子。</li>
-<li>对元素 <span class="math"><span class="upr">0..6</span></span> 依次 <code>unite(0,1)</code>、<code>unite(1,2)</code>、<code>unite(3,4)</code>，画出父指针，再 <code>find(0)</code> 后画出路径压缩的结果。</li>
+<li>对元素 <span class="math"><span class="upr">0..6</span></span> 依次 <code>unite(0,1)</code>、<code>unite(2,3)</code>、<code>unite(0,2)</code>（按本书 <code>DisjointSet</code> 的重量权衡口径，规模相等时值大的根挂到值小的根下），画出父指针，再 <code>find(3)</code> 后画出路径压缩的结果。</li>
 <li>完全 3 叉树按层编号，写出结点 4 的父和孩子们。</li>
 </ol>
 <h3 id="原书习题"><a class="anchor" href="#原书习题">#</a>原书习题</h3>
 <blockquote><p>以下是原书第 6 章的习题，本轮按扫描件补回题面；<strong>参考答案见 <code>book/习题与参考答案.md</code> 的同章小节</strong>， 由 <code>tools/check_doc.py</code> 的 R14 逐题守着。</p></blockquote>
 <ol>
-<li>给出一棵树的逻辑结构 <span class="math">T<span class="rel">=</span>(K,R)</span>，其中 <span class="math">K<span class="rel">=</span>{A,B,C,D,E,F,G,H,I,J,K,L,M}</span>， <span class="math">R<span class="rel">=</span>{⟨A,B⟩,⟨A,C⟩,⟨A,D⟩,⟨B,E⟩,⟨B,F⟩,⟨B,G⟩,⟨C,H⟩,⟨D,I⟩,⟨D,J⟩,⟨F,K⟩,⟨F,L⟩,⟨I,J⟩}</span>。 试用树形表示法画出此树，并按照递归定义将树划分为子树，指出哪些结点是根、哪些结点是树叶， 确定各结点的层数、度数，并将该树转化为对应的二叉树。</li>
+<li>给出一棵树的逻辑结构 <span class="math">T<span class="rel">=</span>(K,R)</span>，其中 <span class="math">K<span class="rel">=</span>{A,B,C,D,E,F,G,H,I,J,K,L,M}</span>， <span class="math">R<span class="rel">=</span>{⟨A,B⟩,⟨A,C⟩,⟨A,D⟩,⟨B,E⟩,⟨B,F⟩,⟨B,G⟩,⟨C,H⟩,⟨D,I⟩,⟨D,J⟩,⟨F,K⟩,⟨F,L⟩,⟨I,J⟩}</span>。 （题面照原书扫描件抄录。注意 <span class="math">⟨D,J⟩</span> 与 <span class="math">⟨I,J⟩</span> 让 <span class="math">J</span> 有两个父结点，而 <span class="math">M</span> 不出现在任何 有序对里——严格说这个 <span class="math">R</span> 不构成树。做题时先指出这一矛盾，再说明自己如何修正后作答。） 试用树形表示法画出此树，并按照递归定义将树划分为子树，指出哪些结点是根、哪些结点是树叶， 确定各结点的层数、度数，并将该树转化为对应的二叉树。</li>
 <li>3 个结点可以构造出多少个不同的有序树？试将其画出来。</li>
 <li>将图 6.19 中的二叉树转换为对应的森林，分别按照先根次序、后根次序列出其结点。</li>
 </ol>

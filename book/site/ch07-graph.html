@@ -634,7 +634,7 @@ public:
 
 从 0 出发的最短距离: 0 7 9 20 20 11
 最小生成树 5 条边，总权 33</code></pre></div>
-<p>存储差 300 倍，BFS 的检查次数差 1000 倍。稠密图上这个差距会消失——<span class="math">E</span> 接近 <span class="math">V<sup><span class="upr">2</span></sup></span> 时， <span class="math">V<span class="bin">+</span>E</span> 也就是 <span class="math">V<sup><span class="upr">2</span></sup></span>，而矩阵还省掉了存 <code>to</code> 的那一半空间。</p>
+<p>存储差三百多倍（<span class="math"><span class="upr">1000000</span>/<span class="upr">2998</span><span class="rel">≈</span><span class="upr">334</span></span>），BFS 的检查次数差约 1000 倍（<span class="math"><span class="upr">1000000</span>/<span class="upr">999</span></span>）。稠密图上这个差距会消失——<span class="math">E</span> 接近 <span class="math">V<sup><span class="upr">2</span></sup></span> 时， <span class="math">V<span class="bin">+</span>E</span> 也就是 <span class="math">V<sup><span class="upr">2</span></sup></span>，而矩阵还省掉了存 <code>to</code> 的那一半空间。</p>
 <p>Dijkstra 是这一章里差别最大的一处。矩阵版每轮要扫一遍全部顶点找最近的那个，是 <span class="math">O(V<sup><span class="upr">2</span></sup>)</span>； 邻接表配一个最小堆之后，「找最近顶点」由堆负责，「松弛」只走实际存在的边：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/adjacency_list/modern.hpp">code/ch07/adjacency_list/modern.hpp#graph-list-dijkstra</a></div><pre><code><span class="c">/// Dijkstra，最小堆版。代价 $O((V+E)\log V)$。</span>
 <span class="c">///</span>
@@ -686,7 +686,7 @@ public:
     ArcBox* firstout = <span class="k">nullptr</span>;  <span class="c">// 第一条从本顶点出发的弧</span>
 };</code></pre></div>
 <p>先读这两种结点。<code>ArcBox</code> 的前两个域说明“哪条弧”，后两个域说明“这条弧在两条链中各接向哪里”； <code>VexNode</code> 的两个表头则分别给出入链和出链的入口。重点是 <code>firstin</code> 与 <code>firstout</code> 指向的可以是 同一个 <code>ArcBox</code>，并没有第二份边结点。</p>
-<p>下面六行就是传统写法最值得保留的地方。先 <code>new</code> 出<strong>一个</strong>弧结点；<code>tailnextarc</code> 接住旧出链表头， 再改 <code>firstout</code>；<code>headnextarc</code> 接住旧入链表头，再改 <code>firstin</code>。表头插入所以最新插入的弧先被遍历到。</p>
+<p>下面六行就是传统写法最值得保留的地方。先 <code>new</code> 出<strong>一个</strong>弧结点；<code>tailnextarc</code> 接住旧出链表头， 再改 <code>firstout</code>；<code>headnextarc</code> 接住旧入链表头，再改 <code>firstin</code>。因为是表头插入，所以最新插入的弧最先被遍历到。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/orthogonal_graph/teaching.hpp">code/ch07/orthogonal_graph/teaching.hpp#orthogonal-teaching-add</a></div><pre><code><span class="t">void</span> add_edge(std::<span class="t">size_t</span> tail, std::<span class="t">size_t</span> head, <span class="t">int</span> info = <span class="n">1</span>) {
     check_vertex(tail);
     check_vertex(head);
@@ -780,7 +780,7 @@ public:
 </tr>
 </tbody></table></div>
 <p>因此查“从 <span class="math">u</span> 能去哪里”时，从 <code>u.firstoutarc</code> 开始，反复读当前结点的 <code>headvex</code>，然后跳 <code>tailnextarc</code>；查“谁能到 <span class="math">v</span>”时，从 <code>v.firstinarc</code> 开始，反复读当前结点的 <code>tailvex</code>，然后跳 <code>headnextarc</code>。<strong>读的是同一批弧结点，走的是两条不同的 next 链。</strong>这正是“十字”的含义。</p>
-<p>例如依次插入 <span class="math"><span class="upr">0</span><span class="rel">→</span><span class="upr">1</span></span>、<span class="math"><span class="upr">0</span><span class="rel">→</span><span class="upr">2</span></span>、<span class="math"><span class="upr">3</span><span class="rel">→</span><span class="upr">2</span></span>，不管新弧接在表头还是表尾，两个查询的逻辑都是：</p>
+<p>例如依次插入 <span class="math"><span class="upr">0</span><span class="rel">→</span><span class="upr">1</span></span>、<span class="math"><span class="upr">0</span><span class="rel">→</span><span class="upr">2</span></span>、<span class="math"><span class="upr">3</span><span class="rel">→</span><span class="upr">2</span></span>，不管新弧接在表头还是表尾，两个查询的逻辑都是下表这样； 差别只在读出的先后：本节两份实现都是表头插入，所以 0 的出边依次读到 2、1，2 的入边依次读到 3、0 （表尾插入才是表中的 1、2 和 0、3）。</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">查询</th>
 <th style="text-align:left">起点</th>
@@ -810,7 +810,7 @@ public:
 <p>图的周游比树的周游复杂，因为<strong>图中每一个顶点都可能和其他顶点相邻接</strong>：某一个顶点被访问后， 还可能经过其他路径又回到这个顶点。为了避免重复访问同一个顶点，在周游图的过程中应该记下顶点 是否已经被访问，若遇到已访问的顶点则不再访问——这就是下面每个算法里那个 <code>seen</code> 数组存在的 理由（原书写作 <code>Mark</code> 数组，取值 <code>VISITED</code> / <code>UNVISITED</code>）。</p>
 <p>深度优先周游和广度优先周游是两种基本的周游方法，<strong>对有向图和无向图都适用</strong>。</p>
 <h3 id="先跑一遍"><a class="anchor" href="#先跑一遍">#</a>先跑一遍</h3>
-<p>下面这张有向图：<code>0→1(2)</code>、<code>0→2(7)</code>、<code>1→2(1)</code>、<code>1→3(5)</code>、<code>2→3(1)</code>、<code>3→4(3)</code>。从 0 到 4 的最短路是 <code>0→1→2→3→4</code>，总权 7，不是那条权为 7 的直达边 <code>0→2</code> 再往后走。</p>
+<p>下面这张有向图：<code>0→1(2)</code>、<code>0→2(7)</code>、<code>1→2(1)</code>、<code>1→3(5)</code>、<code>2→3(1)</code>、<code>3→4(3)</code>。从 0 到 4 的最短路是 <code>0→1→2→3→4</code>，总权 <span class="math"><span class="upr">2</span><span class="bin">+</span><span class="upr">1</span><span class="bin">+</span><span class="upr">1</span><span class="bin">+</span><span class="upr">3</span><span class="rel">=</span><span class="upr">7</span></span>，不是先走那条权为 7 的直达边 <code>0→2</code> 再往后走（<code>0→2→3→4</code> 总权 11）。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/demo.cpp">code/ch07/graph/demo.cpp</a></div><pre><code><span class="p">#include &quot;modern.hpp&quot;</span>
 
 <span class="p">#include &lt;iostream&gt;</span>
@@ -931,6 +931,8 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
 <p><strong>拓扑排序的方法</strong>是两步的反复：① 从有向图中选出一个没有前驱（入度为 0）的顶点并输出； ② 删除图中该顶点和所有以它为起点的弧。不断重复这两个步骤，会出现两种情形：要么有向图中顶点 全部被输出，要么当前图中不存在没有前驱的顶点。当图中的顶点全部输出时，就完成了拓扑排序； <strong>当图中还有顶点没有输出时，说明有向图中含有环——可见拓扑排序可以顺便检查有向图是否存在环</strong>。</p>
 <p>以图 7.17 为例：<span class="math">c<sub><span class="upr">0</span></sub></span> 和 <span class="math">c<sub><span class="upr">1</span></sub></span> 没有前驱，可以选其中任何一个输出。假设先输出 <span class="math">c<sub><span class="upr">0</span></sub></span>，删除顶点 <span class="math">c<sub><span class="upr">0</span></sub></span> 和弧 <span class="math">⟨c<sub><span class="upr">0</span></sub>,c<sub><span class="upr">2</span></sub>⟩</span>、<span class="math">⟨c<sub><span class="upr">0</span></sub>,c<sub><span class="upr">7</span></sub>⟩</span> 之后，顶点 <span class="math">c<sub><span class="upr">1</span></sub></span> 和 <span class="math">c<sub><span class="upr">7</span></sub></span> 没有前驱，则不妨从中选择 <span class="math">c<sub><span class="upr">1</span></sub></span> 输出，然后删去顶点 <span class="math">c<sub><span class="upr">1</span></sub></span> 和弧 <span class="math">⟨c<sub><span class="upr">1</span></sub>,c<sub><span class="upr">2</span></sub>⟩</span>、<span class="math">⟨c<sub><span class="upr">1</span></sub>,c<sub><span class="upr">3</span></sub>⟩</span>、<span class="math">⟨c<sub><span class="upr">1</span></sub>,c<sub><span class="upr">4</span></sub>⟩</span>； 依次类推，就可以得到有向无环图的拓扑有序序列。</p>
 <p>具体实现时，用邻接表作为存储结构，每个顶点中加入一个存放该顶点入度的域（indegree），这样检查 顶点数组就可以方便地找出入度为 0 的顶点；删除该顶点及以它为尾的弧，即将边表中所有弧头顶点的 入度减 1。<strong>为了减少查找入度为 0 的顶点的次数</strong>，可以把入度为 0 的顶点构造成一个队列，使得每次 查找时只要从队列中取出第一个顶点即可，而不必检查整个顶点表；删除入度为 0 的顶点后，如果此时 某个顶点的入度减为 0，就将其插入队列。若最终取出的点数少于顶点数，图里有环。</p>
+<p>按这个队列做法、每次先处理编号小的顶点，图 7.17 得到的是 <span class="math">(c<sub><span class="upr">0</span></sub>,c<sub><span class="upr">1</span></sub>,c<sub><span class="upr">7</span></sub>,c<sub><span class="upr">2</span></sub>,c<sub><span class="upr">4</span></sub>,c<sub><span class="upr">8</span></sub>,c<sub><span class="upr">3</span></sub>,c<sub><span class="upr">5</span></sub>,c<sub><span class="upr">6</span></sub>)</span>： 初始入度为 0 的 <span class="math">c<sub><span class="upr">0</span></sub></span>、<span class="math">c<sub><span class="upr">1</span></sub></span> 先入队；删去 <span class="math">c<sub><span class="upr">0</span></sub></span> 后 <span class="math">c<sub><span class="upr">7</span></sub></span> 入度变 0 入队，删去 <span class="math">c<sub><span class="upr">1</span></sub></span> 后 <span class="math">c<sub><span class="upr">2</span></sub></span>、<span class="math">c<sub><span class="upr">4</span></sub></span> 入队； 以此类推。这又是一个与图注里两个都不同的合法拓扑序。</p>
+<p><strong>代价同样取决于存储结构。</strong> 用邻接表时，求全部入度扫一遍边表是 <span class="math">O(n<span class="bin">+</span>e)</span>，每个顶点进出队列一次、 每条弧让弧头入度减 1 一次，合计 <span class="math">O(n<span class="bin">+</span>e)</span>。下面的实现用邻接矩阵，求入度和「删除以它为尾的弧」都要 扫整行，合计 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#topological</a></div><pre><code>[[nodiscard]] std::optional&lt;std::vector&lt;std::<span class="t">size_t</span>&gt;&gt; topological_sort() <span class="k">const</span> {
     std::vector&lt;std::<span class="t">size_t</span>&gt; indegree(vertices());
     <span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; vertices(); ++from) {
@@ -988,7 +990,67 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
 <p>解决它的一个常用算法是 <strong>Dijkstra 算法</strong>，由 E. W. Dijkstra 提出，是一种<strong>按路径长度递增的次序 产生到各顶点最短路径的贪心算法</strong>。基本思想是把图的顶点集合划分成两个集合 <span class="math">S</span> 和 <span class="math">V<span class="bin">−</span>S</span>： <span class="math">S</span> 表示最短距离已经确定的顶点集，其余顶点放在 <span class="math">V<span class="bin">−</span>S</span> 中。初始时 <span class="math">S</span> 只包含源点，即 <span class="math">S<span class="rel">=</span>{s}</span>，此时只有源点到自己的最短距离是已知的。</p>
 <p>设 <span class="math">v</span> 是 <span class="math">V</span> 中的某个顶点，把从源点 <span class="math">s</span> 到顶点 <span class="math">v</span> 且<strong>中间只经过集合 <span class="math">S</span> 中顶点</strong>的路径称为从源点 到 <span class="math">v</span> 的<strong>特殊路径</strong>，并用数组 <span class="math">D</span> 记录当前所找到的、从源点 <span class="math">s</span> 到每个顶点的最短特殊路径长度。 <span class="math">D</span> 的初始状态是：如果从 <span class="math">s</span> 到 <span class="math">v</span> 有弧，则 <span class="math">D[v]</span> 记为弧的权值，否则置为无穷大。Dijkstra 算法 每次从尚未确定最短路径长度的集合 <span class="math">V<span class="bin">−</span>S</span> 中取出一个最短特殊路径长度最小的顶点 <span class="math">u</span>，将 <span class="math">u</span> 加入 集合 <span class="math">S</span>，同时修改数组 <span class="math">D</span> 中由 <span class="math">s</span> 可达的最短路径长度：若加进 <span class="math">u</span> 做中间顶点使得 <span class="math">v<sub>i</sub></span> 的最短特殊 路径长度变短，则修改 <span class="math">v<sub>i</sub></span> 的距离值（即当 <span class="math">D[u]<span class="bin">+</span>W[u,v<sub>i</sub>]&lt;D[v<sub>i</sub>]</span> 时，令 <span class="math">D[v<sub>i</sub>]<span class="rel">=</span>D[u]<span class="bin">+</span>W[u,v<sub>i</sub>]</span>）—— 这一步通常称为<strong>松弛</strong>。重复上述操作，一旦 <span class="math">S</span> 包含了所有 <span class="math">V</span> 中的顶点，<span class="math">D</span> 中各顶点的距离值就 记录了从源点 <span class="math">s</span> 到该顶点的最短路径长度。</p>
 <p><strong>要输出路径本身，还需要一个 <code>pre</code> 域</strong>：记录从源点到顶点 <span class="math">v</span> 的最短路径上 <span class="math">v</span> 前面经过的那个顶点。 初始时对所有 <span class="math">v<span class="rel">≠</span>s</span> 均设其前一个顶点为 <span class="math">s</span>；更新最短路径长度时，只要 <span class="math">D[u]<span class="bin">+</span>W[u,v]&lt;D[v]</span> 就设置 <span class="math">v</span> 的前一个顶点为 <span class="math">u</span>，否则不做修改。算法终止时，顺着 <code>pre</code> 一路回溯就得到完整路径。</p>
+<p>例如对图 7.19 的有向图，从源点 <span class="math">v<sub><span class="upr">0</span></sub></span> 出发，每一步的 <span class="math">S</span>、距离 length 和前驱 pre 如表 7.2（原书表 7.2； 带 \* 的是这一步刚并入 <span class="math">S</span> 的顶点，它的 length 从此不再改变）：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">迭代步数</th>
+<th style="text-align:left"><span class="math">S</span></th>
+<th style="text-align:left"><span class="math">v<sub><span class="upr">0</span></sub></span></th>
+<th style="text-align:left"><span class="math">v<sub><span class="upr">1</span></sub></span></th>
+<th style="text-align:left"><span class="math">v<sub><span class="upr">2</span></sub></span></th>
+<th style="text-align:left"><span class="math">v<sub><span class="upr">3</span></sub></span></th>
+<th style="text-align:left"><span class="math">v<sub><span class="upr">4</span></sub></span></th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">初始状态</td>
+<td style="text-align:left"><span class="math">{v<sub><span class="upr">0</span></sub>}</span></td>
+<td style="text-align:left">0 / 0</td>
+<td style="text-align:left">10 / 0</td>
+<td style="text-align:left">∞ / 0</td>
+<td style="text-align:left">30 / 0</td>
+<td style="text-align:left">100 / 0</td>
+</tr>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left"><span class="math">{v<sub><span class="upr">0</span></sub>,v<sub><span class="upr">1</span></sub>}</span></td>
+<td style="text-align:left">0 / 0</td>
+<td style="text-align:left">10\* / 0</td>
+<td style="text-align:left">60 / 1</td>
+<td style="text-align:left">30 / 0</td>
+<td style="text-align:left">100 / 0</td>
+</tr>
+<tr>
+<td style="text-align:left">2</td>
+<td style="text-align:left"><span class="math">{v<sub><span class="upr">0</span></sub>,v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">3</span></sub>}</span></td>
+<td style="text-align:left">0 / 0</td>
+<td style="text-align:left">10 / 0</td>
+<td style="text-align:left">50 / 3</td>
+<td style="text-align:left">30\* / 0</td>
+<td style="text-align:left">90 / 3</td>
+</tr>
+<tr>
+<td style="text-align:left">3</td>
+<td style="text-align:left"><span class="math">{v<sub><span class="upr">0</span></sub>,v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">3</span></sub>,v<sub><span class="upr">2</span></sub>}</span></td>
+<td style="text-align:left">0 / 0</td>
+<td style="text-align:left">10 / 0</td>
+<td style="text-align:left">50\* / 3</td>
+<td style="text-align:left">30 / 0</td>
+<td style="text-align:left">60 / 2</td>
+</tr>
+<tr>
+<td style="text-align:left">4</td>
+<td style="text-align:left"><span class="math">{v<sub><span class="upr">0</span></sub>,v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">3</span></sub>,v<sub><span class="upr">2</span></sub>,v<sub><span class="upr">4</span></sub>}</span></td>
+<td style="text-align:left">0 / 0</td>
+<td style="text-align:left">10 / 0</td>
+<td style="text-align:left">50 / 3</td>
+<td style="text-align:left">30 / 0</td>
+<td style="text-align:left">60\* / 2</td>
+</tr>
+</tbody></table></div>
+<p>表 7.2　用 Dijkstra 算法的处理过程，源点为 <span class="math">v<sub><span class="upr">0</span></sub></span>（每格写作「length / pre」）。第 1 步选中 <span class="math">v<sub><span class="upr">1</span></sub></span>（10 最小）， 经 <span class="math">v<sub><span class="upr">1</span></sub></span> 到 <span class="math">v<sub><span class="upr">2</span></sub></span> 得 <span class="math"><span class="upr">10</span><span class="bin">+</span><span class="upr">50</span><span class="rel">=</span><span class="upr">60</span></span>；第 2 步选中 <span class="math">v<sub><span class="upr">3</span></sub></span>（30），<span class="math">v<sub><span class="upr">2</span></sub></span> 改为 <span class="math"><span class="upr">30</span><span class="bin">+</span><span class="upr">20</span><span class="rel">=</span><span class="upr">50</span></span>，<span class="math">v<sub><span class="upr">4</span></sub></span> 改为 <span class="math"><span class="upr">30</span><span class="bin">+</span><span class="upr">60</span><span class="rel">=</span><span class="upr">90</span></span>； 第 3 步选中 <span class="math">v<sub><span class="upr">2</span></sub></span>（50），<span class="math">v<sub><span class="upr">4</span></sub></span> 再改为 <span class="math"><span class="upr">50</span><span class="bin">+</span><span class="upr">10</span><span class="rel">=</span><span class="upr">60</span></span>；第 4 步选中 <span class="math">v<sub><span class="upr">4</span></sub></span>，<span class="math">S<span class="rel">=</span>V</span>，结束。顺着 pre 回溯， 到 <span class="math">v<sub><span class="upr">4</span></sub></span> 的最短路径是 <span class="math">v<sub><span class="upr">0</span></sub><span class="rel">→</span>v<sub><span class="upr">3</span></sub><span class="rel">→</span>v<sub><span class="upr">2</span></sub><span class="rel">→</span>v<sub><span class="upr">4</span></sub></span>，长度 60，比直达边的 100 短。</p>
+<p><strong>为什么这样得到的就是最短路径？</strong> 设某一步选中的是 <span class="math">u</span>，假如存在一条从 <span class="math">s</span> 到 <span class="math">u</span>、比 <span class="math">D[u]</span> 更短的 路径。这条路径从 <span class="math">S</span> 出发，最终要到 <span class="math">S</span> 外的 <span class="math">u</span>，所以它一定有第一个落在 <span class="math">V<span class="bin">−</span>S</span> 里的顶点，记为 <span class="math">x</span>； 把这条路径上 <span class="math">s</span> 到 <span class="math">x</span>、<span class="math">x</span> 到 <span class="math">u</span> 两段的长度分别记为 <span class="math">d(s,x)</span>、<span class="math">d(x,u)</span>，全长 <span class="math">d(s,u)<span class="rel">=</span>d(s,x)<span class="bin">+</span>d(x,u)</span>。 <span class="math">s</span> 到 <span class="math">x</span> 这一段中间只经过 <span class="math">S</span> 中的顶点，是一条特殊路径，故 <span class="math">D[x]<span class="rel">≤</span>d(s,x)</span>。边权非负， 所以 <span class="math">d(s,x)<span class="rel">≤</span>d(s,x)<span class="bin">+</span>d(x,u)<span class="rel">=</span>d(s,u)&lt;D[u]</span>，于是 <span class="math">D[x]&lt;D[u]</span>——这与「<span class="math">u</span> 是 <span class="math">V<span class="bin">−</span>S</span> 中距离值最小的 顶点」矛盾。所以每次并入 <span class="math">S</span> 的 <span class="math">u</span>，它的距离值就是从 <span class="math">s</span> 到 <span class="math">u</span> 的最短路径长度。证明里 「<span class="math">d(x,u)<span class="rel">≥</span><span class="upr">0</span></span>」这一步正是非负权的用处；有负权边时，绕道反而可能更短，结论就不成立了。</p>
+<p>本书实现的初始化与上面的描述写法不同、效果相同：<code>distance</code> 只把源点置 0、其余置为「到不了」， 第一轮必然选中源点本身，松弛它的出边之后，<span class="math">D</span> 就恰好是上面说的初始状态。</p>
 <p><strong>代价取决于用什么挑「最小的那个」。</strong> 对于 <span class="math">n</span> 个顶点 <span class="math">e</span> 条边的图，图中的任何一条边都可能在最短 路径中出现，因此最短路径算法对每条边至少都要检查一次。原书【算法7.8】采用<strong>最小堆</strong>来选择权值 最小的边，每次改变最短特殊路径长度时需要对堆进行一次重排，时间复杂度为 <span class="math">O((n<span class="bin">+</span>e)&thinsp;<span class="upr">log</span>&thinsp;e)</span>， <strong>适合于稀疏图</strong>；如果像 Prim 算法那样，通过直接比较 <span class="math">D</span> 数组元素来确定代价最小的边，则需要总 时间 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>，取出顶点后修改最短特殊路径长度共需要 <span class="math">O(e)</span>，因此共需 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>，<strong>这种方法适合于 稠密图</strong>。</p>
+<p>本节下面的 <code>Graph::dijkstra</code> 是后一种：邻接矩阵加 <code>nearest_unvisited</code> 逐个比较，<span class="math">O(n<sup><span class="upr">2</span></sup>)</span>； 堆版本是 7.3.2 节邻接表上的 <code>GraphList::dijkstra</code>。那里写的 <span class="math">O((V<span class="bin">+</span>E)&thinsp;<span class="upr">log</span>&thinsp;V)</span> 与这里的 <span class="math">O((n<span class="bin">+</span>e)&thinsp;<span class="upr">log</span>&thinsp;e)</span> 是同一个量级——没有多重边时 <span class="math">e<span class="rel">≤</span>n<sup><span class="upr">2</span></sup></span>，<span class="math"><span class="upr">log</span>&thinsp;e<span class="rel">≤</span><span class="upr">2</span>&thinsp;<span class="upr">log</span>&thinsp;n</span>。</p>
 <p>边权必须非负。</p>
 <figure><img loading="lazy" src="../assets/scan/fig-7-19.png" alt="图 7.19 单源最短路径的示例"><figcaption>图 7.19 单源最短路径的示例</figcaption></figure>
 <p>图 7.19　单源最短路径的示例。已确定的顶点集合每轮扩大一个：从「尚未确定」的顶点里挑距离最小的那个，它的距离<strong>此后不会再变小</strong>——因为任何绕道都要先经过一个距离不更小的顶点，而边权非负。这条论证正是 Dijkstra 要求非负权的地方，本书的实现因此在 <code>add_edge</code> 就拒绝负权。</p>
@@ -1028,7 +1090,7 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
                 distance[target] = candidate
     <span class="k">return</span> distance</code></pre></div>
 <h4 id="把路径本身取出来"><a class="anchor" href="#把路径本身取出来">#</a>把路径本身取出来</h4>
-<p>上面的 <code>dijkstra</code> 只给距离。要输出路径，就像前文说的那样多记一个 <code>pre</code> 域，也就是原书 <code>Dist</code> 类里的 <code>pre</code>。<code>Graph::dijkstra_tree</code> 和 <code>dijkstra</code> 是同一个算法，只多了一句：<strong>只在松弛成功时</strong>把 <code>to</code> 的前驱设为 <code>from</code>。如果不管松没松弛都去改前驱，距离数组照样正确，但顺着前驱走出来的路径和距离对不上，甚至会走成环。源点没有前驱，到不了的顶点也没有前驱，所以前驱数组用 <code>std::optional</code>。</p>
+<p>上面的 <code>dijkstra</code> 只给距离。要输出路径，就像前文说的那样多记一个 <code>pre</code> 域，也就是原书 <code>Dist</code> 类里的 <code>pre</code>。<code>Graph::dijkstra_tree</code> 和 <code>dijkstra</code> 是同一个算法，只多了一句：<strong>只在松弛成功时</strong>把 <code>to</code> 的前驱设为 <code>from</code>。如果不管松没松弛都去改前驱，距离数组照样正确，但顺着前驱走出来的路径和距离对不上，甚至会走成环。源点没有前驱，到不了的顶点也没有前驱，所以前驱数组用 <code>std::optional</code>。原书把所有 <span class="math">v<span class="rel">≠</span>s</span> 的 pre 初始化为 <span class="math">s</span>（表 7.2 的初始状态就是这样）；对走得到的顶点两种写法结果相同——第一轮选中源点、松弛它的出边时前驱就被设成了 <span class="math">s</span>——区别只在到不了的顶点上：原书会留下一个看似「从 <span class="math">s</span> 直达」的假前驱，本书留空。</p>
 <p><code>Graph::shortest_path</code> 从汇点出发，顺着前驱倒着走回源点，再把序列反转过来。到不了时返回空；汇点就是源点时，路径只有源点一个顶点。前驱链断了或者成环，说明传进来的树已经坏了，这时抛 <code>std::invalid_argument</code>。有好几条等长的最短路径时，返回哪一条取决于顶点的扫描次序，所以测试不断言具体路径，只断言路径合法：首尾是源点和汇点，每一步都是图里真实存在的边，边权之和等于 Floyd 算出的最短距离。这项检查在随机小图上跑，边权取 0 到 4，并列和零权边都会大量出现。</p>
 <p>关于溢出：边权是 <code>int</code>，必须小于 <code>Graph::infinity</code>（<code>INT_MAX/4</code>，在矩阵里表示「无边」）；路径长度是若干条边之和，用 64 位的 <code>Graph::distance_type</code> 存，「到不了」记为 <code>Graph::unreachable</code>。一条简单路径至多 <span class="math">V<span class="bin">−</span><span class="upr">1</span></span> 条边，总长小于 <span class="math">V<span class="bin">⋅</span><span class="upr">2</span><sup><span class="upr">29</span></sup></span>，既不会溢出，也不会撞上 <code>unreachable</code>。早先用 <code>int</code> 存距离、以 <code>infinity</code> 兼任「到不了」时，一条总长恰好等于 <code>infinity</code> 的合法路径会被误读成到不了——同一张图上 BFS 却说走得到（D-039）。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#dijkstra-path</a></div><pre><code><span class="c">/// 原书 Dist 类的 `length` 与 `pre` 两个域：到各点的距离，和最短路径上的前一个顶点。</span>
@@ -1125,14 +1187,52 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
 <h3 id="752-每对顶点之间的最短路径"><a class="anchor" href="#752-每对顶点之间的最短路径">#</a>7.5.2 每对顶点之间的最短路径</h3>
 <p>给定带权图 <span class="math">G<span class="rel">=</span>⟨V,E⟩</span>，要求对任意的顶点有序对 <span class="math">⟨v<sub>i</sub>,v<sub>j</sub>⟩</span> 找出从 <span class="math">v<sub>i</sub></span> 到 <span class="math">v<sub>j</sub></span> 的 最短路径，这个问题通常称为<strong>所有顶点对之间的最短路径</strong>（all-pairs shortest paths）问题。</p>
 <p>解决它可以每次以一个顶点为源点、重复执行 Dijkstra 算法 <span class="math">n</span> 次，时间复杂度为 <span class="math">O(n<sup><span class="upr">3</span></sup>)</span>。下面介绍 <strong>Floyd 算法</strong>，它是一个典型的<strong>动态规划法</strong>：先自底向上分别求解子问题的解，然后由这些子问题的解 得到原问题的解；时间复杂度也是 <span class="math">O(n<sup><span class="upr">3</span></sup>)</span>，但形式上比较简单。</p>
-<p>Floyd 算法用相邻矩阵 <span class="math">adj</span> 表示带权有向图，基本思想是：初始化 <span class="math">adj<sup>(<span class="upr">0</span>)</sup></span> 为相邻矩阵 <span class="math">adj</span>，在 <span class="math">adj<sup>(<span class="upr">0</span>)</sup></span> 上做 <span class="math">n</span> 次迭代，递归地产生一个矩阵序列 <span class="math">adj<sup>(<span class="upr">1</span>)</sup>,⋯,adj<sup>(k)</sup>,⋯,adj<sup>(n)</sup></span>。其中， <strong>经过第 <span class="math">k</span> 次迭代，<span class="math">adj<sup>(k)</sup>[i,j]</span> 的值等于从顶点 <span class="math">v<sub>i</sub></span> 到 <span class="math">v<sub>j</sub></span> 路径上所经过的顶点序号不大于 <span class="math">k</span> 的 最短路径长度。</strong></p>
-<p>推导只有两种情况：进行第 <span class="math">k</span> 次迭代时已求得矩阵 <span class="math">adj<sup>(k<span class="bin">−</span><span class="upr">1</span>)</sup></span>，那么从 <span class="math">v<sub>i</sub></span> 到 <span class="math">v<sub>j</sub></span> 中间顶点序号不 大于 <span class="math">k</span> 的最短路径，要么<strong>中间不经过顶点 <span class="math">v<sub>k</sub></span></strong>，此时 <span class="math">adj<sup>(k)</sup>[i,j]<span class="rel">=</span>adj<sup>(k<span class="bin">−</span><span class="upr">1</span>)</sup>[i,j]</span>；要么<strong>中间经过 <span class="math">v<sub>k</sub></span></strong>，此时这条路径由两段组成——从 <span class="math">v<sub>i</sub></span> 到 <span class="math">v<sub>k</sub></span> 且中间顶点序号不大于 <span class="math">k<span class="bin">−</span><span class="upr">1</span></span> 的最短路径，加上 从 <span class="math">v<sub>k</sub></span> 到 <span class="math">v<sub>j</sub></span> 且中间顶点序号不大于 <span class="math">k<span class="bin">−</span><span class="upr">1</span></span> 的最短路径。综合两种情况：</p>
-<div class="math math-display">adj<sup>(k)</sup>[i,j]<span class="rel">=</span>&thinsp;<span class="upr">min</span>&thinsp;{adj<sup>(k<span class="bin">−</span><span class="upr">1</span>)</sup>[i,j], adj<sup>(k<span class="bin">−</span><span class="upr">1</span>)</sup>[i,k]<span class="bin">+</span>adj<sup>(k<span class="bin">−</span><span class="upr">1</span>)</sup>[k,j]}</div>
-<p>这样 <span class="math">adj<sup>(n)</sup>[i,j]</span> 就是所要求的从 <span class="math">v<sub>i</sub></span> 到 <span class="math">v<sub>j</sub></span> 的最短路径长度。</p>
-<p><strong>要输出路径本身</strong>，可以设置一个 <span class="math">n<span class="bin">×</span>n</span> 的矩阵 <span class="math">path</span>：<span class="math">path[i,j]</span> 是由 <span class="math">v<sub>i</sub></span> 到 <span class="math">v<sub>j</sub></span> 的最短路径上 排在 <span class="math">v<sub>j</sub></span> 前面的那个顶点——当 <span class="math">k</span> 在 Floyd 算法中使得 <span class="math">adj<sup>(k)</sup>[i,j]</span> 达到最小值，就置 <span class="math">path[i,j]<span class="rel">=</span>k</span>；如果当前没有最短路径，就将 <span class="math">path[i,j]</span> 置为 <span class="math"><span class="bin">−</span><span class="upr">1</span></span>。</p>
+<p>Floyd 算法用相邻矩阵 <span class="math">adj</span> 表示带权有向图，基本思想是：初始化 <span class="math">adj<sup>(<span class="upr">0</span>)</sup></span> 为相邻矩阵 <span class="math">adj</span>，在 <span class="math">adj<sup>(<span class="upr">0</span>)</sup></span> 上做 <span class="math">n</span> 次迭代，递归地产生一个矩阵序列 <span class="math">adj<sup>(<span class="upr">1</span>)</sup>,⋯,adj<sup>(k)</sup>,⋯,adj<sup>(n)</sup></span>。其中， <strong>经过第 <span class="math">k</span> 次迭代，<span class="math">adj<sup>(k)</sup>[i,j]</span> 的值等于从顶点 <span class="math">v<sub>i</sub></span> 到 <span class="math">v<sub>j</sub></span>、中间顶点只取自前 <span class="math">k</span> 个顶点 <span class="math">v<sub><span class="upr">0</span></sub>,⋯,v<sub>k<span class="bin">−</span><span class="upr">1</span></sub></span> 的最短路径长度。</strong> 原书说成「路径上所经过的顶点序号不大于 <span class="math">k</span>」，那是把顶点从 1 数起的说法；本书的顶点从 <span class="math">v<sub><span class="upr">0</span></sub></span> 编号，按「前 <span class="math">k</span> 个」理解才与下面图 7.21 的数字对得上。<span class="math">adj<sup>(<span class="upr">0</span>)</sup></span> 不允许 任何中间顶点，正是相邻矩阵本身。</p>
+<p>推导只有两种情况：进行第 <span class="math">k</span> 次迭代时已求得矩阵 <span class="math">adj<sup>(k<span class="bin">−</span><span class="upr">1</span>)</sup></span>，这一次新开放的中转点是 <span class="math">v<sub>k<span class="bin">−</span><span class="upr">1</span></sub></span>。那么从 <span class="math">v<sub>i</sub></span> 到 <span class="math">v<sub>j</sub></span>、中间顶点只取自前 <span class="math">k</span> 个顶点的最短路径，要么<strong>中间不经过顶点 <span class="math">v<sub>k<span class="bin">−</span><span class="upr">1</span></sub></span></strong>，此时 <span class="math">adj<sup>(k)</sup>[i,j]<span class="rel">=</span>adj<sup>(k<span class="bin">−</span><span class="upr">1</span>)</sup>[i,j]</span>；要么<strong>中间经过 <span class="math">v<sub>k<span class="bin">−</span><span class="upr">1</span></sub></span></strong>，此时这条路径由两段组成——从 <span class="math">v<sub>i</sub></span> 到 <span class="math">v<sub>k<span class="bin">−</span><span class="upr">1</span></sub></span> 且中间顶点只取自前 <span class="math">k<span class="bin">−</span><span class="upr">1</span></span> 个顶点的最短路径，加上从 <span class="math">v<sub>k<span class="bin">−</span><span class="upr">1</span></sub></span> 到 <span class="math">v<sub>j</sub></span> 且中间顶点只取自前 <span class="math">k<span class="bin">−</span><span class="upr">1</span></span> 个顶点的最短路径（最短路径不会两次经过 <span class="math">v<sub>k<span class="bin">−</span><span class="upr">1</span></sub></span>，所以两段里都不必再用它）。综合两种情况：</p>
+<div class="math math-display">adj<sup>(k)</sup>[i,j]<span class="rel">=</span>&thinsp;<span class="upr">min</span>&thinsp;{adj<sup>(k<span class="bin">−</span><span class="upr">1</span>)</sup>[i,j], adj<sup>(k<span class="bin">−</span><span class="upr">1</span>)</sup>[i,k<span class="bin">−</span><span class="upr">1</span>]<span class="bin">+</span>adj<sup>(k<span class="bin">−</span><span class="upr">1</span>)</sup>[k<span class="bin">−</span><span class="upr">1</span>,j]}</div>
+<p>这样 <span class="math">adj<sup>(n)</sup>[i,j]</span>（全部 <span class="math">n</span> 个顶点都可以当中转点）就是所要求的从 <span class="math">v<sub>i</sub></span> 到 <span class="math">v<sub>j</sub></span> 的最短路径长度。</p>
+<p><strong>要输出路径本身</strong>，可以设置一个 <span class="math">n<span class="bin">×</span>n</span> 的矩阵 <span class="math">path</span>：<span class="math">path[i,j]</span> 是由 <span class="math">v<sub>i</sub></span> 到 <span class="math">v<sub>j</sub></span> 的最短路径上 排在 <span class="math">v<sub>j</sub></span> 前面的那个顶点。初始时 <span class="math">path[i,i]<span class="rel">=</span>i</span>；有弧 <span class="math">⟨v<sub>i</sub>,v<sub>j</sub>⟩</span> 时 <span class="math">path[i,j]<span class="rel">=</span>i</span>；如果当前没有 路径，就将 <span class="math">path[i,j]</span> 置为 <span class="math"><span class="bin">−</span><span class="upr">1</span></span>。第 <span class="math">k</span> 次迭代若经 <span class="math">v<sub>k<span class="bin">−</span><span class="upr">1</span></sub></span> 中转使 <span class="math">adj[i,j]</span> 变小，就置 <span class="math">path[i,j]<span class="rel">=</span>path[k<span class="bin">−</span><span class="upr">1</span>,j]</span>——新路径的后半段就是 <span class="math">v<sub>k<span class="bin">−</span><span class="upr">1</span></sub></span> 到 <span class="math">v<sub>j</sub></span> 的那段，<span class="math">v<sub>j</sub></span> 前面的顶点自然也就是那段 路上 <span class="math">v<sub>j</sub></span> 前面的顶点。原书正文写的是「当 <span class="math">k</span> 使得 <span class="math">adj<sup>(k)</sup>[i,j]</span> 达到最小值，就置 <span class="math">path[i,j]<span class="rel">=</span>k</span>」， 这只在中转点到 <span class="math">v<sub>j</sub></span> 的那段恰好是一条弧时才对；原书【算法7.9】的代码写的是 <code>D[i][j].pre = D[v][j].pre</code>，与这里 一致。反例：弧 <span class="math">v<sub><span class="upr">0</span></sub><span class="rel">→</span>v<sub><span class="upr">2</span></sub></span>、<span class="math">v<sub><span class="upr">2</span></sub><span class="rel">→</span>v<sub><span class="upr">1</span></sub></span>、<span class="math">v<sub><span class="upr">1</span></sub><span class="rel">→</span>v<sub><span class="upr">3</span></sub></span> 权都为 1，第 3 次迭代经 <span class="math">v<sub><span class="upr">2</span></sub></span> 中转得到 <span class="math">v<sub><span class="upr">0</span></sub><span class="rel">→</span>v<sub><span class="upr">2</span></sub><span class="rel">→</span>v<sub><span class="upr">1</span></sub><span class="rel">→</span>v<sub><span class="upr">3</span></sub></span>，<span class="math">v<sub><span class="upr">3</span></sub></span> 前面的顶点是 <span class="math">v<sub><span class="upr">1</span></sub></span>，而「置为中转点」会写成 <span class="math">v<sub><span class="upr">2</span></sub></span>。</p>
 <p>具体到实现：Floyd 枚举中转点 <code>via</code>，比较 <code>from→to</code> 与 <code>from→via→to</code>。测试里五个源点的 Dijkstra 与 Floyd 逐项对拍。</p>
 <figure><img loading="lazy" src="../assets/scan/fig-7-20.png" alt="图 7.20 每对顶点间的最短路径的示例"><figcaption>图 7.20 每对顶点间的最短路径的示例</figcaption></figure>
-<p>图 7.20　每对顶点间最短路径的示例。Floyd 从相邻矩阵 <span class="math">adj<sup>(<span class="upr">0</span>)</sup></span> 出发，第 <span class="math">k</span> 轮允许把 <span class="math">v<sub>k</sub></span> 当中转点，得到 <span class="math">adj<sup>(k)</sup></span>；<span class="math">n</span> 轮之后每一格就是最短路径长度（原书图 7.21 逐轮列出了这个迭代过程）。三重循环的次序不能换：<strong>中转点必须在最外层</strong>，否则 <span class="math">adj<sup>(k)</sup></span> 还没算完就被拿去用了。</p>
+<p>图 7.20　每对顶点间最短路径的示例。Floyd 从相邻矩阵 <span class="math">adj<sup>(<span class="upr">0</span>)</sup></span> 出发，第 <span class="math">k</span> 轮新允许把 <span class="math">v<sub>k<span class="bin">−</span><span class="upr">1</span></sub></span> 当中转点（代码里的 <code>via</code> 从 0 数起，即 <code>via</code> <span class="math"><span class="rel">=</span>k<span class="bin">−</span><span class="upr">1</span></span>），得到 <span class="math">adj<sup>(k)</sup></span>；<span class="math">n</span> 轮之后每一格就是最短路径长度（逐轮结果见下面的图 7.21）。三重循环的次序不能换：<strong>中转点必须在最外层</strong>，否则 <span class="math">adj<sup>(k)</sup></span> 还没算完就被拿去用了。</p>
+<p>例如图 7.20 的有向带权图（弧 <span class="math">⟨v<sub><span class="upr">0</span></sub>,v<sub><span class="upr">2</span></sub>⟩</span> 权 2、<span class="math">⟨v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">0</span></sub>⟩</span> 权 5、 <span class="math">⟨v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">2</span></sub>⟩</span> 权 8、<span class="math">⟨v<sub><span class="upr">2</span></sub>,v<sub><span class="upr">1</span></sub>⟩</span> 权 3），<span class="math">adj<sup>(<span class="upr">0</span>)</sup></span> 的初值和每次迭代的结果如图 7.21 所示（每格写作「<span class="math">adj</span> / <span class="math">path</span>」，加粗的是这一轮刚变小的格）：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">迭代</th>
+<th style="text-align:left">新开放的中转点</th>
+<th style="text-align:left">第 0 行</th>
+<th style="text-align:left">第 1 行</th>
+<th style="text-align:left">第 2 行</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><span class="math">adj<sup>(<span class="upr">0</span>)</sup></span></td>
+<td style="text-align:left">无</td>
+<td style="text-align:left">0/0　∞/−1　2/0</td>
+<td style="text-align:left">5/1　0/1　8/1</td>
+<td style="text-align:left">∞/−1　3/2　0/2</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">adj<sup>(<span class="upr">1</span>)</sup></span></td>
+<td style="text-align:left"><span class="math">v<sub><span class="upr">0</span></sub></span></td>
+<td style="text-align:left">0/0　∞/−1　2/0</td>
+<td style="text-align:left">5/1　0/1　<strong>7/0</strong></td>
+<td style="text-align:left">∞/−1　3/2　0/2</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">adj<sup>(<span class="upr">2</span>)</sup></span></td>
+<td style="text-align:left"><span class="math">v<sub><span class="upr">1</span></sub></span></td>
+<td style="text-align:left">0/0　∞/−1　2/0</td>
+<td style="text-align:left">5/1　0/1　7/0</td>
+<td style="text-align:left"><strong>8/1</strong>　3/2　0/2</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">adj<sup>(<span class="upr">3</span>)</sup></span></td>
+<td style="text-align:left"><span class="math">v<sub><span class="upr">2</span></sub></span></td>
+<td style="text-align:left">0/0　<strong>5/2</strong>　2/0</td>
+<td style="text-align:left">5/1　0/1　7/0</td>
+<td style="text-align:left">8/1　3/2　0/2</td>
+</tr>
+</tbody></table></div>
+<p>图 7.21　每对顶点间的最短路径的 Floyd 算法迭代过程（原书印成矩阵，这里按行排成表）。第 1 次迭代经 <span class="math">v<sub><span class="upr">0</span></sub></span> 中转：<span class="math">v<sub><span class="upr">1</span></sub><span class="rel">→</span>v<sub><span class="upr">0</span></sub><span class="rel">→</span>v<sub><span class="upr">2</span></sub></span> 长 <span class="math"><span class="upr">5</span><span class="bin">+</span><span class="upr">2</span><span class="rel">=</span><span class="upr">7</span>&lt;<span class="upr">8</span></span>；第 2 次经 <span class="math">v<sub><span class="upr">1</span></sub></span>：<span class="math">v<sub><span class="upr">2</span></sub><span class="rel">→</span>v<sub><span class="upr">1</span></sub><span class="rel">→</span>v<sub><span class="upr">0</span></sub></span> 长 <span class="math"><span class="upr">3</span><span class="bin">+</span><span class="upr">5</span><span class="rel">=</span><span class="upr">8</span>&lt;∞</span>； 第 3 次经 <span class="math">v<sub><span class="upr">2</span></sub></span>：<span class="math">v<sub><span class="upr">0</span></sub><span class="rel">→</span>v<sub><span class="upr">2</span></sub><span class="rel">→</span>v<sub><span class="upr">1</span></sub></span> 长 <span class="math"><span class="upr">2</span><span class="bin">+</span><span class="upr">3</span><span class="rel">=</span><span class="upr">5</span>&lt;∞</span>。最后一张表里 <span class="math">path[<span class="upr">2</span>,<span class="upr">0</span>]<span class="rel">=</span><span class="upr">1</span></span>、<span class="math">path[<span class="upr">2</span>,<span class="upr">1</span>]<span class="rel">=</span><span class="upr">2</span></span>， 所以 <span class="math">v<sub><span class="upr">2</span></sub></span> 到 <span class="math">v<sub><span class="upr">0</span></sub></span> 的最短路径倒着读出来是 <span class="math">v<sub><span class="upr">0</span></sub><span class="rel">←</span>v<sub><span class="upr">1</span></sub><span class="rel">←</span>v<sub><span class="upr">2</span></sub></span>，即 <span class="math">v<sub><span class="upr">2</span></sub><span class="rel">→</span>v<sub><span class="upr">1</span></sub><span class="rel">→</span>v<sub><span class="upr">0</span></sub></span>。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#floyd</a></div><pre><code>[[nodiscard]] std::vector&lt;std::vector&lt;distance_type&gt;&gt; floyd() <span class="k">const</span> {
     std::vector&lt;std::vector&lt;distance_type&gt;&gt; distance(
         vertices(), std::vector&lt;distance_type&gt;(vertices(), unreachable));
@@ -1169,7 +1269,7 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
 <p>回到本章开始提到的例子：假设要在 <span class="math">n</span> 个城市之间建立通信网络，要在最节省经费的情况下建立这个 网络，则联通 <span class="math">n</span> 个城市只需要 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 条线路——如何在这些可能的线路中选择 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 条使得总花费 最小，就是<strong>最小生成树问题</strong>。目标不是任意两点最短，而是连通全部顶点且选中边的总权最小。</p>
 <p>图 <span class="math">G</span> 的<strong>生成树</strong>是一棵包含 <span class="math">G</span> 的所有顶点的树，树上所有权值总和表示代价；在 <span class="math">G</span> 的所有生成树中， 代价最小的生成树称为图 <span class="math">G</span> 的<strong>最小生成树</strong>（minimum-cost spanning tree，MST）。构造最小生成树 有多种算法，本节介绍 Prim 算法和 Kruskal 算法。</p>
 <p>Prim 和 Kruskal 都是贪心算法，都靠同一条性质站住脚，<strong>MST 性质</strong>：设 <span class="math">U</span> 是顶点集 <span class="math">V</span> 的非空真子集，若 <span class="math">(u,v)</span> 是所有一端在 <span class="math">U</span>、另一端在 <span class="math">V<span class="bin">−</span>U</span> 的边里权最小的一条，则一定存在一棵包含 <span class="math">(u,v)</span> 的最小生成树。</p>
-<p>反证：假设某棵最小生成树 <span class="math">T</span> 不含 <span class="math">(u,v)</span>。把 <span class="math">(u,v)</span> 加进 <span class="math">T</span> 必成一个回路，回路上一定另有一条边 <span class="math">(u&#x27;,v&#x27;)</span> 同样跨在 <span class="math">U</span> 与 <span class="math">V<span class="bin">−</span>U</span> 之间：</p>
+<p>反证：假设 <span class="math">G</span> 的<strong>任何一棵</strong>最小生成树都不含 <span class="math">(u,v)</span>，任取其中一棵 <span class="math">T</span>。把 <span class="math">(u,v)</span> 加进 <span class="math">T</span> 必成一个回路；这个回路从 <span class="math">U</span> 里的 <span class="math">u</span> 走到 <span class="math">V<span class="bin">−</span>U</span> 里的 <span class="math">v</span> 之后还要回到 <span class="math">u</span>，所以回路上一定另有一条边 <span class="math">(u&#x27;,v&#x27;)</span> 同样跨在 <span class="math">U</span> 与 <span class="math">V<span class="bin">−</span>U</span> 之间（<span class="math">u&#x27;<span class="rel">∈</span>U</span>，<span class="math">v&#x27;<span class="rel">∈</span>V<span class="bin">−</span>U</span>）：</p>
 <figure><img loading="lazy" src="../assets/scan/fig-7-22.png" alt="图 7.22 含 (u,v) 的回路"><figcaption>图 7.22 含 (u,v) 的回路</figcaption></figure>
 <p>图 7.22　含 <span class="math">(u,v)</span> 的回路。删掉 <span class="math">(u&#x27;,v&#x27;)</span> 就消掉了回路，得到另一棵生成树 <span class="math">T&#x27;</span>；因为 <span class="math">W(u,v)<span class="rel">≤</span>W(u&#x27;,v&#x27;)</span>，<span class="math">T&#x27;</span> 的代价不比 <span class="math">T</span> 大，于是 <span class="math">T&#x27;</span> 也是最小生成树，且含 <span class="math">(u,v)</span>——与假设矛盾。</p>
 <p>这条性质就是两个算法「每一步都可以放心地取当前最小的那条跨界边」的依据。下面两小节都拿同一张带权图举例：</p>
@@ -1187,6 +1287,51 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
 <figure><img loading="lazy" src="../assets/scan/fig-7-24-abc.png" alt="图 7.24(a)(b)(c) Prim 算法构造最小生成树的前三步"><figcaption>图 7.24(a)(b)(c) Prim 算法构造最小生成树的前三步</figcaption></figure>
 <figure><img loading="lazy" src="../assets/scan/fig-7-24-def.png" alt="图 7.24(d)(e)(f) Prim 算法构造最小生成树的后三步"><figcaption>图 7.24(d)(e)(f) Prim 算法构造最小生成树的后三步</figcaption></figure>
 <p>图 7.24　Prim 算法在图 7.23 上的六个步骤（原书印在相邻两页上，(a)(b)(c) 一页、(d)(e)(f) 一页，这里照原样分作两张）。注意每一步长出来的都是<strong>一棵连着的树</strong>——这正是它与 Kruskal 的区别。</p>
+<p>逐步对照（从 <span class="math">v<sub><span class="upr">0</span></sub></span> 出发，「候选」列出此刻所有跨在 <span class="math">U</span> 与 <span class="math">V<span class="bin">−</span>U</span> 之间的边）：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">步骤</th>
+<th style="text-align:left"><span class="math">U</span>（并入前）</th>
+<th style="text-align:left">候选跨界边</th>
+<th style="text-align:left">选中</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left"><span class="math">{v<sub><span class="upr">0</span></sub>}</span></td>
+<td style="text-align:left"><span class="math">(v<sub><span class="upr">0</span></sub>,v<sub><span class="upr">1</span></sub>)</span> 20，<span class="math">(v<sub><span class="upr">0</span></sub>,v<sub><span class="upr">4</span></sub>)</span> 1</td>
+<td style="text-align:left"><span class="math">(v<sub><span class="upr">0</span></sub>,v<sub><span class="upr">4</span></sub>)</span> 1</td>
+</tr>
+<tr>
+<td style="text-align:left">2</td>
+<td style="text-align:left"><span class="math">{v<sub><span class="upr">0</span></sub>,v<sub><span class="upr">4</span></sub>}</span></td>
+<td style="text-align:left"><span class="math">(v<sub><span class="upr">0</span></sub>,v<sub><span class="upr">1</span></sub>)</span> 20，<span class="math">(v<sub><span class="upr">4</span></sub>,v<sub><span class="upr">5</span></sub>)</span> 15</td>
+<td style="text-align:left"><span class="math">(v<sub><span class="upr">4</span></sub>,v<sub><span class="upr">5</span></sub>)</span> 15</td>
+</tr>
+<tr>
+<td style="text-align:left">3</td>
+<td style="text-align:left"><span class="math">{v<sub><span class="upr">0</span></sub>,v<sub><span class="upr">4</span></sub>,v<sub><span class="upr">5</span></sub>}</span></td>
+<td style="text-align:left"><span class="math">(v<sub><span class="upr">0</span></sub>,v<sub><span class="upr">1</span></sub>)</span> 20，<span class="math">(v<sub><span class="upr">5</span></sub>,v<sub><span class="upr">3</span></sub>)</span> 12，<span class="math">(v<sub><span class="upr">5</span></sub>,v<sub><span class="upr">6</span></sub>)</span> 10</td>
+<td style="text-align:left"><span class="math">(v<sub><span class="upr">5</span></sub>,v<sub><span class="upr">6</span></sub>)</span> 10</td>
+</tr>
+<tr>
+<td style="text-align:left">4</td>
+<td style="text-align:left"><span class="math">{v<sub><span class="upr">0</span></sub>,v<sub><span class="upr">4</span></sub>,v<sub><span class="upr">5</span></sub>,v<sub><span class="upr">6</span></sub>}</span></td>
+<td style="text-align:left"><span class="math">(v<sub><span class="upr">0</span></sub>,v<sub><span class="upr">1</span></sub>)</span> 20，<span class="math">(v<sub><span class="upr">5</span></sub>,v<sub><span class="upr">3</span></sub>)</span> 12，<span class="math">(v<sub><span class="upr">6</span></sub>,v<sub><span class="upr">3</span></sub>)</span> 8，<span class="math">(v<sub><span class="upr">6</span></sub>,v<sub><span class="upr">2</span></sub>)</span> 2</td>
+<td style="text-align:left"><span class="math">(v<sub><span class="upr">6</span></sub>,v<sub><span class="upr">2</span></sub>)</span> 2</td>
+</tr>
+<tr>
+<td style="text-align:left">5</td>
+<td style="text-align:left">再加 <span class="math">v<sub><span class="upr">2</span></sub></span></td>
+<td style="text-align:left"><span class="math">(v<sub><span class="upr">0</span></sub>,v<sub><span class="upr">1</span></sub>)</span> 20，<span class="math">(v<sub><span class="upr">5</span></sub>,v<sub><span class="upr">3</span></sub>)</span> 12，<span class="math">(v<sub><span class="upr">6</span></sub>,v<sub><span class="upr">3</span></sub>)</span> 8，<span class="math">(v<sub><span class="upr">2</span></sub>,v<sub><span class="upr">1</span></sub>)</span> 6</td>
+<td style="text-align:left"><span class="math">(v<sub><span class="upr">2</span></sub>,v<sub><span class="upr">1</span></sub>)</span> 6</td>
+</tr>
+<tr>
+<td style="text-align:left">6</td>
+<td style="text-align:left">再加 <span class="math">v<sub><span class="upr">1</span></sub></span></td>
+<td style="text-align:left"><span class="math">(v<sub><span class="upr">5</span></sub>,v<sub><span class="upr">3</span></sub>)</span> 12，<span class="math">(v<sub><span class="upr">6</span></sub>,v<sub><span class="upr">3</span></sub>)</span> 8，<span class="math">(v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">3</span></sub>)</span> 4</td>
+<td style="text-align:left"><span class="math">(v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">3</span></sub>)</span> 4</td>
+</tr>
+</tbody></table></div>
+<p>6 步选出 <span class="math">n<span class="bin">−</span><span class="upr">1</span><span class="rel">=</span><span class="upr">6</span></span> 条边，总权 <span class="math"><span class="upr">1</span><span class="bin">+</span><span class="upr">15</span><span class="bin">+</span><span class="upr">10</span><span class="bin">+</span><span class="upr">2</span><span class="bin">+</span><span class="upr">6</span><span class="bin">+</span><span class="upr">4</span><span class="rel">=</span><span class="upr">38</span></span>。第 2 步取了权 15 的边，是因为此刻跨界边只有 20 和 15 两条——Prim 只看「离当前这棵树最近」，不看全局最小。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#prim</a></div><pre><code>[[nodiscard]] std::optional&lt;std::vector&lt;Edge&gt;&gt; prim(std::<span class="t">size_t</span> source) <span class="k">const</span> {
     check_vertex(source);
     std::vector&lt;<span class="t">int</span>&gt; distance(vertices(), infinity);
@@ -1238,6 +1383,69 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
 <figure><img loading="lazy" src="../assets/scan/fig-7-25-abc.png" alt="图 7.25(a)(b)(c) Kruskal 算法构造最小生成树的前三步"><figcaption>图 7.25(a)(b)(c) Kruskal 算法构造最小生成树的前三步</figcaption></figure>
 <figure><img loading="lazy" src="../assets/scan/fig-7-25-def.png" alt="图 7.25(d)(e)(f) Kruskal 算法构造最小生成树的后三步"><figcaption>图 7.25(d)(e)(f) Kruskal 算法构造最小生成树的后三步</figcaption></figure>
 <p>图 7.25　Kruskal 算法在同一张图 7.23 上的步骤（同样跨两页，(a)(b)(c) 与 (d)(e)(f) 各一张）。中间过程是<strong>一片森林</strong>，直到最后才连成一棵树；判断「这条边会不会成环」就是判断两个端点是不是已经在同一棵树里——这正是第 6 章并查集的用处。两个算法走的路不同，得到的总权相同。</p>
+<p>把 9 条边按权排好逐条看：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">边</th>
+<th style="text-align:right">权</th>
+<th style="text-align:left">两端是否已连通</th>
+<th style="text-align:left">处理</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left"><span class="math">(v<sub><span class="upr">0</span></sub>,v<sub><span class="upr">4</span></sub>)</span></td>
+<td style="text-align:right">1</td>
+<td style="text-align:left">否</td>
+<td style="text-align:left">取，步骤 (a)</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">(v<sub><span class="upr">2</span></sub>,v<sub><span class="upr">6</span></sub>)</span></td>
+<td style="text-align:right">2</td>
+<td style="text-align:left">否</td>
+<td style="text-align:left">取，步骤 (b)</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">(v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">3</span></sub>)</span></td>
+<td style="text-align:right">4</td>
+<td style="text-align:left">否</td>
+<td style="text-align:left">取，步骤 (c)</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">(v<sub><span class="upr">1</span></sub>,v<sub><span class="upr">2</span></sub>)</span></td>
+<td style="text-align:right">6</td>
+<td style="text-align:left">否</td>
+<td style="text-align:left">取，步骤 (d)</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">(v<sub><span class="upr">3</span></sub>,v<sub><span class="upr">6</span></sub>)</span></td>
+<td style="text-align:right">8</td>
+<td style="text-align:left">是：<span class="math">v<sub><span class="upr">3</span></sub><span class="bin">−</span>v<sub><span class="upr">1</span></sub><span class="bin">−</span>v<sub><span class="upr">2</span></sub><span class="bin">−</span>v<sub><span class="upr">6</span></sub></span></td>
+<td style="text-align:left">舍去</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">(v<sub><span class="upr">5</span></sub>,v<sub><span class="upr">6</span></sub>)</span></td>
+<td style="text-align:right">10</td>
+<td style="text-align:left">否</td>
+<td style="text-align:left">取，步骤 (e)</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">(v<sub><span class="upr">3</span></sub>,v<sub><span class="upr">5</span></sub>)</span></td>
+<td style="text-align:right">12</td>
+<td style="text-align:left">是：<span class="math">v<sub><span class="upr">3</span></sub><span class="bin">−</span>v<sub><span class="upr">1</span></sub><span class="bin">−</span>v<sub><span class="upr">2</span></sub><span class="bin">−</span>v<sub><span class="upr">6</span></sub><span class="bin">−</span>v<sub><span class="upr">5</span></sub></span></td>
+<td style="text-align:left">舍去</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">(v<sub><span class="upr">4</span></sub>,v<sub><span class="upr">5</span></sub>)</span></td>
+<td style="text-align:right">15</td>
+<td style="text-align:left">否</td>
+<td style="text-align:left">取，步骤 (f)，已有 <span class="math">n<span class="bin">−</span><span class="upr">1</span><span class="rel">=</span><span class="upr">6</span></span> 条边</td>
+</tr>
+<tr>
+<td style="text-align:left"><span class="math">(v<sub><span class="upr">0</span></sub>,v<sub><span class="upr">1</span></sub>)</span></td>
+<td style="text-align:right">20</td>
+<td style="text-align:left">是</td>
+<td style="text-align:left">舍去（实现里照样查一次，结果不变）</td>
+</tr>
+</tbody></table></div>
+<p>选中的 6 条边与 Prim 完全相同，总权同为 38，只是加入的次序不同。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch07/graph/modern.hpp">code/ch07/graph/modern.hpp#kruskal</a></div><pre><code>[[nodiscard]] std::optional&lt;std::vector&lt;Edge&gt;&gt; kruskal() <span class="k">const</span> {
     std::vector&lt;Edge&gt; edges;
     <span class="k">for</span> (std::<span class="t">size_t</span> from = <span class="n">0</span>; from &lt; vertices(); ++from) {
@@ -1297,7 +1505,7 @@ Dijkstra(0-&gt;4) = 7</code></pre></div>
 <p><strong>图有 3 种主要存储结构：相邻矩阵表示法、邻接表表示法和十字链表表示法。</strong> 相邻矩阵用数组表示顶点 间相邻关系的矩阵；图的邻接表由顶点表和边表组成，把依附于同一个顶点的边（或弧）存放在同一个边表 中；十字链表是有向图的另一种链式存储结构，可以看做有向图的邻接表和逆邻接表的结合。相邻矩阵 表示法与邻接表表示法有以下差异：</p>
 <ol>
 <li><strong>相邻矩阵适合存储稠密图，邻接表适合存储稀疏图；</strong></li>
-<li>求无向图顶点的度时采用这两种存储结构都比较容易，求有向图顶点的出度时采用相邻矩阵更方便；</li>
+<li>求无向图顶点的度时采用这两种存储结构都比较容易，求有向图顶点的<strong>入度</strong>时采用相邻矩阵更方便 （原书此处印作「出度」。出度在邻接表里就是边表长度，<span class="math">O(<span class="upr">deg</span>&thinsp;v)</span> 即得；入度在矩阵里是一列之和， <span class="math">O(n)</span>，在邻接表里却要扫遍全部边表，<span class="math">O(n<span class="bin">+</span>e)</span>——见 7.3.2 节逆邻接表的由来）；</li>
 <li>判断是否是图中的边，相邻矩阵更容易；</li>
 <li>求边数 <span class="math">e</span>，相邻矩阵耗时为 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>、与 <span class="math">e</span> 无关，邻接表的耗时为 <span class="math">O(n<span class="bin">+</span>e)</span>。</li>
 </ol>

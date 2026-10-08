@@ -167,7 +167,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>读每一种方法时同时问四件事：它靠元素之间比较，还是靠关键码的数字结构做分配？相等的键排完之后相对次序变不变（稳定）？除了原序列还要多少额外空间？最好、平均、最坏各是什么时间？「稳定」不是装饰：按成绩排序时，两名同分学生若仍按原来的姓名顺序出现，后续按姓名再排才有意义。</p>
 <p><strong>怎么衡量代价。</strong> 评价一种排序算法的好坏主要通过空间代价和时间代价两方面，尤其是时间代价； 如果有特殊的空间限制，则要注意采用辅助空间较小的算法。时间代价一般通过<strong>记录的总比较次数和 总移动次数</strong>来衡量：一次移动就是一次记录赋值，<strong>一次 <code>swap</code> 交换算三次移动</strong>——这条换算在 8.7.2 节解释「同样是 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>，冒泡为什么比插入慢几十倍」时会再用到。记录的数量、排序码和记录的 大小、以及输入记录的原始有序程度，都会影响排序算法的相对运行时间。估算时间代价时需要分别 考虑 3 种情况：最小时间代价（最佳情况）、最大时间代价（最差情况）以及平均时间代价（平均情况）。 <strong>当序列中不含重复记录时，一个长度为 <span class="math">n</span> 的序列共有 <span class="math">n!</span> 种排列；假定每种排列的出现都是等概率的， 所有可能排列的平均运行时间就是排序算法的平均时间代价。</strong></p>
 <p><strong>本章的分类</strong>沿用原书：把直接插入排序、Shell 排序归为插入排序类（8.2）；把冒泡排序和快速排序 归为交换排序（8.4）；把直接选择排序、堆排序以及第 9 章的选择树归并排序划为选择排序（8.3）； 分配排序中介绍桶排序、基数排序以及索引排序（8.6）。另一种常见分类是把插入、直接选择、冒泡归为 「简单排序」，把快速排序和归并排序归为「分治排序」。</p>
-<p>比较排序在最坏情况下至少需要 <span class="math">Ω(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 次比较，这是判定树给出的下界。插入、选择、冒泡是 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>；堆和归并最坏也是 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>；快排平均 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，已经有序时退化成 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>。计数和基数不是比较排序，代价取决于值域或位数。</p>
+<p>比较排序在最坏情况下至少需要 <span class="math">Ω(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 次比较，这是判定树给出的下界。插入、选择、冒泡是 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>；堆和归并最坏也是 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>；快排平均 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，但取首/末元素作轴时（本书的实现就是取末元素），已经有序或全部相等的输入会让它退化成 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>。计数和基数不是比较排序，代价取决于值域或位数。</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">方法</th>
 <th style="text-align:left">平均时间</th>
@@ -307,7 +307,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>图 8.2　Shell 排序。同一种底纹标出的是同一个子序列。</p>
 <p>8.2.1 节已经介绍过两条性质：初始序列为正序时，插入排序的最佳时间代价为 <span class="math">Θ(n)</span>；另外，对于 短序列的情况插入排序也比较有效。<strong>Shell 排序（D. L. Shell，1959）有效地利用了插入排序的这两个 性质。</strong></p>
 <p>与直接插入排序不同的是，Shell 排序不是着眼于相邻记录之间的比较，而是<strong>对那些不相邻的记录进行 比较和移动</strong>：先将待排序序列分为若干个子序列，而且要保证子序列中的记录在原始数组中不相邻、 且间距相同，分别对这些小子序列进行插入排序；然后减少记录间的间距、减少小序列个数，将原始序列 分为更大、更有序的子序列，分别进行插入排序；重复下去，直到最后间距减少为 1（整个序列比较接近 于正序状态），然后对整个序列进行插入排序——此时序列已经<strong>基本有序</strong>，插入排序在这种输入上接近 <span class="math">Θ(n)</span>。</p>
-<p>由于 Shell 排序按照不断缩小的增量来将原始序列分成若干个子序列，因此有时也称为<strong>缩小增量排序法</strong> （diminishing increment sorting）。本书按原书取「增量每次除以 2 递减」，即增量序列为 <span class="math">(<span class="upr">2</span><sup>k</sup>,<span class="upr">2</span><sup>k<span class="bin">−</span><span class="upr">1</span></sup>,⋯,<span class="upr">2</span>,<span class="upr">1</span>)</span>。仍用上面那个序列（<span class="math">n<span class="rel">=</span><span class="upr">8</span></span>），两个 34 用 34 和 34′ 区分：</p>
+<p>由于 Shell 排序按照不断缩小的增量来将原始序列分成若干个子序列，因此有时也称为<strong>缩小增量排序法</strong> （diminishing increment sorting）。本书按原书取「增量每次除以 2 递减」：代码里增量从 <span class="math">⌊n/<span class="upr">2</span>⌋</span> 开始、每趟整除 2，直到 1；<span class="math">n<span class="rel">=</span><span class="upr">2</span><sup>k<span class="bin">+</span><span class="upr">1</span></sup></span> 时增量序列就是 <span class="math">(<span class="upr">2</span><sup>k</sup>,<span class="upr">2</span><sup>k<span class="bin">−</span><span class="upr">1</span></sup>,⋯,<span class="upr">2</span>,<span class="upr">1</span>)</span>。仍用上面那个序列（<span class="math">n<span class="rel">=</span><span class="upr">8</span></span>），两个 34 用 34 和 34′ 区分：</p>
 <div class="codeblock" data-lang="text"><pre><code>初始       45  34  78  12 34′  32  29  64
 gap=4     34′  32  29  12  45  34  78  64
 gap=2      29  12 34′  32  45  34  78  64
@@ -328,10 +328,10 @@ gap=1      12  29  32 34′  34  45  64  78</code></pre></div>
     }
 }</code></pre></div>
 <p>增量序列的选择直接决定复杂度，这是一个至今没有完全解决的问题：减半序列最坏 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>，Hibbard 序列 <span class="math"><span class="upr">1</span>,<span class="upr">3</span>,<span class="upr">7</span>,…,<span class="upr">2</span><sup>k</sup><span class="bin">−</span><span class="upr">1</span></span> 最坏 <span class="math">Θ(n<sup><span class="upr">3</span>/<span class="upr">2</span></sup>)</span>， 实测常用的 Sedgewick 序列更好。本书取减半，是因为它最容易讲清楚「增量」这件事本身。</p>
-<h2 id="83-选择排序"><a class="anchor" href="#83-选择排序">#</a>8.3 选择排序</h2>
 <p><strong>为什么「除以 2 递减」效果有限。</strong> Shell 排序的效率比直接插入排序要高——整个排序过程中，第一轮 循环中逆置个数比较多，最后几轮循环中子序列都是基本有序的，因此效率比起直接对整个数组做插入 排序要好。但是当选取「增量每次除以 2 递减」时，<strong>效率仍然为 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span></strong>，并没有多大效果。问题 就在于这样选取的增量之间<strong>并不互质</strong>：间距为 <span class="math"><span class="upr">2</span><sup>k<span class="bin">−</span><span class="upr">1</span></sup></span> 的子序列都是由那些间距为 <span class="math"><span class="upr">2</span><sup>k</sup></span> 的子序列组成 的，而实际上上一轮循环中这些子序列都已经排序过，导致后面的处理效率不高。最坏情况下，所有比较 大的记录下标都是奇数、比较小的记录下标都是偶数：由于每次分出的子序列要么下标都是奇数、要么 都是偶数，因此每次对子序列排序后，大数仍然在奇数位置上、小数仍然在偶数位置上，整个序列没有 达到基本有序状态，导致最后一次对整个序列做直接插入排序时效率大幅降低。</p>
 <p><strong>换增量序列能换来质变。</strong> Hibbard 提出了一种新的增量序列 <span class="math">{<span class="upr">2</span><sup>k</sup><span class="bin">−</span><span class="upr">1</span>,<span class="upr">2</span><sup>k<span class="bin">−</span><span class="upr">1</span></sup><span class="bin">−</span><span class="upr">1</span>,⋯,<span class="upr">7</span>,<span class="upr">3</span>,<span class="upr">1</span>}</span>， 推理证明这种选取方式下 Shell 排序的效率可以达到 <span class="math">Θ(n<sup><span class="upr">3</span>/<span class="upr">2</span></sup>)</span>，而模拟实验表明甚至可以达到 <span class="math">Θ(n<sup><span class="upr">5</span>/<span class="upr">4</span></sup>)</span>，只是尚未得到理论上的证明；「增量每次除以 3 递减」的效率也是 <span class="math">Θ(n<sup><span class="upr">3</span>/<span class="upr">2</span></sup>)</span>。 事实上，选取其他增量序列还可以进一步减少时间代价，甚至有的增量序列可以达到 <span class="math">Θ(n<sup><span class="upr">7</span>/<span class="upr">6</span></sup>)</span>， 很接近 <span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，比直接插入排序要快得多。</p>
 <p><strong>注意两条边界。</strong> 一是<strong>最后一趟的增量必须是 1</strong>：如果采用其他增量序列，一定要注意人为地加上一个 间距为 1 的增量元素，否则整个序列不能保证有序。二是 <strong>Shell 排序不稳定</strong>：子序列互相交错，而且 跨度比较大——上面那个例子里 34 和 34′ 的排序结果就是不稳定的。空间代价仍是 <span class="math">Θ(<span class="upr">1</span>)</span>。</p>
+<h2 id="83-选择排序"><a class="anchor" href="#83-选择排序">#</a>8.3 选择排序</h2>
 <p><strong>选择排序</strong>（selection sorting）的算法思想是逐个找出第 <span class="math">i</span> 小的记录，并将其放到数组的第 <span class="math">i</span> 个位置。 <strong>关键在于如何从剩余的未排序记录中找出最小（或最大）的那个记录</strong>：本节介绍简单的线性查找方法 （直接选择排序）和基于二叉树堆进行选择的方法（堆排序）。</p>
 <h3 id="831-直接选择排序"><a class="anchor" href="#831-直接选择排序">#</a>8.3.1 直接选择排序</h3>
 <p>选择排序的思路是逐个「选出第 <span class="math">i</span> 小的记录，一次交换到位」：第 <span class="math">i</span> 轮从剩下的 <span class="math">n<span class="bin">−</span>i</span> 个记录里线性扫描出最小的那个，与下标 <span class="math">i</span> 上的记录交换。</p>
@@ -355,15 +355,32 @@ i=3        12  29  32 34′  45  78  34  64    34′ 与下标 4 交换
 i=4        12  29  32 34′  34  78  45  64    34 与下标 6 交换
 i=5        12  29  32 34′  34  45  78  64    45 与下标 6 交换
 i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre></div>
-<p><strong>它不稳定，第 3 轮就看得出来</strong>：扫描是从前往后的，34′（下标 4）先于 34（下标 6） 被选中，于是排完是 <code>34′ 34</code>，与输入次序相反。更本质的原因是那次交换的<strong>跨度很大</strong>—— <code>i=1</code> 那一轮把 34 从下标 1 一脚踢到了下标 6，越过了 34′。稳定的排序必须避免这种远距离交换。</p>
+<p>（<code>i=7</code> 那一轮内层一次也不比较，<code>minimum == first</code>，代码里的 <code>swap</code> 是一次自己与自己的交换，排列不变，表中省去。）</p>
+<p><strong>它不稳定，<code>i=3</code> 那一轮（第 4 轮）就看得出来</strong>：扫描是从前往后的，34′（下标 4）先于 34（下标 6） 被选中，于是排完是 <code>34′ 34</code>，与输入次序相反。更本质的原因是那次交换的<strong>跨度很大</strong>—— <code>i=1</code> 那一轮把 34 从下标 1 一脚踢到了下标 6，越过了 34′。稳定的排序必须避免这种远距离交换。</p>
 <p>代价分析很干脆：外层 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 轮，第 <span class="math">i</span> 轮内层比较 <span class="math">n<span class="bin">−</span><span class="upr">1</span><span class="bin">−</span>i</span> 次，</p>
 <div class="math math-display">∑<sub>i<span class="rel">=</span><span class="upr">0</span></sub><sup>n<span class="bin">−</span><span class="upr">2</span></sup>(n<span class="bin">−</span><span class="upr">1</span><span class="bin">−</span>i)<span class="rel">=</span><span class="frac"><span class="num">n(n<span class="bin">−</span><span class="upr">1</span>)</span><span class="den"><span class="upr">2</span></span></span><span class="rel">=</span>Θ(n<sup><span class="upr">2</span></sup>)</div>
 <p><strong>而且与输入顺序无关</strong>——已经排好序的输入照样扫这么多次，所以最好、平均、最坏都是 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>。这一点和插入排序、冒泡排序都不同，后两者在有序输入上是 <span class="math">Θ(n)</span>。</p>
-<p>但它有一个别人没有的优点：<strong>交换次数最多只有 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 次</strong>。当记录很大（比如每条记录几百字节） 而比较很便宜时，移动开销才是主导，这时选择排序反而合适。想把移动降到更低， 见 8.6.3 节的索引排序。空间代价 <span class="math">Θ(<span class="upr">1</span>)</span>。</p>
+<p>但它有一个别人没有的优点：<strong>真正改变位置的交换最多只有 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 次</strong>（每轮 1 次交换、3 次移动）。 注意本书代码每轮都无条件调用一次 <code>swap</code>，<code>minimum == first</code> 时就是一次白做的自交换—— 原书习题 5 讨论的正是这一点。当记录很大（比如每条记录几百字节） 而比较很便宜时，移动开销才是主导，这时选择排序反而合适。想把移动降到更低， 见 8.6.3 节的索引排序。空间代价 <span class="math">Θ(<span class="upr">1</span>)</span>。</p>
 <h3 id="832-堆排序"><a class="anchor" href="#832-堆排序">#</a>8.3.2 堆排序</h3>
-<p>先把数组建成最大堆，再反复把堆顶与堆尾交换并缩小堆。<code>sift_down</code> 必须比较左右两个孩子。</p>
+<p>直接选择排序每一轮都从头线性扫描剩余记录，<strong>没有利用前一轮查找已经得到的比较信息</strong>。 堆排序（heapsort）用堆来保存「剩余记录之间谁大谁小」的信息，因而是更有效的选择排序。</p>
+<p>这里用<strong>最大堆</strong>：每个父结点的值都大于或等于它的子结点，所以堆顶就是剩余记录中的最大者， 次大者一定在堆顶的左或右孩子里。堆排序分两步：</p>
+<ol>
+<li>对所有记录建立最大堆（与 5.5 节的最小堆对称，只是把比较方向反过来）；</li>
+<li>把堆顶的最大记录与堆的末端记录交换——最大记录落在下标 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span>，原末端记录临时处于根； 再把根向下筛选（<code>sift_down</code>），剩下的 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 个记录重新成堆；然后把新堆顶与下标 <span class="math">n<span class="bin">−</span><span class="upr">2</span></span> 交换…… 不断重复，直到堆里只剩一个记录。这时数组正好按从小到大排好。</li>
+</ol>
+<p>筛选时 <code>sift_down</code> 必须比较左右两个孩子、与<strong>较大</strong>的那个交换，否则换上来的孩子可能比它的兄弟小，堆性质就破了。</p>
 <figure><img loading="lazy" src="../assets/scan/fig-8-4.png" alt="图 8.4 堆排序"><figcaption>图 8.4 堆排序</figcaption></figure>
-<p>图 8.4　堆排序：(a) 待排序列建成最大堆；(b) 取走最大值 78，用末尾的 32 填上；(c) 重新筛选后又是一个堆；(d) 重复下去，每取一次就把一个最大值放到已排好的那一段。建堆是 <span class="math">O(n)</span>（5.5.1a 证过），此后 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 次筛选各 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>，合计 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>——<strong>而且不需要额外数组</strong>。</p>
+<p>图 8.4　堆排序：(a) 待排序列建成最大堆；(b) 取走最大值 78，用末尾的 32 填上；(c) 重新筛选后又是一个堆；(d) 重复下去，每取一次就把一个最大值放到已排好的那一段。建堆是 <span class="math">O(n)</span>（5.5.1a 证过），此后 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 次筛选各 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>，合计 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>——<strong>而且不需要额外数组</strong>。（扫描件 (c) 那一行开头多印了一个 78，正确的序列是 <code>45 34 34′ 12 29 32 | 78</code>。）</p>
+<p>原书的待排数组是 <span class="math">{<span class="upr">45</span>,<span class="upr">29</span>,<span class="upr">32</span>,<span class="upr">12</span>,<span class="upr">34</span>,<span class="upr">34</span>&#x27;,<span class="upr">78</span>}</span>，按上面的代码建堆得到图 8.4(a) 的 <span class="math">{<span class="upr">78</span>,<span class="upr">34</span>,<span class="upr">45</span>,<span class="upr">12</span>,<span class="upr">29</span>,<span class="upr">34</span>&#x27;,<span class="upr">32</span>}</span>。此后每一趟「堆顶与堆尾交换、再从根筛选」的结果如下 （竖线右边是已经排好的部分）：</p>
+<div class="codeblock" data-lang="text"><pre><code>建堆后     78  34  45  12  29 34′  32
+第1趟      45  34 34′  12  29  32 | 78           图 8.4(c)
+第2趟      34  32 34′  12  29 | 45  78           图 8.4(d)
+第3趟     34′  32  29  12 | 34  45  78
+第4趟      32  12  29 | 34′  34  45  78
+第5趟      29  12 | 32  34′  34  45  78
+第6趟      12 | 29  32  34′  34  45  78</code></pre></div>
+<p>第 2 趟筛选时根的两个孩子是 34 和 34′，相等，代码只在左孩子<strong>严格小于</strong>右孩子时才选右孩子， 于是 34 被提上来；下一趟第三个出堆的就是 34，它被放到了 34′ 后面。最终结果是 <code>12 29 32 34′ 34 45 78</code>——输入里 34 在 34′ 之前，排完反了过来。<strong>堆排序不稳定</strong>： 建堆和筛选都是父子之间的远距离移动，保证不了两个相等记录的原始次序。</p>
+<p><strong>代价分析。</strong> 建堆 <span class="math">Θ(n)</span>，此后 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 次「删除堆顶、重新筛选」每次 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>，总时间 <span class="math">Θ(n)<span class="bin">+</span>O(n&thinsp;<span class="upr">log</span>&thinsp;n)<span class="rel">=</span>O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>；关键码互不相同时，最佳、最差、平均都是 <span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> （全部相等这种极端输入下每次筛选立即返回，只要 <span class="math">Θ(n)</span>）。交换只用一个临时记录，空间代价 <span class="math">Θ(<span class="upr">1</span>)</span>。 堆排序的优点是建堆很快、只需建一次就能反复取用，且最坏情况也有 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 的保证；第 9 章还会 看到堆在外排序（置换选择）里的用处。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#heap</a></div><pre><code><span class="c">// 算法8.4：手写最大堆筛选与堆排序，不委托 std::make_heap/sort_heap。</span>
 <span class="k">inline</span> <span class="t">void</span> sift_down(std::vector&lt;<span class="t">int</span>&gt;&amp; values, std::<span class="t">size_t</span> root, std::<span class="t">size_t</span> count) {
     <span class="k">while</span> (root * <span class="n">2</span> + <span class="n">1</span> &lt; count) {
@@ -412,7 +429,7 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 <p>冒泡排序（bubble sorting，也称为起泡排序）不停地比较<strong>相邻</strong>两个记录，如果不满足排序要求就交换 相邻记录，直到所有的记录都已经排好序为止。一趟走完，最大（或最小）的那个必然被顶到一端， <strong>就像一个气泡从水底慢慢地冒上来、最后浮出水面</strong>——这就是冒泡排序的命名由来。</p>
 <p>对于长度为 <span class="math">n</span> 的待排序记录数组 <span class="math">R<span class="rel">=</span>{r<sub><span class="upr">0</span></sub>,r<sub><span class="upr">1</span></sub>,⋯,r<sub>n<span class="bin">−</span><span class="upr">1</span></sub>}</span>，原书的步骤是：从数组末端开始， 不断比较相邻记录，不满足排序要求就交换——首先比较 <span class="math">r<sub>n<span class="bin">−</span><span class="upr">1</span></sub></span> 和 <span class="math">r<sub>n<span class="bin">−</span><span class="upr">2</span></sub></span>，如果 <span class="math">r<sub>n<span class="bin">−</span><span class="upr">1</span></sub>&lt;r<sub>n<span class="bin">−</span><span class="upr">2</span></sub></span> 则两者 交换，然后依次对 <span class="math">r<sub>n<span class="bin">−</span><span class="upr">2</span></sub></span> 和 <span class="math">r<sub>n<span class="bin">−</span><span class="upr">3</span></sub></span>、<span class="math">⋯</span>、<span class="math">r<sub><span class="upr">1</span></sub></span> 和 <span class="math">r<sub><span class="upr">0</span></sub></span> 比较处理；这样比较完一轮后，最小的那个 记录已经被推到数组的最左端 <span class="math">r<sub><span class="upr">0</span></sub></span> 位置上。开始第二轮时由于 <span class="math">r<sub><span class="upr">0</span></sub></span> 已经是最小的记录，因此只需要对 <span class="math">r<sub>n<span class="bin">−</span><span class="upr">1</span></sub></span> 到 <span class="math">r<sub><span class="upr">1</span></sub></span> 进行比较；依次类推，直到数组中所有记录都已经排好序为止。</p>
 <figure><img loading="lazy" src="../assets/scan/fig-8-5.png" alt="图 8.5 冒泡排序"><figcaption>图 8.5 冒泡排序</figcaption></figure>
-<p>图 8.5　冒泡排序。每一行是一趟之后的序列，带箭头的是本轮交换过的相邻记录。</p>
+<p>图 8.5　冒泡排序（原书的方向：从右往左冒，每趟把最小的推到左端）。第 <span class="math">i</span> 行是第 <span class="math">i</span> 趟冒泡<strong>开始前</strong>的序列（<span class="math">i<span class="rel">=</span><span class="upr">0</span></span> 即初始序列）；带箭头的连线表示尾部的某个记录在这一趟里将被逐次交换、一路移到箭头所指记录之前；带下画线的是上一趟冒到左端的那个记录，它和 <code>‖</code> 左边的记录都已经排好。<span class="math">i<span class="rel">=</span><span class="upr">5</span></span> 那一趟没有发生任何交换，算法结束。</p>
 <p>原书是从数组末端往前比，每趟把最小的推到最左；本书从前往后比， 每趟把最大的顶到最右——原书自己也写了「算法的具体实现取决于编程人员的个人喜好」， 两种写法对称等价。</p>
 <p>关键的一处优化在原书算法8.5 里已经有了：<strong>记一个「本趟有没有发生过交换」的标志， 没有就说明整个序列已经有序，立刻结束</strong>。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#fn:bubble_sort</a></div><pre><code><span class="c">// 算法8.5：带“本趟无交换即结束”优化的冒泡排序。</span>
@@ -437,7 +454,8 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 第4趟      12  32  29  34 34′  45  64  78
 第5趟      12  29  32  34 34′  45  64  78
 第6趟      12  29  32  34 34′  45  64  78    ← 本趟一次交换都没有，结束</code></pre></div>
-<p><strong>它是稳定的</strong>：只有严格小于才交换，相等的两个元素永远不会互换位置—— 第 3、4 趟里 34 越过 32 和 29 往左走，34′ 也在走，但两者始终保持「34 在前」。 把实现里的 <code>&lt;</code> 写成 <code>&lt;=</code>，稳定性当场消失，这是最容易犯的一个错。</p>
+<p>本书的写法里大的记录往右走：每一趟从左往右扫，「到目前为止最大的那个」被一路换到右边；遇上不比它小的记录就停下，改由那个记录接着往右走。</p>
+<p><strong>它是稳定的</strong>：只有严格小于才交换，相等的两个元素永远不会互换位置—— 第 3 趟里 34 碰到右邻居 34′ 就停下（不严格小于，不交换），改由 34′ 越过 32 和 29 往右走； 第 4 趟轮到 34 越过同样的 32 和 29，又停在 34′ 左边。两者始终保持「34 在前」。 把实现里的 <code>&lt;</code> 写成 <code>&lt;=</code>，稳定性当场消失，这是最容易犯的一个错。</p>
 <p>时间代价：最好情况是输入已经有序，第一趟没有交换就退出，<span class="math">Θ(n)</span>； 最坏是完全逆序，比较与交换次数都是</p>
 <div class="math math-display">∑<sub>i<span class="rel">=</span><span class="upr">1</span></sub><sup>n<span class="bin">−</span><span class="upr">1</span></sup>(n<span class="bin">−</span>i)<span class="rel">=</span><span class="frac"><span class="num">n(n<span class="bin">−</span><span class="upr">1</span>)</span><span class="den"><span class="upr">2</span></span></span><span class="rel">=</span>Θ(n<sup><span class="upr">2</span></sup>)</div>
 <p>平均交换次数约为最坏的一半，仍是 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>。空间 <span class="math">Θ(<span class="upr">1</span>)</span>。</p>
@@ -455,20 +473,20 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 </ol>
 <p>步骤 2、3 是「分」「治」过程，可以同时实现，完成序列的分割。<strong>轴值 <span class="math">k</span> 已经到位，而左序列 <span class="math">L</span> 的记录 再也不会跑到 <span class="math">k</span> 的右边，反之亦然，因此不需要明显的「合」过程</strong>——这是它与归并排序（8.5 节）最大 的区别。如果把轴值看成子根、分割后的 <span class="math">L</span> 和 <span class="math">R</span> 分别看做轴值的左右子结点，则整幅图可以看成一棵 二叉树；对这棵二叉树进行中序遍历，收集轴值以及单个元素的叶结点，就得到最终的排序结果。</p>
 <p><strong>轴值怎么选，影响很大。</strong> 轴值的选择应尽量使得序列可以据此划分为均匀的两半。最糟糕的情况莫过于 轴值恰好是第一个或者最后一个记录——这样分出的两个子序列中就会有一个为空，从而使分治法根本 起不到作用。最简单的办法是选择第一个记录（下标 <code>start</code>）或者最后一个记录（下标 <code>end</code>）作为轴值， <strong>但弊端在于：当原始输入数组恰巧是正序或者恰好是逆序时，每次分割都会将剩余记录全都分到一个 序列中，而另一个序列却为空。</strong> 可以选取中间点 <code>(start + end) / 2</code> 的记录作为轴值，这种轴值在输入 数据为正序或逆序时可以平分序列，实验效果非常好。</p>
-<p>本书的实现选区间末元素为枢轴，把更小的元素换到左侧，再递归两边。全相等的输入必须也能结束。</p>
+<p>本书的实现选区间末元素为枢轴，把更小的元素换到左侧，再递归两边——分割方案与下面原书的两种都不同，同节代码之后会用图 8.7 的数据把它逐步走一遍。全相等的输入必须也能结束（它确实能结束，但代价是退化，见代码后的说明）。</p>
 <figure><img loading="lazy" src="../assets/scan/fig-8-7.png" alt="图 8.7 分割过程"><figcaption>图 8.7 分割过程</figcaption></figure>
 <p>图 8.7　一趟分割的过程。分割是快排的全部工作量所在：它是 <span class="math">O(n)</span> 的一次线性扫描，而<strong>分得均不均匀决定了递归有多深</strong>——每次都平分是 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，每次只切下一个元素就退化成 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>。</p>
 <p><strong>原书给了两种分割写法。</strong> 最简单的一种是 <span class="math">l</span>、<span class="math">r</span> 下标分别从序列的左端、右端向中间扫描：左边越过 那些小于等于 pivot 的值，停在第一个大于 pivot 的值 <span class="math">k<sub>l</sub></span>；右边越过那些大于等于 pivot 的值，停在 第一个小于 pivot 的值 <span class="math">k<sub>r</sub></span>；交换逆置记录 <span class="math">k<sub>l</sub></span> 和 <span class="math">k<sub>r</sub></span>；从交换后的位置继续从左右向中间扫描， 发现并交换逆置记录对，直到 <span class="math">l</span>、<span class="math">r</span> 交叉而整个序列扫描完毕。一种改进的方法（图 8.7 画的就是它） 是<strong>从序列两端交替检查空闲位置，将逆置记录移动到空闲位置上，而不是直接交换逆置记录</strong>：分割前 先将轴值与最后一个记录交换、并把轴值保存到一个临时变量中，此时序列中的最后一个位置就是空闲 位置。不同的分割方法所分出来的子序列不同。</p>
 <p><strong>图 8.7 那趟分割逐行读下来是这样的。</strong> 初始序列如第一行，轴值为 32；<strong>分割前先将轴值与最后一个 记录交换，并将轴值保存到一个临时变量中</strong>，此时序列中的最后一个位置就是空闲位置（图中用方框表示）， <span class="math">l</span>、<span class="math">r</span> 分别用来扫描整个序列的左右指针、初始时分别位于序列两端。首先 <span class="math">l</span> 指针从左边开始扫描， 找到 34 大于轴值就停下；<strong>将这个逆置记录放到空闲位置 <span class="math">r</span> 上</strong>，这时 34 原来所在位置 <span class="math">l</span> 就空闲了、 可以用来存放下一个逆置记录；然后从 <span class="math">r</span> 前面的记录开始寻找小于轴值的逆置记录，找到 29 停下， <strong>将 29 放到空闲位置 <span class="math">l</span> 上</strong>，这时 29 原来所在位置 <span class="math">r</span> 变为空闲。不断循环下去，直到 <span class="math">l</span>、<span class="math">r</span> 相遇， 表示整个序列已经扫描完毕；<strong>此时的空闲位置正好就是轴值的正确位置，将轴值 32 回填回去</strong>—— 可以看到轴值左边的记录都小于它、右边的记录都大于它，分割过程完毕。</p>
-<p><strong>等于轴值的记录怎么办？</strong> 由于快速排序是不稳定的，因此等于轴值的情况可以有多种处理方法。原书算法8.6 里那句 <code>while (Array[l] &lt;= TempRecord &amp;&amp; r &gt; l) l++;</code> 的注释写着「<code>&lt;=</code> 也可以改写为 <code>&lt;</code>，但增加记录移动」——<strong>两种写法都对，差别只在移动次数上。</strong></p>
+<p><strong>等于轴值的记录怎么办？</strong> 由于快速排序是不稳定的，因此等于轴值的情况可以有多种处理方法。原书算法8.6 里那句 <code>while (Array[l] &lt;= TempRecord &amp;&amp; r &gt; l) l++;</code> 的注释写着「<code>&lt;=</code> 也可以改写为 <code>&lt;</code>，但增加记录移动」——<strong>两种写法都对，差别在移动次数上</strong>；重复值很多时还牵涉到分得均不均匀， 本节代码之后用全相等的输入说明。</p>
 <p><strong>代价分析。</strong> 最差情况下每次分割只切下一个元素，需要 <span class="math">Θ(n)</span> 次分割，最大时间代价为 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>；每次分割时递归算法都需要用到编译栈中一个临时记录来存储轴值，因此最大空间代价为 <span class="math">Θ(n)</span>。最好情况下每次分割恰好将记录分为两个长度相等的子序列，此时</p>
 <div class="math math-display">T(n)<span class="rel">=</span><span class="upr">2</span>T(n/<span class="upr">2</span>)<span class="bin">+</span>cn</div>
-<p>两边同除以 <span class="math">n</span> 得 <span class="math">T(n)/n<span class="rel">=</span>T(n/<span class="upr">2</span>)/(n/<span class="upr">2</span>)<span class="bin">+</span>c</span>，逐层展开并叠加（算法共要进行 <span class="math"><span class="upr">log</span>&thinsp;n</span> 次分割）得到 <span class="math">T(n)/n<span class="rel">=</span>T(<span class="upr">1</span>)/<span class="upr">1</span><span class="bin">+</span>c&thinsp;<span class="upr">log</span>&thinsp;n</span>，即 <span class="math">T(n)<span class="rel">=</span>cn&thinsp;<span class="upr">log</span>&thinsp;n<span class="bin">+</span>n<span class="rel">=</span>Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>。</p>
+<p>两边同除以 <span class="math">n</span> 得 <span class="math">T(n)/n<span class="rel">=</span>T(n/<span class="upr">2</span>)/(n/<span class="upr">2</span>)<span class="bin">+</span>c</span>，逐层展开并叠加（递归共 <span class="math"><span class="upr">log</span>&thinsp;n</span> 层，每层的分割合计扫描约 <span class="math">n</span> 个记录）得到 <span class="math">T(n)/n<span class="rel">=</span>T(<span class="upr">1</span>)/<span class="upr">1</span><span class="bin">+</span>c&thinsp;<span class="upr">log</span>&thinsp;n</span>，即 <span class="math">T(n)<span class="rel">=</span>cn&thinsp;<span class="upr">log</span>&thinsp;n<span class="bin">+</span>n<span class="rel">=</span>Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>。</p>
 <p>平均情况要对所有可能的情况求和再除以总情况数。假设每次分割时轴值处于结果数组中各位置的概率 是一样的，即轴值把数组分成长度为 0 和 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span>、1 和 <span class="math">n<span class="bin">−</span><span class="upr">2</span></span>、<span class="math">⋯</span> 的子序列的概率都是 <span class="math"><span class="upr">1</span>/n</span>，则 <span class="math">T(i)</span> 和 <span class="math">T(n<span class="bin">−</span><span class="upr">1</span><span class="bin">−</span>i)</span> 的平均值均为 <span class="math"><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den">n</span></span>∑<sub>k<span class="rel">=</span><span class="upr">0</span></sub><sup>n<span class="bin">−</span><span class="upr">1</span></sup>T(k)</span>，代入递推式得到</p>
 <div class="math math-display">T(n)<span class="rel">=</span>cn<span class="bin">+</span><span class="frac"><span class="num"><span class="upr">2</span></span><span class="den">n</span></span>∑<sub>k<span class="rel">=</span><span class="upr">0</span></sub><sup>n<span class="bin">−</span><span class="upr">1</span></sup>T(k)</div>
 <p>两边同乘 <span class="math">n</span> 得 <span class="math">nT(n)<span class="rel">=</span>cn<sup><span class="upr">2</span></sup><span class="bin">+</span><span class="upr">2</span>∑<sub>k<span class="rel">=</span><span class="upr">0</span></sub><sup>n<span class="bin">−</span><span class="upr">1</span></sup>T(k)</span>；以 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 代入同一式得 <span class="math">(n<span class="bin">−</span><span class="upr">1</span>)T(n<span class="bin">−</span><span class="upr">1</span>)<span class="rel">=</span>c(n<span class="bin">−</span><span class="upr">1</span>)<sup><span class="upr">2</span></sup><span class="bin">+</span><span class="upr">2</span>∑<sub>k<span class="rel">=</span><span class="upr">0</span></sub><sup>n<span class="bin">−</span><span class="upr">2</span></sup>T(k)</span>；两式相减并忽略常数项，得 <span class="math">nT(n)<span class="rel">=</span>(n<span class="bin">+</span><span class="upr">1</span>)T(n<span class="bin">−</span><span class="upr">1</span>)<span class="bin">+</span><span class="upr">2</span>cn</span>。再两边同除以 <span class="math">n(n<span class="bin">+</span><span class="upr">1</span>)</span> 并逐层展开叠加：</p>
 <div class="math math-display"><span class="frac"><span class="num">T(n)</span><span class="den">n<span class="bin">+</span><span class="upr">1</span></span></span><span class="rel">=</span><span class="frac"><span class="num">T(<span class="upr">1</span>)</span><span class="den"><span class="upr">2</span></span></span><span class="bin">+</span><span class="upr">2</span>c∑<sub>i<span class="rel">=</span><span class="upr">3</span></sub><sup>n<span class="bin">+</span><span class="upr">1</span></sup><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den">i</span></span><span class="rel">=</span>Θ(<span class="upr">log</span>&thinsp;n)</div>
-<p>因此 <span class="math">T(n)<span class="rel">=</span>Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>。<strong>快速排序平均时间代价 <span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，平均需要 <span class="math">Θ(<span class="upr">log</span>&thinsp;n)</span> 次 分割，平均空间代价 <span class="math">Θ(<span class="upr">log</span>&thinsp;n)</span>。</strong></p>
+<p>因此 <span class="math">T(n)<span class="rel">=</span>Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>。<strong>快速排序平均时间代价 <span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，平均递归深度（分割的层数）为 <span class="math">Θ(<span class="upr">log</span>&thinsp;n)</span>， 平均空间代价 <span class="math">Θ(<span class="upr">log</span>&thinsp;n)</span>。</strong>（原书写作「平均需要 <span class="math">Θ(<span class="upr">log</span>&thinsp;n)</span> 次分割」，指的是层数；分割的<strong>次数</strong>总是 <span class="math">Θ(n)</span>——每次分割都让一个轴值到位。）</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#quick</a></div><pre><code><span class="k">inline</span> std::<span class="t">size_t</span> partition(std::vector&lt;<span class="t">int</span>&gt;&amp; values, std::<span class="t">size_t</span> first, std::<span class="t">size_t</span> last) {
     <span class="k">const</span> <span class="t">int</span> pivot = values[last - <span class="n">1</span>];
     std::<span class="t">size_t</span> boundary = first;
@@ -522,11 +540,21 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 <span class="c"># test.py 里有断言把这两件事都钉住。</span>
 <span class="k">def</span> quick_sort(values: <span class="t">list</span>[<span class="t">int</span>]) -&gt; <span class="k">None</span>:
     quick_sort_range(values, <span class="n">0</span>, <span class="t">len</span>(values))</code></pre></div>
-<p><strong>这一版在 Python 里会真的崩，而在 C++ 里只是慢。</strong> 末元素当枢轴，遇到已排好序的 输入就退化成 <span class="math">n</span> 层递归。C++ 默认 8 MB 栈，几万层才炸；CPython 的递归上限默认 1000 层，<strong>两千个有序元素就抛 <code>RecursionError</code></strong>。同一个算法缺陷， 两种语言的暴露阈值差两个数量级——下面那条「只对较短的一侧递归」的优化， 在 C++ 里是省栈，在 Python 里是<strong>能不能跑完</strong>。</p>
-<p>基础版有两处会出事，原书算法8.7 给了对策：</p>
+<p><strong>本书的 <code>partition</code> 逐步走一遍。</strong> 它不是图 8.7 那种「两端交替填空位」，而是单向扫描： <code>boundary</code> 左边是已经确认「严格小于轴值」的记录；<code>index</code> 从左往右扫，遇到小于轴值的就与 <code>values[boundary]</code> 交换、<code>boundary</code> 右移一格；扫完后把末尾的轴值与 <code>values[boundary]</code> 交换， <code>boundary</code> 就是轴值的最终位置。取图 8.7 第 1 行——轴值 32 已经换到末尾——作输入：</p>
+<div class="codeblock" data-lang="text"><pre><code>下标              0    1    2    3    4    5    6    7
+输入             25   34   45   64  34′   12   29  [32]   轴值 32，boundary=0
+index=0  25&lt;32   25   34   45   64  34′   12   29  [32]   与自己交换，boundary=1
+index=1..4       34、45、64、34′ 都不小于 32，跳过
+index=5  12&lt;32   25   12   45   64  34′   34   29  [32]   12 与下标 1 的 34 交换，boundary=2
+index=6  29&lt;32   25   12   29   64  34′   34   45  [32]   29 与下标 2 的 45 交换，boundary=3
+轴值归位          25   12   29   32  34′   34   45   64    32 与下标 3 的 64 交换，返回 3</code></pre></div>
+<p>左段 <code>25 12 29</code> 都小于 32，右段 <code>34′ 34 45 64</code> 都不小于 32，与图 8.7 的结果 <code>25 29 12 32 34′ 64 45 34</code> 不同——<strong>不同的分割方法分出的子序列不同</strong>，但都满足「左小右大」。 这一趟也顺便演示了不稳定：34 在 <code>index=5</code> 那次交换里被甩到 34′ 后面。比较次数是 <span class="math">n<span class="bin">−</span><span class="upr">1</span><span class="rel">=</span><span class="upr">7</span></span>， 与图 8.7 一样是一次线性扫描；代价是交换更多（等于把「小于轴值」的记录逐个搬到左边）。</p>
+<p><strong>等于轴值的记录一律留在右侧</strong>（判断是严格的 <code>&lt;</code>）。这让全相等的输入退化：每次 <code>boundary</code> 都停在 <code>first</code>，轴值落在最左端，右段只比原区间短 1，于是要分割 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 层、做 <span class="math">n(n<span class="bin">−</span><span class="upr">1</span>)/<span class="upr">2</span></span> 次比较—— 与已排好序的输入一样是 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>，递归深度也是 <span class="math">n</span>。原书算法8.6 照印的 <code>&lt;=</code>/<code>&gt;=</code> 写法同样如此 （<span class="math">l</span> 一路越过所有相等记录，轴值落在最右端）；把它改成 <code>&lt;</code>/<code>&gt;</code>、遇到相等就停下来搬动，全相等时轴值 恰好落在正中——这正是原书注释里「增加记录移动」换来的东西。重复值很多时，习题 11 的三分数组是更彻底的办法。</p>
+<p><strong>这一版在 Python 里会真的崩，而在 C++ 里只是慢。</strong> 末元素当枢轴，遇到已排好序的 输入就退化成 <span class="math">n</span> 层递归。C++ 默认 8 MB 栈，几万层才炸；CPython 的递归上限默认 1000 层，<strong>一千个有序元素就抛 <code>RecursionError</code></strong>（实测 995 个还能跑完，1000 个就抛；<code>test.py</code> 用两千个，留足余量）。同一个算法缺陷， 两种语言的暴露阈值差两个数量级——下面那条「只对较短的一侧递归」的优化， 在 C++ 里是省栈，在 Python 里是<strong>能不能跑完</strong>。</p>
+<p>基础版有两处会出事。原书算法8.7 只给了第二条的对策（小区间不递归、最后整体插入排序），两侧照样都递归——原书认为用栈消除递归在现代编译器下收益不明显；第一条对策是本书补上的：</p>
 <ul>
 <li><strong>递归太深</strong>。每次只把区间切成两半再各自递归，划分不平衡时深度可达 <span class="math">n</span>； 已经排好序的输入配上「取末元素作枢轴」正是最坏情形。对策是<strong>只对较短的一侧递归， 较长的一侧改成循环</strong>——这样递归深度被压到 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>，因为每次递归的区间至少减半。</li>
-<li><strong>小区间上递归不划算</strong>。区间只剩十几个元素时，递归调用与划分的固定开销超过了收益， 改用直接插入排序更快。本书的阈值取 16。原书的道理讲得更细：当子数组小于某个长度时不必继续 递归，<strong>那些子数组内部是无序的，但整块地看待这些子数组时它们一块块地有序</strong>（左边子数组的排序码 都小于右边数组的排序码），整个序列已经基本有序，正适合最后对整个数组做一次插入排序。原书按 表 8.4 的实验取阈值 28；<strong>阈值与算法、机器的软/硬件条件有关，在不同的环境下得到过 9、16、28 等 最佳值</strong>——本书在自己的机器上取 16，读者应当在自己的环境里重测。</li>
+<li><strong>小区间上递归不划算</strong>。区间只剩十几个元素时，递归调用与划分的固定开销超过了收益， 改用直接插入排序更快。本书的阈值取 16，而且是<strong>每个小区间当场</strong>做插入排序；原书则是先全部跳过、最后对整个数组做<strong>一次</strong>插入排序——两种做法的总代价同阶。原书的道理讲得更细：当子数组小于某个长度时不必继续 递归，<strong>那些子数组内部是无序的，但整块地看待这些子数组时它们一块块地有序</strong>（左边子数组的排序码 都小于右边数组的排序码），整个序列已经基本有序，正适合最后对整个数组做一次插入排序。原书按 表 8.4 的实验取阈值 28；<strong>阈值与算法、机器的软/硬件条件有关，在不同的环境下得到过 9、16、28 等 最佳值</strong>——本书在自己的机器上取 16，读者应当在自己的环境里重测。</li>
 </ul>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#fn:quick_sort_optimized</a></div><pre><code><span class="k">inline</span> <span class="t">void</span> quick_sort_optimized(std::vector&lt;<span class="t">int</span>&gt;&amp; values) {
     quick_sort_optimized_range(values, <span class="n">0</span>, values.size());
@@ -543,7 +571,7 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 <p>图 8.8　归并排序。<strong>归并与快排正好相反</strong>：快排把力气花在分（分割）上，合的时候什么都不用做；归并分得很随意（对半切），力气全花在合上。</p>
 <p>归并排序所需时间主要包括划分时间、两个子序列的排序时间以及归并时间：<strong>划分时间为常数，可以 忽略；归并时间随着数组长度 <span class="math">n</span> 线性增长</strong>。当数组长度为 1 时函数直接返回，<span class="math">T(<span class="upr">1</span>)<span class="rel">=</span><span class="upr">1</span></span>。 由于<strong>归并排序不依赖于原始数组的输入情况</strong>，每次划分时两个子序列的长度都是基本一样的，因此 它的最大、最小以及平均时间代价均为 <span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>——这一点与快速排序不同，快排的最差情况会 退化到 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>。</p>
 <p>实现只分配一个与输入等长的缓冲区，并在所有递归层复用它；因此辅助空间为 <span class="math">Θ(n)</span>，递归 调用栈另占 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>。合并时使用「右侧严格更小才取右侧」的判断：相等元素先取左侧， 从而保持稳定性（原书【算法8.8】的注释写的是「为保证稳定性，相等时左边优先」，是同一件事）。</p>
-<p><strong>归并排序也有改进的余地。</strong> R. Sedgewick 提出过一种优化：在把数组暂时复制到临时数组时， <strong>将第二个子数组中元素的顺序颠倒一下</strong>；这样两个子数组从两端开始处理、向中间推进，使得这两个 子数组的两端互相成为另一个数组的「<strong>监视哨</strong>」，从而不用像基本版那样在循环里反复检查子序列是否 已经结束。另外，当子数组小于某个长度（原书取 28）时也不继续递归，而是最后对整个序列使用一次 插入排序——与 8.4.2 节优化快排的思路完全一样。</p>
+<p><strong>归并排序也有改进的余地。</strong> R. Sedgewick 提出过一种优化：在把数组暂时复制到临时数组时， <strong>将第二个子数组中元素的顺序颠倒一下</strong>；这样两个子数组从两端开始处理、向中间推进，使得这两个 子数组的两端互相成为另一个数组的「<strong>监视哨</strong>」，从而不用像基本版那样在循环里反复检查子序列是否 已经结束。另外，当子数组小于某个长度（原书取 28）时也不继续递归，而是<strong>当场对这个小子数组</strong>做插入 排序。原书正文这里写的是「对整个序列使用插入排序」，像 8.4.2 节优化快排那样留到最后扫尾——但那对归并 行不通：归并要求两半<strong>各自已经有序</strong>，小子数组不排好就没法往上合并。原书算法8.9 的代码本身是逐段做的 （<code>else InsertSort(&amp;Array[left], right - left + 1)</code>），以代码为准。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#merge</a></div><pre><code><span class="k">inline</span> <span class="t">void</span> merge_ranges(std::vector&lt;<span class="t">int</span>&gt;&amp; values, std::vector&lt;<span class="t">int</span>&gt;&amp; buffer,
                          std::<span class="t">size_t</span> first, std::<span class="t">size_t</span> middle, std::<span class="t">size_t</span> last) {
     std::<span class="t">size_t</span> left = first;
@@ -609,7 +637,7 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
     merge_sort_range(values, buffer, <span class="n">0</span>, <span class="t">len</span>(values))</code></pre></div>
 <p><code>values[right] &lt; values[left]</code> 里的这个 <code>&lt;</code> 就是稳定性的全部来源：相等时取左边。 写成 <code>&lt;=</code> 就取右边，稳定性当场消失——<strong>而 C++ 那份 <code>std::vector&lt;int&gt;</code> 的实现 根本无法验证这一点</strong>，两个相等的 <code>3</code> 换不换位置，排完一模一样。 Python 这份不必改一个字就能排任何可比较的对象，于是测试里放一种 「只按 key 比较、payload 不参与比较」的记录，排完检查 payload 是否还是入场顺序。 把那个 <code>&lt;</code> 改成 <code>&lt;=</code>，这条断言会红。</p>
 <p>空序列和单元素序列都能直接通过。</p>
-<p>原书算法8.9 给了两处优化，本书都实现了：</p>
+<p>原书算法8.9 的两处优化是上一段说的 Sedgewick 反向复制（省掉「子序列是否结束」的检查）和阈值 28 的小区间插入排序。本书的优化版（<code>merge_sort_optimized</code>）保留了后一处，前一处换成了另一个同样常见的技巧：</p>
 <ul>
 <li><strong>小区间改用直接插入排序</strong>（阈值 16）。递归到只剩十几个元素时，划分与函数调用的固定 开销超过了收益，而插入排序在这种规模上几乎是最快的。</li>
 <li><strong>归并前先看一眼左半段的末尾与右半段的开头</strong>：若 <code>values[middle-1] &lt;= values[middle]</code>， 两段拼起来本来就有序，整趟归并直接跳过。对已经有序或接近有序的输入，这一句把实际搬移 从 <span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 压到接近 <span class="math">Θ(n)</span>；对随机输入它几乎不命中，代价只是每层多一次比较。</li>
@@ -776,7 +804,7 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 <h3 id="862-基数排序"><a class="anchor" href="#862-基数排序">#</a>8.6.2 基数排序</h3>
 <p>当值域 <span class="math">m</span> 很大时，可以对桶式排序做一些改进：<strong>将排序码拆分为多个部分来进行比较</strong>。例如要对 <span class="math"><span class="upr">0</span><span class="rel">∼</span><span class="upr">9999</span></span> 之间的整数进行排序，可以先按千、百、十、个位拆分。这种将排序码按照其进制的<strong>基数</strong> 进行拆分排序的方法就是基数排序，是分配排序的一种特例。</p>
 <p><strong>先把记号定下来。</strong> 假设一个长度为 <span class="math">n</span> 的序列 <span class="math">R<span class="rel">=</span>{r<sub><span class="upr">0</span></sub>,r<sub><span class="upr">1</span></sub>,⋯,r<sub>n<span class="bin">−</span><span class="upr">1</span></sub>}</span>，记录的排序码 <span class="math">K</span> 包含 <span class="math">d</span> 个子排序码 <span class="math">K<span class="rel">=</span>(k<sub>d<span class="bin">−</span><span class="upr">1</span></sub>,k<sub>d<span class="bin">−</span><span class="upr">2</span></sub>,⋯,k<sub><span class="upr">1</span></sub>,k<sub><span class="upr">0</span></sub>)</span>，称序列 <span class="math">R</span> 对排序码有序，就是对于任意的两个 记录 <span class="math">R<sub>i</sub></span>、<span class="math">R<sub>j</sub></span>（<span class="math"><span class="upr">0</span><span class="rel">≤</span>i&lt;j<span class="rel">≤</span>n<span class="bin">−</span><span class="upr">1</span></span>）都满足 <span class="math">(k<sub>i,d<span class="bin">−</span><span class="upr">1</span></sub>,⋯,k<sub>i,<span class="upr">0</span></sub>)<span class="rel">≤</span>(k<sub>j,d<span class="bin">−</span><span class="upr">1</span></sub>,⋯,k<sub>j,<span class="upr">0</span></sub>)</span>；其中 <span class="math">k<sub>d<span class="bin">−</span><span class="upr">1</span></sub></span> 称为最高位排序码， <span class="math">k<sub><span class="upr">0</span></sub></span> 称为最低位排序码。</p>
-<p><strong>这 <span class="math">d</span> 个排序码可以是不同类型。</strong> 例如按照桥牌规则，扑克牌的排序码就是（花色，面值）的组合值： 花色按黑桃 &gt; 红心 &gt; 梅花 &gt; 方片的顺序，面值按 A &gt; K &gt; Q &gt; J &gt; 10 &gt; 9 &gt; <span class="math">⋯</span> &gt; 3 &gt; 2 的顺序。 人们对整数的运算是十进制的，因此本章例子都选取 10 作为基数；其实对于由 0、1 代码组成的整数， 还可以看做二进制、四进制、八进制、十六进制，而采用基数 <span class="math">r<span class="rel">=</span><span class="upr">2</span>,<span class="upr">4</span>,<span class="upr">8</span>,<span class="upr">16</span></span>；<strong>对于字符串，则可以采用 基数 <span class="math">r<span class="rel">=</span><span class="upr">26</span></span>（英文字母个数）。</strong></p>
+<p><strong>这 <span class="math">d</span> 个排序码可以是不同类型。</strong> 例如按照桥牌规则，扑克牌的排序码就是（花色，面值）的组合值： 花色按黑桃（S）&gt; 红心（H）&gt; 方片（D）&gt; 梅花（C）的顺序，面值按 A &gt; K &gt; Q &gt; J &gt; 10 &gt; 9 &gt; <span class="math">⋯</span> &gt; 3 &gt; 2 的顺序。 （原书印作「黑桃（S）&gt; 红心（H）&gt; 梅花（D）&gt; 方片（C）」：把梅花、方片的英文字母配反了。桥牌规则里方片高于梅花；「黑、红、梅、方」是国内很多牌戏的习惯次序，原书第 8 章习题 22 用的就是它，两者不要混淆。 下面例子的结果按 C &lt; D &lt; H &lt; S 排，与这里的更正一致。） 人们对整数的运算是十进制的，因此本章例子都选取 10 作为基数；其实对于由 0、1 代码组成的整数， 还可以看做二进制、四进制、八进制、十六进制，而采用基数 <span class="math">r<span class="rel">=</span><span class="upr">2</span>,<span class="upr">4</span>,<span class="upr">8</span>,<span class="upr">16</span></span>；<strong>对于字符串，则可以采用 基数 <span class="math">r<span class="rel">=</span><span class="upr">26</span></span>（英文字母个数）。</strong></p>
 <p><strong>按照排序码的先后顺序，分配排序分为两种。</strong> <strong>高位优先法</strong>（most significant digit first，MSD）： 先对高位 <span class="math">k<sub>d<span class="bin">−</span><span class="upr">1</span></sub></span> 排序，将序列分成若干子序列，每个子序列具有相同 <span class="math">k<sub>d<span class="bin">−</span><span class="upr">1</span></sub></span> 值；然后对每个子序列按 次高位 <span class="math">k<sub>d<span class="bin">−</span><span class="upr">2</span></sub></span> 排序，分成更小的子序列；依次重复，直到对 <span class="math">k<sub><span class="upr">1</span></sub></span> 排序后，分成的极小子序列每个内部 含有相同的排序码；最后对每个子序列用最低位 <span class="math">k<sub><span class="upr">0</span></sub></span> 排序，将所有子序列依次连接在一起，成为一个有序 序列——<strong>这是一个分、分、<span class="math">⋯</span>、分、收的过程，是一个递归分治问题。</strong> <strong>低位优先法</strong>（least significant digit first，LSD）：从最低位 <span class="math">k<sub><span class="upr">0</span></sub></span> 开始排序，对于排好的序列再用次低位 <span class="math">k<sub><span class="upr">1</span></sub></span> 排序，依次重复，直至对最高位 <span class="math">k<sub>d<span class="bin">−</span><span class="upr">1</span></sub></span> 排好序后整个序列成为有序的——<strong>这是一个分、收；分、收； <span class="math">⋯</span>；分、收的过程。</strong></p>
 <p>以扑克牌 <code>S3 HJ C8 H9 S9 D3 CA D7</code> 为例：<strong>MSD 方法</strong>先按花色分 4 堆、各堆中再按牌点分，最后把 4 堆合并（先按花色得 <code>C8 CA D3 D7 HJ H9 S3 S9</code>，再按面值得 <code>C8 CA D3 D7 H9 HJ S3 S9</code>）； <strong>LSD 方法</strong>先按牌点分成顺序的 13 堆，再依次从这 13 堆中顺序取出 4 种花色（先按面值得 <code>S3 D3 D7 C8 H9 S9 HJ CA</code>，再按花色得 <code>C8 CA D3 D7 H9 HJ S3 S9</code>）。</p>
 <p><strong>在人们看起来似乎觉得 MSD 比较直观，一般都采用 MSD 方法；但是计算机常用 LSD 进行分配排序， 因为它速度较快、便于统一处理</strong>——而 MSD 在分配之后还要处理各子集的排序问题，这通常是一个递归 过程，计算机处理比较复杂。<strong>本节的算法都是讨论 LSD 方法。</strong></p>
@@ -920,7 +948,7 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
         values[index] = key + shift_base</code></pre></div>
 <p><strong>C++ 版那个「异或最高位」的技巧在 Python 里不成立</strong>，这是本章最值得看的一处语言差异。 C++ 的 <code>int</code> 是定长补码，把符号位翻过来，负数的位模式就整体排到正数前面，一趟不用特殊处理。 Python 的整数是任意精度、<strong>没有「最高位」这个东西</strong>，<code>-1</code> 的二进制是概念上无限长的 1。 所以 Python 版换成<strong>整体平移到非负区间</strong>，排完再平移回来：代价是多一次 <code>min</code> 扫描， 换来的是不依赖任何机器字长——这份实现对 <span class="math"><span class="upr">10</span><sup><span class="upr">30</span></sup></span> 一样成立，测试里就是拿这个规模钉住的。</p>
 <p>一趟按一个字节分配，4 趟覆盖 32 位，因此时间是 <span class="math">Θ(d(n<span class="bin">+</span>r))</span>：<span class="math">d<span class="rel">=</span><span class="upr">4</span></span> 趟， 每趟 <span class="math">r<span class="rel">=</span><span class="upr">256</span></span> 个桶。与桶式排序相比，基数排序把「值域 <span class="math">m</span>」换成了「位数 <span class="math">d</span> 与基数 <span class="math">r</span>」， 于是 <span class="math">[<span class="upr">0</span>,<span class="upr">2</span><sup><span class="upr">32</span></sup>)</span> 这样的值域也排得动——代价是要扫 4 遍。</p>
-<p>上面这版把桶做成了计数数组（先数、再累加、再放），桶是<strong>隐式</strong>的。 原书算法8.13 走的是另一条路：桶是<strong>显式</strong>的队列，每趟把记录 <code>push</code> 进 256 个队列， 再按桶号依次 <code>pop</code> 出来。它更接近「分配-收集」这个名字的字面意思，也更容易看懂； 代价是每趟都要维护 256 个队列。原书为此专门给了一个定长队列（代码8.12）：</p>
+<p>上面这版把桶做成了计数数组（先数、再累加、再放），桶是<strong>隐式</strong>的。 原书算法8.13 走的是另一条路：桶是<strong>显式</strong>的队列。不过原书的桶是<strong>静态链队列</strong>——代码8.12 的 <code>StaticQueue</code> 只有 <code>head</code>、<code>tail</code> 两个下标，每条记录多一个 <code>next</code> 域，分配时把记录挂到第 <span class="math">k</span> 个桶的 链尾，收集时把 <span class="math">r</span> 条非空链首尾相接，<strong>记录本身一次都不搬</strong>，两趟之后再用 <code>AddrSort()</code> 顺链整理 （图 8.12 就是这个过程）。本书的 <code>radix_sort_linked_style</code> 保留了「桶是显式队列、按桶号依次出队」 这个结构，把桶换成固定容量的环形队列、每趟把值 <code>push</code> 进 256 个队列再按桶号依次 <code>pop</code> 出来—— 它更接近「分配-收集」这个名字的字面意思，也更容易看懂；代价是每趟都要维护 256 个队列， 而且值是真的搬了，<strong>静态链「不搬记录」那一点没有演示出来</strong>。本书的定长队列如下（编号沿用代码8.12）：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#static-queue</a></div><pre><code><span class="c">// 代码8.12：固定容量 FIFO，是基数排序的桶而非通用 STL queue 替身。</span>
 <span class="k">template</span> &lt;<span class="k">typename</span> T&gt;
 <span class="k">class</span> StaticQueue {
@@ -945,7 +973,7 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
     std::<span class="t">size_t</span> front_{<span class="n">0</span>};
     std::<span class="t">size_t</span> size_{<span class="n">0</span>};
 };</code></pre></div>
-<p><strong>代码8.12 是本章 Python 侧唯一不给实现的三条清单之一</strong>（另两条是代码8.16 随机数据与 代码8.17 计时）。理由写在 <code>code/ch08/sorting/unit.json</code> 的 <code>py_skip</code> 字段里： 容量、环绕、下标回卷都是<strong>存储管理</strong>，而 Python 的 <code>list</code> 没有容量这个概念， 照着写只会得到一层没有内容的包装。下面算法8.13 的 Python 版改用普通 <code>list</code> 作桶， 这一节要讲的东西——稳定性来自「桶内保持入桶顺序、收集时按桶号从小到大」——一个字都没少。</p>
+<p><strong>本章 Python 侧不给实现的清单一共三条，代码8.12 是其中之一</strong>（另两条是代码8.16 随机数据与 代码8.17 计时）。理由写在 <code>code/ch08/sorting/unit.json</code> 的 <code>py_skip</code> 字段里： 容量、环绕、下标回卷都是<strong>存储管理</strong>，而 Python 的 <code>list</code> 没有容量这个概念， 照着写只会得到一层没有内容的包装。下面算法8.13 的 Python 版改用普通 <code>list</code> 作桶， 这一节要讲的东西——稳定性来自「桶内保持入桶顺序、收集时按桶号从小到大」——一个字都没少。</p>
 <p>它不是 <code>std::queue</code> 的替身，而是基数排序的桶：容量固定、不扩容，<code>push</code> 满了返回 <code>false</code>， <code>pop</code> 空了返回 <code>std::nullopt</code>（D-001 §3c：可预期的空状态用 <code>optional</code>，不是错误）。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch08/sorting/modern.hpp">code/ch08/sorting/modern.hpp#fn:radix_sort_linked_style</a></div><pre><code><span class="c">// 算法8.13：以显式桶队列演示顺序收集的基数排序。</span>
 <span class="k">inline</span> <span class="t">void</span> radix_sort_linked_style(std::vector&lt;<span class="t">int</span>&gt;&amp; values) {
@@ -1063,7 +1091,7 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 <p>这组数据一共两个环：</p>
 <div class="codeblock" data-lang="text"><pre><code>环 {0, 5, 4, 2}    12   25   29   64   34  34′   32   45
 环 {3, 6, 7}       12   25   29   32   34  34′   45   64</code></pre></div>
-<p>每个元素恰好被搬一次，所以整理是 <span class="math">Θ(n)</span> 的。（底稿里这一环印成了 <code>{0,5,4,1}</code>， 与它自己列出的元素 <code>{29,12,34′,34}</code> 对不上——那组元素对应的下标是 <code>{0,5,4,2}</code>， 多半是扫描损坏。）</p>
+<p>不在正确位置上的元素每个恰好被搬一次（每个环另加一次存入、取出临时变量；本例下标 1 的 25 已经在位，根本不动），所以整理是 <span class="math">Θ(n)</span> 的。（底稿里这一环印成了 <code>{0,5,4,1}</code>， 与它自己列出的元素 <code>{29,12,34′,34}</code> 对不上——那组元素对应的下标是 <code>{0,5,4,2}</code>， 多半是扫描损坏。）</p>
 <p><strong>代价与收益</strong>：多用 <span class="math">Θ(n)</span> 的索引空间，换来「排序阶段一次记录搬移都没有」。 8.6.2 节的静态链基数排序其实也是一种索引排序——它排的是 <code>next</code> 链，不是记录本身。</p>
 <h2 id="87-排序算法的时间代价"><a class="anchor" href="#87-排序算法的时间代价">#</a>8.7 排序算法的时间代价</h2>
 <p>以下结论都以「元素比较次数」为模型，并假定一次比较是 <span class="math">O(<span class="upr">1</span>)</span>。</p>
@@ -1134,7 +1162,7 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 <p>两件事值得停下来看：</p>
 <ol>
 <li><strong>同为 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>，冒泡比插入慢 27 倍</strong>（5822 对 214）。渐近记号把常数丢掉了， 而这里的常数差异来自「冒泡每遇到一个逆序对就做一次三步交换，插入只做一次搬移」。 <span class="math">Θ</span> 告诉你 <span class="math">n</span> 变大时谁会输，不告诉你在你关心的那个 <span class="math">n</span> 上谁更快。</li>
-<li><span class="math">n</span> 从 1 万涨到 5 万（5 倍），<span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span> 的三个涨了约 25 倍， <span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 的三个只涨了 5～6 倍。<strong>这就是量出来的数量级。</strong></li>
+<li><span class="math">n</span> 从 1 万涨到 5 万（5 倍），<span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span> 的三个涨了 25～36 倍（理论值 <span class="math"><span class="upr">5</span><sup><span class="upr">2</span></sup><span class="rel">=</span><span class="upr">25</span></span>，冒泡偏高； 渐近记号只管增长的阶，不保证每一档都正好是这个倍数），<span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 的三个只涨了 4～6 倍（理论值约 <span class="math"><span class="upr">5</span><span class="bin">×</span><span class="upr">1.17</span><span class="rel">≈</span><span class="upr">5.9</span></span>； 零点几毫秒的计时本身误差就大）。<strong>这就是量出来的数量级。</strong></li>
 </ol>
 <p>再看输入形态的影响（2 万个数）：</p>
 <div class="codeblock" data-lang="text"><pre><code>                    插入      冒泡    优化快排
@@ -1159,7 +1187,7 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 <p>证明用判定树。把一次排序的执行过程画成一棵二叉树：每个内部结点是一次比较 「<span class="math">a<sub>i</sub>&lt;a<sub>j</sub></span>?」，两条边是两种结果，每片叶子是一种最终的输出排列。 算法在某个输入上做了多少次比较，就等于从根走到对应叶子的路径长度。</p>
 <p><span class="math">n</span> 个互不相同的元素有 <span class="math">n!</span> 种排列，每一种都必须能被这棵树区分出来， 否则算法会对两个不同的输入给出同一个答案——所以<strong>叶子至少有 <span class="math">n!</span> 片</strong>。 高度为 <span class="math">h</span> 的二叉树最多有 <span class="math"><span class="upr">2</span><sup>h</sup></span> 片叶子，于是 <span class="math"><span class="upr">2</span><sup>h</sup><span class="rel">≥</span>n!</span>，</p>
 <div class="math math-display">h<span class="rel">≥</span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>(n!)<span class="rel">=</span>Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</div>
-<p>最后一步用 Stirling 公式：<span class="math"><span class="upr">log</span><sub><span class="upr">2</span></sub>(n!)<span class="rel">≥</span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>(<span class="frac"><span class="num">n</span><span class="den"><span class="upr">2</span></span></span>)<sup>n/<span class="upr">2</span></sup><span class="rel">=</span><span class="frac"><span class="num">n</span><span class="den"><span class="upr">2</span></span></span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub><span class="frac"><span class="num">n</span><span class="den"><span class="upr">2</span></span></span><span class="rel">=</span>Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>。而树的高度正是最坏情况下的比较次数。</p>
+<p>最后一步不必用 Stirling 公式，原书用的初等估计就够：<span class="math">n!</span> 的 <span class="math">n</span> 个因子里，较大的一半（<span class="math">n,n<span class="bin">−</span><span class="upr">1</span>,⋯,⌈n/<span class="upr">2</span>⌉</span>） 每个都不小于 <span class="math">n/<span class="upr">2</span></span>，所以 <span class="math"><span class="upr">log</span><sub><span class="upr">2</span></sub>(n!)<span class="rel">≥</span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>(<span class="frac"><span class="num">n</span><span class="den"><span class="upr">2</span></span></span>)<sup>n/<span class="upr">2</span></sup><span class="rel">=</span><span class="frac"><span class="num">n</span><span class="den"><span class="upr">2</span></span></span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub><span class="frac"><span class="num">n</span><span class="den"><span class="upr">2</span></span></span><span class="rel">=</span>Ω(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>；另一方面 <span class="math">n!<span class="rel">≤</span>n<sup>n</sup></span>，<span class="math"><span class="upr">log</span><sub><span class="upr">2</span></sub>(n!)<span class="rel">≤</span>n&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>n</span>， 两边合起来就是 <span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>。而树的高度正是最坏情况下的比较次数。</p>
 <p>这个下界<strong>只约束比较排序</strong>。桶式排序和基数排序不比较元素，它们直接用关键码的值算位置， 所以能做到 <span class="math">Θ(m<span class="bin">+</span>n)</span> 或 <span class="math">Θ(d(n<span class="bin">+</span>r))</span>——它们没有违反下界，是站在下界管辖范围之外。 代价是对关键码的形态有额外要求：值域要够密，或者位数要够少。</p>
 <h2 id="本章小结"><a class="anchor" href="#本章小结">#</a>本章小结</h2>
 <p>其实所谓排序，就是将线性表序列中的记录按照特定的顺序排列起来。<strong>如果存在多个具有相同排序码的 记录，经过排序后这些记录的相对次序仍然保持不变，则这种排序算法称为「稳定的」</strong>，否则称为 「不稳定的」。</p>
@@ -1172,15 +1200,98 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 <li><strong>直接选择排序</strong>：依次从剩余记录中找出第 <span class="math">i</span> 小的记录，直接交换到正确位置（本趟待排子序列的 最前端）。</li>
 <li><strong>堆排序</strong>：对所有记录建立最大堆（也可以用最小堆），取出堆顶的最大记录，重新建堆；不断重复这一 操作，直到堆为空，得到完整的有序序列。</li>
 <li><strong>冒泡排序</strong>：依次比较相邻的两个记录，若逆序则交换，每趟把当前无序区中最大的记录 &quot;冒泡&quot;到本趟的最末端。反复进行直到某一趟没有发生交换为止。</li>
-<li><strong>快速排序</strong>：首先从待排序序列中任意选择一个记录 <span class="math">k</span> 作为轴值，然后将剩余的记录分割成左子序列 <span class="math">L</span> 和右子序列 <span class="math">R</span>；<span class="math">L</span> 中包含所有小于或等于轴值 <span class="math">k</span> 的记录，<span class="math">R</span> 中包含所有大于轴值 <span class="math">k</span> 的记录， <span class="math">k</span> 正好到位。原问题分解为 <span class="math">L</span> 和 <span class="math">R</span> 这两个规模更小的同结构子问题，递归进行直到子序列中只含有 0 或 1 个元素时退出递归。</li>
+<li><strong>快速排序</strong>：首先从待排序序列中任意选择一个记录 <span class="math">k</span> 作为轴值，然后将剩余的记录分割成左子序列 <span class="math">L</span> 和右子序列 <span class="math">R</span>；<span class="math">L</span> 中的记录都小于或等于轴值 <span class="math">k</span>，<span class="math">R</span> 中的记录都大于或等于轴值 <span class="math">k</span>， <span class="math">k</span> 正好到位（等于 <span class="math">k</span> 的记录分到哪一侧取决于分割写法：本书代码把它们全放进 <span class="math">R</span>）。原问题分解为 <span class="math">L</span> 和 <span class="math">R</span> 这两个规模更小的同结构子问题，递归进行直到子序列中只含有 0 或 1 个元素时退出递归。</li>
 <li><strong>归并排序</strong>：将序列划分为两个子序列，对子序列递归；反复比较两个有序子序列的最小记录，取较小者 出列进入结果序列，合并为一个有序序列。</li>
 <li><strong>桶式排序</strong>：扫描一遍序列进行统计计数，然后再统计小于等于编号 <span class="math">i</span> 的个数，给各桶预留适当的 空间；从序列尾部往前再一次进行扫描，将具有相同值的记录都分配到同一个桶中；最后依次按照编号 从桶中取出记录。</li>
 <li><strong>基数排序</strong>：将排序码拆分为 <span class="math">d</span> 个子码，按照低位优先的顺序进行 <span class="math">d</span> 趟桶式排序。有顺序存储和 静态链式存储两种实现方法。</li>
 </ol>
 <p><strong>插入排序、冒泡排序、归并排序、分配排序（桶式、基数）都是稳定的排序算法。</strong> 若要证明一个排序算法 是稳定的，则需证明：对于任意两个关键码相同的记录 <span class="math">r<sub>i</sub></span>、<span class="math">r<sub>j</sub></span>（<span class="math">K<sub>i</sub><span class="rel">=</span>K<sub>j</sub></span>，序号 <span class="math">i&lt;j</span>），排序后 它们的新位置为 <span class="math">i&#x27;</span>、<span class="math">j&#x27;</span>，其相对序号仍保持 <span class="math">i&#x27;&lt;j&#x27;</span>。<strong>可以举反例来证明一个排序算法是不稳定的 ——直接选择排序、堆排序、Shell 排序、快速排序都是不稳定的排序算法。</strong></p>
 <p><strong>时间代价在排序算法中居于非常重要的地位，是衡量排序算法最重要的指标。</strong> 排序总时间代价是比较和 移动次数之和；根据应用需要可以分别考察最小、平均、最大时间代价。对于记录比较大的情况，可以采取 减少移动记录的策略，例如索引排序法。</p>
-<p>直接插入、直接选择、冒泡这 3 种排序算法的时间代价都很大，在平均和最差情况下的时间代价均为 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>。<strong>三者之中，插入排序的试验时间最好，而冒泡排序的性能最差</strong>，因此插入排序经常被用来 与其他排序方法结合使用。快速排序、归并排序、堆排序、基数排序都是 <span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 量级的排序； <strong>快速排序的确是最快的，比同级别的排序算法都要快一些，尤其是数组规模较大时更为明显</strong>，因此快速 排序在实践中应用十分广泛。本章证明了所有基于比较的排序算法的时间代价都是 <span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>， 这也是排序问题的时间代价。</p>
-<p><strong>空间代价考虑排序算法所需要的额外空间，包括编译栈消耗的辅助记录空间。</strong> 直接插入排序、直接选择 排序、冒泡排序、Shell 排序、堆排序的空间代价为 <span class="math">Θ(<span class="upr">1</span>)</span>，快速排序为 <span class="math">Θ(<span class="upr">log</span>&thinsp;n)</span>，归并排序为 <span class="math">Θ(n)</span>，桶式排序为 <span class="math">Θ(n<span class="bin">+</span>m)</span>，基数排序为 <span class="math">Θ(n<span class="bin">+</span>r)</span>。如果有特殊的空间限制，则要注意 采用辅助空间较小的算法。</p>
+<p>直接插入、直接选择、冒泡这 3 种排序算法的时间代价都很大，在平均和最差情况下的时间代价均为 <span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span>。<strong>三者之中，插入排序的试验时间最好，而冒泡排序的性能最差</strong>，因此插入排序经常被用来 与其他排序方法结合使用。快速排序、归并排序、堆排序、基数排序都是 <span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 量级的排序； <strong>快速排序的确是最快的，比同级别的排序算法都要快一些，尤其是数组规模较大时更为明显</strong>，因此快速 排序在实践中应用十分广泛。本章证明了任何基于比较的排序算法在最坏情况下都至少需要 <span class="math">Ω(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 次比较，而堆排序、归并排序 恰好达到 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，因此 <span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span> 就是（基于比较的）排序问题的时间代价。</p>
+<p><strong>空间代价考虑排序算法所需要的额外空间，包括编译栈消耗的辅助记录空间。</strong> 直接插入排序、直接选择 排序、冒泡排序、Shell 排序、堆排序的空间代价为 <span class="math">Θ(<span class="upr">1</span>)</span>，快速排序平均为 <span class="math">Θ(<span class="upr">log</span>&thinsp;n)</span>（最坏 <span class="math">Θ(n)</span>， 只对短侧递归的优化版最坏也是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>），归并排序为 <span class="math">Θ(n)</span>，桶式排序为 <span class="math">Θ(n<span class="bin">+</span>m)</span>，基数排序为 <span class="math">Θ(n<span class="bin">+</span>r)</span>。如果有特殊的空间限制，则要注意 采用辅助空间较小的算法。</p>
+<p>把本章各算法的代价放进一张表（时间按比较、移动次数计，关键码互不相同；「本书实现」指同节代码）：</p>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">算法</th>
+<th style="text-align:left">最好</th>
+<th style="text-align:left">平均</th>
+<th style="text-align:left">最坏</th>
+<th style="text-align:left">辅助空间</th>
+<th style="text-align:left">稳定</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">直接插入</td>
+<td style="text-align:left"><span class="math">Θ(n)</span></td>
+<td style="text-align:left"><span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span></td>
+<td style="text-align:left"><span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span></td>
+<td style="text-align:left"><span class="math">Θ(<span class="upr">1</span>)</span></td>
+<td style="text-align:left">稳定</td>
+</tr>
+<tr>
+<td style="text-align:left">Shell（增量减半）</td>
+<td style="text-align:left"><span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span></td>
+<td style="text-align:left">取决于增量序列</td>
+<td style="text-align:left"><span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span></td>
+<td style="text-align:left"><span class="math">Θ(<span class="upr">1</span>)</span></td>
+<td style="text-align:left">不稳定</td>
+</tr>
+<tr>
+<td style="text-align:left">直接选择</td>
+<td style="text-align:left"><span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span></td>
+<td style="text-align:left"><span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span></td>
+<td style="text-align:left"><span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span></td>
+<td style="text-align:left"><span class="math">Θ(<span class="upr">1</span>)</span></td>
+<td style="text-align:left">不稳定</td>
+</tr>
+<tr>
+<td style="text-align:left">堆排序</td>
+<td style="text-align:left"><span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span></td>
+<td style="text-align:left"><span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span></td>
+<td style="text-align:left"><span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span></td>
+<td style="text-align:left"><span class="math">Θ(<span class="upr">1</span>)</span></td>
+<td style="text-align:left">不稳定</td>
+</tr>
+<tr>
+<td style="text-align:left">冒泡（带无交换退出）</td>
+<td style="text-align:left"><span class="math">Θ(n)</span></td>
+<td style="text-align:left"><span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span></td>
+<td style="text-align:left"><span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span></td>
+<td style="text-align:left"><span class="math">Θ(<span class="upr">1</span>)</span></td>
+<td style="text-align:left">稳定</td>
+</tr>
+<tr>
+<td style="text-align:left">快速排序（本书：末元素作轴）</td>
+<td style="text-align:left"><span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span></td>
+<td style="text-align:left"><span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span></td>
+<td style="text-align:left"><span class="math">Θ(n<sup><span class="upr">2</span></sup>)</span></td>
+<td style="text-align:left">平均 <span class="math">Θ(<span class="upr">log</span>&thinsp;n)</span>，最坏 <span class="math">Θ(n)</span></td>
+<td style="text-align:left">不稳定</td>
+</tr>
+<tr>
+<td style="text-align:left">归并排序（基本版）</td>
+<td style="text-align:left"><span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span></td>
+<td style="text-align:left"><span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span></td>
+<td style="text-align:left"><span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span></td>
+<td style="text-align:left"><span class="math">Θ(n)</span></td>
+<td style="text-align:left">稳定</td>
+</tr>
+<tr>
+<td style="text-align:left">桶式排序</td>
+<td style="text-align:left"><span class="math">Θ(n<span class="bin">+</span>m)</span></td>
+<td style="text-align:left"><span class="math">Θ(n<span class="bin">+</span>m)</span></td>
+<td style="text-align:left"><span class="math">Θ(n<span class="bin">+</span>m)</span></td>
+<td style="text-align:left"><span class="math">Θ(n<span class="bin">+</span>m)</span></td>
+<td style="text-align:left">稳定</td>
+</tr>
+<tr>
+<td style="text-align:left">基数排序（<span class="math">d</span> 趟，基数 <span class="math">r</span>）</td>
+<td style="text-align:left"><span class="math">Θ(d(n<span class="bin">+</span>r))</span></td>
+<td style="text-align:left"><span class="math">Θ(d(n<span class="bin">+</span>r))</span></td>
+<td style="text-align:left"><span class="math">Θ(d(n<span class="bin">+</span>r))</span></td>
+<td style="text-align:left"><span class="math">Θ(n<span class="bin">+</span>r)</span></td>
+<td style="text-align:left">稳定</td>
+</tr>
+</tbody></table></div>
+<p>Shell 排序的最好情况指输入已经有序：每一趟每个记录只比较一次，<span class="math"><span class="upr">log</span>&thinsp;n</span> 趟共 <span class="math">Θ(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>。 归并排序的优化版（合并前先比较两段交界）在已经有序的输入上只要 <span class="math">Θ(n)</span>。</p>
 <p>在实际应用中，可以根据排序规模（<span class="math">n</span> 的大小）、稳定性要求、待排数组有序状况、排序码的组合情况等来 选择合适的排序算法，或者对这些排序算法进行适当的组合。<strong>可以遵循以下一些原则：</strong></p>
 <ol>
 <li>当待排序的关键码序列基本有序时，直接插入排序最快，冒泡排序速度也较快；</li>
@@ -1254,7 +1365,7 @@ i=6        12  29  32 34′  34  45  64  78    64 与下标 7 交换</code></pre
 <ol>
 <li>编程实现下述算法，并与教材上的算法进行时间效率比较，然后用理论分析支持你的试验结论。 (1) 教材中是用插入排序算法线性搜索来寻找正确位置的；在插入第 <span class="math">i</span> 个记录时，前面的记录已经 有序，因此可以考虑用二分法查找第 <span class="math">i</span> 个记录的正确位置，这种算法称为<strong>二分法插入排序</strong> （binary insert sorting）；(2) <strong>交换式插入排序</strong>（swap insert sorting）改写教材中每一次插入时的 操作：当插入第 <span class="math">i</span> 个记录时，如果该记录比它前面的那个记录小，则交换该记录与其前面的那个记录， 即将该记录向前移动一个位置，然后继续向前比较，直到遇到一个小于或等于它的记录，本次插入才完成。</li>
 <li><strong>奇偶交换排序</strong>是另一种交换排序。它的第一趟对序列中的所有奇数项 <span class="math">i</span> 进行扫描，第二趟对序列中 的所有偶数项 <span class="math">i</span> 进行扫描；若 <code>A[i] &gt; A[i+1]</code> 则交换它们。第三趟又对所有的奇数项，第四趟对所有 的偶数项，如此反复，直到整个序列全部排好序为止。(1) 这种排序方法结束的条件是什么？ (2) 写出奇偶交换排序的算法，并实验测试其时间代价；(3) 当待排序排序码序列的初始排列是从小到大 有序，或从大到小有序时，在奇偶交换排序过程中的排序码比较次数是多少？分析奇偶交换排序的平均 时间代价。</li>
-<li>改写算法 8.8 中的快速排序算法，采用一种不同的轴值选择方法：<strong>选择序列中所有记录的平均值作为 轴值</strong>。试设计并实现一个 <code>MeanPivotQuickSort</code> 类，使其能把要排列的序列分割成比平均值大和比 平均值小的元素。注意：需要修改原来的分割函数，因为现在轴值可能不是序列中的元素。试编程比较 两种算法的实际运行时间。</li>
+<li>改写算法 8.6 中的快速排序算法（原书此处印作「算法 8.8」，8.8 是归并排序），采用一种不同的轴值选择方法：<strong>选择序列中所有记录的平均值作为 轴值</strong>。试设计并实现一个 <code>MeanPivotQuickSort</code> 类，使其能把要排列的序列分割成比平均值大和比 平均值小的元素。注意：需要修改原来的分割函数，因为现在轴值可能不是序列中的元素。试编程比较 两种算法的实际运行时间。</li>
 <li>试写一组英文单词按字典序排序的基数排序算法。单词区分大小写，设最大的单词有 <span class="math">n</span> 个字母。 本章中介绍的排序算法大都是基于数组实现的，试采用链式存储来改写本章的排序算法，并试验比较 算法的数组实现和链式实现效率。此时，可以发现大部分算法都能用链表来实现，<strong>但有些特殊算法不适于 链式存储，试分析为什么这些算法不适合链式存储。</strong></li>
 </ol>
 <div class="pagenav"><a href="ch07-graph.html"><span class="dir">← 上一篇</span>第7章 图</a><a href="ch09-external-sort.html" style="text-align:right"><span class="dir">下一篇 →</span>第9章 文件管理与外部排序</a></div>

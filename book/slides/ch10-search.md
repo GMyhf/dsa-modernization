@@ -193,11 +193,15 @@ n 个元素的判定树高度是 $\lceil\log_2(n+1)\rceil$——
 //
 // 逐字节读的是 `unsigned char` 而不是 `char`——`char` 在多数平台上是有符号的，
 // 中文等非 ASCII 字节会变成负数，一进位运算就带出符号扩展，散列值随平台而变。
+//
+// 中间值用 32 位的 `std::uint32_t`：ELF 散列是按 32 位定义的。若用 64 位的
+// `std::size_t`，`hash << 4` 再加一个字节可能进位到第 32 位，下面只清第 28–31 位，
+// 那一位就永远留着，结果与经典 ELF 散列不同。
 inline std::size_t elf_hash(const std::string& text) {
-    std::size_t hash = 0;
+    std::uint32_t hash = 0;
     for (unsigned char character : text) {
         hash = (hash << 4U) + character;        // 左移 4 位，腾出位置放新字节
-        std::size_t high_bits = hash & 0xF0000000U;   // 溢出到高 4 位的那部分
+        std::uint32_t high_bits = hash & 0xF0000000U;   // 溢出到高 4 位的那部分
         if (high_bits != 0) {
             hash ^= high_bits >> 24U;           // 折回低位，别让它白白丢掉
         }

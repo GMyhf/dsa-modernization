@@ -155,7 +155,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <div class="layout">
 <nav class="book"><b>导读</b><a href="index.html" class="here">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="midterm-review.html">期中复习题库（第 1—6 章）</a><a href="final-review.html">期末复习题库（第 7—12 章）</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a><a href="exam-codepack.html">考场代码包</a></nav>
 <main>
-<a class="download" href="../pdf/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95.pdf" download><span class="dl-badge">PDF</span><span class="dl-body"><b>下载完整教程</b><span class="dl-meta">B5 开本，带书签目录 · 748 页 · 8.0 MB · 217 张插图 · 含 12 章正文、习题与参考答案、原书插图与勘误</span></span><span class="dl-arrow">↓</span></a>
+<a class="download" href="../pdf/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95.pdf" download><span class="dl-badge">PDF</span><span class="dl-body"><b>下载完整教程</b><span class="dl-meta">B5 开本，带书签目录 · 794 页 · 8.2 MB · 217 张插图 · 含 12 章正文、习题与参考答案、原书插图与勘误</span></span><span class="dl-arrow">↓</span></a>
 <h2 id="如何使用本教程"><a class="anchor" href="#如何使用本教程">#</a>如何使用本教程</h2>
 <h3 id="两条阅读路径"><a class="anchor" href="#两条阅读路径">#</a>两条阅读路径</h3>
 <p>这本书的每个数据结构都有<strong>两份实现</strong>，写给两种不同的读者：</p>
@@ -181,7 +181,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 </tr>
 <tr>
 <td style="text-align:left">异常安全</td>
-<td style="text-align:left">基本保证</td>
+<td style="text-align:left">不作承诺：分配与拷贝不抛时正确，<code>T</code> 拷贝抛出时可能漏内存（见下）</td>
 <td style="text-align:left">强异常保证（失败时容器像没动过）</td>
 </tr>
 <tr>
@@ -197,7 +197,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 </tbody></table></div>
 <p><strong>初学者只读教学版就够了。</strong> 它不是「简化到不对」的版本——它一样进闸门， 一样在 <code>-Werror</code> + AddressSanitizer/UBSan 与 <code>-O2</code> 两档下真编译真运行， 一样有专门的断言测试。</p>
 <p><strong>但它的正确性有一条明确的边界，这里说清楚</strong>：教学版在 <strong>内存分配和元素类型 <code>T</code> 的拷贝都不抛异常</strong>时是正确的——元素是 <code>int</code>、 <code>std::string</code>、指针这类东西时就是如此，也就是教材里的全部场景。 一旦 <code>T</code> 的拷贝真的抛出，几个手写裸指针的实现会<strong>漏掉已经申请的内存</strong> （顺序栈扩容中的新缓冲区、链式栈拷贝到一半的结点、二叉树递归克隆的半棵树）。 工程版用 <code>try/catch</code> 补上了这一段，那正是各章「进阶（选读）」要讲的<strong>强异常保证</strong>。</p>
-<p>换句话说：教学版少的是<strong>工程加固</strong>，而工程加固里有一项是<strong>异常路径上的正确性</strong>。 不写成「教学版完全正确」，是因为那句话在 <code>T</code> 会抛的前提下不成立。</p>
+<p>换句话说：教学版少的是<strong>工程加固</strong>，而工程加固里有一项是<strong>异常路径上的正确性</strong>。 也因为会漏内存，教学版连「基本异常保证」都谈不上——基本保证要求出异常后不泄漏资源、对象仍然可用， 漏掉一块缓冲区就已经不满足了。 不写成「教学版完全正确」，是因为那句话在 <code>T</code> 会抛的前提下不成立。</p>
 <p>标着「进阶（选读）」的小节可以整节跳过，等到你需要写自己的容器时再回来。 这个分层的理由与代价写在 <code>collab/DECISION_LOG.md</code> 的 D-012。</p>
 <p><strong>哪些结构有教学版</strong>：凡是「自己管着内存」的手写数据结构都有。</p>
 <div class="table-wrap"><table><thead><tr>
@@ -259,6 +259,12 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <td style="text-align:left"><code>ch05/heap_huffman</code></td>
 <td style="text-align:left">5.5</td>
 <td style="text-align:left">5.6a</td>
+</tr>
+<tr>
+<td style="text-align:left">7.3.3 十字链表</td>
+<td style="text-align:left"><code>ch07/orthogonal_graph</code></td>
+<td style="text-align:left">7.3.3</td>
+<td style="text-align:left">7.3.3 后半「现代实现」</td>
 </tr>
 <tr>
 <td style="text-align:left">10.1–10.3 检索与散列</td>
@@ -323,8 +329,8 @@ python3 tools/check_doc.py</code></pre></div>
 </tr></thead><tbody>
 <tr>
 <td style="text-align:left"><code>std::optional</code> 表达「可能没有」</td>
-<td style="text-align:left">第 2 章顺序表</td>
-<td style="text-align:left">2.2.2 顺序表的检索</td>
+<td style="text-align:left">第 1 章 <code>best_source()</code></td>
+<td style="text-align:left">1.1.3 初见，2.2.2 顺序表的检索有完整对照</td>
 <td style="text-align:left">正文</td>
 </tr>
 <tr>
@@ -365,8 +371,8 @@ python3 tools/check_doc.py</code></pre></div>
 </tr>
 <tr>
 <td style="text-align:left"><code>[[nodiscard]]</code></td>
-<td style="text-align:left">第 2 章起</td>
-<td style="text-align:left">2.2.2 与下面的“属性和接口约定”</td>
+<td style="text-align:left">第 1 章起</td>
+<td style="text-align:left">1.1.3 的 <code>best_source()</code>、2.2.2 与下面的“属性和接口约定”</td>
 <td style="text-align:left">选读</td>
 </tr>
 <tr>
@@ -383,8 +389,8 @@ python3 tools/check_doc.py</code></pre></div>
 <p><strong>五法则（Rule of Five）</strong>：在三法则之上再加<strong>移动构造、移动赋值</strong>。 它们不修正确性，只修性能：把一个马上要销毁的临时对象赋给别人时， 没必要深拷贝一遍，直接把指针「偷」过来即可。工程版写全五个，属于「进阶（选读）」。</p>
 <p><strong>RAII</strong>：把「资源的生命周期」绑在「对象的生命周期」上——构造时拿到，析构时自动还回去。 好处是无论函数怎么退出（正常返回、提前 <code>return</code>、抛异常），析构都一定会跑， 所以不会漏掉释放。<code>std::unique_ptr</code> 就是 RAII 的典型；本书在少数几处刻意不用它， 理由和代价见 2.3.1 节的「所有权工具怎么选」。</p>
 <p><strong><code>noexcept</code></strong>：写在函数后面，承诺这个函数不会抛异常。它不只是文档——标准库和本书的容器 都会<strong>查询</strong>这个承诺来决定策略（例如扩容时是「移动元素」还是「拷贝元素」）。 承诺了却真的抛，程序直接 <code>std::terminate</code>，没有补救余地。</p>
-<p><strong>强异常保证</strong>：一个操作要么完全成功，要么<strong>像没发生过一样</strong>，绝不留下半成品状态。 典型做法是「先在新地方做好，全部成功了再换过去」。反例是原书扩容：先 <code>delete[]</code> 旧缓冲区 再搬元素，中途抛异常就停在一个既不是旧状态、也不是新状态的地方，对象从此不可用。 第 3.1.3 节有可运行的对照测试。</p>
-<p><strong>摊还代价（amortized cost）</strong>：单次操作偶尔很贵，但把总代价分摊到所有操作上后每次很便宜。 顺序表扩容是标准例子：绝大多数插入是 O(1)，偶尔一次翻倍要搬走全部 n 个元素； 但两次扩容之间至少发生了 n 次插入，把这次搬迁分摊下去，每次插入仍是 O(1)。 注意它说的是<strong>平均</strong>，不是保证——对延迟敏感的场合，那一次搬迁仍然会实打实地卡住。</p>
+<p><strong>强异常保证</strong>：一个操作要么完全成功，要么<strong>像没发生过一样</strong>，绝不留下半成品状态。 典型做法是「先在新地方做好，全部成功了再换过去」。反例是原书扩容：先 <code>delete[]</code> 旧缓冲区 再搬元素，中途抛异常就停在一个既不是旧状态、也不是新状态的地方，对象从此不可用。 第 3.1.2a 节（顺序栈的进阶小节）有可运行的对照测试。</p>
+<p><strong>摊还代价（amortized cost）</strong>：单次操作偶尔很贵，但把总代价分摊到所有操作上后每次很便宜。 顺序表扩容是标准例子：绝大多数插入是 O(1)，偶尔一次翻倍要搬走全部 n 个元素； 但容量是翻倍长的，上一次扩容（容量从 n/2 到 n）之后已经插入了 n/2 个元素，把这次搬迁分摊给它们， 每个元素只摊到 2 次搬运。从空表一路插入 n 个元素，历次搬运合计 <span class="math"><span class="upr">1</span><span class="bin">+</span><span class="upr">2</span><span class="bin">+</span><span class="upr">4</span><span class="bin">+</span>⋯&lt;<span class="upr">2</span>n</span> 次， 所以每次插入的摊还代价仍是 O(1)。 注意它说的是<strong>平均</strong>，不是保证——对延迟敏感的场合，那一次搬迁仍然会实打实地卡住。</p>
 <h3 id="属性和接口约定"><a class="anchor" href="#属性和接口约定">#</a>属性和接口约定</h3>
 <p>代码中的 <code>[[nodiscard]]</code> 是 C++17 的标准属性，意思是“调用者不应无意丢弃这个返回值”。它特别 适合查找结果、<code>std::optional</code>、是否成功以及新建对象等接口：</p>
 <div class="codeblock" data-lang="text"><pre><code>[[nodiscard]] std::optional&lt;std::size_t&gt; find(int key) const;</code></pre></div>
@@ -408,7 +414,7 @@ python3 tools/check_doc.py</code></pre></div>
 <tr>
 <td style="text-align:left">第 3 章 栈与队列</td>
 <td style="text-align:left">实现并测试</td>
-<td style="text-align:left"><code>code/ch03</code> 下 6 个单元</td>
+<td style="text-align:left"><code>code/ch03</code> 下 7 个单元</td>
 </tr>
 <tr>
 <td style="text-align:left">第 4 章 字符串</td>
@@ -428,7 +434,7 @@ python3 tools/check_doc.py</code></pre></div>
 <tr>
 <td style="text-align:left">第 7 章 图</td>
 <td style="text-align:left">实现并测试</td>
-<td style="text-align:left"><code>code/ch07/graph</code> 邻接矩阵、<code>code/ch07/adjacency_list</code> 邻接表，两者逐项对拍</td>
+<td style="text-align:left"><code>code/ch07/graph</code> 邻接矩阵、<code>code/ch07/adjacency_list</code> 邻接表，两者逐项对拍；<code>code/ch07/orthogonal_graph</code> 十字链表</td>
 </tr>
 <tr>
 <td style="text-align:left">第 8 章 内部排序</td>
@@ -457,7 +463,7 @@ python3 tools/check_doc.py</code></pre></div>
 </tr>
 </tbody></table></div>
 <h3 id="每章验证边界"><a class="anchor" href="#每章验证边界">#</a>每章验证边界</h3>
-<p>“实现并测试”表示对应 <code>code/</code> 单元在 Release-O2 运行通过，并不表示所有平台、线程场景或极端 输入都已证明。macOS 环境若无法启动 ASan/UBSan，检查脚本会明确报告降级；递归结构的栈深度也 随编译器、优化级别和进程栈大小变化。概念导读章节不伪造未验证的实现，练习代码需要读者自行 编译和测试。</p>
+<p>“实现并测试”表示对应 <code>code/</code> 单元在 g++ 与 clang++ 下各编两档——<code>-Werror</code> 加 ASan/UBSan 的调试档与 <code>-O2</code> 档——都编译并运行通过，并不表示所有平台、线程场景或极端 输入都已证明。macOS 环境若无法启动 ASan/UBSan，检查脚本会明确报告降级；递归结构的栈深度也 随编译器、优化级别和进程栈大小变化。概念导读章节不伪造未验证的实现，练习代码需要读者自行 编译和测试。</p>
 <h2 id="目录"><a class="anchor" href="#目录">#</a>目录</h2>
 <ol>
 <li><a href="ch01-adt.html">概论</a>：1.1 问题求解，1.2 数据结构，1.3 算法，1.4 算法分析。</li>
@@ -470,7 +476,7 @@ python3 tools/check_doc.py</code></pre></div>
 <li><a href="ch08-sorting.html">内部排序</a>：8.1 概念，8.2–8.6 各类排序，8.7 时间代价。</li>
 <li><a href="ch09-external-sort.html">文件管理与外部排序</a>：9.1–9.2 外存与文件，9.3 置换选择与选择树。</li>
 <li><a href="ch10-search.html">检索</a>：10.1 线性表检索，10.2 集合，10.3 散列。</li>
-<li><a href="ch11-index.html">索引技术</a>：11.1–11.6 线性/倒排/B 树/位图/红黑树。</li>
+<li><a href="ch11-index.html">索引技术</a>：11.1–11.5 线性/多分树/倒排/B 树与 B+ 树/位索引；原书 11.6 的红黑树并在 11.5 末尾讲。</li>
 <li><a href="ch12-advanced.html">高级数据结构</a>：12.1 多维数组，12.2 广义表与存储，12.3 Trie，12.4 改进 BST。</li>
 </ol>
 <p>对照纸书时，编译级硬伤与算法错见 <a href="errata.html">原书勘误</a>；底稿的 OCR 图库见 <a href="figures.html">插图</a>（仅网页版）。 各章习题、上机题及参考答案见 <a href="exercises.html">习题与参考答案</a>； 按期中复习提要（第 1—6 章）编排的自测题与答案见 <a href="midterm-review.html">期中复习题库</a>， 按期末复习大纲（第 7—12 章）编排的见 <a href="final-review.html">期末复习题库</a>；题目来源和验证状态见 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/collab/TRACEABILITY-MATRIX.md" class="ext">参考资料逐项追踪矩阵</a>。 MOOC 题目的逐题解析作为来源参考附录收录，见 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/DSA_MOOC_solution.md" class="ext">MOOC 题解附录</a>；其中答案 需以本书正文、代码测试和追踪矩阵为准，不替代本书的自拟习题答案。</p>
@@ -482,7 +488,7 @@ python3 tools/check_doc.py</code></pre></div>
 <li><strong>风险如实保留。</strong> 递归树周游与析构仍适合教学，但极深退化结构存在栈溢出风险；详见 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/collab/UNVERIFIED-RISKS.md" class="ext"><code>collab/UNVERIFIED-RISKS.md</code></a>。</li>
 </ul>
 <h2 id="验证与边界"><a class="anchor" href="#验证与边界">#</a>验证与边界</h2>
-<p>本教程覆盖原书 105 条算法/代码清单。<code>code/</code> 下的每个单元都有对应的 <code>unit.json</code>、现代实现、 原书问题证据和可执行测试；书稿的 C++ 代码由工具逐字同步。完整的边界条件、未覆盖故障路径与 递归深度风险见 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/collab/UNVERIFIED-RISKS.md" class="ext"><code>collab/UNVERIFIED-RISKS.md</code></a>。</p>
+<p>本教程覆盖原书 105 条算法/代码清单：104 条做了现代化实现，1 条（代码4.2，标准库 <code>basic_string</code> 的空声明骨架）经登记退场，理由见 <code>collab/exclusions.json</code>。<code>code/</code> 下的每个单元都有对应的 <code>unit.json</code>、现代实现、 原书问题证据和可执行测试；书稿的 C++ 代码由工具逐字同步。完整的边界条件、未覆盖故障路径与 递归深度风险见 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/collab/UNVERIFIED-RISKS.md" class="ext"><code>collab/UNVERIFIED-RISKS.md</code></a>。</p>
 <p>本教程采用 C++17，侧重数据结构的实现与算法语义。它不提供文件系统、数据库页缓存、并发控制 或跨平台性能承诺；这些属于使用数据结构的系统层设计。</p>
 <div class="pagenav"><span></span><a href="ch01-adt.html" style="text-align:right"><span class="dir">下一篇 →</span>第1章 概论</a></div>
 </main>

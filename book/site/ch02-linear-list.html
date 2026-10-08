@@ -156,7 +156,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <nav class="book"><b>导读</b><a href="index.html">封面与导读</a><b>正文</b><a href="ch01-adt.html">第1章 概论</a><a href="ch02-linear-list.html" class="here">第2章 线性表</a><a href="ch03-stack.html">第3章 栈与队列</a><a href="ch04-string.html">第4章 字符串</a><a href="ch05-binary-tree.html">第5章 二叉树</a><a href="ch06-tree.html">第6章 树</a><a href="ch07-graph.html">第7章 图</a><a href="ch08-sorting.html">第8章 内部排序</a><a href="ch09-external-sort.html">第9章 文件管理与外部排序</a><a href="ch10-search.html">第10章 检索</a><a href="ch11-index.html">第11章 索引技术</a><a href="ch12-advanced.html">第12章 高级数据结构</a><b>附录</b><a href="exercises.html">习题、上机题与参考答案</a><a href="midterm-review.html">期中复习题库（第 1—6 章）</a><a href="final-review.html">期末复习题库（第 7—12 章）</a><a href="figures.html">原书插图</a><a href="errata.html">原书勘误</a><a href="exam-codepack.html">考场代码包</a></nav>
 <main>
 
-<p>线性表把一串同类型元素排成唯一的先后次序。顺序表把元素连续放在数组里，能 O(1) 按下标访问； 链表用链接保存相邻关系，能在已知结点位置 O(1) 插入或删除。关键是区分「按位置找元素」和 「已知结点后改链接」这两类操作。</p>
+<p>线性表把一串同类型元素排成唯一的先后次序。顺序表把元素连续放在数组里，能 O(1) 按下标访问； 链表用链接保存相邻关系，能在已知前驱结点时 O(1) 插入或删除。关键是区分「按位置找元素」和 「已知结点后改链接」这两类操作。</p>
 <p>源码：<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/teaching.hpp" class="ext">顺序表·教学版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/modern.hpp" class="ext">顺序表·工程版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/demo.cpp" class="ext">顺序表示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/teaching.hpp" class="ext">链表·教学版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/modern.hpp" class="ext">链表·工程版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/linked_list/demo.cpp" class="ext">链表示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/doubly_linked_list/teaching.hpp" class="ext">双链表·教学版</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/doubly_linked_list/modern.hpp" class="ext">双链表·工程版</a>。</p>
 <h2 id="先跑一遍"><a class="anchor" href="#先跑一遍">#</a>先跑一遍</h2>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/demo.cpp">code/ch02/array_list/demo.cpp</a></div><pre><code><span class="c">// 第 2 章「先跑一遍」：用教学版 ArrayList 走一遍 append / insert / find / remove。</span>
@@ -225,13 +225,13 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 删除位置 0 得到 10，剩余: 20 30
 append 之后尾元素是 30</code></pre></div>
 <p><code>append</code> 经尾指针 O(1) 接链，不必再从头走到尾。</p>
-<blockquote><p><strong>本文件的地位</strong>：《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008） 第 2.1–2.2 节的现代化重排。原书正文（<code>dsa_raw.md:1145</code> 起）的讲法、编号、图表一概保留； 换掉的只是那套 2008 年的 C++ 写法。2.3 节链表另开一轮。</p>
-<p>书里印的每一段 C++ 都来自 <code>code/ch02/array_list/</code>，真正编译、真正跑过 （<code>tools/check_doc.py</code> 的 R3 逐字核对）。原书那份写法错在哪、改了什么、 什么刻意没改，逐条记在 <code>code/ch02/array_list/legacy.md</code>。</p>
+<blockquote><p><strong>本文件的地位</strong>：《数据结构与算法》（张铭、王腾蛟、赵海燕，高等教育出版社 2008） 第 2 章的现代化重排。原书正文（<code>dsa_raw.md:1145</code> 起）的讲法、编号、图表一概保留； 换掉的只是那套 2008 年的 C++ 写法。</p>
+<p>书里印的每一段 C++ 都来自 <code>code/ch02/</code> 下的 <code>array_list/</code>、<code>linked_list/</code>、 <code>doubly_linked_list/</code>、<code>ownership/</code> 四个单元，真正编译、真正跑过 （<code>tools/check_doc.py</code> 的 R3 逐字核对）。原书那份写法错在哪、改了什么、 什么刻意没改，逐条记在各单元的 <code>legacy.md</code>（顺序表见 <code>code/ch02/array_list/legacy.md</code>）。</p>
 <p>代码风格遵循 <code>collab/DECISION_LOG.md</code> 的 D-001 与 D-005。</p></blockquote>
 <h2 id="21-线性表的概念"><a class="anchor" href="#21-线性表的概念">#</a>2.1 线性表的概念</h2>
 <p>线性表（linear list）是由称为元素（element）的数据项组成的一种有限且有序的序列， 这些元素也可称结点或表目。用第 1 章的二元组 <span class="math">B<span class="rel">=</span>(K,R)</span> 写出来就是</p>
 <div class="math math-display">K<span class="rel">=</span>{k<sub><span class="upr">0</span></sub>,k<sub><span class="upr">1</span></sub>,⋯,k<sub>n<span class="bin">−</span><span class="upr">1</span></sub>}, R<span class="rel">=</span>{r}, r<span class="rel">=</span>{⟨k<sub>i</sub>,k<sub>i<span class="bin">+</span><span class="upr">1</span></sub>⟩,<span class="upr">0</span><span class="rel">≤</span>i<span class="rel">≤</span>n<span class="bin">−</span><span class="upr">2</span>}</div>
-<p>结点集合 <span class="math">K</span> 中的元素个数 <span class="math">n</span> 称为线性表的<strong>长度</strong>：<span class="math">n<span class="rel">=</span><span class="upr">0</span></span> 时称空表，<span class="math">n&gt;<span class="upr">0</span></span> 时称非空表； <span class="math">k<sub><span class="upr">0</span></sub></span> 称开始结点或<strong>表首</strong>，<span class="math">k<sub>n<span class="bin">−</span><span class="upr">1</span></sub></span> 称终止结点或<strong>表尾</strong>。线性关系 <span class="math">r</span> 刻画元素间的前驱、 后继关系——<span class="math">k<sub>i</sub></span> 是 <span class="math">k<sub>i<span class="bin">+</span><span class="upr">1</span></sub></span> 的前驱，<span class="math">k<sub>i<span class="bin">+</span><span class="upr">1</span></sub></span> 是 <span class="math">k<sub>i</sub></span> 的后继，所以线性关系也称前驱关系或 后继关系。<strong>关系 <span class="math">r</span> 具有反对称性和传递性</strong>；由定义可知线性表的逻辑特征是：<span class="math">K</span> 中的每个 结点在关系 <span class="math">r</span> 上最多只有一个前驱结点和一个后继结点。</p>
+<p>结点集合 <span class="math">K</span> 中的元素个数 <span class="math">n</span> 称为线性表的<strong>长度</strong>：<span class="math">n<span class="rel">=</span><span class="upr">0</span></span> 时称空表，<span class="math">n&gt;<span class="upr">0</span></span> 时称非空表； <span class="math">k<sub><span class="upr">0</span></sub></span> 称开始结点或<strong>表首</strong>，<span class="math">k<sub>n<span class="bin">−</span><span class="upr">1</span></sub></span> 称终止结点或<strong>表尾</strong>。线性关系 <span class="math">r</span> 刻画元素间的前驱、 后继关系——<span class="math">k<sub>i</sub></span> 是 <span class="math">k<sub>i<span class="bin">+</span><span class="upr">1</span></sub></span> 的前驱，<span class="math">k<sub>i<span class="bin">+</span><span class="upr">1</span></sub></span> 是 <span class="math">k<sub>i</sub></span> 的后继，所以线性关系也称前驱关系或 后继关系。<strong>关系 <span class="math">r</span> 具有反对称性和传递性</strong>（严格地说，上式写出的 <span class="math">r</span> 只含相邻的有序对， 例如 <span class="math">⟨k<sub><span class="upr">0</span></sub>,k<sub><span class="upr">1</span></sub>⟩</span>、<span class="math">⟨k<sub><span class="upr">1</span></sub>,k<sub><span class="upr">2</span></sub>⟩<span class="rel">∈</span>r</span> 而 <span class="math">⟨k<sub><span class="upr">0</span></sub>,k<sub><span class="upr">2</span></sub>⟩<span class="rel">∉</span>r</span>， 它本身并不传递；具有传递性的是由它导出的「排在前面」关系，即 <span class="math">r</span> 的传递闭包）；由定义可知线性表的逻辑特征是：<span class="math">K</span> 中的每个 结点在关系 <span class="math">r</span> 上最多只有一个前驱结点和一个后继结点。</p>
 <p>线性结构有两个结构特点。<strong>均匀性</strong>：虽然不同线性表的数据元素可以各种各样，但同一线性表中 的各数据元素必定具有相同的数据类型和长度。<strong>有序性</strong>：各数据元素在表中都有自己的位置， 元素之间的相对位置是线性的。本章讨论的简单线性表因此约定所有元素同类型——概念上并不反对 元素类型不同（例如第 12 章的广义表），但那属于高级线性结构。</p>
 <p>同一种线性结构在不同场合有不同的称谓：顺序表、链表、串、栈、顺序文件；其中的元素也相应地 叫表目、结点或记录。一般情况下这些称谓可作为同义词互通使用。</p>
 <p>在线性表上可以实施的运算依赖于具体应用，但一般不外乎两大类：一类是<strong>对整个表</strong>的操作—— 创建或置空一个线性表、合并两个线性表、判断表是否为空或为满；另一类是<strong>对表中元素</strong>的操作 ——查找满足一定条件的元素、在表中插入或删除指定的元素。</p>
@@ -501,7 +501,7 @@ append 之后尾元素是 30</code></pre></div>
 <p>第四个 <code>position</code> 是个<strong>当前处理位置游标</strong>，配合正文提到的 <code>setPos / setStart / next / prev</code> 用来「依次处理元素」。这个设计今天不能要： 遍历状态一旦住进容器，<code>const</code> 对象就没法遍历（游标要改），两处代码不能同时遍历， 嵌套遍历直接互相踩。本书删掉这个成员，改为提供 <code>begin()/end()</code>， 把遍历状态交回调用方——range-for 因此可以直接用在顺序表上。 （顺带一提：原书那个 <code>position</code>，在书中展示的所有算法里一次都没被用到。）</p>
 <p>缓冲区是<strong>裸指针</strong>。于是这个类自己管着资源，就必须遵守<strong>三法则</strong>： 一个类只要写了<strong>析构函数、拷贝构造、拷贝赋值</strong>中的任意一个，通常这三个都得写。 理由很直白——你之所以要写析构函数，是因为你在管资源；既然在管资源， 编译器那份「逐成员照抄」的拷贝就一定是错的：照抄一个指针成员的结果是 <strong>两个对象指向同一块内存</strong>，各自析构时各释放一次，同一块内存被释放两次。</p>
 <p>原书 <code>arrList</code> 正是如此：有析构函数，却没有拷贝构造与拷贝赋值。一句普通的 <code>arrList&lt;int&gt; b = a;</code> 就会二次释放——与第 3 章 <code>arrStack</code> 是同一个错误，同一份 ASan 报告可以复现。</p>
-<p>这里用裸指针而不是 <code>std::unique_ptr&lt;T[]&gt;</code>，是因为顺序表的存储管理正是本节的教学内容： 用智能指针时这几个函数编译器生成的就够用，学生看不到它们为什么必须存在。判据见 2.3.1 节的「所有权工具怎么选」。</p>
+<p>这里用裸指针而不是 <code>std::unique_ptr&lt;T[]&gt;</code>，是因为顺序表的存储管理正是本节的教学内容： 换成 <code>std::unique_ptr&lt;T[]&gt;</code> 后，析构和两个移动操作都由编译器生成，学生看不到它们为什么必须存在 （拷贝构造和拷贝赋值则被禁用，要拷贝仍得手写）。判据见 2.3.1 节的「所有权工具怎么选」。</p>
 <p>另外原书的 <code>clear()</code> 是这样写的：</p>
 <div class="codeblock" data-lang="text"><pre><code>void clear() { delete [] aList; curLen = position = 0; aList = new T[maxSize]; }</code></pre></div>
 <p>释放整块再重新分配。既没必要（把长度归零即可，容量留着复用），也不是异常安全的： 若 <code>new</code> 抛异常，对象就停在「指针已释放、长度已归零」的破碎状态， 之后析构还会再 <code>delete[]</code> 一次。教学版的 <code>clear()</code> 只把长度归零，一行。</p>
@@ -535,7 +535,7 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 <p>教学版没有写这个属性——它是纯粹的工程加固，与顺序表这一节要讲的东西无关。</p>
 <p>一句话概括这个改动：<strong>原来靠调用方自觉，现在靠类型系统和编译器</strong>。「找没找到」这件事 从「一个你可以忽略的 <code>bool</code>」变成了「不处理就取不出数据的盒子」。全书凡是「可能没有结果」 的接口——查找、出栈、取队首——都按这条办。</p>
 <p>（顺带一提，算法2.3 那段按印刷原样是编译不过的：循环写的是 <code>for (i = 0; i &lt; n; i++)</code>， 而 <code>n</code> 从未声明，按上下文应为 <code>curLen</code>。）</p>
-<p>检索的时间代价体现在比较次数上。最好情况是第 1 个元素即为所求，比较 1 次； 最差情况是表中没有该元素，比较 n 次。等概率假设下平均比较次数为</p>
+<p>检索的时间代价体现在比较次数上。最好情况是第 1 个元素即为所求，比较 1 次； 最差情况是表中没有该元素，比较 n 次。假设待查值出现在每个位置的概率相同，均为 <span class="math">p<span class="rel">=</span><span class="upr">1</span>/n</span>， 它在下标 <span class="math">i<span class="bin">−</span><span class="upr">1</span></span>（第 <span class="math">i</span> 个元素）处时要比较 <span class="math">i</span> 次，于是查找成功时的平均比较次数为</p>
 <div class="math math-display">∑<sub>i<span class="rel">=</span><span class="upr">1</span></sub><sup>n</sup>p<span class="bin">×</span>i<span class="rel">=</span><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den">n</span></span>(<span class="upr">1</span><span class="bin">+</span><span class="upr">2</span><span class="bin">+</span>⋯<span class="bin">+</span>n)<span class="rel">=</span><span class="frac"><span class="num">n<span class="bin">+</span><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span></div>
 <p>即平均需要检查表中一半的元素，时间开销为 O(n)。</p>
 <h4 id="顺序表的插入"><a class="anchor" href="#顺序表的插入">#</a>顺序表的插入</h4>
@@ -576,11 +576,11 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 </tr>
 </tbody></table></div>
 <p>图 2.2 顺序表元素插入示意图</p>
-<p>时间代价仍然是 O(n)。最好情况是插在表尾，移动 0 次；最差情况是插在表头， n 个元素全要移动；等概率假设下平均移动次数为</p>
+<p>时间代价仍然是 O(n)。最好情况是插在表尾，移动 0 次；最差情况是插在表头， n 个元素全要移动；一般地，插在位置 i 要把其后的 <span class="math">n<span class="bin">−</span>i</span> 个元素右移。可插入的位置有 <span class="math"><span class="upr">0</span>,<span class="upr">1</span>,⋯,n</span> 共 <span class="math">n<span class="bin">+</span><span class="upr">1</span></span> 个，假设在各位置插入的概率相等，均为 <span class="math">p<span class="rel">=</span><span class="upr">1</span>/(n<span class="bin">+</span><span class="upr">1</span>)</span>，则平均移动次数为</p>
 <div class="math math-display">∑<sub>i<span class="rel">=</span><span class="upr">0</span></sub><sup>n</sup>p<span class="bin">×</span>(n<span class="bin">−</span>i)<span class="rel">=</span><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den">n<span class="bin">+</span><span class="upr">1</span></span></span>∑<sub>i<span class="rel">=</span><span class="upr">0</span></sub><sup>n</sup>(n<span class="bin">−</span>i)<span class="rel">=</span><span class="frac"><span class="num">n</span><span class="den"><span class="upr">2</span></span></span></div>
 <p><strong>扩容没有改变这个结论</strong>：翻倍带来的搬迁<strong>摊还</strong>到每次插入是 O(1)， 而元素右移本身仍是 O(n)。</p>
-<p>「摊还」是指：单次操作偶尔很贵，但把总代价分摊到所有操作上之后，每次仍然很便宜。 这里绝大多数插入不触发扩容，偶尔一次翻倍要搬走全部 n 个元素；但两次扩容之间至少发生了 n 次插入，把这一次搬迁分摊下去，每次插入平摊仍是 O(1)。注意它说的是<strong>平均</strong>而不是保证—— 那一次搬迁真的会卡住，对延迟敏感的场合要单独考虑。</p>
-<p>这一点是 2.3 节拿顺序表与链表对比的依据，不能被优化掉。</p>
+<p>「摊还」是指：单次操作偶尔很贵，但把总代价分摊到所有操作上之后，每次仍然很便宜。 这里绝大多数插入不触发扩容，偶尔一次翻倍要搬走全部 n 个元素；但容量 n 是上一次翻倍 （从 n/2 到 n）得来的，两次扩容之间至少发生了 n/2 次插入，把这一次搬迁的 n 次复制分摊下去， 每次插入平摊不超过 2 次，仍是 O(1)。累计起来，从空表连续追加 N 个元素，扩容搬迁的总次数 是 <span class="math"><span class="upr">8</span><span class="bin">+</span><span class="upr">16</span><span class="bin">+</span>⋯</span> 这样一个等比级数，末项不超过 N，总和小于 2N。注意它说的是<strong>平均</strong>而不是保证—— 那一次搬迁真的会卡住，对延迟敏感的场合要单独考虑。</p>
+<p>这一点是 2.4 节拿顺序表与链表对比的依据，不能被优化掉。</p>
 <h4 id="顺序表的删除"><a class="anchor" href="#顺序表的删除">#</a>顺序表的删除</h4>
 <p>删除是插入的镜像：把 pos 之后的元素逐个左移一位，这次循环<strong>正着走</strong>。 教学版的 <code>remove()</code> 还多做一件事——先把被删的元素存下来，最后返回给调用方。</p>
 <p>空表上删除必然越界，所以不需要原书那句单独的空表检查： 「表空」在这里不是一种可预期状态，而就是下标非法的一个特例。</p>
@@ -635,16 +635,18 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 </tbody></table></div>
 <p>图 2.3 顺序表元素删除示意图</p>
 <p>原书【算法2.5】的函数名是 <code>delete</code>——C++ 关键字，编译不过；本书叫 <code>remove</code>。 另外它返回 <code>bool</code>，被删掉的值就此丢失；这里把它返回给调用方， 「删除并取用」不必先 <code>getValue</code> 再 <code>delete</code> 两步走。</p>
-<p>删除的时间代价分析与插入相同，平均为 O(n)。</p>
+<p>删除的时间代价分析与插入相似，平均为 O(n)。具体地，删除位置 i 上的元素要把其后的 <span class="math">n<span class="bin">−</span><span class="upr">1</span><span class="bin">−</span>i</span> 个 元素左移；可删除的位置只有 <span class="math"><span class="upr">0</span>,<span class="upr">1</span>,⋯,n<span class="bin">−</span><span class="upr">1</span></span> 共 <span class="math">n</span> 个，等概率（<span class="math">p<span class="rel">=</span><span class="upr">1</span>/n</span>）时平均移动次数为</p>
+<div class="math math-display">∑<sub>i<span class="rel">=</span><span class="upr">0</span></sub><sup>n<span class="bin">−</span><span class="upr">1</span></sup>p<span class="bin">×</span>(n<span class="bin">−</span><span class="upr">1</span><span class="bin">−</span>i)<span class="rel">=</span><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den">n</span></span>∑<sub>i<span class="rel">=</span><span class="upr">0</span></sub><sup>n<span class="bin">−</span><span class="upr">1</span></sup>(n<span class="bin">−</span><span class="upr">1</span><span class="bin">−</span>i)<span class="rel">=</span><span class="frac"><span class="num">n<span class="bin">−</span><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span></div>
+<p>比插入少半次：删表尾不必移动，而插入多了「插在表尾之后」这个位置。</p>
 <h3 id="22a-进阶选读从教学版到工程版"><a class="anchor" href="#22a-进阶选读从教学版到工程版">#</a>2.2a 进阶（选读）：从教学版到工程版</h3>
-<p><strong>这一节可以整节跳过。</strong> 上面那份教学版在<strong>分配和 <code>T</code> 的拷贝都不抛异常</strong>时是正确的 （元素是 <code>int</code>、<code>std::string</code> 这类东西时就是如此），跑得起来，日常用例下 ASan 也干净。 这一节讲的是把它变成一个<strong>工业级容器</strong>还要补哪些东西。 等你哪天要写自己的容器时再回来读。工程版在 <code>code/ch02/array_list/modern.hpp</code>，与教学版一样进闸门、一样双档编译运行。</p>
+<p><strong>这一节可以整节跳过。</strong> 上面那份教学版在<strong>分配和 <code>T</code> 的拷贝都不抛异常</strong>时是正确的 （元素是 <code>int</code>、<code>std::string</code> 这类东西时就是如此），跑得起来，日常用例下 ASan 也干净。 这一节讲的是把它变成一个<strong>工业级容器</strong>还要补哪些东西。 等你哪天要写自己的容器时再回来读。工程版在 <code>code/ch02/array_list/modern.hpp</code>，与教学版一样进闸门、一样在 g++ 与 clang++ 下各按两档编译运行。</p>
 <h4 id="一三法则补成五法则移动语义"><a class="anchor" href="#一三法则补成五法则移动语义">#</a>一、三法则补成五法则：移动语义</h4>
 <p>教学版把一个临时表赋给别人时，会老老实实深拷贝一遍——而那个临时对象下一行就要销毁， 这次拷贝纯属浪费。工程版补上<strong>移动构造</strong>与<strong>移动赋值</strong>：直接把指针「偷」过来， 再把对方置空，O(1) 完事。</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch02/array_list/modern.hpp">code/ch02/array_list/modern.hpp#insert</a></div><pre><code><span class="c">/// 在位置 pos 插入元素，pos 可以等于 size()（即追加到表尾）。</span>
 <span class="c">/// 位置非法抛 std::out_of_range；容量不足自动翻倍。</span>
 <span class="c">///</span>
 <span class="c">/// 时间代价仍是 O(n)——pos 之后的元素都要右移一位。这是顺序表的固有代价，</span>
-<span class="c">/// 也是第 2.3 节要拿它和链表对比的地方，没有被&quot;优化&quot;掉。</span>
+<span class="c">/// 也是第 2.4 节要拿它和链表对比的地方，没有被&quot;优化&quot;掉。</span>
 <span class="t">void</span> insert(size_type pos, <span class="k">const</span> T&amp; value) {
     make_gap(pos);
     data_[pos] = value;
@@ -735,7 +737,7 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 </tr>
 <tr>
 <td style="text-align:left"><code>class List { ... }</code> 无 <code>public:</code></td>
-<td style="text-align:left">不设基类，要求写成 <code>static_assert</code></td>
+<td style="text-align:left">不设基类，运算直接定义在 <code>ArrayList&lt;T&gt;</code> 上（工程版对 <code>T</code> 的要求写成 <code>static_assert</code>）</td>
 <td style="text-align:left">所有运算私有的 ADT 在语义上是空的；空基类给不了多态</td>
 </tr>
 <tr>
@@ -774,8 +776,8 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 <td style="text-align:left">原写法没必要，且 <code>new</code> 抛异常会留下破碎对象</td>
 </tr>
 </tbody></table></div>
-<p><strong>刻意没改的</strong>：连续存储、按下标 O(1) 随机存取、插入与删除搬动 O(n) 个元素。 这三条正是 2.3 节拿顺序表和链表做对比的全部依据，一条都不能优化掉。</p>
-<p>完整实现见 <code>code/ch02/array_list/modern.hpp</code>，测试见同目录 <code>test.cpp</code> （47 项断言，覆盖上表每一行；用 <code>python3 tools/check_code.py</code> 在 <code>-Werror</code> + ASan/UBSan 与 <code>-O2</code> 两种构建下各跑一遍）。</p>
+<p><strong>刻意没改的</strong>：连续存储、按下标 O(1) 随机存取、插入与删除搬动 O(n) 个元素。 这三条正是 2.4 节拿顺序表和链表做对比的全部依据，一条都不能优化掉。</p>
+<p>完整实现见 <code>code/ch02/array_list/modern.hpp</code>，测试见同目录 <code>test.cpp</code> （47 项断言，覆盖上表每一行；用 <code>python3 tools/check_code.py</code> 在 <code>-Werror</code> + ASan/UBSan 与 <code>-O2</code> 两种构建下、g++ 与 clang++ 两个编译器上共跑四遍）。</p>
 <h2 id="23-链表"><a class="anchor" href="#23-链表">#</a>2.3 链表</h2>
 <h3 id="为什么这一节没有-python-版-1"><a class="anchor" href="#为什么这一节没有-python-版-1">#</a>为什么这一节没有 Python 版</h3>
 <p>链表这一节要看的是结点所有权：谁负责 <code>new</code> 出来的结点、拷贝时是否深复制、异常和析构时怎样沿链释放。Python 的 <code>list</code> 既不是这条链，也不要求读者实现拷贝构造、拷贝赋值、移动构造和析构；即便手写 Python 结点，垃圾回收仍会把所有权边界变得不可观察。因此这里保留 C++ 的裸指针与五法则，Python 版只会成为另一种容器写法。</p>
@@ -989,7 +991,7 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 <p>【代码2.7结束】</p>
 <h4 id="构析与循链定位"><a class="anchor" href="#构析与循链定位">#</a>构析与循链定位</h4>
 <p>【算法2.8】带有头结点的单链表构造函数与析构函数。</p>
-<p>教学版的构造函数 <code>new</code> 出头结点，析构函数先 <code>clear()</code> 掉全部真元素、再把头结点还回去。 <code>clear()</code> 沿 <code>next</code> <strong>逐个循环释放</strong>，不是递归——链长十万级时递归释放会耗尽运行栈， 这一点第 3 章 3.1.3 有实测数字。</p>
+<p>教学版的构造函数 <code>new</code> 出头结点，析构函数先 <code>clear()</code> 掉全部真元素、再把头结点还回去。 <code>clear()</code> 沿 <code>next</code> <strong>逐个循环释放</strong>，不是递归——链长十万级时递归释放会耗尽运行栈， 本节稍后的「所有权工具怎么选」和第 3 章 3.1.3a 都有实测数字。</p>
 <p>两处一漏就出事，教学版的测试各有一条断言盯着：</p>
 <ul>
 <li><code>clear()</code> 之后 <code>tail_</code> 必须退回头结点。不退，下一次 <code>append</code> 就写进已释放的内存， AddressSanitizer 报 <code>heap-use-after-free</code>。</li>
@@ -1087,7 +1089,7 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 <tr>
 <td style="text-align:left">树（孩子唯一所有权）</td>
 <td style="text-align:left"><code>unique_ptr</code></td>
-<td style="text-align:left">释放同样递归，但深度是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>；第 11 章的 B+ 树、第 12 章的 Trie 用的就是它</td>
+<td style="text-align:left">释放同样递归，但深度等于树高——B+ 树这类平衡树是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>，Trie 是最长键的长度，都远小于结点数（退化成一条链的树则另当别论）；第 11 章的 B+ 树、第 12 章的 Trie 用的就是它</td>
 </tr>
 <tr>
 <td style="text-align:left">一整块缓冲区</td>
@@ -1125,7 +1127,8 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 <p>双链结点比单链结点多一根 <code>prev</code>。多出来的那个指针（64 位机上 8 字节） 只买到一件事，但这件事很值：<strong>已知一个结点时，删除它是 O(1)</strong>。 单链表要做同一件事得先从头走到它的前驱，O(n)——因为单链表从一个结点走不回前一个。</p>
 <p>原书在此只给出结点定义，没有给出完整的双链表算法。</p>
 <figure><img loading="lazy" src="../assets/scan/fig-2-9.png" alt="图2.9 加入表头结点的双链表"><figcaption>图2.9 加入表头结点的双链表</figcaption></figure>
-<p>图 2.9　加入表头结点的双链表。带斜线阴影的是头结点；<code>head</code> 指向表首，<code>tail</code> 指向表尾。</p>
+<p>图 2.9　加入表头结点的双链表。带斜线阴影的是头结点；<code>head</code> 指向这个头结点（它排在表首结点之前），<code>tail</code> 指向表尾结点。</p>
+<p>注意下面的教学版<strong>没有</strong>头结点：它的 <code>head_</code> 直接指向第一个真元素，空表时 <code>head_</code> 与 <code>tail_</code> 都是 <code>nullptr</code>。代价是表头、表尾各成一个特例，所以 <code>push_front</code>、<code>push_back</code>、<code>erase_node</code> 里都有判空指针的分支——这正好与带头结点的单链表形成对照。</p>
 <figure><img loading="lazy" src="../assets/scan/fig-2-10.png" alt="图 2.10 双链表的结点"><figcaption>图 2.10 双链表的结点</figcaption></figure>
 <p>图 2.10　双链表的结点：一个数据域，两根指针——<code>prev</code> 指前驱，<code>next</code> 指后继。</p>
 <p>【代码2.12结束】</p>
@@ -1341,12 +1344,14 @@ error: ignoring return value of ‘std::optional&lt;...&gt; dsa::ArrayList&lt;T&
 p-&gt;next-&gt;prev = p-&gt;prev;
 p-&gt;next = NULL; p-&gt;prev = NULL; delete p;</code></pre></div>
 <figure><img loading="lazy" src="../assets/scan/fig-2-11.png" alt="图2.11 双链表的删除操作示意"><figcaption>图2.11 双链表的删除操作示意</figcaption></figure>
-<p>图 2.11　双链表的删除操作示意。摘链之后把 <code>p</code> 自己的两根指针置空再释放，是为了让「已删除的结点还被别人拿着」这种错误尽早暴露。</p>
+<p>图 2.11　双链表的删除操作示意。原书在摘链之后先把 <code>p</code> 自己的两根指针置空再释放；这两句对正确性没有作用——<code>delete</code> 之后那块内存本来就不能再读，编译器甚至可以把这两次写入当作无用存储删掉，所以教学版的 <code>erase_node</code> 不写它们。</p>
+<p>还要注意，这三行假定 <code>p</code> <strong>既有前驱也有后继</strong>。带头结点时前驱总是存在，但若 <code>p</code> 是表尾， <code>p-&gt;next</code> 为空指针，第二行就是对空指针解引用。教学版的 <code>erase_node</code> 因此在表头、表尾各留一个分支。</p>
 <p>在 <code>p</code> 之后插入新结点 <code>q</code>，先让 <code>q</code> 认好左右邻居，再让邻居认 <code>q</code>：</p>
 <div class="codeblock" data-lang="text"><pre><code>q-&gt;prev = p;  q-&gt;next = p-&gt;next;
 p-&gt;next = q;  q-&gt;next-&gt;prev = q;</code></pre></div>
 <figure><img loading="lazy" src="../assets/scan/fig-2-12.png" alt="图2.12 双链表插入操作示意"><figcaption>图2.12 双链表插入操作示意</figcaption></figure>
-<p>图 2.12　双链表插入操作示意。四条赋值的次序可以变，但「先让新结点指向两侧、再改两侧指向新结点」这个方向不能反——否则改到一半就丢了原来的后继。</p>
+<p>图 2.12　双链表插入操作示意。四条赋值的次序有一处不能反：<code>q-&gt;next = p-&gt;next</code> 必须在 <code>p-&gt;next = q</code> 之前——先改 <code>p-&gt;next</code> 就丢了原来的后继；而最后一句 <code>q-&gt;next-&gt;prev = q</code> 要借 <code>q-&gt;next</code> 找到后继，也必须排在 <code>q-&gt;next</code> 填好之后。稳妥的做法就是原书的次序：先让新结点指向两侧，再改两侧指向新结点。</p>
+<p>同样，最后一句假定 <code>p</code> 不是表尾：<code>p</code> 是表尾时 <code>q-&gt;next</code> 为空指针，这一句要换成更新 <code>tail</code>。教学版 <code>insert</code> 把这种情形交给 <code>push_back</code> 处理。</p>
 <p>双链表比单链表多一根指针的空间开销，换来的是给定元素时能在 <span class="math">O(<span class="upr">1</span>)</span> 时间内找到它的前驱。</p>
 <p>【本书补充实现结束】</p>
 <h3 id="233-循环链表"><a class="anchor" href="#233-循环链表">#</a>2.3.3 循环链表</h3>
@@ -1360,7 +1365,7 @@ p-&gt;next = q;  q-&gt;next-&gt;prev = q;</code></pre></div>
 <p>把双链表的首尾也接起来，就是循环双链表，反向遍历同样闭合。</p>
 <figure><img loading="lazy" src="../assets/scan/fig-2-15.png" alt="图 2.15 循环双链表示意图"><figcaption>图 2.15 循环双链表示意图</figcaption></figure>
 <p>图 2.15　循环双链表示意图。</p>
-<p>只保存 <code>tail</code> 就够了：取首结点是 <code>tail-&gt;next</code>，尾插只需改两根链接，均为 <span class="math">O(<span class="upr">1</span>)</span>。从任意结点开始遍历时必须保存起点，并在再次遇到起点时停止，不能写成“走到 <code>nullptr</code> 为止”。删除最后一个结点后要把 <code>tail</code> 清空；删除首结点则把 <code>tail-&gt;next</code> 跳过被删结点。循环双链表再把首结点的 <code>prev</code> 接到尾结点，反向遍历同样闭合。</p>
+<p>只保存 <code>tail</code> 就够了：取首结点是 <code>tail-&gt;next</code>，尾插只需改两根链接，均为 <span class="math">O(<span class="upr">1</span>)</span>。从任意结点开始遍历时必须保存起点，并在再次遇到起点时停止，不能写成“走到 <code>nullptr</code> 为止”。删除唯一剩下的那个结点后要把 <code>tail</code> 清空；删除首结点则把 <code>tail-&gt;next</code> 跳过被删结点。循环双链表再把首结点的 <code>prev</code> 接到尾结点，反向遍历同样闭合。</p>
 <p>循环链表的代价是边界更容易写错：空表、单结点表和多结点表的链接规则不同。测试至少应覆盖三种长度，并验证从每个结点出发恰好走一整圈；否则漏接或误接都可能表现为无限循环。</p>
 <h3 id="23a-进阶选读从教学版到工程版"><a class="anchor" href="#23a-进阶选读从教学版到工程版">#</a>2.3a 进阶（选读）：从教学版到工程版</h3>
 <p><strong>这一节可以整节跳过。</strong> 工程版（<code>code/ch02/linked_list/modern.hpp</code> 与 <code>code/ch02/doubly_linked_list/modern.hpp</code>）在教学版之上补三件事。</p>

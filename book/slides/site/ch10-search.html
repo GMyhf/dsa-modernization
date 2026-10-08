@@ -215,11 +215,15 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <span class="c">//</span>
 <span class="c">// 逐字节读的是 `unsigned char` 而不是 `char`——`char` 在多数平台上是有符号的，</span>
 <span class="c">// 中文等非 ASCII 字节会变成负数，一进位运算就带出符号扩展，散列值随平台而变。</span>
+<span class="c">//</span>
+<span class="c">// 中间值用 32 位的 `std::uint32_t`：ELF 散列是按 32 位定义的。若用 64 位的</span>
+<span class="c">// `std::size_t`，`hash &lt;&lt; 4` 再加一个字节可能进位到第 32 位，下面只清第 28–31 位，</span>
+<span class="c">// 那一位就永远留着，结果与经典 ELF 散列不同。</span>
 <span class="k">inline</span> std::<span class="t">size_t</span> elf_hash(<span class="k">const</span> std::string&amp; text) {
-    std::<span class="t">size_t</span> hash = <span class="n">0</span>;
+    std::uint32_t hash = <span class="n">0</span>;
     <span class="k">for</span> (<span class="t">unsigned</span> <span class="t">char</span> character : text) {
         hash = (hash &lt;&lt; <span class="n">4U</span>) + character;        <span class="c">// 左移 4 位，腾出位置放新字节</span>
-        std::<span class="t">size_t</span> high_bits = hash &amp; <span class="n">0xF0000000U</span>;   <span class="c">// 溢出到高 4 位的那部分</span>
+        std::uint32_t high_bits = hash &amp; <span class="n">0xF0000000U</span>;   <span class="c">// 溢出到高 4 位的那部分</span>
         <span class="k">if</span> (high_bits != <span class="n">0</span>) {
             hash ^= high_bits &gt;&gt; <span class="n">24U</span>;           <span class="c">// 折回低位，别让它白白丢掉</span>
         }
