@@ -3,7 +3,8 @@
 //
 // 一个文件、两个类、能直接编译运行，给「第一次读这一节」的人看。
 //
-//   BinaryTree         二叉链表：一个结点，两根指向孩子的链接；深度优先与层次周游。
+//   BinaryTree         二叉链表：一个结点，两根指向孩子的链接；深度优先与层次周游；
+//                      由中序 + 后序序列重建（5.2.2，不是原书编号算法）。
 //   BinarySearchTree   在二叉树上加一条「左小右大」的约束，于是查找变成一路往下走。
 //
 // **递归是这一章的正题**，所以周游、释放、深拷贝这里全部写成递归——形状和定义一样，
@@ -12,10 +13,12 @@
 //
 // 与 modern.hpp（工程版）的分工：
 //   教学版  三法则 + 全递归；
-//   工程版  五法则、迭代释放（右旋拉直）、迭代深拷贝、强异常保证、非递归周游。
+//   工程版  五法则、迭代释放（右旋拉直）、迭代深拷贝、强异常保证、非递归周游、
+//           O(n log n) 且不递归的重建。
 #pragma once
 
 #include <cstddef>
+#include <stdexcept>
 
 // ---------------------------------------------------------------------------
 // 二叉树（二叉链表）
@@ -67,6 +70,19 @@ public:
         Node* fresh = new Node{value, nullptr, nullptr};
         clear();
         root_ = fresh;
+    }
+
+    // 由中序 + 后序序列重建二叉树（两个序列各 count 个元素，关键码互不相同）。
+    // 递归的主体在 build_impl；前序 + 中序的写法留作本章上机题第 1 题。
+    //
+    // 两个序列对不上（比如中序 1 2 3、后序 3 1 2）就抛 std::invalid_argument，
+    // 不悄悄建出一棵错树；这时本树保持原样。
+    void build_from_inorder_postorder(const T* inorder, const T* postorder, std::size_t count) {
+        BinaryTree fresh;                   // 先建在一棵临时树里：中途抛异常，
+        build_impl(fresh.root_, inorder, 0, count, postorder, 0);   // 由它的析构收拾半成品
+        clear();                            // 建成了，再拆掉旧树、接过新树
+        root_ = fresh.root_;
+        fresh.root_ = nullptr;
     }
 
     // 【算法5.3】深度优先周游的三种次序。三个函数只差 visit 那一行的位置：
@@ -144,6 +160,33 @@ private:
             return nullptr;
         }
         return new Node{node->value, clone(node->left), clone(node->right)};
+    }
+
+    // 把中序 inorder[in_begin, in_end) 与后序 postorder[post_begin, …) 建成一棵子树，挂到 link 上。
+    // 两段一样长；只传下标，不拷贝子数组。
+    //
+    // 后序段的最后一个是根；在中序段里找到它（下标 k），左边 k - in_begin 个是左子树，
+    // 右边是右子树。左子树的大小一旦知道，后序段也就切成了「左子树 | 右子树 | 根」。
+    static void build_impl(Node*& link, const T* inorder, std::size_t in_begin, std::size_t in_end,
+                           const T* postorder, std::size_t post_begin) {
+        if (in_begin == in_end) {
+            return;                                         // 空区间：空子树，link 保持 nullptr
+        }
+        const std::size_t size = in_end - in_begin;
+        const T& key = postorder[post_begin + size - 1];    // 后序段的最后一个是根
+
+        std::size_t k = in_begin;                           // 在中序段里从左往右找根
+        while (k < in_end && inorder[k] != key) {           // 只找本段：根不在本段，说明两个序列对不上
+            ++k;
+        }
+        if (k == in_end) {
+            throw std::invalid_argument("build_from_inorder_postorder: root lies outside its inorder range");
+        }
+
+        link = new Node{key, nullptr, nullptr};             // 先挂上：子树里再抛异常，它也归临时树释放
+        const std::size_t left_size = k - in_begin;
+        build_impl(link->left, inorder, in_begin, k, postorder, post_begin);
+        build_impl(link->right, inorder, k + 1, in_end, postorder, post_begin + left_size);
     }
 
     template <typename Visitor>

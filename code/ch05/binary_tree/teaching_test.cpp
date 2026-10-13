@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
 namespace {
@@ -291,6 +292,119 @@ void test_bst_self_assignment_is_safe() {
     check(bst.contains(3) && bst.contains(5) && bst.contains(8), "自赋值后内容不变");
 }
 
+// ---- 由中序 + 后序重建（5.2.2） ----
+
+// 四种周游拼成一个串（中间用 / 隔开）：四种全对上，形状才算一样。
+std::string all_orders(const BinaryTree<char>& tree) {
+    std::string out;
+    auto visit = [&out](char c) { out.push_back(c); };
+    tree.preorder(visit);
+    out.push_back('/');
+    tree.inorder(visit);
+    out.push_back('/');
+    tree.postorder(visit);
+    out.push_back('/');
+    tree.level_order(visit);
+    return out;
+}
+
+// 重建；两个序列对不上（抛 invalid_argument）时返回 false。
+// 合法输入上实现若回归，会被误判成不自洽而抛出——折成 false 交给具名的 check 去红，
+// 不让未捕获异常直接 terminate 整个进程。
+bool rebuild(BinaryTree<char>& tree, const std::string& in, const std::string& post) {
+    try {
+        tree.build_from_inorder_postorder(in.data(), post.data(), in.size());
+    } catch (const std::invalid_argument&) {
+        return false;
+    }
+    return true;
+}
+
+// 图 5.5：中序 DBGEACHFI、后序 DGEBHIFCA，与课件逐帧推演的是同一棵树。
+// 变异：左右子树的后序起点算错 / 取后序段的第一个当根 → 这里会红。
+void test_rebuild_figure_5_5() {
+    BinaryTree<char> tree;
+    check(rebuild(tree, "DBGEACHFI", "DGEBHIFCA"), "重建：图 5.5 的合法序列被接受");
+    check(all_orders(tree) == "ABDEGCFHI/DBGEACHFI/DGEBHIFCA/ABCDEFGHI",
+          "重建：图 5.5 前序 ABDEGCFHI，层次 ABCDEFGHI");
+    check(tree.size() == 9 && tree.height() == 4, "重建：图 5.5 共 9 个结点、高度 4");
+}
+
+std::string all_orders_of_sample() {
+    BinaryTree<char> tree;
+    build_sample(tree);
+    return all_orders(tree);
+}
+
+// 样例树里 C 只有右孩子——单侧空子树的切分最容易差一。
+void test_rebuild_sample_tree() {
+    BinaryTree<char> tree;
+    check(rebuild(tree, "DBEACF", "DEBFCA"), "重建：样例树的合法序列被接受");
+    check(all_orders(tree) == all_orders_of_sample(), "重建：样例树四种周游与原树一致");
+}
+
+// 随机形状往返：建一棵树 → 取中序、后序 → 重建 → 四种周游逐一比对。
+unsigned g_seed = 20261013u;
+unsigned next_random() {
+    g_seed = g_seed * 1103515245u + 12345u;
+    return g_seed >> 16;
+}
+
+// 用 create_tree 拼一棵 n 个结点的随机树，关键码从 next_key 起依次取，互不相同。
+void random_tree(BinaryTree<char>& tree, int n, char& next_key) {
+    if (n == 0) {
+        tree.clear();
+        return;
+    }
+    const int left_n = static_cast<int>(next_random() % static_cast<unsigned>(n));
+    BinaryTree<char> left, right;
+    random_tree(left, left_n, next_key);
+    const char key = next_key++;
+    random_tree(right, n - 1 - left_n, next_key);
+    tree.create_tree(key, left, right);
+}
+
+void test_rebuild_random_round_trip() {
+    bool accepted = true, same = true;
+    for (int round = 0; round < 300; ++round) {
+        const int n = static_cast<int>(next_random() % 41);     // 0..40 个结点
+        char next_key = '0';                                     // '0' 起 40 个可打印字符
+        BinaryTree<char> original;
+        random_tree(original, n, next_key);
+        std::string in, post;
+        original.inorder([&in](char c) { in.push_back(c); });
+        original.postorder([&post](char c) { post.push_back(c); });
+
+        BinaryTree<char> rebuilt;
+        const bool ok = rebuild(rebuilt, in, post);
+        accepted = accepted && ok;
+        same = same && ok && all_orders(rebuilt) == all_orders(original);
+    }
+    check(accepted, "重建：300 棵随机树的合法序列全部被接受");
+    check(same, "重建：300 棵随机树（n≤40）重建后四种周游全一致");
+}
+
+void test_rebuild_empty() {
+    BinaryTree<char> tree;
+    build_sample(tree);
+    check(rebuild(tree, "", ""), "重建：空序列被接受");
+    check(tree.empty(), "重建：空序列得空树（原来的树被替换掉）");
+}
+
+// 两个序列对不上：抛 invalid_argument，且原树不动。
+// 中序 123、后序 312：根 2 已经建好，左子树才发现 3 不在区间 [1] 里——
+// 半成品若没人释放，LeakSanitizer 会报泄漏；若直接建在本树上，原树就没了。
+// 变异：去掉 k < in_end 的边界 → 越界读（ASan 红）；直接建进 root_ → 「原树不动」红。
+void test_rebuild_rejects_inconsistent() {
+    BinaryTree<char> tree;
+    build_sample(tree);
+    const std::string before = all_orders(tree);
+    check(!rebuild(tree, "123", "312"), "重建拒绝：中序 123、后序 312 不对应任何树");
+    check(all_orders(tree) == before, "重建拒绝后原树不动");
+    check(!rebuild(tree, "123", "124"), "重建拒绝：后序出现中序没有的键");
+    check(all_orders(tree) == before, "连续两次被拒后原树仍不动");
+}
+
 // D-001 第 3 条红线：容器内零 I/O。
 void test_no_console_output() {
     std::ostringstream out, err;
@@ -304,6 +418,8 @@ void test_no_console_output() {
         BinaryTree<char> copy = tree;
         copy = tree;
         tree.clear();
+        (void)rebuild(tree, "DBEACF", "DEBFCA");
+        (void)rebuild(tree, "123", "312");
 
         BinarySearchTree<int> bst;
         (void)bst.insert(1);
@@ -338,6 +454,12 @@ int main() {
     test_bst_remove_root_and_missing_key();
     test_bst_copy_is_deep();
     test_bst_self_assignment_is_safe();
+
+    test_rebuild_figure_5_5();
+    test_rebuild_sample_tree();
+    test_rebuild_random_round_trip();
+    test_rebuild_empty();
+    test_rebuild_rejects_inconsistent();
 
     test_no_console_output();
 

@@ -412,8 +412,50 @@ BST 中序: 1 3 4 6 7 8 10 14
 <h4 id="由周游序列重建二叉树"><a class="anchor" href="#由周游序列重建二叉树">#</a>由周游序列重建二叉树</h4>
 <p>反过来问：给出周游序列，能不能把树建回来？<strong>一个序列不行</strong>——前序 <code>A B C</code> 既可以是一条左链，也可以是一条右链。<strong>前序（或后序）加中序就够了</strong>，前提是结点的关键码互不相同：后序的最后一个元素（前序的第一个元素）一定是根；在中序里找到根的位置 <span class="math">k</span>，它左边的就是左子树的全部结点，右边的就是右子树；左子树的结点个数 <span class="math">k</span> 一旦知道，前序或后序里哪一段属于左子树、哪一段属于右子树也就切开了。对两段各做一遍同样的事，直到区间为空。</p>
 <p>以图 5.5 为例：后序 <code>D G E B H I F C A</code> 的末元素 A 是根；A 在中序 <code>D B G E A C H F I</code> 里左边有 4 个结点，于是后序的前 4 个 <code>D G E B</code> 是左子树的后序、接下来的 <code>H I F C</code> 是右子树的后序，再各自对照中序的 <code>D B G E</code> 与 <code>C H F I</code> 递推下去。前序加后序则不够：前序 <code>A B</code>、后序 <code>B A</code> 说不清 B 是左孩子还是右孩子。</p>
-<p>这是一道典型的上机题（本章上机题第 1 题就是「由先序和中序序列重建二叉树」），写法有两处常见的坑。第一，每一层都把子数组拷贝出来再递归，总代价会退化成 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>；只传<strong>下标区间</strong>、在中序里<strong>查位置</strong>就不必拷贝。第二，<strong>输入不自洽时默默建出一棵树</strong>。中序 <code>1 2 3</code>、后序 <code>3 1 2</code> 不对应任何一棵二叉树：根是 2，左子树只该有结点 1，后序里对应的却是 3。朴素写法在这里要么越界、要么建出一棵中序根本不是 <code>1 2 3</code> 的树。工程版的处理与第 6 章由双标记先根序列重建森林（【算法6.10】）时一样：<strong>能当场指出输入错了，就不把错误合法化</strong>。检查只要一条——每次取出的根必须落在当前的中序区间里；键重复、键缺失、次序矛盾最后都会撞上它，重复键另外单独报出，好让报错说对原因。</p>
-<p>工程版把两种重建做成 <code>BinaryTree</code> 的两个静态工厂，返回一棵拥有全部结点的新树：</p>
+<p>这是一道典型的上机题（本章上机题第 1 题就是「由先序和中序序列重建二叉树」），写法有两处常见的坑。第一，每一层都把子数组拷贝出来再递归，总代价会退化成 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>；只传<strong>下标区间</strong>就不必拷贝。第二，<strong>输入不自洽时默默建出一棵树</strong>。中序 <code>1 2 3</code>、后序 <code>3 1 2</code> 不对应任何一棵二叉树：根是 2，左子树只该有结点 1，后序里对应的却是 3。朴素写法在这里要么越界、要么建出一棵中序根本不是 <code>1 2 3</code> 的树。本书的处理与第 6 章由双标记先根序列重建森林（【算法6.10】）时一样：<strong>能当场指出输入错了，就不把错误合法化</strong>。检查只要一条——每次取出的根必须落在当前的中序区间里。</p>
+<p>教学版把上面的推演原样写成递归，只做「中序 + 后序」；「前序 + 中序」留给上机题。对外的入口先把树建在一棵临时树里，建成了才替换掉自己——中途发现序列对不上而抛出异常时，临时树的析构会释放已经建好的那一半，原来的树一个结点都不动：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/teaching.hpp">code/ch05/binary_tree/teaching.hpp#fn:BinaryTree::build_from_inorder_postorder</a></div><pre><code><span class="c">// 由中序 + 后序序列重建二叉树（两个序列各 count 个元素，关键码互不相同）。</span>
+<span class="c">// 递归的主体在 build_impl；前序 + 中序的写法留作本章上机题第 1 题。</span>
+<span class="c">//</span>
+<span class="c">// 两个序列对不上（比如中序 1 2 3、后序 3 1 2）就抛 std::invalid_argument，</span>
+<span class="c">// 不悄悄建出一棵错树；这时本树保持原样。</span>
+<span class="t">void</span> build_from_inorder_postorder(<span class="k">const</span> T* inorder, <span class="k">const</span> T* postorder, std::<span class="t">size_t</span> count) {
+    BinaryTree fresh;                   <span class="c">// 先建在一棵临时树里：中途抛异常，</span>
+    build_impl(fresh.root_, inorder, <span class="n">0</span>, count, postorder, <span class="n">0</span>);   <span class="c">// 由它的析构收拾半成品</span>
+    clear();                            <span class="c">// 建成了，再拆掉旧树、接过新树</span>
+    root_ = fresh.root_;
+    fresh.root_ = <span class="k">nullptr</span>;
+}</code></pre></div>
+<p>递归主体的每一次调用，就是上面图 5.5 那段推演里的一步：参数里的两个区间是当前的中序段和后序段，<code>key</code> 是这一段的根，最后两行递归分别去建左子树和右子树：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/teaching.hpp">code/ch05/binary_tree/teaching.hpp#fn:BinaryTree::build_impl</a></div><pre><code><span class="c">// 把中序 inorder[in_begin, in_end) 与后序 postorder[post_begin, …) 建成一棵子树，挂到 link 上。</span>
+<span class="c">// 两段一样长；只传下标，不拷贝子数组。</span>
+<span class="c">//</span>
+<span class="c">// 后序段的最后一个是根；在中序段里找到它（下标 k），左边 k - in_begin 个是左子树，</span>
+<span class="c">// 右边是右子树。左子树的大小一旦知道，后序段也就切成了「左子树 | 右子树 | 根」。</span>
+<span class="k">static</span> <span class="t">void</span> build_impl(Node*&amp; link, <span class="k">const</span> T* inorder, std::<span class="t">size_t</span> in_begin, std::<span class="t">size_t</span> in_end,
+                       <span class="k">const</span> T* postorder, std::<span class="t">size_t</span> post_begin) {
+    <span class="k">if</span> (in_begin == in_end) {
+        <span class="k">return</span>;                                         <span class="c">// 空区间：空子树，link 保持 nullptr</span>
+    }
+    <span class="k">const</span> std::<span class="t">size_t</span> size = in_end - in_begin;
+    <span class="k">const</span> T&amp; key = postorder[post_begin + size - <span class="n">1</span>];    <span class="c">// 后序段的最后一个是根</span>
+
+    std::<span class="t">size_t</span> k = in_begin;                           <span class="c">// 在中序段里从左往右找根</span>
+    <span class="k">while</span> (k &lt; in_end &amp;&amp; inorder[k] != key) {           <span class="c">// 只找本段：根不在本段，说明两个序列对不上</span>
+        ++k;
+    }
+    <span class="k">if</span> (k == in_end) {
+        <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;build_from_inorder_postorder: root lies outside its inorder range&quot;</span>);
+    }
+
+    link = <span class="k">new</span> Node{key, <span class="k">nullptr</span>, <span class="k">nullptr</span>};             <span class="c">// 先挂上：子树里再抛异常，它也归临时树释放</span>
+    <span class="k">const</span> std::<span class="t">size_t</span> left_size = k - in_begin;
+    build_impl(link-&gt;left, inorder, in_begin, k, postorder, post_begin);
+    build_impl(link-&gt;right, inorder, k + <span class="n">1</span>, in_end, postorder, post_begin + left_size);
+}</code></pre></div>
+<p>两处坑在这里各对应一行。参数只有下标，子数组一次也没有拷贝。找根的 <code>while</code> 只在本段 <code>[in_begin, in_end)</code> 里找——找不到就说明根不在它的中序区间里，中序 <code>1 2 3</code>、后序 <code>3 1 2</code> 正是在这里被拒：建左子树时，后序段只剩 <code>3</code>，中序段却只有 <code>1</code>。去掉 <code>k &lt; in_end</code> 这个边界，<code>while</code> 就会越过本段一直往后读，这就是「要么越界」。</p>
+<p>教学版的代价也一目了然：每一帧从左往右找根，最多看一遍本段，所以总时间是 <span class="math">O(n<span class="bin">⋅</span>h)</span>，<span class="math">h</span> 为树高；树退化成一条链时就是 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>。递归深度等于树高，与本节的递归周游、5.6a 说的递归 <code>clone</code> 一样，退化成链的输入会压穿运行栈。教学版也不单独检查重复键：有重复键时它照样能建出一棵中序、后序都对得上的树，只是这棵树不唯一。</p>
+<p>工程版在教学版上做了三处升级：找根从「从左往右数」换成「把中序下标按键排序，再二分」，总代价降到 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>；递归换成显式栈；重复键、键缺失单独报出，好让报错说对原因。它把两种重建做成 <code>BinaryTree</code> 的两个静态工厂，返回一棵拥有全部结点的新树：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/modern.hpp">code/ch05/binary_tree/modern.hpp#rebuild</a></div><pre><code><span class="c">/// 由中序 + 后序序列重建二叉树（两个序列各 count 个元素，**关键码互不相同**）。</span>
 <span class="c">///</span>
 <span class="c">/// 不自洽的输入一律抛 std::invalid_argument，绝不默默建出一棵错树：</span>
@@ -427,7 +469,7 @@ BST 中序: 1 3 4 6 7 8 10 14
 <span class="k">static</span> BinaryTree from_preorder_inorder(<span class="k">const</span> T* preorder, <span class="k">const</span> T* inorder, std::<span class="t">size_t</span> count) {
     <span class="k">return</span> rebuild(inorder, preorder, count, Order::preorder);
 }</code></pre></div>
-<p>主体只写一份。它<strong>没有写成递归</strong>：待建的子树记成「中序区间 + 另一序列的起点 + 该挂到哪根指针上」这样一帧，压进本章那把手写链式栈。递归版的深度等于树高，退化成链的输入会和 5.6a 说的递归 <code>clone</code> 一样压穿运行栈；显式栈在堆上，测试里 20 万结点的纯左链照样重建。查位置用的是「把中序下标按键排序，再二分」，所以要求 <code>T</code> 支持 <code>&lt;</code>，总代价 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>：</p>
+<p>主体只写一份。它<strong>没有写成递归</strong>（这是与教学版 <code>build_impl</code> 最大的不同）：待建的子树记成「中序区间 + 另一序列的起点 + 该挂到哪根指针上」这样一帧，压进本章那把手写链式栈。递归版的深度等于树高，退化成链的输入会和 5.6a 说的递归 <code>clone</code> 一样压穿运行栈；显式栈在堆上，测试里 20 万结点的纯左链照样重建。查位置用的是「把中序下标按键排序，再二分」，所以要求 <code>T</code> 支持 <code>&lt;</code>，总代价 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/modern.hpp">code/ch05/binary_tree/modern.hpp#rebuild-impl</a></div><pre><code><span class="c">/// 两种重建共用的主体。**不递归**：待建的子树用手写链式栈保存为「区间帧」，</span>
 <span class="c">/// 退化成链的输入也不会压穿调用栈。每一帧只记下标，不复制子数组。</span>
 <span class="k">static</span> BinaryTree rebuild(<span class="k">const</span> T* inorder, <span class="k">const</span> T* other, std::<span class="t">size_t</span> count, Order order) {
@@ -482,7 +524,7 @@ BST 中序: 1 3 4 6 7 8 10 14
     }
     <span class="k">return</span> result;
 }</code></pre></div>
-<p>为什么「能建完就一定对」？对区间长度归纳：根取自区间的末端（后序）或首端（前序），左右两段恰好分走剩下的元素；若两段各自重建出的子树中序、后序（前序）与各自的区间一致，拼上根之后整棵树也一致。所以建完之后不必再周游一遍核对。测试用 400 棵随机树做往返：取序列、重建、再取四种序列（含层次序列，确认形状也一样）逐一比对。</p>
+<p>为什么「能建完就一定对」？对区间长度归纳：根取自区间的末端（后序）或首端（前序），左右两段恰好分走剩下的元素；若两段各自重建出的子树中序、后序（前序）与各自的区间一致，拼上根之后整棵树也一致。所以建完之后不必再周游一遍核对，教学版与工程版都是如此。测试用随机树做往返（工程版 400 棵、教学版 300 棵）：取序列、重建、再取四种序列（含层次序列，确认形状也一样）逐一比对。</p>
 <h3 id="523-广度优先周游二叉树"><a class="anchor" href="#523-广度优先周游二叉树">#</a>5.2.3 广度优先周游二叉树</h3>
 <p><strong>先把三种深度优先周游的代价算清楚。</strong> 不管采用哪种周游方式，对于有 <span class="math">n</span> 个结点的二叉树， 周游完树的所有元素都需要 <span class="math">O(n)</span> 时间——只要对每个结点的处理（<code>Visit</code> 的执行）时间是一个常数， 周游二叉树就可以在线性时间内完成。所需要的<strong>辅助空间为周游过程中栈的最大容量，即树的高度</strong>； 最坏情况下（每个结点只有一个孩子的「藤」），具有 <span class="math">n</span> 个结点的二叉树高度为 <span class="math">n</span>，所需空间复杂度 为 <span class="math">O(n)</span>。写成递归时这个栈就是运行栈，因此那句「树退化成藤会爆栈」不是危言耸听—— 本书 README 的「闸门证明不了什么」一节量过这个边界。</p>
 <p>深度优先是尽量往深走，广度优先是一层一层走：首先访问第 0 层（即根结点所在的层），然后从左到右 依次访问第 1 层的两个结点，依次类推——当第 <span class="math">i</span> 层的所有结点访问完之后，再从左至右依次访问 第 <span class="math">i<span class="bin">+</span><span class="upr">1</span></span> 层的各个结点。对图 5.5 那棵树，结果是 A B C D E F G H I。</p>
@@ -587,7 +629,8 @@ BST 中序: 1 3 4 6 7 8 10 14
 <span class="c">//</span>
 <span class="c">// 一个文件、两个类、能直接编译运行，给「第一次读这一节」的人看。</span>
 <span class="c">//</span>
-<span class="c">//   BinaryTree         二叉链表：一个结点，两根指向孩子的链接；深度优先与层次周游。</span>
+<span class="c">//   BinaryTree         二叉链表：一个结点，两根指向孩子的链接；深度优先与层次周游；</span>
+<span class="c">//                      由中序 + 后序序列重建（5.2.2，不是原书编号算法）。</span>
 <span class="c">//   BinarySearchTree   在二叉树上加一条「左小右大」的约束，于是查找变成一路往下走。</span>
 <span class="c">//</span>
 <span class="c">// **递归是这一章的正题**，所以周游、释放、深拷贝这里全部写成递归——形状和定义一样，</span>
@@ -596,10 +639,12 @@ BST 中序: 1 3 4 6 7 8 10 14
 <span class="c">//</span>
 <span class="c">// 与 modern.hpp（工程版）的分工：</span>
 <span class="c">//   教学版  三法则 + 全递归；</span>
-<span class="c">//   工程版  五法则、迭代释放（右旋拉直）、迭代深拷贝、强异常保证、非递归周游。</span>
+<span class="c">//   工程版  五法则、迭代释放（右旋拉直）、迭代深拷贝、强异常保证、非递归周游、</span>
+<span class="c">//           O(n log n) 且不递归的重建。</span>
 <span class="p">#pragma once</span>
 
 <span class="p">#include &lt;cstddef&gt;</span>
+<span class="p">#include &lt;stdexcept&gt;</span>
 
 <span class="c">// ---------------------------------------------------------------------------</span>
 <span class="c">// 二叉树（二叉链表）</span>
@@ -651,6 +696,19 @@ BST 中序: 1 3 4 6 7 8 10 14
         Node* fresh = <span class="k">new</span> Node{value, <span class="k">nullptr</span>, <span class="k">nullptr</span>};
         clear();
         root_ = fresh;
+    }
+
+    <span class="c">// 由中序 + 后序序列重建二叉树（两个序列各 count 个元素，关键码互不相同）。</span>
+    <span class="c">// 递归的主体在 build_impl；前序 + 中序的写法留作本章上机题第 1 题。</span>
+    <span class="c">//</span>
+    <span class="c">// 两个序列对不上（比如中序 1 2 3、后序 3 1 2）就抛 std::invalid_argument，</span>
+    <span class="c">// 不悄悄建出一棵错树；这时本树保持原样。</span>
+    <span class="t">void</span> build_from_inorder_postorder(<span class="k">const</span> T* inorder, <span class="k">const</span> T* postorder, std::<span class="t">size_t</span> count) {
+        BinaryTree fresh;                   <span class="c">// 先建在一棵临时树里：中途抛异常，</span>
+        build_impl(fresh.root_, inorder, <span class="n">0</span>, count, postorder, <span class="n">0</span>);   <span class="c">// 由它的析构收拾半成品</span>
+        clear();                            <span class="c">// 建成了，再拆掉旧树、接过新树</span>
+        root_ = fresh.root_;
+        fresh.root_ = <span class="k">nullptr</span>;
     }
 
     <span class="c">// 【算法5.3】深度优先周游的三种次序。三个函数只差 visit 那一行的位置：</span>
@@ -728,6 +786,33 @@ BST 中序: 1 3 4 6 7 8 10 14
             <span class="k">return</span> <span class="k">nullptr</span>;
         }
         <span class="k">return</span> <span class="k">new</span> Node{node-&gt;value, clone(node-&gt;left), clone(node-&gt;right)};
+    }
+
+    <span class="c">// 把中序 inorder[in_begin, in_end) 与后序 postorder[post_begin, …) 建成一棵子树，挂到 link 上。</span>
+    <span class="c">// 两段一样长；只传下标，不拷贝子数组。</span>
+    <span class="c">//</span>
+    <span class="c">// 后序段的最后一个是根；在中序段里找到它（下标 k），左边 k - in_begin 个是左子树，</span>
+    <span class="c">// 右边是右子树。左子树的大小一旦知道，后序段也就切成了「左子树 | 右子树 | 根」。</span>
+    <span class="k">static</span> <span class="t">void</span> build_impl(Node*&amp; link, <span class="k">const</span> T* inorder, std::<span class="t">size_t</span> in_begin, std::<span class="t">size_t</span> in_end,
+                           <span class="k">const</span> T* postorder, std::<span class="t">size_t</span> post_begin) {
+        <span class="k">if</span> (in_begin == in_end) {
+            <span class="k">return</span>;                                         <span class="c">// 空区间：空子树，link 保持 nullptr</span>
+        }
+        <span class="k">const</span> std::<span class="t">size_t</span> size = in_end - in_begin;
+        <span class="k">const</span> T&amp; key = postorder[post_begin + size - <span class="n">1</span>];    <span class="c">// 后序段的最后一个是根</span>
+
+        std::<span class="t">size_t</span> k = in_begin;                           <span class="c">// 在中序段里从左往右找根</span>
+        <span class="k">while</span> (k &lt; in_end &amp;&amp; inorder[k] != key) {           <span class="c">// 只找本段：根不在本段，说明两个序列对不上</span>
+            ++k;
+        }
+        <span class="k">if</span> (k == in_end) {
+            <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;build_from_inorder_postorder: root lies outside its inorder range&quot;</span>);
+        }
+
+        link = <span class="k">new</span> Node{key, <span class="k">nullptr</span>, <span class="k">nullptr</span>};             <span class="c">// 先挂上：子树里再抛异常，它也归临时树释放</span>
+        <span class="k">const</span> std::<span class="t">size_t</span> left_size = k - in_begin;
+        build_impl(link-&gt;left, inorder, in_begin, k, postorder, post_begin);
+        build_impl(link-&gt;right, inorder, k + <span class="n">1</span>, in_end, postorder, post_begin + left_size);
     }
 
     <span class="k">template</span> &lt;<span class="k">typename</span> Visitor&gt;
