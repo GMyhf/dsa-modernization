@@ -129,6 +129,49 @@ static void inorder_impl(const Node* node, Visitor& visit) {
         ['**后序**', '**后缀**表达式（逆波兰式）', '`A B C D + × +`'],
     ], '中序那一行：照它算出来的是 A + B×C + D，已经不是原式 —— 要印回可读的中缀式，必须按优先级补括号'),
 
+    ('bullets', '由周游序列重建：前序或后序 + 中序', [
+        '**一个序列不行**：前序 `A B C` 既可以是一条左链，也可以是一条右链',
+        '**前序（或后序）+ 中序就够了**，前提是关键码互不相同：',
+        '- 后序的**最后一个**（前序的第一个）是根；在中序里找到它，左边是左子树、右边是右子树',
+        '- 左子树有几个结点一旦知道，后序也就切成「左子树 | 右子树 | 根」；对两段递推',
+        '图 5.5：后序 `DGEBHIFCA` 的末元素 A 是根，中序里 A 左边 4 个 → 后序前 4 个 `DGEB` 是左子树',
+        '**反例**：中序 `1 2 3`、后序 `3 1 2` 不对应任何树 —— **每次取出的根必须落在当前中序区间里**，否则报错',
+        '前序 + 后序不够：前序 `A B`、后序 `B A` 说不清 B 是左孩子还是右孩子',
+    ]),
+
+    ('code', '教学版：推演的每一步 = 一次 build_impl 调用', '''static void build_impl(Node*& link, const T* inorder, std::size_t in_begin, std::size_t in_end,
+                       const T* postorder, std::size_t post_begin) {
+    if (in_begin == in_end) {
+        return;                                         // 空区间：空子树，link 保持 nullptr
+    }
+    const std::size_t size = in_end - in_begin;
+    const T& key = postorder[post_begin + size - 1];    // 后序段的最后一个是根
+
+    std::size_t k = in_begin;                           // 在中序段里从左往右找根
+    while (k < in_end && inorder[k] != key) {           // 只找本段：根不在本段，说明两个序列对不上
+        ++k;
+    }
+    if (k == in_end) {
+        throw std::invalid_argument("build_from_inorder_postorder: root lies outside its inorder range");
+    }
+
+    link = new Node{key, nullptr, nullptr};             // 先挂上：子树里再抛异常，它也归临时树释放
+    const std::size_t left_size = k - in_begin;
+    build_impl(link->left, inorder, in_begin, k, postorder, post_begin);
+    build_impl(link->right, inorder, k + 1, in_end, postorder, post_begin + left_size);
+}''',
+     '只传下标、不拷贝子数组；只在本段里找根，找不到就抛异常。总代价 O(n·h)，退化成链时 O(n²)'),
+
+    ('bullets', '再快一点、再稳一点：查表与显式栈', [
+        '**键是 char 时直接查表**：`pos[c]` = 字符 `c` 在中序里的下标',
+        '- 找根从「数一遍」变成「查一次」，总代价 **O(n)**；登记时撞上就是重复键',
+        '**递归改显式栈**：一次调用的参数 → 一帧；调用 → 压栈，返回 → 弹栈',
+        '- 先压右、再压左：左子树先建，次序同递归',
+        '- 栈包成局部对象 `FrameStack`，**析构负责还帧**：找不到根、`new` 失败都不漏',
+        '**工程版（进阶）**把两步合在一起，推广到任意 `T`：键不一定能当下标 → 中序下标排序后**二分**，O(n log n)',
+        '上机题第 1 题（前序 + 中序）只差「根在段首」—— 自己写',
+    ]),
+
     ('bullets', '5.2.3 广度优先周游', [
         '深度优先尽量往**深**走，广度优先**一层一层**走',
         '- 第 0 层（根）→ 第 1 层从左到右 → 第 2 层…… 图 5.5 的结果是 `A B C D E F G H I`',

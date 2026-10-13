@@ -17,7 +17,7 @@ https://github.com/GMyhf/dsa-modernization
 
 | 类型 | 位置 |
 | --- | --- |
-| 课件（39 页，16:9） | [`DSA_CH05_Binary_Tree.pptx`](DSA_CH05_Binary_Tree.pptx) |
+| 课件（42 页，16:9） | [`DSA_CH05_Binary_Tree.pptx`](DSA_CH05_Binary_Tree.pptx) |
 | 视频（720p 轻量版） | [`video/ch05-preview.mp4`](video/ch05-preview.mp4) |
 | 书稿正文 | [`../book/ch05-binary-tree.md`](../book/ch05-binary-tree.md) |
 | 代码 | [`../code/ch05/binary_tree/`](../code/ch05/binary_tree/)、[`../code/ch05/heap_huffman/`](../code/ch05/heap_huffman/) |
@@ -206,6 +206,60 @@ static void inorder_impl(const Node* node, Visitor& visit) {
 
 > 第 3.1.4 节那个后缀表达式求值器吃的正是这棵树后序周游的结果；
 > 那一节把中缀式转成后缀式的工作，换个说法就是「**建出这棵表达式树，再后序周游一遍**」。
+
+#### 由周游序列重建
+
+反过来问：给出周游序列，能不能把树建回来？**一个序列不行** —— 前序 `A B C` 既可以是一条左链，也可以是一条右链。
+**前序（或后序）加中序就够了**，前提是关键码互不相同：后序的最后一个（前序的第一个）一定是根；
+在中序里找到根，左边是左子树，右边是右子树；左子树的结点个数一旦知道，后序也就切成「左子树 | 右子树 | 根」三段，
+对两段各做一遍同样的事。以图 5.5 为例，后序 `D G E B H I F C A` 的末元素 A 是根，中序里 A 左边有 4 个结点，
+于是后序的前 4 个 `D G E B` 就是左子树的后序。前序加后序不够：前序 `A B`、后序 `B A` 说不清 B 是左孩子还是右孩子。
+
+**输入不自洽时不能默默建出一棵树。** 中序 `1 2 3`、后序 `3 1 2` 不对应任何一棵二叉树：根是 2，
+左子树只该有 1，后序给的却是 3。检查只要一条 —— **每次取出的根必须落在当前的中序区间里**。
+教学版把推演原样写成递归，每一次调用就是推演里的一步：
+
+```cpp
+// 把中序 inorder[in_begin, in_end) 与后序 postorder[post_begin, …) 建成一棵子树，挂到 link 上。
+// 两段一样长；只传下标，不拷贝子数组。
+//
+// 后序段的最后一个是根；在中序段里找到它（下标 k），左边 k - in_begin 个是左子树，
+// 右边是右子树。左子树的大小一旦知道，后序段也就切成了「左子树 | 右子树 | 根」。
+static void build_impl(Node*& link, const T* inorder, std::size_t in_begin, std::size_t in_end,
+                       const T* postorder, std::size_t post_begin) {
+    if (in_begin == in_end) {
+        return;                                         // 空区间：空子树，link 保持 nullptr
+    }
+    const std::size_t size = in_end - in_begin;
+    const T& key = postorder[post_begin + size - 1];    // 后序段的最后一个是根
+
+    std::size_t k = in_begin;                           // 在中序段里从左往右找根
+    while (k < in_end && inorder[k] != key) {           // 只找本段：根不在本段，说明两个序列对不上
+        ++k;
+    }
+    if (k == in_end) {
+        throw std::invalid_argument("build_from_inorder_postorder: root lies outside its inorder range");
+    }
+
+    link = new Node{key, nullptr, nullptr};             // 先挂上：子树里再抛异常，它也归临时树释放
+    const std::size_t left_size = k - in_begin;
+    build_impl(link->left, inorder, in_begin, k, postorder, post_begin);
+    build_impl(link->right, inorder, k + 1, in_end, postorder, post_begin + left_size);
+}
+```
+
+参数只有下标，子数组一次也没有拷贝；找根的 `while` 只在本段里找，找不到就抛异常。
+入口 `build_from_inorder_postorder` 先建在一棵临时树里，建成了才替换自己，出错时原树不动。
+代价是每帧从左往右找一遍本段，总 $O(n\cdot h)$，退化成链时 $O(n^2)$；递归深度等于树高。
+
+两处可以再改进，书稿 5.2.2 有完整代码：
+
+- **键是 `char` 时直接查表**：先把中序登记成「点名册」`pos[c]`，找根从「数一遍」变成「查一次」，总代价 $O(n)$；
+- **递归改显式栈**：一次调用的参数存成一帧，调用变压栈、返回变弹栈；栈包成局部对象 `FrameStack`，
+  由析构负责还帧，找不到根抛异常、`new` 失败都不漏。
+
+工程版把两步合在一起并推广到任意类型 `T`：关键码不一定能当下标，只好把中序下标按键排序后二分，$O(n\log n)$。
+本章上机题第 1 题（前序 + 中序）与这里只差「根在段首」，留给读者自己写。
 
 ### 5.2.3 广度优先周游
 

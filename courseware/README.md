@@ -38,7 +38,7 @@ https://github.com/GMyhf/dsa-modernization
 | 2 | `DSA_CH02_Linear_List` | 39 | 20:03 | 顺序表与链表、三法则、按位置访问 vs 改链接 |
 | 3 | `DSA_CH03_Stack_Queue` | 40 | 22:43 | 栈与队列、后缀求值、运行栈与递归深度实测、循环队列 |
 | 4 | `DSA_CH04_String` | 27 | 18:29 | 字符编码与串比较、串的存储、朴素匹配与 KMP |
-| 5 | `DSA_CH05_Binary_Tree` | 39 | 25:10 | 递归定义与三种周游、二叉搜索树、堆与线性建堆、Huffman |
+| 5 | `DSA_CH05_Binary_Tree` | 42 | 25:10 | 递归定义与三种周游、二叉搜索树、堆与线性建堆、Huffman |
 | 6 | `DSA_CH06_Tree` | 24 | 15:27 | 一般树与森林、与二叉树的等价转换、左子右兄、并查集 |
 | 7 | `DSA_CH07_Graph` | 27 | 17:54 | 两种存储、DFS/BFS 与拓扑排序、Dijkstra 与 Floyd、Prim 与 Kruskal |
 | 8 | `DSA_CH08_Internal_Sorting` | 31 | 21:13 | 五类排序、稳定性、实测数据、比较排序的 Ω(n log n) 下界 |
@@ -47,7 +47,7 @@ https://github.com/GMyhf/dsa-modernization
 | 11 | `DSA_CH11_Indexing` | 27 | 18:47 | 线性索引与多分树、倒排索引、B 树与 B+ 树、位索引 |
 | 12 | `DSA_CH12_Advanced_Structures` | 28 | 21:19 | 多维数组与稀疏矩阵、广义表与存储管理、Trie、改进的 BST |
 
-**全书 12 章已齐**，课件合计 **378 页**。章号与输出文件名的对照表在
+**全书 12 章已齐**，课件合计 **381 页**。章号与输出文件名的对照表在
 [`build_all.py`](build_all.py) 的 `CHAPTERS` 里。
 
 版面 16:9，中文字体**微软雅黑**，代码字体 **Consolas**。

@@ -520,8 +520,9 @@ def check_video(chapters, modules):
                 fail('8 视频', f'第{ch}章视频已与课件、讲稿同版，video/pending.json 里这一章的登记该删掉了')
                 continue
             PENDING_VIDEO.append(ch)
+            note(f'⚠ 第{ch}章视频待合成（{entry["date"]} {entry["by"]} 登记：{entry["reason"]}），本次降为提示：')
             for prob in problems:
-                note(f'⚠ 视频待合成（{entry["date"]} {entry["by"]} 登记：{entry["reason"]}）—— {prob}')
+                note(f'    {prob}')
             continue
         for prob in problems:
             fail('8 视频', prob)

@@ -148,7 +148,8 @@ class VideoPendingTests(unittest.TestCase):
         verify.check_video(['01'], self.modules)
         self.assertEqual(verify.FAILURES, [])
         self.assertEqual(verify.PENDING_VIDEO, ['01'])
-        self.assertTrue(any(n.startswith('· ⚠ 视频待合成') and '视频过期' in n for n in verify.NOTES))
+        self.assertTrue(any(n.startswith('· ⚠ 第01章视频待合成') for n in verify.NOTES))
+        self.assertTrue(any('视频过期' in n for n in verify.NOTES), '降级的问题要逐条列出来')
 
     def test_registered_but_up_to_date_fails(self):
         """登记表不许过期。变异：去掉「已同版就判红」→ 这里会红。"""

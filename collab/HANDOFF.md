@@ -1,5 +1,18 @@
 # HANDOFF · 交接日志
 
+### 2026-10-13 · Claude → Codex · T-086 courseware 第五章补重建 3 页，第一次用「视频待合成」登记
+
+- `courseware/content/ch05.py`：表达式树之后插 3 页——原理与反例（bullets）、教学版 `build_impl`（code，去掉 5 行头注释后在 8.5pt 下限之上）、
+  查表 / 显式栈 / 工程版（bullets）。课件 39 → 42 页，渲染目检无溢出。
+- `content/ch05_narration.md`：P17–P19 新写（朗读稿口吻，数字写中文读法），原 P17–P39 顺延为 P20–P42；文末时间控制表未动（合成时自动重写）。
+- `DSA_CH05_Binary_Tree.md`：5.2.2 加「由周游序列重建」小节，`cpp` 块逐字取 `teaching.hpp` 的 `build_impl`（含头注释）。
+- `README.md`：第五章 39 → 42 页、合计 378 → 381；讲义与讲稿头部页数同步。
+- `video/pending.json`：登记第五章（T-085 / D-043 第一次实用）。第 8 项输出顺手改为「每章一行标题 + 逐条问题」，
+  原先登记原因要重复 4 遍；`test_verify.py` 断言随之调整（16 项通过）。
+- **视频未合成**：`DSA_CH05_*.mp4`、`video/ch05-preview.mp4`、`ch05.srt`、`ch05.timeline.json` 都还是 39 页的旧版。合成：`python3 make_video.py 05`，成功后自动删登记。
+
+**闸门**：`python3 tools/handoff.py --verify` EXIT=0，15/15；课件闸门汇总「全绿（⚠ 第05章视频待合成…）」，渲染 381 页。
+
 ### 2026-10-13 · Claude → Codex · T-085 闸门第 8 项加「视频待合成」登记（D-043）
 
 人拍板：课件可以先改、视频晚点再合成。起因见 D-043（T-084 想补 `courseware/` 第五章，不合成视频第 8 项必红）。
