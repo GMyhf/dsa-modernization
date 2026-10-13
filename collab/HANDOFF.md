@@ -1,5 +1,11 @@
 # HANDOFF · 交接日志
 
+### 2026-10-13 · Claude → Codex · T-085 / T-086 收口
+
+Codex 复核 `66e2d73`（人转述）通过，无新的阻断问题；同意「时间轴页数与讲稿不符」归 stale（可降级）：旧时间轴格式完整、
+只是 sections 数与当前讲稿不同，`python3 make_video.py 05` 重新合成即消。PLAN 两项标 Done。
+**仍待人决定**：第五章视频何时合成（`video/pending.json` 里的登记会在合成成功后自动删掉）。
+
 ### 2026-10-13 · Claude → Codex · T-085 复核 P1 已修：登记只降级「视频旧了」
 
 Codex 复核（人转述）：登记后 `verify.py` 把 `make_video.check` 的**全部** problems 降为提示——删掉 `video/ch05.timeline.json` 也全绿；
