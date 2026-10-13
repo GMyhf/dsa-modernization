@@ -4,7 +4,7 @@
 // 一个文件、两个类、能直接编译运行，给「第一次读这一节」的人看。
 //
 //   BinaryTree         二叉链表：一个结点，两根指向孩子的链接；深度优先与层次周游；
-//                      由中序 + 后序序列重建（5.2.2，不是原书编号算法）。
+//                      由中序 + 后序序列重建，递归与显式栈各一版（5.2.2，不是原书编号算法）。
 //   BinarySearchTree   在二叉树上加一条「左小右大」的约束，于是查找变成一路往下走。
 //
 // **递归是这一章的正题**，所以周游、释放、深拷贝这里全部写成递归——形状和定义一样，
@@ -81,6 +81,58 @@ public:
         BinaryTree fresh;                   // 先建在一棵临时树里：中途抛异常，
         build_impl(fresh.root_, inorder, 0, count, postorder, 0);   // 由它的析构收拾半成品
         clear();                            // 建成了，再拆掉旧树、接过新树
+        root_ = fresh.root_;
+        fresh.root_ = nullptr;
+    }
+
+    // 同一个重建，不递归：把每次递归调用的参数存成一帧，压进一条手写的链式栈。
+    // 与 build_impl 逐行对应——「递归调用」变成「压一帧」，「函数返回」变成「弹一帧」；
+    // 参数 Node*& link 变成帧里的 Node** link（引用存不进结构体，只能存指针）。
+    //
+    // 注意：教学版的析构 destroy 仍是递归的，所以一条很长的链就算这样建出来了，
+    // 析构时照样压穿运行栈。这里要学的是「递归 → 显式栈」的改写手法；
+    // 工程版把析构也改成了迭代，见 5.6a。
+    void build_from_inorder_postorder_iterative(const T* inorder, const T* postorder, std::size_t count) {
+        struct Frame {
+            Node** link;                    // 建好的子树挂到哪根指针上
+            std::size_t in_begin, in_end;   // 中序段
+            std::size_t post_begin;         // 后序段起点（与中序段一样长）
+            Frame* next;                    // 链式栈：下面那一帧
+        };
+        BinaryTree fresh;
+        Frame* top = new Frame{&fresh.root_, 0, count, 0, nullptr};   // 第一次「调用」
+        while (top != nullptr) {
+            const Frame f = *top;           // 弹出一帧
+            Frame* popped = top;
+            top = top->next;
+            delete popped;
+
+            if (f.in_begin == f.in_end) {
+                continue;                   // 空区间：空子树
+            }
+            const std::size_t size = f.in_end - f.in_begin;
+            const T& key = postorder[f.post_begin + size - 1];
+            std::size_t k = f.in_begin;
+            while (k < f.in_end && inorder[k] != key) {
+                ++k;
+            }
+            if (k == f.in_end) {
+                while (top != nullptr) {    // 抛异常之前，先把栈里剩下的帧还掉
+                    Frame* rest = top->next;
+                    delete top;
+                    top = rest;
+                }
+                throw std::invalid_argument("build_from_inorder_postorder_iterative: root lies outside its inorder range");
+            }
+
+            Node* node = new Node{key, nullptr, nullptr};
+            *f.link = node;                 // 先挂上：之后再抛异常，它也归临时树释放
+            const std::size_t left_size = k - f.in_begin;
+            // 先压右、再压左：栈后进先出，于是左子树先建，与递归的次序一致
+            top = new Frame{&node->right, k + 1, f.in_end, f.post_begin + left_size, top};
+            top = new Frame{&node->left, f.in_begin, k, f.post_begin, top};
+        }
+        clear();
         root_ = fresh.root_;
         fresh.root_ = nullptr;
     }

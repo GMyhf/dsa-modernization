@@ -455,7 +455,95 @@ BST 中序: 1 3 4 6 7 8 10 14
 }</code></pre></div>
 <p>两处坑在这里各对应一行。参数只有下标，子数组一次也没有拷贝。找根的 <code>while</code> 只在本段 <code>[in_begin, in_end)</code> 里找——找不到就说明根不在它的中序区间里，中序 <code>1 2 3</code>、后序 <code>3 1 2</code> 正是在这里被拒：建左子树时，后序段只剩 <code>3</code>，中序段却只有 <code>1</code>。去掉 <code>k &lt; in_end</code> 这个边界，<code>while</code> 就会越过本段一直往后读，这就是「要么越界」。</p>
 <p>教学版的代价也一目了然：每一帧从左往右找根，最多看一遍本段，所以总时间是 <span class="math">O(n<span class="bin">⋅</span>h)</span>，<span class="math">h</span> 为树高；树退化成一条链时就是 <span class="math">O(n<sup><span class="upr">2</span></sup>)</span>。递归深度等于树高，与本节的递归周游、5.6a 说的递归 <code>clone</code> 一样，退化成链的输入会压穿运行栈。教学版也不单独检查重复键：有重复键时它照样能建出一棵中序、后序都对得上的树，只是这棵树不唯一。</p>
-<p>工程版在教学版上做了三处升级：找根从「从左往右数」换成「把中序下标按键排序，再二分」，总代价降到 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>；递归换成显式栈；重复键、键缺失单独报出，好让报错说对原因。它把两种重建做成 <code>BinaryTree</code> 的两个静态工厂，返回一棵拥有全部结点的新树：</p>
+<p>找根还能更快。上机题里的关键码多半是字符或小整数，这时可以直接拿关键码当数组下标，先把中序登记成一本「点名册」：<code>pos[c]</code> 记下字符 <code>c</code> 在中序里的下标，<code>-1</code> 表示中序里没有它；登记时发现这一格已经有人，就是中序里有重复键。下面两个函数写在教学版的测试文件里，测试拿它们与类里的两版逐棵对拍：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/teaching_test.cpp">code/ch05/binary_tree/teaching_test.cpp#fn:fill_position_table</a></div><pre><code><span class="c">// 「点名册」：pos[c] = 字符 c 坐在中序第几号，-1 表示中序里没有。</span>
+<span class="c">// 登记时发现这一格已经有人，就是中序里有重复键。</span>
+<span class="t">void</span> fill_position_table(<span class="t">int</span> pos[<span class="n">256</span>], <span class="k">const</span> <span class="t">char</span>* inorder, <span class="t">int</span> count) {
+    <span class="k">for</span> (<span class="t">int</span> c = <span class="n">0</span>; c &lt; <span class="n">256</span>; ++c) {
+        pos[c] = -<span class="n">1</span>;
+    }
+    <span class="k">for</span> (<span class="t">int</span> i = <span class="n">0</span>; i &lt; count; ++i) {
+        <span class="k">const</span> <span class="t">unsigned</span> <span class="t">char</span> c = <span class="k">static_cast</span>&lt;<span class="t">unsigned</span> <span class="t">char</span>&gt;(inorder[i]);
+        <span class="k">if</span> (pos[c] != -<span class="n">1</span>) {
+            <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;duplicate key in inorder sequence&quot;</span>);
+        }
+        pos[c] = i;
+    }
+}</code></pre></div>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/teaching_test.cpp">code/ch05/binary_tree/teaching_test.cpp#fn:build_by_table</a></div><pre><code><span class="c">// 与 build_impl 同一个递归，只把「从左往右数」换成查一次表：找根 O(1)，总代价 O(n)。</span>
+<span class="c">// 两棵子树先各自建成小树，再用 create_tree（【代码5.2】）接到根上。</span>
+<span class="t">void</span> build_by_table(BinaryTree&lt;<span class="t">char</span>&gt;&amp; out, <span class="k">const</span> <span class="t">int</span> pos[<span class="n">256</span>], <span class="k">const</span> <span class="t">char</span>* postorder,
+                    <span class="t">int</span> in_begin, <span class="t">int</span> in_end, <span class="t">int</span> post_begin) {
+    <span class="k">if</span> (in_begin == in_end) {
+        out.clear();
+        <span class="k">return</span>;
+    }
+    <span class="k">const</span> <span class="t">char</span> key = postorder[post_begin + (in_end - in_begin) - <span class="n">1</span>];   <span class="c">// 后序段的最后一个是根</span>
+    <span class="k">const</span> <span class="t">int</span> k = pos[<span class="k">static_cast</span>&lt;<span class="t">unsigned</span> <span class="t">char</span>&gt;(key)];                 <span class="c">// 查表：它坐在中序第几号</span>
+    <span class="k">if</span> (k &lt; in_begin || k &gt;= in_end) {                                  <span class="c">// 不在本段（-1 也落在这里）</span>
+        <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;root lies outside its inorder range&quot;</span>);
+    }
+    <span class="k">const</span> <span class="t">int</span> left_size = k - in_begin;
+    BinaryTree&lt;<span class="t">char</span>&gt; left, right;
+    build_by_table(left, pos, postorder, in_begin, k, post_begin);
+    build_by_table(right, pos, postorder, k + <span class="n">1</span>, in_end, post_begin + left_size);
+    out.create_tree(key, left, right);
+}</code></pre></div>
+<p>递归的形状与 <code>build_impl</code> 一样，只是那个从左往右数的 <code>while</code> 换成了查一次表：找根 <span class="math">O(<span class="upr">1</span>)</span>，总代价 <span class="math">O(n)</span>。<code>k &lt; in_begin || k &gt;= in_end</code> 就是那条「根必须落在本段」的检查，查不到时的 <code>-1</code> 也落在这里。两棵子树先各自建成小树，再用【代码5.2】的 <code>create_tree</code> 接到根上。它只适用于关键码范围很小的情形——关键码是任意整数或字符串时，没法拿它当下标。</p>
+<p>再看递归。递归深度等于树高；把递归改写成显式栈，是本章反复用到的手法（5.6a 的非递归周游、迭代深拷贝都是）。改写是机械的：一次递归调用的参数存成一帧，「调用」变成压栈，「返回」变成弹栈：</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/teaching.hpp">code/ch05/binary_tree/teaching.hpp#fn:BinaryTree::build_from_inorder_postorder_iterative</a></div><pre><code><span class="c">// 同一个重建，不递归：把每次递归调用的参数存成一帧，压进一条手写的链式栈。</span>
+<span class="c">// 与 build_impl 逐行对应——「递归调用」变成「压一帧」，「函数返回」变成「弹一帧」；</span>
+<span class="c">// 参数 Node*&amp; link 变成帧里的 Node** link（引用存不进结构体，只能存指针）。</span>
+<span class="c">//</span>
+<span class="c">// 注意：教学版的析构 destroy 仍是递归的，所以一条很长的链就算这样建出来了，</span>
+<span class="c">// 析构时照样压穿运行栈。这里要学的是「递归 → 显式栈」的改写手法；</span>
+<span class="c">// 工程版把析构也改成了迭代，见 5.6a。</span>
+<span class="t">void</span> build_from_inorder_postorder_iterative(<span class="k">const</span> T* inorder, <span class="k">const</span> T* postorder, std::<span class="t">size_t</span> count) {
+    <span class="k">struct</span> Frame {
+        Node** link;                    <span class="c">// 建好的子树挂到哪根指针上</span>
+        std::<span class="t">size_t</span> in_begin, in_end;   <span class="c">// 中序段</span>
+        std::<span class="t">size_t</span> post_begin;         <span class="c">// 后序段起点（与中序段一样长）</span>
+        Frame* next;                    <span class="c">// 链式栈：下面那一帧</span>
+    };
+    BinaryTree fresh;
+    Frame* top = <span class="k">new</span> Frame{&amp;fresh.root_, <span class="n">0</span>, count, <span class="n">0</span>, <span class="k">nullptr</span>};   <span class="c">// 第一次「调用」</span>
+    <span class="k">while</span> (top != <span class="k">nullptr</span>) {
+        <span class="k">const</span> Frame f = *top;           <span class="c">// 弹出一帧</span>
+        Frame* popped = top;
+        top = top-&gt;next;
+        <span class="k">delete</span> popped;
+
+        <span class="k">if</span> (f.in_begin == f.in_end) {
+            <span class="k">continue</span>;                   <span class="c">// 空区间：空子树</span>
+        }
+        <span class="k">const</span> std::<span class="t">size_t</span> size = f.in_end - f.in_begin;
+        <span class="k">const</span> T&amp; key = postorder[f.post_begin + size - <span class="n">1</span>];
+        std::<span class="t">size_t</span> k = f.in_begin;
+        <span class="k">while</span> (k &lt; f.in_end &amp;&amp; inorder[k] != key) {
+            ++k;
+        }
+        <span class="k">if</span> (k == f.in_end) {
+            <span class="k">while</span> (top != <span class="k">nullptr</span>) {    <span class="c">// 抛异常之前，先把栈里剩下的帧还掉</span>
+                Frame* rest = top-&gt;next;
+                <span class="k">delete</span> top;
+                top = rest;
+            }
+            <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;build_from_inorder_postorder_iterative: root lies outside its inorder range&quot;</span>);
+        }
+
+        Node* node = <span class="k">new</span> Node{key, <span class="k">nullptr</span>, <span class="k">nullptr</span>};
+        *f.link = node;                 <span class="c">// 先挂上：之后再抛异常，它也归临时树释放</span>
+        <span class="k">const</span> std::<span class="t">size_t</span> left_size = k - f.in_begin;
+        <span class="c">// 先压右、再压左：栈后进先出，于是左子树先建，与递归的次序一致</span>
+        top = <span class="k">new</span> Frame{&amp;node-&gt;right, k + <span class="n">1</span>, f.in_end, f.post_begin + left_size, top};
+        top = <span class="k">new</span> Frame{&amp;node-&gt;left, f.in_begin, k, f.post_begin, top};
+    }
+    clear();
+    root_ = fresh.root_;
+    fresh.root_ = <span class="k">nullptr</span>;
+}</code></pre></div>
+<p>对照 <code>build_impl</code> 逐行看：参数 <code>Node*&amp; link</code> 变成帧里的 <code>Node** link</code>（引用存不进结构体，只能存指针）；先压右、再压左，是因为栈后进先出，这样左子树先建，次序与递归一致（反过来压也能建对，只是建的次序不同）。抛异常之前要先把栈里剩下的帧还掉——递归版不用操心这件事，运行栈是自动回收的。还要说清楚一点：教学版的析构 <code>destroy</code> 仍是递归的，一条很长的链即使这样建出来了，析构时照样压穿运行栈。这里要学的是改写的手法本身。</p>
+<p>工程版把上面两步合在一起，并推广到任意类型 <code>T</code>。关键码不一定能当下标，点名册只好换成「把中序下标按键排序，再二分」，总代价 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，只要求 <code>T</code> 支持 <code>&lt;</code>；显式栈换成本章那把手写的链式栈 <code>LinkedStack</code>，析构也是迭代的，所以 20 万结点的链从建到拆都不怕；重复键、键缺失单独报出，好让报错说对原因。它把两种重建做成 <code>BinaryTree</code> 的两个静态工厂，返回一棵拥有全部结点的新树：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/modern.hpp">code/ch05/binary_tree/modern.hpp#rebuild</a></div><pre><code><span class="c">/// 由中序 + 后序序列重建二叉树（两个序列各 count 个元素，**关键码互不相同**）。</span>
 <span class="c">///</span>
 <span class="c">/// 不自洽的输入一律抛 std::invalid_argument，绝不默默建出一棵错树：</span>
@@ -630,7 +718,7 @@ BST 中序: 1 3 4 6 7 8 10 14
 <span class="c">// 一个文件、两个类、能直接编译运行，给「第一次读这一节」的人看。</span>
 <span class="c">//</span>
 <span class="c">//   BinaryTree         二叉链表：一个结点，两根指向孩子的链接；深度优先与层次周游；</span>
-<span class="c">//                      由中序 + 后序序列重建（5.2.2，不是原书编号算法）。</span>
+<span class="c">//                      由中序 + 后序序列重建，递归与显式栈各一版（5.2.2，不是原书编号算法）。</span>
 <span class="c">//   BinarySearchTree   在二叉树上加一条「左小右大」的约束，于是查找变成一路往下走。</span>
 <span class="c">//</span>
 <span class="c">// **递归是这一章的正题**，所以周游、释放、深拷贝这里全部写成递归——形状和定义一样，</span>
@@ -707,6 +795,58 @@ BST 中序: 1 3 4 6 7 8 10 14
         BinaryTree fresh;                   <span class="c">// 先建在一棵临时树里：中途抛异常，</span>
         build_impl(fresh.root_, inorder, <span class="n">0</span>, count, postorder, <span class="n">0</span>);   <span class="c">// 由它的析构收拾半成品</span>
         clear();                            <span class="c">// 建成了，再拆掉旧树、接过新树</span>
+        root_ = fresh.root_;
+        fresh.root_ = <span class="k">nullptr</span>;
+    }
+
+    <span class="c">// 同一个重建，不递归：把每次递归调用的参数存成一帧，压进一条手写的链式栈。</span>
+    <span class="c">// 与 build_impl 逐行对应——「递归调用」变成「压一帧」，「函数返回」变成「弹一帧」；</span>
+    <span class="c">// 参数 Node*&amp; link 变成帧里的 Node** link（引用存不进结构体，只能存指针）。</span>
+    <span class="c">//</span>
+    <span class="c">// 注意：教学版的析构 destroy 仍是递归的，所以一条很长的链就算这样建出来了，</span>
+    <span class="c">// 析构时照样压穿运行栈。这里要学的是「递归 → 显式栈」的改写手法；</span>
+    <span class="c">// 工程版把析构也改成了迭代，见 5.6a。</span>
+    <span class="t">void</span> build_from_inorder_postorder_iterative(<span class="k">const</span> T* inorder, <span class="k">const</span> T* postorder, std::<span class="t">size_t</span> count) {
+        <span class="k">struct</span> Frame {
+            Node** link;                    <span class="c">// 建好的子树挂到哪根指针上</span>
+            std::<span class="t">size_t</span> in_begin, in_end;   <span class="c">// 中序段</span>
+            std::<span class="t">size_t</span> post_begin;         <span class="c">// 后序段起点（与中序段一样长）</span>
+            Frame* next;                    <span class="c">// 链式栈：下面那一帧</span>
+        };
+        BinaryTree fresh;
+        Frame* top = <span class="k">new</span> Frame{&amp;fresh.root_, <span class="n">0</span>, count, <span class="n">0</span>, <span class="k">nullptr</span>};   <span class="c">// 第一次「调用」</span>
+        <span class="k">while</span> (top != <span class="k">nullptr</span>) {
+            <span class="k">const</span> Frame f = *top;           <span class="c">// 弹出一帧</span>
+            Frame* popped = top;
+            top = top-&gt;next;
+            <span class="k">delete</span> popped;
+
+            <span class="k">if</span> (f.in_begin == f.in_end) {
+                <span class="k">continue</span>;                   <span class="c">// 空区间：空子树</span>
+            }
+            <span class="k">const</span> std::<span class="t">size_t</span> size = f.in_end - f.in_begin;
+            <span class="k">const</span> T&amp; key = postorder[f.post_begin + size - <span class="n">1</span>];
+            std::<span class="t">size_t</span> k = f.in_begin;
+            <span class="k">while</span> (k &lt; f.in_end &amp;&amp; inorder[k] != key) {
+                ++k;
+            }
+            <span class="k">if</span> (k == f.in_end) {
+                <span class="k">while</span> (top != <span class="k">nullptr</span>) {    <span class="c">// 抛异常之前，先把栈里剩下的帧还掉</span>
+                    Frame* rest = top-&gt;next;
+                    <span class="k">delete</span> top;
+                    top = rest;
+                }
+                <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;build_from_inorder_postorder_iterative: root lies outside its inorder range&quot;</span>);
+            }
+
+            Node* node = <span class="k">new</span> Node{key, <span class="k">nullptr</span>, <span class="k">nullptr</span>};
+            *f.link = node;                 <span class="c">// 先挂上：之后再抛异常，它也归临时树释放</span>
+            <span class="k">const</span> std::<span class="t">size_t</span> left_size = k - f.in_begin;
+            <span class="c">// 先压右、再压左：栈后进先出，于是左子树先建，与递归的次序一致</span>
+            top = <span class="k">new</span> Frame{&amp;node-&gt;right, k + <span class="n">1</span>, f.in_end, f.post_begin + left_size, top};
+            top = <span class="k">new</span> Frame{&amp;node-&gt;left, f.in_begin, k, f.post_begin, top};
+        }
+        clear();
         root_ = fresh.root_;
         fresh.root_ = <span class="k">nullptr</span>;
     }

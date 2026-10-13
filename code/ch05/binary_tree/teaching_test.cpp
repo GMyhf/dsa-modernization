@@ -320,6 +320,69 @@ bool rebuild(BinaryTree<char>& tree, const std::string& in, const std::string& p
     return true;
 }
 
+// 显式栈版的同一个包装。
+bool rebuild_iterative(BinaryTree<char>& tree, const std::string& in, const std::string& post) {
+    try {
+        tree.build_from_inorder_postorder_iterative(in.data(), post.data(), in.size());
+    } catch (const std::invalid_argument&) {
+        return false;
+    }
+    return true;
+}
+
+// ---- 键是 char 时：直接查表（与类里的两版对拍） ----
+
+// 「点名册」：pos[c] = 字符 c 坐在中序第几号，-1 表示中序里没有。
+// 登记时发现这一格已经有人，就是中序里有重复键。
+void fill_position_table(int pos[256], const char* inorder, int count) {
+    for (int c = 0; c < 256; ++c) {
+        pos[c] = -1;
+    }
+    for (int i = 0; i < count; ++i) {
+        const unsigned char c = static_cast<unsigned char>(inorder[i]);
+        if (pos[c] != -1) {
+            throw std::invalid_argument("duplicate key in inorder sequence");
+        }
+        pos[c] = i;
+    }
+}
+
+// 与 build_impl 同一个递归，只把「从左往右数」换成查一次表：找根 O(1)，总代价 O(n)。
+// 两棵子树先各自建成小树，再用 create_tree（【代码5.2】）接到根上。
+void build_by_table(BinaryTree<char>& out, const int pos[256], const char* postorder,
+                    int in_begin, int in_end, int post_begin) {
+    if (in_begin == in_end) {
+        out.clear();
+        return;
+    }
+    const char key = postorder[post_begin + (in_end - in_begin) - 1];   // 后序段的最后一个是根
+    const int k = pos[static_cast<unsigned char>(key)];                 // 查表：它坐在中序第几号
+    if (k < in_begin || k >= in_end) {                                  // 不在本段（-1 也落在这里）
+        throw std::invalid_argument("root lies outside its inorder range");
+    }
+    const int left_size = k - in_begin;
+    BinaryTree<char> left, right;
+    build_by_table(left, pos, postorder, in_begin, k, post_begin);
+    build_by_table(right, pos, postorder, k + 1, in_end, post_begin + left_size);
+    out.create_tree(key, left, right);
+}
+
+bool rebuild_by_table(BinaryTree<char>& tree, const std::string& in, const std::string& post) {
+    try {
+        if (post.size() != in.size()) {
+            throw std::invalid_argument("sequences differ in length");
+        }
+        int pos[256];
+        fill_position_table(pos, in.data(), static_cast<int>(in.size()));
+        BinaryTree<char> fresh;                 // 先建在临时树里：出错时 tree 不动
+        build_by_table(fresh, pos, post.data(), 0, static_cast<int>(in.size()), 0);
+        tree = fresh;
+    } catch (const std::invalid_argument&) {
+        return false;
+    }
+    return true;
+}
+
 // 图 5.5：中序 DBGEACHFI、后序 DGEBHIFCA，与课件逐帧推演的是同一棵树。
 // 变异：左右子树的后序起点算错 / 取后序段的第一个当根 → 这里会红。
 void test_rebuild_figure_5_5() {
@@ -405,6 +468,64 @@ void test_rebuild_rejects_inconsistent() {
     check(all_orders(tree) == before, "连续两次被拒后原树仍不动");
 }
 
+// 显式栈版、查表版与递归版对拍：同一批随机树，三版建出的树四种周游全一致。
+// 变异：显式栈版右子树后序起点算错 / 忘了 *f.link = node；查表版去掉 k >= in_end → 这里会红。
+void test_rebuild_three_versions_agree() {
+    bool iterative_ok = true, table_ok = true;
+    for (int round = 0; round < 300; ++round) {
+        const int n = static_cast<int>(next_random() % 61);     // 0..60 个结点
+        char next_key = '0';
+        BinaryTree<char> original;
+        random_tree(original, n, next_key);
+        std::string in, post;
+        original.inorder([&in](char c) { in.push_back(c); });
+        original.postorder([&post](char c) { post.push_back(c); });
+        const std::string want = all_orders(original);
+
+        BinaryTree<char> a, b;
+        iterative_ok = iterative_ok && rebuild_iterative(a, in, post) && all_orders(a) == want;
+        table_ok = table_ok && rebuild_by_table(b, in, post) && all_orders(b) == want;
+    }
+    check(iterative_ok, "重建（显式栈版）：300 棵随机树（n≤60）与原树四种周游全一致");
+    check(table_ok, "重建（查表版）：300 棵随机树（n≤60）与原树四种周游全一致");
+
+    BinaryTree<char> fig;
+    check(rebuild_iterative(fig, "DBGEACHFI", "DGEBHIFCA") && all_orders(fig) == "ABDEGCFHI/DBGEACHFI/DGEBHIFCA/ABCDEFGHI",
+          "重建（显式栈版）：图 5.5");
+    check(rebuild_by_table(fig, "DBGEACHFI", "DGEBHIFCA") && all_orders(fig) == "ABDEGCFHI/DBGEACHFI/DGEBHIFCA/ABCDEFGHI",
+          "重建（查表版）：图 5.5");
+    check(rebuild_iterative(fig, "", "") && fig.empty(), "重建（显式栈版）：空序列得空树");
+}
+
+// 不自洽输入：两版都拒绝，且原树不动。
+// 显式栈版中序 1234、后序 3412：根 2 建好后，栈里还压着右子树那一帧，左子树才失败——
+// 剩下的帧与半成品若没还，LeakSanitizer 会报泄漏。
+void test_rebuild_other_versions_reject() {
+    BinaryTree<char> tree;
+    build_sample(tree);
+    const std::string before = all_orders(tree);
+    check(!rebuild_iterative(tree, "1234", "3412"), "重建拒绝（显式栈版）：中序 1234、后序 3412");
+    check(!rebuild_iterative(tree, "123", "124"), "重建拒绝（显式栈版）：后序出现中序没有的键");
+    check(all_orders(tree) == before, "重建拒绝（显式栈版）后原树不动");
+    check(!rebuild_by_table(tree, "123", "312"), "重建拒绝（查表版）：中序 123、后序 312");
+    check(!rebuild_by_table(tree, "123", "124"), "重建拒绝（查表版）：后序出现中序没有的键");
+    check(!rebuild_by_table(tree, "ABA", "AAB"), "重建拒绝（查表版）：中序有重复键");
+    // 重复键即使不在登记时查，也会因「根落在区间外」被拒（抽屉原理）；
+    // 登记时单独查，是为了让报错说对原因。所以直接对点名册断言。
+    // 变异：去掉 fill_position_table 里的重复检查 → 这里会红。
+    {
+        int pos[256];
+        bool duplicate_reported = false;
+        try {
+            fill_position_table(pos, "ABA", 3);
+        } catch (const std::invalid_argument& e) {
+            duplicate_reported = std::string(e.what()).find("duplicate") != std::string::npos;
+        }
+        check(duplicate_reported, "查表版：登记点名册时就报出重复键");
+    }
+    check(all_orders(tree) == before, "重建拒绝（查表版）后原树不动");
+}
+
 // D-001 第 3 条红线：容器内零 I/O。
 void test_no_console_output() {
     std::ostringstream out, err;
@@ -420,6 +541,8 @@ void test_no_console_output() {
         tree.clear();
         (void)rebuild(tree, "DBEACF", "DEBFCA");
         (void)rebuild(tree, "123", "312");
+        (void)rebuild_iterative(tree, "1234", "3412");
+        (void)rebuild_by_table(tree, "123", "312");
 
         BinarySearchTree<int> bst;
         (void)bst.insert(1);
@@ -460,6 +583,8 @@ int main() {
     test_rebuild_random_round_trip();
     test_rebuild_empty();
     test_rebuild_rejects_inconsistent();
+    test_rebuild_three_versions_agree();
+    test_rebuild_other_versions_reject();
 
     test_no_console_output();
 

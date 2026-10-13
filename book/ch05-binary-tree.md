@@ -408,7 +408,108 @@ static void build_impl(Node*& link, const T* inorder, std::size_t in_begin, std:
 
 教学版的代价也一目了然：每一帧从左往右找根，最多看一遍本段，所以总时间是 $O(n\cdot h)$，$h$ 为树高；树退化成一条链时就是 $O(n^2)$。递归深度等于树高，与本节的递归周游、5.6a 说的递归 `clone` 一样，退化成链的输入会压穿运行栈。教学版也不单独检查重复键：有重复键时它照样能建出一棵中序、后序都对得上的树，只是这棵树不唯一。
 
-工程版在教学版上做了三处升级：找根从「从左往右数」换成「把中序下标按键排序，再二分」，总代价降到 $O(n\log n)$；递归换成显式栈；重复键、键缺失单独报出，好让报错说对原因。它把两种重建做成 `BinaryTree` 的两个静态工厂，返回一棵拥有全部结点的新树：
+找根还能更快。上机题里的关键码多半是字符或小整数，这时可以直接拿关键码当数组下标，先把中序登记成一本「点名册」：`pos[c]` 记下字符 `c` 在中序里的下标，`-1` 表示中序里没有它；登记时发现这一格已经有人，就是中序里有重复键。下面两个函数写在教学版的测试文件里，测试拿它们与类里的两版逐棵对拍：
+
+```cpp file=code/ch05/binary_tree/teaching_test.cpp#fn:fill_position_table
+// 「点名册」：pos[c] = 字符 c 坐在中序第几号，-1 表示中序里没有。
+// 登记时发现这一格已经有人，就是中序里有重复键。
+void fill_position_table(int pos[256], const char* inorder, int count) {
+    for (int c = 0; c < 256; ++c) {
+        pos[c] = -1;
+    }
+    for (int i = 0; i < count; ++i) {
+        const unsigned char c = static_cast<unsigned char>(inorder[i]);
+        if (pos[c] != -1) {
+            throw std::invalid_argument("duplicate key in inorder sequence");
+        }
+        pos[c] = i;
+    }
+}
+```
+
+```cpp file=code/ch05/binary_tree/teaching_test.cpp#fn:build_by_table
+// 与 build_impl 同一个递归，只把「从左往右数」换成查一次表：找根 O(1)，总代价 O(n)。
+// 两棵子树先各自建成小树，再用 create_tree（【代码5.2】）接到根上。
+void build_by_table(BinaryTree<char>& out, const int pos[256], const char* postorder,
+                    int in_begin, int in_end, int post_begin) {
+    if (in_begin == in_end) {
+        out.clear();
+        return;
+    }
+    const char key = postorder[post_begin + (in_end - in_begin) - 1];   // 后序段的最后一个是根
+    const int k = pos[static_cast<unsigned char>(key)];                 // 查表：它坐在中序第几号
+    if (k < in_begin || k >= in_end) {                                  // 不在本段（-1 也落在这里）
+        throw std::invalid_argument("root lies outside its inorder range");
+    }
+    const int left_size = k - in_begin;
+    BinaryTree<char> left, right;
+    build_by_table(left, pos, postorder, in_begin, k, post_begin);
+    build_by_table(right, pos, postorder, k + 1, in_end, post_begin + left_size);
+    out.create_tree(key, left, right);
+}
+```
+
+递归的形状与 `build_impl` 一样，只是那个从左往右数的 `while` 换成了查一次表：找根 $O(1)$，总代价 $O(n)$。`k < in_begin || k >= in_end` 就是那条「根必须落在本段」的检查，查不到时的 `-1` 也落在这里。两棵子树先各自建成小树，再用【代码5.2】的 `create_tree` 接到根上。它只适用于关键码范围很小的情形——关键码是任意整数或字符串时，没法拿它当下标。
+
+再看递归。递归深度等于树高；把递归改写成显式栈，是本章反复用到的手法（5.6a 的非递归周游、迭代深拷贝都是）。改写是机械的：一次递归调用的参数存成一帧，「调用」变成压栈，「返回」变成弹栈：
+
+```cpp file=code/ch05/binary_tree/teaching.hpp#fn:BinaryTree::build_from_inorder_postorder_iterative
+// 同一个重建，不递归：把每次递归调用的参数存成一帧，压进一条手写的链式栈。
+// 与 build_impl 逐行对应——「递归调用」变成「压一帧」，「函数返回」变成「弹一帧」；
+// 参数 Node*& link 变成帧里的 Node** link（引用存不进结构体，只能存指针）。
+//
+// 注意：教学版的析构 destroy 仍是递归的，所以一条很长的链就算这样建出来了，
+// 析构时照样压穿运行栈。这里要学的是「递归 → 显式栈」的改写手法；
+// 工程版把析构也改成了迭代，见 5.6a。
+void build_from_inorder_postorder_iterative(const T* inorder, const T* postorder, std::size_t count) {
+    struct Frame {
+        Node** link;                    // 建好的子树挂到哪根指针上
+        std::size_t in_begin, in_end;   // 中序段
+        std::size_t post_begin;         // 后序段起点（与中序段一样长）
+        Frame* next;                    // 链式栈：下面那一帧
+    };
+    BinaryTree fresh;
+    Frame* top = new Frame{&fresh.root_, 0, count, 0, nullptr};   // 第一次「调用」
+    while (top != nullptr) {
+        const Frame f = *top;           // 弹出一帧
+        Frame* popped = top;
+        top = top->next;
+        delete popped;
+
+        if (f.in_begin == f.in_end) {
+            continue;                   // 空区间：空子树
+        }
+        const std::size_t size = f.in_end - f.in_begin;
+        const T& key = postorder[f.post_begin + size - 1];
+        std::size_t k = f.in_begin;
+        while (k < f.in_end && inorder[k] != key) {
+            ++k;
+        }
+        if (k == f.in_end) {
+            while (top != nullptr) {    // 抛异常之前，先把栈里剩下的帧还掉
+                Frame* rest = top->next;
+                delete top;
+                top = rest;
+            }
+            throw std::invalid_argument("build_from_inorder_postorder_iterative: root lies outside its inorder range");
+        }
+
+        Node* node = new Node{key, nullptr, nullptr};
+        *f.link = node;                 // 先挂上：之后再抛异常，它也归临时树释放
+        const std::size_t left_size = k - f.in_begin;
+        // 先压右、再压左：栈后进先出，于是左子树先建，与递归的次序一致
+        top = new Frame{&node->right, k + 1, f.in_end, f.post_begin + left_size, top};
+        top = new Frame{&node->left, f.in_begin, k, f.post_begin, top};
+    }
+    clear();
+    root_ = fresh.root_;
+    fresh.root_ = nullptr;
+}
+```
+
+对照 `build_impl` 逐行看：参数 `Node*& link` 变成帧里的 `Node** link`（引用存不进结构体，只能存指针）；先压右、再压左，是因为栈后进先出，这样左子树先建，次序与递归一致（反过来压也能建对，只是建的次序不同）。抛异常之前要先把栈里剩下的帧还掉——递归版不用操心这件事，运行栈是自动回收的。还要说清楚一点：教学版的析构 `destroy` 仍是递归的，一条很长的链即使这样建出来了，析构时照样压穿运行栈。这里要学的是改写的手法本身。
+
+工程版把上面两步合在一起，并推广到任意类型 `T`。关键码不一定能当下标，点名册只好换成「把中序下标按键排序，再二分」，总代价 $O(n\log n)$，只要求 `T` 支持 `<`；显式栈换成本章那把手写的链式栈 `LinkedStack`，析构也是迭代的，所以 20 万结点的链从建到拆都不怕；重复键、键缺失单独报出，好让报错说对原因。它把两种重建做成 `BinaryTree` 的两个静态工厂，返回一棵拥有全部结点的新树：
 
 ```cpp file=code/ch05/binary_tree/modern.hpp#rebuild
 /// 由中序 + 后序序列重建二叉树（两个序列各 count 个元素，**关键码互不相同**）。
@@ -619,7 +720,7 @@ void level_order(Visitor visit) const {
 // 一个文件、两个类、能直接编译运行，给「第一次读这一节」的人看。
 //
 //   BinaryTree         二叉链表：一个结点，两根指向孩子的链接；深度优先与层次周游；
-//                      由中序 + 后序序列重建（5.2.2，不是原书编号算法）。
+//                      由中序 + 后序序列重建，递归与显式栈各一版（5.2.2，不是原书编号算法）。
 //   BinarySearchTree   在二叉树上加一条「左小右大」的约束，于是查找变成一路往下走。
 //
 // **递归是这一章的正题**，所以周游、释放、深拷贝这里全部写成递归——形状和定义一样，
@@ -696,6 +797,58 @@ public:
         BinaryTree fresh;                   // 先建在一棵临时树里：中途抛异常，
         build_impl(fresh.root_, inorder, 0, count, postorder, 0);   // 由它的析构收拾半成品
         clear();                            // 建成了，再拆掉旧树、接过新树
+        root_ = fresh.root_;
+        fresh.root_ = nullptr;
+    }
+
+    // 同一个重建，不递归：把每次递归调用的参数存成一帧，压进一条手写的链式栈。
+    // 与 build_impl 逐行对应——「递归调用」变成「压一帧」，「函数返回」变成「弹一帧」；
+    // 参数 Node*& link 变成帧里的 Node** link（引用存不进结构体，只能存指针）。
+    //
+    // 注意：教学版的析构 destroy 仍是递归的，所以一条很长的链就算这样建出来了，
+    // 析构时照样压穿运行栈。这里要学的是「递归 → 显式栈」的改写手法；
+    // 工程版把析构也改成了迭代，见 5.6a。
+    void build_from_inorder_postorder_iterative(const T* inorder, const T* postorder, std::size_t count) {
+        struct Frame {
+            Node** link;                    // 建好的子树挂到哪根指针上
+            std::size_t in_begin, in_end;   // 中序段
+            std::size_t post_begin;         // 后序段起点（与中序段一样长）
+            Frame* next;                    // 链式栈：下面那一帧
+        };
+        BinaryTree fresh;
+        Frame* top = new Frame{&fresh.root_, 0, count, 0, nullptr};   // 第一次「调用」
+        while (top != nullptr) {
+            const Frame f = *top;           // 弹出一帧
+            Frame* popped = top;
+            top = top->next;
+            delete popped;
+
+            if (f.in_begin == f.in_end) {
+                continue;                   // 空区间：空子树
+            }
+            const std::size_t size = f.in_end - f.in_begin;
+            const T& key = postorder[f.post_begin + size - 1];
+            std::size_t k = f.in_begin;
+            while (k < f.in_end && inorder[k] != key) {
+                ++k;
+            }
+            if (k == f.in_end) {
+                while (top != nullptr) {    // 抛异常之前，先把栈里剩下的帧还掉
+                    Frame* rest = top->next;
+                    delete top;
+                    top = rest;
+                }
+                throw std::invalid_argument("build_from_inorder_postorder_iterative: root lies outside its inorder range");
+            }
+
+            Node* node = new Node{key, nullptr, nullptr};
+            *f.link = node;                 // 先挂上：之后再抛异常，它也归临时树释放
+            const std::size_t left_size = k - f.in_begin;
+            // 先压右、再压左：栈后进先出，于是左子树先建，与递归的次序一致
+            top = new Frame{&node->right, k + 1, f.in_end, f.post_begin + left_size, top};
+            top = new Frame{&node->left, f.in_begin, k, f.post_begin, top};
+        }
+        clear();
         root_ = fresh.root_;
         fresh.root_ = nullptr;
     }

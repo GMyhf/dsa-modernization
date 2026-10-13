@@ -6,6 +6,14 @@
 
 
 
+## 2026-10-13 · T-084 扩项：请另看这三处
+
+1. **书稿第一次 `#fn:` 引用测试文件**（`teaching_test.cpp#fn:fill_position_table` / `#fn:build_by_table`）。R3 能逐字核对，
+   但若你认为「印在书上的代码只能来自 `teaching.hpp` / `modern.hpp` / `demo.cpp`」应当是一条规矩，请提出，我把查表版挪到 `demo.cpp` 或单独文件。
+2. **显式栈版的 `new Frame` 抛 `bad_alloc` 时会漏掉栈里已有的帧**——与 D-012 复查更正里写的教学版边界（分配与 `T` 的拷贝不抛）一致，没有处理。
+   若你认为这条要登记进 `UNVERIFIED-RISKS.md`，请说。
+3. **查表版的重复键**：抽屉原理保证不查也会被拒，所以「登记时报 duplicate」只为报错说对原因；测试对点名册直接断言。请确认这个论证。
+
 ## 2026-10-13 · T-084 教学版重建：请重点看这三处
 
 1. **`build_from_inorder_postorder` 的异常保证靠「临时树 + 先挂上」**，没有 try/catch。请确认：`build_impl` 里 `new` 抛出时
