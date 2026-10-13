@@ -164,6 +164,151 @@ static void inorder_impl(const Node* node, Visitor& visit) {
 
 ---
 
+# 由周游序列重建：前序或后序 + 中序
+
+**一个序列不行**：前序 `A B C` 既可以是左链，也可以是右链。
+
+- 后序的**最后一个**（前序的第一个）是根
+- 在中序里找到根：左边是左子树，右边是右子树
+- 左子树有几个结点一旦知道，后序也就切成「左子树 | 右子树 | 根」
+
+| 子问题 | 后序段 | 中序段 | 根 |
+| --- | --- | --- | --- |
+| 整棵树 | `DGEBHIFCA` | `DBGEACHFI` | A |
+| A 的左 | `DGEB` | `DBGE` | B |
+| A 的右 | `HIFC` | `CHFI` | C |
+
+反例：中序 `1 2 3`、后序 `3 1 2` 不对应任何树——左子树只该有 1，后序给的却是 3。
+**每次取出的根必须落在当前的中序区间里**，否则报错。
+
+<!-- 备注
+先让学生手算反例：多数人会「算出」一棵树。再问：建出来的树，中序还是 1 2 3 吗？
+前序 + 后序不够：前序 A B、后序 B A 说不清 B 是左孩子还是右孩子。
+-->
+
+---
+
+# 重建 · 教学版：推演表的一行 = 一次调用
+
+```cpp file=code/ch05/binary_tree/teaching.hpp#fn:BinaryTree::build_impl
+// 把中序 inorder[in_begin, in_end) 与后序 postorder[post_begin, …) 建成一棵子树，挂到 link 上。
+// 两段一样长；只传下标，不拷贝子数组。
+//
+// 后序段的最后一个是根；在中序段里找到它（下标 k），左边 k - in_begin 个是左子树，
+// 右边是右子树。左子树的大小一旦知道，后序段也就切成了「左子树 | 右子树 | 根」。
+static void build_impl(Node*& link, const T* inorder, std::size_t in_begin, std::size_t in_end,
+                       const T* postorder, std::size_t post_begin) {
+    if (in_begin == in_end) {
+        return;                                         // 空区间：空子树，link 保持 nullptr
+    }
+    const std::size_t size = in_end - in_begin;
+    const T& key = postorder[post_begin + size - 1];    // 后序段的最后一个是根
+
+    std::size_t k = in_begin;                           // 在中序段里从左往右找根
+    while (k < in_end && inorder[k] != key) {           // 只找本段：根不在本段，说明两个序列对不上
+        ++k;
+    }
+    if (k == in_end) {
+        throw std::invalid_argument("build_from_inorder_postorder: root lies outside its inorder range");
+    }
+
+    link = new Node{key, nullptr, nullptr};             // 先挂上：子树里再抛异常，它也归临时树释放
+    const std::size_t left_size = k - in_begin;
+    build_impl(link->left, inorder, in_begin, k, postorder, post_begin);
+    build_impl(link->right, inorder, k + 1, in_end, postorder, post_begin + left_size);
+}
+```
+
+**只传下标，不拷贝子数组；只在本段里找根，找不到就抛异常。**
+
+<!-- 备注
+对参数：中序段 [in_begin, in_end)、后序段从 post_begin 起一样长、key = 后序段最后一个。
+代价：每帧从左往右数一遍本段，总 O(n·h)，链状最坏 O(n²)；递归深度 = 树高。
+入口 build_from_inorder_postorder 先建在临时树 fresh 里，出错时原树不动。
+易错：右子树的后序起点是 post_begin + left_size，不是 k + 1。
+-->
+
+---
+
+# 重建：键是 char 时直接查表
+
+先把中序登记成「点名册」：`pos[c]` = 字符 `c` 在中序里的下标，`-1` 表示没有；登记时撞上就是重复键。
+
+```cpp file=code/ch05/binary_tree/teaching_test.cpp#fn:build_by_table
+// 与 build_impl 同一个递归，只把「从左往右数」换成查一次表：找根 O(1)，总代价 O(n)。
+// 两棵子树先各自建成小树，再用 create_tree（【代码5.2】）接到根上。
+void build_by_table(BinaryTree<char>& out, const int pos[256], const char* postorder,
+                    int in_begin, int in_end, int post_begin) {
+    if (in_begin == in_end) {
+        out.clear();
+        return;
+    }
+    const char key = postorder[post_begin + (in_end - in_begin) - 1];   // 后序段的最后一个是根
+    const int k = pos[static_cast<unsigned char>(key)];                 // 查表：它坐在中序第几号
+    if (k < in_begin || k >= in_end) {                                  // 不在本段（-1 也落在这里）
+        throw std::invalid_argument("root lies outside its inorder range");
+    }
+    const int left_size = k - in_begin;
+    BinaryTree<char> left, right;
+    build_by_table(left, pos, postorder, in_begin, k, post_begin);
+    build_by_table(right, pos, postorder, k + 1, in_end, post_begin + left_size);
+    out.create_tree(key, left, right);
+}
+```
+
+找根从「数一遍」变成「查一次」：**总代价 O(n)**。
+只适用于键能当下标的情形——任意整数、字符串都不行。
+
+<!-- 备注
+完整代码（含 fill_position_table）在 teaching_test.cpp，测试拿它和类里的两版逐棵对拍。
+问：工程版为什么不用它？→ 键不一定能当下标；哈希表要求键能哈希；工程版只要求 T 支持 <，只好排序 + 二分。
+它离上机题第 1 题（前序 + 中序）只差「根在段首」，作业要求自己写。
+-->
+
+---
+
+# 重建：递归改显式栈
+
+改写是机械的：**一次调用的参数 → 一帧；调用 → 压栈；返回 → 弹栈。**
+
+```text
+压入第一帧 {挂到 fresh.root_, 中序 [0, n), 后序从 0 起}
+只要栈非空:
+    弹出一帧 f;  空区间就跳过            ← 递归版的 return
+    在中序段里找根 k;  找不到就抛异常      ← 与递归版一字不差
+    建结点, 挂到 *f.link
+    压入右子树那一帧, 再压入左子树那一帧   ← 两次递归调用
+```
+
+- `Node*& link` 变成帧里的 `Node** link`：引用存不进结构体
+- 栈包成局部对象 `FrameStack`，**析构负责还帧**：找不到根、`new` 失败都不漏
+
+完整实现在 `teaching.hpp` 的 `build_from_inorder_postorder_iterative`。
+
+<!-- 备注
+三条规则：一次调用的参数 → 一帧；调用 → 压栈；返回 → 弹栈。Node*& 变 Node**：引用存不进结构体。
+FrameStack：栈也要有主人，析构负责还帧——找不到根抛异常、new 失败都不漏（Codex 复核抓出 new 失败这条路；测试把 28 次 new 逐个注入失败）。
+先压右、再压左：后进先出，左子树先建，次序同递归。
+局限：教学版析构仍递归，长链建得出、拆时照样爆栈；这里学的是改写手法。
+-->
+
+---
+
+# 重建 · 工程版（进阶）：两步合在一起，推广到任意 T
+
+| | 教学版 | 工程版 `modern.hpp` |
+| --- | --- | --- |
+| 找根 | 从左往右数 / `char` 查表 | 中序下标按键排序，**二分** |
+| 总代价 | O(n·h) / O(n) | O(n log n)，只要求 `T` 支持 `<` |
+| 递归 | 递归 / 手写栈 | 区间帧压进 `LinkedStack`，析构也迭代 |
+| 报错 | 根不在本段 | 另把重复键、键缺失单独报出 |
+
+接口是两个静态工厂：`from_inorder_postorder`、`from_preorder_inorder`（后者即上机题第 1 题）。
+
+**能建完就一定对**：各帧的中序区间互不重叠、每个根都落在自己的区间里，所以不必再周游核对。
+
+---
+
 # 5.3 存储结构：二叉链表
 
 ![图 5.7 二叉树结点的存储结构](../assets/scan/fig-5-7.png)

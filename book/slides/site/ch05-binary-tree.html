@@ -181,7 +181,136 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <td style="text-align:left"><strong>后缀</strong>表达式（逆波兰式）</td>
 </tr>
 </tbody></table></div>
-<p>第 3 章那个后缀求值器，吃的就是这棵树后序周游的结果。</p></section><section class="slide" data-notes="&lt;p&gt;create_tree 里那两句置空是考点：两棵子树的所有权&lt;strong&gt;转移&lt;/strong&gt;给新树，
+<p>第 3 章那个后缀求值器，吃的就是这棵树后序周游的结果。</p></section><section class="slide" data-notes="&lt;p&gt;先让学生手算反例：多数人会「算出」一棵树。再问：建出来的树，中序还是 1 2 3 吗？
+前序 + 后序不够：前序 A B、后序 B A 说不清 B 是左孩子还是右孩子。&lt;/p&gt;"><h1 id="由周游序列重建前序或后序-中序"><a class="anchor" href="#由周游序列重建前序或后序-中序">#</a>由周游序列重建：前序或后序 + 中序</h1>
+<p><strong>一个序列不行</strong>：前序 <code>A B C</code> 既可以是左链，也可以是右链。</p>
+<ul>
+<li>后序的<strong>最后一个</strong>（前序的第一个）是根</li>
+<li>在中序里找到根：左边是左子树，右边是右子树</li>
+<li>左子树有几个结点一旦知道，后序也就切成「左子树 | 右子树 | 根」</li>
+</ul>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left">子问题</th>
+<th style="text-align:left">后序段</th>
+<th style="text-align:left">中序段</th>
+<th style="text-align:left">根</th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">整棵树</td>
+<td style="text-align:left"><code>DGEBHIFCA</code></td>
+<td style="text-align:left"><code>DBGEACHFI</code></td>
+<td style="text-align:left">A</td>
+</tr>
+<tr>
+<td style="text-align:left">A 的左</td>
+<td style="text-align:left"><code>DGEB</code></td>
+<td style="text-align:left"><code>DBGE</code></td>
+<td style="text-align:left">B</td>
+</tr>
+<tr>
+<td style="text-align:left">A 的右</td>
+<td style="text-align:left"><code>HIFC</code></td>
+<td style="text-align:left"><code>CHFI</code></td>
+<td style="text-align:left">C</td>
+</tr>
+</tbody></table></div>
+<p>反例：中序 <code>1 2 3</code>、后序 <code>3 1 2</code> 不对应任何树——左子树只该有 1，后序给的却是 3。 <strong>每次取出的根必须落在当前的中序区间里</strong>，否则报错。</p></section><section class="slide" data-notes="&lt;p&gt;对参数：中序段 [in_begin, in_end)、后序段从 post_begin 起一样长、key = 后序段最后一个。
+代价：每帧从左往右数一遍本段，总 O(n·h)，链状最坏 O(n²)；递归深度 = 树高。
+入口 build_from_inorder_postorder 先建在临时树 fresh 里，出错时原树不动。
+易错：右子树的后序起点是 post_begin + left_size，不是 k + 1。&lt;/p&gt;"><h1 id="重建-教学版推演表的一行-一次调用"><a class="anchor" href="#重建-教学版推演表的一行-一次调用">#</a>重建 · 教学版：推演表的一行 = 一次调用</h1>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/teaching.hpp">code/ch05/binary_tree/teaching.hpp#fn:BinaryTree::build_impl</a></div><pre><code><span class="c">// 把中序 inorder[in_begin, in_end) 与后序 postorder[post_begin, …) 建成一棵子树，挂到 link 上。</span>
+<span class="c">// 两段一样长；只传下标，不拷贝子数组。</span>
+<span class="c">//</span>
+<span class="c">// 后序段的最后一个是根；在中序段里找到它（下标 k），左边 k - in_begin 个是左子树，</span>
+<span class="c">// 右边是右子树。左子树的大小一旦知道，后序段也就切成了「左子树 | 右子树 | 根」。</span>
+<span class="k">static</span> <span class="t">void</span> build_impl(Node*&amp; link, <span class="k">const</span> T* inorder, std::<span class="t">size_t</span> in_begin, std::<span class="t">size_t</span> in_end,
+                       <span class="k">const</span> T* postorder, std::<span class="t">size_t</span> post_begin) {
+    <span class="k">if</span> (in_begin == in_end) {
+        <span class="k">return</span>;                                         <span class="c">// 空区间：空子树，link 保持 nullptr</span>
+    }
+    <span class="k">const</span> std::<span class="t">size_t</span> size = in_end - in_begin;
+    <span class="k">const</span> T&amp; key = postorder[post_begin + size - <span class="n">1</span>];    <span class="c">// 后序段的最后一个是根</span>
+
+    std::<span class="t">size_t</span> k = in_begin;                           <span class="c">// 在中序段里从左往右找根</span>
+    <span class="k">while</span> (k &lt; in_end &amp;&amp; inorder[k] != key) {           <span class="c">// 只找本段：根不在本段，说明两个序列对不上</span>
+        ++k;
+    }
+    <span class="k">if</span> (k == in_end) {
+        <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;build_from_inorder_postorder: root lies outside its inorder range&quot;</span>);
+    }
+
+    link = <span class="k">new</span> Node{key, <span class="k">nullptr</span>, <span class="k">nullptr</span>};             <span class="c">// 先挂上：子树里再抛异常，它也归临时树释放</span>
+    <span class="k">const</span> std::<span class="t">size_t</span> left_size = k - in_begin;
+    build_impl(link-&gt;left, inorder, in_begin, k, postorder, post_begin);
+    build_impl(link-&gt;right, inorder, k + <span class="n">1</span>, in_end, postorder, post_begin + left_size);
+}</code></pre></div>
+<p><strong>只传下标，不拷贝子数组；只在本段里找根，找不到就抛异常。</strong></p></section><section class="slide" data-notes="&lt;p&gt;完整代码（含 fill_position_table）在 teaching_test.cpp，测试拿它和类里的两版逐棵对拍。
+问：工程版为什么不用它？→ 键不一定能当下标；哈希表要求键能哈希；工程版只要求 T 支持 &amp;lt;，只好排序 + 二分。
+它离上机题第 1 题（前序 + 中序）只差「根在段首」，作业要求自己写。&lt;/p&gt;"><h1 id="重建键是-char-时直接查表"><a class="anchor" href="#重建键是-char-时直接查表">#</a>重建：键是 char 时直接查表</h1>
+<p>先把中序登记成「点名册」：<code>pos[c]</code> = 字符 <code>c</code> 在中序里的下标，<code>-1</code> 表示没有；登记时撞上就是重复键。</p>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/teaching_test.cpp">code/ch05/binary_tree/teaching_test.cpp#fn:build_by_table</a></div><pre><code><span class="c">// 与 build_impl 同一个递归，只把「从左往右数」换成查一次表：找根 O(1)，总代价 O(n)。</span>
+<span class="c">// 两棵子树先各自建成小树，再用 create_tree（【代码5.2】）接到根上。</span>
+<span class="t">void</span> build_by_table(BinaryTree&lt;<span class="t">char</span>&gt;&amp; out, <span class="k">const</span> <span class="t">int</span> pos[<span class="n">256</span>], <span class="k">const</span> <span class="t">char</span>* postorder,
+                    <span class="t">int</span> in_begin, <span class="t">int</span> in_end, <span class="t">int</span> post_begin) {
+    <span class="k">if</span> (in_begin == in_end) {
+        out.clear();
+        <span class="k">return</span>;
+    }
+    <span class="k">const</span> <span class="t">char</span> key = postorder[post_begin + (in_end - in_begin) - <span class="n">1</span>];   <span class="c">// 后序段的最后一个是根</span>
+    <span class="k">const</span> <span class="t">int</span> k = pos[<span class="k">static_cast</span>&lt;<span class="t">unsigned</span> <span class="t">char</span>&gt;(key)];                 <span class="c">// 查表：它坐在中序第几号</span>
+    <span class="k">if</span> (k &lt; in_begin || k &gt;= in_end) {                                  <span class="c">// 不在本段（-1 也落在这里）</span>
+        <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;root lies outside its inorder range&quot;</span>);
+    }
+    <span class="k">const</span> <span class="t">int</span> left_size = k - in_begin;
+    BinaryTree&lt;<span class="t">char</span>&gt; left, right;
+    build_by_table(left, pos, postorder, in_begin, k, post_begin);
+    build_by_table(right, pos, postorder, k + <span class="n">1</span>, in_end, post_begin + left_size);
+    out.create_tree(key, left, right);
+}</code></pre></div>
+<p>找根从「数一遍」变成「查一次」：<strong>总代价 O(n)</strong>。 只适用于键能当下标的情形——任意整数、字符串都不行。</p></section><section class="slide" data-notes="&lt;p&gt;三条规则：一次调用的参数 → 一帧；调用 → 压栈；返回 → 弹栈。Node*&amp;amp; 变 Node**：引用存不进结构体。
+FrameStack：栈也要有主人，析构负责还帧——找不到根抛异常、new 失败都不漏（Codex 复核抓出 new 失败这条路；测试把 28 次 new 逐个注入失败）。
+先压右、再压左：后进先出，左子树先建，次序同递归。
+局限：教学版析构仍递归，长链建得出、拆时照样爆栈；这里学的是改写手法。&lt;/p&gt;"><h1 id="重建递归改显式栈"><a class="anchor" href="#重建递归改显式栈">#</a>重建：递归改显式栈</h1>
+<p>改写是机械的：<strong>一次调用的参数 → 一帧；调用 → 压栈；返回 → 弹栈。</strong></p>
+<div class="codeblock" data-lang="text"><pre><code>压入第一帧 {挂到 fresh.root_, 中序 [0, n), 后序从 0 起}
+只要栈非空:
+    弹出一帧 f;  空区间就跳过            ← 递归版的 return
+    在中序段里找根 k;  找不到就抛异常      ← 与递归版一字不差
+    建结点, 挂到 *f.link
+    压入右子树那一帧, 再压入左子树那一帧   ← 两次递归调用</code></pre></div>
+<ul>
+<li><code>Node*&amp; link</code> 变成帧里的 <code>Node** link</code>：引用存不进结构体</li>
+<li>栈包成局部对象 <code>FrameStack</code>，<strong>析构负责还帧</strong>：找不到根、<code>new</code> 失败都不漏</li>
+</ul>
+<p>完整实现在 <code>teaching.hpp</code> 的 <code>build_from_inorder_postorder_iterative</code>。</p></section><section class="slide" data-notes=""><h1 id="重建-工程版进阶两步合在一起推广到任意-t"><a class="anchor" href="#重建-工程版进阶两步合在一起推广到任意-t">#</a>重建 · 工程版（进阶）：两步合在一起，推广到任意 T</h1>
+<div class="table-wrap"><table><thead><tr>
+<th style="text-align:left"></th>
+<th style="text-align:left">教学版</th>
+<th style="text-align:left">工程版 <code>modern.hpp</code></th>
+</tr></thead><tbody>
+<tr>
+<td style="text-align:left">找根</td>
+<td style="text-align:left">从左往右数 / <code>char</code> 查表</td>
+<td style="text-align:left">中序下标按键排序，<strong>二分</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">总代价</td>
+<td style="text-align:left">O(n·h) / O(n)</td>
+<td style="text-align:left">O(n log n)，只要求 <code>T</code> 支持 <code>&lt;</code></td>
+</tr>
+<tr>
+<td style="text-align:left">递归</td>
+<td style="text-align:left">递归 / 手写栈</td>
+<td style="text-align:left">区间帧压进 <code>LinkedStack</code>，析构也迭代</td>
+</tr>
+<tr>
+<td style="text-align:left">报错</td>
+<td style="text-align:left">根不在本段</td>
+<td style="text-align:left">另把重复键、键缺失单独报出</td>
+</tr>
+</tbody></table></div>
+<p>接口是两个静态工厂：<code>from_inorder_postorder</code>、<code>from_preorder_inorder</code>（后者即上机题第 1 题）。</p>
+<p><strong>能建完就一定对</strong>：各帧的中序区间互不重叠、每个根都落在自己的区间里，所以不必再周游核对。</p></section><section class="slide" data-notes="&lt;p&gt;create_tree 里那两句置空是考点：两棵子树的所有权&lt;strong&gt;转移&lt;/strong&gt;给新树，
 传进来的那两棵随即变空。不置空的话同一批结点会被两棵树各删一次，
 ASan 当场报 double-free。教学版测试专门守着这一条。&lt;/p&gt;"><h1 id="53-存储结构二叉链表"><a class="anchor" href="#53-存储结构二叉链表">#</a>5.3 存储结构：二叉链表</h1>
 <figure><img loading="lazy" src="../../assets/scan/fig-5-7.png" alt="图 5.7 二叉树结点的存储结构"><figcaption>图 5.7 二叉树结点的存储结构</figcaption></figure>
@@ -460,7 +589,7 @@ python3 tools/check_code.py code/ch05/heap_huffman</code></pre></div>
 <blockquote><p>最后一条会让 WPL 变大——测试里那个 <code>30</code> 就是为它准备的。</p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第5章 二叉树</div><div class="thumb"><div class="no">2</div>5.1 定义与五种基本形态</div><div class="thumb"><div class="no">3</div>满二叉树与完全二叉树</div><div class="thumb"><div class="no">4</div>5.1.3 三条要用到的性质</div><div class="thumb"><div class="no">5</div>性质 5：一棵 n 结点的树里有 n+1 个空指针</div><div class="thumb"><div class="no">6</div>5.2 周游：三种深度优先</div><div class="thumb"><div class="no">7</div>三种周游的代码只差一行</div><div class="thumb"><div class="no">8</div>广度优先：一层一层来</div><div class="thumb"><div class="no">9</div>表达式树：周游的一个用途</div><div class="thumb"><div class="no">10</div>5.3 存储结构：二叉链表</div><div class="thumb"><div class="no">11</div>释放：必须后序</div><div class="thumb"><div class="no">12</div>5.3 另一种存法：完全二叉树进数组</div><div class="thumb"><div class="no">13</div>5.4 二叉搜索树</div><div class="thumb"><div class="no">14</div>插入：指向指针的指针</div><div class="thumb"><div class="no">15</div>删除：难点只有一个</div><div class="thumb"><div class="no">16</div>删除：还藏着一步</div><div class="thumb"><div class="no">17</div>5.5 堆：完全二叉树 + 数组</div><div class="thumb"><div class="no">18</div>插入：放末尾，然后上浮</div><div class="thumb"><div class="no">19</div>删除最小：搬最后一个上来，然后下沉</div><div class="thumb"><div class="no">20</div>删除最小：搬最后一个上来，然后下沉（续）</div><div class="thumb"><div class="no">21</div>建堆为什么是 O(n)</div><div class="thumb"><div class="no">22</div>建堆为什么是 O(n)（续）</div><div class="thumb"><div class="no">23</div>建堆：把和算出来</div><div class="thumb"><div class="no">24</div>5.5.2 优先队列</div><div class="thumb"><div class="no">25</div>5.6 Huffman 树</div><div class="thumb"><div class="no">26</div>带权路径长度 WPL</div><div class="thumb"><div class="no">27</div>5.6.2 为什么需要前缀码</div><div class="thumb"><div class="no">28</div>Huffman 树天然给出前缀码</div><div class="thumb"><div class="no">29</div>编码总长恰好等于 WPL</div><div class="thumb"><div class="no">30</div>译码：用同一棵树</div><div class="thumb"><div class="no">31</div>课堂讲解卡：树的形状决定代价</div><div class="thumb"><div class="no">32</div>课堂例题：插入 5、3、7、2、4</div><div class="thumb"><div class="no">33</div>课堂例题答案：BST 与堆</div><div class="thumb"><div class="no">34</div>课末自检</div><div class="thumb"><div class="no">35</div>课末自检参考答案</div><div class="thumb"><div class="no">36</div>状态演算：堆下沉</div><div class="thumb"><div class="no">37</div>反例：只和左孩子交换</div><div class="thumb"><div class="no">38</div>课堂练习与答案</div><div class="thumb"><div class="no">39</div>语言分工：本章为什么以 C++ 为主</div><div class="thumb"><div class="no">40</div>本章小结</div><div class="thumb"><div class="no">41</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第5章 二叉树</div><div class="thumb"><div class="no">2</div>5.1 定义与五种基本形态</div><div class="thumb"><div class="no">3</div>满二叉树与完全二叉树</div><div class="thumb"><div class="no">4</div>5.1.3 三条要用到的性质</div><div class="thumb"><div class="no">5</div>性质 5：一棵 n 结点的树里有 n+1 个空指针</div><div class="thumb"><div class="no">6</div>5.2 周游：三种深度优先</div><div class="thumb"><div class="no">7</div>三种周游的代码只差一行</div><div class="thumb"><div class="no">8</div>广度优先：一层一层来</div><div class="thumb"><div class="no">9</div>表达式树：周游的一个用途</div><div class="thumb"><div class="no">10</div>由周游序列重建：前序或后序 + 中序</div><div class="thumb"><div class="no">11</div>重建 · 教学版：推演表的一行 = 一次调用</div><div class="thumb"><div class="no">12</div>重建：键是 char 时直接查表</div><div class="thumb"><div class="no">13</div>重建：递归改显式栈</div><div class="thumb"><div class="no">14</div>重建 · 工程版（进阶）：两步合在一起，推广到任意 T</div><div class="thumb"><div class="no">15</div>5.3 存储结构：二叉链表</div><div class="thumb"><div class="no">16</div>释放：必须后序</div><div class="thumb"><div class="no">17</div>5.3 另一种存法：完全二叉树进数组</div><div class="thumb"><div class="no">18</div>5.4 二叉搜索树</div><div class="thumb"><div class="no">19</div>插入：指向指针的指针</div><div class="thumb"><div class="no">20</div>删除：难点只有一个</div><div class="thumb"><div class="no">21</div>删除：还藏着一步</div><div class="thumb"><div class="no">22</div>5.5 堆：完全二叉树 + 数组</div><div class="thumb"><div class="no">23</div>插入：放末尾，然后上浮</div><div class="thumb"><div class="no">24</div>删除最小：搬最后一个上来，然后下沉</div><div class="thumb"><div class="no">25</div>删除最小：搬最后一个上来，然后下沉（续）</div><div class="thumb"><div class="no">26</div>建堆为什么是 O(n)</div><div class="thumb"><div class="no">27</div>建堆为什么是 O(n)（续）</div><div class="thumb"><div class="no">28</div>建堆：把和算出来</div><div class="thumb"><div class="no">29</div>5.5.2 优先队列</div><div class="thumb"><div class="no">30</div>5.6 Huffman 树</div><div class="thumb"><div class="no">31</div>带权路径长度 WPL</div><div class="thumb"><div class="no">32</div>5.6.2 为什么需要前缀码</div><div class="thumb"><div class="no">33</div>Huffman 树天然给出前缀码</div><div class="thumb"><div class="no">34</div>编码总长恰好等于 WPL</div><div class="thumb"><div class="no">35</div>译码：用同一棵树</div><div class="thumb"><div class="no">36</div>课堂讲解卡：树的形状决定代价</div><div class="thumb"><div class="no">37</div>课堂例题：插入 5、3、7、2、4</div><div class="thumb"><div class="no">38</div>课堂例题答案：BST 与堆</div><div class="thumb"><div class="no">39</div>课末自检</div><div class="thumb"><div class="no">40</div>课末自检参考答案</div><div class="thumb"><div class="no">41</div>状态演算：堆下沉</div><div class="thumb"><div class="no">42</div>反例：只和左孩子交换</div><div class="thumb"><div class="no">43</div>课堂练习与答案</div><div class="thumb"><div class="no">44</div>语言分工：本章为什么以 C++ 为主</div><div class="thumb"><div class="no">45</div>本章小结</div><div class="thumb"><div class="no">46</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>
@@ -473,7 +602,7 @@ python3 tools/check_code.py code/ch05/heap_huffman</code></pre></div>
 <b>第5章 二叉树</b><span>数据结构与算法：Python 讲可迁移算法，C++ 讲存储与工程实现</span>
 <span class="grow"></span>
 <a href="index.html" style="color:var(--muted)">目录</a>
-<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 41</b>
+<span>按 <b>?</b> 看快捷键</span><b id="now">1 / 46</b>
 </div>
 <script>
 (function(){

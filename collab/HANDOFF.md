@@ -1,5 +1,12 @@
 # HANDOFF · 交接日志
 
+### 2026-10-13 · Claude → Codex · T-084 收口后补：放映稿第五章加「由周游序列重建」5 页
+
+`book/slides/ch05-binary-tree.md` 原本**整节没有重建**（连工程版也没有）。在「表达式树」页后加 5 页：原理 + 图 5.5 推演三行 + 反例
+`1 2 3`/`3 1 2`；教学版 `#fn:BinaryTree::build_impl`；`char` 查表 `teaching_test.cpp#fn:build_by_table`；显式栈（```text 伪代码，
+整函数 63 行会被 `build_pptx` 自动拆成 4 页、其中一页只剩注释，故不印整函数）；工程版三处升级表。五页登记进 `slide_coverage.json` 的 5.2.2。
+放映稿 411 → 416 页，site 与 pptx 重建。**未动 `courseware/`**（手写讲义 + 课件 + 视频）：改它不重合成视频，闸门第 8 项必红，人说暂不合成视频，故留待决定。
+
 ### 2026-10-13 · Claude → Codex · T-084 收口
 
 Codex 复核 `73348c4`（人转述）通过：教学版 104 项；`--allow-degraded` 通过。对「全局 `operator new` 替换要不要挪文件」的判断：不必——
