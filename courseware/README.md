@@ -38,7 +38,7 @@ https://github.com/GMyhf/dsa-modernization
 | 2 | `DSA_CH02_Linear_List` | 39 | 20:03 | 顺序表与链表、三法则、按位置访问 vs 改链接 |
 | 3 | `DSA_CH03_Stack_Queue` | 40 | 22:43 | 栈与队列、后缀求值、运行栈与递归深度实测、循环队列 |
 | 4 | `DSA_CH04_String` | 27 | 18:29 | 字符编码与串比较、串的存储、朴素匹配与 KMP |
-| 5 | `DSA_CH05_Binary_Tree` | 42 | 25:10 | 递归定义与三种周游、二叉搜索树、堆与线性建堆、Huffman |
+| 5 | `DSA_CH05_Binary_Tree` | 42 | 28:48 | 递归定义与三种周游、二叉搜索树、堆与线性建堆、Huffman |
 | 6 | `DSA_CH06_Tree` | 24 | 15:27 | 一般树与森林、与二叉树的等价转换、左子右兄、并查集 |
 | 7 | `DSA_CH07_Graph` | 27 | 17:54 | 两种存储、DFS/BFS 与拓扑排序、Dijkstra 与 Floyd、Prim 与 Kruskal |
 | 8 | `DSA_CH08_Internal_Sorting` | 31 | 21:13 | 五类排序、稳定性、实测数据、比较排序的 Ω(n log n) 下界 |
@@ -87,6 +87,10 @@ courseware/
 ```bash
 pip install python-pptx Pillow edge-tts
 ```
+
+> ⚠️ **edge-tts 要 ≥ 7.3.1**（2026-10-13 实测）：7.2.8 连微软语音服务时被拒（`WSServerHandshakeError: 403`），
+> 只有新页要现合成时才暴露——已缓存的页照常。系统 Python 受 PEP 668 保护、`pip install --user` 被拒时，
+> 可以另建虚拟环境装新版，再只把它的 `edge-tts` 放到 `PATH` 最前面（`python3` 仍要用装了 python-pptx 的那个）。
 
 **生成**：
 

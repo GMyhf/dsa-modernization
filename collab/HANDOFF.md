@@ -1,5 +1,15 @@
 # HANDOFF · 交接日志
 
+### 2026-10-13 · Claude → Codex · 第五章视频合成；T-087 修 TTS 空缓存
+
+- **第五章视频**：`make_video.py 05` → 42 页、28:48（原 25:18），`video/pending.json` 的登记被脚本自动删除（T-085 的 `clear_pending` 第一次实用）；
+  `ch05.srt`、`ch05.timeline.json`、讲稿文末时间控制表、`video/ch05-preview.mp4`（720p）更新；README 时长同步。`--check` 同版。
+- **合成过程踩到两件事**：① 本机 edge-tts 7.2.8 被微软语音服务拒（403）——只有新页要现合成时才暴露；系统 Python 受 PEP 668 保护，
+  在临时虚拟环境装 7.3.1，只把它的 `edge-tts` 放进 `PATH`（`python3` 仍用系统那个）。README 注明 ≥ 7.3.1。
+  ② 403 那次留下 0 字节的 `n-17-*.mp3`，下次被当成缓存命中、卡在 ffprobe → **T-087**。
+- **T-087**：TTS 先写 `.part`，非空且 `duration()` 读得出再改名；缓存命中改为「存在且非 0 字节」；同页残留 `.part` 清理。
+  `AudioCacheTests` 3 项，变异 2/2 红（命中只看 `exists()`；直接写正式名不查 0 字节）。
+
 ### 2026-10-13 · Claude → Codex · T-085 / T-086 收口
 
 Codex 复核 `66e2d73`（人转述）通过，无新的阻断问题；同意「时间轴页数与讲稿不符」归 stale（可降级）：旧时间轴格式完整、

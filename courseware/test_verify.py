@@ -230,5 +230,54 @@ class VideoPendingTests(unittest.TestCase):
         self.assertIsNone(verify.make_video.clear_pending('01', self.pending))
 
 
+class AudioCacheTests(unittest.TestCase):
+    """TTS 中途失败不能留下「看起来命中」的空缓存（2026-10-13 合成第五章时踩到：
+    edge-tts 403 留下 0 字节 mp3，下一次直接当缓存命中，卡在 ffprobe 上）。"""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.audio = Path(self.tmp.name) / 'audio'
+        self.sections = [dict(page=1, title='封面', text='各位同学好。')]
+        self.calls = []
+
+    def fake_run(self, write_bytes):
+        def run(cmd, **kw):
+            self.calls.append(cmd[0])
+            out = Path(cmd[cmd.index('--write-media') + 1])
+            out.write_bytes(write_bytes)
+        return run
+
+    def synth(self, write_bytes):
+        mv = verify.make_video
+        with patch.object(mv, 'run', side_effect=self.fake_run(write_bytes)), \
+             patch.object(mv, 'duration', return_value=1.0):
+            return mv.synth(self.sections, self.audio)
+
+    def test_failed_tts_leaves_no_cache_hit(self):
+        """变异：直接写成正式名、不查 0 字节 → 这里会红。"""
+        with self.assertRaises(SystemExit):
+            self.synth(b'')
+        self.assertEqual(list(self.audio.glob('n-*.mp3')), [], '失败的 TTS 不能留下正式缓存文件')
+
+    def test_empty_cache_from_old_runs_is_resynthesized(self):
+        """变异：缓存命中只看 exists() → 这里会红。"""
+        self.audio.mkdir(parents=True)
+        mv = verify.make_video
+        spoken = mv.norm_for_tts(self.sections[0]['text'])
+        key = mv.hashlib.sha256(('%s|%s|%s' % (mv.VOICE, mv.RATE, spoken)).encode('utf-8')).hexdigest()[:16]
+        broken = self.audio / f'n-01-{key}.mp3'
+        broken.write_bytes(b'')
+        self.synth(b'ID3fake-mp3')
+        self.assertEqual(self.calls, ['edge-tts'], '0 字节的旧缓存必须重新合成')
+        self.assertGreater(broken.stat().st_size, 0)
+
+    def test_good_cache_is_reused(self):
+        self.synth(b'ID3fake-mp3')
+        self.calls.clear()
+        self.synth(b'ID3fake-mp3')
+        self.assertEqual(self.calls, [], '非空缓存应直接复用')
+
+
 if __name__ == '__main__':
     unittest.main()

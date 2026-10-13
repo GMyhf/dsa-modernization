@@ -159,6 +159,11 @@ def norm_for_tts(text):
 
 
 # ---------------------------------------------------------------- 语音
+def cached_audio_ok(mp3):
+    """缓存命中的条件：文件在、且不是 0 字节。0 字节是以前中断留下的坏缓存，当作没有。"""
+    return mp3.exists() and mp3.stat().st_size > 0
+
+
 def synth(sections, audio_dir):
     audio_dir.mkdir(parents=True, exist_ok=True)
     meta = []
@@ -168,12 +173,20 @@ def synth(sections, audio_dir):
         key = hashlib.sha256(
             ('%s|%s|%s' % (VOICE, RATE, spoken)).encode('utf-8')).hexdigest()[:16]
         mp3 = audio_dir / f'n-{pid}-{key}.mp3'
-        if not mp3.exists():
-            # 同一页的旧音频（讲稿改过）清掉，别在工作目录里越攒越多
-            for stale in audio_dir.glob(f'n-{pid}-*.mp3'):
+        if not cached_audio_ok(mp3):
+            # 同一页的旧音频（讲稿改过）与上次中断留下的半成品清掉，别越攒越多
+            for stale in [*audio_dir.glob(f'n-{pid}-*.mp3'), *audio_dir.glob(f'n-{pid}-*.part')]:
                 stale.unlink()
+            # 先写临时文件，确认非空、能读出时长再改名：TTS 中途失败（例如服务端 403）
+            # 会留下 0 字节文件，直接写成正式名的话，下次就被当成缓存命中，卡在 ffprobe 上。
+            part = mp3.with_name(mp3.name + '.part')
             run(['edge-tts', '--voice', VOICE, '--rate', RATE,
-                 '--text', spoken, '--write-media', mp3])
+                 '--text', spoken, '--write-media', part])
+            if not part.exists() or part.stat().st_size == 0:
+                part.unlink(missing_ok=True)
+                sys.exit(f'P{pid} 的 TTS 没有产出音频（0 字节），未写入缓存')
+            duration(part)                  # 读不出时长就在这里退出，不会改名成缓存
+            part.replace(mp3)
             mark = ' 新'
         else:
             mark = ''
