@@ -51,6 +51,7 @@ from pptx.oxml.ns import qn                         # noqa: E402
 
 FAILURES = []
 NOTES = []
+PENDING_VIDEO = []      # 登记了「视频待合成」、本次确实过期的章（D-043）
 
 
 def fail(item, msg):
@@ -476,7 +477,16 @@ def check_render(chapters):
 # ---------------------------------------------------------------- 8 视频
 def check_video(chapters, modules):
     """视频本身不入库（一章约 50MB），所以这里查的是**能不能重建出同一份**：
-    讲稿与课件一页一节，时间轴记的来源摘要还对得上。"""
+    讲稿与课件一页一节，时间轴记的来源摘要还对得上。
+
+    D-043：`video/pending.json` 登记了的章，「视频过期」「字幕条数」降为醒目提示
+    （课件可以先改、视频晚点再合成）；讲稿一页一节照样判红——它是视频的源；
+    登记了却已经同版，判红——登记表不许过期。"""
+    pending, registry_problems = make_video.load_pending(HERE / 'video' / 'pending.json')
+    for prob in registry_problems:
+        fail('8 视频', prob)
+    for ch in sorted(set(pending) - set(chapters)):
+        fail('8 视频', f'video/pending.json 登记了第{ch}章，但这一章还没有课件内容')
     for ch in chapters:
         stem = build_all.CHAPTERS[ch]
         script = HERE / 'content' / f'ch{ch}_narration.md'
@@ -497,15 +507,24 @@ def check_video(chapters, modules):
         timeline = HERE / 'video' / f'ch{ch}.timeline.json'
         mp4 = HERE / (stem + '.mp4')
         problems, hints = make_video.check(ch, pptx, script, mp4, timeline)
-        for prob in problems:
-            fail('8 视频', prob)
         for hint in hints:
             note(hint)
         srt = HERE / 'video' / f'ch{ch}.srt'
         if not srt.exists():
-            fail('8 视频', f'第{ch}章缺字幕 video/ch{ch}.srt')
+            problems.append(f'第{ch}章缺字幕 video/ch{ch}.srt')
         elif len(re.findall(r'^\d+$', srt.read_text(encoding='utf-8'), re.M)) != pages:
-            fail('8 视频', f'第{ch}章字幕条数与课件页数不一致')
+            problems.append(f'第{ch}章字幕条数与课件页数不一致')
+        if ch in pending:
+            entry = pending[ch]
+            if not problems:
+                fail('8 视频', f'第{ch}章视频已与课件、讲稿同版，video/pending.json 里这一章的登记该删掉了')
+                continue
+            PENDING_VIDEO.append(ch)
+            for prob in problems:
+                note(f'⚠ 视频待合成（{entry["date"]} {entry["by"]} 登记：{entry["reason"]}）—— {prob}')
+            continue
+        for prob in problems:
+            fail('8 视频', prob)
         if not problems:
             tl = json.loads(timeline.read_text(encoding='utf-8'))
             note(f'第{ch}章视频 {pages} 页、总时长 {tl["total"]}，'
@@ -543,7 +562,11 @@ def main():
             print(line)
         print(f'\n{len(FAILURES)} 项不通过。')
         return 1
-    print('\n全绿。')
+    if PENDING_VIDEO:
+        chs = '、'.join(f'第{ch}章' for ch in PENDING_VIDEO)
+        print(f'\n全绿（⚠ {chs}视频待合成，见 video/pending.json；合成：python3 make_video.py <章号>）。')
+    else:
+        print('\n全绿。')
     return 0
 
 

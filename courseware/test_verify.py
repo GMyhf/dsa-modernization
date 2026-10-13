@@ -1,4 +1,5 @@
 """Courseware gate regressions; run with python -m unittest discover -s courseware."""
+import json
 import tempfile
 import unittest
 import zipfile
@@ -91,6 +92,99 @@ class GateRegressionTests(unittest.TestCase):
                     '<word xMin="20" yMin="20" xMax="40" yMax="40">Test</word>'
                     '</page>')
         self.assertEqual(verify.FAILURES, [])
+
+
+class VideoPendingTests(unittest.TestCase):
+    """D-043：课件可以先改、视频晚点再合成——但登记表本身也要经得起查。"""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.stem = verify.build_all.CHAPTERS['01']
+        self.pptx = self.root / (self.stem + '.pptx')
+        meta = dict(title='Test', subtitle='Subtitle', footer='Footer', info='Info')
+        self.modules = {'01': SimpleNamespace(META=meta, SLIDES=[])}   # 只有封面 1 页
+        verify.deck.build(meta, [], str(self.pptx))
+        (self.root / 'content').mkdir()
+        (self.root / 'video').mkdir()
+        self.script = self.root / 'content' / 'ch01_narration.md'
+        self.script.write_text('# 讲稿\n\n---\n\n## P1｜封面\n\n各位同学好。\n', encoding='utf-8')
+        self.timeline = self.root / 'video' / 'ch01.timeline.json'
+        verify.make_video.write_timeline(
+            [dict(page=1, title='封面', clip=3.0, chars=6)], self.timeline,
+            verify.make_video.pptx_digest(self.pptx), verify.make_video.script_digest(self.script), 3.0)
+        (self.root / 'video' / 'ch01.srt').write_text(
+            '1\n00:00:00,000 --> 00:00:03,000\n各位同学好。\n', encoding='utf-8')
+        self.pending = self.root / 'video' / 'pending.json'
+        self.patch = patch.object(verify, 'HERE', self.root)
+        self.patch.start()
+        self.addCleanup(self.patch.stop)
+        verify.FAILURES.clear()
+        verify.NOTES.clear()
+        verify.PENDING_VIDEO.clear()
+
+    def register(self, **overrides):
+        item = dict(chapter='01', reason='先改课件，攒几处再合成', by='Claude', date='2026-10-13')
+        item.update(overrides)
+        self.pending.write_text(json.dumps({'pending': [item]}, ensure_ascii=False), encoding='utf-8')
+
+    def make_stale(self):
+        self.script.write_text('# 讲稿\n\n---\n\n## P1｜封面\n\n各位同学好，改了一句。\n', encoding='utf-8')
+
+    def test_up_to_date_video_passes(self):
+        verify.check_video(['01'], self.modules)
+        self.assertEqual(verify.FAILURES, [])
+
+    def test_stale_video_fails_without_registration(self):
+        self.make_stale()
+        verify.check_video(['01'], self.modules)
+        self.assertTrue(any('视频过期' in f for f in verify.FAILURES))
+
+    def test_registered_stale_video_is_a_loud_note(self):
+        """变异：登记了也照样 fail → 这里会红。"""
+        self.make_stale()
+        self.register()
+        verify.check_video(['01'], self.modules)
+        self.assertEqual(verify.FAILURES, [])
+        self.assertEqual(verify.PENDING_VIDEO, ['01'])
+        self.assertTrue(any(n.startswith('· ⚠ 视频待合成') and '视频过期' in n for n in verify.NOTES))
+
+    def test_registered_but_up_to_date_fails(self):
+        """登记表不许过期。变异：去掉「已同版就判红」→ 这里会红。"""
+        self.register()
+        verify.check_video(['01'], self.modules)
+        self.assertTrue(any('登记该删掉' in f for f in verify.FAILURES))
+
+    def test_narration_mismatch_still_fails_when_registered(self):
+        """讲稿是视频的源，不降级。"""
+        self.script.write_text('# 讲稿\n\n## P1｜封面\n\n甲。\n\n## P2｜多出来的一页\n\n乙。\n', encoding='utf-8')
+        self.register()
+        verify.check_video(['01'], self.modules)
+        self.assertTrue(any('一页一节' in f for f in verify.FAILURES))
+
+    def test_registration_without_reason_fails(self):
+        self.make_stale()
+        self.register(reason='')
+        verify.check_video(['01'], self.modules)
+        self.assertTrue(any('缺 reason' in f for f in verify.FAILURES))
+        self.assertTrue(any('视频过期' in f for f in verify.FAILURES), '缺字段的登记不能生效')
+
+    def test_registration_of_unwritten_chapter_fails(self):
+        self.register(chapter='02')
+        verify.check_video(['01'], self.modules)
+        self.assertTrue(any('第02章' in f for f in verify.FAILURES))
+
+    def test_clear_pending_removes_only_that_chapter(self):
+        """make_video.py 合成成功后自动删登记。"""
+        items = [dict(chapter='01', reason='a', by='Claude', date='2026-10-13'),
+                 dict(chapter='02', reason='b', by='Claude', date='2026-10-13')]
+        self.pending.write_text(json.dumps({'pending': items}), encoding='utf-8')
+        removed = verify.make_video.clear_pending('01', self.pending)
+        self.assertEqual(removed['reason'], 'a')
+        left = json.loads(self.pending.read_text(encoding='utf-8'))['pending']
+        self.assertEqual([it['chapter'] for it in left], ['02'])
+        self.assertIsNone(verify.make_video.clear_pending('01', self.pending))
 
 
 if __name__ == '__main__':

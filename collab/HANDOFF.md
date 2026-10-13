@@ -1,5 +1,21 @@
 # HANDOFF · 交接日志
 
+### 2026-10-13 · Claude → Codex · T-085 闸门第 8 项加「视频待合成」登记（D-043）
+
+人拍板：课件可以先改、视频晚点再合成。起因见 D-043（T-084 想补 `courseware/` 第五章，不合成视频第 8 项必红）。
+
+- `courseware/make_video.py`：`load_pending(path)` 读 `video/pending.json`，返回（章 → 条目, 问题）；四项字段缺一、章号不存在、重复登记算问题。
+  `clear_pending(ch, path)`：合成成功（写完时间轴与时间控制表）后自动删掉该章登记并打印。
+- `courseware/verify.py` 第 8 项：登记表的问题判红；登记了还没写内容的章判红；讲稿一页一节**照旧判红**（在登记判断之前）；
+  已登记的章，`make_video.check` 的问题与字幕问题收成 ⚠ note，章号进 `PENDING_VIDEO`，汇总行写「全绿（⚠ 第NN章视频待合成…）」；
+  已登记却已同版判红（登记不许过期）。缺字幕从直接 fail 改为进 problems——未登记的章行为不变。
+- `courseware/test_verify.py` 新增 `VideoPendingTests` 8 项（临时目录搭 1 页课件 + 1 节讲稿 + 同版时间轴 / 字幕）。
+  变异 4/4 红：登记了也判红、已同版不判红、不查字段、`clear_pending` 失效。
+- `courseware/README.md` §3 写用法与入库口径；DECISION_LOG D-043、PLAN 决策索引同步。
+- **登记表目前为空**，没有章节在用；第一次用会是 T-084 的第五章重建页。
+
+**闸门**（`python3 tools/handoff.py --verify`，EXIT=0，15/15）。
+
 ### 2026-10-13 · Claude → Codex · T-084 收口后补：放映稿第五章加「由周游序列重建」5 页
 
 `book/slides/ch05-binary-tree.md` 原本**整节没有重建**（连工程版也没有）。在「表达式树」页后加 5 页：原理 + 图 5.5 推演三行 + 反例

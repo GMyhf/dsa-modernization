@@ -324,6 +324,61 @@ def write_timetable(script_path, meta, total):
         head + '\n\n---\n\n' + '\n'.join(rows) + '\n')
 
 
+# ---------------------------------------------------------------- 待合成登记（D-043）
+PENDING_FIELDS = ('chapter', 'reason', 'by', 'date')
+
+
+def pending_path():
+    return HERE / 'video' / 'pending.json'
+
+
+def load_pending(path=None):
+    """读「视频待合成」登记表，返回 ({章号: 条目}, [问题])。
+
+    课件可以先改、视频晚点再合成：登记在这里的章，闸门第 8 项把「视频过期」
+    降为醒目提示。表不存在就是没有待合成的章。四项字段缺一、章号不存在、
+    同一章登记两次，都算问题——登记表本身也要经得起查。
+    """
+    path = path or pending_path()
+    if not path.exists():
+        return {}, []
+    try:
+        raw = json.loads(path.read_text(encoding='utf-8'))
+    except json.JSONDecodeError as e:
+        return {}, [f'{path.name} 不是合法 JSON：{e}']
+    entries, problems = {}, []
+    for item in raw.get('pending', []):
+        ch = str(item.get('chapter', '')).zfill(2)
+        missing = [f for f in PENDING_FIELDS if not str(item.get(f, '')).strip()]
+        if missing:
+            problems.append(f'{path.name} 第{ch}章的登记缺 {"、".join(missing)}')
+            continue
+        if ch not in build_all.CHAPTERS:
+            problems.append(f'{path.name} 登记了不存在的第{ch}章')
+            continue
+        if ch in entries:
+            problems.append(f'{path.name} 第{ch}章登记了两次')
+            continue
+        entries[ch] = item
+    return entries, problems
+
+
+def clear_pending(chapter, path=None):
+    """视频合成成功后删掉这一章的登记；返回删掉的条目（没有就是 None）。"""
+    path = path or pending_path()
+    if not path.exists():
+        return None
+    raw = json.loads(path.read_text(encoding='utf-8'))
+    items = raw.get('pending', [])
+    keep = [it for it in items if str(it.get('chapter', '')).zfill(2) != chapter]
+    if len(keep) == len(items):
+        return None
+    removed = next(it for it in items if str(it.get('chapter', '')).zfill(2) == chapter)
+    raw['pending'] = keep
+    path.write_text(json.dumps(raw, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    return removed
+
+
 # ---------------------------------------------------------------- --check
 def check(chapter, pptx, script, mp4, timeline):
     """校验时间轴记录的来源摘要是否仍等于当前的课件与讲稿。
@@ -431,6 +486,9 @@ def main():
     write_srt(meta, srt)
     write_timeline(meta, timeline, pptx_sha, script_digest(script), total)
     write_timetable(script, meta, total)
+    removed = clear_pending(ch)
+    if removed is not None:
+        print('已删掉「视频待合成」登记：第%s章（%s）' % (ch, removed['reason']))
     size = mp4.stat().st_size / 1e6
     print('\n输出：%s　总时长 %s　%.1f MB' % (mp4.name, fmt(total), size))
     return 0
