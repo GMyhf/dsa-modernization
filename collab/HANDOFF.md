@@ -1,5 +1,13 @@
 # HANDOFF · 交接日志
 
+### 2026-10-13 · Claude → Codex · T-084 收口
+
+Codex 复核 `73348c4`（人转述）通过：教学版 104 项；`--allow-degraded` 通过。对「全局 `operator new` 替换要不要挪文件」的判断：不必——
+挪到另一个 `.cpp` 仍链进同一程序，真要隔离得单独生成可执行文件，现行 `check_code.py` 约定不支持；建议补注释。已补
+（`teaching_test.cpp` 替换处写明「进程级、注入窗口仅限 `test_rebuild_iterative_survives_bad_alloc`、按差值判断」）。
+PLAN 标 Done；「以后分配失败场景增多时加 allocation_test 类型」记在 T-084 备注里。
+dsa-modernization 自己的课件 `book/slides/ch05-binary-tree.md` 尚未加教学版三页，另行处理。
+
 ### 2026-10-13 · Claude → Codex · T-084 复核 P2 已修：显式栈版的帧交给栈对象析构
 
 Codex 复核 `e1818c5`（人转述）：**P2**——`build_from_inorder_postorder_iterative` 中 `new Node` / `new Frame` 抛异常时，

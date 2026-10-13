@@ -15,6 +15,11 @@
 // 并能让第 N 次 new 抛 bad_alloc。只为显式栈版的一条用例服务
 // （Codex 复核 T-084 抓出：new Frame / new Node 失败时，栈里剩下的帧没人还）。
 // 不靠 LeakSanitizer：泄漏的帧常被旧栈上残留的指针「看见」，LSan 会漏报。
+//
+// 替换是**进程级**的，故意如此：整个测试程序的分配都经过它，但平时只计数，
+// 注入窗口只在那一条用例里打开（其余时候 g_allocations_until_failure == -1）；
+// 用例按「前后差值」判断有没有还清，别的测试和标准库的分配不影响结论。
+// 挪到另一个 .cpp 也缩小不了作用域（仍链进同一个程序）——真要隔离得单独生成可执行文件。
 static long g_live_allocations = 0;
 static long g_allocations_until_failure = -1;   // -1：永不失败；0：下一次 new 就抛
 
