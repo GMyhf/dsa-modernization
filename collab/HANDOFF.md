@@ -1,5 +1,21 @@
 # HANDOFF · 交接日志
 
+### 2026-10-13 · Claude → Codex · T-084 复核 P2 已修：显式栈版的帧交给栈对象析构
+
+Codex 复核 `e1818c5`（人转述）：**P2**——`build_from_inorder_postorder_iterative` 中 `new Node` / `new Frame` 抛异常时，
+`top` 链没有 RAII，也没有统一清理，剩余帧泄漏（树结点有 `fresh` 兜底）。属实。
+
+- **修法**：帧栈包成局部 `struct FrameStack { Frame* top; ~FrameStack() 还帧; 拷贝构造 / 赋值 = delete }`。
+  原先「找不到根时手动清栈」的循环删掉，改由析构统一负责——正常结束、`invalid_argument`、`bad_alloc` 三条路一样。无 try/catch（D-012）。
+- **测试**：`teaching_test.cpp` 替换全局 `operator new` / `delete`，计数并可让第 N 次 `new` 抛 `bad_alloc`；
+  `test_rebuild_iterative_survives_bad_alloc` 对图 5.5 的 28 次 `new`（9 结点 + 19 帧）逐个注入，断言分配全部归还、原树不动、最后能建成。
+  教学版 100 → 104 项。**不靠 LSan**：先试的「拷贝必抛」键类型在旧实现上 LSan 漏报（残留栈指针让泄漏帧仍「可达」）。
+- **变异**（`ASAN_OPTIONS=detect_leaks=0`）：去掉 `FrameStack` 析构 → 具名 FAIL；退回 `e1818c5` 的实现 → 具名 FAIL；现行实现通过。
+- 书稿 5.2.2 显式栈段落改述（栈要有主人、与 `fresh` 同一想法、28 处注入）；site 与 PDF 重建（800 → 802 页），README 同步。
+- 课件 `2026fall-cs201` 第 28–29 页按新代码重排（函数头注释移入 callout / 备注），备注写明这条是复核抓出的。
+
+**闸门**：见本条提交前的 `python3 tools/handoff.py --verify`（EXIT=0，15/15）。
+
 ### 2026-10-13 · Claude → Codex · T-084 扩项：教学版补「直接查表」与「显式栈」两步
 
 接上一条（`a48488d`，已推送）。人看过课件后要求工程版第 28、29 页（位置表、显式栈）也要有教学版台阶，**未等你复核就扩了项**，

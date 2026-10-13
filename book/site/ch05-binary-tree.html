@@ -505,12 +505,29 @@ BST 中序: 1 3 4 6 7 8 10 14
         std::<span class="t">size_t</span> post_begin;         <span class="c">// 后序段起点（与中序段一样长）</span>
         Frame* next;                    <span class="c">// 链式栈：下面那一帧</span>
     };
+    <span class="c">// 栈也要有主人：它一离开作用域——正常建完、找不到根抛异常、</span>
+    <span class="c">// 甚至 new 本身失败——析构都会把剩下的帧还掉。与 fresh 是同一个想法。</span>
+    <span class="k">struct</span> FrameStack {
+        Frame* top = <span class="k">nullptr</span>;
+        FrameStack() = <span class="k">default</span>;
+        FrameStack(<span class="k">const</span> FrameStack&amp;) = <span class="k">delete</span>;             <span class="c">// 三法则：拷贝出两份，</span>
+        FrameStack&amp; <span class="k">operator</span>=(<span class="k">const</span> FrameStack&amp;) = <span class="k">delete</span>;  <span class="c">// 同一批帧就会被删两次</span>
+        ~FrameStack() {
+            <span class="k">while</span> (top != <span class="k">nullptr</span>) {
+                Frame* rest = top-&gt;next;
+                <span class="k">delete</span> top;
+                top = rest;
+            }
+        }
+    };
+
     BinaryTree fresh;
-    Frame* top = <span class="k">new</span> Frame{&amp;fresh.root_, <span class="n">0</span>, count, <span class="n">0</span>, <span class="k">nullptr</span>};   <span class="c">// 第一次「调用」</span>
-    <span class="k">while</span> (top != <span class="k">nullptr</span>) {
-        <span class="k">const</span> Frame f = *top;           <span class="c">// 弹出一帧</span>
-        Frame* popped = top;
-        top = top-&gt;next;
+    FrameStack stack;
+    stack.top = <span class="k">new</span> Frame{&amp;fresh.root_, <span class="n">0</span>, count, <span class="n">0</span>, <span class="k">nullptr</span>};   <span class="c">// 第一次「调用」</span>
+    <span class="k">while</span> (stack.top != <span class="k">nullptr</span>) {
+        <span class="k">const</span> Frame f = *stack.top;     <span class="c">// 弹出一帧</span>
+        Frame* popped = stack.top;
+        stack.top = stack.top-&gt;next;
         <span class="k">delete</span> popped;
 
         <span class="k">if</span> (f.in_begin == f.in_end) {
@@ -522,12 +539,7 @@ BST 中序: 1 3 4 6 7 8 10 14
         <span class="k">while</span> (k &lt; f.in_end &amp;&amp; inorder[k] != key) {
             ++k;
         }
-        <span class="k">if</span> (k == f.in_end) {
-            <span class="k">while</span> (top != <span class="k">nullptr</span>) {    <span class="c">// 抛异常之前，先把栈里剩下的帧还掉</span>
-                Frame* rest = top-&gt;next;
-                <span class="k">delete</span> top;
-                top = rest;
-            }
+        <span class="k">if</span> (k == f.in_end) {            <span class="c">// 剩下的帧由 stack 的析构还掉</span>
             <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;build_from_inorder_postorder_iterative: root lies outside its inorder range&quot;</span>);
         }
 
@@ -535,14 +547,14 @@ BST 中序: 1 3 4 6 7 8 10 14
         *f.link = node;                 <span class="c">// 先挂上：之后再抛异常，它也归临时树释放</span>
         <span class="k">const</span> std::<span class="t">size_t</span> left_size = k - f.in_begin;
         <span class="c">// 先压右、再压左：栈后进先出，于是左子树先建，与递归的次序一致</span>
-        top = <span class="k">new</span> Frame{&amp;node-&gt;right, k + <span class="n">1</span>, f.in_end, f.post_begin + left_size, top};
-        top = <span class="k">new</span> Frame{&amp;node-&gt;left, f.in_begin, k, f.post_begin, top};
+        stack.top = <span class="k">new</span> Frame{&amp;node-&gt;right, k + <span class="n">1</span>, f.in_end, f.post_begin + left_size, stack.top};
+        stack.top = <span class="k">new</span> Frame{&amp;node-&gt;left, f.in_begin, k, f.post_begin, stack.top};
     }
     clear();
     root_ = fresh.root_;
     fresh.root_ = <span class="k">nullptr</span>;
 }</code></pre></div>
-<p>对照 <code>build_impl</code> 逐行看：参数 <code>Node*&amp; link</code> 变成帧里的 <code>Node** link</code>（引用存不进结构体，只能存指针）；先压右、再压左，是因为栈后进先出，这样左子树先建，次序与递归一致（反过来压也能建对，只是建的次序不同）。抛异常之前要先把栈里剩下的帧还掉——递归版不用操心这件事，运行栈是自动回收的。还要说清楚一点：教学版的析构 <code>destroy</code> 仍是递归的，一条很长的链即使这样建出来了，析构时照样压穿运行栈。这里要学的是改写的手法本身。</p>
+<p>对照 <code>build_impl</code> 逐行看：参数 <code>Node*&amp; link</code> 变成帧里的 <code>Node** link</code>（引用存不进结构体，只能存指针）；先压右、再压左，是因为栈后进先出，这样左子树先建，次序与递归一致（反过来压也能建对，只是建的次序不同）。递归版不用操心「剩下的帧」：一出错，运行栈自动回收；自己管的栈就得有个主人。这里把栈包成局部对象 <code>FrameStack</code>，它的析构负责还帧——正常建完、找不到根抛异常、甚至某次 <code>new</code> 本身失败，剩下的帧都由它还掉，与入口里那棵临时树 <code>fresh</code> 是同一个想法。测试把 28 次 <code>new</code>（图 5.5 的 9 个结点加 19 帧）逐个注入失败，每一次都核对分配全部归还、原树不动。还要说清楚一点：教学版的析构 <code>destroy</code> 仍是递归的，一条很长的链即使这样建出来了，析构时照样压穿运行栈。这里要学的是改写的手法本身。</p>
 <p>工程版把上面两步合在一起，并推广到任意类型 <code>T</code>。关键码不一定能当下标，点名册只好换成「把中序下标按键排序，再二分」，总代价 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>，只要求 <code>T</code> 支持 <code>&lt;</code>；显式栈换成本章那把手写的链式栈 <code>LinkedStack</code>，析构也是迭代的，所以 20 万结点的链从建到拆都不怕；重复键、键缺失单独报出，好让报错说对原因。它把两种重建做成 <code>BinaryTree</code> 的两个静态工厂，返回一棵拥有全部结点的新树：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch05/binary_tree/modern.hpp">code/ch05/binary_tree/modern.hpp#rebuild</a></div><pre><code><span class="c">/// 由中序 + 后序序列重建二叉树（两个序列各 count 个元素，**关键码互不相同**）。</span>
 <span class="c">///</span>
@@ -813,12 +825,29 @@ BST 中序: 1 3 4 6 7 8 10 14
             std::<span class="t">size_t</span> post_begin;         <span class="c">// 后序段起点（与中序段一样长）</span>
             Frame* next;                    <span class="c">// 链式栈：下面那一帧</span>
         };
+        <span class="c">// 栈也要有主人：它一离开作用域——正常建完、找不到根抛异常、</span>
+        <span class="c">// 甚至 new 本身失败——析构都会把剩下的帧还掉。与 fresh 是同一个想法。</span>
+        <span class="k">struct</span> FrameStack {
+            Frame* top = <span class="k">nullptr</span>;
+            FrameStack() = <span class="k">default</span>;
+            FrameStack(<span class="k">const</span> FrameStack&amp;) = <span class="k">delete</span>;             <span class="c">// 三法则：拷贝出两份，</span>
+            FrameStack&amp; <span class="k">operator</span>=(<span class="k">const</span> FrameStack&amp;) = <span class="k">delete</span>;  <span class="c">// 同一批帧就会被删两次</span>
+            ~FrameStack() {
+                <span class="k">while</span> (top != <span class="k">nullptr</span>) {
+                    Frame* rest = top-&gt;next;
+                    <span class="k">delete</span> top;
+                    top = rest;
+                }
+            }
+        };
+
         BinaryTree fresh;
-        Frame* top = <span class="k">new</span> Frame{&amp;fresh.root_, <span class="n">0</span>, count, <span class="n">0</span>, <span class="k">nullptr</span>};   <span class="c">// 第一次「调用」</span>
-        <span class="k">while</span> (top != <span class="k">nullptr</span>) {
-            <span class="k">const</span> Frame f = *top;           <span class="c">// 弹出一帧</span>
-            Frame* popped = top;
-            top = top-&gt;next;
+        FrameStack stack;
+        stack.top = <span class="k">new</span> Frame{&amp;fresh.root_, <span class="n">0</span>, count, <span class="n">0</span>, <span class="k">nullptr</span>};   <span class="c">// 第一次「调用」</span>
+        <span class="k">while</span> (stack.top != <span class="k">nullptr</span>) {
+            <span class="k">const</span> Frame f = *stack.top;     <span class="c">// 弹出一帧</span>
+            Frame* popped = stack.top;
+            stack.top = stack.top-&gt;next;
             <span class="k">delete</span> popped;
 
             <span class="k">if</span> (f.in_begin == f.in_end) {
@@ -830,12 +859,7 @@ BST 中序: 1 3 4 6 7 8 10 14
             <span class="k">while</span> (k &lt; f.in_end &amp;&amp; inorder[k] != key) {
                 ++k;
             }
-            <span class="k">if</span> (k == f.in_end) {
-                <span class="k">while</span> (top != <span class="k">nullptr</span>) {    <span class="c">// 抛异常之前，先把栈里剩下的帧还掉</span>
-                    Frame* rest = top-&gt;next;
-                    <span class="k">delete</span> top;
-                    top = rest;
-                }
+            <span class="k">if</span> (k == f.in_end) {            <span class="c">// 剩下的帧由 stack 的析构还掉</span>
                 <span class="k">throw</span> std::invalid_argument(<span class="s">&quot;build_from_inorder_postorder_iterative: root lies outside its inorder range&quot;</span>);
             }
 
@@ -843,8 +867,8 @@ BST 中序: 1 3 4 6 7 8 10 14
             *f.link = node;                 <span class="c">// 先挂上：之后再抛异常，它也归临时树释放</span>
             <span class="k">const</span> std::<span class="t">size_t</span> left_size = k - f.in_begin;
             <span class="c">// 先压右、再压左：栈后进先出，于是左子树先建，与递归的次序一致</span>
-            top = <span class="k">new</span> Frame{&amp;node-&gt;right, k + <span class="n">1</span>, f.in_end, f.post_begin + left_size, top};
-            top = <span class="k">new</span> Frame{&amp;node-&gt;left, f.in_begin, k, f.post_begin, top};
+            stack.top = <span class="k">new</span> Frame{&amp;node-&gt;right, k + <span class="n">1</span>, f.in_end, f.post_begin + left_size, stack.top};
+            stack.top = <span class="k">new</span> Frame{&amp;node-&gt;left, f.in_begin, k, f.post_begin, stack.top};
         }
         clear();
         root_ = fresh.root_;

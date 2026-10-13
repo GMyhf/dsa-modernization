@@ -4,10 +4,43 @@
 #include "teaching.hpp"
 
 #include <cstdio>
+#include <cstdlib>
 #include <iostream>
+#include <new>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+
+// 分配失败注入：替换全局 operator new / delete，数一数还有几次 new 没还，
+// 并能让第 N 次 new 抛 bad_alloc。只为显式栈版的一条用例服务
+// （Codex 复核 T-084 抓出：new Frame / new Node 失败时，栈里剩下的帧没人还）。
+// 不靠 LeakSanitizer：泄漏的帧常被旧栈上残留的指针「看见」，LSan 会漏报。
+static long g_live_allocations = 0;
+static long g_allocations_until_failure = -1;   // -1：永不失败；0：下一次 new 就抛
+
+void* operator new(std::size_t size) {
+    if (g_allocations_until_failure == 0) {
+        throw std::bad_alloc();
+    }
+    if (g_allocations_until_failure > 0) {
+        --g_allocations_until_failure;
+    }
+    void* p = std::malloc(size == 0 ? 1 : size);
+    if (p == nullptr) {
+        throw std::bad_alloc();
+    }
+    ++g_live_allocations;
+    return p;
+}
+
+void operator delete(void* p) noexcept {
+    if (p != nullptr) {
+        --g_live_allocations;
+        std::free(p);
+    }
+}
+
+void operator delete(void* p, std::size_t) noexcept { operator delete(p); }
 
 namespace {
 
@@ -526,6 +559,39 @@ void test_rebuild_other_versions_reject() {
     check(all_orders(tree) == before, "重建拒绝（查表版）后原树不动");
 }
 
+// 显式栈版：第 1、2、……次 new 依次失败（每次只让一处失败），看每一处都收拾干净。
+// 图 5.5 共 9 个结点、19 帧（第一帧 + 每个结点压两帧），也就是 28 次 new。
+// 变异：去掉 FrameStack 的析构，或退回「只在找不到根时手动清栈」的写法 → 「全部还掉」会红。
+void test_rebuild_iterative_survives_bad_alloc() {
+    const std::string in = "DBGEACHFI", post = "DGEBHIFCA";
+    BinaryTree<char> tree;
+    tree.create_leaf('Z');                       // 原树：只有一个 Z
+
+    int failures = 0;
+    bool all_released = true, unchanged = true;
+    for (long n = 0;; ++n) {
+        const long live_before = g_live_allocations;
+        g_allocations_until_failure = n;         // 前 n 次 new 成功，第 n+1 次抛
+        bool failed = false;
+        try {
+            tree.build_from_inorder_postorder_iterative(in.data(), post.data(), in.size());
+        } catch (const std::bad_alloc&) {
+            failed = true;
+        }
+        g_allocations_until_failure = -1;
+        if (!failed) {
+            break;                               // n 次就够用了：建成了
+        }
+        ++failures;
+        all_released = all_released && g_live_allocations == live_before;
+        unchanged = unchanged && tree.size() == 1 && tree.root()->value == 'Z';
+    }
+    check(failures == 28, "显式栈版：图 5.5 共 28 次 new（9 个结点 + 19 帧），每一处都注入过失败");
+    check(all_released, "显式栈版：任何一次 new 失败，已建结点与栈里剩下的帧全部还掉");
+    check(unchanged, "显式栈版：new 失败后原树不动");
+    check(all_orders(tree) == "ABDEGCFHI/DBGEACHFI/DGEBHIFCA/ABCDEFGHI", "显式栈版：不再注入失败时正常建成图 5.5");
+}
+
 // D-001 第 3 条红线：容器内零 I/O。
 void test_no_console_output() {
     std::ostringstream out, err;
@@ -585,6 +651,7 @@ int main() {
     test_rebuild_rejects_inconsistent();
     test_rebuild_three_versions_agree();
     test_rebuild_other_versions_reject();
+    test_rebuild_iterative_survives_bad_alloc();
 
     test_no_console_output();
 

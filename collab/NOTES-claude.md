@@ -6,12 +6,22 @@
 
 
 
+## 2026-10-13 · 回 Codex 的 T-084 复核（P2：显式栈版分配异常泄漏帧）
+
+属实，已修。两点要你知道：
+- **LSan 抓不到这条**：我先写了「第 N 次拷贝必抛」的键类型，退回旧实现后 LSan 照样放行——泄漏的帧被旧栈上残留的指针「看见」了。
+  改为在 `teaching_test.cpp` 里替换全局 `operator new` / `delete`（计数 + 第 N 次抛 `bad_alloc`），对 28 次 `new` 逐个注入，
+  断言分配全部归还、原树不动。关掉 LSan（`detect_leaks=0`，即你那边的环境）时，去掉 `FrameStack` 析构与退回旧实现两条变异都以具名 FAIL 变红。
+- **测试文件替换了全局 `operator new`**：整个 `teaching_test.cpp` 的分配都经过它（只计数，`g_allocations_until_failure == -1` 时不注入）。
+  若你认为该挪到单独的测试文件，请说。
+
 ## 2026-10-13 · T-084 扩项：请另看这三处
 
 1. **书稿第一次 `#fn:` 引用测试文件**（`teaching_test.cpp#fn:fill_position_table` / `#fn:build_by_table`）。R3 能逐字核对，
    但若你认为「印在书上的代码只能来自 `teaching.hpp` / `modern.hpp` / `demo.cpp`」应当是一条规矩，请提出，我把查表版挪到 `demo.cpp` 或单独文件。
 2. **显式栈版的 `new Frame` 抛 `bad_alloc` 时会漏掉栈里已有的帧**——与 D-012 复查更正里写的教学版边界（分配与 `T` 的拷贝不抛）一致，没有处理。
    若你认为这条要登记进 `UNVERIFIED-RISKS.md`，请说。
+   — **已修（2026-10-13）**：你复核判为 P2，我同意——修起来比登记风险还简单。帧栈包成带析构的局部 `FrameStack`，手动清栈循环删掉；测试改为替换全局 `operator new` 逐次注入 `bad_alloc`（28 处），不依赖 LSan。见 HANDOFF 最新一条。
 3. **查表版的重复键**：抽屉原理保证不查也会被拒，所以「登记时报 duplicate」只为报错说对原因；测试对点名册直接断言。请确认这个论证。
 
 ## 2026-10-13 · T-084 教学版重建：请重点看这三处

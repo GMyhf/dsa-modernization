@@ -468,12 +468,29 @@ void build_from_inorder_postorder_iterative(const T* inorder, const T* postorder
         std::size_t post_begin;         // 后序段起点（与中序段一样长）
         Frame* next;                    // 链式栈：下面那一帧
     };
+    // 栈也要有主人：它一离开作用域——正常建完、找不到根抛异常、
+    // 甚至 new 本身失败——析构都会把剩下的帧还掉。与 fresh 是同一个想法。
+    struct FrameStack {
+        Frame* top = nullptr;
+        FrameStack() = default;
+        FrameStack(const FrameStack&) = delete;             // 三法则：拷贝出两份，
+        FrameStack& operator=(const FrameStack&) = delete;  // 同一批帧就会被删两次
+        ~FrameStack() {
+            while (top != nullptr) {
+                Frame* rest = top->next;
+                delete top;
+                top = rest;
+            }
+        }
+    };
+
     BinaryTree fresh;
-    Frame* top = new Frame{&fresh.root_, 0, count, 0, nullptr};   // 第一次「调用」
-    while (top != nullptr) {
-        const Frame f = *top;           // 弹出一帧
-        Frame* popped = top;
-        top = top->next;
+    FrameStack stack;
+    stack.top = new Frame{&fresh.root_, 0, count, 0, nullptr};   // 第一次「调用」
+    while (stack.top != nullptr) {
+        const Frame f = *stack.top;     // 弹出一帧
+        Frame* popped = stack.top;
+        stack.top = stack.top->next;
         delete popped;
 
         if (f.in_begin == f.in_end) {
@@ -485,12 +502,7 @@ void build_from_inorder_postorder_iterative(const T* inorder, const T* postorder
         while (k < f.in_end && inorder[k] != key) {
             ++k;
         }
-        if (k == f.in_end) {
-            while (top != nullptr) {    // 抛异常之前，先把栈里剩下的帧还掉
-                Frame* rest = top->next;
-                delete top;
-                top = rest;
-            }
+        if (k == f.in_end) {            // 剩下的帧由 stack 的析构还掉
             throw std::invalid_argument("build_from_inorder_postorder_iterative: root lies outside its inorder range");
         }
 
@@ -498,8 +510,8 @@ void build_from_inorder_postorder_iterative(const T* inorder, const T* postorder
         *f.link = node;                 // 先挂上：之后再抛异常，它也归临时树释放
         const std::size_t left_size = k - f.in_begin;
         // 先压右、再压左：栈后进先出，于是左子树先建，与递归的次序一致
-        top = new Frame{&node->right, k + 1, f.in_end, f.post_begin + left_size, top};
-        top = new Frame{&node->left, f.in_begin, k, f.post_begin, top};
+        stack.top = new Frame{&node->right, k + 1, f.in_end, f.post_begin + left_size, stack.top};
+        stack.top = new Frame{&node->left, f.in_begin, k, f.post_begin, stack.top};
     }
     clear();
     root_ = fresh.root_;
@@ -507,7 +519,7 @@ void build_from_inorder_postorder_iterative(const T* inorder, const T* postorder
 }
 ```
 
-对照 `build_impl` 逐行看：参数 `Node*& link` 变成帧里的 `Node** link`（引用存不进结构体，只能存指针）；先压右、再压左，是因为栈后进先出，这样左子树先建，次序与递归一致（反过来压也能建对，只是建的次序不同）。抛异常之前要先把栈里剩下的帧还掉——递归版不用操心这件事，运行栈是自动回收的。还要说清楚一点：教学版的析构 `destroy` 仍是递归的，一条很长的链即使这样建出来了，析构时照样压穿运行栈。这里要学的是改写的手法本身。
+对照 `build_impl` 逐行看：参数 `Node*& link` 变成帧里的 `Node** link`（引用存不进结构体，只能存指针）；先压右、再压左，是因为栈后进先出，这样左子树先建，次序与递归一致（反过来压也能建对，只是建的次序不同）。递归版不用操心「剩下的帧」：一出错，运行栈自动回收；自己管的栈就得有个主人。这里把栈包成局部对象 `FrameStack`，它的析构负责还帧——正常建完、找不到根抛异常、甚至某次 `new` 本身失败，剩下的帧都由它还掉，与入口里那棵临时树 `fresh` 是同一个想法。测试把 28 次 `new`（图 5.5 的 9 个结点加 19 帧）逐个注入失败，每一次都核对分配全部归还、原树不动。还要说清楚一点：教学版的析构 `destroy` 仍是递归的，一条很长的链即使这样建出来了，析构时照样压穿运行栈。这里要学的是改写的手法本身。
 
 工程版把上面两步合在一起，并推广到任意类型 `T`。关键码不一定能当下标，点名册只好换成「把中序下标按键排序，再二分」，总代价 $O(n\log n)$，只要求 `T` 支持 `<`；显式栈换成本章那把手写的链式栈 `LinkedStack`，析构也是迭代的，所以 20 万结点的链从建到拆都不怕；重复键、键缺失单独报出，好让报错说对原因。它把两种重建做成 `BinaryTree` 的两个静态工厂，返回一棵拥有全部结点的新树：
 
@@ -815,12 +827,29 @@ public:
             std::size_t post_begin;         // 后序段起点（与中序段一样长）
             Frame* next;                    // 链式栈：下面那一帧
         };
+        // 栈也要有主人：它一离开作用域——正常建完、找不到根抛异常、
+        // 甚至 new 本身失败——析构都会把剩下的帧还掉。与 fresh 是同一个想法。
+        struct FrameStack {
+            Frame* top = nullptr;
+            FrameStack() = default;
+            FrameStack(const FrameStack&) = delete;             // 三法则：拷贝出两份，
+            FrameStack& operator=(const FrameStack&) = delete;  // 同一批帧就会被删两次
+            ~FrameStack() {
+                while (top != nullptr) {
+                    Frame* rest = top->next;
+                    delete top;
+                    top = rest;
+                }
+            }
+        };
+
         BinaryTree fresh;
-        Frame* top = new Frame{&fresh.root_, 0, count, 0, nullptr};   // 第一次「调用」
-        while (top != nullptr) {
-            const Frame f = *top;           // 弹出一帧
-            Frame* popped = top;
-            top = top->next;
+        FrameStack stack;
+        stack.top = new Frame{&fresh.root_, 0, count, 0, nullptr};   // 第一次「调用」
+        while (stack.top != nullptr) {
+            const Frame f = *stack.top;     // 弹出一帧
+            Frame* popped = stack.top;
+            stack.top = stack.top->next;
             delete popped;
 
             if (f.in_begin == f.in_end) {
@@ -832,12 +861,7 @@ public:
             while (k < f.in_end && inorder[k] != key) {
                 ++k;
             }
-            if (k == f.in_end) {
-                while (top != nullptr) {    // 抛异常之前，先把栈里剩下的帧还掉
-                    Frame* rest = top->next;
-                    delete top;
-                    top = rest;
-                }
+            if (k == f.in_end) {            // 剩下的帧由 stack 的析构还掉
                 throw std::invalid_argument("build_from_inorder_postorder_iterative: root lies outside its inorder range");
             }
 
@@ -845,8 +869,8 @@ public:
             *f.link = node;                 // 先挂上：之后再抛异常，它也归临时树释放
             const std::size_t left_size = k - f.in_begin;
             // 先压右、再压左：栈后进先出，于是左子树先建，与递归的次序一致
-            top = new Frame{&node->right, k + 1, f.in_end, f.post_begin + left_size, top};
-            top = new Frame{&node->left, f.in_begin, k, f.post_begin, top};
+            stack.top = new Frame{&node->right, k + 1, f.in_end, f.post_begin + left_size, stack.top};
+            stack.top = new Frame{&node->left, f.in_begin, k, f.post_begin, stack.top};
         }
         clear();
         root_ = fresh.root_;

@@ -99,12 +99,29 @@ public:
             std::size_t post_begin;         // 后序段起点（与中序段一样长）
             Frame* next;                    // 链式栈：下面那一帧
         };
+        // 栈也要有主人：它一离开作用域——正常建完、找不到根抛异常、
+        // 甚至 new 本身失败——析构都会把剩下的帧还掉。与 fresh 是同一个想法。
+        struct FrameStack {
+            Frame* top = nullptr;
+            FrameStack() = default;
+            FrameStack(const FrameStack&) = delete;             // 三法则：拷贝出两份，
+            FrameStack& operator=(const FrameStack&) = delete;  // 同一批帧就会被删两次
+            ~FrameStack() {
+                while (top != nullptr) {
+                    Frame* rest = top->next;
+                    delete top;
+                    top = rest;
+                }
+            }
+        };
+
         BinaryTree fresh;
-        Frame* top = new Frame{&fresh.root_, 0, count, 0, nullptr};   // 第一次「调用」
-        while (top != nullptr) {
-            const Frame f = *top;           // 弹出一帧
-            Frame* popped = top;
-            top = top->next;
+        FrameStack stack;
+        stack.top = new Frame{&fresh.root_, 0, count, 0, nullptr};   // 第一次「调用」
+        while (stack.top != nullptr) {
+            const Frame f = *stack.top;     // 弹出一帧
+            Frame* popped = stack.top;
+            stack.top = stack.top->next;
             delete popped;
 
             if (f.in_begin == f.in_end) {
@@ -116,12 +133,7 @@ public:
             while (k < f.in_end && inorder[k] != key) {
                 ++k;
             }
-            if (k == f.in_end) {
-                while (top != nullptr) {    // 抛异常之前，先把栈里剩下的帧还掉
-                    Frame* rest = top->next;
-                    delete top;
-                    top = rest;
-                }
+            if (k == f.in_end) {            // 剩下的帧由 stack 的析构还掉
                 throw std::invalid_argument("build_from_inorder_postorder_iterative: root lies outside its inorder range");
             }
 
@@ -129,8 +141,8 @@ public:
             *f.link = node;                 // 先挂上：之后再抛异常，它也归临时树释放
             const std::size_t left_size = k - f.in_begin;
             // 先压右、再压左：栈后进先出，于是左子树先建，与递归的次序一致
-            top = new Frame{&node->right, k + 1, f.in_end, f.post_begin + left_size, top};
-            top = new Frame{&node->left, f.in_begin, k, f.post_begin, top};
+            stack.top = new Frame{&node->right, k + 1, f.in_end, f.post_begin + left_size, stack.top};
+            stack.top = new Frame{&node->left, f.in_begin, k, f.post_begin, stack.top};
         }
         clear();
         root_ = fresh.root_;
