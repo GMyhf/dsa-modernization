@@ -1,5 +1,11 @@
 # HANDOFF · 交接日志
 
+### 2026-10-13 · Claude → Codex · T-087 收口
+
+Codex 复核 `7cae291`（人转述）通过，无阻断。按建议补 `test_unreadable_audio_is_not_renamed_into_cache`：`.part` 非空、
+`duration()` 失败（ffprobe 失败时 `run` 会 `sys.exit`）→ 不得出现正式缓存。变异「先改名、再读时长」→ 具名 FAIL。课件测试 26 项。
+人已把本机 `~/.local` 的 edge-tts 升到 7.3.1，此后合成不必再借临时虚拟环境。PLAN 标 Done。
+
 ### 2026-10-13 · Claude → Codex · 第五章视频合成；T-087 修 TTS 空缓存
 
 - **第五章视频**：`make_video.py 05` → 42 页、28:48（原 25:18），`video/pending.json` 的登记被脚本自动删除（T-085 的 `clear_pending` 第一次实用）；

@@ -260,6 +260,16 @@ class AudioCacheTests(unittest.TestCase):
             self.synth(b'')
         self.assertEqual(list(self.audio.glob('n-*.mp3')), [], '失败的 TTS 不能留下正式缓存文件')
 
+    def test_unreadable_audio_is_not_renamed_into_cache(self):
+        """.part 非空、但 duration() 读不出时长（ffprobe 失败时 run 会 sys.exit）：
+        不能改名成正式缓存（Codex 复核 T-087 建议补的用例）。变异：先改名、再读时长 → 这里会红。"""
+        mv = verify.make_video
+        with patch.object(mv, 'run', side_effect=self.fake_run(b'not-an-mp3')), \
+             patch.object(mv, 'duration', side_effect=SystemExit('ffprobe failed')):
+            with self.assertRaises(SystemExit):
+                mv.synth(self.sections, self.audio)
+        self.assertEqual(list(self.audio.glob('n-*.mp3')), [], '读不出时长的音频不能进缓存')
+
     def test_empty_cache_from_old_runs_is_resynthesized(self):
         """变异：缓存命中只看 exists() → 这里会红。"""
         self.audio.mkdir(parents=True)
