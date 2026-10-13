@@ -176,6 +176,48 @@ class VideoPendingTests(unittest.TestCase):
         verify.check_video(['01'], self.modules)
         self.assertTrue(any('第02章' in f for f in verify.FAILURES))
 
+    # Codex 复核 T-085（P1）：登记只降级「视频旧了」，源或记录缺了、坏了照样判红。
+    def test_registered_missing_timeline_still_fails(self):
+        self.make_stale()
+        self.register()
+        self.timeline.unlink()
+        verify.check_video(['01'], self.modules)
+        self.assertTrue(any('时间轴不存在' in f for f in verify.FAILURES))
+        self.assertEqual(verify.PENDING_VIDEO, [])
+
+    def test_registered_malformed_timeline_still_fails(self):
+        self.make_stale()
+        self.register()
+        self.timeline.write_text('{not json', encoding='utf-8')
+        verify.check_video(['01'], self.modules)
+        self.assertTrue(any('不是合法 JSON' in f for f in verify.FAILURES))
+
+    def test_registered_timeline_missing_field_still_fails(self):
+        self.make_stale()
+        self.register()
+        self.timeline.write_text(json.dumps({'sections': []}), encoding='utf-8')
+        verify.check_video(['01'], self.modules)
+        self.assertTrue(any('时间轴缺字段' in f for f in verify.FAILURES))
+
+    def test_registered_missing_subtitles_still_fails(self):
+        self.make_stale()
+        self.register()
+        (self.root / 'video' / 'ch01.srt').unlink()
+        verify.check_video(['01'], self.modules)
+        self.assertTrue(any('缺字幕' in f for f in verify.FAILURES))
+
+    def test_registered_missing_narration_still_fails(self):
+        self.register()
+        self.script.unlink()
+        verify.check_video(['01'], self.modules)
+        self.assertTrue(any('没有旁白讲稿' in f for f in verify.FAILURES))
+
+    def test_unregistered_missing_narration_is_only_skipped(self):
+        """没登记、也没讲稿的章（还没做视频）照旧只提示——行为不变。"""
+        self.script.unlink()
+        verify.check_video(['01'], self.modules)
+        self.assertEqual(verify.FAILURES, [])
+
     def test_clear_pending_removes_only_that_chapter(self):
         """make_video.py 合成成功后自动删登记。"""
         items = [dict(chapter='01', reason='a', by='Claude', date='2026-10-13'),

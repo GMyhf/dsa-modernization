@@ -380,33 +380,52 @@ def clear_pending(chapter, path=None):
 
 
 # ---------------------------------------------------------------- --check
-def check(chapter, pptx, script, mp4, timeline):
-    """校验时间轴记录的来源摘要是否仍等于当前的课件与讲稿。
+def check_split(chapter, pptx, script, mp4, timeline):
+    """校验时间轴记录的来源摘要是否仍等于当前的课件与讲稿，问题分两类返回。
+
+    返回 (hard, stale, hints)：
+      hard  —— 源或记录缺了、坏了：课件 / 讲稿 / 时间轴不存在，时间轴不是合法 JSON
+               或缺字段。这类问题重新合成也未必修得好，**任何时候都判红**；
+      stale —— 视频旧了：课件或讲稿的摘要变了、时间轴页数与讲稿对不上。
+               重新合成即可修好；D-043 登记了「视频待合成」的章，这一类降为提示。
+    （Codex 复核 T-085 抓出：最初不分类，登记后连时间轴缺失也被一并降级。）
 
     成品 mp4 不入库（一章约 50MB），所以它缺席**不判红**，只提示可重建 ——
-    和 tools/pdfref.py 缺少扫描件时的做法一致。判红的是「时间轴与来源对不上」：
-    那说明课件或讲稿改过而视频没重建，此时哪怕 mp4 在，它也是旧的。
+    和 tools/pdfref.py 缺少扫描件时的做法一致。
     """
-    problems, hints = [], []
+    hard, stale, hints = [], [], []
     for label, path in (('课件', pptx), ('讲稿', script), ('时间轴', timeline)):
         if not path.exists():
-            problems.append(f'{label}不存在：{path.name}')
-    if problems:
-        return problems, hints
-    tl = json.loads(timeline.read_text(encoding='utf-8'))
-    if tl.get('source_pptx_sha256') != pptx_digest(pptx):
-        problems.append(f'第{chapter}章视频过期：课件改过而视频没重建')
-    if tl.get('source_script_sha256') != script_digest(script):
-        problems.append(f'第{chapter}章视频过期：讲稿改过而视频没重建')
+            hard.append(f'{label}不存在：{path.name}')
+    if hard:
+        return hard, stale, hints
+    try:
+        tl = json.loads(timeline.read_text(encoding='utf-8'))
+    except json.JSONDecodeError as e:
+        return [f'第{chapter}章时间轴不是合法 JSON：{e}'], stale, hints
+    missing = [k for k in ('source_pptx_sha256', 'source_script_sha256', 'sections')
+               if not isinstance(tl, dict) or k not in tl]
+    if missing or not isinstance(tl.get('sections'), list):
+        return [f'第{chapter}章时间轴缺字段：{"、".join(missing) or "sections 不是列表"}'], stale, hints
+    if tl['source_pptx_sha256'] != pptx_digest(pptx):
+        stale.append(f'第{chapter}章视频过期：课件改过而视频没重建')
+    if tl['source_script_sha256'] != script_digest(script):
+        stale.append(f'第{chapter}章视频过期：讲稿改过而视频没重建')
     pages_in_script = len(SECTION.findall(
         script.read_text(encoding='utf-8').split(TIMETABLE_HEAD)[0]))
-    if len(tl.get('sections', [])) != pages_in_script:
-        problems.append(f'第{chapter}章时间轴 {len(tl.get("sections", []))} 页，'
-                        f'讲稿 {pages_in_script} 页 —— 对不上')
+    if len(tl['sections']) != pages_in_script:
+        stale.append(f'第{chapter}章时间轴 {len(tl["sections"])} 页，'
+                     f'讲稿 {pages_in_script} 页 —— 对不上')
     if not mp4.exists():
         hints.append(f'第{chapter}章成品视频不在本地（按设计不入库）：'
                      f'`python3 make_video.py {chapter}` 可重建')
-    return problems, hints
+    return hard, stale, hints
+
+
+def check(chapter, pptx, script, mp4, timeline):
+    """`--check` 用：两类问题合在一起，任何一条都判红。"""
+    hard, stale, hints = check_split(chapter, pptx, script, mp4, timeline)
+    return hard + stale, hints
 
 
 def script_digest(path):

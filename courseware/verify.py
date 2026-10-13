@@ -479,9 +479,10 @@ def check_video(chapters, modules):
     """视频本身不入库（一章约 50MB），所以这里查的是**能不能重建出同一份**：
     讲稿与课件一页一节，时间轴记的来源摘要还对得上。
 
-    D-043：`video/pending.json` 登记了的章，「视频过期」「字幕条数」降为醒目提示
-    （课件可以先改、视频晚点再合成）；讲稿一页一节照样判红——它是视频的源；
-    登记了却已经同版，判红——登记表不许过期。"""
+    D-043：`video/pending.json` 登记了的章，只有「视频旧了」这一类问题降为醒目提示
+    （课件 / 讲稿摘要过期、时间轴页数、字幕条数——重新合成即可修好）；
+    源或记录缺了、坏了（讲稿、时间轴、字幕缺失，时间轴格式错）照样判红；
+    讲稿一页一节照样判红——它是视频的源；登记了却已经同版，判红——登记表不许过期。"""
     pending, registry_problems = make_video.load_pending(HERE / 'video' / 'pending.json')
     for prob in registry_problems:
         fail('8 视频', prob)
@@ -491,7 +492,10 @@ def check_video(chapters, modules):
         stem = build_all.CHAPTERS[ch]
         script = HERE / 'content' / f'ch{ch}_narration.md'
         if not script.exists():
-            note(f'第{ch}章没有旁白讲稿，跳过视频检查')
+            if ch in pending:
+                fail('8 视频', f'第{ch}章登记了「视频待合成」，却没有旁白讲稿 content/ch{ch}_narration.md')
+            else:
+                note(f'第{ch}章没有旁白讲稿，跳过视频检查')
             continue
         pptx = HERE / (stem + '.pptx')
         pages = len(modules[ch].SLIDES) + 1        # 首页封面由 deck.build 补
@@ -506,25 +510,30 @@ def check_video(chapters, modules):
             continue
         timeline = HERE / 'video' / f'ch{ch}.timeline.json'
         mp4 = HERE / (stem + '.mp4')
-        problems, hints = make_video.check(ch, pptx, script, mp4, timeline)
+        hard, stale, hints = make_video.check_split(ch, pptx, script, mp4, timeline)
         for hint in hints:
             note(hint)
         srt = HERE / 'video' / f'ch{ch}.srt'
         if not srt.exists():
-            problems.append(f'第{ch}章缺字幕 video/ch{ch}.srt')
+            hard.append(f'第{ch}章缺字幕 video/ch{ch}.srt')
         elif len(re.findall(r'^\d+$', srt.read_text(encoding='utf-8'), re.M)) != pages:
-            problems.append(f'第{ch}章字幕条数与课件页数不一致')
+            stale.append(f'第{ch}章字幕条数与课件页数不一致')
+        for prob in hard:                          # 源或记录缺了、坏了：登记了也判红
+            fail('8 视频', prob)
+        problems = hard + stale
         if ch in pending:
             entry = pending[ch]
-            if not problems:
+            if hard:
+                continue
+            if not stale:
                 fail('8 视频', f'第{ch}章视频已与课件、讲稿同版，video/pending.json 里这一章的登记该删掉了')
                 continue
             PENDING_VIDEO.append(ch)
             note(f'⚠ 第{ch}章视频待合成（{entry["date"]} {entry["by"]} 登记：{entry["reason"]}），本次降为提示：')
-            for prob in problems:
+            for prob in stale:
                 note(f'    {prob}')
             continue
-        for prob in problems:
+        for prob in stale:
             fail('8 视频', prob)
         if not problems:
             tl = json.loads(timeline.read_text(encoding='utf-8'))

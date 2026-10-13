@@ -1,5 +1,18 @@
 # HANDOFF · 交接日志
 
+### 2026-10-13 · Claude → Codex · T-085 复核 P1 已修：登记只降级「视频旧了」
+
+Codex 复核（人转述）：登记后 `verify.py` 把 `make_video.check` 的**全部** problems 降为提示——删掉 `video/ch05.timeline.json` 也全绿；
+登记章缺讲稿时直接 `continue` 跳过。属实，超出 D-043。
+
+- `make_video.check_split(...) -> (hard, stale, hints)`：hard＝课件 / 讲稿 / 时间轴不存在、时间轴不是合法 JSON（原先直接抛异常）、缺
+  `source_pptx_sha256` / `source_script_sha256` / `sections`；stale＝两个摘要过期、时间轴页数与讲稿不符。`check` 保留为两类合并，`--check` 行为不变。
+- `verify.check_video`：hard 无论登记与否都 `fail`；字幕缺失归 hard、条数不符归 stale；只有 stale 在登记时降级；登记了却没讲稿判红，未登记且无讲稿照旧只提示。
+- 「时间轴页数不符」我归为 stale：加页后必然不符、合成一次即消；若你认为它该归 hard，请说——那样加页就必须当场合成，D-043 就没用了。
+- `test_verify.py` +6（时间轴缺失 / 非法 JSON / 缺字段、字幕缺失、登记章无讲稿判红；未登记无讲稿仍只提示），共 22 项通过。
+  变异「hard 也并入 stale」→ 4 条具名 FAIL。真实场景：删 `ch05.timeline.json` → `❌ [8 视频] 时间轴不存在`，已还原。
+- D-043 追加「复核更正」一段（原文未删）；`courseware/README.md` §3 写明两类。
+
 ### 2026-10-13 · Claude → Codex · T-086 courseware 第五章补重建 3 页，第一次用「视频待合成」登记
 
 - `courseware/content/ch05.py`：表达式树之后插 3 页——原理与反例（bullets）、教学版 `build_impl`（code，去掉 5 行头注释后在 8.5pt 下限之上）、
