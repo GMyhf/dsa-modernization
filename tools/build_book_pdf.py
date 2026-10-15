@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""把 book/ 各章组装成一本带书签的学生用 PDF。
+"""把 book/ 各章组装成一本带书签的学生用 PDF，另外把 STANDALONE 里的篇目各出一份单行本。
 
 不改 dsa_raw.md。不把 292 张图的图册整本塞进去（那会变成图集而不是教材）；
 正文里已经嵌了教学需要的图。勘误作为附录。
@@ -48,6 +48,14 @@ CHAPTERS = [
     BOOK / "考场代码包.md",
 ]
 
+# 单行本：整本 800 页太厚，复习时只想带这一篇。2026-10-15 加：Typora 1.14.10 在 macOS 27 上
+# 导出的 PDF 不带书签（它靠标题里隐藏的 af:// 链接定位页码，新系统打印时把这类链接丢了，
+# 小文件实测同样没有），于是由这里用同一套 pandoc + xelatex 出一份带左侧导航的。
+# 键是输出文件名（不带 .pdf），sidecar 是同名的 .build-info.json，`--check` 一并核对是否过期。
+STANDALONE = {
+    "期中复习题库": BOOK / "期中复习题库.md",
+}
+
 # `book/插图.md` **有意不在这张表里**（2026-09-04）。它是上游 OCR 图库那 292 张的记录，
 # 归 `collect_figures.py --check` 核；正文用的图现在全是 `assets/scan/` 下的扫描件裁图。
 # 两者同时进 PDF，等于每张图印两遍——学生版因此白涨 4MB。图册留在仓库与网页版里。
@@ -85,7 +93,7 @@ PAGES_RE = re.compile(r"Output written on \S+ \((\d+) pages?")
 FIGURE_REF_RE = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
 
 
-def referenced_assets() -> list[Path]:
+def referenced_assets(chapters: list[Path] | None = None) -> list[Path]:
     """各章正文引用到、并且会被嵌进 PDF 的本地图片。
 
     **2026-08-17 复查补上**：第一版的摘要只覆盖 `.md` 与 preamble，
@@ -94,7 +102,7 @@ def referenced_assets() -> list[Path]:
     实测：给一张 jpg 尾部追加两个字节，`--check` 照样报「与源文件一致」。
     """
     seen, assets = set(), []
-    for chapter in CHAPTERS:
+    for chapter in CHAPTERS if chapters is None else chapters:
         if not chapter.is_file():
             continue
         for target in FIGURE_REF_RE.findall(chapter.read_text(encoding="utf-8", errors="replace")):
@@ -108,15 +116,16 @@ def referenced_assets() -> list[Path]:
     return sorted(assets)
 
 
-def build_inputs() -> list[Path]:
+def build_inputs(chapters: list[Path] | None = None) -> list[Path]:
     """会改变 PDF 内容的全部入参，顺序本身也是摘要的一部分。"""
-    return [*CHAPTERS, PREAMBLE, Path(__file__).resolve(), *referenced_assets()]
+    chapters = CHAPTERS if chapters is None else chapters
+    return [*chapters, PREAMBLE, Path(__file__).resolve(), *referenced_assets(chapters)]
 
 
-def source_sha256() -> str:
+def source_sha256(chapters: list[Path] | None = None) -> str:
     """对相对路径与文件内容一起取摘要，避免同内容文件换位而不报旧。"""
     digest = hashlib.sha256()
-    for path in build_inputs():
+    for path in build_inputs(chapters):
         if not path.is_file():
             raise FileNotFoundError(path)
         try:
@@ -130,12 +139,24 @@ def source_sha256() -> str:
     return digest.hexdigest()
 
 
+def standalone_paths(name: str) -> tuple[Path, Path]:
+    """单行本的成品与 sidecar；跟着 PDF_DIR 走，测试把它指到临时目录时一起挪。"""
+    return PDF_DIR / f"{name}.pdf", PDF_DIR / f"{name}.build-info.json"
+
+
 def check_current() -> int:
-    """只读检查发布 PDF 是否由当前书稿构建，接口与 build_site --check 同形。"""
-    info_path = PDF_DIR / "build-info.json"
+    """只读检查发布 PDF（整本 + 各单行本）是否由当前书稿构建，接口与 build_site --check 同形。"""
+    status = check_one(OUTPUT, PDF_DIR / "build-info.json", None)
+    for name, source in STANDALONE.items():
+        output, info_path = standalone_paths(name)
+        status |= check_one(output, info_path, [source])
+    return status
+
+
+def check_one(output: Path, info_path: Path, chapters: list[Path] | None) -> int:
     problems = []
-    if not OUTPUT.is_file():
-        problems.append(f"缺少 {rel_label(OUTPUT)}")
+    if not output.is_file():
+        problems.append(f"缺少 {rel_label(output)}")
     if not info_path.is_file():
         problems.append(f"缺少 {rel_label(info_path)}")
         info = {}
@@ -147,7 +168,7 @@ def check_current() -> int:
             info = {}
 
     try:
-        current = source_sha256()
+        current = source_sha256(chapters)
     except (OSError, FileNotFoundError) as exc:
         problems.append(f"无法读取 PDF 构建输入：{exc}")
         current = ""
@@ -155,22 +176,26 @@ def check_current() -> int:
     if current and recorded != current:
         if recorded:
             problems.append(
-                f"PDF 已过期：源文件摘要应为 {current[:12]}，sidecar 仍是 {recorded[:12]}"
+                f"PDF 已过期：{rel_label(output)} 的源文件摘要应为 {current[:12]}，"
+                f"sidecar 仍是 {recorded[:12]}"
             )
         else:
-            problems.append("PDF 已过期：sidecar 没有 source_sha256")
+            problems.append(f"PDF 已过期：{rel_label(info_path)} 没有 source_sha256")
 
-    for field in ("pages", "chapters", "main_chapters", "figures"):
+    # 单行本可以一张图、一个正文章都没有，只要求页数与章数为正。
+    fields = ("pages", "chapters", "main_chapters", "figures") if chapters is None else ("pages", "chapters")
+    for field in fields:
         if not isinstance(info.get(field), int) or info[field] <= 0:
-            problems.append(f"sidecar 的 {field} 不是正整数")
+            problems.append(f"{rel_label(info_path)} 的 {field} 不是正整数")
 
     if problems:
         for problem in problems:
             print(f"❌ {problem}")
         print("   修法：python3 tools/build_book_pdf.py")
         return 1
+    label = "PDF" if chapters is None else f"单行本 {output.name}"
     print(
-        f"✅ PDF 与源文件一致：{info['pages']} 页、{info['chapters']} 章、"
+        f"✅ {label} 与源文件一致：{info['pages']} 页、{info['chapters']} 章、"
         f"{info['figures']} 张图，sha256 {current[:12]}"
     )
     return 0
@@ -319,19 +344,43 @@ def assemble() -> str:
     return "\n".join(parts)
 
 
+STANDALONE_FRONT = """---
+lang: zh-CN
+documentclass: ctexbook
+classoption:
+  - UTF8
+  - heading=true
+  - scheme=plain
+  - fontset=none
+  - oneside
+  - openany
+---
+
+"""
+
+
+def assemble_standalone(path: Path) -> str:
+    """单行本：文件自己的 `#` 标题由 pandoc 提成书名（--shift-heading-level-by=-1），`##` 成为各章。"""
+    if not path.is_file():
+        raise SystemExit(f"missing {path}")
+    body = path.read_text(encoding="utf-8")
+    body = demote_figures(rewrite_links(rewrite_fences(drop_repo_meta(body, path))))
+    return STANDALONE_FRONT + body.rstrip() + "\n"
+
+
 def drop_partial_pdf() -> None:
     """xelatex 中途停机也会写出一份「半本书」。留着它，早晚有人当成品拷走。
 
     2026-08-14 发布的那份 189 页 PDF 就是这么来的：MOOC 附录里一处 `$ S = \\sum…$`
     让 xelatex 停在第 187 页，291 张插图和勘误附录整整两章没排进去。
     """
-    partial = WORK / "book.pdf"
-    if partial.is_file():
+    for partial in WORK.parent.glob("*/book.pdf"):   # 整本与各单行本的工作目录
         partial.unlink()
         sys.stderr.write(f"已删除半成品 {partial.relative_to(ROOT)}，不要拿它当成品\n")
 
 
 def run_xelatex(tex_path: Path) -> None:
+    """在 tex_path 所在目录里跑；整本与单行本各有自己的工作目录，互不覆盖。"""
     cmd = [
         "xelatex",
         "-interaction=nonstopmode",
@@ -340,7 +389,7 @@ def run_xelatex(tex_path: Path) -> None:
         "-max-print-line=1000",
         tex_path.name,
     ]
-    proc = subprocess.run(cmd, cwd=WORK, capture_output=True, text=True)
+    proc = subprocess.run(cmd, cwd=tex_path.parent, capture_output=True, text=True)
     if proc.returncode != 0:
         sys.stderr.write(proc.stdout[-4000:])
         sys.stderr.write(proc.stderr[-2000:])
@@ -401,7 +450,8 @@ def verify_not_truncated(tex_path: Path, toc_path: Path, log_text: str) -> int:
     return pages
 
 
-def write_build_info(tex_path: Path, log_text: str, pages: int) -> Path:
+def write_build_info(tex_path: Path, log_text: str, pages: int,
+                     path: Path | None = None, chapters: list[Path] | None = None) -> Path:
     """把「这本 PDF 有多少页/章/图」写成 sidecar，供网页版的下载卡片显示。
 
     页数只在 xelatex 的日志里（PDF 自身的页树是压缩的，正则挖不出来），而日志在
@@ -409,25 +459,29 @@ def write_build_info(tex_path: Path, log_text: str, pages: int) -> Path:
     答案的时刻**把它落到磁盘上。不写时间戳：同一份书稿重排两次，这个文件应当一模一样。
     """
     tex = tex_path.read_text(encoding="utf-8", errors="replace")
+    sources = CHAPTERS if chapters is None else chapters
     info = {
         "chapters": len(CHAPTER_RE.findall(tex)),
-        "main_chapters": sum(1 for path in CHAPTERS if re.fullmatch(r"ch\d\d-.+\.md", path.name)),
+        "main_chapters": sum(1 for src in sources if re.fullmatch(r"ch\d\d-.+\.md", src.name)),
         "figures": len({Path(src).name for src in GRAPHIC_RE.findall(tex)}),
         "pages": pages,
-        "source_sha256": source_sha256(),
+        "source_sha256": source_sha256(chapters),
     }
-    path = PDF_DIR / "build-info.json"
+    path = PDF_DIR / "build-info.json" if path is None else path
     path.write_text(json.dumps(info, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"wrote {rel_label(path)} {info}")      # 测试会把 PDF_DIR 指到 /tmp，别用 relative_to
     return path
 
 
-def run_pandoc(md_path: Path, pdf_path: Path) -> None:
+def run_pandoc(md_path: Path, pdf_path: Path, *, info_path: Path | None = None,
+               chapters: list[Path] | None = None, extra: list[str] | None = None) -> None:
+    """md_path 所在目录就是这次的工作目录（里面要先放好 preamble.tex）。"""
     if not shutil.which("pandoc"):
         raise SystemExit("需要 pandoc")
     if not shutil.which("xelatex"):
         raise SystemExit("需要 xelatex（MacTeX / TeX Live）")
-    tex_path = WORK / "book.tex"
+    work = md_path.parent
+    tex_path = work / "book.tex"
     cmd = [
         "pandoc",
         str(md_path),
@@ -438,7 +492,7 @@ def run_pandoc(md_path: Path, pdf_path: Path) -> None:
         "--toc",
         "--toc-depth=3",
         "--top-level-division=chapter",
-        f"--include-in-header={WORK / 'preamble.tex'}",
+        f"--include-in-header={work / 'preamble.tex'}",
         "--resource-path",
         str(BOOK),
         "-V",
@@ -450,9 +504,10 @@ def run_pandoc(md_path: Path, pdf_path: Path) -> None:
         "-V",
         "linestretch=1.15",
         "--highlight-style=tango",
+        *(extra or []),
     ]
     print(" ".join(cmd))
-    proc = subprocess.run(cmd, cwd=WORK, capture_output=True, text=True)
+    proc = subprocess.run(cmd, cwd=work, capture_output=True, text=True)
     if proc.returncode != 0:
         sys.stderr.write(proc.stdout)
         sys.stderr.write(proc.stderr)
@@ -460,37 +515,59 @@ def run_pandoc(md_path: Path, pdf_path: Path) -> None:
     # 两遍：第一遍写目录与书签，第二遍把页码和大纲钉死。
     run_xelatex(tex_path)
     run_xelatex(tex_path)
-    built = WORK / "book.pdf"
+    built = work / "book.pdf"
     if not built.is_file():
         raise SystemExit("xelatex 没有写出 book.pdf")
     # 自检不过就不许覆盖已发布的成品：宁可留着旧版，也不发一本缺章少图的书。
-    log_text = (WORK / "book.log").read_text(encoding="utf-8", errors="replace")
-    pages = verify_not_truncated(tex_path, WORK / "book.toc", log_text)
-    write_build_info(tex_path, log_text, pages)
+    log_text = (work / "book.log").read_text(encoding="utf-8", errors="replace")
+    pages = verify_not_truncated(tex_path, work / "book.toc", log_text)
+    write_build_info(tex_path, log_text, pages, info_path, chapters)
     # macOS 上目标 PDF 可能已存在；显式复制并替换，避免旧文件被保留。
     shutil.copy2(str(built), str(pdf_path))
     built.unlink()
     print("xelatex ok")
 
 
+def build_standalone(name: str, assemble_only: bool) -> None:
+    source = STANDALONE[name]
+    work = WORK.parent / f"standalone-{name}"
+    work.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(PREAMBLE, work / "preamble.tex")
+    md_path = work / "assembled.md"
+    text = assemble_standalone(source)
+    md_path.write_text(text, encoding="utf-8")
+    print(f"assembled {md_path.relative_to(ROOT)} ({len(text.splitlines())} lines)")
+    if assemble_only:
+        return
+    output, info_path = standalone_paths(name)
+    run_pandoc(md_path, output, info_path=info_path, chapters=[source],
+               extra=["--shift-heading-level-by=-1"])
+    print(f"wrote {output.relative_to(ROOT)} ({output.stat().st_size // 1024} KB)")
+
+
 def main() -> int:
-    parser = argparse.ArgumentParser(description="组装并编译学生用 PDF")
+    parser = argparse.ArgumentParser(description="组装并编译学生用 PDF（整本 + 单行本）")
     parser.add_argument("--assemble-only", action="store_true")
     parser.add_argument("--check", action="store_true",
                         help="只检查已发布 PDF 是否由当前源文件构建")
+    parser.add_argument("--only", choices=["book", *STANDALONE],
+                        help="只构建整本（book）或某一份单行本；缺省全部构建")
     opts = parser.parse_args()
     if opts.check:
         return check_current()
     PDF_DIR.mkdir(parents=True, exist_ok=True)
-    WORK.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(PREAMBLE, WORK / "preamble.tex")
-    text = assemble()
-    ASSEMBLED.write_text(text, encoding="utf-8")
-    print(f"assembled {ASSEMBLED.relative_to(ROOT)} ({len(text.splitlines())} lines)")
-    if opts.assemble_only:
-        return 0
-    run_pandoc(ASSEMBLED, OUTPUT)
-    print(f"wrote {OUTPUT.relative_to(ROOT)} ({OUTPUT.stat().st_size // 1024} KB)")
+    if opts.only in (None, "book"):
+        WORK.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(PREAMBLE, WORK / "preamble.tex")
+        text = assemble()
+        ASSEMBLED.write_text(text, encoding="utf-8")
+        print(f"assembled {ASSEMBLED.relative_to(ROOT)} ({len(text.splitlines())} lines)")
+        if not opts.assemble_only:
+            run_pandoc(ASSEMBLED, OUTPUT)
+            print(f"wrote {OUTPUT.relative_to(ROOT)} ({OUTPUT.stat().st_size // 1024} KB)")
+    for name in STANDALONE:
+        if opts.only in (None, name):
+            build_standalone(name, opts.assemble_only)
     return 0
 
 

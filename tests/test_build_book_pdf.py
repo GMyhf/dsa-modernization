@@ -180,6 +180,7 @@ class TestPdfFreshness(unittest.TestCase):
             build_book_pdf.PREAMBLE,
             build_book_pdf.PDF_DIR,
             build_book_pdf.OUTPUT,
+            build_book_pdf.STANDALONE,
         )
         pdf_dir = root / "pdf"
         pdf_dir.mkdir()
@@ -192,6 +193,7 @@ class TestPdfFreshness(unittest.TestCase):
             build_book_pdf.PREAMBLE = preamble
             build_book_pdf.PDF_DIR = pdf_dir
             build_book_pdf.OUTPUT = output
+            build_book_pdf.STANDALONE = {}   # 这组只管整本；单行本见 test_stale_standalone_is_caught
             info = {"chapters": 1, "main_chapters": 1, "figures": 1, "pages": 2,
                     "source_sha256": build_book_pdf.source_sha256()}
             (pdf_dir / "build-info.json").write_text(json.dumps(info), encoding="utf-8")
@@ -200,8 +202,8 @@ class TestPdfFreshness(unittest.TestCase):
                 result = build_book_pdf.check_current()
             return result, out.getvalue()
         finally:
-            (build_book_pdf.CHAPTERS, build_book_pdf.PREAMBLE,
-             build_book_pdf.PDF_DIR, build_book_pdf.OUTPUT) = original
+            (build_book_pdf.CHAPTERS, build_book_pdf.PREAMBLE, build_book_pdf.PDF_DIR,
+             build_book_pdf.OUTPUT, build_book_pdf.STANDALONE) = original
 
     def test_matching_source_hash_passes(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -316,6 +318,49 @@ class TestPdfFreshness(unittest.TestCase):
                  build_book_pdf.PDF_DIR, build_book_pdf.OUTPUT) = original
         self.assertEqual(result, 1)
         self.assertIn("PDF 已过期", out.getvalue())
+
+    def test_stale_standalone_is_caught(self):
+        """单行本（如期中复习题库）也要被 --check 管住：源文件改一个字，它就得报旧。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            book_src = root / "chapter.md"
+            book_src.write_text("整本\n", encoding="utf-8")
+            single = root / "single.md"
+            single.write_text("第一版\n", encoding="utf-8")
+            pdf_dir = root / "pdf"
+            pdf_dir.mkdir()
+            preamble = root / "preamble.tex"
+            preamble.write_text("% test\n", encoding="utf-8")
+            output = pdf_dir / "book.pdf"
+            output.write_bytes(b"%PDF-test")
+            original = (build_book_pdf.CHAPTERS, build_book_pdf.PREAMBLE,
+                        build_book_pdf.PDF_DIR, build_book_pdf.OUTPUT, build_book_pdf.STANDALONE)
+            try:
+                build_book_pdf.CHAPTERS = [book_src]
+                build_book_pdf.PREAMBLE = preamble
+                build_book_pdf.PDF_DIR = pdf_dir
+                build_book_pdf.OUTPUT = output
+                build_book_pdf.STANDALONE = {"single": single}
+                info = {"chapters": 1, "main_chapters": 1, "figures": 1, "pages": 2,
+                        "source_sha256": build_book_pdf.source_sha256()}
+                (pdf_dir / "build-info.json").write_text(json.dumps(info), encoding="utf-8")
+                single_pdf, single_info = build_book_pdf.standalone_paths("single")
+                single_pdf.write_bytes(b"%PDF-test")
+                info = {"chapters": 1, "main_chapters": 0, "figures": 0, "pages": 1,
+                        "source_sha256": build_book_pdf.source_sha256([single])}
+                single_info.write_text(json.dumps(info), encoding="utf-8")
+                with contextlib.redirect_stdout(io.StringIO()):
+                    fresh = build_book_pdf.check_current()
+                single.write_text("第二版\n", encoding="utf-8")
+                out = io.StringIO()
+                with contextlib.redirect_stdout(out):
+                    stale = build_book_pdf.check_current()
+            finally:
+                (build_book_pdf.CHAPTERS, build_book_pdf.PREAMBLE, build_book_pdf.PDF_DIR,
+                 build_book_pdf.OUTPUT, build_book_pdf.STANDALONE) = original
+        self.assertEqual(fresh, 0, "没改源文件时整本与单行本都应通过（单行本 0 张图也合法）")
+        self.assertEqual(stale, 1)
+        self.assertIn("single.pdf", out.getvalue())
 
 
 class TestRegexes(unittest.TestCase):
