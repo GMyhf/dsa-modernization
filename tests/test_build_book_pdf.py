@@ -363,6 +363,22 @@ class TestPdfFreshness(unittest.TestCase):
         self.assertIn("single.pdf", out.getvalue())
 
 
+class TestUnindentQuestions(unittest.TestCase):
+    def test_question_lines_get_inline_raw_noindent(self):
+        """题号段顶格；必须是行内 raw，裸 \\noindent 会让 pandoc 把整段当 LaTeX、题号的 ** 原样印出。"""
+        text = "**1-2.** 题干\n**3.** 模拟卷题\n> **答**：不动\n正文 **1-2.** 不在行首也不动\n"
+        out = build_book_pdf.unindent_questions(text)
+        self.assertIn("`\\noindent`{=latex}**1-2.** 题干", out)
+        self.assertIn("`\\noindent`{=latex}**3.** 模拟卷题", out)
+        self.assertIn("> **答**：不动", out)
+        self.assertIn("正文 **1-2.** 不在行首也不动", out)
+        self.assertNotRegex(out, r"(?m)^\\noindent ")
+
+    def test_code_fences_are_untouched(self):
+        text = "```text\n**1-2.** 代码里的\n```\n"
+        self.assertEqual(build_book_pdf.unindent_questions(text), text)
+
+
 class TestRegexes(unittest.TestCase):
     def test_graphic_regex_handles_optional_args(self):
         found = build_book_pdf.GRAPHIC_RE.findall(

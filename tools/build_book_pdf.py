@@ -333,6 +333,7 @@ def assemble() -> str:
         body = rewrite_fences(body)
         body = rewrite_links(body)
         body = demote_figures(body)
+        body = unindent_questions(body)
         # 每章从新页开始，但前言那份总目录不要再套一层 chapter
         if path.name == "ch01-adt.md":
             parts.append("\\mainmatter\n")
@@ -364,8 +365,30 @@ def assemble_standalone(path: Path) -> str:
     if not path.is_file():
         raise SystemExit(f"missing {path}")
     body = path.read_text(encoding="utf-8")
-    body = demote_figures(rewrite_links(rewrite_fences(drop_repo_meta(body, path))))
+    body = unindent_questions(demote_figures(rewrite_links(rewrite_fences(drop_repo_meta(body, path)))))
     return STANDALONE_FRONT + body.rstrip() + "\n"
+
+
+QUESTION_RE = re.compile(r"^(?=\*\*(?:\d+-)?\d+\.\*\*)", re.M)
+
+
+def unindent_questions(text: str) -> str:
+    """题库里以「**1-2.**」「**3.**」起头的题干段落顶格排。
+
+    preamble 给正文段落 2em 首行缩进，而紧跟标题的第一段按 LaTeX 惯例不缩进，
+    于是每组只有第一题顶格、其余都缩进，题号对不齐（2026-10-15 用户在单行本第 3 页发现）。
+    代码块已由 rewrite_fences 原样保留，这里只碰行首、不进引用块，不会误伤。
+    """
+    out, in_fence = [], False
+    for line in text.split("\n"):
+        if line.startswith("```"):
+            in_fence = not in_fence
+        elif not in_fence:
+            # 必须写成行内 raw（`…`{=latex}）：裸写的 \noindent 在段首会让 pandoc 把整段当原始 LaTeX，
+            # 题号的 ** 就原样印出来了（第一次试就是这样）。
+            line = QUESTION_RE.sub(r"`\\noindent`{=latex}", line)
+        out.append(line)
+    return "\n".join(out)
 
 
 def drop_partial_pdf() -> None:

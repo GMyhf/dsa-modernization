@@ -179,7 +179,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <blockquote><p><strong>答</strong>：<strong>顺序</strong>存储、<strong>链接</strong>存储、<strong>索引</strong>存储、<strong>散列</strong>存储。 顺序靠下标算地址，随机访问 <span class="math">O(<span class="upr">1</span>)</span>、插删要搬元素；链接靠指针相连，已知所需结点及前驱时插删 <span class="math">O(<span class="upr">1</span>)</span>，但不能随机访问； 索引另建索引表，借助索引定位记录；散列由关键码直接算地址，平均 <span class="math">O(<span class="upr">1</span>)</span> 但要处理冲突。</p></blockquote>
 <p><strong>1-4.</strong> 大 <span class="math">O</span> 表示法的定义：称 <span class="math">f(n)<span class="rel">=</span>O(g(n))</span>，当且仅当存在正常数 ____ 和 ____， 使得对所有 ____ 都有 ____ 成立。</p>
 <blockquote><p><strong>答</strong>：存在正常数 <span class="math">c</span> 和 <span class="math">n<sub><span class="upr">0</span></sub></span>，使得对所有 <span class="math">n<span class="rel">≥</span>n<sub><span class="upr">0</span></sub></span> 都有 <span class="math">f(n)<span class="rel">≤</span>c<span class="bin">⋅</span>g(n)</span>。 三个要点缺一不可：<span class="math">c</span> 与 <span class="math">n</span> 无关、只要求 <span class="math">n</span> 充分大之后成立、是<strong>上界</strong>而不是确界。</p></blockquote>
-<p><strong>1-5.</strong> 把下列函数按渐进增长率从小到大排序： <span class="math">n&thinsp;<span class="upr">log</span>&thinsp;n, <span class="upr">2</span><sup>n</sup>, n<sup><span class="upr">2</span></sup>, &thinsp;<span class="upr">log</span>&thinsp;n, n!, n, n<sup><span class="upr">3</span></sup>, <span class="upr">1</span>, <span class="sqrt">n</span>, <span class="upr">2</span><sup><span class="upr">2</span><sup>n</sup></sup></span>。</p>
+<p><strong>1-5.</strong> 把下列函数按渐进增长率从小到大排序： <span class="math">n&thinsp;<span class="upr">log</span>&thinsp;n</span>，<span class="math"><span class="upr">2</span><sup>n</sup></span>，<span class="math">n<sup><span class="upr">2</span></sup></span>，<span class="math"><span class="upr">log</span>&thinsp;n</span>，<span class="math">n!</span>，<span class="math">n</span>，<span class="math">n<sup><span class="upr">3</span></sup></span>，<span class="math"><span class="upr">1</span></span>，<span class="math"><span class="sqrt">n</span></span>，<span class="math"><span class="upr">2</span><sup><span class="upr">2</span><sup>n</sup></sup></span>。</p>
 <blockquote><p><strong>答</strong>：<span class="math"><span class="upr">1</span>&lt;&thinsp;<span class="upr">log</span>&thinsp;n&lt;<span class="sqrt">n</span>&lt;n&lt;n&thinsp;<span class="upr">log</span>&thinsp;n&lt;n<sup><span class="upr">2</span></sup>&lt;n<sup><span class="upr">3</span></sup>&lt;<span class="upr">2</span><sup>n</sup>&lt;n!&lt;<span class="upr">2</span><sup><span class="upr">2</span><sup>n</sup></sup></span>。 常错的两处：<span class="math"><span class="sqrt">n</span></span> 在 <span class="math"><span class="upr">log</span>&thinsp;n</span> 之后（任何正数次幂都最终超过对数）；<span class="math">n!</span> 在 <span class="math"><span class="upr">2</span><sup>n</sup></span> 之后 （由 <span class="math">n!<span class="rel">≥</span>(n/<span class="upr">2</span>)<sup>n/<span class="upr">2</span></sup></span> 可得）。</p></blockquote>
 <p><strong>1-6.</strong> 本书列出的算法基本性质有 ____、____、____、____。</p>
 <blockquote><p><strong>答</strong>：<strong>通用性</strong>（对符合输入类型的任意输入都能正确求解）、<strong>有效性</strong>（每条指令都能被人或机器确切执行）、 <strong>确定性</strong>（每步之后下一步怎么走有明确指示）、<strong>有穷性</strong>（有限步内结束）。见第 1.3.1 节。 少了有穷性的就只是「计算过程」（如操作系统主循环），不叫算法。 另一种常见口径是 Knuth 的「五特性」：有穷性、确定性、可行性、输入、输出——有效性大致对应可行性， 输入输出则体现在通用性之中。题面若明说「五个特性」就按这一套答。</p></blockquote>
@@ -853,62 +853,72 @@ Pop(i)
 <blockquote><p><strong>答</strong>：<code>-1 0 0 1 1 2 0 1 2</code>。 逐位算（<code>next[i]</code> = <code>P[0..i-1]</code> 的最长公共真前后缀长度）：</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left"><span class="math">i</span></th>
-<th style="text-align:left">0</th>
-<th style="text-align:left">1</th>
-<th style="text-align:left">2</th>
-<th style="text-align:left">3</th>
-<th style="text-align:left">4</th>
-<th style="text-align:left">5</th>
-<th style="text-align:left">6</th>
-<th style="text-align:left">7</th>
-<th style="text-align:left">8</th>
+<th style="text-align:left"><code>P[i]</code></th>
+<th style="text-align:left">前缀 <code>P[0..i-1]</code></th>
+<th style="text-align:left">最长公共真前后缀</th>
+<th style="text-align:left"><code>next[i]</code></th>
 </tr></thead><tbody>
 <tr>
-<td style="text-align:left"><code>P[i]</code></td>
+<td style="text-align:left">0</td>
 <td style="text-align:left">a</td>
-<td style="text-align:left">b</td>
-<td style="text-align:left">a</td>
-<td style="text-align:left">a</td>
-<td style="text-align:left">b</td>
-<td style="text-align:left">c</td>
-<td style="text-align:left">a</td>
-<td style="text-align:left">b</td>
-<td style="text-align:left">a</td>
+<td style="text-align:left">(空)</td>
+<td style="text-align:left">—</td>
+<td style="text-align:left">−1</td>
 </tr>
 <tr>
-<td style="text-align:left">前缀 <code>P[0..i-1]</code></td>
-<td style="text-align:left">(空)</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">b</td>
+<td style="text-align:left">a</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+</tr>
+<tr>
+<td style="text-align:left">2</td>
 <td style="text-align:left">a</td>
 <td style="text-align:left">ab</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+</tr>
+<tr>
+<td style="text-align:left">3</td>
+<td style="text-align:left">a</td>
 <td style="text-align:left">aba</td>
+<td style="text-align:left">1 (<code>a</code>)</td>
+<td style="text-align:left">1</td>
+</tr>
+<tr>
+<td style="text-align:left">4</td>
+<td style="text-align:left">b</td>
 <td style="text-align:left">abaa</td>
+<td style="text-align:left">1 (<code>a</code>)</td>
+<td style="text-align:left">1</td>
+</tr>
+<tr>
+<td style="text-align:left">5</td>
+<td style="text-align:left">c</td>
 <td style="text-align:left">abaab</td>
-<td style="text-align:left">abaabc</td>
-<td style="text-align:left">abaabca</td>
-<td style="text-align:left">abaabcab</td>
-</tr>
-<tr>
-<td style="text-align:left">最长公共真前后缀</td>
-<td style="text-align:left">—</td>
-<td style="text-align:left">0</td>
-<td style="text-align:left">0</td>
-<td style="text-align:left">1 (<code>a</code>)</td>
-<td style="text-align:left">1 (<code>a</code>)</td>
 <td style="text-align:left">2 (<code>ab</code>)</td>
-<td style="text-align:left">0</td>
-<td style="text-align:left">1 (<code>a</code>)</td>
-<td style="text-align:left">2 (<code>ab</code>)</td>
-</tr>
-<tr>
-<td style="text-align:left"><code>next[i]</code></td>
-<td style="text-align:left">−1</td>
-<td style="text-align:left">0</td>
-<td style="text-align:left">0</td>
-<td style="text-align:left">1</td>
-<td style="text-align:left">1</td>
 <td style="text-align:left">2</td>
+</tr>
+<tr>
+<td style="text-align:left">6</td>
+<td style="text-align:left">a</td>
+<td style="text-align:left">abaabc</td>
 <td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+</tr>
+<tr>
+<td style="text-align:left">7</td>
+<td style="text-align:left">b</td>
+<td style="text-align:left">abaabca</td>
+<td style="text-align:left">1 (<code>a</code>)</td>
 <td style="text-align:left">1</td>
+</tr>
+<tr>
+<td style="text-align:left">8</td>
+<td style="text-align:left">a</td>
+<td style="text-align:left">abaabcab</td>
+<td style="text-align:left">2 (<code>ab</code>)</td>
 <td style="text-align:left">2</td>
 </tr>
 </tbody></table></div></blockquote>
@@ -1359,7 +1369,7 @@ LevelOrder(root)                        // 层次（广度优先）：把栈换�
 </tbody></table></div>
 <p><strong>对照</strong>：完全不加约束时就是 Catalan 数 <span class="math">C<sub><span class="upr">5</span></sub><span class="rel">=</span><span class="upr">42</span></span>（5-29）。 加一条约束，递推式的求和范围从「全部 <span class="math">l</span>」缩成一段，数量就掉到 4 或 6。</p>
 <p><strong>带约束的计数题一律这么做</strong>：先写出无约束的递推，再收窄求和范围。 不要试图直接画图穷举——<span class="math">n</span> 稍大就画不完，而且极易重复或漏掉。</p></blockquote>
-<p><strong>5-23.</strong> ★ 已知字符集 <span class="math">{a,b,c,d,e,f,g,h}</span> 的使用频率依次为 <span class="math">{<span class="upr">5</span>,<span class="upr">29</span>,<span class="upr">7</span>,<span class="upr">8</span>,<span class="upr">14</span>,<span class="upr">23</span>,<span class="upr">3</span>,<span class="upr">11</span>}</span>（合计 100）。 (1) 构造 Huffman 树；(2) 给出各字符的 Huffman 编码；(3) 求带权路径长度 WPL 与平均码长； (4) 对码流 <code>000110110</code> 译码。</p>
+<p><strong>5-23.</strong> ★ 已知字符集 <span class="math">{a,b,c,d,e,f,g,h}</span> 的使用频率依次为 5、29、7、8、14、23、3、11（合计 100）。 (1) 构造 Huffman 树；(2) 给出各字符的 Huffman 编码；(3) 求带权路径长度 WPL 与平均码长； (4) 对码流 <code>000110110</code> 译码。</p>
 <blockquote><p><strong>答</strong>： <strong>(1) 构造</strong>（每次取权值最小的两棵树合并，新树权值为两者之和，放回集合）：</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">步</th>
@@ -1628,7 +1638,9 @@ SamePath(U, V, T)
 <p><strong>5-28.</strong> ★ 证明：用筛选法把 <span class="math">n</span> 个元素的无序序列建成堆，时间代价为 <span class="math">O(n)</span>。</p>
 <blockquote><p><strong>证明.</strong> 关键观察：<strong>下沉的代价不是树高 <span class="math"><span class="upr">log</span>&thinsp;n</span>，而是「这个结点离最底层还有多远」</strong>； 越靠底层的结点越多，能下沉的距离却越短，两者恰好抵消。</p>
 <p>先把堆补成一棵层数相同、<strong>各层全满的二叉树</strong>（深度即最大层号 <span class="math">h<span class="rel">=</span>⌊<span class="upr">log</span><sub><span class="upr">2</span></sub>n⌋</span>，根在第 0 层）。 满树每个位置能下沉的距离都不比原堆对应位置短，故在满树上算出的总代价是原堆的上界。 各层全满的树第 <span class="math">i</span> 层恰有 <span class="math"><span class="upr">2</span><sup>i</sup></span> 个结点，每个最多下沉 <span class="math">h<span class="bin">−</span>i</span> 层，于是</p>
-<div class="math math-display"><span class="upr">建堆代价</span><span class="rel">≤</span>∑<sub>i<span class="rel">=</span><span class="upr">0</span></sub><sup>h</sup><span class="upr">2</span><sup>i</sup>(h<span class="bin">−</span>i)<span class="rel">=</span>∑<sub>j<span class="rel">=</span><span class="upr">0</span></sub><sup>h</sup><span class="upr">2</span><sup>h<span class="bin">−</span>j</sup><span class="bin">⋅</span>j<span class="rel">=</span><span class="upr">2</span><sup>h</sup>∑<sub>j<span class="rel">=</span><span class="upr">0</span></sub><sup>h</sup><span class="frac"><span class="num">j</span><span class="den"><span class="upr">2</span><sup>j</sup></span></span>&lt;<span class="upr">2</span><sup>h</sup><span class="bin">⋅</span><span class="upr">2</span><span class="rel">=</span><span class="upr">2</span><sup>h<span class="bin">+</span><span class="upr">1</span></sup><span class="rel">≤</span><span class="upr">2</span>n</div>
+<div class="math math-display"><span class="upr">建堆代价</span><span class="rel">≤</span>∑<sub>i<span class="rel">=</span><span class="upr">0</span></sub><sup>h</sup><span class="upr">2</span><sup>i</sup>(h<span class="bin">−</span>i)<span class="rel">=</span>∑<sub>j<span class="rel">=</span><span class="upr">0</span></sub><sup>h</sup><span class="upr">2</span><sup>h<span class="bin">−</span>j</sup><span class="bin">⋅</span>j<span class="rel">=</span><span class="upr">2</span><sup>h</sup>∑<sub>j<span class="rel">=</span><span class="upr">0</span></sub><sup>h</sup><span class="frac"><span class="num">j</span><span class="den"><span class="upr">2</span><sup>j</sup></span></span>,</div>
+<p>而</p>
+<div class="math math-display"><span class="upr">2</span><sup>h</sup>∑<sub>j<span class="rel">=</span><span class="upr">0</span></sub><sup>h</sup><span class="frac"><span class="num">j</span><span class="den"><span class="upr">2</span><sup>j</sup></span></span>&lt;<span class="upr">2</span><sup>h</sup><span class="bin">⋅</span><span class="upr">2</span><span class="rel">=</span><span class="upr">2</span><sup>h<span class="bin">+</span><span class="upr">1</span></sup><span class="rel">≤</span><span class="upr">2</span>n,</div>
 <p>其中用到 <span class="math">∑<sub>j<span class="rel">≥</span><span class="upr">0</span></sub>j/<span class="upr">2</span><sup>j</sup><span class="rel">=</span><span class="upr">2</span></span> 与 <span class="math"><span class="upr">2</span><sup>h</sup><span class="rel">≤</span>n</span>。故建堆为 <span class="math">O(n)</span>。∎</p>
 <p><strong>对照</strong>：逐个 <code>Insert</code> 建堆是 <span class="math">O(n&thinsp;<span class="upr">log</span>&thinsp;n)</span>——每次上浮都可能走满一条树高， 而<strong>上浮的代价才真正是 <span class="math"><span class="upr">log</span>&thinsp;n</span></strong>（越靠底层的结点离根越远）。 两种建法的差别正好说明：<strong>同一个结构，调整方向不同，代价可以差一个 <span class="math"><span class="upr">log</span>&thinsp;</span></strong>。</p></blockquote>
 <p><strong>5-29.</strong> 证明：<span class="math">n</span> 个结点的不同二叉树形态共有 <span class="math">C<sub>n</sub><span class="rel">=</span><span class="frac"><span class="num"><span class="upr">1</span></span><span class="den">n<span class="bin">+</span><span class="upr">1</span></span></span>C<sub><span class="upr">2</span>n</sub><sup>n</sup></span> 种。</p>
@@ -1827,7 +1839,7 @@ Union(a, b)                              // 重量权衡合并
 </ul>
 <p><strong>代价</strong>：只用重量权衡合并时，单次操作最坏 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>；只用路径压缩时，单次 <code>Find</code> 最坏仍可能是 <span class="math">O(n)</span> （树可以先被合并成一条链），但 <span class="math">m</span> 次操作摊还下来每次是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span> 量级；两条同时用时， <span class="math">m</span> 次操作的总代价是 <span class="math">O(m α(n))</span>，<span class="math">α</span> 是反 Ackermann 函数，实际中不超过 4， <strong>这是摊还界，单次操作最坏仍为 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span></strong>。初始化另需 <span class="math">Θ(n)</span>。</p>
 <p><strong>易错点</strong>：<code>Union</code> 里必须先 <code>Find</code> 出两个根再比较——直接对 <code>a</code>、<code>b</code> 操作是错的； 权值并列时要有确定的取舍规则（本课程约定<strong>值大的根挂到值小的根下</strong>），否则画出的树形对不上答案。</p></blockquote>
-<p><strong>6-20.</strong> ★ 设有 8 个元素 <span class="math"><span class="upr">1..8</span></span>，依次读入等价偶对 <span class="math">(<span class="upr">1</span>,<span class="upr">2</span>),(<span class="upr">3</span>,<span class="upr">4</span>),(<span class="upr">5</span>,<span class="upr">6</span>),(<span class="upr">7</span>,<span class="upr">8</span>),(<span class="upr">2</span>,<span class="upr">4</span>),(<span class="upr">6</span>,<span class="upr">8</span>),(<span class="upr">4</span>,<span class="upr">8</span>)</span>。 采用<strong>重量权衡合并 + 路径压缩</strong>，写出每一步之后的父指针数组，并给出最终的等价类。</p>
+<p><strong>6-20.</strong> ★ 设有 8 个元素 <span class="math"><span class="upr">1..8</span></span>，依次读入等价偶对 <span class="math">(<span class="upr">1</span>,<span class="upr">2</span>)</span>，<span class="math">(<span class="upr">3</span>,<span class="upr">4</span>)</span>，<span class="math">(<span class="upr">5</span>,<span class="upr">6</span>)</span>，<span class="math">(<span class="upr">7</span>,<span class="upr">8</span>)</span>，<span class="math">(<span class="upr">2</span>,<span class="upr">4</span>)</span>，<span class="math">(<span class="upr">6</span>,<span class="upr">8</span>)</span>，<span class="math">(<span class="upr">4</span>,<span class="upr">8</span>)</span>。 采用<strong>重量权衡合并 + 路径压缩</strong>，写出每一步之后的父指针数组，并给出最终的等价类。</p>
 <blockquote><p><strong>答</strong>：约定根的父记为 <span class="math"><span class="upr">0</span></span>；权值并列时<strong>值大的根挂到值小的根下</strong>。</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">步</th>
