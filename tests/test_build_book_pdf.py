@@ -6,6 +6,7 @@
 import contextlib
 import io
 import json
+import re
 import sys
 import tempfile
 import unittest
@@ -377,6 +378,36 @@ class TestUnindentQuestions(unittest.TestCase):
     def test_code_fences_are_untouched(self):
         text = "```text\n**1-2.** 代码里的\n```\n"
         self.assertEqual(build_book_pdf.unindent_questions(text), text)
+
+
+class TestStripAnswers(unittest.TestCase):
+    def test_real_source_loses_every_answer_but_keeps_every_question(self):
+        """纯题目版：引用块（答案）与速查表一个不剩，题号一个不少，题干里的代码块原样保留。"""
+        source = (ROOT / "book" / "期中复习题库.md").read_text(encoding="utf-8")
+        out = build_book_pdf.strip_answers(source)
+        self.assertNotRegex(out, r"(?m)^\s*>")
+        self.assertNotIn("**答**", out)
+        self.assertNotIn("考前速查表\n", out)
+        self.assertIn("纯题目版", out)
+        question = re.compile(r"(?m)^\*\*(?:\d+-)?\d+\.\*\*")
+        self.assertEqual(len(question.findall(out)), len(question.findall(source)))
+        self.assertEqual(out.count("```") % 2, 0)
+
+    def test_code_in_question_stem_is_kept(self):
+        text = ("# 期中复习题库（第 1—6 章）\n**怎么用**：分章题答案跟在题目下面的引用块里，模拟卷答案集中在各组之后，"
+                "先把引用块遮住自己做一遍，再对答案。配比出的），\n最后一页是速查表。\n"
+                "可当作一次完整自测。答案集中在各组题目之后。\n"
+                "**1-1.** 题干\n```text\n> 题干代码里的 >\n```\n> **答**：答案\n> 第二行\n\n"
+                "---\n\n## 考前速查表\n公式\n")
+        out = build_book_pdf.strip_answers(text)
+        self.assertIn("> 题干代码里的 >", out)
+        self.assertNotIn("**答**", out)
+        self.assertNotIn("第二行", out)
+        self.assertNotIn("公式", out)
+
+    def test_drifted_intro_fails_loudly(self):
+        with self.assertRaises(SystemExit):
+            build_book_pdf.strip_answers("# 别的标题\n")
 
 
 class TestRegexes(unittest.TestCase):

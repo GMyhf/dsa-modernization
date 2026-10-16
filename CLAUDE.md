@@ -42,6 +42,7 @@ python3 tools/check_doc.py [file]      # book/ hygiene; --list-rules explains R1
 python3 tools/sync_book.py --write     # push code/ sources into the book's code blocks
 python3 tools/build_book_pdf.py        # student PDF; fonts pinned to Noto (D-042), fails on any missing glyph
 python3 tools/build_book_pdf.py --only 期中复习题库   # just the standalone book/pdf/期中复习题库.pdf (bookmarked; --check guards it too)
+python3 tools/build_book_pdf.py --only 期中复习题库-纯题目   # same source, answers + cheat sheet stripped (QUESTIONS_ONLY)
 python3 tools/build_site.py            # render book/*.md into the browsable site book/site/
 python3 tools/build_site.py --check    # same, verify only — the gate's "site is stale" arbiter
 python3 tools/vendor_figures.py <md>   # download remote figures into book/assets/
