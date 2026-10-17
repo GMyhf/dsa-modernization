@@ -116,7 +116,63 @@ python3 make_video.py 01 --preview      # 从成品转一份 720p 轻量版，�
 一段旁白」合成一个片段 → 拼接并做响度归一化（`loudnorm I=-16`）。
 
 因为画面是现导的，视频永远和课件同版；`video/chNN.timeline.json` 记下课件与讲稿的
-sha256，任何一边改了而没重新合成，闸门第 8 项就会报「视频过期」。
+摘要，任何一边改了而没重新合成，闸门第 8 项就会报「视频过期」。
+
+### 3.1 合成流程详解
+
+以第 1 章为例，`python3 make_video.py 01` 依次做下面几步（中间产物都在
+`.videowork/ch01/`，已 gitignore）。
+
+**第 0 步　两份源。**
+课件 `DSA_CH01_*.pptx` 由 `python3 build_all.py 01` 从 `content/ch01.py` 生成；
+讲稿 `content/ch01_narration.md` 手写，一页一节，标题形如 `## P1｜封面`，
+数字与公式写成中文读法。
+
+**第 1 步　旁白（edge-tts）。**
+
+- 切掉讲稿文末的「附：时间控制表」，按 `## Pn｜标题` 切成每页一段；
+  标题、引用、表格、列表、`【翻页提示】` 和 `**` 不朗读。
+  页号必须从 1 连续，节数必须等于课件页数，否则直接退出。
+- 送 TTS 前兜底替换几个符号（`——` → 逗号、`≠` → 不等于、`Ω` → 欧米伽，
+  书名号与引号去掉）。
+- 调 `edge-tts --voice zh-CN-YunyangNeural --rate +0%`，
+  按「音色 + 语速 + 朗读文本」的哈希缓存为 `audio/n-<页>-<hash>.mp3`。
+- 先写成 `.part`，确认非空、`ffprobe` 读得出时长才改成正式名 ——
+  TTS 失败（如 403）留下的 0 字节文件不会被当成缓存命中。
+- `--audio-only` 停在这一步，只报总时长。
+
+**第 2 步　画面。**
+`soffice --headless --convert-to pdf` 把课件转成 PDF，再 `pdftoppm -r 144 -png`
+导出逐页 PNG（`frames/slide-NN.png`）。是否复用上次的导出，看 `pptx_digest()`：
+它摘要的是**画面内容**（每个形状的位置尺寸、文字、字号 / 加粗 / 字体、图片内容哈希），
+不是文件字节 —— python-pptx 写出的 zip 带时间戳，同样的内容两次生成字节也不同。
+导出张数必须等于课件页数。
+
+**第 3 步　逐页片段（ffmpeg）。**
+每页「一张静帧 + 一段旁白」合成 `clips/c-NN.mp4`：
+画面缩放到 1920×1080，不足处用主色 `0x12395B` 补边；
+旁白前加 0.4 秒静默、读完留 1.0 秒；
+H.264 crf 23、30 fps，AAC 48 kHz 双声道 128k。
+
+**第 4 步　拼接 + 响度归一化。**
+ffmpeg concat 拼接所有片段，同时做 `loudnorm=I=-16:TP=-1.5:LRA=11`
+（TTS 原始输出偏轻，教室里听不清），输出成品 `DSA_CH01_*.mp4`（1080p，约 50 MB，不入库）。
+
+**第 5 步　附属产物。**
+
+- `video/ch01.srt`：字幕，每页一条（「P页号｜标题」），不是逐句字幕；
+- `video/ch01.timeline.json`：每页起止、时长、字数，以及课件摘要与讲稿摘要
+  （讲稿只摘朗读部分，不含机器写回的时间控制表）；
+- 讲稿文末「附：时间控制表」按实测时长重写；
+- 若这一章登记在 `video/pending.json`，合成成功后自动删掉这条登记。
+
+**最后　轻量版。**
+`python3 make_video.py 01 --preview` 从成品转出 `video/ch01-preview.mp4`：
+1280×720（lanczos），H.264 crf 28，AAC 44.1 kHz 单声道 64k。
+它入库，换一台机器不装 edge-tts / ffmpeg 也能直接看。
+
+**依赖**：`python-pptx`、`Pillow`、`edge-tts`（≥ 7.3.1）、`ffmpeg`（含 `ffprobe`）、
+`libreoffice`（`soffice`）、`poppler-utils`（`pdftoppm`）。
 
 **课件可以先改、视频晚点再合成**（D-043）：在 `video/pending.json` 登记这一章，
 闸门第 8 项就把**「视频旧了」这一类**问题（课件 / 讲稿摘要过期、时间轴页数、字幕条数）降为 ⚠ 提示，汇总行写明几章待合成：
