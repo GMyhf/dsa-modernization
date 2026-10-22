@@ -57,46 +57,6 @@
       "date": "2026-08-17"
     },
     {
-      "section": "11.3.1",
-      "kind": "merged",
-      "into": "11.3",
-      "reason": "基于属性的倒排：新书 11.3 一节讲完两种倒排，不切三级标题",
-      "by": "Claude",
-      "date": "2026-08-17"
-    },
-    {
-      "section": "11.3.2",
-      "kind": "merged",
-      "into": "11.3",
-      "reason": "对正文文件的倒排：同上，与基于属性的倒排放在一起对照着讲",
-      "by": "Claude",
-      "date": "2026-08-17"
-    },
-    {
-      "section": "11.4.1",
-      "kind": "merged",
-      "into": "11.4",
-      "reason": "B 树：新书 11.4 标题就是『B 树与 B+ 树』，两者并列讲",
-      "by": "Claude",
-      "date": "2026-08-17"
-    },
-    {
-      "section": "11.4.2",
-      "kind": "merged",
-      "into": "11.4",
-      "reason": "B+ 树：同上；实现在 code/ch11/bplus_tree",
-      "by": "Claude",
-      "date": "2026-08-17"
-    },
-    {
-      "section": "11.4.3",
-      "kind": "merged",
-      "into": "11.4",
-      "reason": "B 树的性能分析：树高约 log_m n、一次查找读多少页，写在 11.4 正文里",
-      "by": "Claude",
-      "date": "2026-08-17"
-    },
-    {
       "section": "11.5.1",
       "kind": "merged",
       "into": "11.5",
