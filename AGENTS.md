@@ -55,6 +55,21 @@ assertions, non-zero exit = fail). Test standard: **reverting to the book's vers
 turn some assertion red** — run a mutation self-check before handing off.
 Worked example: `code/ch03/array_stack` + `book/ch03-stack.md`.
 
+## Gotchas (learned the hard way)
+
+- **After editing `book/*.md`, rebuild in this order**: `build_book_pdf.py` → `build_site.py`
+  (the site's front page reads the PDF's page count/size from the file) → sync README.md's
+  "页 / MB" numbers (`tests/test_readme.py` checks them against the PDF sidecar).
+- **Read gate output in full, not just the tail.** A red step scrolls away as later steps
+  print; the main-PDF staleness check once went red unnoticed for exactly this reason.
+- **Restoring a section number** (原书有、新书缺的小节) means touching four places: the
+  heading itself (title must match the original verbatim, R11), `collab/section_gaps.json`
+  (remove the gap entry), `collab/slide_coverage.json` (R16 entry), and any 「原书 X.Y.Z 节」
+  back-references in the prose.
+- `--allow-degraded` is a `check_code.py` flag; `handoff.py` has no pass-through. On this
+  macOS machine ASan/UBSan can't run at all (interceptor failure) — the code gate only runs
+  degraded here; sanitizer profiles need a Linux machine.
+
 ## Collaboration protocol
 
 Two AI agents alternate implement/review via shared files in `collab/` (see
