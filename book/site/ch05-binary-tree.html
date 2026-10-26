@@ -690,6 +690,9 @@ BST 中序: 1 3 4 6 7 8 10 14
 <p>而对于一棵具有 <span class="math">n</span> 个结点的<strong>完全二叉树</strong>，可以从根结点起自上而下、从左至右地把所有结点编号， 得到一个足以反映整个二叉树结构的线性序列——采用这种方式，线性序列里存储的结点就是按照层次 周游二叉树得到的排列。按层次顺序把结点从 <span class="math"><span class="upr">0</span></span> 到 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 编号，编号 <span class="math">i</span> 的结点就放在数组下标 <span class="math">i</span>。</p>
 <figure><img loading="lazy" src="../assets/scan/fig-5-9.png" alt="图 5.9 完全二叉树的结点编号"><figcaption>图 5.9 完全二叉树的结点编号</figcaption></figure>
 <p>图 5.9　完全二叉树的结点编号。</p>
+<p>按层次次序把图 5.9 的 12 个结点放进一维数组，就得到图 5.10：</p>
+<figure><img loading="lazy" src="../assets/fig-5-10.png" alt="图 5.10 完全二叉树的顺序存储结构"><figcaption>图 5.10 完全二叉树的顺序存储结构</figcaption></figure>
+<p>图 5.10　完全二叉树的顺序存储结构：下标 0～11 依次对应 A～L。</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">下标</th>
 <th style="text-align:left">0</th>
@@ -721,7 +724,7 @@ BST 中序: 1 3 4 6 7 8 10 14
 <td style="text-align:left">L</td>
 </tr>
 </tbody></table></div>
-<p>上图就是图 5.9 的顺序存储结构。结点间的关系不再靠指针，而是<strong>隐含在下标里</strong>：下标 <span class="math">i</span> 的左右孩子是 <span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">1</span></span> 和 <span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">2</span></span>，父结点是 <span class="math">⌊(i<span class="bin">−</span><span class="upr">1</span>)/<span class="upr">2</span>⌋</span>——正是 5.1.3 的性质。一个指针都不用存，这是完全二叉树最省空间的存法；5.5 节的堆和 8.3.2 节的堆排序都用它。<strong>但它只对完全二叉树划算</strong>：树一旦有空洞，数组里就要留出同样多的空位。</p>
+<p>结点间的关系不再靠指针，而是<strong>隐含在下标里</strong>：下标 <span class="math">i</span> 的左右孩子是 <span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">1</span></span> 和 <span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">2</span></span>，父结点是 <span class="math">⌊(i<span class="bin">−</span><span class="upr">1</span>)/<span class="upr">2</span>⌋</span>——正是 5.1.3 的性质。一个指针都不用存，这是完全二叉树最省空间的存法；5.5 节的堆和 8.3.2 节的堆排序都用它。<strong>但它只对完全二叉树划算</strong>：树一旦有空洞，数组里就要留出同样多的空位。</p>
 <p>第 6 章会介绍一般情况下树的顺序存储；由于二叉树与树能够进行等价转换，因此一般情况下的二叉树 也可以采用类似的顺序存储结构方法。</p>
 <p><strong>在不同的存储结构中，不仅空间开销有差异，实现二叉树操作的方法也不同。</strong> 因此在具体应用中 采取什么存储结构，除了根据二叉树的形态之外，还应该考虑时间、空间复杂度和算法的简洁性。</p>
 <h3 id="教学版完整实现"><a class="anchor" href="#教学版完整实现">#</a>教学版：完整实现</h3>
@@ -1185,7 +1188,7 @@ BST 中序: 1 3 4 6 7 8 10 14
 <div class="math math-display">K<sub>i</sub><span class="rel">≤</span>K<sub><span class="upr">2</span>i<span class="bin">+</span><span class="upr">1</span></sub>, K<sub>i</sub><span class="rel">≤</span>K<sub><span class="upr">2</span>i<span class="bin">+</span><span class="upr">2</span></sub> (i<span class="rel">=</span><span class="upr">0</span>,<span class="upr">1</span>,⋯,⌊n/<span class="upr">2</span>⌋<span class="bin">−</span><span class="upr">1</span>)</div>
 <p>（下标超过 <span class="math">n<span class="bin">−</span><span class="upr">1</span></span> 的那一项不存在，就不必比较：例如 <span class="math">n</span> 为偶数时，最后一个内部结点 <span class="math">i<span class="rel">=</span>n/<span class="upr">2</span><span class="bin">−</span><span class="upr">1</span></span> 只有左孩子 <span class="math"><span class="upr">2</span>i<span class="bin">+</span><span class="upr">1</span><span class="rel">=</span>n<span class="bin">−</span><span class="upr">1</span></span>。）</p>
 <p>从逻辑的角度来讲，堆是一种树形结构，而且是一种<strong>特殊的完全二叉树</strong>：此完全二叉树的每个结点 对应于序列中的一个关键码，根结点对应于 <span class="math">K<sub><span class="upr">0</span></sub></span>，按层次从左至右依次类推。说其特殊，主要是因为 <strong>堆序只是局部有序</strong>——最小堆对应的完全二叉树中所有内部结点的值均不大于其左右子结点的关键 码值，且一个结点与其兄弟之间没有必然的联系。最小堆不像二叉搜索树那样实现了关键码的完全排序； 相比较而言，只有当结点之间是父子关系时，才可以确定这两个结点关键码的大小关系。</p>
-<p>根据最小堆的定义，堆对应的完全二叉树的根结点具有最小关键码值，即堆所对应序列的第一个元素 具有最小值。5.3.2 节已经介绍过用顺序存储结构实现完全二叉树的有效方法，因此可以把最小堆的 关键码存储在一维数组中：只需要计算简单的代数表达式，就能非常容易地查找某个结点的父结点和 子结点（下标 <code>i</code> 的孩子是 <code>2i+1</code> 和 <code>2i+2</code>），<strong>既避免了使用指针来保持结构，又能有效地执行相应 操作</strong>。当然，由于顺序存储的空间分配要求，必须预先知道堆的大小（本书的实现按需扩容）。 <code>sift_down</code> 必须比较左右两个孩子。空堆上 <code>remove_min()</code> 返回 <code>nullopt</code>。</p>
+<p>根据最小堆的定义，堆对应的完全二叉树的根结点具有最小关键码值，即堆所对应序列的第一个元素 具有最小值。5.3.2 节已经介绍过用顺序存储结构实现完全二叉树的有效方法，因此可以把最小堆的 关键码存储在一维数组中：只需要计算简单的代数表达式，就能非常容易地查找某个结点的父结点和 子结点（下标 <code>i</code> 的孩子是 <code>2i+1</code> 和 <code>2i+2</code>），<strong>既避免了使用指针来保持结构，又能有效地执行相应 操作</strong>。当然，由于顺序存储的空间分配要求，必须预先知道堆的大小（本书的实现按需扩容）。</p>
 <p><strong>插入与删除。</strong> 插入时新添的元素加入末尾；为了保持最小堆的性质，需要沿着其祖先的路径，自下 而上依次比较和交换该结点与父结点的位置，直到重新满足堆的性质为止。这样做会出现两种情况： 要么新结点升到最小堆的顶端，要么到某一位置时发现父结点比新插入的结点关键码值小。这个自下 而上逐渐上升、最后停在满足最小堆性质的位置的过程，通常被称为「<strong>筛选</strong>」。删除操作的处理与 插入时方向相反：删除某个位置的元素后形成了一个空位置，首先把最末端的结点填入这个位置；同理， 这样做也可能导致破坏堆序特性，末端元素需要与被删位置的子结点比较交换，直到过滤到该结点小于 最小子结点的正确位置为止。删除的若是<strong>堆顶以外的任意位置</strong>，还要多看一眼父结点：填进来的末端元素可能比新父结点还小 （它原本来自另一棵子树），这时要改为<strong>向上</strong>筛选。例如堆 <code>1 10 2 11 12 3 4</code> 删除下标 3 的 11，填进来的 4 比父结点 10 小，就得上浮。原书【代码5.11】的 <code>Remove(pos)</code> 正是先比父结点、再决定上浮还是下沉。</p>
 <p><strong>建堆。</strong> 把所有关键码放到一维数组中，此时形成的完全二叉树并不具备最小堆的特性，但是<strong>仅包含 叶子结点的子树已经是堆</strong>——在有 <span class="math">n</span> 个结点的完全二叉树中，当 <span class="math">i&gt;⌊n/<span class="upr">2</span>⌋<span class="bin">−</span><span class="upr">1</span></span> 时，以 关键码 <span class="math">K<sub>i</sub></span> 为根的子树已经是堆。这时，从含有内部结点数最少的子树（这种子树在完全二叉树的 倒数第二层，此时 <span class="math">i<span class="rel">=</span>⌊n/<span class="upr">2</span>⌋<span class="bin">−</span><span class="upr">1</span></span>）开始，从右至左依次进行调整；对这一层调整完成之后， 继续对上一层进行同样的工作，直到整个过程到达树根时，整棵完全二叉树就成为一个堆。</p>
 <p>对当前结点 <span class="math">K<sub>i</sub></span>，调整过程是从 <span class="math">K<sub>i</sub></span> 开始向下筛选的过程：如果 <span class="math">K<sub>i</sub><span class="rel">≤</span>K<sub><span class="upr">2</span>i<span class="bin">+</span><span class="upr">1</span></sub></span> 且 <span class="math">K<sub>i</sub><span class="rel">≤</span>K<sub><span class="upr">2</span>i<span class="bin">+</span><span class="upr">2</span></sub></span>，则以 <span class="math">K<sub>i</sub></span> 为根的子树就已经是堆，不需要调整结点的位置；否则将 <span class="math">K<sub>i</sub></span> 的值与 其子结点中关键码小的一个进行交换，交换后继续对以该子结点为根的子树进行重建，这样在最坏 情况下向下调整到树叶，然后依次调整以 <span class="math">K<sub>i<span class="bin">−</span><span class="upr">1</span></sub>,K<sub>i<span class="bin">−</span><span class="upr">2</span></sub>,⋯,K<sub><span class="upr">0</span></sub></span> 为根的子树。完成了以 <span class="math">K<sub><span class="upr">0</span></sub></span> 为根的树的筛选，就完成了建堆的过程。</p>
@@ -1845,6 +1848,9 @@ Direct leak of 24 byte(s) in 1 object(s) allocated from:
 <li>判断“先序和后序遍历序列总能唯一确定二叉树”是否成立；若不成立给出最小反例。</li>
 <li>设计 <code>O(n)</code> 算法检查数组是否为大顶堆，并说明为什么只需检查每个非根结点与父结点的关系。</li>
 <li>证明含 <code>n</code> 个结点的满二叉 Huffman 树叶子数为 <code>(n+1)/2</code>。</li>
+</ol>
+<p><strong>以下为本书正文习题：</strong></p>
+<ol>
 <li>分别画出含 3 个结点的二叉树的所有不同形态。</li>
 <li>一棵二叉树的先序是 ABCDEFG、中序是 CBDAFEG，画出这棵树并写出后序。</li>
 <li>证明：有 <span class="math">n</span> 个结点的二叉树，空指针域的个数是 <span class="math">n<span class="bin">+</span><span class="upr">1</span></span>。</li>
