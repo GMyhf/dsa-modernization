@@ -2067,7 +2067,7 @@ LevelOrder(p)                   // 层次：用队列
         else
             S.Push(____(②)____)
             S.Push(____(③)____)</code></pre></div>
-<p>(1) 补全空缺；(2) ② 与 ③ 两句能否交换次序？ (3) 设一棵树的根 <code>A</code> 有孩子 <code>B</code>、<code>C</code>、<code>D</code>，<code>C</code> 有孩子 <code>E</code>、<code>F</code>，<code>D</code> 有孩子 <code>G</code>。 写出访问序列，以及访问 <code>E</code> 时栈中的记录（自底向上）； (4) 分析代价。</p>
+<p>(1) 补全空缺；(2) ② 与 ③ 两句能否交换次序？(3) 设一棵树的根 <code>A</code> 有孩子 <code>B</code>、<code>C</code>、<code>D</code>， <code>C</code> 有孩子 <code>E</code>、<code>F</code>，<code>D</code> 有孩子 <code>G</code>。写出访问序列，以及访问 <code>E</code> 时栈中的记录（自底向上）；(4) 分析代价。</p>
 <blockquote><p><strong>答</strong>：(1) ① <code>c = nullptr</code>　② <code>(p, k + 1)</code>　③ <code>(c, 1)</code></p>
 <p>后根次序要求「所有孩子都处理完才访问自己」。记录里的 <span class="math">k</span> 就是 5-21 末尾说的<strong>标记</strong>： 它记住这个结点已经处理到第几个孩子。对照递归写法 <code>for k ← 1 to p 的度数: PostOrder(Child(p, k));  然后访问 p</code>， <span class="math">k</span> 正是循环变量，也就是第 3 章「用栈消除递归」里要保存的<strong>返回点</strong>（3-15）。</p>
 <p>(2) <strong>不能交换</strong>。栈后进先出，必须先压 <code>(p, k+1)</code>、再压 <code>(c, 1)</code>，孩子 <code>c</code> 才会先出栈， 它的整棵子树处理完之后才轮到 <code>p</code> 的下一个孩子。交换之后 <code>p</code> 的记录先出栈， 会一路跳过所有孩子、先访问 <code>p</code> 本身——第 (3) 问那棵树会最先访问 <code>A</code>，后根次序全乱。</p>
