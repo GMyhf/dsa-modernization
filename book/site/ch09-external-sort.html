@@ -160,7 +160,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>源码：<a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch09/external_sort/modern.hpp" class="ext">置换选择与竞赛树</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch09/external_sort/demo.cpp" class="ext">可运行示例</a>、 <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch09/external_sort/test.cpp" class="ext">测试</a>。</p>
 <h2 id="91-主存储器和外存储器"><a class="anchor" href="#91-主存储器和外存储器">#</a>9.1 主存储器和外存储器</h2>
 <p>前面各章的结构基本上都在内存里，也叫内部数据结构。内存容量有限，程序一结束数据也就没了。大规模数据必须放到外存上，排序过程也就变成多次内存与外存之间的交换。</p>
-<p>主存（RAM、cache、显存）在主板上，按单元连续编址，CPU 直接访问，一次存取时间可以看成很小的常数，单位是纳秒。它快、贵、容量相对小，断电就丢。外存（硬盘、磁带、U 盘）便宜、容量大，信息断电不丢，有的还能随身带走。但一次存取以毫秒甚至秒计，比内存慢几个数量级。</p>
+<p>主存（RAM、cache、显存）在主板上，按单元连续编址，CPU 直接访问，一次存取时间可以看成很小的常数，单位是纳秒。常见主存还包括高速缓存和视频存储器；常见外存则包括硬盘、软盘、磁带、光盘和 U 盘等。主存中存放的是当前正在执行的程序和数据，程序结束后其中的状态随之消失；外存便宜、容量大，信息不易失，也便于携带：断电后数据仍在，并能在不同设备之间传递。但一次存取以毫秒甚至秒计，比内存慢几个数量级。</p>
 <p>外存慢，一个原因是每次访问都要先定位再读写。磁盘要把磁头移到目标磁道，再等扇区转到磁头下，定位往往就要几毫秒到几十毫秒，远慢于真正把数据读出来。所以外存按固定大小的页块存取：一次定位读写一整页，减少定位次数。顺序扫描时再配合缓冲：一次读入一页或几页到内存，后面的访问尽量打在缓冲区里。</p>
 <p>对外排序来说，目标首先是减少读写次数，而不是减少内存里的比较。一次磁盘 I/O 往往比一次比较贵几个数量级。</p>
 <h3 id="先建立成本模型"><a class="anchor" href="#先建立成本模型">#</a>先建立成本模型</h3>
@@ -187,8 +187,6 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 </tr>
 </tbody></table></div>
 <p>例如 1 亿条 16 字节记录约占 1.6 GB。若内存工作区只有 64 MB，任何“把全部记录放进数组再排序”的内部排序都不成立；外排序必须让大部分记录始终留在外存，只在内存里保存少量缓冲页和当前候选。</p>
-<figure><img loading="lazy" src="../assets/scan/fig-9-1.png" alt="图9.1 置换选择算法流程"><figcaption>图9.1 置换选择算法流程</figcaption></figure>
-<p>图9.1把输入缓冲、内存工作区和输出缓冲分开。输入缓冲空了才整页补入，输出缓冲满了才整页写回；工作区处理的是记录，真正与设备交换的是页。</p>
 <h2 id="92-文件的组织和管理"><a class="anchor" href="#92-文件的组织和管理">#</a>9.2 文件的组织和管理</h2>
 <p>文件是外存上的数据结构，由大量性质相同的记录组成。记录是有独立逻辑意义的一块数据，简单可以是一串字符，复杂则由若干字段组成。操作系统文件常常是连续字符流，结构不明显；数据库文件是有结构的记录集合，每条记录由若干不可再分的数据项组成。学生登记表——姓名、学号、性别、出生年月——就是后一种。</p>
 <p>按记录长度，文件分定长和不定长：定长更好处理。按关键码个数，分单关键码和多关键码：多关键码文件除了主码还可以有若干次码。操作通常以记录为单位：顺序读、追加、按条件修改或删除。处理方式有实时（要求很快应答）和批量（允许较长反馈）。</p>
@@ -271,7 +269,9 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p>若内存能放 <span class="math">M</span> 条记录，普通分批排序只能产生长度至多 <span class="math">M</span> 的初始顺串，顺串数约为 <span class="math">r<span class="rel">=</span>⌈N/M⌉</span>。做 <span class="math">k</span> 路归并需要 <span class="math">⌈<span class="upr">log</span><sub>k</sub>r⌉</span> 趟；每一趟都要读完整文件再写完整文件，所以减少一趟，省下的是约 <span class="math"><span class="upr">2</span>N/B</span> 次页 I/O，而不是几个比较。</p>
 <h3 id="931-置换选择排序"><a class="anchor" href="#931-置换选择排序">#</a>9.3.1 置换选择排序</h3>
 <p><strong>置换选择排序</strong>（replacement selection sorting）是在<strong>堆排序的基础上演化而来的</strong>。顺串是磁盘上已经 有序的一段记录；内存一次只能装 <span class="math">M</span> 条时，朴素做法是每批排成一条长为 <span class="math">M</span> 的顺串——顺串数因此是 <span class="math">⌈N/M⌉</span>，一个也少不了。</p>
-<p>置换选择可以做得更好：输出堆顶之后，若下一条记录<strong>不小于</strong>刚输出的值，它还可以进入当前顺串； 否则冻结到下一趟。<strong>置换选择排序得到的顺串长度并不相等，但平均情况下可以形成长度为 <span class="math"><span class="upr">2</span>M</span> 的 顺串</strong>——顺串数因此大约减半，而每减少一半顺串数，归并趟数就可能少一趟，省下的是一整轮完整的 读写。</p>
+<p>置换选择可以做得更好：输出堆顶之后，若下一条记录<strong>不小于</strong>刚输出的值，它还可以进入当前顺串； 否则冻结到下一趟。<strong>置换选择排序得到的顺串长度并不相等，但平均情况下可以形成长度为 <span class="math"><span class="upr">2</span>M</span> 的 顺串</strong>——顺串数因此大约减半，而每减少一半顺串数，归并趟数就可能少一趟，省下的是一整轮完整的 读写。整个工作过程如图 9.1 所示。</p>
+<figure><img loading="lazy" src="../assets/scan/fig-9-1.png" alt="图 9.1 置换选择算法流程"><figcaption>图 9.1 置换选择算法流程</figcaption></figure>
+<p>图 9.1　置换选择算法流程。输入缓冲空了才整页补入，输出缓冲满了才整页写回；工作区处理的是记录，真正与设备交换的是页。</p>
 <p>原书图 9.2 的输入是 <code>50 49 35 45 30 25 15 60 16 27 1</code>，工作区 <code>M = 7</code>。前 7 个建成最小堆后，堆顶是 15，先输出它。接着读到 60——它比刚输出的 15 大，可以进当前堆；之后每输出一个堆顶再读一条：16、27、1 依次遇到刚输出的 25、30、35，都比它小，被冻结。第一顺串因此是</p>
 <div class="codeblock" data-lang="text"><pre><code>15 25 30 35 45 49 50 60</code></pre></div>
 <p>长度 8，已经超过 M。剩下的 <code>1 16 27</code> 构成第二顺串。</p>
@@ -881,6 +881,9 @@ R3:  6  8 30</code></pre></div>
 <li>给定内存容量 <code>M</code> 的最小堆，模拟置换选择生成全部顺串，并标出每次冻结的记录。</li>
 <li>给定页大小、记录大小和内存缓冲页数，计算一次归并的最大路数、顺串长度和访外次数。</li>
 <li>比较 winner tree、loser tree 与最小堆在多路归并中的更新代价。</li>
+</ol>
+<h3 id="正文习题"><a class="anchor" href="#正文习题">#</a>正文习题</h3>
+<ol>
 <li>说明为什么外存要按页读写，以及缓冲如何减少定位次数。</li>
 <li>对输入 <code>50 49 35 45 30 25 15 60 16 27 1</code>、<span class="math">M<span class="rel">=</span><span class="upr">7</span></span>，写出置换选择的两个顺串，并指出哪些键被冻结。</li>
 <li>若 <span class="math">M</span> 大到能装下全部输入，置换选择退化成什么。</li>
@@ -905,14 +908,14 @@ R3:  6  8 30</code></pre></div>
 <li>比较 <span class="math">M<span class="rel">=</span><span class="upr">4</span>,<span class="upr">8</span>,<span class="upr">16</span></span> 时置换选择产生的顺串个数。</li>
 </ol>
 <h3 id="原书上机题"><a class="anchor" href="#原书上机题">#</a>原书上机题</h3>
-<blockquote><p>同上，本轮只补题面，参考答案登记在 <code>collab/answer_gaps.json</code>。</p></blockquote>
+<blockquote><p>原书上机题的参考答案见 <code>book/习题与参考答案.md</code> 的「原书上机题参考」，由 R14 逐题守着。</p></blockquote>
 <ol>
 <li>在磁盘中，图片一般作为数据一行一行地存储。16 色图片可以用 4 位表示一个像素；如果允许每个 像素 8 位，则不需要解压缩像素的处理（由于 1 个像素对应 1 个字节，在大多数机器中字节是最低级的 寻址单位）；<strong>如果把两个像素压缩到一个字节中，就能够节省空间，但是必须对像素进行解压缩。</strong> 对比每个像素 8 位和压缩为每个像素 4 位两种情况，哪种情况从磁盘中读取并访问图像中每个像素所花 的时间更多？对这两种情况进行编程，并比较需要的时间。</li>
 <li>根据本章描述的置换选择方法和多路归并算法实现一个外部排序。<strong>针对大记录文件和小记录文件两种 情况测试你的程序</strong>，考虑记录为多大时，应该首先采用关键码排序、然后再根据排序结果重排原数据文件。</li>
 </ol>
 <div class="pagenav"><a href="ch08-sorting.html"><span class="dir">← 上一篇</span>第8章 内部排序</a><a href="ch10-search.html" style="text-align:right"><span class="dir">下一篇 →</span>第10章 检索</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#91-主存储器和外存储器">9.1 主存储器和外存储器</a><a href="#先建立成本模型" class="sub">先建立成本模型</a><a href="#92-文件的组织和管理">9.2 文件的组织和管理</a><a href="#921-文件组织" class="sub">9.2.1 文件组织</a><a href="#922-c的流文件" class="sub">9.2.2 C++的流文件</a><a href="#记录怎样装进页" class="sub">记录怎样装进页</a><a href="#93-外排序">9.3 外排序</a><a href="#931-置换选择排序" class="sub">9.3.1 置换选择排序</a><a href="#932-二路外排序" class="sub">9.3.2 二路外排序</a><a href="#933-多路归并选择树" class="sub">9.3.3 多路归并——选择树</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充外排序题参考课程第-9-章" class="sub">补充外排序题（参考课程第 9 章）</a><a href="#原书习题" class="sub">原书习题</a><a href="#上机题">上机题</a><a href="#原书上机题" class="sub">原书上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#91-主存储器和外存储器">9.1 主存储器和外存储器</a><a href="#先建立成本模型" class="sub">先建立成本模型</a><a href="#92-文件的组织和管理">9.2 文件的组织和管理</a><a href="#921-文件组织" class="sub">9.2.1 文件组织</a><a href="#922-c的流文件" class="sub">9.2.2 C++的流文件</a><a href="#记录怎样装进页" class="sub">记录怎样装进页</a><a href="#93-外排序">9.3 外排序</a><a href="#931-置换选择排序" class="sub">9.3.1 置换选择排序</a><a href="#932-二路外排序" class="sub">9.3.2 二路外排序</a><a href="#933-多路归并选择树" class="sub">9.3.3 多路归并——选择树</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充外排序题参考课程第-9-章" class="sub">补充外排序题（参考课程第 9 章）</a><a href="#正文习题" class="sub">正文习题</a><a href="#原书习题" class="sub">原书习题</a><a href="#上机题">上机题</a><a href="#原书上机题" class="sub">原书上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch09-external-sort.md</code> 生成
