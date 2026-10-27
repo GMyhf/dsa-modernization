@@ -7,6 +7,7 @@ import contextlib
 import io
 import json
 import re
+import shutil
 import sys
 import tempfile
 import unittest
@@ -408,6 +409,68 @@ class TestStripAnswers(unittest.TestCase):
     def test_drifted_intro_fails_loudly(self):
         with self.assertRaises(SystemExit):
             build_book_pdf.strip_answers("# 别的标题\n")
+
+
+HAS_PANDOC = shutil.which("pandoc") is not None
+
+
+class TestParenNumbering(unittest.TestCase):
+    """pandoc 把行首 `(n) ` 当列表并按顺序重编号；PDF 上印出的序号必须与源文件一致。"""
+
+    def run_check(self, text):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "chapter.md"
+            path.write_text(text, encoding="utf-8")
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                status = build_book_pdf.check_paren_numbering([path])
+        return status, out.getvalue()
+
+    def test_sentinel_carries_label_and_line(self):
+        marked = build_book_pdf.mark_paren_items("正文\n    (4) 乙\n> b) 丙\n(2)\n")
+        self.assertEqual(marked.split("\n")[1], "    (4) ⟦4@2⟧ 乙")
+        self.assertEqual(marked.split("\n")[2], "> b) ⟦b@3⟧ 丙")
+        self.assertEqual(marked.split("\n")[3], "(2) ⟦2@4⟧")
+
+    def test_mid_line_markers_are_left_alone(self):
+        text = "甲；(2) 乙；(3) 丙\n"
+        self.assertEqual(build_book_pdf.mark_paren_items(text), text)
+
+    def test_shown_label_styles(self):
+        self.assertEqual(build_book_pdf.shown_label(2, "Decimal"), "2")
+        self.assertEqual(build_book_pdf.shown_label(3, "LowerAlpha"), "c")
+        self.assertEqual(build_book_pdf.shown_label(4, "UpperRoman"), "IV")
+
+    @unittest.skipUnless(HAS_PANDOC, "需要 pandoc")
+    def test_renumbered_continuation_is_caught(self):
+        """第 10 章习题 17 的原形：续行行首的 (4) 被印成 (2)。"""
+        status, out = self.run_check(
+            "12. 题面：\n    (1) 甲；(2) 乙；(3) 丙；\n    (4) 丁。\n"
+        )
+        self.assertEqual(status, 1)
+        self.assertIn(":3 写的是 (4)，PDF 会印成 (2)", out)
+
+    @unittest.skipUnless(HAS_PANDOC, "需要 pandoc")
+    def test_reordered_labels_in_blockquote_are_caught(self):
+        """DSA_MOOC_solution.md 的原形：按大小排序列出 (5)(1)(2)…，PDF 印成 (5)(6)(7)…。"""
+        status, out = self.run_check("> 说明\n>\n> (5) 甲\n>\n> (1) 乙\n")
+        self.assertEqual(status, 1)
+        self.assertIn("写的是 (1)，PDF 会印成 (6)", out)
+
+    @unittest.skipUnless(HAS_PANDOC, "需要 pandoc")
+    def test_consecutive_and_escaped_markers_pass(self):
+        status, out = self.run_check(
+            "1. 题面：\n    (1) 甲；\n    (2) 乙。\n\n> 说明\n>\n> \\(5) 甲\n>\n> \\(1) 乙\n"
+        )
+        self.assertEqual(status, 0, out)
+
+    @unittest.skipUnless(HAS_PANDOC, "需要 pandoc")
+    def test_committed_book_is_clean(self):
+        paths = [*build_book_pdf.CHAPTERS, *build_book_pdf.STANDALONE.values()]
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            status = build_book_pdf.check_paren_numbering(paths)
+        self.assertEqual(status, 0, out.getvalue())
 
 
 class TestRegexes(unittest.TestCase):

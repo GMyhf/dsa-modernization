@@ -97,6 +97,20 @@ PAGES_RE = re.compile(r"Output written on \S+ \((\d+) pages?")
 
 FIGURE_REF_RE = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
 
+PANDOC_FROM = "markdown+tex_math_dollars+raw_tex+pipe_tables+grid_tables+fenced_code_attributes"
+
+# 括号序号自检（2026-10-27 加）。pandoc 的 fancy_lists 会把行首的 `(3) `、`b) ` 当成列表标记，
+# 而且**按顺序重新编号**：列表项续行里写「…；(3) 甲；\n    (4) 乙」，PDF 上印出来是 (2)。
+# 网页版只认 `1.` / `-`，不受影响，所以只有 PDF 会错，人眼对着源文件也看不出来。
+# 一次校对里查出 7 处，其中一处是那次校对自己新折出来的。判据：给每个行首标记后面插一个哨兵
+# 「⟦源标签@行号⟧」，让 pandoc 解析，再拿它要印的序号与哨兵里的源标签逐项比对。
+PAREN_MARKER_RE = re.compile(
+    r"^(?P<lead>(?:[ \t]*>)*[ \t]*)"
+    r"(?P<marker>\((?P<l2>[0-9]+|[A-Za-z]+)\)|(?P<l1>[0-9]+|[A-Za-z]+)\))"
+    r"(?P<gap>[ \t]+|$)"
+)
+SENTINEL_RE = re.compile(r"^⟦(?P<label>[^@⟧]+)@(?P<line>\d+)⟧")
+
 
 def referenced_assets(chapters: list[Path] | None = None) -> list[Path]:
     """各章正文引用到、并且会被嵌进 PDF 的本地图片。
@@ -155,6 +169,7 @@ def check_current() -> int:
     for name, source in STANDALONE.items():
         output, info_path = standalone_paths(name)
         status |= check_one(output, info_path, [source])
+    status |= check_paren_numbering([*CHAPTERS, *STANDALONE.values()])
     return status
 
 
@@ -203,6 +218,103 @@ def check_one(output: Path, info_path: Path, chapters: list[Path] | None) -> int
         f"✅ {label} 与源文件一致：{info['pages']} 页、{info['chapters']} 章、"
         f"{info['figures']} 张图，sha256 {current[:12]}"
     )
+    return 0
+
+
+def mark_paren_items(text: str) -> str:
+    """在每个行首括号标记后插入哨兵 ⟦标签@行号⟧；不改变 pandoc 对列表结构的判断。"""
+    out = []
+    for number, line in enumerate(text.split("\n"), 1):
+        match = PAREN_MARKER_RE.match(line)
+        if match:
+            label = match.group("l2") or match.group("l1")
+            cut = match.start("gap")
+            line = f"{line[:cut]} ⟦{label}@{number}⟧{line[cut:]}"
+        out.append(line)
+    return "\n".join(out)
+
+
+def _roman(n: int) -> str:
+    table = [(1000, "m"), (900, "cm"), (500, "d"), (400, "cd"), (100, "c"), (90, "xc"),
+             (50, "l"), (40, "xl"), (10, "x"), (9, "ix"), (5, "v"), (4, "iv"), (1, "i")]
+    out = ""
+    for value, digits in table:
+        while n >= value:
+            out += digits
+            n -= value
+    return out
+
+
+def shown_label(n: int, style: str) -> str:
+    """pandoc 给第 n 项印出的标签（不含括号）。"""
+    if style == "LowerAlpha":
+        return chr(ord("a") + n - 1) if 1 <= n <= 26 else str(n)
+    if style == "UpperAlpha":
+        return chr(ord("A") + n - 1) if 1 <= n <= 26 else str(n)
+    if style == "LowerRoman":
+        return _roman(n)
+    if style == "UpperRoman":
+        return _roman(n).upper()
+    return str(n)
+
+
+def renumbered_items(ast: dict) -> list[tuple[int, str, str]]:
+    """在 pandoc JSON 里找括号列表中「印出的序号 ≠ 源文件序号」的项，返回 (行号, 源标签, 印出标签)。"""
+    found = []
+
+    def first_str(blocks):
+        for block in blocks:
+            if block.get("t") in ("Plain", "Para") and block["c"]:
+                inline = block["c"][0]
+                return inline["c"] if inline.get("t") == "Str" else None
+            return None
+        return None
+
+    def walk(node):
+        if isinstance(node, dict):
+            if node.get("t") == "OrderedList":
+                (start, style, delim), items = node["c"]
+                if delim["t"] in ("OneParen", "TwoParens"):
+                    for index, item in enumerate(items):
+                        head = first_str(item)
+                        match = SENTINEL_RE.match(head or "")
+                        if not match:
+                            continue
+                        shown = shown_label(start + index, style["t"])
+                        if match.group("label") != shown:
+                            found.append((int(match.group("line")), match.group("label"), shown))
+            walk(node.get("c"))
+        elif isinstance(node, list):
+            for child in node:
+                walk(child)
+
+    walk(ast.get("blocks", []))
+    return found
+
+
+def check_paren_numbering(paths: list[Path]) -> int:
+    """PDF 会印错的括号序号；没有 pandoc 时出声跳过（判据离不开 pandoc 自己的解析）。"""
+    if not shutil.which("pandoc"):
+        print("⚠️  未找到 pandoc，跳过括号序号自检（部分验证）")
+        return 0
+    problems = []
+    for path in dict.fromkeys(paths):
+        proc = subprocess.run(
+            ["pandoc", "--from", PANDOC_FROM, "--to", "json"],
+            input=mark_paren_items(path.read_text(encoding="utf-8")),
+            capture_output=True, text=True,
+        )
+        if proc.returncode != 0:
+            problems.append(f"{rel_label(path)}：pandoc 解析失败：{proc.stderr.strip()[:200]}")
+            continue
+        for line, source, shown in renumbered_items(json.loads(proc.stdout)):
+            problems.append(f"{rel_label(path)}:{line} 写的是 ({source})，PDF 会印成 ({shown})")
+    if problems:
+        for problem in problems:
+            print(f"❌ {problem}")
+        print("   修法：重新折行，让续接的 (n) 不落在行首（例如把它留在上一行末尾）")
+        return 1
+    print(f"✅ 括号序号：{len(dict.fromkeys(paths))} 个源文件，PDF 印出的序号与源文件一致")
     return 0
 
 
@@ -549,7 +661,7 @@ def run_pandoc(md_path: Path, pdf_path: Path, *, info_path: Path | None = None,
         "-o",
         str(tex_path),
         "--from",
-        "markdown+tex_math_dollars+raw_tex+pipe_tables+grid_tables+fenced_code_attributes",
+        PANDOC_FROM,
         "--toc",
         "--toc-depth=3",
         "--top-level-division=chapter",
@@ -616,6 +728,11 @@ def main() -> int:
     opts = parser.parse_args()
     if opts.check:
         return check_current()
+    if not opts.assemble_only:
+        sources = [*CHAPTERS] if opts.only in (None, "book") else []
+        sources += [path for name, path in STANDALONE.items() if opts.only in (None, name)]
+        if check_paren_numbering(sources):
+            raise SystemExit("括号序号会被 pandoc 改号，先修源文件再出 PDF")
     PDF_DIR.mkdir(parents=True, exist_ok=True)
     if opts.only in (None, "book"):
         WORK.mkdir(parents=True, exist_ok=True)
