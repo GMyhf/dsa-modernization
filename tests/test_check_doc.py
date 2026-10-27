@@ -964,6 +964,19 @@ class TestR14ExerciseAnswers(unittest.TestCase):
                 path.unlink()
         self.assertEqual(counts, {"习题": 3, "上机题": 1, "原书习题": 0, "原书上机题": 0})
 
+    def test_supplementary_section_after_main_is_still_skipped(self):
+        """补充小节排在正文题后面时，「最后一组」不能变成补充题（第 3 章曾只核对了 3 道）。"""
+        text = ("# 第9章\n\n## 习题\n\n### 正文习题\n\n"
+                "1. 正文第一题\n2. 正文第二题\n3. 正文第三题\n4. 正文第四题\n\n"
+                "### 补充题（参考课程第 9 章）\n\n1. 补充第一题\n2. 补充第二题\n\n"
+                "## 上机题\n\n1. 上机第一题\n")
+        path = self.chapter(None, text)
+        try:
+            counts = check_doc.chapter_exercises(path)
+        finally:
+            path.unlink()
+        self.assertEqual(counts["习题"], 4, counts)
+
     def test_original_exercises_are_a_separate_group(self):
         """回填的原书题单独成组：正文题的答案数不该把原书题的欠账遮住。"""
         text = ("# 第9章\n\n## 习题\n\n### 补充题（参考课程第 9 章）\n\n"

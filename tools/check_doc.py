@@ -1190,8 +1190,9 @@ def chapter_exercises(path: Path):
 
     * `### 补充…（参考课程第 N 章）` 那一组——**不算在内**，它们与附录的
       「补充题参考答案」早已一一对应，不是这条规则要管的缺口；
-    * 新书自己的正文题——按今天的写法，它紧跟在补充小节的后面、自己没有标题，
-      所以判据只能是「非原书小节里的最后一组编号」；
+    * 新书自己的正文题——如今在 `### 正文习题` 小节里；早先的写法没有标题、
+      紧跟在补充那组后面，所以判据是「去掉补充小节的第一组之后，非原书小节里的
+      最后一组编号」；
     * `### 原书习题` 小节里的那一组——2026-09-04 回填原书题目时新增，单独成组，
       这样它的答案欠账不会被正文题的答案数遮住。
     """
@@ -1214,6 +1215,10 @@ def chapter_exercises(path: Path):
                 continue
             if heading and "原书" in heading:
                 counts[f"原书{name}"] += sum(len(g) for g in groups)
+            elif heading and "补充" in heading:
+                # 第一组是补充题本身；2026-10-27 之前它若排在正文题之后，
+                # 「最后一组」就成了这 3 道补充题，第 3 章 12 道正文题无人核对。
+                legacy.extend(groups[1:])
             else:
                 legacy.extend(groups)
         counts[name] = len(legacy[-1]) if legacy else 0
