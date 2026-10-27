@@ -2412,6 +2412,13 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
 <p>顺序队列采用固定的存储空间，一方面在读访问时非常简单、在特殊应用中需要访问内部元素时也很方便； 但另一方面，在某些无法事先估计其大小的情况下会出现溢出现象。<strong>链式队列可以通过动态申请空间来 满足队列长度的大幅变动。</strong></p>
 <p>队列也是一种应用很广泛的数据结构，常见的应用包括广度优先搜索、消息缓冲器、操作系统的各种资源 管理等——只要符合先进先出特性的应用均可运用队列。</p>
 <h2 id="习题"><a class="anchor" href="#习题">#</a>习题</h2>
+<h3 id="补充算法设计题参考课程第-3-章"><a class="anchor" href="#补充算法设计题参考课程第-3-章">#</a>补充算法设计题（参考课程第 3 章）</h3>
+<ol>
+<li>只使用两个栈的 <code>push</code>、<code>pop</code>、<code>empty</code>，设计队列的 <code>enqueue</code>、<code>dequeue</code> 和 <code>empty</code>，并分析摊还复杂度。</li>
+<li>编号为 <code>1..n</code> 的车辆依次进栈，求所有合法出栈序列的数量并证明其为 Catalan 数。</li>
+<li>用两个栈设计编辑器的撤销和恢复；说明新操作、撤销、恢复时两个栈如何变化。</li>
+</ol>
+<h3 id="正文习题"><a class="anchor" href="#正文习题">#</a>正文习题</h3>
 <ol>
 <li>如果允许在循环队列的两端都可以进行插入和删除操作，要求：(1) 写出循环队列的类型定义； (2) 写出「从队尾删除」和「从队头插入」的算法。</li>
 <li>如果用一个循环数组 <span class="math">q[<span class="upr">0</span>…m<span class="bin">−</span><span class="upr">1</span>]</span> 表示队列时，该队列只有一个队列头指针 <code>front</code>、不设队列尾 指针 <code>rear</code>，而设置计数器 <code>count</code> 用以记录队列中结点的个数。试编写算法实现队列的 3 个基本 运算：判空、入队、出队。</li>
@@ -2426,12 +2433,6 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
 <li>试写出一个按照下面定义计算整数 <span class="math">n</span> 和 <span class="math">m</span> 的最大公因子 <span class="math">GCD(n,m)</span> 的递归算法： <span class="math">GCD(n,m)<span class="rel">=</span>m</span>（当 <span class="math">m<span class="rel">≤</span>n</span> 且 <span class="math">n&thinsp;<span class="upr">bmod</span>&thinsp;m<span class="rel">=</span><span class="upr">0</span></span>）；<span class="math">GCD(n,m)<span class="rel">=</span>GCD(m,n)</span>（当 <span class="math">n&lt;m</span>）； 否则 <span class="math">GCD(n,m)<span class="rel">=</span>GCD(m, n&thinsp;<span class="upr">bmod</span>&thinsp;m)</span>。</li>
 <li>写递归和非递归算法，求 <span class="math"><span class="upr">1</span><span class="bin">+</span><span class="upr">1</span>/<span class="upr">2</span><span class="bin">−</span><span class="upr">1</span>/<span class="upr">3</span><span class="bin">+</span><span class="upr">1</span>/<span class="upr">4</span><span class="bin">−</span>⋯</span> 的前 <span class="math">n</span> 项和。</li>
 </ol>
-<h3 id="补充算法设计题参考课程第-3-章"><a class="anchor" href="#补充算法设计题参考课程第-3-章">#</a>补充算法设计题（参考课程第 3 章）</h3>
-<ol>
-<li>只使用两个栈的 <code>push</code>、<code>pop</code>、<code>empty</code>，设计队列的 <code>enqueue</code>、<code>dequeue</code> 和 <code>empty</code>，并分析摊还复杂度。</li>
-<li>编号为 <code>1..n</code> 的车辆依次进栈，求所有合法出栈序列的数量并证明其为 Catalan 数。</li>
-<li>用两个栈设计编辑器的撤销和恢复；说明新操作、撤销、恢复时两个栈如何变化。</li>
-</ol>
 <h2 id="上机题"><a class="anchor" href="#上机题">#</a>上机题</h2>
 <ol>
 <li>利用两个栈 <span class="math">s<sub><span class="upr">1</span></sub></span>、<span class="math">s<sub><span class="upr">2</span></sub></span> 模拟一个队列时，如何用栈的运算来实现该队列的运算？ (1) <code>enqueue</code>：插入一个元素；(2) <code>dequeue</code>：删除一个元素；(3) <code>queue_empty</code>：判定队列为空。</li>
@@ -2443,7 +2444,7 @@ factorial(-5) = 1                          ← 负数静默当成 0 处理</code
 </ol>
 <div class="pagenav"><a href="ch02-linear-list.html"><span class="dir">← 上一篇</span>第2章 线性表</a><a href="ch04-string.html" style="text-align:right"><span class="dir">下一篇 →</span>第4章 字符串</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#31-栈">3.1 栈</a><a href="#为什么顺序栈和链式栈只有-c" class="sub">为什么顺序栈和链式栈只有 C++</a><a href="#311-栈的抽象数据类型" class="sub">3.1.1 栈的抽象数据类型</a><a href="#312-顺序栈" class="sub">3.1.2 顺序栈</a><a href="#312a-进阶选读从教学版到工程版" class="sub">3.1.2a 进阶（选读）：从教学版到工程版</a><a href="#313-链式栈" class="sub">3.1.3 链式栈</a><a href="#313a-进阶选读从教学版到工程版" class="sub">3.1.3a 进阶（选读）：从教学版到工程版</a><a href="#314-表达式求值" class="sub">3.1.4 表达式求值</a><a href="#315-栈与递归" class="sub">3.1.5 栈与递归</a><a href="#运行栈有多大三个档位三种结果" class="sub">运行栈有多大：三个档位，三种结果</a><a href="#反直觉的那一条-o2-为什么不崩" class="sub">反直觉的那一条：-O2 为什么不崩</a><a href="#递归吃运行栈显式栈吃堆" class="sub">递归吃运行栈，显式栈吃堆</a><a href="#原书这三个版本共同的问题不查溢出" class="sub">原书这三个版本共同的问题：不查溢出</a><a href="#一个更复杂的例子背包问题" class="sub">一个更复杂的例子：背包问题</a><a href="#与原书的对照">与原书的对照</a><a href="#32-队列">3.2 队列</a><a href="#为什么这一节没有-python-版" class="sub">为什么这一节没有 Python 版</a><a href="#321-队列的抽象数据类型" class="sub">3.2.1 队列的抽象数据类型</a><a href="#322-顺序队列" class="sub">3.2.2 顺序队列</a><a href="#323-链式队列" class="sub">3.2.3 链式队列</a><a href="#323a-进阶选读从教学版到工程版" class="sub">3.2.3a 进阶（选读）：从教学版到工程版</a><a href="#33-栈与队列的深入讨论">3.3 栈与队列的深入讨论</a><a href="#331-顺序栈与链式栈的比较" class="sub">3.3.1 顺序栈与链式栈的比较</a><a href="#332-顺序队列与链式队列的比较" class="sub">3.3.2 顺序队列与链式队列的比较</a><a href="#333-限制存取点的表" class="sub">3.3.3 限制存取点的表</a><a href="#出栈序列能不能得到拿顺序栈模拟一遍" class="sub">出栈序列能不能得到：拿顺序栈模拟一遍</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充算法设计题参考课程第-3-章" class="sub">补充算法设计题（参考课程第 3 章）</a><a href="#上机题">上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#先跑一遍">先跑一遍</a><a href="#31-栈">3.1 栈</a><a href="#为什么顺序栈和链式栈只有-c" class="sub">为什么顺序栈和链式栈只有 C++</a><a href="#311-栈的抽象数据类型" class="sub">3.1.1 栈的抽象数据类型</a><a href="#312-顺序栈" class="sub">3.1.2 顺序栈</a><a href="#312a-进阶选读从教学版到工程版" class="sub">3.1.2a 进阶（选读）：从教学版到工程版</a><a href="#313-链式栈" class="sub">3.1.3 链式栈</a><a href="#313a-进阶选读从教学版到工程版" class="sub">3.1.3a 进阶（选读）：从教学版到工程版</a><a href="#314-表达式求值" class="sub">3.1.4 表达式求值</a><a href="#315-栈与递归" class="sub">3.1.5 栈与递归</a><a href="#运行栈有多大三个档位三种结果" class="sub">运行栈有多大：三个档位，三种结果</a><a href="#反直觉的那一条-o2-为什么不崩" class="sub">反直觉的那一条：-O2 为什么不崩</a><a href="#递归吃运行栈显式栈吃堆" class="sub">递归吃运行栈，显式栈吃堆</a><a href="#原书这三个版本共同的问题不查溢出" class="sub">原书这三个版本共同的问题：不查溢出</a><a href="#一个更复杂的例子背包问题" class="sub">一个更复杂的例子：背包问题</a><a href="#与原书的对照">与原书的对照</a><a href="#32-队列">3.2 队列</a><a href="#为什么这一节没有-python-版" class="sub">为什么这一节没有 Python 版</a><a href="#321-队列的抽象数据类型" class="sub">3.2.1 队列的抽象数据类型</a><a href="#322-顺序队列" class="sub">3.2.2 顺序队列</a><a href="#323-链式队列" class="sub">3.2.3 链式队列</a><a href="#323a-进阶选读从教学版到工程版" class="sub">3.2.3a 进阶（选读）：从教学版到工程版</a><a href="#33-栈与队列的深入讨论">3.3 栈与队列的深入讨论</a><a href="#331-顺序栈与链式栈的比较" class="sub">3.3.1 顺序栈与链式栈的比较</a><a href="#332-顺序队列与链式队列的比较" class="sub">3.3.2 顺序队列与链式队列的比较</a><a href="#333-限制存取点的表" class="sub">3.3.3 限制存取点的表</a><a href="#出栈序列能不能得到拿顺序栈模拟一遍" class="sub">出栈序列能不能得到：拿顺序栈模拟一遍</a><a href="#本章小结">本章小结</a><a href="#习题">习题</a><a href="#补充算法设计题参考课程第-3-章" class="sub">补充算法设计题（参考课程第 3 章）</a><a href="#正文习题" class="sub">正文习题</a><a href="#上机题">上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch03-stack.md</code> 生成
