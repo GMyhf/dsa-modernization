@@ -189,7 +189,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <td style="text-align:left"><code>code/ch11/bitmap_index</code></td>
 </tr>
 <tr>
-<td style="text-align:left">11.5 红黑树</td>
+<td style="text-align:left">11.5 中的红黑树（原书 11.6）</td>
 <td style="text-align:left">概念导读</td>
 <td style="text-align:left">只作对照讨论，不另写实现</td>
 </tr>
@@ -828,7 +828,7 @@ AND      : 1 0 0 0 1 0</code></pre></div>
 及格 67 条，不及格 133 条；取反只做了 4 次字运算
 稀疏位图 16 个字 → 游程压缩后 4 个字
 签名粗筛「数据」的候选文档数：1（仍需回原文确认）</code></pre></div>
-<p>第二行就是位图的全部理由：200 条记录只占 4 个机器字，一次取反做 4 次运算就处理完了全部记录。查询写出来只是逐字的按位运算：</p>
+<p>第二行就是位图的全部理由：每个取值的位串只占 4 个机器字，两个取值合计 8 个机器字；一次取反只对「及格」那一张位图的 4 个字做运算，就处理完了全部记录。查询写出来只是逐字的按位运算：</p>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/bitmap_index/modern.hpp">code/ch11/bitmap_index/modern.hpp#bitmap-ops</a></div><pre><code><span class="c">/// 「与」：逐字 `&amp;`。`word_ops()` 数的就是这里做了几次字运算。</span>
 [[nodiscard]] std::vector&lt;std::<span class="t">size_t</span>&gt; select_and(<span class="k">const</span> std::string&amp; a,
                                                   <span class="k">const</span> std::string&amp; b) <span class="k">const</span> {
@@ -985,6 +985,9 @@ AND      : 1 0 0 0 1 0</code></pre></div>
 <li>给定页大小、记录大小和索引项大小，计算稠密索引最多支持的记录数及二级索引的访外次数。</li>
 <li>对给定的院系表和宿舍表建立倒排索引，并求“院系且宿舍”查询的交集。</li>
 <li>模拟 B+ 树查找、插入分裂和删除后继替换，分别统计读页和写页次数。</li>
+</ol>
+<h3 id="正文习题"><a class="anchor" href="#正文习题">#</a>正文习题</h3>
+<ol>
 <li>稠密索引和稀疏索引各要求主文件怎样组织。</li>
 <li>多级索引一次查询大约读几页？关键指标为什么不是比较次数。</li>
 <li>静态多分树插入一条溢出记录会发生什么。</li>
@@ -1049,7 +1052,7 @@ AND      : 1 0 0 0 1 0</code></pre></div>
 <h2 id="上机题"><a class="anchor" href="#上机题">#</a>上机题</h2>
 <p>见本章「练习路径」的五条。</p>
 <h3 id="原书上机题"><a class="anchor" href="#原书上机题">#</a>原书上机题</h3>
-<blockquote><p>同上，本轮只补题面，参考答案登记在 <code>collab/answer_gaps.json</code>。</p></blockquote>
+<blockquote><p>原书上机题的参考答案见 <code>book/习题与参考答案.md</code> 的「原书上机题参考」，由 R14 逐题守着。</p></blockquote>
 <ol>
 <li>对如图 11.1 和 11.2 所示的变长记录实现一个二级线性索引。假定磁盘块的长度是 1024 B，数据库 文件中记录的长度一般在 20～200 B 之间、包括 4 B 的关键码值。索引文件中的每条记录存储一个关键 码值和一字节偏移量，这个偏移量表示相应记录第一个字节在数据库文件中的字节偏移量。<strong>顶层索引 （存储在内存中）应当是一个简单的数组</strong>，存储索引文件相应块的最小关键码值。</li>
 <li>试参照 <span class="math">B</span> 树的插入、删除算法实现 <span class="math">B<sup><span class="bin">+</span></sup></span> 树的插入、删除算法。</li>
@@ -1059,7 +1062,7 @@ AND      : 1 0 0 0 1 0</code></pre></div>
 </ol>
 <div class="pagenav"><a href="ch10-search.html"><span class="dir">← 上一篇</span>第10章 检索</a><a href="ch12-advanced.html" style="text-align:right"><span class="dir">下一篇 →</span>第12章 高级数据结构</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#111-线性索引">11.1 线性索引</a><a href="#112-静态索引多分树">11.2 静态索引——多分树</a><a href="#113-倒排索引">11.3 倒排索引</a><a href="#1131-基于属性的倒排" class="sub">11.3.1 基于属性的倒排</a><a href="#1132-对正文文件的倒排" class="sub">11.3.2 对正文文件的倒排</a><a href="#114-动态索引">11.4 动态索引</a><a href="#1141-b-树" class="sub">11.4.1 B 树</a><a href="#1142-b树" class="sub">11.4.2 B+树</a><a href="#1143-b-树的性能分析" class="sub">11.4.3 B 树的性能分析</a><a href="#1144-动态索引和静态索引性能的比较" class="sub">11.4.4 动态索引和静态索引性能的比较</a><a href="#115-位索引技术">11.5 位索引技术</a><a href="#位图签名和红黑树" class="sub">位图、签名和红黑树</a><a href="#练习路径">练习路径</a><a href="#本章小结">本章小结</a><a href="#python-实现的证据链" class="sub">Python 实现的证据链</a><a href="#习题">习题</a><a href="#补充索引题参考课程第-11-章" class="sub">补充索引题（参考课程第 11 章）</a><a href="#原书习题" class="sub">原书习题</a><a href="#上机题">上机题</a><a href="#原书上机题" class="sub">原书上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#111-线性索引">11.1 线性索引</a><a href="#112-静态索引多分树">11.2 静态索引——多分树</a><a href="#113-倒排索引">11.3 倒排索引</a><a href="#1131-基于属性的倒排" class="sub">11.3.1 基于属性的倒排</a><a href="#1132-对正文文件的倒排" class="sub">11.3.2 对正文文件的倒排</a><a href="#114-动态索引">11.4 动态索引</a><a href="#1141-b-树" class="sub">11.4.1 B 树</a><a href="#1142-b树" class="sub">11.4.2 B+树</a><a href="#1143-b-树的性能分析" class="sub">11.4.3 B 树的性能分析</a><a href="#1144-动态索引和静态索引性能的比较" class="sub">11.4.4 动态索引和静态索引性能的比较</a><a href="#115-位索引技术">11.5 位索引技术</a><a href="#位图签名和红黑树" class="sub">位图、签名和红黑树</a><a href="#练习路径">练习路径</a><a href="#本章小结">本章小结</a><a href="#python-实现的证据链" class="sub">Python 实现的证据链</a><a href="#习题">习题</a><a href="#补充索引题参考课程第-11-章" class="sub">补充索引题（参考课程第 11 章）</a><a href="#正文习题" class="sub">正文习题</a><a href="#原书习题" class="sub">原书习题</a><a href="#上机题">上机题</a><a href="#原书上机题" class="sub">原书上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch11-index.md</code> 生成

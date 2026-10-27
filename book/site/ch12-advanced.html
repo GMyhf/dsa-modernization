@@ -175,9 +175,9 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <td style="text-align:left"><code>code/ch12/gen_list</code></td>
 </tr>
 <tr>
-<td style="text-align:left">12.2.2 可利用空间表、最优 BST</td>
+<td style="text-align:left">12.2.2 可利用空间表</td>
 <td style="text-align:left">实现并测试</td>
-<td style="text-align:left"><code>code/ch12/optimal_bst</code></td>
+<td style="text-align:left"><code>code/ch12/optimal_bst</code> 的 <code>ReusableNodePool</code></td>
 </tr>
 <tr>
 <td style="text-align:left">12.2.3 动态分配与回收</td>
@@ -271,7 +271,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <tr>
 <td style="text-align:left">取 <span class="math">a<sub>ij</sub></span></td>
 <td style="text-align:left"><span class="math">O(<span class="upr">1</span>)</span></td>
-<td style="text-align:left"><span class="math">O(<span class="upr">log</span>&thinsp;t)</span></td>
+<td style="text-align:left"><span class="math">O(t)</span>；若按键有序可用二分，<span class="math">O(<span class="upr">log</span>&thinsp;t)</span></td>
 <td style="text-align:left"><span class="math">O(该行非零元数)</span></td>
 </tr>
 <tr>
@@ -609,7 +609,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <p><strong>先说清楚 Trie 与 BST 分属两种「分解」。</strong> 第 5 章的 BST 是一种组织上基于<strong>对象空间</strong>（object space） 分解的数据结构，即<strong>关键码范围的分解是由存储在树中的对象（关键码值）决定的</strong>；BST 并不是一种平衡 的树，其树结构与输入数据的顺序有很大关系——按升序输入会退化成线性表，查找一个关键码的时间 代价为 <span class="math">O(n)</span>。</p>
 <p><strong>若要消除这样的不平衡，最根本的办法就是改变关键码的划分方式</strong>：在关键码范围内，对树结构中每一个 结点预定义划分位置。假设划分因子为 2（每次仅把当前范围分为两部分，对应于二叉树）：根结点把整个 关键码范围分为两部分，插入时不考虑插入的顺序，小于根的关键码都放到左子树、大于根的放到右子树。 <strong>按照此规则所产生的树不依赖于关键码的插入顺序，其深度只受关键码精度的影响</strong>，因此最坏情况下就 等于存储关键码所需要的位数：如果关键码是 <span class="math"><span class="upr">0</span><span class="rel">∼</span><span class="upr">255</span></span> 之间的整数，精度就是 8 个二进制位，两个只在 最低位不同的关键码要到第 8 次划分才能分开，这棵搜索树深度也为 8。</p>
 <p><strong>这种对关键码范围进行均分的方法称为关键码空间（key space）分解，基于关键码分解的数据结构叫做 Trie 结构。</strong> 「trie」这个词来源于「retrieval」，暗示了它的主要应用：信息检索（information retrieval）。 这种数据结构被很多人用来存储英文字符串，尤其是大规模的英文词典，在自然语言理解系统中经常用到。 <strong>与 B+ 树一样，Trie 树内部结点仅作为占位符引导检索过程，数据记录只存储在叶结点中。</strong></p>
-<p><strong>但这种结构并不能保证树是平衡的</strong>：考虑一种极端情况，如果所选择的根结点不合适，导致所有的关键码 都小于根结点，那么这棵树的右子树将没有任何元素——这是因为关键码分布得很不均衡。</p>
+<p><strong>但 Trie 也不能保证树是平衡的</strong>。原书这里接了一句「如果所选择的根结点不合适，导致所有关键码都小于根结点，右子树就没有元素」——这句话描述的仍是对象空间 BST 的失效模式，不适合刚定义的 key-space Trie：Trie 的划分位置是预先固定的，不存在“选错根”。Trie 的失衡来自<strong>关键码空间的分布偏斜</strong>：例如存英文词典时，以 <code>t</code> 开头的单词远多于以 <code>z</code> 开头的单词，<code>t</code> 子树又深又大，<code>z</code> 侧几乎为空；若许多关键码共享长前缀，也会把对应分支拉得很深。</p>
 <p><strong>Trie 树基于两个原则</strong>：关键码集合是固定的；能够对结点进行分层标记。如果所有的元素都可以使用 数字或者字母等来标记，就可以考虑使用 Trie 结构——例如元素可以用 <span class="math"><span class="upr">0</span><span class="rel">∼</span><span class="upr">9</span></span> 的数字组合来标记时， 就可以在根结点分出 10 个子结点分别标记 <span class="math"><span class="upr">0</span><span class="rel">∼</span><span class="upr">9</span></span>，然后每个子结点又可以分出 10 个结点，如此下去 直到所有的元素都能够被区分开。</p>
 <p>二叉搜索树按整个关键码比较，树的形状依赖插入次序。Trie 换一种切法：按关键码的字符（或二进制位）一层一层分支，第 <span class="math">i</span> 层对应第 <span class="math">i</span> 个字符。公共前缀在树里只存一次，所以它特别适合字典、IP 路由这种「按前缀分类」的问题。查找沿着字符走，时间与关键码长度成正比，与表里有多少个词关系不大。</p>
 <p>最简单的形式是<strong>二叉 Trie</strong>：按关键码所在的数值区间对半分，左枝标 0、右枝标 1。</p>
@@ -1102,7 +1102,7 @@ RL（右左）：先在 C 上右旋，再在 A 上左旋
 <p><strong>为支持动态数据结构，操作系统需要一套有效的内存管理技术</strong>，动态地进行内存的分配和回收。在实际的 操作系统中，内存管理本质上是利用链表和广义表来实现的；内存管理最基本的问题是存储的分配和回收， 需要解决碎片问题以及存储空间溢出时无用单元的回收管理等。<strong>内存分配是通过可利用空间表的组织来 进行的</strong>，这是把存储区中当前还未使用的空间通过链表方式管理起来的一种方法。</p>
 <p><strong>BST 树是一种基于对象空间分解的数据结构</strong>，即关键码范围的分解是由存储在树中的对象决定的，这种 分解方式受关键码输入的影响。<strong>Trie 结构对关键码范围进行均分，它基于两个原则：有一个固定的关键码 集合和对于结点的分层标记。</strong> 其内部结点仅作为占位符引导检索过程，数据记录只存储在叶结点中；英文 字符 Trie 树的每个内部结点都有 26 个子结点（如果算上空格，则为 27 个）。<strong>PATRICIA 树是 Trie 树的 变体，它根据关键码的二进制编码来进行划分，是一种比较好的中文字典组织方式。</strong></p>
 <p>最佳二叉搜索树、平衡二叉搜索树 AVL、伸展树是二叉搜索树 BST 的几个变体。<strong>检索中平均比较次数 最小的二叉搜索树称为最佳二叉搜索树</strong>，它满足最优子问题和子问题重叠性质，可以使用动态规划算法来 构造。</p>
-<p><strong>AVL 树中任何结点的左子树和右子树高度最多相差 1。</strong> 插入新结点按照 BST 的插入算法，如果插入后 仍然是 AVL 树则不调整，否则需要根据 LL、LR、RL、RR 四种类型进行调整；AVL 树的删除结点采用 BST 的基本删除算法，如果删除后需要调整，则从被删除的结点找到第一个失衡的祖先结点，然后开始单旋转或 多旋转操作，<strong>这样的调整操作向根的方向传递，直到树平衡为止</strong>。AVL 树放宽了 BST 的平衡要求，它既 照顾到更新操作的代价，又兼顾完成操作后树结构的检索功能，其树高为 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>。</p>
+<p><strong>AVL 树中任何结点的左子树和右子树高度最多相差 1。</strong> 插入新结点按照 BST 的插入算法，如果插入后 仍然是 AVL 树则不调整，否则需要根据 LL、LR、RL、RR 四种类型进行调整；AVL 树的删除结点采用 BST 的基本删除算法，如果删除后需要调整，则从被删除的结点找到第一个失衡的祖先结点，然后开始单旋转或 多旋转操作，<strong>这样的调整操作向根的方向传递，直到树平衡为止</strong>。AVL 在任意 BST 的基础上<strong>收严了平衡要求</strong>，它既 照顾到更新操作的代价，又兼顾完成操作后树结构的检索功能，其树高为 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>。</p>
 <p><strong>伸展树不要求 BST 结构总是保持平衡或最佳检索状态</strong>，而是在每次访问时通过一系列双旋转、单旋转将 被访问结点移到根结点，<strong>这样尽量使最近访问的结点容易被检索到</strong>，其检索效率比较高。</p>
 <p>第 11 章介绍的红黑树也是一种改进的 BST，它是一种常用的索引结构，统计性能要好于 AVL 树；其平衡 要求比 AVL 树更低，利用对树中结点红黑着色的要求达到局部平衡。</p>
 <p><strong>二叉搜索树（包括红黑树、AVL 树、伸展树等）适用于组织内存中小规模的目录。</strong> AVL 树的高度不超过 <span class="math"><span class="upr">1.5</span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>(n<span class="bin">+</span><span class="upr">1</span>)</span>，具有 <span class="math">n</span> 个内部结点的红黑树最大树高是 <span class="math"><span class="upr">2</span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>(n<span class="bin">+</span><span class="upr">1</span>)<span class="bin">+</span><span class="upr">1</span></span>（按原书口径，树高数到最深的外部空叶为止；只数内部结点时是 <span class="math"><span class="upr">2</span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>(n<span class="bin">+</span><span class="upr">1</span>)</span>，见 11.5 节），因此<strong>最坏情况下的红黑树 的高度大于最坏情况下具有相同（内部）结点数目的 AVL 树</strong>；AVL 树和伸展树适合于检索较多的应用， 插入删除操作比较频繁的应用往往采用红黑树。</p>
@@ -1114,6 +1114,9 @@ RL（右左）：先在 C 上右旋，再在 A 上左旋
 <li>说明共享广义表为什么不能简单递归释放，并设计引用计数或访问标记方案。</li>
 <li>证明长度为 <code>N</code> 的字符串所有后缀插入 Trie 后，每个不同子串对应 Trie 中一个结点；分析最坏时间。</li>
 <li>实现 AVL 的四种旋转，并用中序遍历验证旋转前后序列不变。</li>
+</ol>
+<h3 id="正文习题"><a class="anchor" href="#正文习题">#</a>正文习题</h3>
+<ol>
 <li>写出 <span class="math"><span class="upr">3</span><span class="bin">×</span><span class="upr">4</span></span> 数组按行优先时 <span class="math">a<sub><span class="upr">2</span>,<span class="upr">1</span></sub></span> 相对首地址的偏移（元素占 1 个单元）。</li>
 <li>把 4 阶下三角压成一维，给出 <span class="math">a<sub><span class="upr">3</span>,<span class="upr">1</span></sub></span> 的下标。</li>
 <li>说明纯表、再入表、循环表分别对应什么图，释放时要注意什么。</li>
@@ -1157,7 +1160,7 @@ RL（右左）：先在 C 上右旋，再在 A 上左旋
 <li>按教材权重实现最优 BST，输出根表并重建树形。</li>
 </ol>
 <h3 id="原书上机题"><a class="anchor" href="#原书上机题">#</a>原书上机题</h3>
-<blockquote><p>同上，本轮只补题面，参考答案登记在 <code>collab/answer_gaps.json</code>。原书这一章的上机题分量最重， 后几道（阅卷管理、职工管理、搜索引擎）是北京大学计算机系多年来的学期综合上机实习题。</p></blockquote>
+<blockquote><p>原书上机题的参考答案见 <code>book/习题与参考答案.md</code> 的「原书上机题参考」，由 R14 逐题守着。原书这一章的上机题分量最重， 后几道（阅卷管理、职工管理、搜索引擎）是北京大学计算机系多年来的学期综合上机实习题。</p></blockquote>
 <ol>
 <li>设二维数组 <span class="math">a[<span class="upr">1..</span>m,<span class="upr">1..</span>n]</span> 含有 <span class="math">m<span class="bin">×</span>n</span> 个整数。写出一个算法来判断 <span class="math">a</span> 中所有元素是否互不 相同，输出相关信息（yes/no），并分析你的算法的时间复杂度。</li>
 <li>广义表具有可共享性，因此在周游一个广义表时必须为每一个结点增加一个标志域 <code>mark</code>，以记录该 结点是否访问过；一旦某一个共享的子表结点被做过访问标志，以后就不再访问它。(1) 试定义该广义表 的类结构；(2) 实现对一个非递归的广义表进行周游的算法。</li>
@@ -1178,7 +1181,7 @@ RL（右左）：先在 C 上右旋，再在 A 上左旋
 </ol>
 <div class="pagenav"><a href="ch11-index.html"><span class="dir">← 上一篇</span>第11章 索引技术</a><a href="exercises.html" style="text-align:right"><span class="dir">下一篇 →</span>习题、上机题与参考答案</a></div>
 </main>
-<nav class="page"><b>本页</b><a href="#121-多维数组">12.1 多维数组</a><a href="#1211-多维数组的存储" class="sub">12.1.1 多维数组的存储</a><a href="#1212-特殊矩阵" class="sub">12.1.2 特殊矩阵</a><a href="#1213-稀疏矩阵" class="sub">12.1.3 稀疏矩阵</a><a href="#122-广义表和存储管理">12.2 广义表和存储管理</a><a href="#为什么这一节没有-python-版" class="sub">为什么这一节没有 Python 版</a><a href="#1221-广义表的定义和存储结构" class="sub">12.2.1 广义表的定义和存储结构</a><a href="#1222-可利用空间表" class="sub">12.2.2 可利用空间表</a><a href="#1223-存储的动态分配和回收" class="sub">12.2.3 存储的动态分配和回收</a><a href="#1224-失败处理策略和无用单元回收" class="sub">12.2.4 失败处理策略和无用单元回收</a><a href="#123-trie-结构和-patricia-树">12.3 Trie 结构和 Patricia 树</a><a href="#为什么这一节的存储侧只有-c" class="sub">为什么这一节的存储侧只有 C++</a><a href="#124-改进的二叉搜索树">12.4 改进的二叉搜索树</a><a href="#1241-最佳二叉搜索树" class="sub">12.4.1 最佳二叉搜索树</a><a href="#1242-平衡的二叉搜索树" class="sub">12.4.2 平衡的二叉搜索树</a><a href="#1243-伸展树" class="sub">12.4.3 伸展树</a><a href="#本章小结">本章小结</a><a href="#python-实现的证据链" class="sub">Python 实现的证据链</a><a href="#习题">习题</a><a href="#补充概念与上机题参考课程第-12-章" class="sub">补充概念与上机题（参考课程第 12 章）</a><a href="#原书习题" class="sub">原书习题</a><a href="#上机题">上机题</a><a href="#原书上机题" class="sub">原书上机题</a></nav>
+<nav class="page"><b>本页</b><a href="#121-多维数组">12.1 多维数组</a><a href="#1211-多维数组的存储" class="sub">12.1.1 多维数组的存储</a><a href="#1212-特殊矩阵" class="sub">12.1.2 特殊矩阵</a><a href="#1213-稀疏矩阵" class="sub">12.1.3 稀疏矩阵</a><a href="#122-广义表和存储管理">12.2 广义表和存储管理</a><a href="#为什么这一节没有-python-版" class="sub">为什么这一节没有 Python 版</a><a href="#1221-广义表的定义和存储结构" class="sub">12.2.1 广义表的定义和存储结构</a><a href="#1222-可利用空间表" class="sub">12.2.2 可利用空间表</a><a href="#1223-存储的动态分配和回收" class="sub">12.2.3 存储的动态分配和回收</a><a href="#1224-失败处理策略和无用单元回收" class="sub">12.2.4 失败处理策略和无用单元回收</a><a href="#123-trie-结构和-patricia-树">12.3 Trie 结构和 Patricia 树</a><a href="#为什么这一节的存储侧只有-c" class="sub">为什么这一节的存储侧只有 C++</a><a href="#124-改进的二叉搜索树">12.4 改进的二叉搜索树</a><a href="#1241-最佳二叉搜索树" class="sub">12.4.1 最佳二叉搜索树</a><a href="#1242-平衡的二叉搜索树" class="sub">12.4.2 平衡的二叉搜索树</a><a href="#1243-伸展树" class="sub">12.4.3 伸展树</a><a href="#本章小结">本章小结</a><a href="#python-实现的证据链" class="sub">Python 实现的证据链</a><a href="#习题">习题</a><a href="#补充概念与上机题参考课程第-12-章" class="sub">补充概念与上机题（参考课程第 12 章）</a><a href="#正文习题" class="sub">正文习题</a><a href="#原书习题" class="sub">原书习题</a><a href="#上机题">上机题</a><a href="#原书上机题" class="sub">原书上机题</a></nav>
 </div>
 <footer>
   本页由 <code>tools/build_site.py</code> 从 <code>book/ch12-advanced.md</code> 生成
