@@ -116,7 +116,12 @@ Overflow Risk。
 Dijkstra 与 Floyd 对拍，比较 Prim/Kruskal 的边数与总权，覆盖 BFS/DFS 顺序、拓扑环、非连通
 MST、负权和越界顶点。
 
-legacy 现在记录代码7.1 的缺函数体、代码7.2 标识符被空格切断、代码7.3 不能表示零权边、
+按扫描件书页 165–166 校定（`ba7a5b4`）：代码7.1 的类定义花括号配平，`IsEdge` 是成员函数声明；
+底稿 OCR 把类末尾的 `};` 识别成了 `;`。单独编译代码7.1 的实际报错是 `Edge` 尚未声明，
+其定义见代码7.2；作为图的基类，`Graph` 的成员函数也未声明为 `virtual`。见
+[图单元的 legacy 记录](../code/ch07/graph/legacy.md)。
+
+legacy 还记录代码7.2 标识符被空格切断、代码7.3 不能表示零权边、
 代码7.4 裸链表所有权不明，以及算法7.6/7.9 缺结束标记，并附可重跑的 `error:` 证据。
 
 DFS 仍是递归，Stack Overflow Risk 已明示。macOS ASan 未启动；请补跑 sanitizer，重点变异 DFS
