@@ -29,7 +29,7 @@ public:
     string insert(const char c, const int index);
     int find(const char c, const int start);
     string substr(const int s, const int len);
-};
+}                                               // 原书如此：类尾缺分号（缺陷 8）
 
 int strcmp(const char * s1, const char * s2) {  // 算法4.3
     int i = 0;
@@ -37,9 +37,9 @@ int strcmp(const char * s1, const char * s2) {  // 算法4.3
         if (s1[i] > s2[i]) return 1;
         else if (s1[i] < s2[i]) return -1;
         i++;
-        if (s1[i] == '\0' && s2[i] != '\0') return -1;
-        else if (s2[i] == '\0' && s1[i] != '\0') return 1;
     }
+    if (s1[i] == '\0' && s2[i] != '\0') return -1;
+    else if s2[i] == '\0' && s1[i] != '\0') return 1;   // 原书如此：缺左括号（缺陷 8）
     return 0;
 }
 
@@ -148,11 +148,26 @@ AddressSanitizer:DEADLYSIGNAL
 还是返回了一个新串而 `s` 原封不动。现代实现返回 `String&`，把语义钉死，
 并支持链式调用。
 
-### 缺陷 6（接口形状）：用 `int` 和 `-1` 表达"没有"
+### 缺陷 6（接口形状）：用 `int` 表达"没有"
 
-`int find(const char c, const int start)` 用 `-1` 表示没找到，与"位置 0"
-只差一个符号；`int isEmpty()` 用 `int` 表达布尔。现代实现分别用
+`int find(const char c, const int start)` 只返回 `int`。原书只给了声明、没给函数体，作者代码包里也没有，
+所以「没找到」返回什么原书没有说；按惯例多半是 `-1`，那就与"位置 0"只差一个符号（这是推断，不是原文）；`int isEmpty()` 用 `int` 表达布尔。现代实现分别用
 `std::optional<size_type>` 与 `bool`。
+
+### 缺陷 8（致命）：代码4.1 类尾缺分号，算法4.3 一处 `else if` 缺左括号
+
+2026-11-07 对照扫描件校出（书页 82、88）。此前第一节把这两处悄悄补上了，算法4.3 末尾两条
+`if` 还被挪进了 while 循环体；扫描件上它们印在循环的 `}` 之后，现已按原样改回。
+按原样抄出这两段（`s43.cpp`，类体只留一个成员）：
+
+```text
+$ g++ -std=c++17 -fsyntax-only s43.cpp
+s43.cpp:4:2: error: expected ‘;’ after class definition
+s43.cpp:17:13: error: expected ‘(’ before ‘s2’
+```
+
+顺带一提：按原书结构，循环要等两串同时到 `'\0'` 才退出，所以循环后那两条 `if` 永远不会成立。
+现代实现直接用标准 `std::strcmp`，不受影响。
 
 ### 缺陷 7：`class string` 这个名字
 

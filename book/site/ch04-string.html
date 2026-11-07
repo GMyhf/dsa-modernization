@@ -225,7 +225,7 @@ KMP:  10
 <p>原书【代码4.1】给出字符串的抽象数据类型。那份声明有三处今天必须改：</p>
 <ol>
 <li><strong>类名是小写的 <code>string</code>。</strong> 在任何 <code>using namespace std;</code> 的翻译单元里， 它与 <code>std::string</code> 构成歧义。原书正文随后又改用大写 <code>String</code>， 同一章里两个名字混用。</li>
-<li><strong><code>int isEmpty();</code></strong> 用 <code>int</code> 表达布尔，<strong><code>int find(const char c, const int start);</code></strong> 用 <code>-1</code> 表示&quot;没找到&quot;——与&quot;位置 0&quot;只差一个符号，调用方漏判就会把 &quot;没找到&quot;当成&quot;匹配在开头&quot;。</li>
+<li><strong><code>int isEmpty();</code></strong> 用 <code>int</code> 表达布尔，<strong><code>int find(const char c, const int start);</code></strong> 只有声明，原书没给函数体，「没找到」返回什么没说；返回 <code>int</code> 的查找按惯例用 <code>-1</code>， 与&quot;位置 0&quot;只差一个符号，调用方漏判就会把&quot;没找到&quot;当成&quot;匹配在开头&quot;。</li>
 <li><strong>修改器按值返回</strong>：<code>string append(const char c);</code>、<code>string concatenate(const char* s);</code> 都返回 <code>string</code> 而非引用。代码4.1 只有声明没有函数体，所以不能断定原书会丢结果； <strong>能断定的是签名含混</strong>——调用方无从判断 <code>s.append(&#x27;x&#x27;);</code> 是改了 <code>s</code>， 还是返回了一个新串而 <code>s</code> 原封不动。</li>
 </ol>
 <p>本书的 <code>String</code> 把这三处分别改为：类名大写、<code>bool empty()</code>、 <code>std::optional&lt;size_type&gt; find(...)</code>、修改器返回 <code>String&amp;</code>。</p>
@@ -451,8 +451,8 @@ char s3[6];</code></pre></div>
         <span class="k">return</span> result;
     }
 
-    <span class="c">// 【算法4.4】从 start 开始查找字符 c。找到返回下标，没找到返回空 optional。</span>
-    <span class="c">// 原书用 -1 表示没找到——与「位置 0」只差一个符号，忘了判就会读错位置。</span>
+    <span class="c">// 【代码4.1】的 find：从 start 开始查找字符 c。找到返回下标，没找到返回空 optional。</span>
+    <span class="c">// 原书只有声明；返回 int 的查找惯用 -1 表示没找到，与「位置 0」只差一个符号。</span>
     std::optional&lt;size_type&gt; find(<span class="t">char</span> c, size_type start = <span class="n">0</span>) <span class="k">const</span> {
         <span class="k">for</span> (size_type i = start; i &lt; size_; ++i) {
             <span class="k">if</span> (data_[i] == c) {
@@ -509,7 +509,7 @@ ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000</code></pre></di
 <p>本书越界就抛 <code>std::out_of_range</code>，让错误停在发生的地方， 而不是变成调用方某处的段错误。</p>
 <p><code>pos == size()</code> 是<strong>合法</strong>的，得到空串——与&quot;从末尾取 0 个字符&quot;的直觉一致； <code>len</code> 超出剩余长度时<strong>截断</strong>而不报错，与原书的 <code>if (n &gt; left) n = left;</code> 语义一致。</p>
 <h4 id="查找与比较"><a class="anchor" href="#查找与比较">#</a>查找与比较</h4>
-<p>对应【算法4.4】的 <code>find</code> 返回 <code>std::optional&lt;size_type&gt;</code>：找到是下标，没找到是空盒子。 原书用 <code>-1</code> 表示没找到——与&quot;位置 0&quot;只差一个符号，调用方漏判就会把 &quot;没找到&quot;当成&quot;匹配在开头&quot;。这与 2.2.2 节 <code>getPos</code> 那一处是同一个问题、同一个改法。</p>
+<p>对应【代码4.1】里声明的 <code>find</code>（原书只有声明，没给实现）返回 <code>std::optional&lt;size_type&gt;</code>：找到是下标，没找到是空盒子。 返回 <code>int</code> 的查找按惯例用 <code>-1</code> 表示没找到——与&quot;位置 0&quot;只差一个符号，调用方漏判就会把 &quot;没找到&quot;当成&quot;匹配在开头&quot;。这与 2.2.2 节 <code>getPos</code> 那一处是同一个问题、同一个改法。</p>
 <p>关于【算法4.3】：原书自己实现了一个 <code>strcmp</code>，固定返回 −1/0/1， 并在正文里说&quot;这与 C/C++ 语言中通常的大小比较习惯(0和非0)不一致&quot;。 其实标准 <code>strcmp</code> 返回的就是差值的符号，调用方本来就只该看符号—— 不一致的是原书固定返回 ±1 的写法。本书保持标准语义，并据此提供关系运算符。</p>
 <p>（另外补一句实测结论：原书那个与标准库同名同签名的 <code>strcmp</code> 定义， 既能编译也能链接，不构成冲突——这是我们查过之后否掉的一个猜测， 记在 <code>legacy.md</code> 第五节。）</p>
 <h3 id="42a-进阶选读从教学版到工程版"><a class="anchor" href="#42a-进阶选读从教学版到工程版">#</a>4.2a 进阶（选读）：从教学版到工程版</h3>

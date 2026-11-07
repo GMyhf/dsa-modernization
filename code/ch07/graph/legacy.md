@@ -16,8 +16,11 @@
 
 ## 原书可复核问题
 
-1. **代码7.1 不是完整类定义。** `bool IsEdge(Edge oneEdge)` 缺函数体开花括号，随后又有
-   孤立分号；多个声明没有闭合花括号。OCR 损伤必须与图 ADT 设计分开记录。
+1. **代码7.1 用了尚未声明的 `Edge`，且成员都不是 `virtual`。** 原书称它为「图的基类」，
+   但 `Edge` 要到代码7.2 才定义，单独编译代码7.1 不通过；成员函数也没有声明为 `virtual`，
+   派生类无法覆盖。类定义本身是完整的：扫描件书页 165 印 `class Graph {`，书页 166 印 `};`，
+   花括号配平。（2026-11-07 更正：此前这里写「缺函数体开花括号、孤立分号、没有闭合花括号」，
+   那是 `dsa_raw.md:5797` 把 `};` 识别成 `;` 造成的 OCR 损伤，不是原书的问题。）
 2. **代码7.2 多处标识符被空格切断。** `num Vertex = num Vert` 与 `~ Graph()` 都不是可编译
    C++；它还用裸数组却没给复制控制，默认拷贝会双重释放 Mark/Indegree。
 3. **代码7.3 的矩阵申请有全角分号，且边权 0 被同时当成“无边”。** 这让零权边无法表示；
@@ -36,6 +39,15 @@
    正常结果状态，现代返回 optional 或 infinity，不混入控制台。
 
 ## 真实编译器证据
+
+代码7.1 按扫描件原样（类定义完整、花括号配平）单独编译，`Edge` 未声明：
+
+```text
+$ g++ -std=c++17 -fsyntax-only code71.cpp
+code71.cpp:5:5: error: ‘Edge’ does not name a type
+code71.cpp:6:5: error: ‘Edge’ does not name a type
+code71.cpp:9:17: error: ‘Edge’ has not been declared
+```
 
 代码7.2 的标识符空格可缩为：
 

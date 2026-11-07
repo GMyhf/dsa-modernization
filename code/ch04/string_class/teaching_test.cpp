@@ -109,7 +109,7 @@ void test_substr() {
     check(thrown, "起始位置越界抛 out_of_range，而不是返回 NULL");
 }
 
-// 【算法4.4】原书用 -1 表示没找到，与「位置 0」只差一个符号。
+// 【代码4.1】的 find：原书只有声明；返回 int 的查找惯用 -1 表示没找到，与「位置 0」只差一个符号。
 void test_find_returns_optional() {
     String s = "banana";
     auto first = s.find('a');

@@ -219,6 +219,16 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <td style="text-align:left"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch03/knapsack/legacy.md" class="ext">knapsack</a></td>
 </tr>
 <tr>
+<td style="text-align:left">代码4.1</td>
+<td style="text-align:left"><code>class string { … }</code> 类尾缺分号</td>
+<td style="text-align:left"><code>error: expected ‘;’ after class definition</code> · <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/legacy.md" class="ext">string_class</a></td>
+</tr>
+<tr>
+<td style="text-align:left">算法4.3</td>
+<td style="text-align:left"><code>else if s2[i] == &#x27;\0&#x27; &amp;&amp; s1[i] != &#x27;\0&#x27;)</code> 缺左括号</td>
+<td style="text-align:left"><code>error: expected ‘(’ before ‘s2’</code> · 同上</td>
+</tr>
+<tr>
 <td style="text-align:left">算法4.4</td>
 <td style="text-align:left"><code>assert(str != &#x27;\0&#x27;)</code> 是指针与字符比较</td>
 <td style="text-align:left"><code>error: ISO C++ forbids comparison between pointer and integer</code> · <a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/legacy.md" class="ext">string_class</a></td>
@@ -396,6 +406,11 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <td style="text-align:left">扫描件第 218 页 · 第 8 章 8.6.2 节</td>
 </tr>
 <tr>
+<td style="text-align:left">第 8.6.3 节，索引排序的循环调整</td>
+<td style="text-align:left">「下标{0,5,4,1}涉及的元素{29,12,34&#x27;,34}」：按表 8.1，这四个元素在下标 0、5、4、2，应为 {0,5,4,2}（下标 1 是已在位的 25）</td>
+<td style="text-align:left">扫描件书页 227 确认原书即如此印 · 第 8 章 8.6.3 节</td>
+</tr>
+<tr>
 <td style="text-align:left">第 8 章上机题 3、图 8.4(c)</td>
 <td style="text-align:left">上机题 3 写「算法 8.8 中的快速排序」，快排是算法 8.6；图 8.4(c) 那一行开头多印了一个 78</td>
 <td style="text-align:left">第 8 章上机题 3、图 8.4 题注</td>
@@ -508,7 +523,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <td style="text-align:left">E08 / E20</td>
 <td style="text-align:left">算法3.5 / 算法3.9</td>
 <td style="text-align:left">包里没有</td>
-<td style="text-align:left">包里栈的 ADT 就是 <code>pop(T* item)</code>，算法里写 <code>s.pop(&amp;x)</code> 与之一致、编译得过；原书把 ADT 印成了 <code>pop(T&amp;)</code>，算法却照抄了包里的 <code>pop(&amp;x)</code></td>
+<td style="text-align:left">包里栈的 ADT 就是 <code>pop(T* item)</code>，算法里写 <code>s.pop(&amp;x)</code> 与之一致、编译得过；原书印的 ADT 是 <code>pop(T&amp;)</code>，算法却印成与包里一致的 <code>pop(&amp;x)</code>（两者孰先孰后不可考）</td>
 </tr>
 <tr>
 <td style="text-align:left">E09</td>
@@ -577,6 +592,18 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <td style="text-align:left">包里同样用 <code>operand1 == 0.0</code> 判除零</td>
 </tr>
 <tr>
+<td style="text-align:left">E52</td>
+<td style="text-align:left">代码4.1</td>
+<td style="text-align:left">包里无此代码</td>
+<td style="text-align:left">包里没有代码4.1 这份 ADT（成员用 … 占位，不是可编译程序）；包里实际在用的 <code>class String</code>（<code>alg4-5/myString.h</code>）类尾写的是 <code>};</code></td>
+</tr>
+<tr>
+<td style="text-align:left">E53</td>
+<td style="text-align:left">算法4.3</td>
+<td style="text-align:left">包里没有</td>
+<td style="text-align:left">包里 <code>strcmp</code> 的 <code>else if (</code> 有左括号（括号后折行），编译得过；循环后两条 <code>if</code> 的位置与扫描件一致</td>
+</tr>
+<tr>
 <td style="text-align:left">E22</td>
 <td style="text-align:left">顺序表/链表/顺序栈/链式栈/最小堆</td>
 <td style="text-align:left">包里也有</td>
@@ -602,7 +629,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 </tr>
 <tr>
 <td style="text-align:left">R15</td>
-<td style="text-align:left">算法5.x Parent</td>
+<td style="text-align:left">代码5.8 Parent</td>
 <td style="text-align:left">包里也有</td>
 <td style="text-align:left">包里 <code>Parent</code> 的循环走完后直接落到函数末尾，没有 <code>return NULL</code>（找不到父结点时返回值未定义）</td>
 </tr>

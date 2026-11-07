@@ -156,7 +156,7 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 </tr>
 </tbody></table></div>
 <p><strong>「有环」「不连通」不是异常，是可预期的结果</strong>——所以 <code>topological_sort</code>、<code>prim</code>、<code>kruskal</code> 返回 <code>std::optional</code>，空值就是答案。</p>
-<p>原书【代码7.1】【代码7.2】的 ADT 声明残缺，标识符还被 OCR 的空格切断。 本书直接把运算定义在 <code>Graph</code> 上。</p></section><section class="slide" data-notes="&lt;p&gt;infinity 在矩阵里只表示「无边」，边权必须小于它（add_edge 会拒绝）。
+<p>原书【代码7.1】里的 <code>Edge</code> 要到【代码7.2】才定义，成员也都不是 <code>virtual</code>；底稿 OCR 还把标识符切断。 本书直接把运算定义在 <code>Graph</code> 上。</p></section><section class="slide" data-notes="&lt;p&gt;infinity 在矩阵里只表示「无边」，边权必须小于它（add_edge 会拒绝）。
 路径长度是若干条边之和，Dijkstra/Floyd 用 64 位的 distance_type 存，到不了记 unreachable——
 否则总长恰为 infinity 的路径会被读成到不了，更长的还会溢出。这一处第 1 章也讲过。
 

@@ -232,8 +232,8 @@ String substr(size_type pos, size_type len) <span class="k">const</span> {
 并在正文里说「这与 C/C++ 通常的习惯不一致」——
 其实不一致的是原书自己：标准 strcmp 返回的就是差值的符号，
 调用方本来就只该看符号。&lt;/p&gt;"><h1 id="查找与比较"><a class="anchor" href="#查找与比较">#</a>查找与比较</h1>
-<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/teaching.hpp">code/ch04/string_class/teaching.hpp#fn:find</a></div><pre><code><span class="c">// 【算法4.4】从 start 开始查找字符 c。找到返回下标，没找到返回空 optional。</span>
-<span class="c">// 原书用 -1 表示没找到——与「位置 0」只差一个符号，忘了判就会读错位置。</span>
+<div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch04/string_class/teaching.hpp">code/ch04/string_class/teaching.hpp#fn:find</a></div><pre><code><span class="c">// 【代码4.1】的 find：从 start 开始查找字符 c。找到返回下标，没找到返回空 optional。</span>
+<span class="c">// 原书只有声明；返回 int 的查找惯用 -1 表示没找到，与「位置 0」只差一个符号。</span>
 std::optional&lt;size_type&gt; find(<span class="t">char</span> c, size_type start = <span class="n">0</span>) <span class="k">const</span> {
     <span class="k">for</span> (size_type i = start; i &lt; size_; ++i) {
         <span class="k">if</span> (data_[i] == c) {
@@ -242,7 +242,7 @@ std::optional&lt;size_type&gt; find(<span class="t">char</span> c, size_type sta
     }
     <span class="k">return</span> std::nullopt;
 }</code></pre></div>
-<p>原书用 <code>-1</code> 表示没找到——<strong>与「位置 0」只差一个符号</strong>， 调用方漏判就会把「没找到」当成「匹配在开头」。</p></section><section class="slide" data-notes=""><h1 id="43-模式匹配"><a class="anchor" href="#43-模式匹配">#</a>4.3 模式匹配</h1>
+<p>原书只声明了 <code>int find(...)</code>，没给实现；返回 <code>int</code> 的查找惯用 <code>-1</code> 表示没找到——<strong>与「位置 0」只差一个符号</strong>， 调用方漏判就会把「没找到」当成「匹配在开头」。</p></section><section class="slide" data-notes=""><h1 id="43-模式匹配"><a class="anchor" href="#43-模式匹配">#</a>4.3 模式匹配</h1>
 <p>在正文 T 里找模式 P 第一次出现的位置。</p>
 <figure><img loading="lazy" src="../../assets/scan/fig-4-6.png" alt="图 4.6 朴素匹配的示例"><figcaption>图 4.6 朴素匹配的示例</figcaption></figure>
 <p><strong>朴素做法</strong>：把 P 对齐到 T 的每个位置试一遍， 失配就把 P 整体右移一位，从头再比。</p></section><section class="slide" data-notes=""><h1 id="朴素匹配手动走一遍"><a class="anchor" href="#朴素匹配手动走一遍">#</a>朴素匹配：手动走一遍</h1>

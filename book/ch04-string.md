@@ -120,8 +120,8 @@ $j = 0, 1, \cdots, m-1$ 都有 $b_j = a_{i+j}$ 同时成立，则称字符串 $s
    它与 `std::string` 构成歧义。原书正文随后又改用大写 `String`，
    同一章里两个名字混用。
 2. **`int isEmpty();`** 用 `int` 表达布尔，**`int find(const char c, const int start);`**
-   用 `-1` 表示"没找到"——与"位置 0"只差一个符号，调用方漏判就会把
-   "没找到"当成"匹配在开头"。
+   只有声明，原书没给函数体，「没找到」返回什么没说；返回 `int` 的查找按惯例用 `-1`，
+   与"位置 0"只差一个符号，调用方漏判就会把"没找到"当成"匹配在开头"。
 3. **修改器按值返回**：`string append(const char c);`、`string concatenate(const char* s);`
    都返回 `string` 而非引用。代码4.1 只有声明没有函数体，所以不能断定原书会丢结果；
    **能断定的是签名含混**——调用方无从判断 `s.append('x');` 是改了 `s`，
@@ -439,8 +439,8 @@ public:
         return result;
     }
 
-    // 【算法4.4】从 start 开始查找字符 c。找到返回下标，没找到返回空 optional。
-    // 原书用 -1 表示没找到——与「位置 0」只差一个符号，忘了判就会读错位置。
+    // 【代码4.1】的 find：从 start 开始查找字符 c。找到返回下标，没找到返回空 optional。
+    // 原书只有声明；返回 int 的查找惯用 -1 表示没找到，与「位置 0」只差一个符号。
     std::optional<size_type> find(char c, size_type start = 0) const {
         for (size_type i = start; i < size_; ++i) {
             if (data_[i] == c) {
@@ -546,8 +546,8 @@ ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000
 
 #### 查找与比较
 
-对应【算法4.4】的 `find` 返回 `std::optional<size_type>`：找到是下标，没找到是空盒子。
-原书用 `-1` 表示没找到——与"位置 0"只差一个符号，调用方漏判就会把
+对应【代码4.1】里声明的 `find`（原书只有声明，没给实现）返回 `std::optional<size_type>`：找到是下标，没找到是空盒子。
+返回 `int` 的查找按惯例用 `-1` 表示没找到——与"位置 0"只差一个符号，调用方漏判就会把
 "没找到"当成"匹配在开头"。这与 2.2.2 节 `getPos` 那一处是同一个问题、同一个改法。
 
 关于【算法4.3】：原书自己实现了一个 `strcmp`，固定返回 −1/0/1，

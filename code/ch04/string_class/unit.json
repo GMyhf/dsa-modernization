@@ -9,13 +9,13 @@
     },
     {
       "id": "算法4.3",
-      "code_line": "String& concatenate(const char* s)",
-      "test": "concatenate 接在串尾"
+      "code_line": "int compare(const String& other) const noexcept",
+      "test": "小于时 compare 为负"
     },
     {
       "id": "算法4.4",
-      "code_line": "int compare(const String& other) const noexcept",
-      "test": "小于时 compare 为负"
+      "code_line": "String(const char* s) {",
+      "test": "从字符串字面量构造，长度为 5"
     },
     {
       "id": "算法4.5",

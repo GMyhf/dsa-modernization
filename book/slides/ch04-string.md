@@ -218,8 +218,8 @@ String substr(size_type pos, size_type len) const {
 # 查找与比较
 
 ```cpp file=code/ch04/string_class/teaching.hpp#fn:find
-// 【算法4.4】从 start 开始查找字符 c。找到返回下标，没找到返回空 optional。
-// 原书用 -1 表示没找到——与「位置 0」只差一个符号，忘了判就会读错位置。
+// 【代码4.1】的 find：从 start 开始查找字符 c。找到返回下标，没找到返回空 optional。
+// 原书只有声明；返回 int 的查找惯用 -1 表示没找到，与「位置 0」只差一个符号。
 std::optional<size_type> find(char c, size_type start = 0) const {
     for (size_type i = start; i < size_; ++i) {
         if (data_[i] == c) {
@@ -230,7 +230,7 @@ std::optional<size_type> find(char c, size_type start = 0) const {
 }
 ```
 
-原书用 `-1` 表示没找到——**与「位置 0」只差一个符号**，
+原书只声明了 `int find(...)`，没给实现；返回 `int` 的查找惯用 `-1` 表示没找到——**与「位置 0」只差一个符号**，
 调用方漏判就会把「没找到」当成「匹配在开头」。
 
 <!-- 备注

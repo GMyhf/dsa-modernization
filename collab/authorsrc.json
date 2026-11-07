@@ -1818,7 +1818,7 @@
         "E08",
         "E20"
       ],
-      "summary": "包里栈的 ADT 就是 `pop(T* item)`，算法里写 `s.pop(&x)` 与之一致、编译得过；原书把 ADT 印成了 `pop(T&)`，算法却照抄了包里的 `pop(&x)`",
+      "summary": "包里栈的 ADT 就是 `pop(T* item)`，算法里写 `s.pop(&x)` 与之一致、编译得过；原书印的 ADT 是 `pop(T&)`，算法却印成与包里一致的 `pop(&x)`（两者孰先孰后不可考）",
       "checks": [
         {
           "file": "ch03_StackQueue/alg3.5/myStack.h",
@@ -2053,6 +2053,8 @@
         }
       ]
     },
+    {"id": "E52", "listing": "代码4.1", "verdict": "no_code", "errata": "E52", "summary": "包里没有代码4.1 这份 ADT（成员用 … 占位，不是可编译程序）；包里实际在用的 `class String`（`alg4-5/myString.h`）类尾写的是 `};`", "checks": [{"file": "ch04_String/alg4-5/myString.h", "match": ["^class String \\{", "^\\};"]}]},
+    {"id": "E53", "listing": "算法4.3", "verdict": "absent", "errata": "E53", "summary": "包里 `strcmp` 的 `else if (` 有左括号（括号后折行），编译得过；循环后两条 `if` 的位置与扫描件一致", "checks": [{"file": "ch04_String/alg3/strcmp.cpp", "match": ["else if \\(\\s*\\n\\s*s2\\[i\\] == '\\\\0'"], "no_match": ["else if s2\\[i\\]"]}]},
     {
       "id": "E22",
       "listing": "顺序表/链表/顺序栈/链式栈/最小堆",
@@ -2171,7 +2173,7 @@
     },
     {
       "id": "R15",
-      "listing": "算法5.x Parent",
+      "listing": "代码5.8 Parent",
       "verdict": "same",
       "errata": "R15",
       "summary": "包里 `Parent` 的循环走完后直接落到函数末尾，没有 `return NULL`（找不到父结点时返回值未定义）",
