@@ -10,10 +10,14 @@
   python3 vlm_proof.py 端口[,端口...] 工作目录 [页码范围 a-b]
 工作目录里要有：glm.md、qwen.md、dsa_raw.md、book.pdf；结果写到 工作目录/proof/pNNN.json。
 汇总：python3 vlm_proof.py --report 工作目录 输出.md 输出.json
+合并两个模型：python3 vlm_proof.py --merge 工作目录 proof.json proof_gemma.json 输出.md 输出.json
 """
 import base64, concurrent.futures as cf, itertools, json, os, re, subprocess, sys, threading, time, urllib.request
 
 DPI = 220
+# 换模型：环境变量 VLM_MODEL=gemma VLM_OUT=proof_gemma（默认 qwen、proof）；采样参数按各模型推荐值
+MODEL = os.environ.get('VLM_MODEL', 'qwen'); OUT = os.environ.get('VLM_OUT', 'proof')
+SAMPLE = {'qwen': {'temperature': 0.6, 'top_p': 0.95, 'top_k': 20}, 'gemma': {'temperature': 1.0, 'top_p': 0.95, 'top_k': 64}}[MODEL]
 PROMPT = '''你在做教材扫描件的校对。图片是《数据结构与算法》（2008 年）的一页扫描，下面是这一页的 OCR 转写。
 请逐字对照图片，找出转写和图片**不一致**的地方。
 
@@ -46,14 +50,18 @@ def bare(s):  # 去掉空白和 LaTeX 记号后比较，只差这些的不算差
 
 def extract(c):
     c = re.sub(r'^.*?</think>', '', c or '', flags=re.S).strip()
-    m = re.search(r'\[.*\]', c, re.S)
-    if not m: return None
-    try: return json.loads(m.group(0))
-    except Exception: return None
+    # 模型有时先给一个数组、再“修正”成另一个，取最后一个能解析的数组
+    D, last = json.JSONDecoder(), None
+    for i, ch in enumerate(c):
+        if ch == '[':
+            try: v, _ = D.raw_decode(c, i)
+            except Exception: continue
+            if isinstance(v, list) and all(isinstance(x, dict) for x in v): last = v
+    return last
 
 def run(ports, W, rng):
-    G = pages(f'{W}/glm.md'); os.makedirs(f'{W}/png', exist_ok=True); os.makedirs(f'{W}/proof', exist_ok=True)
-    todo = [p for p in sorted(G) if (not rng or rng[0] <= p <= rng[1]) and not os.path.exists(f'{W}/proof/p{p:03d}.json')]
+    G = pages(f'{W}/glm.md'); os.makedirs(f'{W}/png', exist_ok=True); os.makedirs(f'{W}/{OUT}', exist_ok=True)
+    todo = [p for p in sorted(G) if (not rng or rng[0] <= p <= rng[1]) and not os.path.exists(f'{W}/{OUT}/p{p:03d}.json')]
     C = itertools.cycle(ports); L = threading.Lock(); print('待做', len(todo), '页', flush=True)
     def one(p):
         f = f'{W}/png/p{p:03d}'
@@ -61,7 +69,7 @@ def run(ports, W, rng):
             subprocess.run(['pdftoppm', '-r', str(DPI), '-f', str(p), '-l', str(p), '-png', '-singlefile', '-gray', f'{W}/book.pdf', f], check=True)
         b = base64.b64encode(open(f + '.png', 'rb').read()).decode()
         with L: port = next(C)
-        body = {'model': 'qwen', 'max_tokens': 16000, 'temperature': 0.6, 'top_p': 0.95, 'top_k': 20,
+        body = {'model': MODEL, 'max_tokens': 16000, **SAMPLE,
                 'messages': [{'role': 'user', 'content': [{'type': 'image_url', 'image_url': {'url': 'data:image/png;base64,' + b}},
                                                           {'type': 'text', 'text': PROMPT.replace('{text}', G[p])}]}]}
         t = time.time()
@@ -74,7 +82,7 @@ def run(ports, W, rng):
                 c, out, r = {'content': repr(e)}, None, {}
         json.dump({'page': p, 'items': out, 'raw': c.get('content'), 'finish': (r.get('choices') or [{}])[0].get('finish_reason'),
                    'tokens': (r.get('usage') or {}).get('completion_tokens'), 'sec': round(time.time() - t, 1)},
-                  open(f'{W}/proof/p{p:03d}.json', 'w', encoding='utf8'), ensure_ascii=False, indent=1)
+                  open(f'{W}/{OUT}/p{p:03d}.json', 'w', encoding='utf8'), ensure_ascii=False, indent=1)
         return p
     with cf.ThreadPoolExecutor(16) as ex:
         for i, p in enumerate(ex.map(one, todo), 1):
@@ -86,8 +94,9 @@ SMOOTH = [('性', '度'), ('码', '词')]  # Qwen 已知的“改通顺”（见
 def report(W, out_md, out_json):
     G, Q = pages(f'{W}/glm.md'), pages(f'{W}/qwen.md'); R = han(open(f'{W}/dsa_raw.md', encoding='utf8').read())
     items, bad, same, fail, n_pages = [], 0, 0, [], 0
-    for f in sorted(os.listdir(f'{W}/proof')):
-        j = json.load(open(f'{W}/proof/{f}', encoding='utf8')); p = j['page']; n_pages += 1
+    for f in sorted(os.listdir(f'{W}/{OUT}')):
+        j = json.load(open(f'{W}/{OUT}/{f}', encoding='utf8')); p = j['page']; n_pages += 1
+        j['items'] = extract(j.get('raw')) if j.get('raw') else j['items']
         if j['items'] is None: fail.append(p); continue
         g = G[p]; q = han(Q.get(p, ''))
         for it in j['items']:
@@ -119,6 +128,55 @@ def report(W, out_md, out_json):
     open(out_md, 'w', encoding='utf8').write('\n'.join(L))
     print(n_pages, '页', len(items), '条', '丢弃', bad, '相同', same, '失败页', fail, '两份', len(both), '一份', len(one), '无', len(none), '改通顺', len(sm))
 
+def cores(a, o):
+    """转写→原图的差异片段集合（去空白和 LaTeX 记号后），用来判断两个模型是否报了同一处。"""
+    import difflib
+    a, o = bare(a), bare(o)
+    return {(a[i1:i2], o[j1:j2]) for t, i1, i2, j1, j2 in difflib.SequenceMatcher(None, a, o, autojunk=False).get_opcodes() if t != 'equal'}
+
+GLYPH = {('{', '|'), ('}', '|'), ('l', '1'), ('1', 'l'), ('[', '|'), (']', '|')}  # 扫描件代码字体里形近，两个模型会错得一样
+
+def glyph_only(i):
+    import difflib
+    a, o = han(i['转写']), han(i['原图'])  # 只去空白，保留花括号
+    c = {(a[i1:i2], o[j1:j2]) for t, i1, i2, j1, j2 in difflib.SequenceMatcher(None, a, o, autojunk=False).get_opcodes() if t != 'equal'}
+    return bool(c) and all(len(a) == len(b) and all((x, y) in GLYPH for x, y in zip(a, b)) for a, b in c)
+
+def merge(W, qj, gj, out_md, out_json):
+    Q, G = json.load(open(qj, encoding='utf8')), json.load(open(gj, encoding='utf8'))
+    gc = {}
+    for i in G['items']: gc.setdefault(i['page'], []).append((cores(i['转写'], i['原图']), i))
+    for i in Q['items']:
+        c = cores(i['转写'], i['原图']); i['gemma同意'] = any(c & d for d, _ in gc.get(i['page'], []))
+    used = {id(g) for i in Q['items'] for d, g in gc.get(i['page'], []) if cores(i['转写'], i['原图']) & d}
+    extra = [g for p in gc for d, g in gc[p] if id(g) not in used and g['raw旁证'] and g['qwen旁证'] and not g['疑似改通顺']]
+    json.dump({'qwen': Q, 'gemma_failed_pages': G['failed_pages'], 'gemma_extra': extra}, open(out_json, 'w', encoding='utf8'), ensure_ascii=False, indent=1)
+    I = Q['items']; esc = lambda s: s.replace('|', '\\|').replace('\n', '⏎')
+    row = lambda i: f"| {i['page']} | {esc(i['转写'])} | {esc(i['原图'])} | {i['类型']} | {'raw' if i['raw旁证'] else ''}{' qwen' if i['qwen旁证'] else ''} |"
+    hd = ['| 页 | 转写 | 原图 | 类型 | 旁证 |', '|---|---|---|---|---|']
+    gly = [i for i in I if glyph_only(i)]; I = [i for i in I if not glyph_only(i)]
+    # Gemma 常把代码注释整段判为原图没有；这类删除的旁证没有意义（短串到处都有），不收
+    extra = [g for g in extra if not glyph_only(g) and not ('//' in g['转写'] and '//' not in g['原图'])]
+    agree = [i for i in I if i['gemma同意']]
+    tiers = [('两份旁证', lambda i: i['raw旁证'] and i['qwen旁证']), ('一份旁证', lambda i: i['raw旁证'] ^ i['qwen旁证']), ('无旁证', lambda i: not i['raw旁证'] and not i['qwen旁证'])]
+    L = ['# GLM-OCR 逐页校对清单（模型初筛）', '',
+         f'{time.strftime("%Y-%m-%d")} 由 `vlm_proof.py` 生成（T-093）。主清单是 Qwen3.8-27B-FP8 对照 {DPI}dpi 扫描页逐页找出的 GLM 转写差异；Gemma 4 31B-it（4 比特 QAT）独立再做一遍，作为第二意见。**未经人工核对，不能直接据此改文本。**', '',
+         f'- Qwen：{Q["pages"]} 页，保留 {len(I)} 条；丢弃引文在 GLM 原文里找不到的 {Q["dropped_unlocatable"]} 条、去掉空白和 LaTeX 记号后两边相同的 {Q["dropped_same"]} 条。',
+         f'- Gemma 噪声大（同口径丢弃 {G["dropped_same"]} 条只差空白的，{len(G["failed_pages"])} 页输出不是合法 JSON），所以只用来：标出 Qwen 的哪些条目它也报了（{len(agree)} 条）；补充它独有、且 `dsa_raw.md` 和 Qwen 转写都旁证的条目（{len(extra)} 条）。',
+         '- 旁证：`dsa_raw.md` 全书和 Qwen 转写同页里能否找到“原图”文字。页码是 PDF 页码，书上页码 = PDF 页码 − 14。',
+         '- 建议核对顺序：两个模型一致 → 两份旁证 → 一份旁证 → Gemma 补充 → 无旁证。无旁证的不能整体丢掉：公式和上标常常三份 OCR 错得一样。', '',
+         '<!-- 抽查 -->', '',
+         f'## 一、两个模型一致（{len(agree)} 条）', ''] + hd + [row(i) for i in agree] + ['']
+    for k, (t, f) in enumerate(tiers):
+        S = [i for i in I if not i['gemma同意'] and f(i)]
+        L += [f'## {"二三四"[k]}、只有 Qwen 报，{t}（{len(S)} 条）', ''] + hd + [row(i) for i in S] + ['']
+        if k == 1:
+            L += [f'## 补充、只有 Gemma 报，两份旁证（{len(extra)} 条）', ''] + hd + [row(i) for i in extra] + ['']
+    L += [f'## 附、疑似字形误报（{len(gly)} 条）', '', '只差 `{`/`}`/`[`/`]` 与 `|`、或 `l` 与 `1`。扫描件代码字体里这几对形近，模型常常错得一样，代码里原书多半是 `{`、`}` 和变量 `l`。', ''] + hd + [row(i) for i in gly] + ['']
+    open(out_md, 'w', encoding='utf8').write('\n'.join(L))
+    print('Qwen', len(I), '两模型一致', len(agree), 'Gemma 补充', len(extra), '字形', len(gly))
+
 if __name__ == '__main__':
     if sys.argv[1] == '--report': report(*sys.argv[2:5])
+    elif sys.argv[1] == '--merge': merge(*sys.argv[2:7])
     else: run([int(x) for x in sys.argv[1].split(',')], sys.argv[2], [int(x) for x in sys.argv[3].split('-')] if len(sys.argv) > 3 else None)
