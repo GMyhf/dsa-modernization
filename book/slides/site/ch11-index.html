@@ -150,8 +150,8 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <p>磁盘按页读写，所以<strong>一个索引结点就设计成恰好装满一页</strong>。 二叉树每个结点只有两个孩子，同样多的 key 会把树撑得很高。</p>
 <p>覆盖一百万个叶页：二叉树约 <strong>20</strong> 层，100 路树只要 <strong>3</strong> 层。 页内要多比较几个分界 key，但<strong>整页已经在内存里</strong>——比多读一次外存页便宜得多。</p></section><section class="slide" data-notes="&lt;p&gt;接下一节的话头：B+ 树把「重组」换成了「就地分裂与合并」。
 批量装入这件事本身没被淘汰——&lt;code&gt;code/ch11/bplus_tree&lt;/code&gt; 的 &lt;code&gt;bulk_load&lt;/code&gt; 做的正是
-「排好序、连续填叶页、用每个孩子的最小 key 建上一层」，
-装出来的就是 11.4 那张图的形状。差别只在后续怎么维护。&lt;/p&gt;"><h1 id="扇出是算出来的不是拍的"><a class="anchor" href="#扇出是算出来的不是拍的">#</a>扇出是算出来的，不是拍的</h1>
+「排好序、连续填叶页、用每个孩子的最大 key 建上一层」，
+和按图原样装树的 &lt;code&gt;assemble&lt;/code&gt; 共用同一段建层代码。差别只在后续怎么维护。&lt;/p&gt;"><h1 id="扇出是算出来的不是拍的"><a class="anchor" href="#扇出是算出来的不是拍的">#</a>扇出是算出来的，不是拍的</h1>
 <p>页大小 4096 字节，一项「关键码 + 孩子页号」占 16 字节，扣掉页头 —— 大约放 250 项，<strong>扇出约 251</strong>。关键码变长或页头变大，扇出就掉。</p>
 <p><strong>数据库索引偏爱短关键码，不只为省空间，更为压低树高。</strong></p>
 <p>静态多分树<strong>批量装入时按页填满，之后结构不再变</strong>：</p>
@@ -281,22 +281,22 @@ padding:.1em .5em;font-family:monospace;margin-right:.6em}
 <ul>
 <li>内部结点更小 → 一页能装更多路标 → 树更矮</li>
 <li><strong>范围查询</strong>只需定位一次，然后顺着叶子链扫</li>
-</ul></section><section class="slide" data-notes=""><h1 id="b-树插入-60分裂传播到根"><a class="anchor" href="#b-树插入-60分裂传播到根">#</a>B+ 树插入 60：分裂传播到根</h1>
-<p>以 3 阶树为例，叶子装满后插入 60：</p>
-<div class="codeblock" data-lang="text"><pre><code>1. 沿分隔键下降到目标叶
-2. 叶中插入 60，发生溢出
-3. 叶分成左右两页，复制右页首键到父页
-4. 父页若也溢出，再分裂并把中间分隔键上推
-5. 根溢出时新建根，树高增加 1</code></pre></div>
-<p>叶分裂保留全部记录并维护横向链； 内部页分裂搬的是导航键与孩子指针。</p>
+</ul></section><section class="slide" data-notes=""><h1 id="b-树插入-15分裂传播到根图-1110"><a class="anchor" href="#b-树插入-15分裂传播到根图-1110">#</a>B+ 树插入 15：分裂传播到根（图 11.10）</h1>
+<p>原书定义：叶存 ⌈m/2⌉～m 个关键码；内部结点 k 个孩子、k 个关键码， 每个关键码是对应子树<strong>最大码的复写</strong>。在图 11.9 的 3 阶树里插入 15：</p>
+<div class="codeblock" data-lang="text"><pre><code>1. 按「第一个不小于 15 的路标」下降：a → b → 叶 e
+2. e 成为 (5,10,15,20)，超过 m=3，分成 (5,10) 与 (15,20)
+3. 两半的最大码 10、20 都复写在父结点 b 里
+4. b 有了 4 个孩子，照样分裂；a 也一样
+5. 根分裂时新建根 t(40,90)，树高增加 1</code></pre></div>
+<p>读盘 3 次（a, b, e），写盘 7 次（e, e&#x27;, b, b&#x27;, a, a&#x27;, t）—— 程序按图装树后插入 15，打印出的树和计数与图注逐项一致。</p>
 <p>一次更新只沿根到叶的一条路径传播，不重建整棵树。</p></section><section class="slide" data-notes="&lt;p&gt;定位到起点 O(log n)，之后每个结果只花 O(1)。
 B 树做同样的事要反复中序周游，跨结点时得回到父亲——这就是数据库
 几乎一律用 B+ 树而不是 B 树的原因。
 
 本书的实现里同样有 page_reads()/page_writes() 计数器。&lt;/p&gt;"><h1 id="范围查询b-树的看家本领"><a class="anchor" href="#范围查询b-树的看家本领">#</a>范围查询：B+ 树的看家本领</h1>
 <div class="codeblock" data-lang="cpp"><div class="srcbar"><a href="https://github.com/GMyhf/dsa-modernization/blob/main/code/ch11/bplus_tree/modern.hpp">code/ch11/bplus_tree/modern.hpp#bplus-range</a></div><pre><code><span class="c">/// 范围扫描：找到下限所在的叶，然后沿叶链横着走，不再回到内部结点。</span>
-[[nodiscard]] std::vector&lt;std::pair&lt;<span class="t">int</span>, std::string&gt;&gt; range(<span class="t">int</span> low, <span class="t">int</span> high) <span class="k">const</span> {
-    std::vector&lt;std::pair&lt;<span class="t">int</span>, std::string&gt;&gt; out;
+[[nodiscard]] std::vector&lt;Row&gt; range(<span class="t">int</span> low, <span class="t">int</span> high) <span class="k">const</span> {
+    std::vector&lt;Row&gt; out;
     <span class="k">if</span> (low &gt; high) {
         <span class="k">return</span> out;
     }
@@ -318,15 +318,18 @@ B 树做同样的事要反复中序周游，跨结点时得回到父亲——这
         node = node-&gt;next;
     }
     <span class="k">return</span> out;
-}</code></pre></div></section><section class="slide" data-notes="&lt;p&gt;可以现场把「复制」改成「移动」，然后跑范围查询——单点查询依然全绿，
-只有范围查询的断言会红。这正是「有牙的测试」该抓到的东西。&lt;/p&gt;"><h1 id="叶子分裂与内部分裂不一样"><a class="anchor" href="#叶子分裂与内部分裂不一样">#</a>叶子分裂与内部分裂不一样</h1>
-<div class="codeblock" data-lang="text"><pre><code>叶子分裂:   中间那个关键码**复制**一份上去
-            (叶子仍然保留它, 因为数据在叶子)
+}</code></pre></div></section><section class="slide" data-notes="&lt;p&gt;别的教材常用「至多 m−1 个关键码、分界码取右子树最小码」的约定，
+那一套里叶分裂复写、内部分裂上移，两种动作不一样。本书按原书定义。
+可以现场把 insert_into 里「改最右路标」那两行删掉，再插入一个比全树都大的键——
+validate() 立刻报错，期末 11-17 那棵树也画不对。&lt;/p&gt;"><h1 id="b-树的分裂只有复写b-树才有上移"><a class="anchor" href="#b-树的分裂只有复写b-树才有上移">#</a>B+ 树的分裂只有「复写」，B 树才有「上移」</h1>
+<div class="codeblock" data-lang="text"><pre><code>B+ 树（原书定义）:  叶和内部结点放进第 m+1 项就分成两半,
+                     两半的最大码都复写在父结点里
+                     (关键码与孩子一一对应, 跟着孩子走)
 
-内部分裂:   中间那个关键码**移动**上去
-            (内部结点只是路标, 不必留)</code></pre></div>
-<p><strong>这一处最容易写错</strong>，而且写错的表现很隐蔽： 范围查询会漏掉边界上的键，单点查询却全对。</p>
-<p>实现见 <code>code/ch11/bplus_tree/modern.hpp</code> 的 <code>split_leaf</code> 与 <code>split_internal</code>。</p></section><section class="slide" data-notes=""><h1 id="1144-静态索引还是动态索引"><a class="anchor" href="#1144-静态索引还是动态索引">#</a>11.4.4 静态索引还是动态索引</h1>
+B 树:               中间那个关键码**移动**到父结点
+                     (原结点不再保留它)</code></pre></div>
+<p>另一处容易漏：新关键码比全树都大时， 最右路径上各层的最后一个路标都要改成它。</p>
+<p>实现见 <code>code/ch11/bplus_tree/modern.hpp</code> 的 <code>split_node</code> 与 <code>adopt_split</code>。</p></section><section class="slide" data-notes=""><h1 id="1144-静态索引还是动态索引"><a class="anchor" href="#1144-静态索引还是动态索引">#</a>11.4.4 静态索引还是动态索引</h1>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">工作负载</th>
 <th style="text-align:left">更合适</th>
@@ -441,7 +444,7 @@ AND      : 1 0 0 0 1 0</code></pre></div>
 <li>排序倒排表可用双指针线性求交。</li>
 <li>选择索引要同时考虑选择性、更新成本和空间。</li>
 </ul></section><section class="slide" data-notes=""><h1 id="状态演算b-树分裂"><a class="anchor" href="#状态演算b-树分裂">#</a>状态演算：B+ 树分裂</h1>
-<p>叶子 <code>[10,20,30,40]</code> 插入 25 后分成 <code>[10,20]</code>、<code>[25,30,40]</code>；把右叶最小键 25 复制为父结点分隔键，并连接叶子链。</p></section><section class="slide" data-notes=""><h1 id="反例只更新父键不接叶链"><a class="anchor" href="#反例只更新父键不接叶链">#</a>反例：只更新父键不接叶链</h1>
+<p>4 阶 B+ 树的叶子 <code>[10,20,30,40]</code> 插入 25 后有 5 个关键码，超过 <span class="math">m<span class="rel">=</span><span class="upr">4</span></span>，分成 <code>[10,20,25]</code>、<code>[30,40]</code>：父结点里原来指向它的路标 40 留给右叶，左叶的新最大码 25 复写进父结点，再把两片叶子接进叶子链。</p></section><section class="slide" data-notes=""><h1 id="反例只更新父键不接叶链"><a class="anchor" href="#反例只更新父键不接叶链">#</a>反例：只更新父键不接叶链</h1>
 <p>点查可能仍成功，但范围查询沿叶子链会跳过新叶，结果不完整。</p></section><section class="slide" data-notes=""><h1 id="课堂练习与答案"><a class="anchor" href="#课堂练习与答案">#</a>课堂练习与答案</h1>
 <p>课堂练习：为什么 B+ 树范围查询只需一次树高定位？答案：找到下界叶后沿叶子链顺序扫描，不必为每个后继键重新从根查找。</p></section><section class="slide" data-notes=""><h1 id="python-算法轨线性倒排与位图索引"><a class="anchor" href="#python-算法轨线性倒排与位图索引">#</a>Python 算法轨：线性、倒排与位图索引</h1>
 <p>Python 版展示索引定位、倒排表交并和位图运算；B/B+ 树的页分裂和叶链仍以 C++ 实现为主，避免把磁盘布局隐藏掉。</p>
@@ -468,12 +471,12 @@ python3 tools/check_code.py code/ch11/inverted_index</code></pre></div>
 <ul>
 <li>用 <code>page_reads()</code> 量一量：同样的查询，1 层索引和 2 层索引各读几页</li>
 <li>在 B+ 树里做一次范围查询，数一数跨了几个叶结点</li>
-<li>把叶子分裂的「复制」改成「移动」，看范围查询漏掉了什么</li>
+<li>把叶子分裂后父结点里的路标写错（比如取右叶的最小码），看 <code>validate()</code> 和范围查询怎么说</li>
 </ul>
 <blockquote><p>B+ 树的测试里有一条 <code>validate()</code>：每次插入删除后都检查 「所有叶子同层、每个结点半满、叶子链有序」这三条不变量。</p></blockquote></section></div>
 <div class="bar"></div>
 <div class="notes"></div>
-<div class="overview"><div class="thumb"><div class="no">1</div>第11章 索引技术</div><div class="thumb"><div class="no">2</div>11.1 线性索引</div><div class="thumb"><div class="no">3</div>二级索引：索引本身也放不下怎么办</div><div class="thumb"><div class="no">4</div>1000 条记录：索引为什么有四层</div><div class="thumb"><div class="no">5</div>11.2 静态索引：多分树</div><div class="thumb"><div class="no">6</div>扇出是算出来的，不是拍的</div><div class="thumb"><div class="no">7</div>11.3 倒排索引</div><div class="thumb"><div class="no">8</div>倒排表的交并</div><div class="thumb"><div class="no">9</div>倒排表求交：双指针只走一遍</div><div class="thumb"><div class="no">10</div>短语查询要位置信息</div><div class="thumb"><div class="no">11</div>11.4 B 树：为磁盘设计的树</div><div class="thumb"><div class="no">12</div>B 树的结构</div><div class="thumb"><div class="no">13</div>插入导致分裂</div><div class="thumb"><div class="no">14</div>B+ 树：数据全在叶子</div><div class="thumb"><div class="no">15</div>B+ 树插入 60：分裂传播到根</div><div class="thumb"><div class="no">16</div>范围查询：B+ 树的看家本领</div><div class="thumb"><div class="no">17</div>叶子分裂与内部分裂不一样</div><div class="thumb"><div class="no">18</div>11.4.4 静态索引还是动态索引</div><div class="thumb"><div class="no">19</div>11.5 位图索引</div><div class="thumb"><div class="no">20</div>11.5 位图索引（续）</div><div class="thumb"><div class="no">21</div>位图的代价与压缩</div><div class="thumb"><div class="no">22</div>位图逐位查询与尾部掩码</div><div class="thumb"><div class="no">23</div>各种索引怎么选</div><div class="thumb"><div class="no">24</div>课堂讲解卡：索引是在空间与查询之间做交换</div><div class="thumb"><div class="no">25</div>课堂例题：一次范围查询的路径</div><div class="thumb"><div class="no">26</div>课堂例题答案：B+ 树范围查询</div><div class="thumb"><div class="no">27</div>课末自检</div><div class="thumb"><div class="no">28</div>课末自检参考答案</div><div class="thumb"><div class="no">29</div>状态演算：B+ 树分裂</div><div class="thumb"><div class="no">30</div>反例：只更新父键不接叶链</div><div class="thumb"><div class="no">31</div>课堂练习与答案</div><div class="thumb"><div class="no">32</div>Python 算法轨：线性、倒排与位图索引</div><div class="thumb"><div class="no">33</div>本章小结</div><div class="thumb"><div class="no">34</div>上机</div></div>
+<div class="overview"><div class="thumb"><div class="no">1</div>第11章 索引技术</div><div class="thumb"><div class="no">2</div>11.1 线性索引</div><div class="thumb"><div class="no">3</div>二级索引：索引本身也放不下怎么办</div><div class="thumb"><div class="no">4</div>1000 条记录：索引为什么有四层</div><div class="thumb"><div class="no">5</div>11.2 静态索引：多分树</div><div class="thumb"><div class="no">6</div>扇出是算出来的，不是拍的</div><div class="thumb"><div class="no">7</div>11.3 倒排索引</div><div class="thumb"><div class="no">8</div>倒排表的交并</div><div class="thumb"><div class="no">9</div>倒排表求交：双指针只走一遍</div><div class="thumb"><div class="no">10</div>短语查询要位置信息</div><div class="thumb"><div class="no">11</div>11.4 B 树：为磁盘设计的树</div><div class="thumb"><div class="no">12</div>B 树的结构</div><div class="thumb"><div class="no">13</div>插入导致分裂</div><div class="thumb"><div class="no">14</div>B+ 树：数据全在叶子</div><div class="thumb"><div class="no">15</div>B+ 树插入 15：分裂传播到根（图 11.10）</div><div class="thumb"><div class="no">16</div>范围查询：B+ 树的看家本领</div><div class="thumb"><div class="no">17</div>B+ 树的分裂只有「复写」，B 树才有「上移」</div><div class="thumb"><div class="no">18</div>11.4.4 静态索引还是动态索引</div><div class="thumb"><div class="no">19</div>11.5 位图索引</div><div class="thumb"><div class="no">20</div>11.5 位图索引（续）</div><div class="thumb"><div class="no">21</div>位图的代价与压缩</div><div class="thumb"><div class="no">22</div>位图逐位查询与尾部掩码</div><div class="thumb"><div class="no">23</div>各种索引怎么选</div><div class="thumb"><div class="no">24</div>课堂讲解卡：索引是在空间与查询之间做交换</div><div class="thumb"><div class="no">25</div>课堂例题：一次范围查询的路径</div><div class="thumb"><div class="no">26</div>课堂例题答案：B+ 树范围查询</div><div class="thumb"><div class="no">27</div>课末自检</div><div class="thumb"><div class="no">28</div>课末自检参考答案</div><div class="thumb"><div class="no">29</div>状态演算：B+ 树分裂</div><div class="thumb"><div class="no">30</div>反例：只更新父键不接叶链</div><div class="thumb"><div class="no">31</div>课堂练习与答案</div><div class="thumb"><div class="no">32</div>Python 算法轨：线性、倒排与位图索引</div><div class="thumb"><div class="no">33</div>本章小结</div><div class="thumb"><div class="no">34</div>上机</div></div>
 <div class="help"><div>
 <p><b>放映快捷键</b></p>
 <p><kbd>→ / 空格</kbd>下一页　<kbd>←</kbd>上一页　<kbd>Home / End</kbd>首尾</p>

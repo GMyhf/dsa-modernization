@@ -294,7 +294,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <li>数组下标、顶点编号若无特别说明一律<strong>从 0 开始</strong>；图的顶点数记 <span class="math">n</span>、边数记 <span class="math">e</span>。</li>
 <li>排序一律指<strong>从小到大</strong>；「一趟」指算法自己定义的一轮外层循环结束时的状态。</li>
 <li><span class="math">m</span> 阶 B 树按本书第 11.4 节的定义：每结点至多 <span class="math">m</span> 个子结点、至多 <span class="math">m<span class="bin">−</span><span class="upr">1</span></span> 个关键码； 除根和叶外至少 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 个子结点；所有叶结点在同一层。</li>
-<li><span class="math">m</span> 阶 <strong>B+ 树</strong>一律按原书 11.4.2 节（第 11 章各题都用这一套）：每结点至多 <span class="math">m</span> 个子结点， 除根外至少 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 个，根至少 2 个；<strong>叶结点存 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 到 <span class="math">m</span> 个关键码</strong>； 有 <span class="math">k</span> 个子结点的内部结点<strong>有 <span class="math">k</span> 个关键码</strong>，每个是对应子结点的<strong>最大关键码的复写</strong>。 （别的教材常用「至多 <span class="math">m<span class="bin">−</span><span class="upr">1</span></span> 个关键码、取右子树最小码作分界」的约定，答案会不同； 正文 11.4.2 节的推演例子用的就是那一套，考试按原书定义答。）</li>
+<li><span class="math">m</span> 阶 <strong>B+ 树</strong>一律按原书 11.4.2 节（第 11 章各题都用这一套）：每结点至多 <span class="math">m</span> 个子结点， 除根外至少 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 个，根至少 2 个；<strong>叶结点存 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 到 <span class="math">m</span> 个关键码</strong>； 有 <span class="math">k</span> 个子结点的内部结点<strong>有 <span class="math">k</span> 个关键码</strong>，每个是对应子结点的<strong>最大关键码的复写</strong>。 正文 11.4.2 节、<code>code/ch11/bplus_tree</code> 的实现与测试、习题答案都用这一套。 （别的教材常用「至多 <span class="math">m<span class="bin">−</span><span class="upr">1</span></span> 个关键码、取右子树最小码作分界」的约定，答案会不同； 原书混合型 B+ 树的图 11.12～11.14、11.30 也是那样画的，见勘误。考试按原书定义答。）</li>
 <li>算法设计题按大纲要求：<strong>写明基本思想、无歧义即可</strong>；用到栈、队列、优先队列等现成结构时， 先写出 ADT（函数名、入口参数、出口参数、功能一句话）再调用。</li>
 <li>伪代码用缩进表示层次，<code>←</code> 是赋值，<code>=</code> 是比较。</li>
 </ul>
@@ -2059,7 +2059,8 @@ Delete(T, k)
 <li><strong>检索长度</strong>。B+ 树每次都要走到叶，长度固定等于树高； B 树<strong>可能在内部结点就命中</strong>，长度不定（运气好时更短）。</li>
 </ol>
 <p>顺带注意分裂时机也不同：B+ 树的叶能存 <span class="math">m<span class="rel">=</span><span class="upr">5</span></span> 个，第 6 个进来才分裂； B 树结点至多 <span class="math">m<span class="bin">−</span><span class="upr">1</span><span class="rel">=</span><span class="upr">4</span></span> 个，第 5 个进来就分裂（对照 11-8 (3)）。</p>
-<p><strong>由此得到 B+ 树的看家本领</strong>：叶层顺序链起来，<strong>从任一关键码出发可以顺着叶链做范围扫描</strong>； 而且内部结点不带数据，同样大小的页能装更多分支，<strong>树更矮、访外更少</strong>。 这就是数据库索引普遍选 B+ 树的原因（对照 11-5）。</p></blockquote>
+<p><strong>由此得到 B+ 树的看家本领</strong>：叶层顺序链起来，<strong>从任一关键码出发可以顺着叶链做范围扫描</strong>； 而且内部结点不带数据，同样大小的页能装更多分支，<strong>树更矮、访外更少</strong>。 这就是数据库索引普遍选 B+ 树的原因（对照 11-5）。</p>
+<p>（上面的 B+ 树由 <code>code/ch11/bplus_tree</code> 的测试逐字断言。）</p></blockquote>
 <p><strong>11-18.</strong> ★ 一棵红黑树如下（括号里是颜色）。 (1) 插入关键码 40，写出自平衡的过程与结果；(2) 在原树上插入关键码 3，同样作答。</p>
 <div class="codeblock" data-lang="text"><pre><code>            20(黑)
         /          \

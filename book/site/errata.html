@@ -297,6 +297,11 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <td style="text-align:left">正文明写下标从 0 起，返回值却按 1 起始算</td>
 <td style="text-align:left">图4.12 只画过程、没给返回值，所以印出来没人发现</td>
 </tr>
+<tr>
+<td style="text-align:left">第 11.4.2 节定义⑤ vs 图 11.12～11.14、图 11.30</td>
+<td style="text-align:left">定义⑤写明「有 <span class="math">k</span> 个子结点的分支结点必有 <span class="math">k</span> 个关键码」（每个是子树最大码的复写），图 11.9～11.11、11.29 也按这个画；混合型 B+ 树的图 11.12～11.14 和习题 22 的图 11.30 却是 <span class="math">k</span> 个孩子 <span class="math">k<span class="bin">−</span><span class="upr">1</span></span> 个分界码、分界码取右子树最小码的画法</td>
+<td style="text-align:left">两种画法的树形一一对应：<code>code/ch11/bplus_tree</code> 按定义⑤把图 11.12 装进去，插入 22、删除 40 后的形状与图 11.13、11.14 逐结点相同，只是路标取值不同；本书正文、代码、习题答案按定义⑤，第 11.4.2 节图注与习题 22 答案说明了这处差别</td>
+</tr>
 </tbody></table></div>
 <h2 id="正文说法有误"><a class="anchor" href="#正文说法有误">#</a>正文说法有误</h2>
 <p>代码之外、正文里的概念性错误。它们不对应某条清单，但照着字面去写代码会得到与书中所说不同的结果。</p>

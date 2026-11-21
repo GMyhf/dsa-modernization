@@ -152,9 +152,9 @@ int main() {
 
 扇出不是随意选的。页大小 4096 字节，若每个“关键码 + 孩子页号”占 16 字节，扣除页头后大约能放 250 项，扇出约 251；关键码变长或页头元数据增加，扇出就会下降。数据库索引喜欢短关键码，不只为省总空间，也为让一页容纳更多分支、压低树高。
 
-批量装入本身就是「按页填满、自底向上建层」，`code/ch11/bplus_tree` 的 `bulk_load` 实现的正是这件事——把 11.4 节那棵 3 阶 B+ 树按这个办法装出来，得到的就是 11.4 图里的形状。区别只在后续：静态多分树靠重组，B+ 树靠分裂与合并就地维护。
+批量装入本身就是「按页填满、自底向上建层」，`code/ch11/bplus_tree` 的 `bulk_load` 实现的正是这件事——它和 `assemble`（按书上的图原样装树）共用同一段建层代码。区别只在后续：静态多分树靠重组，B+ 树靠分裂与合并就地维护。
 
-批量装入前必须按 key 排好记录，然后连续填叶页，再用每个孩子的最小 key 建上一层。这样叶页天然相邻，范围扫描接近顺序 I/O。若一条条随机插入再指望得到相同布局，结点会因分裂留下空隙，树形和页利用率都不同。
+批量装入前必须按 key 排好记录，然后连续填叶页，再用每个孩子的最大 key 建上一层。这样叶页天然相邻，范围扫描接近顺序 I/O。若一条条随机插入再指望得到相同布局，结点会因分裂留下空隙，树形和页利用率都不同。
 
 ## 11.3 倒排索引
 
@@ -427,138 +427,140 @@ B+ 树把记录（或记录位置）全部放在叶上，内部结点只作路�
 
 B 树命中内部关键码时就可能拿到记录；B+ 树内部关键码只是叶键的复写，点查询仍要走到叶。看似多走一步，换来的是内部页只放短 key 和孩子指针，扇出更大、树更矮，而且所有记录都在同一叶层，范围访问路径统一。
 
-一棵 3 阶 B+ 树可以这样看（内部结点只导航，数据全在最下一层，叶之间有横链）：
+内部结点的每个关键码是它那棵子树的**最大关键码**，所以检索的规则是：在结点里找**第一个不小于**待查关键码的路标，走它对应的孩子。查找 48：根 $a$ 里第一个不小于 48 的是 70，走 $c$；$c$ 里第一个不小于 48 的是 50，走 $h$；在叶 $h$ 里取到 48，共读 3 页。查找 33 到 62：按 33 落到叶 $g$，再沿叶链扫过 $h$、$i$，读到 $j$ 的 65 超过上限就停。
 
-```text
-                [  30  |  70  ]
-               /       |       \
-        [10|20]     [30|50]    [70|90]
-           ↔           ↔           ↔
-         记录…       记录…       记录…
-```
+本书的实现 `code/ch11/bplus_tree` 严格按原书这个定义：`order` 就是 $m$；叶存 $\lceil m/2 \rceil$ 到 $m$ 个 key；内部结点的关键码与孩子一一对应，每个是对应子树最大码的复写。`BPlusTree::assemble` 按图上的页布局原样装树，装完用 `validate()` 逐条检查上面五条定义——扫描件里印作 `5 30` 的叶 $f$ 就过不了这一关（5 不大于左边那棵子树的路标 20），所以图 11.9 的勘误是程序查出来的，不只是眼睛看出来的。
 
-本章的约定：3 阶指一个结点最多 3 个孩子，因此叶和内部结点都最多 2 个 key；内部结点的分界 key 取右子树最小 key 的复写。原书 11.4.2 用的是另一套约定——最大关键码复写，并把 m 阶 B+ 叶的容量定为 $\lceil m/2 \rceil$ 到 $m$ 个 key（3 阶叶因此存 2 到 3 个 key）。两套约定都成立，对照原书读时注意这处差别。
+别的教材常见另一套约定：结点至多 $m-1$ 个 key，内部结点 $k$ 个孩子只有 $k-1$ 个分界码，分界码取右子树的**最小**关键码。同一串操作在两套约定下画出来的树不同，做题时先写明用的是哪一套；本书正文、代码、习题答案和复习题库一律用原书这一套。
 
-查找 50：根上 $30<50<70$，走中间孩子；叶上直接取到 50。查找 35 到 80：先落到含 35 的叶，再沿 `↔` 扫过 50、70，直到超过 80。
+插入 15（图 11.10）：沿 $a$、$b$ 走到叶 $e$，(5,10,20) 放进 15 成为 4 个 key，超过 3 阶叶的上限 $m=3$。叶分成 (5,10) 与 (15,20)，两半各自的最大码复写到父结点 $b$：原来指向 $e$ 的路标 20 留给右半，左半添一个新路标 10。$b$ 于是有 4 个孩子，同样超限，照样分裂，一路传到根：
 
-插入 60：中间叶暂成 `[30|50|60]`，超过 2 个 key 的上限。按原书 11.4.1 的分裂规则取中位数 50 作分界，叶裂成 `[30]` 和 `[50|60]`，50 复写一份上推（B+ 的分界 key 在叶上仍保留）。上推之后根成了 `[30|50|70]`、要挂 4 个孩子，同样超限，于是根也分裂：中位数 50 上移，成为新根，树增高一层。
-
-| 阶段 | 发生溢出的页 | 局部结果 | 向父层传什么 |
+| 阶段 | 上溢的页 | 局部结果 | 父结点里的变化 |
 | --- | --- | --- | --- |
-| 插入前 | - | 叶 `[30,50]` | - |
-| 插入 60 | 叶页 | `[30]` 与 `[50,60]` | 复写 50 |
-| 父层接收 50 | 原根 | key 变为 `[30,50,70]`，4 个孩子 | 上移 50 |
-| 建新根 | 根 | 新根 `[50]`，树高加 1 | 结束 |
+| 插入 15 | 叶 $e$ | $e$(5,10) 与 $e'$(15,20) | $b$ 在路标 20 前添 10，成为 (10,20,30,40) |
+| $b$ 有 4 个孩子 | 内部结点 $b$ | $b$(10,20) 与 $b'$(30,40) | $a$ 在路标 40 前添 20，成为 (20,40,70,90) |
+| $a$ 有 4 个孩子 | 根 $a$ | $a$(20,40) 与 $a'$(70,90) | 新根 $t$(40,90)，树高加 1 |
 
 ![图 11.10 插入后 B+ 树增高一层](assets/scan/fig-11-10.png)
 
 图 11.10　原书的例子：在图 11.9 的 3 阶 B+ 树中插入 15。沿 $a$、$b$、$e$ 找到叶 $e$，(5,10,15,20) 上溢，分裂为 $e$(5,10) 与 $e'$(15,20)，左结点的新最大码 10 复写到 $b$；$b$ 变成 (10,20,30,40) 再分裂为 $b$ 与 $b'$，20 复写到 $a$；$a$ 变成 (20,40,70,90) 又分裂为 $a$ 与 $a'$，两者的最大码 40、90 组成新根 $t$，树增高一层。共读盘 3 次（$a,b,e$）、写盘 7 次（$e,e',b,b',a,a',t$）。原书采用的是「最大关键码复写」，所以与上面「最小关键码复写」的推演形状不同，道理相同。
 
-```text
-                    [  50  ]
-                 /            \
-          [  30  ]            [  70  ]
-         /       \          /        \
-    [10|20]     [30]      [50|60]    [70|90]
-       ↔          ↔           ↔          ↔
-```
-
-叶分裂时分界 key 是**复写**（叶上仍留一份），内部结点分裂时分界 key 是**上移**（原结点不再保留）——这是 B+ 树与 B 树最容易混的一处。两条规则并排写出来就是：
+按原书的定义，叶分裂与内部结点分裂是**同一个动作**：内部结点的关键码与孩子一一对应，跟着孩子分到两半，两半的最大码都复写在父结点里，没有哪个关键码「上移」离开原来那一层。B 树正相反：中间关键码上移到父结点，原结点不再保留——这是 B+ 树与 B 树最容易混的一处。最大码复写还有一个细节：新关键码比全树都大时，要顺着最右路径把各层最后一个路标改成它（`insert_into` 里那个 `key > node->keys[slot]` 分支）。分裂本身的代码如下：
 
 ```cpp file=code/ch11/bplus_tree/modern.hpp#bplus-split
-void split_leaf(Node* node, Split& split) {
-    const std::size_t mid = node->keys.size() / 2;
-    auto right = std::make_unique<Node>(true);
-    right->keys.assign(node->keys.begin() + static_cast<std::ptrdiff_t>(mid), node->keys.end());
-    right->values.assign(std::make_move_iterator(node->values.begin() + static_cast<std::ptrdiff_t>(mid)),
-                         std::make_move_iterator(node->values.end()));
-    node->keys.resize(mid);
-    node->values.resize(mid);
-    right->next = node->next;
-    node->next = right.get();
-    // 叶分裂：分界码是右叶最小关键码，复写上推，叶上仍保留。
+/// 结点放进第 m+1 项：左半留 ⌈(m+1)/2⌉ 项，其余搬进新结点。叶和内部结点一视同仁——
+/// 本定义下内部结点的关键码与孩子一一对应，跟着孩子走就行，不存在「中位数上移」。
+void split_node(Node* node, Split& split) {
+    const std::size_t keep = (entries(*node) + 1) / 2;
+    const auto cut = static_cast<std::ptrdiff_t>(keep);
+    auto right = std::make_unique<Node>(node->leaf);
+    right->keys.assign(node->keys.begin() + cut, node->keys.end());
+    node->keys.resize(keep);
+    if (node->leaf) {
+        right->values.assign(std::make_move_iterator(node->values.begin() + cut),
+                             std::make_move_iterator(node->values.end()));
+        node->values.resize(keep);
+        right->next = node->next;
+        node->next = right.get();
+    } else {
+        right->children.assign(std::make_move_iterator(node->children.begin() + cut),
+                               std::make_move_iterator(node->children.end()));
+        node->children.resize(keep);
+    }
+    mark_dirty(node);
+    mark_dirty(right.get());
     split.happened = true;
-    split.separator = right->keys.front();
     split.right = std::move(right);
-    writes_ += 2;
 }
 
-void split_internal(Node* node, Split& split) {
-    const std::size_t mid = node->keys.size() / 2;
-    auto right = std::make_unique<Node>(false);
-    // 内部结点分裂：中位数上移，原结点不再保留它。
-    split.separator = node->keys[mid];
-    right->keys.assign(node->keys.begin() + static_cast<std::ptrdiff_t>(mid) + 1, node->keys.end());
-    right->children.assign(
-        std::make_move_iterator(node->children.begin() + static_cast<std::ptrdiff_t>(mid) + 1),
-        std::make_move_iterator(node->children.end()));
-    node->keys.resize(mid);
-    node->children.resize(mid + 1);
-    split.happened = true;
-    split.right = std::move(right);
-    writes_ += 2;
+/// 父结点收下分裂出的右半：原路标（右半的上界）留给右半，左半换成自己的新最大码。
+void adopt_split(Node* parent, std::size_t slot, Split& child_split) {
+    const auto at = static_cast<std::ptrdiff_t>(slot);
+    const int right_bound = parent->keys[slot];
+    parent->keys[slot] = parent->children[slot]->keys.back();
+    parent->keys.insert(parent->keys.begin() + at + 1, right_bound);
+    parent->children.insert(parent->children.begin() + at + 1, std::move(child_split.right));
+    mark_dirty(parent);
 }
 ```
 
-先跑一遍。上面那两张图不是画出来的，是这段程序打印出来的：
+先跑一遍。下面的输出不是画出来的：程序按图 11.9 装树，再分别插入 15、删除 75，打印出的树与原书图 11.10、图 11.11 逐结点一致，读写盘次数也与图注一致（一次操作里同一页只算一次读、一次写，释放的页不写回）。
 
 ```cpp file=code/ch11/bplus_tree/demo.cpp
 #include "modern.hpp"
 
 #include <cstdio>
 
-int main() {
-    using dsa::index::BPlusTree;
-    std::vector<std::pair<int, std::string>> rows;
-    for (const int key : {10, 20, 30, 50, 70, 90}) {
-        rows.emplace_back(key, "记录" + std::to_string(key));
+namespace {
+using dsa::index::BPlusTree;
+
+std::vector<BPlusTree::Row> page(std::initializer_list<int> keys) {
+    std::vector<BPlusTree::Row> out;
+    for (const int key : keys) {
+        out.emplace_back(key, "记录" + std::to_string(key));
     }
-    // 11.2：批量装入，按页填满。
-    BPlusTree tree = BPlusTree::bulk_load(3, rows, 2);
-    std::printf("装入后   : %s\n", tree.to_string().c_str());
+    return out;
+}
 
-    // 11.4：插入 60，叶裂 → 根裂 → 树增高一层。
-    tree.insert(60, "记录60");
-    std::printf("插入 60  : %s（树高 %zu）\n", tree.to_string().c_str(), tree.height());
-    tree.insert(65, "记录65");
-    std::printf("插入 65  : %s（父结点没满，没裂到根）\n", tree.to_string().c_str());
+/// 原书图 11.9：叶 e～l 自左向右，上面两层各结点的孩子数自底向上给出。
+BPlusTree fig_11_9() {
+    return BPlusTree::assemble(3,
+                               {page({5, 10, 20}), page({25, 30}), page({35, 40}),
+                                page({45, 48, 50}), page({55, 60}), page({65, 70}),
+                                page({75, 80}), page({85, 90})},
+                               {{3, 3, 2}, {3}});
+}
+}  // namespace
 
-    tree.reset_counters();
+int main() {
+    BPlusTree tree = fig_11_9();
+    std::printf("图 11.9  : %s\n", tree.to_string().c_str());
+
     // 先取结果再取计数：printf 的实参求值顺序没有保证。
-    const auto found = tree.find(50);
+    tree.reset_counters();
+    const auto found = tree.find(48);
     const std::size_t point_reads = tree.page_reads();
-    std::printf("查找 50  : %s，读了 %zu 页\n", found->c_str(), point_reads);
+    std::printf("查找 48  : %s，读了 %zu 页\n", found->c_str(), point_reads);
 
     tree.reset_counters();
-    const auto scan = tree.range(35, 80);
+    const auto scan = tree.range(33, 62);
     const std::size_t scan_reads = tree.page_reads();
-    std::printf("范围 35..80 :");
+    std::printf("范围 33..62 :");
     for (const auto& row : scan) {
         std::printf(" %d", row.first);
     }
     std::printf("，读了 %zu 页\n", scan_reads);
 
-    tree.erase(70);
-    std::printf("删除 70  : %s\n", tree.to_string().c_str());
+    // 图 11.10：插入 15，叶 e → 内部结点 b → 根 a 相继分裂，树增高一层。
+    tree.reset_counters();
+    tree.insert(15, "记录15");
+    std::printf("插入 15  : %s（读 %zu 写 %zu）\n", tree.to_string().c_str(), tree.page_reads(),
+                tree.page_writes());
+
+    // 图 11.11：回到图 11.9 删除 75，叶合并、内部结点借位。
+    BPlusTree other = fig_11_9();
+    other.reset_counters();
+    other.erase(75);
+    std::printf("删除 75  : %s（读 %zu 写 %zu）\n", other.to_string().c_str(), other.page_reads(),
+                other.page_writes());
     return 0;
 }
 ```
 
 ```text
-装入后   : [30,70] / [10,20] [30,50] [70,90]
-插入 60  : [50] / [30] [70] / [10,20] [30] [50,60] [70,90]（树高 3）
-插入 65  : [50] / [30] [60,70] / [10,20] [30] [50] [60,65] [70,90]（父结点没满，没裂到根）
-查找 50  : 记录50，读了 3 页
-范围 35..80 : 50 60 65 70，读了 6 页
-删除 70  : [50] / [30] [60,90] / [10,20] [30] [50] [60,65] [90]
+图 11.9  : [40,70,90] / [20,30,40] [50,60,70] [80,90] / [5,10,20] [25,30] [35,40] [45,48,50] [55,60] [65,70] [75,80] [85,90]
+查找 48  : 记录48，读了 3 页
+范围 33..62 : 35 40 45 48 50 55 60，读了 6 页
+插入 15  : [40,90] / [20,40] [70,90] / [10,20] [30,40] [50,60,70] [80,90] / [5,10] [15,20] [25,30] [35,40] [45,48,50] [55,60] [65,70] [75,80] [85,90]（读 3 写 7）
+删除 75  : [40,60,90] / [20,30,40] [50,60] [70,90] / [5,10,20] [25,30] [35,40] [45,48,50] [55,60] [65,70] [80,85,90]（读 5 写 4）
 ```
 
 范围扫描的写法直接对应「找到下限所在的叶，然后沿叶链横着走」：
 
 ```cpp file=code/ch11/bplus_tree/modern.hpp#bplus-range
 /// 范围扫描：找到下限所在的叶，然后沿叶链横着走，不再回到内部结点。
-[[nodiscard]] std::vector<std::pair<int, std::string>> range(int low, int high) const {
-    std::vector<std::pair<int, std::string>> out;
+[[nodiscard]] std::vector<Row> range(int low, int high) const {
+    std::vector<Row> out;
     if (low > high) {
         return out;
     }
@@ -583,12 +585,12 @@ int main() {
 }
 ```
 
-删除 70：先在叶上删，若叶下溢就向兄弟借或合并，再改内部结点的路标。这里有一处容易漏：借位和合并都会把父结点的分界 key 搬进孩子里，而那个 key 可能正是刚被删掉的——搬完必须按「分界 key = 右子树最小 key」重算一遍，否则树里会留下一个指向已删关键码的路标。这个错误不影响点查询，只有结构不变量检查才看得出来（`code/ch11/bplus_tree/legacy.md` 记了实测过程）。
+删除：先在叶上删；叶若下溢（少于 $\lceil m/2 \rceil$ 个 key），先看左兄弟、再看右兄弟能否借出一项，都借不到就合并（有左兄弟就并进左兄弟）。合并使父结点少一个孩子，父结点也可能下溢，于是向上重复。最大码复写在这里省了事：没下溢时上层路标可以不动，它只是上界；借位时要改的只有两兄弟之间那一个路标；合并后的结点沿用右边那个的路标。
 
 删除后的处理顺序固定：
 
-1. 页仍达到最小占用，更新必要的父分界后结束；
-2. 页下溢且相邻兄弟有富余，借一个键并重算父分界；
+1. 页仍达到最小占用，结束，上层路标不必改；
+2. 页下溢且相邻兄弟有富余（先左后右），借一项，并把两兄弟之间的路标改成左边那个的新最大码；
 3. 兄弟也在下限，合并两页，父结点少一个 key 和一个孩子；
 4. 父结点因此下溢，向上重复；若根只剩一个孩子，让该孩子成为新根，树高减 1。
 
@@ -600,7 +602,7 @@ int main() {
 
 ![图11.12 混合型 B+ 树，内部结点阶为 4，叶结点阶 5](assets/scan/fig-11-12.png)
 
-图 11.12　混合型 B+ 树：内部结点阶为 4，叶结点阶为 5。
+图 11.12　混合型 B+ 树：内部结点阶为 4，叶结点阶为 5。注意这三张图换了画法：内部结点 $k$ 个孩子只有 $k-1$ 个分界码，分界码取右子树的**最小**关键码，与上面定义⑤（$k$ 个孩子 $k$ 个关键码、最大码复写）不一致，是原书自己的前后不一（见勘误）。两种画法的树形一一对应：按定义⑤，$b$ 应是 (15,23,31,39)、$c$ 是 (47,52)、$a$ 是 (39,52)。
 
 ![图 11.13 在图11.12 混合型 B+ 树中插入 22 后的结果](assets/scan/fig-11-13.png)
 
@@ -608,7 +610,7 @@ int main() {
 
 ![图11.14 在图11.13 混合型 B+ 树中删除 40 后的结果](assets/scan/fig-11-14.png)
 
-图 11.14　在图 11.13 上删除 40 之后。分裂与合并的规则不变，只是内外两层各按各自的阶判断溢出和下溢。
+图 11.14　在图 11.13 上删除 40 之后。分裂与合并的规则不变，只是内外两层各按各自的阶判断溢出和下溢。`code/ch11/bplus_tree` 按定义⑤把图 11.12 装进去（`BPlusTree(4, 5)`，内部阶 4、叶阶 5），插入 22、删除 40 后打印出的形状与图 11.13、11.14 逐结点相同，只是路标是各子树的最大码。
 
 分裂与合并要同时维护叶链。只修父子指针而漏掉 `next`，点查询仍可能全绿，范围查询却会跨不过断链；所以测试既要逐键 `find`，也要把全范围扫描结果与排序后的记录全集对拍。
 
@@ -1033,7 +1035,7 @@ Linux 内核中的用户态地址空间管理也使用了红黑树。
 2. 多级索引一次查询大约读几页？关键指标为什么不是比较次数。
 3. 静态多分树插入一条溢出记录会发生什么。
 4. 用倒排表求「计算机系且擅长英语」的交集。
-5. 在 11.4 插入 60 之后的那棵 3 阶 B+ 树上继续插入 65，写出叶和根，并说明这次为什么没有一直裂到根。
+5. 在图 11.10 那棵 3 阶 B+ 树（图 11.9 插入 15 之后）上继续插入 47，写出各层结点和这次的读写盘次数，并说明这次为什么没有一直裂到根。
 6. 位图、签名、红黑树、B+ 树各适合内存还是外存、点查询还是范围查询。
 
 ### 原书习题
@@ -1126,7 +1128,7 @@ Linux 内核中的用户态地址空间管理也使用了红黑树。
 
 ![图 11.30 混合型 B+ 树，内部结点阶为 4、叶结点阶为 3](assets/scan/fig-11-30.png)
 
-图 11.30　混合型 $B^+$ 树，内部结点阶为 4、叶结点阶为 3
+图 11.30　混合型 $B^+$ 树，内部结点阶为 4、叶结点阶为 3（与图 11.12 一样按「$k-1$ 个分界码、取最小码」画，见勘误）
 
 23. 下面是顾客记录，格式为「顾客号：(年龄, 月收入)」：1:(25,600) 2:(45,600) 3:(50,750) 4:(50,1000)
     5:(50,1200) 6:(70,1100) 7:(85,1400) 8:(30,2600) 9:(25,4000) 10:(45,3500) 11:(50,2750)
