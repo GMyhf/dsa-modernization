@@ -55,11 +55,13 @@ CHAPTERS = [
 STANDALONE = {
     "期中复习题库": BOOK / "期中复习题库.md",
     "期中复习题库-纯题目": BOOK / "期中复习题库.md",
+    "期末复习题库": BOOK / "期末复习题库.md",          # 2026-11-20 加（T-094）
+    "期末复习题库-纯题目": BOOK / "期末复习题库.md",
 }
 
 # 由同一份源文件剥掉答案出的「纯题目」单行本（2026-10-15 加）：拿来当卷子做，做完再翻完整版对答案。
 # 源文件只有一份，改题时两份 PDF 一起报旧，不会出现题目版与答案版各说各话。
-QUESTIONS_ONLY = {"期中复习题库-纯题目"}
+QUESTIONS_ONLY = {"期中复习题库-纯题目", "期末复习题库-纯题目"}
 
 # `book/插图.md` **有意不在这张表里**（2026-09-04）。它是上游 OCR 图库那 292 张的记录，
 # 归 `collect_figures.py --check` 核；正文用的图现在全是 `assets/scan/` 下的扫描件裁图。
@@ -489,20 +491,31 @@ def assemble_standalone(path: Path, questions_only: bool = False) -> str:
 
 
 # 纯题目版要改写的几句导语：(原文, 替换)。原文对不上就停下来，免得导语还在说「答案跟在下面」。
-QUESTIONS_ONLY_EDITS = [
+# 每份题库一组，按第一条（书名行）认出是哪一份。
+QUESTIONS_ONLY_EDITS = [[
     ("# 期中复习题库（第 1—6 章）\n", "# 期中复习题库（第 1—6 章）·纯题目版\n"),
     ("**怎么用**：分章题答案跟在题目下面的引用块里，模拟卷答案集中在各组之后，先把引用块遮住自己做一遍，再对答案。",
      "**怎么用**：这是去掉全部答案与考前速查表的纯题目版，可直接当卷子做；"
      "答案与讲解见完整版《期中复习题库》，题号两版一致。"),
     ("配比出的），\n最后一页是速查表。", "配比出的）。"),
     ("可当作一次完整自测。答案集中在各组题目之后。", "可当作一次完整自测。"),
-]
+], [
+    ("# 期末复习题库（第 7—12 章）\n", "# 期末复习题库（第 7—12 章）·纯题目版\n"),
+    ("**怎么用**：答案就跟在题目下面的引用块里，先把引用块遮住自己做一遍，再对答案。",
+     "**怎么用**：这是去掉全部答案与考前速查表的纯题目版，可直接当卷子做；"
+     "答案与讲解见完整版《期末复习题库》，题号两版一致。"),
+    ("（20 题），最后一页是速查表。", "（20 题）。"),
+    ("可以当作一次完整的自测。答案在每道题下面。", "可以当作一次完整的自测。"),
+]]
 CHEATSHEET_RE = re.compile(r"\n(?:---\n\s*)?## 考前速查表\n.*\Z", re.S)
 
 
 def strip_answers(text: str) -> str:
     """去掉题库里的全部答案：答案一律写在 `>` 引用块里（分章题与模拟卷都是），速查表整节去掉。"""
-    for old, new in QUESTIONS_ONLY_EDITS:
+    edits = next((group for group in QUESTIONS_ONLY_EDITS if group[0][0] in text), None)
+    if edits is None:
+        raise SystemExit("纯题目版：认不出是哪一份题库（书名行对不上），请同步 QUESTIONS_ONLY_EDITS")
+    for old, new in edits:
         if old not in text:
             raise SystemExit(f"纯题目版：源文件里找不到要改写的导语「{old.strip()}」，请同步 QUESTIONS_ONLY_EDITS")
         text = text.replace(old, new, 1)
