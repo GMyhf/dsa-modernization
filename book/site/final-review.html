@@ -294,6 +294,7 @@ footer{max-width:1440px;margin:0 auto;padding:22px 26px 60px;color:var(--muted);
 <li>数组下标、顶点编号若无特别说明一律<strong>从 0 开始</strong>；图的顶点数记 <span class="math">n</span>、边数记 <span class="math">e</span>。</li>
 <li>排序一律指<strong>从小到大</strong>；「一趟」指算法自己定义的一轮外层循环结束时的状态。</li>
 <li><span class="math">m</span> 阶 B 树按本书第 11.4 节的定义：每结点至多 <span class="math">m</span> 个子结点、至多 <span class="math">m<span class="bin">−</span><span class="upr">1</span></span> 个关键码； 除根和叶外至少 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 个子结点；所有叶结点在同一层。</li>
+<li><span class="math">m</span> 阶 <strong>B+ 树</strong>一律按原书 11.4.2 节（第 11 章各题都用这一套）：每结点至多 <span class="math">m</span> 个子结点， 除根外至少 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 个，根至少 2 个；<strong>叶结点存 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 到 <span class="math">m</span> 个关键码</strong>； 有 <span class="math">k</span> 个子结点的内部结点<strong>有 <span class="math">k</span> 个关键码</strong>，每个是对应子结点的<strong>最大关键码的复写</strong>。 （别的教材常用「至多 <span class="math">m<span class="bin">−</span><span class="upr">1</span></span> 个关键码、取右子树最小码作分界」的约定，答案会不同； 正文 11.4.2 节的推演例子用的就是那一套，考试按原书定义答。）</li>
 <li>算法设计题按大纲要求：<strong>写明基本思想、无歧义即可</strong>；用到栈、队列、优先队列等现成结构时， 先写出 ADT（函数名、入口参数、出口参数、功能一句话）再调用。</li>
 <li>伪代码用缩进表示层次，<code>←</code> 是赋值，<code>=</code> 是比较。</li>
 </ul>
@@ -1945,14 +1946,14 @@ Delete(T, k)
 <blockquote><p><strong>答</strong>：<span class="math">h</span> 个（从根到叶各一次），再加 1 次读主文件数据块； <span class="math">h<span class="rel">≤</span>&thinsp;<span class="upr">log</span><sub>⌈m/<span class="upr">2</span>⌉</sub><span class="frac"><span class="num">n<span class="bin">+</span><span class="upr">1</span></span><span class="den"><span class="upr">2</span></span></span><span class="bin">+</span><span class="upr">1</span></span>。 这个上界来自「最坏情况下每个非根结点只有 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 个子结点」。 数量级感受一下：<span class="math">m<span class="rel">=</span><span class="upr">100</span></span>、<span class="math">n<span class="rel">=</span><span class="upr">10</span><sup><span class="upr">8</span></sup></span> 时，上界为 <span class="math"><span class="upr">log</span><sub><span class="upr">50</span></sub>(<span class="upr">5</span><span class="bin">×</span><span class="upr">10</span><sup><span class="upr">7</span></sup>)<span class="bin">+</span><span class="upr">1</span><span class="rel">≈</span><span class="upr">5.5</span></span>，即<strong>最坏也只有 5 层</strong>；结点装得较满时（每结点约 100 个分支）只有 <span class="math"><span class="upr">log</span><sub><span class="upr">100</span></sub><span class="upr">10</span><sup><span class="upr">8</span></sup><span class="rel">=</span><span class="upr">4</span></span> 层左右——<strong>四五次访外就能定位一亿条记录中的一条</strong>。</p></blockquote>
 <p><strong>11-7.</strong> 红黑树的四条性质：① 结点非红即黑；② ____ 是黑色； ③ 红结点的子结点 ____；④ 从任一结点到其所有后代空叶结点的路径上，____ 相同。 由此可得含 <span class="math">n</span> 个内部结点的红黑树，树高最多 ____。</p>
 <blockquote><p><strong>答</strong>：<strong>根结点</strong>（有的教材还要求空叶结点为黑）；<strong>必须是黑色</strong>（即<strong>不允许红红相邻</strong>）； <strong>黑结点个数</strong>（黑高）；<span class="math"><span class="upr">2</span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>(n<span class="bin">+</span><span class="upr">1</span>)</span>（只数内部结点；教材原书把末端空叶也数进树高，写作 <span class="math"><span class="upr">2</span>&thinsp;<span class="upr">log</span><sub><span class="upr">2</span></sub>(n<span class="bin">+</span><span class="upr">1</span>)<span class="bin">+</span><span class="upr">1</span></span>，两种写法都对，答题时说明口径）。 <strong>这四条合起来只做一件事：让最长路径不超过最短路径的两倍。</strong> 最短路径全黑，最长路径红黑相间——长度至多是前者的 2 倍，所以树高仍是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>。</p></blockquote>
-<p><strong>11-8.</strong> ★ 按本书第 11.4 节的定义作答。B 树按本篇开头的约定。<span class="math">m</span> 阶 B+ 树按原书 11.4.2 节： 除根外每个结点至少 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 个子结点，根至少 2 个子结点；叶结点存 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 到 <span class="math">m</span> 个关键码； 有 <span class="math">k</span> 个子结点的内部结点有 <span class="math">k</span> 个关键码。 (1) 含 200 个关键码的 5 阶 B 树，检索一个关键码（不读主文件）<strong>至多</strong>读盘 ____ 次； (2) 高度为 2 的 60 阶 B+ 树，叶层最少存 ____ 个关键码、最多存 ____ 个； (3) 在 <span class="math">m</span> 阶 B+ 树中插入一个关键码引起<strong>叶结点</strong>分裂，该叶原有 ____ 个关键码；若是 <span class="math">m</span> 阶 <strong>B 树</strong>，原有 ____ 个。</p>
+<p><strong>11-8.</strong> ★ B 树与 B+ 树都按本篇开头的约定（B+ 树即原书 11.4.2 节：叶结点存 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 到 <span class="math">m</span> 个关键码， 有 <span class="math">k</span> 个子结点的内部结点有 <span class="math">k</span> 个关键码）。 (1) 含 200 个关键码的 5 阶 B 树，检索一个关键码（不读主文件）<strong>至多</strong>读盘 ____ 次； (2) 高度为 2 的 60 阶 B+ 树，叶层最少存 ____ 个关键码、最多存 ____ 个； (3) 在 <span class="math">m</span> 阶 B+ 树中插入一个关键码引起<strong>叶结点</strong>分裂，该叶原有 ____ 个关键码；若是 <span class="math">m</span> 阶 <strong>B 树</strong>，原有 ____ 个。</p>
 <blockquote><p><strong>答</strong>：(1) <strong>5</strong>；(2) <strong>60</strong>、<strong>3600</strong>；(3) <span class="math">m</span>；<span class="math">m<span class="bin">−</span><span class="upr">1</span></span>。</p>
 <p><strong>(1)</strong> 读盘次数 = 树高，要找的是 200 个关键码<strong>最高</strong>能长到几层。最高的树每个结点都取最少： 根 1 个关键码、2 个子结点；其余结点 2 个关键码、3 个子结点。各层结点数至少为 1、2、6、18、54…… 高度为 <span class="math">h</span> 的 5 阶 B 树至少有</p>
 <div class="math math-display"><span class="upr">1</span><span class="bin">+</span><span class="upr">2</span><span class="bin">⋅</span><span class="upr">2</span><span class="bin">⋅</span>(<span class="upr">1</span><span class="bin">+</span><span class="upr">3</span><span class="bin">+</span>⋯<span class="bin">+</span><span class="upr">3</span><sup>h<span class="bin">−</span><span class="upr">2</span></sup>)<span class="rel">=</span><span class="upr">2</span><span class="bin">⋅</span><span class="upr">3</span><sup>h<span class="bin">−</span><span class="upr">1</span></sup><span class="bin">−</span><span class="upr">1</span></div>
 <p>个关键码：<span class="math">h<span class="rel">=</span><span class="upr">5</span></span> 时是 161，<span class="math">h<span class="rel">=</span><span class="upr">6</span></span> 时是 485。<span class="math"><span class="upr">161</span><span class="rel">≤</span><span class="upr">200</span>&lt;<span class="upr">485</span></span>，所以最高 5 层，<strong>至多读盘 5 次</strong>。 套 11-6 的公式也一样：<span class="math">h<span class="rel">≤</span>&thinsp;<span class="upr">log</span><sub><span class="upr">3</span></sub><span class="frac"><span class="num"><span class="upr">201</span></span><span class="den"><span class="upr">2</span></span></span><span class="bin">+</span><span class="upr">1</span><span class="rel">≈</span><span class="upr">5.19</span></span>，取整为 5。</p>
 <p><strong>(2)</strong> 高度为 2 就是「根 + 叶层」。最少：根至少 2 个子结点，每个叶至少 <span class="math">⌈<span class="upr">60</span>/<span class="upr">2</span>⌉<span class="rel">=</span><span class="upr">30</span></span> 个关键码， 共 <span class="math"><span class="upr">2</span><span class="bin">×</span><span class="upr">30</span><span class="rel">=</span><span class="upr">60</span></span>；最多：根至多 60 个子结点，每个叶至多 60 个关键码，共 <span class="math"><span class="upr">60</span><span class="bin">×</span><span class="upr">60</span><span class="rel">=</span><span class="upr">3600</span></span>。</p>
 <p><strong>(3)</strong> B+ 树的叶结点最多能存 <span class="math">m</span> 个关键码，要放第 <span class="math">m<span class="bin">+</span><span class="upr">1</span></span> 个时才分裂，所以原有 <span class="math">m</span> 个； B 树结点最多 <span class="math">m<span class="bin">−</span><span class="upr">1</span></span> 个关键码，原有 <span class="math">m<span class="bin">−</span><span class="upr">1</span></span> 个。</p>
-<p><strong>注意口径</strong>：11-17 用的是另一种常见约定——B+ 树的结点也像 B 树一样至多 <span class="math">m<span class="bin">−</span><span class="upr">1</span></span> 个关键码， 在那种约定下 (3) 的答案也是 <span class="math">m<span class="bin">−</span><span class="upr">1</span></span>。原书 11.4.2 节写明叶结点「可以有 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 到 <span class="math">m</span> 个关键码」， 考试按教材答 <span class="math">m</span>。<strong>做题前先写清用的是哪一种定义。</strong></p></blockquote>
+<p><strong>注意口径</strong>：若按别的教材「B+ 树结点也至多 <span class="math">m<span class="bin">−</span><span class="upr">1</span></span> 个关键码」的约定，(3) 的答案也是 <span class="math">m<span class="bin">−</span><span class="upr">1</span></span>。 原书 11.4.2 节写明叶结点「可以有 <span class="math">⌈m/<span class="upr">2</span>⌉</span> 到 <span class="math">m</span> 个关键码」，本篇与考试都按原书答 <span class="math">m</span>。</p></blockquote>
 <h3 id="二选择题-4"><a class="anchor" href="#二选择题-4">#</a>二、选择题</h3>
 <p><strong>11-9.</strong> ★ B+ 树不同于 B 树的特点之一是（　）。 A. 能支持顺序检索 B. 结点中含有关键码 C. 根结点至少有两个分支 D. 所有叶结点都在同一层上</p>
 <blockquote><p><strong>答：A</strong>。B、C、D 三条 <strong>B 树也都有</strong>，不是「不同点」。 A 是 B+ 树独有的：全部记录都在叶结点上，且叶结点用指针顺序链起来， 于是<strong>从某个关键码开始顺着叶链往下走就能做范围扫描</strong>，B 树做不到这一点 （B 树的记录散布在各层内部结点上，顺序访问要中序遍历整棵树）。</p>
@@ -2016,53 +2017,48 @@ Delete(T, k)
 <li>若再插一个使某叶分裂、根变成 5 个关键码，根也会分裂，树将长到 3 层。</li>
 </ol>
 <p><strong>答题提醒</strong>：阶为<strong>偶数</strong>时「中间那个」有两种取法（偏左或偏右）， 不同教材结果不同；<strong>做题前先声明自己用哪种</strong>，或者优先挑奇数阶的题做。</p></blockquote>
-<p><strong>11-17.</strong> ★ 依次把 <span class="math"><span class="upr">10</span>,<span class="upr">20</span>,<span class="upr">30</span>,<span class="upr">40</span>,<span class="upr">50</span>,<span class="upr">60</span>,<span class="upr">70</span>,<span class="upr">80</span>,<span class="upr">90</span></span> 插入一棵初始为空的 <strong>5 阶 B+ 树</strong>， 画出最终结果；并与同样输入下的 <strong>5 阶 B 树</strong>（做法见 11-16）对照，说明两者的差别。</p>
-<blockquote><p><strong>答</strong>：约定（做题前务必声明）：5 阶 B+ 树的内部结点至多 5 个子结点、4 个关键码； 叶结点至多 4 个关键码；<strong>叶满时分裂成 2 + 3，并把右叶的首关键码&quot;复制&quot;上去</strong>； 内部结点满时分裂，中间关键码&quot;移动&quot;上去。</p>
+<p><strong>11-17.</strong> ★ 依次把 <span class="math"><span class="upr">10</span>,<span class="upr">20</span>,<span class="upr">30</span>,<span class="upr">40</span>,<span class="upr">50</span>,<span class="upr">60</span>,<span class="upr">70</span>,<span class="upr">80</span>,<span class="upr">90</span></span> 插入一棵初始为空的 <strong>5 阶 B+ 树</strong>（按本篇开头的约定）， 画出最终结果；并与同样输入下的 <strong>5 阶 B 树</strong>（做法见 11-16）对照，说明两者的差别。</p>
+<blockquote><p><strong>答</strong>：先写约定：5 阶 B+ 树的叶结点存 3 到 5 个关键码（树里只有一个叶时它就是根，不受下限约束）， <strong>叶里放进第 6 个才分裂</strong>，分成 3 + 3；内部结点有几个子结点就有几个关键码， 每个关键码是对应子结点的<strong>最大关键码的复写</strong>。所以新关键码若比全树都大， 除了放进最右的叶，还要把沿途内部结点的最后一个关键码改成它。</p>
 <p><strong>逐步过程</strong>：</p>
 <div class="table-wrap"><table><thead><tr>
 <th style="text-align:left">插入</th>
 <th style="text-align:left">发生了什么</th>
 </tr></thead><tbody>
 <tr>
-<td style="text-align:left">10,20,30,40</td>
-<td style="text-align:left">都进同一个叶（同时也是根），<code>[10,20,30,40]</code></td>
-</tr>
-<tr>
-<td style="text-align:left">50</td>
-<td style="text-align:left">叶满 5 个 → 分裂成 <code>[10,20]</code> 与 <code>[30,40,50]</code>，<strong>复制</strong> 30 上去成为新根 <code>[30]</code></td>
+<td style="text-align:left">10,20,30,40,50</td>
+<td style="text-align:left">都进同一个叶（同时也是根），<code>[10,20,30,40,50]</code>，5 个还没超</td>
 </tr>
 <tr>
 <td style="text-align:left">60</td>
-<td style="text-align:left">进右叶 → <code>[30,40,50,60]</code></td>
+<td style="text-align:left">叶里成了 6 个 → 分裂成 <code>[10,20,30]</code> 与 <code>[40,50,60]</code>；两叶的最大码 30、60 <strong>复写</strong>到新根 <code>[30,60]</code>，树高 2</td>
 </tr>
 <tr>
 <td style="text-align:left">70</td>
-<td style="text-align:left">右叶满 → 分裂成 <code>[30,40]</code> 与 <code>[50,60,70]</code>，<strong>复制</strong> 50 上去，根变 <code>[30,50]</code></td>
+<td style="text-align:left">比全树都大 → 进右叶 <code>[40,50,60,70]</code>，根里对应的 60 改成 70：<code>[30,70]</code></td>
 </tr>
 <tr>
 <td style="text-align:left">80</td>
-<td style="text-align:left">进最右叶 → <code>[50,60,70,80]</code></td>
+<td style="text-align:left">同上 → 右叶 <code>[40,50,60,70,80]</code>，根 <code>[30,80]</code></td>
 </tr>
 <tr>
 <td style="text-align:left">90</td>
-<td style="text-align:left">最右叶满 → 分裂成 <code>[50,60]</code> 与 <code>[70,80,90]</code>，<strong>复制</strong> 70 上去，根变 <code>[30,50,70]</code></td>
+<td style="text-align:left">右叶成了 6 个 → 分裂成 <code>[40,50,60]</code> 与 <code>[70,80,90]</code>，左叶的新最大码 60 复写进根：<code>[30,60,90]</code></td>
 </tr>
 </tbody></table></div>
-<p><strong>最终 B+ 树</strong>：</p>
-<div class="codeblock" data-lang="text"><pre><code>内部（索引层）:        [30, 50, 70]
-                   /      |     |      \
-叶（数据层）:  [10,20] ↔ [30,40] ↔ [50,60] ↔ [70,80,90]
+<p><strong>最终 B+ 树</strong>（根有 3 个子结点、3 个关键码）：</p>
+<div class="codeblock" data-lang="text"><pre><code>内部（索引层）:          [30, 60, 90]
+                     /       |       &gt; 叶（数据层）:  [10,20,30] ↔ [40,50,60] ↔ [70,80,90]
                （叶之间用指针顺序链起来）</code></pre></div>
-<p><strong>同样输入下的 5 阶 B 树</strong>：</p>
+<p><strong>同样输入下的 5 阶 B 树</strong>（结点至多 4 个关键码，第 5 个进来就分裂，中间码<strong>移</strong>上去）：</p>
 <div class="codeblock" data-lang="text"><pre><code>根:                    [30, 60]
-             /            |            \
-         [10,20]       [40,50]      [70,80,90]</code></pre></div>
+             /            |            &gt;          [10,20]       [40,50]      [70,80,90]</code></pre></div>
 <p><strong>三处差别，都要能说出来</strong>：</p>
 <ol>
-<li><strong>关键码是否重复</strong>。B+ 树的 30、50、70 <strong>既在根里、又在叶里</strong>（索引层是叶层的复写）； B 树的 30、60 <strong>只在根里，叶中没有</strong>。</li>
-<li><strong>记录放在哪里</strong>。B+ 树全部记录都在叶层，内部结点只是分界； B 树的记录跟着关键码散布在各层。</li>
+<li><strong>关键码是否重复</strong>。B+ 树的 30、60、90 <strong>既在根里、又在叶里</strong>（索引层是叶层最大码的复写）； B 树的 30、60 <strong>只在根里，叶中没有</strong>。数一数：B+ 树的叶层恰好是全部 9 个关键码，B 树的叶层只有 7 个。</li>
+<li><strong>记录放在哪里</strong>。B+ 树全部记录都在叶层，内部结点只是路标； B 树的记录跟着关键码散布在各层。</li>
 <li><strong>检索长度</strong>。B+ 树每次都要走到叶，长度固定等于树高； B 树<strong>可能在内部结点就命中</strong>，长度不定（运气好时更短）。</li>
 </ol>
+<p>顺带注意分裂时机也不同：B+ 树的叶能存 <span class="math">m<span class="rel">=</span><span class="upr">5</span></span> 个，第 6 个进来才分裂； B 树结点至多 <span class="math">m<span class="bin">−</span><span class="upr">1</span><span class="rel">=</span><span class="upr">4</span></span> 个，第 5 个进来就分裂（对照 11-8 (3)）。</p>
 <p><strong>由此得到 B+ 树的看家本领</strong>：叶层顺序链起来，<strong>从任一关键码出发可以顺着叶链做范围扫描</strong>； 而且内部结点不带数据，同样大小的页能装更多分支，<strong>树更矮、访外更少</strong>。 这就是数据库索引普遍选 B+ 树的原因（对照 11-5）。</p></blockquote>
 <p><strong>11-18.</strong> ★ 一棵红黑树如下（括号里是颜色）。 (1) 插入关键码 40，写出自平衡的过程与结果；(2) 在原树上插入关键码 3，同样作答。</p>
 <div class="codeblock" data-lang="text"><pre><code>            20(黑)
@@ -2241,10 +2237,10 @@ Delete(T, k)
 <ul>
 <li><strong>读</strong>：检索路径 <span class="math">h</span> 次；若被删关键码在内部结点，还要向下找中序前驱/后继来顶替， 最多再读到叶层，仍是 <span class="math">O(h)</span>。 <strong>向兄弟借</strong>或<strong>与兄弟合并</strong>时要读兄弟结点，每层<strong>多读 1 次</strong>。</li>
 <li><strong>写</strong>：</li>
-<li><strong>不发生下溢</strong>：写 1 次。</li>
+<li><strong>不发生下溢</strong>：写 1 次（被删关键码在内部结点时，内部结点和提供顶替码的叶都改了，写 2 次）。</li>
 <li><strong>向兄弟借</strong>（旋转）：改被删结点、兄弟、父结点三个，<strong>写 3 次</strong>，且<strong>到此为止</strong>；</li>
-<li><strong>与兄弟合并</strong>：合并成一个结点（写 1）、父结点少一个分界（写 1）， 若父结点因此下溢则继续向上；设向上传播了 <span class="math">t</span> 层，约 <strong><span class="math"><span class="upr">2</span>t</span> 次写</strong>。</li>
-<li>合并一直传到根且根只剩一个孩子时，<strong>树高减一</strong>。</li>
+<li><strong>与兄弟合并</strong>：两个结点合成一个，写 1 次，另一个块直接释放、不用写； 父结点因此少一个分界码。设自下而上连续合并了 <span class="math">t</span> 层，合并本身写 <span class="math">t</span> 次， 再看合并停在哪：上面那个结点没下溢，改它写 1 次，共 <strong><span class="math">t<span class="bin">+</span><span class="upr">1</span></span></strong>； 它下溢但能向兄弟借，再写 3 次，共 <strong><span class="math">t<span class="bin">+</span><span class="upr">3</span></span></strong>； 一直合并到根、根被拉空，旧根释放、合并出的结点当新根，共 <strong><span class="math">t</span></strong> 次，<strong>树高减一</strong>（11-22 (3) 就是 <span class="math">t<span class="rel">=</span><span class="upr">2</span></span>、写 2 次）。</li>
+<li>所以删除最坏也只是 <span class="math">O(h)</span> 次写，每层合并只写 1 次。</li>
 </ul>
 <p><strong>三条最值得记住的结论</strong>：</p>
 <ol>
@@ -2472,13 +2468,13 @@ Delete(T, k)
 <td style="text-align:left"><strong>不要求把检索结点送到根</strong></td>
 </tr>
 <tr>
-<td style="text-align:left">旋转次数</td>
-<td style="text-align:left">与 <span class="math">x</span> 的深度成正比</td>
-<td style="text-align:left">约为前者的一半</td>
+<td style="text-align:left">一字形的旋转次数</td>
+<td style="text-align:left">每提两层转 <strong>2</strong> 次</td>
+<td style="text-align:left">每走两层只转 <strong>1</strong> 次（之字形两者都是 2 次）</td>
 </tr>
 </tbody></table></div>
-<p><strong>为什么能省</strong>：全伸展每一轮都盯着 <span class="math">x</span> 自己，非把它顶到根不可； 半伸展在一字形情形下把「当前结点」交给父结点接着往上走， <strong>相当于每两层只付一层的代价</strong>，路径上的结点同样被提了上来，但少转了一半。</p>
-<p><strong>代价</strong>：由于 <span class="math">x</span> 未必到根，<strong>「刚访问过的结点下次一定在根」这条性质就没有了</strong>； 它的摊还界与全伸展<strong>不同</strong>（仍是对数量级，但常数与分析方式都变了）。 之字形（zig-zag）两者处理相同。</p>
+<p><strong>为什么能省</strong>：全伸展每一轮都盯着 <span class="math">x</span> 自己，非把它顶到根不可； 半伸展在一字形情形下把「当前结点」交给父结点接着往上走， <strong>在一字形段上相当于每两层只付一层的代价</strong>，路径上的结点同样被提了上来，旋转少一半； 之字形段两者一样，所以总体上省多少取决于路径里一字形占多少。 例如 12-17 那条 7 个结点的左斜链检索 20：全伸展转 5 次，半伸展只转 3 次， 得到 <code>50(30(20(10, -), 40), 70(60, -))</code>，20 停在第 2 层而不是根。</p>
+<p><strong>代价</strong>：由于 <span class="math">x</span> 未必到根，<strong>「刚访问过的结点下次一定在根」这条性质就没有了</strong>； 摊还代价仍是 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>（Sleator 与 Tarjan 1985 年的原论文就证明了），只是常数不同。 之字形（zig-zag）两者处理相同。</p>
 <p><strong>和 AVL、红黑树摆在一起看</strong>（对照 12-12）： 伸展树一族的共同点是<strong>不存任何平衡信息</strong>（没有平衡因子、没有颜色）， 全靠「把刚访问的搬上来」自适应；半伸展则是在「搬多少」上做了个折衷。</p></blockquote>
 <h3 id="四算法设计与分析-4"><a class="anchor" href="#四算法设计与分析-4">#</a>四、算法设计与分析</h3>
 <p><strong>12-16.</strong> ★ 对下面这棵 AVL 树依次插入 10、65、64，画出每次插入后的树， 并指出每次的旋转类型（不需要旋转也要说明）。</p>
@@ -2540,8 +2536,8 @@ Delete(T, k)
        \
         40</code></pre></div>
 <p>核对中序：<code>10 20 30 40 50 60 70</code> ✓。</p>
-<p><strong>看点在于树高</strong>：原来是一条长 7 的链（访问 10 要走 6 步）， 展开之后高度降到 4，10 的深度从 6 降到 1，访问路径上的 30、40、50、60 也都上移了。<strong>一字形旋转的作用正是把同向长链压短</strong>—— 这就是伸展树「不维持平衡、却能摊还 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>」的机制： 每次访问深结点的同时，顺手把那条深路径上的所有结点都提了上来， 代价被后续的访问摊薄了。</p>
-<p><strong>注意</strong>：如果把一字形替换成「连续两次父子单旋」，20 同样能到根， <strong>但那条链只会被平移、不会被压短</strong>，摊还界就失效了。这是一字形不能简化的原因。</p></blockquote>
+<p><strong>看点在于树高</strong>：原来是一条长 7 的链（访问 10 要走 6 步）， 展开之后高度降到 4，20 到了根，10 的深度从 6 降到 1，30 从 4 升到 3； 50 的深度不变，40、60 反而各下沉了一层（40 从 3 到 4，60 从 1 到 3）。 所以不是路径上每个结点都上移，而是<strong>整条路径的深度大约减半</strong>： 原来最深 6 层的那条链，现在最深只有 4。<strong>一字形旋转的作用正是把同向长链压短</strong>—— 这就是伸展树「不维持平衡、却能摊还 <span class="math">O(<span class="upr">log</span>&thinsp;n)</span>」的机制： 每次访问深结点的同时，顺手把那条深路径折短， 代价被后续的访问摊薄了。</p>
+<p><strong>注意</strong>：如果把一字形替换成「连续两次父子单旋」，20 同样能到根， <strong>但那条链只会被平移、不会被压短</strong>：结果是 <code>20(10, 70(60(50(40(30, -), -), -), -))</code>， 70 往下仍是一条 5 个结点的单链，高度 5，比一字形的 4 还高。 反复这样访问，每次都可能付 <span class="math">Θ(n)</span>，摊还界就失效了。这是一字形不能简化的原因。</p></blockquote>
 <p><strong>12-18.</strong> ★ 基于伸展树实现一个简单的文本编辑器。文本是一个字符串， 每个结点存一个字符及它在文本中的下标 <code>index</code>，另有左右孩子与父指针。要求支持： <code>copy(i,j)</code> 把下标 <span class="math">[i,j]</span> 的字符复制到剪贴板； <code>cut(i,j)</code> 把这段删除并移到剪贴板；<code>paste(i)</code> 把剪贴板内容插入到下标 <span class="math">i</span> 之后。 写出三个操作的基本思想。</p>
 <blockquote><p><strong>答</strong>：<strong>统一的思路只有一句：用两次 splay 把要操作的那一段&quot;孤立&quot;成一棵子树。</strong></p>
 <p>用到的 ADT：</p>
@@ -3116,11 +3112,11 @@ paste(i)
 </tr>
 <tr>
 <td style="text-align:left">B+ 树插入</td>
-<td style="text-align:left">叶分裂时右叶首键<strong>复制</strong>上升（关键码在索引层重复出现）（11-17）</td>
+<td style="text-align:left">叶存满 <span class="math">m</span> 个、第 <span class="math">m<span class="bin">+</span><span class="upr">1</span></span> 个进来才分裂；两叶的<strong>最大码复写</strong>到父结点（关键码在索引层重复出现）（11-17）</td>
 </tr>
 <tr>
 <td style="text-align:left">读盘 / 写盘</td>
-<td style="text-align:left">检索读 <span class="math"><span class="rel">≤</span>h</span>、<strong>写 0</strong>；插入读 <span class="math">h</span>、写 <span class="math"><span class="upr">2</span>s<span class="bin">+</span><span class="upr">1</span></span>（<span class="math">s</span> 为分裂层数）；删除借则写 3、合并约写 <span class="math"><span class="upr">2</span>t</span>（11-21）</td>
+<td style="text-align:left">检索读 <span class="math"><span class="rel">≤</span>h</span>、<strong>写 0</strong>；插入读 <span class="math">h</span>、写 <span class="math"><span class="upr">2</span>s<span class="bin">+</span><span class="upr">1</span></span>（<span class="math">s</span> 为分裂层数）；删除借则写 3、合并 <span class="math">t</span> 层写 <span class="math">t<span class="rel">∼</span>t<span class="bin">+</span><span class="upr">3</span></span>（11-21）</td>
 </tr>
 <tr>
 <td style="text-align:left">B 树删除</td>
@@ -3139,7 +3135,7 @@ paste(i)
 <td style="text-align:left"><span class="math"><span class="upr">2</span>⌈m/<span class="upr">2</span>⌉<sup>h<span class="bin">−</span><span class="upr">1</span></sup><span class="bin">−</span><span class="upr">1</span></span>（11-8）</td>
 </tr>
 <tr>
-<td style="text-align:left">原书 B+ 树</td>
+<td style="text-align:left"><span class="math">m</span> 阶 B+ 树（原书定义）</td>
 <td style="text-align:left">叶存 <span class="math">⌈m/<span class="upr">2</span>⌉<span class="rel">∼</span>m</span> 个关键码，满 <span class="math">m</span> 再插才分裂；高 2 时叶层至少 <span class="math"><span class="upr">2</span>⌈m/<span class="upr">2</span>⌉</span> 个（11-8）</td>
 </tr>
 <tr>
